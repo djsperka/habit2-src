@@ -66,7 +66,7 @@ QTextStream& operator<<(QTextStream& out, const LookDirection& direction)
 
 QTextStream& operator<<(QTextStream& out, const HLook& l)
 {
-	out << l.direction() << ":" << l.startMS() << "-" << l.endMS();
+	out << l.direction() << ":" << l.starttime().toString("hh:mm:ss.zzz") << "-" << l.endtime().toString("hh:mm:ss.zzz");
 	return out;
 };
 

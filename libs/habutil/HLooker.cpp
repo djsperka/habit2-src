@@ -11,9 +11,9 @@
 #include <QDebug>
 
 
-void HLooker::addTrans(LookTransType type, int tMS)
+void HLooker::addTrans(LookTransType type, QTime& t)
 {
-	m_transitions.append(qMakePair(type, tMS));
+	m_transitions.append(qMakePair(type, t));
 	update();
 	return;
 }
@@ -51,22 +51,22 @@ bool HLooker::isTransToLook(LookTransType type)
 
 void HLooker::update()
 {
-	int tMS;
+	QTime t;
 	LookTransType trans;
 	
 	while (m_indexAt < m_transitions.count())
 	{
 		trans = m_transitions[m_indexAt].first;
-		tMS = m_transitions[m_indexAt].second;
+		t = m_transitions[m_indexAt].second;
 		
-		qDebug() << "update(): index, trans, t = " << m_indexAt << ", " << trans << ", " << tMS;
+		qDebug() << "update(): index, trans, t = " << m_indexAt << ", " << trans << ", " << t.toString("hh:mm:ss.zzz");
 		
 		if (!m_bLookStarted)
 		{
 			if (isTransToLook(trans))
 			{
 				m_bLookStarted = true;
-				m_lookStartTimeMS = tMS;
+				m_lookStartTime = t;
 				m_lookStartIndex = m_indexAt;
 				m_direction = directionTo(trans);
 				
@@ -81,7 +81,7 @@ void HLooker::update()
 				if (!isTransToLook(trans))
 				{
 					m_bLookAwayStarted = true;
-					m_lookAwayStartTimeMS = tMS;
+					m_lookAwayStartTime = t;
 					m_lookAwayStartIndex = m_indexAt;
 					m_ptimer->start();
 					qDebug() << "update(): Look away started " << m_direction;
@@ -94,12 +94,12 @@ void HLooker::update()
 			}
 			else 
 			{
-				if ((tMS - m_lookAwayStartTimeMS) > m_minLookAwayTimeMS)
+				if (m_lookAwayStartTime.msecsTo(t) > m_minLookAwayTimeMS)
 				{
-					if ((m_lookAwayStartTimeMS - m_lookStartTimeMS) > m_minLookTimeMS)
+					if (m_lookStartTime.msecsTo(m_lookAwayStartTime) > m_minLookTimeMS)
 					{
 						// new look
-						HLook l(m_direction, m_lookStartTimeMS, m_lookAwayStartTimeMS);
+						HLook l(m_direction, m_lookStartTime, m_lookAwayStartTime);
 						m_looks.append(l);
 						m_bLookStarted = false;
 						m_bLookAwayStarted = false;
@@ -133,7 +133,7 @@ void HLooker::update()
 					{
 						m_bLookAwayStarted = false;
 						m_bLookStarted = true;
-						m_lookStartTimeMS = tMS;
+						m_lookStartTime = t;
 						m_direction = directionTo(trans);
 						m_indexAt++;
 						

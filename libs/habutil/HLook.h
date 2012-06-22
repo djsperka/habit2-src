@@ -20,15 +20,15 @@ enum LookDirection { NoLook=0, LookLeft, LookRight, LookCenter };
 class HLook
 {
 public:
-	HLook(LookDirection direc, int startMS, int endMS): m_direction(direc), m_startMS(startMS), m_endMS(endMS) {};
+	HLook(LookDirection direc, QTime& start, QTime& end): m_direction(direc), m_starttime(start), m_endtime(end) {};
 	~HLook() {};
 	LookDirection direction() const { return m_direction; };
-	int startMS() const { return m_startMS; };
-	int endMS() const { return m_endMS; };
+	const QTime& starttime() const { return m_starttime; };
+	const QTime& endtime() const { return m_endtime; };
 private:
 	LookDirection m_direction;
-	int m_startMS;
-	int m_endMS;
+	QTime m_starttime;
+	QTime m_endtime;
 };
 
 QTextStream& operator<<(QTextStream& out, const LookTransType& type);

@@ -11,6 +11,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QTime>
 #include <QTimer>
 #include <QTextStream>
 #include "HLook.h"
@@ -29,7 +30,7 @@ public:
 		QObject::connect(m_ptimer, SIGNAL(timeout()), this, SLOT(timeout()));
 	};
 	~HLooker() {};
-	void addTrans(LookTransType type, int tMS);	
+	void addTrans(LookTransType type, QTime& t);	
 	
 private:
 	bool m_bLive;
@@ -42,10 +43,10 @@ private:
 
 	QTimer *m_ptimer;
 	int m_lookStartIndex;
-	int m_lookStartTimeMS;
+	QTime m_lookStartTime;
 	int m_lookAwayStartIndex;
-	int m_lookAwayStartTimeMS;
-	QList< QPair<LookTransType, int> > m_transitions;
+	QTime m_lookAwayStartTime;
+	QList< QPair<LookTransType, QTime> > m_transitions;
 	QList< HLook > m_looks;
 	
 	LookDirection directionTo(LookTransType type);

@@ -7,55 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		045743AAB27533ADB02899F7 /* HStimRequestState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 4BFC5DFF35CA984D295603F7 /* HStimRequestState.cpp */; settings = {ATTRIBUTES = (); }; };
 		0BA173F30E7A409B5D4799F5 /* moc_HLooker.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 362D0FFF9C9A9143408F1468 /* moc_HLooker.cpp */; settings = {ATTRIBUTES = (); }; };
-		1B5A32BF7C704F131D59AB30 /* HStateMachine.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = F9358756C358EDFE927F3C17 /* HStateMachine.cpp */; settings = {ATTRIBUTES = (); }; };
 		1DC85FBA4D68DDBF75881C53 /* HLooker.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 142F69DE83C067908E46A931 /* HLooker.cpp */; settings = {ATTRIBUTES = (); }; };
-		1FBADE39ED24F9BFD599091D /* HState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 15306E8F995B3EF622AAFFC0 /* HState.cpp */; settings = {ATTRIBUTES = (); }; };
-		6243E59633E2708527E0B0DD /* moc_HStartTrialState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 56D476D8615B94E6C49ECC1A /* moc_HStartTrialState.cpp */; settings = {ATTRIBUTES = (); }; };
 		6B4E749109E23E0094D8973F /* HLook.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 6004E75CB4CADACB84004E6D /* HLook.cpp */; settings = {ATTRIBUTES = (); }; };
-		7D6D5F63F416C01112ABD170 /* moc_HStimRequestState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = ACE83841E963EABFF11A2A34 /* moc_HStimRequestState.cpp */; settings = {ATTRIBUTES = (); }; };
-		82EF5D89401E13DBF0FE263E /* moc_HAGState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 6EDCE8573DBE9B90EB307F6B /* moc_HAGState.cpp */; settings = {ATTRIBUTES = (); }; };
-		88205F195FA3F8571AD4DBA8 /* moc_HStateMachine.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 0567C8164C0E59C1D7172532 /* moc_HStateMachine.cpp */; settings = {ATTRIBUTES = (); }; };
-		97AF56F177A81BBD5577F51B /* moc_HLookTransition.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = CDAB8289D6673CD333CD8638 /* moc_HLookTransition.cpp */; settings = {ATTRIBUTES = (); }; };
-		9A369C73F792E1CB8AA64392 /* HStartTrialState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 962103AE6A13B7A3CC4F2F76 /* HStartTrialState.cpp */; settings = {ATTRIBUTES = (); }; };
-		9A6534B67D70398B4CF3D424 /* HLookTransition.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = F61DBF62AFD578FF21289D5A /* HLookTransition.cpp */; settings = {ATTRIBUTES = (); }; };
-		A7428FA4978CA969696AC019 /* moc_HState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = C576C1EBC3456CFA9767AE64 /* moc_HState.cpp */; settings = {ATTRIBUTES = (); }; };
-		B20AE701CDA2FBD70EE7C906 /* moc_HReadyTransition.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 3733B3827820907B60314BE0 /* moc_HReadyTransition.cpp */; settings = {ATTRIBUTES = (); }; };
-		D4BB2D48CBE2DC888030E4FC /* HAGState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = A7FB2F8167A417F646942344 /* HAGState.cpp */; settings = {ATTRIBUTES = (); }; };
-		D875BBA654E61C2F095E41F7 /* HReadyTransition.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 5AC101599B4FF0DB0EF17B43 /* HReadyTransition.cpp */; settings = {ATTRIBUTES = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0567C8164C0E59C1D7172532 /* moc_HStateMachine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HStateMachine.cpp; sourceTree = "<group>"; };
 		142F69DE83C067908E46A931 /* HLooker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HLooker.cpp; sourceTree = "<group>"; };
-		15306E8F995B3EF622AAFFC0 /* HState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HState.cpp; sourceTree = "<group>"; };
-		1B71FFBE1593F3B000620199 /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		22A5174EEE30616323959E01 /* HStimRequestState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HStimRequestState.h; sourceTree = "<group>"; };
+		1B17F3FB15926325007EC2B8 /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		362D0FFF9C9A9143408F1468 /* moc_HLooker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HLooker.cpp; sourceTree = "<group>"; };
-		3733B3827820907B60314BE0 /* moc_HReadyTransition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HReadyTransition.cpp; sourceTree = "<group>"; };
 		3F2C007BAD3FC743DD4D7F34 /* HLooker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HLooker.h; sourceTree = "<group>"; };
 		45012045CEE85EB3B095E19B /* habutil.pro */ = {isa = PBXFileReference; lastKnownFileType = text; path = habutil.pro; sourceTree = "<group>"; };
-		4BFC5DFF35CA984D295603F7 /* HStimRequestState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HStimRequestState.cpp; sourceTree = "<group>"; };
-		56D476D8615B94E6C49ECC1A /* moc_HStartTrialState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HStartTrialState.cpp; sourceTree = "<group>"; };
-		5AC101599B4FF0DB0EF17B43 /* HReadyTransition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HReadyTransition.cpp; sourceTree = "<group>"; };
 		6004E75CB4CADACB84004E6D /* HLook.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HLook.cpp; sourceTree = "<group>"; };
-		623317C57559513C1448B5B1 /* HLookTransition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HLookTransition.h; sourceTree = "<group>"; };
-		6EDCE8573DBE9B90EB307F6B /* moc_HAGState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HAGState.cpp; sourceTree = "<group>"; };
-		962103AE6A13B7A3CC4F2F76 /* HStartTrialState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HStartTrialState.cpp; sourceTree = "<group>"; };
-		A7FB2F8167A417F646942344 /* HAGState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HAGState.cpp; sourceTree = "<group>"; };
-		ACE83841E963EABFF11A2A34 /* moc_HStimRequestState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HStimRequestState.cpp; sourceTree = "<group>"; };
-		C075B8ADE546BCA1E9EB52B3 /* HEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HEvents.h; sourceTree = "<group>"; };
-		C576C1EBC3456CFA9767AE64 /* moc_HState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HState.cpp; sourceTree = "<group>"; };
-		CDAB8289D6673CD333CD8638 /* moc_HLookTransition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HLookTransition.cpp; sourceTree = "<group>"; };
 		DF5D55B3A28CA9127765D552 /* HLook.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HLook.h; sourceTree = "<group>"; };
-		EF91FED4F1045B0360536C92 /* HStateMachine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HStateMachine.h; sourceTree = "<group>"; };
-		F61DBF62AFD578FF21289D5A /* HLookTransition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HLookTransition.cpp; sourceTree = "<group>"; };
-		F9358756C358EDFE927F3C17 /* HStateMachine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HStateMachine.cpp; sourceTree = "<group>"; };
-		FA80BDC8D956FB02D62AC917 /* HStartTrialState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HStartTrialState.h; sourceTree = "<group>"; };
-		FB9D2D85D9E54EE33BEAF8C2 /* HReadyTransition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HReadyTransition.h; sourceTree = "<group>"; };
-		FBE21B797A1D84EF148ED91E /* HAGState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HAGState.h; sourceTree = "<group>"; };
-		FE4FD8121AD58EB024DD95C9 /* HState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HState.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,15 +41,15 @@
 				46E892BBB6BB6952967E0561 /* Temporary Sources */,
 				883D7615C4D2DE3FA1218F12 /* Headers */,
 				7CABE3C80E79AD2B307756D2 /* Sources [qmake] */,
-				1B71FFBF1593F3B000620199 /* Products */,
+				1B17F3FC15926325007EC2B8 /* Products */,
 			);
 			name = habutil;
 			sourceTree = "<group>";
 		};
-		1B71FFBF1593F3B000620199 /* Products */ = {
+		1B17F3FC15926325007EC2B8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1B71FFBE1593F3B000620199 /* libhabutil.a */,
+				1B17F3FB15926325007EC2B8 /* libhabutil.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -94,13 +58,6 @@
 			isa = PBXGroup;
 			children = (
 				362D0FFF9C9A9143408F1468 /* moc_HLooker.cpp */,
-				6EDCE8573DBE9B90EB307F6B /* moc_HAGState.cpp */,
-				CDAB8289D6673CD333CD8638 /* moc_HLookTransition.cpp */,
-				3733B3827820907B60314BE0 /* moc_HReadyTransition.cpp */,
-				56D476D8615B94E6C49ECC1A /* moc_HStartTrialState.cpp */,
-				C576C1EBC3456CFA9767AE64 /* moc_HState.cpp */,
-				0567C8164C0E59C1D7172532 /* moc_HStateMachine.cpp */,
-				ACE83841E963EABFF11A2A34 /* moc_HStimRequestState.cpp */,
 			);
 			name = "Temporary Sources";
 			sourceTree = "<group>";
@@ -118,14 +75,6 @@
 			children = (
 				DF5D55B3A28CA9127765D552 /* HLook.h */,
 				3F2C007BAD3FC743DD4D7F34 /* HLooker.h */,
-				C075B8ADE546BCA1E9EB52B3 /* HEvents.h */,
-				FBE21B797A1D84EF148ED91E /* HAGState.h */,
-				623317C57559513C1448B5B1 /* HLookTransition.h */,
-				FB9D2D85D9E54EE33BEAF8C2 /* HReadyTransition.h */,
-				FA80BDC8D956FB02D62AC917 /* HStartTrialState.h */,
-				FE4FD8121AD58EB024DD95C9 /* HState.h */,
-				EF91FED4F1045B0360536C92 /* HStateMachine.h */,
-				22A5174EEE30616323959E01 /* HStimRequestState.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -135,13 +84,6 @@
 			children = (
 				6004E75CB4CADACB84004E6D /* HLook.cpp */,
 				142F69DE83C067908E46A931 /* HLooker.cpp */,
-				A7FB2F8167A417F646942344 /* HAGState.cpp */,
-				F61DBF62AFD578FF21289D5A /* HLookTransition.cpp */,
-				5AC101599B4FF0DB0EF17B43 /* HReadyTransition.cpp */,
-				962103AE6A13B7A3CC4F2F76 /* HStartTrialState.cpp */,
-				15306E8F995B3EF622AAFFC0 /* HState.cpp */,
-				F9358756C358EDFE927F3C17 /* HStateMachine.cpp */,
-				4BFC5DFF35CA984D295603F7 /* HStimRequestState.cpp */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -166,7 +108,7 @@
 			name = habutil;
 			productInstallPath = ../../lib/;
 			productName = habutil;
-			productReference = 1B71FFBE1593F3B000620199 /* libhabutil.a */;
+			productReference = 1B17F3FB15926325007EC2B8 /* libhabutil.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -185,7 +127,7 @@
 				German,
 			);
 			mainGroup = 05596AB53D8D521C69802C27 /* habutil */;
-			productRefGroup = 1B71FFBF1593F3B000620199 /* Products */;
+			productRefGroup = 1B17F3FC15926325007EC2B8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -238,21 +180,7 @@
 			files = (
 				6B4E749109E23E0094D8973F /* HLook.cpp in Build Sources */,
 				1DC85FBA4D68DDBF75881C53 /* HLooker.cpp in Build Sources */,
-				D4BB2D48CBE2DC888030E4FC /* HAGState.cpp in Build Sources */,
-				9A6534B67D70398B4CF3D424 /* HLookTransition.cpp in Build Sources */,
-				D875BBA654E61C2F095E41F7 /* HReadyTransition.cpp in Build Sources */,
-				9A369C73F792E1CB8AA64392 /* HStartTrialState.cpp in Build Sources */,
-				1FBADE39ED24F9BFD599091D /* HState.cpp in Build Sources */,
-				1B5A32BF7C704F131D59AB30 /* HStateMachine.cpp in Build Sources */,
-				045743AAB27533ADB02899F7 /* HStimRequestState.cpp in Build Sources */,
 				0BA173F30E7A409B5D4799F5 /* moc_HLooker.cpp in Build Sources */,
-				82EF5D89401E13DBF0FE263E /* moc_HAGState.cpp in Build Sources */,
-				97AF56F177A81BBD5577F51B /* moc_HLookTransition.cpp in Build Sources */,
-				B20AE701CDA2FBD70EE7C906 /* moc_HReadyTransition.cpp in Build Sources */,
-				6243E59633E2708527E0B0DD /* moc_HStartTrialState.cpp in Build Sources */,
-				A7428FA4978CA969696AC019 /* moc_HState.cpp in Build Sources */,
-				88205F195FA3F8571AD4DBA8 /* moc_HStateMachine.cpp in Build Sources */,
-				7D6D5F63F416C01112ABD170 /* moc_HStimRequestState.cpp in Build Sources */,
 			);
 			name = "Build Sources";
 			runOnlyForDeploymentPostprocessing = 0;
