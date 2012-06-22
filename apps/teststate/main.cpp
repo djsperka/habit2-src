@@ -23,6 +23,7 @@
 #include <QFinalState>
 #include <QEvent>
 #include <QEventTransition>
+#include <QTimer>
 #include "HStateMachine.h"
 #include "HStartTrialState.h"
 #include "HAGState.h"
@@ -35,6 +36,7 @@
 int main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
+	QTimer* m_pstimtimer = new QTimer();
 	QDialog *dlg = new QDialog();
 	QPushButton* button = new QPushButton();
 	QVBoxLayout *layout = new QVBoxLayout(dlg);
@@ -90,7 +92,7 @@ int main(int argc, char **argv)
 
 	// transitions within stateStimLook
 	stateStimRequest->addTransition(mpd, SIGNAL(stimStarted()), stateStimRunning);
-	
+	stateStimRunning->addTransition(m_pstimtimer, SIGNAL(timeout()), stateFinal);
 	
 	
 	
