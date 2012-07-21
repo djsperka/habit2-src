@@ -17,12 +17,12 @@ class HAGState: public HState
 
 public:
 
-	HAGState() : HState("HAGState") {};
+	HAGState(QState* parent = 0) : HState("HAGState", parent) {};
 	~HAGState() {};
 
 signals:
 
-	void playAG();
+	void playStim(int);
 
 protected:
 	// on entry to this state we request that the attention getter be played. 
@@ -34,6 +34,6 @@ protected:
 	{
 		Q_UNUSED(e);
 		HState::onEntry(e);
-		emit playAG();
+		emit playStim(0);
 	};
 };

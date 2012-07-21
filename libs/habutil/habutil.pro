@@ -6,20 +6,30 @@ HEADERS +=	HLook.h \
 			HLooker.h \
 			HEvents.h \
 			HAGState.h \
-			HLook.h \
-			HLookTransition.h \
-			HLooker.h \
 			HReadyTransition.h \
 			HStartTrialState.h \
 			HState.h \
 			HStateMachine.h \
-			HStimRequestState.h
+			HStimRequestState.h \
+			HTrial.h \
+			HabitPlayer.h \
+			HabitAudioPlayer.h \
+			HabitVideoImagePlayer.h \
+			StimulusSource.h \
+			ImageWidget.h \
+			HabitMediaManager.h
 SOURCES +=	HLook.cpp \
 			HLooker.cpp \
 			HAGState.cpp \
-			HLookTransition.cpp \
 			HReadyTransition.cpp \
 			HStartTrialState.cpp \
 			HState.cpp \
 			HStateMachine.cpp \
-			HStimRequestState.cpp
+			HStimRequestState.cpp \
+			HTrial.cpp \
+			HabitPlayer.cpp \
+			HabitAudioPlayer.cpp \
+			HabitVideoImagePlayer.cpp \
+			StimulusSource.cpp \
+			ImageWidget.cpp \
+			HabitMediaManager.cpp

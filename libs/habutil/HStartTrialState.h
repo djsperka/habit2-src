@@ -16,10 +16,12 @@
 class HStartTrialState: public HState
 {
 	Q_OBJECT
+	
+	bool m_bAG;
 
 public:
 
-	HStartTrialState(): HState("HStartTrialState") {}
+	HStartTrialState(QState* parent = 0, bool bAG = true): HState("HStartTrialState", parent), m_bAG(bAG) {}
 	~HStartTrialState() {}
 
 protected:
@@ -32,6 +34,9 @@ protected:
 	{
 		Q_UNUSED(e);
 		HState::onEntry(e);
-		machine()->postEvent(new HAGTrialEvent());
+		if (m_bAG)
+			machine()->postEvent(new HAGTrialEvent());
+		else 
+			machine()->postEvent(new HNoAGTrialEvent());
 	}
 };

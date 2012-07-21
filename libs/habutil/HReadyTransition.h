@@ -13,6 +13,7 @@
 #include <QEventTransition>
 #include <QStateMachine>
 #include <QKeyEvent>
+#include <QDebug>
 
 class HReadyTransition : public QEventTransition
 {
@@ -20,12 +21,8 @@ class HReadyTransition : public QEventTransition
 	
 public:
 	
-	HReadyTransition(QObject* obj) : QEventTransition(obj, QEvent::KeyPress) {};
+	HReadyTransition(QObject* obj, QAbstractState* target) : QEventTransition(obj, QEvent::KeyPress) { setTargetState(target); };
 	~HReadyTransition() {};
-#if 0
-	HLookTransition(Window *window) :
-	QEventTransition(window, QEvent::KeyPress) {};
-#endif
 	
 protected:
 	
@@ -34,6 +31,7 @@ protected:
 	
 	bool eventTest(QEvent *event) 
 	{
+		qDebug() << "eventTest";
 		if (event->type() == QEvent::StateMachineWrapped &&
 			static_cast<QStateMachine::WrappedEvent *>(event)->event()->type() == QEvent::KeyPress) {
 			QEvent *wrappedEvent = static_cast<QStateMachine::WrappedEvent *>(event)->event();
