@@ -1,0 +1,403 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2B093CA6F071B023A473CED0 /* main.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 118FCBAABA162BA17933C789 /* main.cpp */; settings = {ATTRIBUTES = (); }; };
+		625B1F7A662F52FF33E1E622 /* PlayerControlDialog.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = F64A773CFBF5F7217E61C8A2 /* PlayerControlDialog.cpp */; settings = {ATTRIBUTES = (); }; };
+		78F73AA034DE11539EE28794 /* moc_PlayerControlDialog.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = E8A74E695346D9A89559BC70 /* moc_PlayerControlDialog.cpp */; settings = {ATTRIBUTES = (); }; };
+		BA55C4AF3685C0E06D2DE656 /* habutil in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = 8491E6C9F1DB91009A641508 /* habutil */; };
+		C28DE529BCF325A846D5AF29 /* phonon.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = CFEBBA93E6ACC9FEF582C3A2 /* phonon.framework */; };
+		D87CFE1BA23D68AF2605A490 /* QtGui.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = A22E40FA9FF2AC675E273EBB /* QtGui.framework */; };
+		E16A1545B0F0502D0704CD14 /* QtCore.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = ABD7D43C27568E737BDBEFDC /* QtCore.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		118FCBAABA162BA17933C789 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		1B53801515B7A3BD003A13FF /* testmp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testmp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C1DF03E31CD8FB0A65410B8 /* testmp.pro */ = {isa = PBXFileReference; lastKnownFileType = text; path = testmp.pro; sourceTree = "<group>"; };
+		8491E6C9F1DB91009A641508 /* habutil */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = habutil; path = ../../lib/libhabutil.a; sourceTree = "<group>"; };
+		A22E40FA9FF2AC675E273EBB /* QtGui.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtGui.framework; path = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtGui.framework"; sourceTree = "<absolute>"; };
+		ABD7D43C27568E737BDBEFDC /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework"; sourceTree = "<absolute>"; };
+		CFEBBA93E6ACC9FEF582C3A2 /* phonon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = phonon.framework; path = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/phonon.framework"; sourceTree = "<absolute>"; };
+		E8A74E695346D9A89559BC70 /* moc_PlayerControlDialog.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_PlayerControlDialog.cpp; sourceTree = "<group>"; };
+		EF6E3D5313DF256DFDBE5DBD /* PlayerControlDialog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlayerControlDialog.h; sourceTree = "<group>"; };
+		F64A773CFBF5F7217E61C8A2 /* PlayerControlDialog.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerControlDialog.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2A1043669E6E5A7426EA502A /* Frameworks & Libraries */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA55C4AF3685C0E06D2DE656 /* habutil in Frameworks & Libraries */,
+				C28DE529BCF325A846D5AF29 /* phonon.framework in Frameworks & Libraries */,
+				D87CFE1BA23D68AF2605A490 /* QtGui.framework in Frameworks & Libraries */,
+				E16A1545B0F0502D0704CD14 /* QtCore.framework in Frameworks & Libraries */,
+			);
+			name = "Frameworks & Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		05596AB53D8D521C69802C27 /* testmp */ = {
+			isa = PBXGroup;
+			children = (
+				FB61758D0F0FDA4BA867C3D5 /* Sources */,
+				46E892BBB6BB6952967E0561 /* Temporary Sources */,
+				883D7615C4D2DE3FA1218F12 /* Headers */,
+				7CABE3C80E79AD2B307756D2 /* Sources [qmake] */,
+				ED1E82605DD74B483AF3C982 /* External Frameworks and Libraries */,
+				1B53801615B7A3BD003A13FF /* Products */,
+			);
+			name = testmp;
+			sourceTree = "<group>";
+		};
+		1B53801615B7A3BD003A13FF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1B53801515B7A3BD003A13FF /* testmp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		46E892BBB6BB6952967E0561 /* Temporary Sources */ = {
+			isa = PBXGroup;
+			children = (
+				E8A74E695346D9A89559BC70 /* moc_PlayerControlDialog.cpp */,
+			);
+			name = "Temporary Sources";
+			sourceTree = "<group>";
+		};
+		7CABE3C80E79AD2B307756D2 /* Sources [qmake] */ = {
+			isa = PBXGroup;
+			children = (
+				2C1DF03E31CD8FB0A65410B8 /* testmp.pro */,
+			);
+			name = "Sources [qmake]";
+			sourceTree = "<group>";
+		};
+		883D7615C4D2DE3FA1218F12 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				EF6E3D5313DF256DFDBE5DBD /* PlayerControlDialog.h */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+		ED1E82605DD74B483AF3C982 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				8491E6C9F1DB91009A641508 /* habutil */,
+				CFEBBA93E6ACC9FEF582C3A2 /* phonon.framework */,
+				A22E40FA9FF2AC675E273EBB /* QtGui.framework */,
+				ABD7D43C27568E737BDBEFDC /* QtCore.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		FB61758D0F0FDA4BA867C3D5 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				118FCBAABA162BA17933C789 /* main.cpp */,
+				F64A773CFBF5F7217E61C8A2 /* PlayerControlDialog.cpp */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		38483CBC97230103C8E2E30E /* testmp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17B3380A4D6A7D415E7F2E1E /* Build configuration list for PBXNativeTarget "testmp" */;
+			buildPhases = (
+				D7BA7D76DAB5DD13389D6332 /* Qt Qmake */,
+				A0A52A2ADF7A1E2A99738674 /* Qt Preprocessors */,
+				C29B8785722055ED95EF7B57 /* Build Sources */,
+				2A1043669E6E5A7426EA502A /* Frameworks & Libraries */,
+				3787F99312C85FF0073FD7BA /* Bundle Resources */,
+				F6069D5A5DA8AA28EDB8B3C6 /* Project Copy */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = testmp;
+			productInstallPath = ../../bin/;
+			productName = testmp;
+			productReference = 1B53801515B7A3BD003A13FF /* testmp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		91B15E841AA80083484172DE /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = CC82A9286117DFED018F418F /* Build configuration list for PBXProject "testmp" */;
+			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 05596AB53D8D521C69802C27 /* testmp */;
+			productRefGroup = 1B53801615B7A3BD003A13FF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				38483CBC97230103C8E2E30E /* testmp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3787F99312C85FF0073FD7BA /* Bundle Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "Bundle Resources";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A0A52A2ADF7A1E2A99738674 /* Qt Preprocessors */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "Qt Preprocessors";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/Oakeslab/work/habit2/apps/testmp -f 'testmp.xcodeproj/qt_preprocess.mak'";
+		};
+		D7BA7D76DAB5DD13389D6332 /* Qt Qmake */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "Qt Qmake";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/Oakeslab/work/habit2/apps/testmp -f 'testmp.xcodeproj/qt_makeqmake.mak'";
+		};
+		F6069D5A5DA8AA28EDB8B3C6 /* Project Copy */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Project Copy";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp -r $BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME /Users/Oakeslab/work/habit2/bin";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C29B8785722055ED95EF7B57 /* Build Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B093CA6F071B023A473CED0 /* main.cpp in Build Sources */,
+				625B1F7A662F52FF33E1E622 /* PlayerControlDialog.cpp in Build Sources */,
+				78F73AA034DE11539EE28794 /* moc_PlayerControlDialog.cpp in Build Sources */,
+			);
+			name = "Build Sources";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4B72B24813252891014BCF61 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = x86_64;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include/QtCore",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtGui.framework/Versions/4/Headers",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include/QtGui",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/phonon.framework/Versions/4/Headers",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include/phonon",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include",
+					../../libs/habutil,
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include/phonon_compat",
+					.,
+					/usr/local/include,
+					/System/Library/Frameworks/CarbonCore.framework/Headers,
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/mkspecs/macx-xcode",
+				);
+				INFOPLIST_FILE = Info.plist;
+				LIBRARY_SEARCH_PATHS = (
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					../../lib,
+					/Users/Oakeslab/work/habit2/lib,
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+				);
+				OTHER_CFLAGS = (
+					"-pipe",
+					"-O2",
+					"-Wall",
+					"-W",
+					"-DQT_NO_DEBUG",
+					"-DQT_PHONON_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pipe",
+					"-O2",
+					"-Wall",
+					"-W",
+					"-DQT_NO_DEBUG",
+					"-DQT_PHONON_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED",
+				);
+				OTHER_LDFLAGS = (
+					"-headerpad_max_install_names",
+					"-L/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"-F/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"-L../../lib",
+					"-L/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"-F/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+				);
+				PRODUCT_NAME = testmp;
+			};
+			name = Debug;
+		};
+		8C7174830A1E4DCBA0332EC1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = testmp;
+			};
+			name = Release;
+		};
+		BEC09A62E69C3553534FF35E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = testmp;
+			};
+			name = Debug;
+		};
+		D70590BEB531B51029F711BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = x86_64;
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				HEADER_SEARCH_PATHS = (
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include/QtCore",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtGui.framework/Versions/4/Headers",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include/QtGui",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/phonon.framework/Versions/4/Headers",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include/phonon",
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include",
+					../../libs/habutil,
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/include/phonon_compat",
+					.,
+					/usr/local/include,
+					/System/Library/Frameworks/CarbonCore.framework/Headers,
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/mkspecs/macx-xcode",
+				);
+				INFOPLIST_FILE = Info.plist;
+				LIBRARY_SEARCH_PATHS = (
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					../../lib,
+					/Users/Oakeslab/work/habit2/lib,
+					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+				);
+				OTHER_CFLAGS = (
+					"-pipe",
+					"-O2",
+					"-Wall",
+					"-W",
+					"-DQT_NO_DEBUG",
+					"-DQT_PHONON_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pipe",
+					"-O2",
+					"-Wall",
+					"-W",
+					"-DQT_NO_DEBUG",
+					"-DQT_PHONON_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_CORE_LIB",
+					"-DQT_SHARED",
+				);
+				OTHER_LDFLAGS = (
+					"-headerpad_max_install_names",
+					"-L/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"-F/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"-L../../lib",
+					"-L/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+					"-F/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
+				);
+				PRODUCT_NAME = testmp;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		17B3380A4D6A7D415E7F2E1E /* Build configuration list for PBXNativeTarget "testmp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEC09A62E69C3553534FF35E /* Debug */,
+				8C7174830A1E4DCBA0332EC1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC82A9286117DFED018F418F /* Build configuration list for PBXProject "testmp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4B72B24813252891014BCF61 /* Debug */,
+				D70590BEB531B51029F711BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 91B15E841AA80083484172DE /* Project object */;
+}
