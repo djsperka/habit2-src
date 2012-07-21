@@ -57,8 +57,8 @@ HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int max
 	{
 		HAGState* sAG = new HAGState(this);
 		HState* sAGRunning = new HState("stateAGRunning", this);
-		sAG->addTransition(pMediaPlayer, SIGNAL(started()), sAGRunning);					// exit this state when ag has started signal that stim has started
 		sInitial->addTransition(sAG);
+		sAG->addTransition(pMediaPlayer, SIGNAL(started()), sAGRunning);					// exit this state when ag has started signal that stim has started
 		sAGRunning->addTransition(new HReadyTransition(pDialog, sStimRequest));				// ready transition looks for <Enter> key
 		QObject::connect(sAG, SIGNAL(playStim(int)), pMediaPlayer, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
 	}
