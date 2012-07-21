@@ -14,6 +14,7 @@
 
 TestLookDialog::TestLookDialog(QWidget* parent) : QDialog(parent), m_bGoClicked(false)
 {
+	m_time.start();
 	pushbuttonGo = new QPushButton();
 	pushbuttonGo->setText("Go");
 	QVBoxLayout *layout = new QVBoxLayout(this);
@@ -59,7 +60,7 @@ void TestLookDialog::gotLook(HLook l)
 
 bool TestLookDialog::eventFilter(QObject *obj, QEvent *event)
 {
-	QTime t = QTime::currentTime();
+	int t = m_time.elapsed();
 	QKeyEvent *keyEvent;
 	bool bVal = false;
 	if (m_bGoClicked) 

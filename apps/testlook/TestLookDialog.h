@@ -9,6 +9,7 @@
 
 #include <QtGui>
 #include <QKeyEvent>
+#include <QTime>
 #include "HLooker.h"
 
 class TestLookDialog: public QDialog
@@ -24,6 +25,7 @@ protected:
 	bool eventFilter ( QObject * o, QEvent * e );
 private:
 	bool m_bGoClicked;
+	QTime m_time;
 	QLineEdit* lineeditLook;
 	QLineEdit* lineeditLookAway;
 	QPushButton* pushbuttonGo;
