@@ -50,11 +50,6 @@
 		lastKnownFileType = sourcecode.c.h;
 		path = HabitMediaManager.h;
 		sourceTree = "<group>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1306, 632}}";
-			sepNavSelRange = "{555, 0}";
-			sepNavVisRange = "{0, 625}";
-		};
 	};
 	1B5382DE15BA2723003A13FF /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -600,11 +595,10 @@
 		vrLen = 178;
 		vrLoc = 0;
 	};
-	1BD3D40415C0C7DD005F32F8 /* XCBuildMessageTextBookmark */ = {
+	1BD3D40415C0C7DD005F32F8 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		comments = "'HTrial::m_bAG' will be initialized after";
 		fRef = 3A910979D974A019934567BC /* HTrial.h */;
-		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
 		rLoc = 38;
 		rType = 1;
@@ -619,11 +613,10 @@
 		vrLen = 272;
 		vrLoc = 599;
 	};
-	1BD3D41F15C0D28A005F32F8 /* XCBuildMessageTextBookmark */ = {
+	1BD3D41F15C0D28A005F32F8 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		comments = "'QKeyEvent' was not declared in this scope";
 		fRef = 3A910979D974A019934567BC /* HTrial.h */;
-		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
 		rLoc = 94;
 		rType = 1;
@@ -751,11 +744,6 @@
 		name = HStimRequestState.h;
 		path = /Users/Oakeslab/work/habit2/libs/habutil/HStimRequestState.h;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1306, 632}}";
-			sepNavSelRange = "{796, 0}";
-			sepNavVisRange = "{0, 803}";
-		};
 	};
 	3A910979D974A019934567BC /* HTrial.h */ = {
 		uiCtxt = {
@@ -792,11 +780,6 @@
 		name = HStimRequestState.cpp;
 		path = /Users/Oakeslab/work/habit2/libs/habutil/HStimRequestState.cpp;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1306, 632}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 171}";
-		};
 	};
 	514969C810A84F3308623DA2 /* HTrial.cpp */ = {
 		uiCtxt = {
@@ -812,11 +795,6 @@
 		name = HReadyTransition.cpp;
 		path = /Users/Oakeslab/work/habit2/libs/habutil/HReadyTransition.cpp;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1306, 632}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 176}";
-		};
 	};
 	5D04CC3124CBA11804EF5B16 /* ImageWidget.cpp */ = {
 		uiCtxt = {
@@ -928,8 +906,8 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 364954089;
-			PBXWorkspaceStateSaveDate = 364954089;
+			PBXPerProjectTemplateStateSaveDate = 364958818;
+			PBXWorkspaceStateSaveDate = 364958818;
 		};
 		perUserProjectItems = {
 			1B5381B215B9C9D7003A13FF = 1B5381B215B9C9D7003A13FF /* PBXTextBookmark */;
@@ -980,22 +958,22 @@
 			1BD3D3EA15C0C1BE005F32F8 = 1BD3D3EA15C0C1BE005F32F8 /* PBXTextBookmark */;
 			1BD3D3EB15C0C1BE005F32F8 = 1BD3D3EB15C0C1BE005F32F8 /* PBXTextBookmark */;
 			1BD3D3EC15C0C1BE005F32F8 = 1BD3D3EC15C0C1BE005F32F8 /* PBXTextBookmark */;
-			1BD3D40215C0C7DD005F32F8 /* PBXTextBookmark */ = 1BD3D40215C0C7DD005F32F8 /* PBXTextBookmark */;
-			1BD3D40315C0C7DD005F32F8 /* PBXTextBookmark */ = 1BD3D40315C0C7DD005F32F8 /* PBXTextBookmark */;
-			1BD3D40415C0C7DD005F32F8 /* XCBuildMessageTextBookmark */ = 1BD3D40415C0C7DD005F32F8 /* XCBuildMessageTextBookmark */;
-			1BD3D40515C0C7DD005F32F8 /* PBXTextBookmark */ = 1BD3D40515C0C7DD005F32F8 /* PBXTextBookmark */;
-			1BD3D41F15C0D28A005F32F8 /* XCBuildMessageTextBookmark */ = 1BD3D41F15C0D28A005F32F8 /* XCBuildMessageTextBookmark */;
-			1BD3D42015C0D28A005F32F8 /* PBXTextBookmark */ = 1BD3D42015C0D28A005F32F8 /* PBXTextBookmark */;
-			1BD3D42215C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42215C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42315C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42315C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42415C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42415C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42515C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42515C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42615C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42615C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42715C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42715C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42815C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42815C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42915C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42915C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42A15C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42A15C0D326005F32F8 /* PBXTextBookmark */;
-			1BD3D42B15C0D326005F32F8 /* PBXTextBookmark */ = 1BD3D42B15C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D40215C0C7DD005F32F8 = 1BD3D40215C0C7DD005F32F8 /* PBXTextBookmark */;
+			1BD3D40315C0C7DD005F32F8 = 1BD3D40315C0C7DD005F32F8 /* PBXTextBookmark */;
+			1BD3D40415C0C7DD005F32F8 = 1BD3D40415C0C7DD005F32F8 /* PBXTextBookmark */;
+			1BD3D40515C0C7DD005F32F8 = 1BD3D40515C0C7DD005F32F8 /* PBXTextBookmark */;
+			1BD3D41F15C0D28A005F32F8 = 1BD3D41F15C0D28A005F32F8 /* PBXTextBookmark */;
+			1BD3D42015C0D28A005F32F8 = 1BD3D42015C0D28A005F32F8 /* PBXTextBookmark */;
+			1BD3D42215C0D326005F32F8 = 1BD3D42215C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42315C0D326005F32F8 = 1BD3D42315C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42415C0D326005F32F8 = 1BD3D42415C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42515C0D326005F32F8 = 1BD3D42515C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42615C0D326005F32F8 = 1BD3D42615C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42715C0D326005F32F8 = 1BD3D42715C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42815C0D326005F32F8 = 1BD3D42815C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42915C0D326005F32F8 = 1BD3D42915C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42A15C0D326005F32F8 = 1BD3D42A15C0D326005F32F8 /* PBXTextBookmark */;
+			1BD3D42B15C0D326005F32F8 = 1BD3D42B15C0D326005F32F8 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 1B17F40D15926335007EC2B8 /* Source Control */;
 		userBuildSettings = {
@@ -1006,13 +984,6 @@
 			sepNavIntBoundsRect = "{{0, 0}, {1070, 949}}";
 			sepNavSelRange = "{1650, 0}";
 			sepNavVisRange = "{838, 1106}";
-		};
-	};
-	ACE83841E963EABFF11A2A34 /* moc_HStimRequestState.cpp */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {921, 1248}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 733}";
 		};
 	};
 	B63327AF9EA176A541EFE53A /* HabitMediaManager.cpp */ = {
@@ -1081,12 +1052,6 @@
 		name = HStartTrialState.h;
 		path = /Users/Oakeslab/work/habit2/libs/habutil/HStartTrialState.h;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1306, 632}}";
-			sepNavSelRange = "{833, 0}";
-			sepNavVisRange = "{0, 833}";
-			sepNavWindowFrame = "{{15, 91}, {1437, 937}}";
-		};
 	};
 	FB9D2D85D9E54EE33BEAF8C2 /* HReadyTransition.h */ = {
 		isa = PBXFileReference;
@@ -1094,11 +1059,6 @@
 		name = HReadyTransition.h;
 		path = /Users/Oakeslab/work/habit2/libs/habutil/HReadyTransition.h;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1306, 715}}";
-			sepNavSelRange = "{231, 0}";
-			sepNavVisRange = "{135, 1026}";
-		};
 	};
 	FBC556DFACA9034540033131 /* StimulusSource.cpp */ = {
 		uiCtxt = {
@@ -1113,11 +1073,6 @@
 		name = HAGState.h;
 		path = /Users/Oakeslab/work/habit2/libs/habutil/HAGState.h;
 		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1306, 632}}";
-			sepNavSelRange = "{760, 0}";
-			sepNavVisRange = "{0, 760}";
-		};
 	};
 	FC89132AD2DD7CC4FE7DEAAD /* HabitPlayer.cpp */ = {
 		uiCtxt = {
