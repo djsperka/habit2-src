@@ -8,18 +8,18 @@
  */
 
 #include "HTrial.h"
-#include "HStartTrialState.h"
-#include "HAGState.h"
-#include "HStimRequestState.h"
 #include <QFinalState>
-#include "HReadyTransition.h"
 
 
-HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int maxTrialLengthMS, bool bFixedLength, bool bUseAG) :
+HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int maxTrialLengthMS, bool bFixedLength, bool bUseAG, bool bUseLeft, bool bUseCenter, bool bUseRight) :
 	HState("HTrial"), 
+	m_pdialog(pDialog),
 	m_maxTrialLengthMS(maxTrialLengthMS), 
 	m_bFixedLength(bFixedLength), 
-	m_bAG(bUseAG)
+	m_bAG(bUseAG),
+	m_bUseLeft(bUseLeft),
+	m_bUseCenter(bUseCenter), 
+	m_bUseRight(bUseRight)
 {
 	// create timer for stim
 	m_ptimer = new QTimer();
