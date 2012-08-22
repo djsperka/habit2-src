@@ -13,8 +13,9 @@
 
 #include <QTime>
 #include <QTextStream>
+#include <QDebug>
 
-enum LookTransType { NoneLeft=0, LeftNone, NoneCenter, CenterNone, NoneRight, RightNone, NoneEnd };
+enum LookTransType { NoneLeft=0, LeftNone, NoneCenter, CenterNone, NoneRight, RightNone, NoneNone};
 enum LookDirection { NoLook=0, LookLeft, LookRight, LookCenter };
 
 class HLook
@@ -34,6 +35,5 @@ private:
 QTextStream& operator<<(QTextStream& out, const LookTransType& type);
 QTextStream& operator<<(QTextStream& out, const LookDirection& direction);
 QTextStream& operator<<(QTextStream& out, const HLook& l);
-
-
+	
 #endif

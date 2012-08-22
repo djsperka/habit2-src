@@ -22,14 +22,17 @@ TestLookDialog::TestLookDialog(QWidget* parent) : QDialog(parent), m_bGoClicked(
 	lineeditLook->setValidator(new QIntValidator(1, 10000));
 	lineeditLookAway = new QLineEdit("250");
 	lineeditLookAway->setValidator(new QIntValidator(0, 10000));
+	rbAG = new QRadioButton("AG");
+	rbLook = new QRadioButton("Look");
 	listWidget = new QListWidget(this);
 	layout->addWidget(lineeditLook);
 	layout->addWidget(lineeditLookAway);
+	layout->addWidget(rbAG);
+	layout->addWidget(rbLook);
 	layout->addWidget(pushbuttonGo);
 	layout->addWidget(listWidget);
 
 	connect(pushbuttonGo, SIGNAL(clicked()), this, SLOT(goClicked()));
-	QCoreApplication::instance()->installEventFilter(this);
 };
 
 
@@ -44,10 +47,34 @@ void TestLookDialog::goClicked()
 	m_bGoClicked = true;
 	//listWidget->installEventFilter(this);
 	
-	looker = new HLooker(lineeditLook->text().toInt(&bValue), lineeditLookAway->text().toInt(&bValue));
-	connect(looker, SIGNAL(look(HLook)), this, SLOT(gotLook(HLook)));
+	//looker = new HLooker(lineeditLook->text().toInt(&bValue), lineeditLookAway->text().toInt(&bValue));
+	ld = new HKeypadLookDetector(lineeditLook->text().toInt(&bValue), lineeditLookAway->text().toInt(&bValue),
+								 listWidget, true, true, true);
+	if (rbAG->isChecked())
+	{
+		ld->enableAGLook();
+	}
+	if (rbLook->isChecked())
+	{
+		ld->enableLook();
+	}
+	//connect(looker, SIGNAL(look(HLook)), this, SLOT(gotLook(HLook)));
+	connect(ld, SIGNAL(look(HLook)), this, SLOT(gotLook(HLook)));
+	connect(ld, SIGNAL(attention()), this, SLOT(gotAttention()));
+	connect(rbAG, SIGNAL(toggled(bool)), this, SLOT(agToggled(bool)));
+	connect(rbLook, SIGNAL(toggled(bool)), this, SLOT(lookToggled(bool)));
 	return;
 };
+
+void TestLookDialog::agToggled(bool checked)
+{
+	if (checked) ld->enableAGLook();
+}
+
+void TestLookDialog::lookToggled(bool checked)
+{
+	if (checked) ld->enableLook();
+}
 
 void TestLookDialog::gotLook(HLook l)
 {
@@ -58,64 +85,10 @@ void TestLookDialog::gotLook(HLook l)
 	new QListWidgetItem(s, listWidget);
 }
 
-bool TestLookDialog::eventFilter(QObject *obj, QEvent *event)
+void TestLookDialog::gotAttention()
 {
-	int t = m_time.elapsed();
-	QKeyEvent *keyEvent;
-	bool bVal = false;
-	if (m_bGoClicked) 
-	{
-		switch (event->type()) 
-		{
-			case QEvent::KeyPress:
-				keyEvent = static_cast<QKeyEvent*>(event);
-				if (keyEvent->isAutoRepeat())
-				{
-					bVal = true;
-					//qDebug() << "Ignore auto-repeat " << keyEvent->key();
-				}
-				else 
-				{
-					qDebug() << "Ate key press " << keyEvent->key();
-					switch (keyEvent->key()) 
-					{
-						case Qt::Key_4:
-							looker->addTrans(NoneLeft, t);
-							bVal = true;
-							break;
-						case Qt::Key_6:
-							looker->addTrans(NoneRight, t);
-							bVal = true;
-							break;
-						default:
-							break;
-					}
-				}
-				break;
-			case QEvent::KeyRelease:
-				keyEvent = static_cast<QKeyEvent*>(event);
-				qDebug() << "Ate key release " << keyEvent->key();
-				switch (keyEvent->key()) {
-					case Qt::Key_4:
-						looker->addTrans(LeftNone, t);
-						bVal = true;
-						break;
-					case Qt::Key_6:
-						looker->addTrans(RightNone, t);
-						bVal = true;
-						break;
-					default:
-						break;
-				}
-				break;
-			default:
-				break;
-			}
-		}
-		else 
-		{
-			// pass the event on to the parent class
-			bVal = QDialog::eventFilter(obj, event);
-		}
-	return bVal;
-}
+	QString s("Got attention signal");
+	qDebug() << s;
+	new QListWidgetItem(s, listWidget);
+}	
+

@@ -65,30 +65,32 @@
 		fRef = 1B17F433159274A1007EC2B8 /* HLooker.cpp */;
 		name = "HLooker.cpp: 16";
 		rLen = 0;
-		rLoc = 232;
+		rLoc = 675;
 		rType = 0;
 		vrLen = 916;
 		vrLoc = 1650;
 	};
-	1B5380E215B8B09D003A13FF /* PBXTextBookmark */ = {
+	1B53831515BA3828003A13FF /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
-		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
-		name = "TestLookDialog.cpp: 55";
+		fRef = 1B53831615BA3828003A13FF /* Oakeslab.pbxuser */;
+		name = "Oakeslab.pbxuser: 1";
 		rLen = 0;
-		rLoc = 1609;
+		rLoc = 0;
 		rType = 0;
-		vrLen = 1286;
-		vrLoc = 26;
+		vrLen = 947;
+		vrLoc = 0;
 	};
-	1B5380E315B8B09D003A13FF /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
-		name = "TestLookDialog.cpp: 25";
-		rLen = 0;
-		rLoc = 669;
-		rType = 0;
-		vrLen = 1286;
-		vrLoc = 26;
+	1B53831615BA3828003A13FF /* Oakeslab.pbxuser */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = text;
+		name = Oakeslab.pbxuser;
+		path = /Users/Oakeslab/work/habit2/apps/testlook/testlook.xcodeproj/Oakeslab.pbxuser;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {885, 5252}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 1118}";
+		};
 	};
 	1B6E4ABF15B78D6800E5E167 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -110,21 +112,203 @@
 		vrLen = 261;
 		vrLoc = 0;
 	};
-	1B6E4AC115B78D6800E5E167 /* PBXTextBookmark */ = {
+	1BD3D51315E53FBD005F32F8 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 9DC85D7899879A7A2DF946EB /* TestLookDialog.h */;
-		name = "TestLookDialog.h: 10";
+		name = "TestLookDialog.h: 17";
 		rLen = 0;
-		rLoc = 144;
+		rLoc = 294;
 		rType = 0;
-		vrLen = 637;
+		vrLen = 691;
+		vrLoc = 24;
+	};
+	1BD3D51415E53FBD005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 16";
+		rLen = 0;
+		rLoc = 339;
+		rType = 0;
+		vrLen = 1107;
+		vrLoc = 0;
+	};
+	1BD3D51515E53FBD005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 55";
+		rLen = 0;
+		rLoc = 1719;
+		rType = 0;
+		vrLen = 1212;
+		vrLoc = 918;
+	};
+	1BD3D53815E5407C005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 39";
+		rLen = 0;
+		rLoc = 1072;
+		rType = 0;
+		vrLen = 1174;
+		vrLoc = 918;
+	};
+	1BD3D54815E540A6005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 39";
+		rLen = 0;
+		rLoc = 1072;
+		rType = 0;
+		vrLen = 1378;
+		vrLoc = 338;
+	};
+	1BD3D54915E540A6005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 39";
+		rLen = 0;
+		rLoc = 1072;
+		rType = 0;
+		vrLen = 1378;
+		vrLoc = 338;
+	};
+	1BD3D55515E54242005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1BD3D55615E54242005F32F8 /* HLookDetector.cpp */;
+		name = "HLookDetector.cpp: 29";
+		rLen = 0;
+		rLoc = 412;
+		rType = 0;
+		vrLen = 580;
+		vrLoc = 0;
+	};
+	1BD3D55615E54242005F32F8 /* HLookDetector.cpp */ = {
+		isa = PBXFileReference;
+		name = HLookDetector.cpp;
+		path = /Users/Oakeslab/work/habit2/libs/habutil/HLookDetector.cpp;
+		sourceTree = "<absolute>";
+	};
+	1BD3D55715E54242005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9DC85D7899879A7A2DF946EB /* TestLookDialog.h */;
+		name = "TestLookDialog.h: 31";
+		rLen = 0;
+		rLoc = 505;
+		rType = 0;
+		vrLen = 709;
+		vrLoc = 0;
+	};
+	1BD3D55815E54242005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 28";
+		rLen = 0;
+		rLoc = 801;
+		rType = 0;
+		vrLen = 1101;
+		vrLoc = 0;
+	};
+	1BD3D55915E54242005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 57";
+		rLen = 0;
+		rLoc = 1730;
+		rType = 0;
+		vrLen = 1308;
+		vrLoc = 669;
+	};
+	1BD3D55E15E543B2005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9DC85D7899879A7A2DF946EB /* TestLookDialog.h */;
+		name = "TestLookDialog.h: 42";
+		rLen = 0;
+		rLoc = 752;
+		rType = 0;
+		vrLen = 720;
+		vrLoc = 37;
+	};
+	1BD3D55F15E543B2005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 57";
+		rLen = 0;
+		rLoc = 1730;
+		rType = 0;
+		vrLen = 1377;
+		vrLoc = 146;
+	};
+	1BD3D56015E543B2005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 77";
+		rLen = 0;
+		rLoc = 2289;
+		rType = 0;
+		vrLen = 1092;
+		vrLoc = 1355;
+	};
+	1BD3D56515E543D1005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 77";
+		rLen = 0;
+		rLoc = 2289;
+		rType = 0;
+		vrLen = 1092;
+		vrLoc = 1355;
+	};
+	1BD3D60215E5A922005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1BD3D60315E5A922005F32F8 /* HKeypadLookDetector.cpp */;
+		name = "HKeypadLookDetector.cpp: 72";
+		rLen = 0;
+		rLoc = 1253;
+		rType = 0;
+		vrLen = 907;
+		vrLoc = 149;
+	};
+	1BD3D60315E5A922005F32F8 /* HKeypadLookDetector.cpp */ = {
+		isa = PBXFileReference;
+		name = HKeypadLookDetector.cpp;
+		path = /Users/Oakeslab/work/habit2/libs/habutil/HKeypadLookDetector.cpp;
+		sourceTree = "<absolute>";
+	};
+	1BD3D60415E5A922005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */;
+		name = "TestLookDialog.cpp: 54";
+		rLen = 0;
+		rLoc = 1697;
+		rType = 0;
+		vrLen = 1301;
+		vrLoc = 1283;
+	};
+	1BD3D60515E5A922005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1B53831615BA3828003A13FF /* Oakeslab.pbxuser */;
+		name = "Oakeslab.pbxuser: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 1118;
+		vrLoc = 0;
+	};
+	1BD3D60615E5A922005F32F8 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1B53831615BA3828003A13FF /* Oakeslab.pbxuser */;
+		name = "Oakeslab.pbxuser: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 1118;
 		vrLoc = 0;
 	};
 	1FD1D0524AC17DDC7519AF46 /* TestLookDialog.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {908, 1456}}";
-			sepNavSelRange = "{669, 0}";
-			sepNavVisRange = "{26, 1286}";
+			sepNavIntBoundsRect = "{{0, 0}, {908, 1235}}";
+			sepNavSelRange = "{1697, 0}";
+			sepNavVisRange = "{1283, 1301}";
 		};
 	};
 	8AB992EE8F66AFD490EFC71F /* testlook.pro */ = {
@@ -153,7 +337,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					695,
+					707,
 					20,
 					48,
 					43,
@@ -161,6 +345,30 @@
 					20,
 				);
 				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.XCSCMDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					20,
+					683,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_SCM_ColumnID,
 					PBXFileDataSource_FiletypeID,
 					PBXFileDataSource_Filename_ColumnID,
 					PBXFileDataSource_Built_ColumnID,
@@ -192,16 +400,32 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 364524998;
-			PBXWorkspaceStateSaveDate = 364524998;
+			PBXPerProjectTemplateStateSaveDate = 367345765;
+			PBXWorkspaceStateSaveDate = 367345765;
 		};
 		perUserProjectItems = {
 			1B17F48915928BE8007EC2B8 = 1B17F48915928BE8007EC2B8 /* PBXTextBookmark */;
-			1B5380E215B8B09D003A13FF = 1B5380E215B8B09D003A13FF /* PBXTextBookmark */;
-			1B5380E315B8B09D003A13FF = 1B5380E315B8B09D003A13FF /* PBXTextBookmark */;
+			1B53831515BA3828003A13FF = 1B53831515BA3828003A13FF /* PBXTextBookmark */;
 			1B6E4ABF15B78D6800E5E167 = 1B6E4ABF15B78D6800E5E167 /* PBXTextBookmark */;
 			1B6E4AC015B78D6800E5E167 = 1B6E4AC015B78D6800E5E167 /* PBXTextBookmark */;
-			1B6E4AC115B78D6800E5E167 = 1B6E4AC115B78D6800E5E167 /* PBXTextBookmark */;
+			1BD3D51315E53FBD005F32F8 = 1BD3D51315E53FBD005F32F8 /* PBXTextBookmark */;
+			1BD3D51415E53FBD005F32F8 = 1BD3D51415E53FBD005F32F8 /* PBXTextBookmark */;
+			1BD3D51515E53FBD005F32F8 = 1BD3D51515E53FBD005F32F8 /* PBXTextBookmark */;
+			1BD3D53815E5407C005F32F8 /* PBXTextBookmark */ = 1BD3D53815E5407C005F32F8 /* PBXTextBookmark */;
+			1BD3D54815E540A6005F32F8 /* PBXTextBookmark */ = 1BD3D54815E540A6005F32F8 /* PBXTextBookmark */;
+			1BD3D54915E540A6005F32F8 /* PBXTextBookmark */ = 1BD3D54915E540A6005F32F8 /* PBXTextBookmark */;
+			1BD3D55515E54242005F32F8 /* PBXTextBookmark */ = 1BD3D55515E54242005F32F8 /* PBXTextBookmark */;
+			1BD3D55715E54242005F32F8 /* PBXTextBookmark */ = 1BD3D55715E54242005F32F8 /* PBXTextBookmark */;
+			1BD3D55815E54242005F32F8 /* PBXTextBookmark */ = 1BD3D55815E54242005F32F8 /* PBXTextBookmark */;
+			1BD3D55915E54242005F32F8 /* PBXTextBookmark */ = 1BD3D55915E54242005F32F8 /* PBXTextBookmark */;
+			1BD3D55E15E543B2005F32F8 /* PBXTextBookmark */ = 1BD3D55E15E543B2005F32F8 /* PBXTextBookmark */;
+			1BD3D55F15E543B2005F32F8 /* PBXTextBookmark */ = 1BD3D55F15E543B2005F32F8 /* PBXTextBookmark */;
+			1BD3D56015E543B2005F32F8 /* PBXTextBookmark */ = 1BD3D56015E543B2005F32F8 /* PBXTextBookmark */;
+			1BD3D56515E543D1005F32F8 /* PBXTextBookmark */ = 1BD3D56515E543D1005F32F8 /* PBXTextBookmark */;
+			1BD3D60215E5A922005F32F8 /* PBXTextBookmark */ = 1BD3D60215E5A922005F32F8 /* PBXTextBookmark */;
+			1BD3D60415E5A922005F32F8 /* PBXTextBookmark */ = 1BD3D60415E5A922005F32F8 /* PBXTextBookmark */;
+			1BD3D60515E5A922005F32F8 /* PBXTextBookmark */ = 1BD3D60515E5A922005F32F8 /* PBXTextBookmark */;
+			1BD3D60615E5A922005F32F8 /* PBXTextBookmark */ = 1BD3D60615E5A922005F32F8 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 1B17F40015926326007EC2B8 /* Source Control */;
 		userBuildSettings = {
@@ -209,9 +433,9 @@
 	};
 	9DC85D7899879A7A2DF946EB /* TestLookDialog.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {873, 551}}";
-			sepNavSelRange = "{144, 0}";
-			sepNavVisRange = "{0, 637}";
+			sepNavIntBoundsRect = "{{0, 0}, {873, 585}}";
+			sepNavSelRange = "{752, 0}";
+			sepNavVisRange = "{37, 720}";
 		};
 	};
 	CAD65F20B390653D665D3A28 /* testlook */ = {

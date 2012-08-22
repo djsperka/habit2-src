@@ -11,6 +11,7 @@
 #define _HTRIAL_H_
 
 #include "HState.h"
+#include "HLookDetector.h"
 #include <QObject>
 #include <QTimer>
 #include <QEvent>
@@ -28,19 +29,25 @@
 
 class HTrial: public HState
 {
+	Q_OBJECT
+	
 public:
-	HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int maxTrialLengthMS, bool bFixedLength, bool bUseAG, bool bUseLeft, bool bUseCenter, bool bUseRight);
+	HTrial(QObject* pDialog, QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, bool bFixedLength, bool bUseAG);
 	~HTrial() {};
 protected:
 private:
 	QObject* m_pdialog;
+	HLookDetector* m_pLD;
 	int m_maxTrialLengthMS;
 	bool m_bFixedLength;
 	bool m_bAG;
-	bool m_bUseLeft;
-	bool m_bUseCenter;
-	bool m_bUseRight;
 	QTimer* m_ptimer;	
+	
+public slots:
+	void onStimRunningEntered();
+	void onAGRunningEntered();
+	
+	
 };
 
 

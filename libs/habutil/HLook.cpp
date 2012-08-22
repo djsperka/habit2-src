@@ -31,8 +31,8 @@ QTextStream& operator<<(QTextStream& out, const LookTransType& lt)
 		case RightNone:
 			out << "RightNone";
 			break;
-		case NoneEnd:
-			out << "NoneEnd";
+		case NoneNone:
+			out << "NoneNone";
 			break;
 		default:
 			out << "Unknown";

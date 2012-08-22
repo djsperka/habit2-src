@@ -21,13 +21,7 @@ class HLooker : public QObject
 	Q_OBJECT
 
 public:
-	HLooker(int minlooktime_ms, int minlookawaytime_ms) : m_bLive(true), m_indexAt(0), m_minLookTimeMS(minlooktime_ms), m_minLookAwayTimeMS(minlookawaytime_ms), m_bLookStarted(false), m_direction(NoLook), m_bLookAwayStarted(false)
-	{
-		m_ptimer = new QTimer();
-		m_ptimer->setInterval(minlookawaytime_ms);
-		m_ptimer->setSingleShot(true);
-		QObject::connect(m_ptimer, SIGNAL(timeout()), this, SLOT(timeout()));
-	};
+	HLooker(int minlooktime_ms, int minlookawaytime_ms);
 	~HLooker() {};
 	void addTrans(LookTransType type, int tMS);	
 	

@@ -8,7 +8,17 @@
  */
 
 #include "HLooker.h"
+#include "HElapsedTimer.h"
 #include <QDebug>
+
+HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms) : 
+m_bLive(true), m_indexAt(0), m_minLookTimeMS(minlooktime_ms), m_minLookAwayTimeMS(minlookawaytime_ms), m_bLookStarted(false), m_direction(NoLook), m_bLookAwayStarted(false)
+{
+	m_ptimer = new QTimer();
+	m_ptimer->setInterval(minlookawaytime_ms);
+	m_ptimer->setSingleShot(true);
+	QObject::connect(m_ptimer, SIGNAL(timeout()), this, SLOT(timeout()));
+};
 
 
 void HLooker::addTrans(LookTransType type, int tMS)
@@ -34,7 +44,7 @@ LookDirection HLooker::directionTo(LookTransType type)
 		case LeftNone:
 		case CenterNone:
 		case RightNone:
-		case NoneEnd:
+		case NoneNone:
 			break;
 	}
 	return ld;
@@ -83,8 +93,7 @@ void HLooker::update()
 					m_bLookAwayStarted = true;
 					m_lookAwayStartTimeMS = tMS;
 					m_lookAwayStartIndex = m_indexAt;
-					m_ptimer->start();
-					qDebug() << "update(): Look away started " << m_direction;
+					qDebug() << "update(): Look away started, pending look " << m_direction;
 				}
 				
 				// TODO: may need to assert that this trans is to look-away. Not sure
@@ -94,9 +103,10 @@ void HLooker::update()
 			}
 			else 
 			{
-				if ((tMS - m_lookAwayStartTimeMS) > m_minLookAwayTimeMS)
+				if ((tMS - m_lookAwayStartTimeMS) >= m_minLookAwayTimeMS)
 				{
-					if ((m_lookAwayStartTimeMS - m_lookStartTimeMS) > m_minLookTimeMS)
+					qDebug() << "update(): min look away time exceeded";
+					if ((m_lookAwayStartTimeMS - m_lookStartTimeMS) >= m_minLookTimeMS)
 					{
 						// new look
 						HLook l(m_direction, m_lookStartTimeMS, m_lookAwayStartTimeMS);
@@ -104,9 +114,8 @@ void HLooker::update()
 						m_bLookStarted = false;
 						m_bLookAwayStarted = false;
 						m_indexAt = m_lookAwayStartIndex + 1;
-						emit look(l);
-						
-						qDebug() << "update(): look complete " << directionTo(trans);
+						qDebug() << "update(): look complete " << m_direction;
+						emit look(l);						
 					}
 					else 
 					{
@@ -120,6 +129,7 @@ void HLooker::update()
 				}
 				else 
 				{
+					qDebug() << "update(): min look away time not exceeded " << tMS << "-" << m_lookAwayStartTimeMS << "=" << tMS - m_lookAwayStartTimeMS;
 					// not a full look-away. If its a look-back to same direction as original look, 
 					// then erase the look-away and resume the look. Otherwise, start a new look.
 					if (directionTo(trans) == m_direction)
@@ -137,17 +147,35 @@ void HLooker::update()
 						m_direction = directionTo(trans);
 						m_indexAt++;
 						
-						qDebug() << "update(): new look started.";
+						qDebug() << "update(): new look started " << m_direction;
 					}
 				}
 			}
 		}
+	}
+	
+	/* 
+	 * If a look away has started then start the timer
+	 */
+	
+	if (m_bLookAwayStarted && !m_ptimer->isActive())
+	{
+		int t = m_minLookAwayTimeMS - (HElapsedTimer::elapsed() - m_lookAwayStartTimeMS);
+		m_ptimer->start(t);
+	}
+	else if (!m_bLookAwayStarted && m_ptimer->isActive())
+	{
+		m_ptimer->stop();
 	}
 	return;
 }
 
 void HLooker::timeout()
 {
+	if (m_bLookAwayStarted)
+	{
+		addTrans(NoneNone, HElapsedTimer::elapsed());
+	}
 	return;
 }
 

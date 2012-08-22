@@ -11,15 +11,13 @@
 #include <QFinalState>
 
 
-HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int maxTrialLengthMS, bool bFixedLength, bool bUseAG, bool bUseLeft, bool bUseCenter, bool bUseRight) :
+HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, bool bFixedLength, bool bUseAG) :
 	HState("HTrial"), 
 	m_pdialog(pDialog),
+	m_pLD(pLD),
 	m_maxTrialLengthMS(maxTrialLengthMS), 
 	m_bFixedLength(bFixedLength), 
-	m_bAG(bUseAG),
-	m_bUseLeft(bUseLeft),
-	m_bUseCenter(bUseCenter), 
-	m_bUseRight(bUseRight)
+	m_bAG(bUseAG)
 {
 	// create timer for stim
 	m_ptimer = new QTimer();
@@ -33,6 +31,7 @@ HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int max
 
 	sStimRequest->addTransition(pMediaPlayer, SIGNAL(started()), sStimRunning);		// on entry, emits playStim()
  	QObject::connect(sStimRequest, SIGNAL(playStim(int)), pMediaPlayer, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
+	QObject::connect(sStimRunning, SIGNAL(entered()), this, SLOT(onStimRunningEntered()));
 	
 	// Transition from sStimRunning depends on what the trial type is.
 	// Fixed length trials end on a timeout signal (and we don't bother with look signals).
@@ -45,7 +44,7 @@ HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int max
 	else 
 	{
 		sStimRunning->addTransition(m_ptimer, SIGNAL(timeout()), sBail);
-		sStimRunning->addTransition(pLooker, SIGNAL(look(HLook)), sFinal);
+		sStimRunning->addTransition(pLD, SIGNAL(look(HLook)), sFinal);
 	}
 	
 	
@@ -59,8 +58,9 @@ HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int max
 		HState* sAGRunning = new HState("stateAGRunning", this);
 		sInitial->addTransition(sAG);
 		sAG->addTransition(pMediaPlayer, SIGNAL(started()), sAGRunning);					// exit this state when ag has started signal that stim has started
-		sAGRunning->addTransition(new HReadyTransition(pDialog, sStimRequest));				// ready transition looks for <Enter> key
+		sAGRunning->addTransition(pLD, SIGNAL(attention()), sStimRequest);				// ready transition looks for <Enter> key
 		QObject::connect(sAG, SIGNAL(playStim(int)), pMediaPlayer, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
+		QObject::connect(sAG, SIGNAL(entered()), this, SLOT(onAGRunningEntered()));
 	}
 	else 
 	{
@@ -71,3 +71,13 @@ HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, QObject*pLooker, int max
 	
 }
 
+
+void HTrial::onStimRunningEntered()
+{
+	m_pLD->enableLook();
+}
+
+void HTrial::onAGRunningEntered()
+{
+	m_pLD->enableAGLook();
+}

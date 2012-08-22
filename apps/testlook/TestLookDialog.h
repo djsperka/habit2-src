@@ -10,7 +10,8 @@
 #include <QtGui>
 #include <QKeyEvent>
 #include <QTime>
-#include "HLooker.h"
+#include "HKeypadLookDetector.h"
+//#include "HLooker.h"
 
 class TestLookDialog: public QDialog
 {
@@ -22,19 +23,22 @@ public:
 	~TestLookDialog() {};
 
 protected:
-	bool eventFilter ( QObject * o, QEvent * e );
 private:
 	bool m_bGoClicked;
 	QTime m_time;
 	QLineEdit* lineeditLook;
 	QLineEdit* lineeditLookAway;
+	QRadioButton* rbAG;
+	QRadioButton* rbLook;
 	QPushButton* pushbuttonGo;
 	QListWidget* listWidget;
-	HLooker* looker;
-	
+	//HLooker* looker;
+	HLookDetector* ld;
 private slots:
 	void goClicked();	
 	void gotLook(HLook);
-	
+	void gotAttention();
+	void agToggled(bool);
+	void lookToggled(bool);
 };
 
