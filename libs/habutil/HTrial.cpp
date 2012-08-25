@@ -24,14 +24,14 @@ HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, HLookDetector* pLD, int 
 	m_ptimer->setSingleShot(true);
 	
 	// Create all stim states and transitions
-	HState* sStimRequest = new HStimRequestState(this);
+	m_sStimRequest = new HStimRequestState(this);
 	HState* sStimRunning = new HStimRunningState(maxTrialLengthMS, m_ptimer, this);
 	HState* sBail = new HState("stateBail", this);
 	QFinalState* sFinal = new QFinalState(this);
 
-	sStimRequest->addTransition(pMediaPlayer, SIGNAL(started()), sStimRunning);		// on entry, emits playStim()
- 	QObject::connect(sStimRequest, SIGNAL(playStim(int)), pMediaPlayer, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
-	QObject::connect(sStimRunning, SIGNAL(entered()), this, SLOT(onStimRunningEntered()));
+	m_sStimRequest->addTransition(pMediaPlayer, SIGNAL(stimStarted()), sStimRunning);		// on entry, emits playStim()
+ 	QObject::connect(m_sStimRequest, SIGNAL(playStim(int)), pMediaPlayer, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
+	QObject::connect(m_sStimRequest, SIGNAL(entered()), this, SLOT(onStimRunningEntered()));
 	
 	// Transition from sStimRunning depends on what the trial type is.
 	// Fixed length trials end on a timeout signal (and we don't bother with look signals).
@@ -41,7 +41,7 @@ HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, HLookDetector* pLD, int 
 	{			
 		sStimRunning->addTransition(m_ptimer, SIGNAL(timeout()), sFinal);
 	}
-	else 
+	else
 	{
 		sStimRunning->addTransition(m_ptimer, SIGNAL(timeout()), sBail);
 		sStimRunning->addTransition(pLD, SIGNAL(look(HLook)), sFinal);
@@ -55,16 +55,17 @@ HTrial::HTrial(QObject* pDialog, QObject* pMediaPlayer, HLookDetector* pLD, int 
 	if (bUseAG)
 	{
 		HAGState* sAG = new HAGState(this);
-		HState* sAGRunning = new HState("stateAGRunning", this);
+		HAGRunningState* sAGRunning = new HAGRunningState(this);
+		//HState* sAGRunning = new HState("stateAGRunning", this);
 		sInitial->addTransition(sAG);
-		sAG->addTransition(pMediaPlayer, SIGNAL(started()), sAGRunning);					// exit this state when ag has started signal that stim has started
-		sAGRunning->addTransition(pLD, SIGNAL(attention()), sStimRequest);				// ready transition looks for <Enter> key
-		QObject::connect(sAG, SIGNAL(playStim(int)), pMediaPlayer, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
+		sAG->addTransition(pMediaPlayer, SIGNAL(agStarted()), sAGRunning);					// exit this state when ag has started signal that stim has started
+		sAGRunning->addTransition(pLD, SIGNAL(attention()), m_sStimRequest);				// ready transition looks for <Enter> key
+		QObject::connect(sAG, SIGNAL(playAG()), pMediaPlayer, SLOT(ag()));					// media player will receive this signal and emit stimStarted()
 		QObject::connect(sAG, SIGNAL(entered()), this, SLOT(onAGRunningEntered()));
 	}
 	else 
 	{
-		sInitial->addTransition(sStimRequest);
+		sInitial->addTransition(m_sStimRequest);
 	}
 	sBail->addTransition(sInitial);															// bailed trial automatically repeats
 	

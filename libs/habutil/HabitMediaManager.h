@@ -19,10 +19,11 @@ class HabitMediaManager : public QObject
 private:
 	QList<HabitPlayer *> m_players;
 	bool m_pendingStartSignal;
+	bool m_pendingAGStartSignal;
 	
 public:
 
-	HabitMediaManager(): QObject(), m_pendingStartSignal(false) {};
+	HabitMediaManager(): QObject(), m_pendingStartSignal(false), m_pendingAGStartSignal(false) {};
 	~HabitMediaManager() {};	// TODO: should this destructor do something? 
 
 	void addPlayer(HabitPlayer* player);
@@ -34,6 +35,6 @@ public slots:
 	void playerStarted(int i);
 
 signals:
-
-	void started();
+	void agStarted();
+	void stimStarted();
 };

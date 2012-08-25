@@ -13,6 +13,7 @@
 #include <QtGui/QLabel>
 #include <QList>
 #include <QTextStream>
+#include <QKeyEvent>
 #include <Phonon/MediaObject>
 #include <Phonon/VideoWidget>
 #include <Phonon/AudioOutput>
@@ -31,6 +32,9 @@ public:
 	virtual void play(int number);
 	virtual void stop(); 
 	friend QTextStream& operator<<(QTextStream& out, const HabitVideoImagePlayer& player);
+	
+protected:
+	void keyPressEvent(QKeyEvent* event);
 	
 private:
 	Phonon::MediaObject *m_pMediaObject;

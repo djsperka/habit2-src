@@ -177,3 +177,8 @@ void HabitVideoImagePlayer::onPrefinishMarkReached(qint32 msec)
 	}
 }
 
+void HabitVideoImagePlayer::keyPressEvent(QKeyEvent* event)
+{
+	qDebug() << "HabitVideoImagePlayer: keyPressEvent " << event->key();
+	HabitPlayer::keyPressEvent(event);
+}

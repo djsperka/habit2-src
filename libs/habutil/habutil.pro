@@ -14,6 +14,7 @@ HEADERS +=	HLook.h \
 			HabitPlayer.h \
 			HabitAudioPlayer.h \
 			HabitVideoImagePlayer.h \
+			HabitNonPlayer.h \
 			StimulusSource.h \
 			ImageWidget.h \
 			HabitMediaManager.h
@@ -28,6 +29,7 @@ SOURCES +=	HLook.cpp \
 			HabitPlayer.cpp \
 			HabitAudioPlayer.cpp \
 			HabitVideoImagePlayer.cpp \
+			HabitNonPlayer.cpp \
 			StimulusSource.cpp \
 			ImageWidget.cpp \
 			HabitMediaManager.cpp

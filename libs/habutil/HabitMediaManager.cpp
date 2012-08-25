@@ -27,16 +27,28 @@ void HabitMediaManager::stim(int i)
 
 void HabitMediaManager::ag()
 {
+	m_pendingAGStartSignal = true;
 	stim(0);
 }
 
 void HabitMediaManager::playerStarted(int id)
 {
 	Q_UNUSED(id);
+	qDebug() << "HabitMediaManager::playerStarted(" << id << ")";
 	if (m_pendingStartSignal)
 	{
-		emit started();
+		if (m_pendingAGStartSignal)
+		{
+			qDebug() << "HabitMediaManager::playerStarted(" << id << "): emit agStarted()";
+			emit agStarted();
+		}
+		else
+		{
+			qDebug() << "HabitMediaManager::playerStarted(" << id << "): emit stimStarted()";
+			emit stimStarted();
+		}
 		m_pendingStartSignal = false;
+		m_pendingAGStartSignal = false;
 	}
 }
 
