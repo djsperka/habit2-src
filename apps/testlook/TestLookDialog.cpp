@@ -58,6 +58,7 @@ void TestLookDialog::goClicked()
 	{
 		ld->enableLook();
 	}
+	
 	//connect(looker, SIGNAL(look(HLook)), this, SLOT(gotLook(HLook)));
 	connect(ld, SIGNAL(look(HLook)), this, SLOT(gotLook(HLook)));
 	connect(ld, SIGNAL(attention()), this, SLOT(gotAttention()));
