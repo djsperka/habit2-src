@@ -35,6 +35,8 @@ public:
 	virtual void playAG() { play(0); };
 	virtual void stop() = 0; 
 	
+	bool eventFilter(QObject *object, QEvent *event);
+
 	// Add a stimulus to the player. This function stores the stimuli at index
 	// positions 1, 2, .... By default, the first position, index 0, is reserved
 	// for the attention getter (AG). That position is initialized with an empty

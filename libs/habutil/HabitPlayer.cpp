@@ -8,11 +8,28 @@
  */
 
 #include "HabitPlayer.h"
+#include <QFocusEvent>
+
+bool HabitPlayer::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::FocusIn)
+    {
+		QFocusEvent* f = dynamic_cast<QFocusEvent*> (event);
+		qDebug() << "HabitPlayer - Got FocusIn Event " << f->reason();
+    }
+    else if (event->type() == QEvent::FocusOut)
+    {
+		QFocusEvent* f = dynamic_cast<QFocusEvent*> (event);
+		qDebug() << "Habitplayer - Got FocusOut Event " << f->reason();		
+    }
+    return false;
+}
 
 HabitPlayer::HabitPlayer(int ID, QWidget *w) : QLabel(w), m_id(ID), m_iCurrentStim(0)
 {
 	m_sources.append(StimulusSource(""));	// dummy placeholder for attention getter stim. 
 	setObjectName("HabitPlayer");
+	installEventFilter(this);
 }
 
 int HabitPlayer::addStimulus(QString filename, bool isLooped)

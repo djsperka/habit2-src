@@ -13,12 +13,7 @@
 #include <QAbstractTransition>
 
 HState::HState( const QString& name, QState* parent )
-: QState( parent ), m_name( name ), m_prefix()
-{
-}
-
-HState::HState( const QString& name, const QString& prefix, QState* parent )
-: QState( parent ), m_name( name ), m_prefix( prefix )
+: QState( parent ), m_name( name )
 {
 }
 
@@ -34,7 +29,7 @@ void HState::onEntry( QEvent* e )
         state = parent->name() + "->" + state;
         parent = dynamic_cast<HState*>( parent->parentState() );
     }
-    qDebug() << m_prefix << "Entering state:" << state;
+    qDebug() << "Entering state:" << state;
 }
 
 void HState::onExit( QEvent* e )
@@ -61,6 +56,6 @@ void HState::onExit( QEvent* e )
 		else sTarget.append("???");
 	}
 	
-    qDebug() << m_prefix << "Exiting state:" << state << " target: " << sTarget;
+    qDebug() << "Exiting state:" << state << " target: " << sTarget;
 }
 

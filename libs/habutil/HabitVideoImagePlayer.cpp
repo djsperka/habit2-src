@@ -8,9 +8,70 @@
  */
 
 #include "HabitVideoImagePlayer.h"
+#include <QFocusEvent>
+#include <QApplication>
+
+bool HabitVideoImagePlayer::eventFilter(QObject *object, QEvent *event)
+{
+	if (event->type() == QEvent::ActivationChange)
+	{
+		qDebug() << "HabitVideoImagePlayer: activation change ignored.";
+		event->ignore();
+	}
+	if (event->type() == QEvent::KeyPress)
+	{
+		qDebug() << "HabitVideoImagePlayer: Got KeyPress Event " << object->metaObject()->className();
+		if (this->parent())
+			qDebug() << "HabitVideoImagePlayer: parent is " << this->parent()->metaObject()->className();
+		else 
+			qDebug() << "HabitVideoImagePlayer no parent!";
+	}		
+	if (event->type() == QEvent::KeyRelease)
+	{
+		qDebug() << "HabitVideoImagePlayer: Got KeyRelease Event " << object->metaObject()->className();
+	}		
+    if (event->type() == QEvent::FocusIn)
+    {
+		QFocusEvent* f = dynamic_cast<QFocusEvent*> (event);
+		qDebug("Got FocusIn Event");
+        if (object == m_pImageWidget)
+        {
+            qDebug() << "ImageWidget FocusIn " << f->reason();
+        }
+		else if (object == m_pVideoWidget)
+		{
+            qDebug() << "VideoWidget FocusIn " << f->reason();
+        }
+		else if (object == this)
+		{
+            qDebug() << "VideoImagePlayer FocusIn " << f->reason();
+        }
+		
+    }
+    else if (event->type() == QEvent::FocusOut)
+    {
+		QFocusEvent* f = dynamic_cast<QFocusEvent*> (event);
+		qDebug("Got FocusOut Event");		
+        if (object == m_pImageWidget)
+        {
+            qDebug() << "ImageWidget FocusOut " << f->reason();
+        }
+		else if (object == m_pVideoWidget)
+		{
+            qDebug() << "VideoWidget FocusOut " << f->reason();
+        }
+		else if (object == this)
+		{
+            qDebug() << "VideoImagePlayer FocusOut " << f->reason();
+        }
+		
+    }
+    return false;
+}
+
 
 HabitVideoImagePlayer::HabitVideoImagePlayer(int id, QWidget *w, bool fullscreen, bool maintainAspectRatio) : 
-HabitPlayer(id, w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
+HabitPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
 {
 	// This combination needed to get the "close window when app exits"
 	// right. Make sure to call with the parent as the thing that should 
@@ -30,6 +91,12 @@ HabitPlayer(id, w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_p
 	m_pVideoWidget = new Phonon::VideoWidget(this);
 	m_pVideoWidget->setObjectName("VideoWidget");
 	m_pAudioOutput = new Phonon::AudioOutput(Phonon::VideoCategory, this);
+	
+	// temp test
+	//m_pImageWidget->installEventFilter(this);
+	m_pVideoWidget->setFocusPolicy(Qt::NoFocus);
+	m_pVideoWidget->installEventFilter(this);
+	installEventFilter(this);
 	
 	// connect media object slot to handle looped video when needed
 	
@@ -146,12 +213,21 @@ void HabitVideoImagePlayer::play(int number)
 						m_pImageWidget->hide();
 						break;
 					case StimulusSource::VIDEO:
+#if 0
 						m_pMediaObject->setCurrentSource((m_sources[number].filename()));
 						m_pVideoWidget->setGeometry(geometry());
 						m_pVideoWidget->show();
 						m_pImageWidget->hide();
 						m_pMediaObject->play();
 						m_pVideoWidget->setFullScreen(m_isFullScreen);
+#endif
+						m_pMediaObject->setCurrentSource((m_sources[number].filename()));
+						m_pVideoWidget->setGeometry(geometry());
+						m_pImageWidget->hide();
+						m_pVideoWidget->show();
+						m_pMediaObject->play();
+						m_pVideoWidget->setFullScreen(m_isFullScreen);
+						m_parent->activateWindow();//HACK
 						break;
 					case StimulusSource::IMAGE:
 						m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
@@ -163,6 +239,42 @@ void HabitVideoImagePlayer::play(int number)
 				break;		
 		}
 		m_iCurrentStim = number;
+	}
+	
+	// find what has the focus.
+	
+	if (!QApplication::activeWindow())
+	{
+		qDebug("There is no active window!");
+	}
+	else 
+	{
+		qDebug() << "There IS an active window - classname " << QApplication::activeWindow()->metaObject()->className();
+		foreach (QWidget *widget, QApplication::allWidgets())
+		{
+			if (widget == QApplication::focusWidget())
+			{
+				qDebug() << "Found active window - classname " << widget->metaObject()->className();
+				if (widget == m_pImageWidget) qDebug("image widget is active window");
+				if (widget == m_pVideoWidget) qDebug("video widget is active window");
+				if (widget == this) qDebug("VideoimagePlayer is active window");
+			}
+		}
+	}
+	
+	if (!QApplication::focusWidget())
+	{
+		qDebug("HabitVideoImagePlayer::play - no widget has focus!");
+	}
+	else 
+	{
+		foreach (QWidget *widget, QApplication::allWidgets())
+		{
+			if (widget == QApplication::focusWidget())
+			{
+				qDebug("Found focus widget");
+			}
+		}
 	}
 }
 
@@ -177,8 +289,3 @@ void HabitVideoImagePlayer::onPrefinishMarkReached(qint32 msec)
 	}
 }
 
-void HabitVideoImagePlayer::keyPressEvent(QKeyEvent* event)
-{
-	qDebug() << "HabitVideoImagePlayer: keyPressEvent " << event->key();
-	HabitPlayer::keyPressEvent(event);
-}

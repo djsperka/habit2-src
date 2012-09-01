@@ -34,7 +34,6 @@ void HabitMediaManager::ag()
 void HabitMediaManager::playerStarted(int id)
 {
 	Q_UNUSED(id);
-	qDebug() << "HabitMediaManager::playerStarted(" << id << ")";
 	if (m_pendingStartSignal)
 	{
 		if (m_pendingAGStartSignal)

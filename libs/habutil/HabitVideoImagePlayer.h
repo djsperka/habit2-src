@@ -32,9 +32,10 @@ public:
 	virtual void play(int number);
 	virtual void stop(); 
 	friend QTextStream& operator<<(QTextStream& out, const HabitVideoImagePlayer& player);
-	
+	bool eventFilter(QObject *object, QEvent *event);
+
 protected:
-	void keyPressEvent(QKeyEvent* event);
+	//void keyPressEvent(QKeyEvent* event);
 	
 private:
 	Phonon::MediaObject *m_pMediaObject;
@@ -43,6 +44,7 @@ private:
 	ImageWidget *m_pImageWidget;
 	bool m_isFullScreen;
 	bool m_maintainAspectRatio;
+	QWidget* m_parent;
 
 signals:
 	void started(int);

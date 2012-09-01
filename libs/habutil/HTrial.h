@@ -30,23 +30,14 @@ class HStimRequestState: public HState
 public:
 	
 	HStimRequestState(QState* parent = 0) : HState("HStimRequestState", parent), m_nextStimID(-1) {};
-	~HStimRequestState() {};
-	
-	void setNextStim(int i) { m_nextStimID = i; };
+	~HStimRequestState() {};	
+	void setNextStim(int i);
 signals:
-	
-	void playStim(int);
-	
+	void playStim(int);	
 protected:
 	// on entry to this state we request that the stim be played. 
-	// Update: Make request by sending a signal (emit) to media controller. 
-	
-	void onEntry(QEvent* e) 
-	{
-		Q_UNUSED(e);
-		HState::onEntry(e);
-		emit playStim(m_nextStimID);
-	};
+	// by emiting a signal to media controller. 	
+	void onEntry(QEvent* e);
 };
 
 
@@ -60,12 +51,11 @@ class HTrial: public HState
 	Q_OBJECT
 	
 public:
-	HTrial(QObject* pDialog, QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, bool bFixedLength, bool bUseAG);
+	HTrial(QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, bool bFixedLength, bool bUseAG, HState* parent);
 	~HTrial() {};
-	void setNextStim(int i)	{ m_sStimRequest->setNextStim(i); };
+	void setNextStim(int i);
 protected:
 private:
-	QObject* m_pdialog;
 	HLookDetector* m_pLD;
 	int m_maxTrialLengthMS;
 	bool m_bFixedLength;
@@ -76,8 +66,8 @@ private:
 public slots:
 	void onStimRunningEntered();
 	void onAGRunningEntered();
-	
-	
+	void onStimRunningExited();
+	void onAGRunningExited();	
 };
 
 
@@ -95,18 +85,8 @@ signals:
 	void playAG();
 	
 protected:
-	// on entry to this state we request that the attention getter be played. 
-	// TODO: will need to have access to the media controller. 
-	// TODO: exit transition should be triggered by the 'started' signal from the player.
-	// Update: Make request by sending a signal (emit) to media controller. 
-	
-	void onEntry(QEvent* e) 
-	{
-		Q_UNUSED(e);
-		qDebug() << "HAGRequestState::onEntry";
-		HState::onEntry(e);
-		emit playAG();
-	};
+	// on entry emit playAG() - media manager should act on that. 
+	void onEntry(QEvent* e);
 };
 
 class HAGRunningState: public HState
@@ -118,13 +98,6 @@ public:
 	HAGRunningState(QState* parent = 0) : HState("HAGRunningState", parent) {};
 	~HAGRunningState() {};
 	
-protected:
-	void onEntry(QEvent* e) 
-	{
-		Q_UNUSED(e);
-		qDebug() << "HAGRunningState::onEntry";
-		HState::onEntry(e);
-	};
 };
 
 
@@ -135,30 +108,16 @@ protected:
 class HStimRunningState: public HState
 {
 public:
-	HStimRunningState(int ms, QTimer* ptimer, QObject* pdialog, QState *parent=0) : HState("HStimRunning", parent), m_ms(ms), m_ptimer(ptimer), m_pdialog(pdialog) {};
+	HStimRunningState(int ms, QTimer* ptimer, QState *parent=0) : HState("HStimRunning", parent), m_ms(ms), m_ptimer(ptimer) {};
 	~HStimRunningState() {};
 	
 protected:
 	// Start timer on entry to this state
-	void onEntry(QEvent* e) 
-	{
-		Q_UNUSED(e);
-		HState::onEntry(e);
-		m_ptimer->start(m_ms);
-		m_pdialog->installEventFilter(this);
-	};
-	
-	void onExit(QEvent* e)
-	{
-		Q_UNUSED(e);
-		m_pdialog->removeEventFilter(this);
-	};
-	
-	
+	void onEntry(QEvent* e);
+
 private:
 	int m_ms;
 	QTimer* m_ptimer;
-	QObject* m_pdialog;
 };
 
 #endif

@@ -13,6 +13,7 @@
 		1FBADE39ED24F9BFD599091D /* HState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 15306E8F995B3EF622AAFFC0 /* HState.cpp */; settings = {ATTRIBUTES = (); }; };
 		2F63E873547D2761BE50D998 /* moc_HabitVideoImagePlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = F2B2268AB851147377F7321F /* moc_HabitVideoImagePlayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		33909D57F609061913680CA7 /* StimulusSource.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = FBC556DFACA9034540033131 /* StimulusSource.cpp */; settings = {ATTRIBUTES = (); }; };
+		410355C1F67F87B5365C5295 /* HPhase.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 1DB843A27517106274BF1269 /* HPhase.cpp */; settings = {ATTRIBUTES = (); }; };
 		451E270C83CE926E784BED78 /* HabitPlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = FC89132AD2DD7CC4FE7DEAAD /* HabitPlayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		4E882245B7EF51BF53921914 /* HabitVideoImagePlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = E404D04D212877E5E7A169FA /* HabitVideoImagePlayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		4EBE691E01A77F6A9B19B6B4 /* moc_HLookDetector.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 43E49AB6EAC748CF46FEBA06 /* moc_HLookDetector.cpp */; settings = {ATTRIBUTES = (); }; };
@@ -20,6 +21,7 @@
 		6B4E749109E23E0094D8973F /* HLook.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 6004E75CB4CADACB84004E6D /* HLook.cpp */; settings = {ATTRIBUTES = (); }; };
 		7736118F7CFFF5B4E4F7132B /* HabitMediaManager.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = B63327AF9EA176A541EFE53A /* HabitMediaManager.cpp */; settings = {ATTRIBUTES = (); }; };
 		7CE7DE26217C97EE294489EF /* moc_HKeypadLookDetector.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = BEE6FC9475CBCB99D8858A95 /* moc_HKeypadLookDetector.cpp */; settings = {ATTRIBUTES = (); }; };
+		82BD2146198AB489404625B7 /* moc_HPhase.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 663102FF60486549496226D9 /* moc_HPhase.cpp */; settings = {ATTRIBUTES = (); }; };
 		8783BE20AB263A15145D3B32 /* moc_HabitNonPlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = BCF71BC7B0DF454EEB31A950 /* moc_HabitNonPlayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		88205F195FA3F8571AD4DBA8 /* moc_HStateMachine.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 0567C8164C0E59C1D7172532 /* moc_HStateMachine.cpp */; settings = {ATTRIBUTES = (); }; };
 		9A7B5566E4B2A6A190328755 /* HabitNonPlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 6B6B7A7324A9310DE34E037E /* HabitNonPlayer.cpp */; settings = {ATTRIBUTES = (); }; };
@@ -42,7 +44,8 @@
 		142F69DE83C067908E46A931 /* HLooker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HLooker.cpp; sourceTree = "<group>"; };
 		15306E8F995B3EF622AAFFC0 /* HState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HState.cpp; sourceTree = "<group>"; };
 		1B5BE14D54FB69074BF4ABF8 /* HabitMediaManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HabitMediaManager.h; sourceTree = "<group>"; };
-		1BD3D70315E82400005F32F8 /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B8A05EE15ED78730032A93E /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DB843A27517106274BF1269 /* HPhase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HPhase.cpp; sourceTree = "<group>"; };
 		1F6C63FC63E8339F9228EC04 /* HabitAudioPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HabitAudioPlayer.h; sourceTree = "<group>"; };
 		32C39BBF60573E7B32B2EF38 /* HabitNonPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HabitNonPlayer.h; sourceTree = "<group>"; };
 		362D0FFF9C9A9143408F1468 /* moc_HLooker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HLooker.cpp; sourceTree = "<group>"; };
@@ -56,7 +59,9 @@
 		5D04CC3124CBA11804EF5B16 /* ImageWidget.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImageWidget.cpp; sourceTree = "<group>"; };
 		6004E75CB4CADACB84004E6D /* HLook.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HLook.cpp; sourceTree = "<group>"; };
 		6022B4CCDDC6B6CF4DCA24E7 /* HElapsedTimer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HElapsedTimer.cpp; sourceTree = "<group>"; };
+		663102FF60486549496226D9 /* moc_HPhase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HPhase.cpp; sourceTree = "<group>"; };
 		6B6B7A7324A9310DE34E037E /* HabitNonPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HabitNonPlayer.cpp; sourceTree = "<group>"; };
+		726CB1DE3A85105F378E6B20 /* HPhase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HPhase.h; sourceTree = "<group>"; };
 		73B9844B0A0C18D019971435 /* HabitVideoImagePlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HabitVideoImagePlayer.h; sourceTree = "<group>"; };
 		73D171D543D54BE77547F95F /* HLookDetector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HLookDetector.cpp; sourceTree = "<group>"; };
 		79BD9240B44F312F275A0C5C /* HLookDetector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HLookDetector.h; sourceTree = "<group>"; };
@@ -103,15 +108,15 @@
 				46E892BBB6BB6952967E0561 /* Temporary Sources */,
 				883D7615C4D2DE3FA1218F12 /* Headers */,
 				7CABE3C80E79AD2B307756D2 /* Sources [qmake] */,
-				1BD3D70415E82400005F32F8 /* Products */,
+				1B8A05EF15ED78730032A93E /* Products */,
 			);
 			name = habutil;
 			sourceTree = "<group>";
 		};
-		1BD3D70415E82400005F32F8 /* Products */ = {
+		1B8A05EF15ED78730032A93E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1BD3D70315E82400005F32F8 /* libhabutil.a */,
+				1B8A05EE15ED78730032A93E /* libhabutil.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,6 +130,7 @@
 				C576C1EBC3456CFA9767AE64 /* moc_HState.cpp */,
 				0567C8164C0E59C1D7172532 /* moc_HStateMachine.cpp */,
 				03EDE1212DF51C15A1B5ACB7 /* moc_HTrial.cpp */,
+				663102FF60486549496226D9 /* moc_HPhase.cpp */,
 				A9D2251E9A5102CCB7F753A8 /* moc_HabitPlayer.cpp */,
 				D4C0DE8B58B228CA5909E227 /* moc_HabitAudioPlayer.cpp */,
 				F2B2268AB851147377F7321F /* moc_HabitVideoImagePlayer.cpp */,
@@ -154,6 +160,7 @@
 				FE4FD8121AD58EB024DD95C9 /* HState.h */,
 				EF91FED4F1045B0360536C92 /* HStateMachine.h */,
 				3A910979D974A019934567BC /* HTrial.h */,
+				726CB1DE3A85105F378E6B20 /* HPhase.h */,
 				C7F6AE7CE95F74DAB9E2A136 /* HElapsedTimer.h */,
 				9A5D38C8A04E33EBFC2A6392 /* HabitPlayer.h */,
 				1F6C63FC63E8339F9228EC04 /* HabitAudioPlayer.h */,
@@ -176,6 +183,7 @@
 				15306E8F995B3EF622AAFFC0 /* HState.cpp */,
 				F9358756C358EDFE927F3C17 /* HStateMachine.cpp */,
 				514969C810A84F3308623DA2 /* HTrial.cpp */,
+				1DB843A27517106274BF1269 /* HPhase.cpp */,
 				6022B4CCDDC6B6CF4DCA24E7 /* HElapsedTimer.cpp */,
 				FC89132AD2DD7CC4FE7DEAAD /* HabitPlayer.cpp */,
 				BF0927CC4ADE57607B0F5EBA /* HabitAudioPlayer.cpp */,
@@ -208,7 +216,7 @@
 			name = habutil;
 			productInstallPath = ../../lib/;
 			productName = habutil;
-			productReference = 1BD3D70315E82400005F32F8 /* libhabutil.a */;
+			productReference = 1B8A05EE15ED78730032A93E /* libhabutil.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -227,7 +235,7 @@
 				German,
 			);
 			mainGroup = 05596AB53D8D521C69802C27 /* habutil */;
-			productRefGroup = 1BD3D70415E82400005F32F8 /* Products */;
+			productRefGroup = 1B8A05EF15ED78730032A93E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -285,6 +293,7 @@
 				1FBADE39ED24F9BFD599091D /* HState.cpp in Build Sources */,
 				1B5A32BF7C704F131D59AB30 /* HStateMachine.cpp in Build Sources */,
 				E7D3109A32CD17C1BFC1EB39 /* HTrial.cpp in Build Sources */,
+				410355C1F67F87B5365C5295 /* HPhase.cpp in Build Sources */,
 				5FAC55CF3A0A3D1EEDC63458 /* HElapsedTimer.cpp in Build Sources */,
 				451E270C83CE926E784BED78 /* HabitPlayer.cpp in Build Sources */,
 				AA578F1409803858893FF650 /* HabitAudioPlayer.cpp in Build Sources */,
@@ -299,6 +308,7 @@
 				A7428FA4978CA969696AC019 /* moc_HState.cpp in Build Sources */,
 				88205F195FA3F8571AD4DBA8 /* moc_HStateMachine.cpp in Build Sources */,
 				AB713D684BD93913B94F65C9 /* moc_HTrial.cpp in Build Sources */,
+				82BD2146198AB489404625B7 /* moc_HPhase.cpp in Build Sources */,
 				9EE4A18157650B2615B2D742 /* moc_HabitPlayer.cpp in Build Sources */,
 				B67B12B81738805255634E0C /* moc_HabitAudioPlayer.cpp in Build Sources */,
 				2F63E873547D2761BE50D998 /* moc_HabitVideoImagePlayer.cpp in Build Sources */,

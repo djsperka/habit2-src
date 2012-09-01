@@ -10,6 +10,7 @@ HEADERS +=	HLook.h \
 			HState.h \
 			HStateMachine.h \
 			HTrial.h \
+			HPhase.h \
 			HElapsedTimer.h \
 			HabitPlayer.h \
 			HabitAudioPlayer.h \
@@ -25,6 +26,7 @@ SOURCES +=	HLook.cpp \
 			HState.cpp \
 			HStateMachine.cpp \
 			HTrial.cpp \
+			HPhase.cpp \
 			HElapsedTimer.cpp \
 			HabitPlayer.cpp \
 			HabitAudioPlayer.cpp \
