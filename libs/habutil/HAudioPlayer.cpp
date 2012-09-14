@@ -1,5 +1,5 @@
 /*
- *  HabitAudioPlayer.cpp
+ *  HAudioPlayer.cpp
  *  myp
  *
  *  Created by Oakes Lab on 6/4/12.
@@ -7,9 +7,9 @@
  *
  */
 
-#include "HabitAudioPlayer.h"
+#include "HAudioPlayer.h"
 
-HabitAudioPlayer::HabitAudioPlayer(int id, QWidget *w) : 
+HAudioPlayer::HAudioPlayer(int id, QWidget *w) : 
 HabitPlayer(id, w), m_pMediaObject(0), m_pAudioOutput(0)
 {
 	// Generate image widget, media object, video widget, audio output
@@ -28,12 +28,12 @@ HabitPlayer(id, w), m_pMediaObject(0), m_pAudioOutput(0)
 	
 }
 
-void HabitAudioPlayer::stop()
+void HAudioPlayer::stop()
 {
 	m_pMediaObject->stop();
 }
 
-void HabitAudioPlayer::play(int number)
+void HAudioPlayer::play(int number)
 {
 	if (number >= 0 && number < m_sources.count())
 	{
@@ -44,7 +44,7 @@ void HabitAudioPlayer::play(int number)
 	}
 }
 
-void HabitAudioPlayer::onPrefinishMarkReached(qint32 msec)
+void HAudioPlayer::onPrefinishMarkReached(qint32 msec)
 {
 	Q_UNUSED(msec);
 	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim)).type() == StimulusSource::AUDIO && (m_sources.at(m_iCurrentStim)).isLooped())
@@ -55,7 +55,7 @@ void HabitAudioPlayer::onPrefinishMarkReached(qint32 msec)
 	}
 }
 
-void HabitAudioPlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
+void HAudioPlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
 {
 	Q_UNUSED(oldState);
 	if (newState == Phonon::PlayingState)

@@ -1,5 +1,5 @@
 /*
- *  HabitVideoImagePlayer.cpp
+ *  HVideoImagePlayer.cpp
  *  myp
  *
  *  Created by Oakes Lab on 6/4/12.
@@ -7,28 +7,28 @@
  *
  */
 
-#include "HabitVideoImagePlayer.h"
+#include "HVideoImagePlayer.h"
 #include <QFocusEvent>
 #include <QApplication>
 
-bool HabitVideoImagePlayer::eventFilter(QObject *object, QEvent *event)
+bool HVideoImagePlayer::eventFilter(QObject *object, QEvent *event)
 {
 	if (event->type() == QEvent::ActivationChange)
 	{
-		qDebug() << "HabitVideoImagePlayer: activation change ignored.";
+		qDebug() << "HVideoImagePlayer: activation change ignored.";
 		event->ignore();
 	}
 	if (event->type() == QEvent::KeyPress)
 	{
-		qDebug() << "HabitVideoImagePlayer: Got KeyPress Event " << object->metaObject()->className();
+		qDebug() << "HVideoImagePlayer: Got KeyPress Event " << object->metaObject()->className();
 		if (this->parent())
-			qDebug() << "HabitVideoImagePlayer: parent is " << this->parent()->metaObject()->className();
+			qDebug() << "HVideoImagePlayer: parent is " << this->parent()->metaObject()->className();
 		else 
-			qDebug() << "HabitVideoImagePlayer no parent!";
+			qDebug() << "HVideoImagePlayer no parent!";
 	}		
 	if (event->type() == QEvent::KeyRelease)
 	{
-		qDebug() << "HabitVideoImagePlayer: Got KeyRelease Event " << object->metaObject()->className();
+		qDebug() << "HVideoImagePlayer: Got KeyRelease Event " << object->metaObject()->className();
 	}		
     if (event->type() == QEvent::FocusIn)
     {
@@ -70,14 +70,14 @@ bool HabitVideoImagePlayer::eventFilter(QObject *object, QEvent *event)
 }
 
 
-HabitVideoImagePlayer::HabitVideoImagePlayer(int id, QWidget *w, bool fullscreen, bool maintainAspectRatio) : 
+HVideoImagePlayer::HVideoImagePlayer(int id, QWidget *w, bool fullscreen, bool maintainAspectRatio) : 
 HabitPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
 {
 	// This combination needed to get the "close window when app exits"
 	// right. Make sure to call with the parent as the thing that should 
 	// kill this window when closed. 
 	
-	setObjectName("HabitVideoImagePlayer");
+	setObjectName("HVideoImagePlayer");
 	setWindowFlags(Qt::Window);
 	showFullScreen();
 	
@@ -128,7 +128,7 @@ HabitPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioO
 	
 }
 
-void HabitVideoImagePlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
+void HVideoImagePlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
 {
 	Q_UNUSED(oldState);
 	if (newState == Phonon::PlayingState)
@@ -138,26 +138,26 @@ void HabitVideoImagePlayer::onStateChanged(Phonon::State newState, Phonon::State
 	return;
 }
 
-void HabitVideoImagePlayer::onImagePainted()
+void HVideoImagePlayer::onImagePainted()
 {
 	emit started(m_id);
 	return;
 }
 		
-void HabitVideoImagePlayer::stop()
+void HVideoImagePlayer::stop()
 {
 	m_pMediaObject->stop();
 }
 
-void HabitVideoImagePlayer::play(int number)
+void HVideoImagePlayer::play(int number)
 {
-	StimulusSource::StimulusSourceType newType = getStimulusType(number);
+	HStimulusSource::HStimulusSourceType newType = getStimulusType(number);
 	switch (getCurrentStimulusType()) 
 	{
-		case StimulusSource::BACKGROUND:
+		case HStimulusSource::BACKGROUND:
 			// Init state, or background state
 			switch (newType) {
-				case StimulusSource::VIDEO:
+				case HStimulusSource::VIDEO:
 					m_pMediaObject->setCurrentSource((m_sources.at(number)).filename());
 					m_pVideoWidget->setGeometry(geometry());
 					m_pVideoWidget->show();
@@ -166,7 +166,7 @@ void HabitVideoImagePlayer::play(int number)
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
 					break;
-				case StimulusSource::IMAGE:
+				case HStimulusSource::IMAGE:
 					m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
 					m_pImageWidget->show();	
 					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
@@ -175,14 +175,14 @@ void HabitVideoImagePlayer::play(int number)
 					break;
 			}
 			break;
-		case StimulusSource::VIDEO:
+		case HStimulusSource::VIDEO:
 			// showing video - stop it
 			stop();
 			switch (newType) {
-				case StimulusSource::BACKGROUND:
+				case HStimulusSource::BACKGROUND:
 					m_pVideoWidget->hide();
 					break;
-				case StimulusSource::VIDEO:
+				case HStimulusSource::VIDEO:
 					m_pMediaObject->setCurrentSource((m_sources[number].filename()));
 					m_pVideoWidget->setGeometry(geometry());
 					m_pVideoWidget->show();
@@ -191,7 +191,7 @@ void HabitVideoImagePlayer::play(int number)
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
 					break;
-				case StimulusSource::IMAGE:
+				case HStimulusSource::IMAGE:
 					m_pVideoWidget->hide();
 					m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
 					m_pImageWidget->show();	
@@ -201,13 +201,13 @@ void HabitVideoImagePlayer::play(int number)
 					break;
 			}
 			break;
-		case StimulusSource::IMAGE:
+		case HStimulusSource::IMAGE:
 			// showing image
 			switch (newType) {
-				case StimulusSource::BACKGROUND:
+				case HStimulusSource::BACKGROUND:
 					m_pImageWidget->hide();
 					break;
-				case StimulusSource::VIDEO:
+				case HStimulusSource::VIDEO:
 					m_pMediaObject->setCurrentSource((m_sources[number].filename()));
 					m_pVideoWidget->setGeometry(geometry());
 					m_pImageWidget->hide();
@@ -217,7 +217,7 @@ void HabitVideoImagePlayer::play(int number)
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
 					m_parent->activateWindow(); //Hack Alert!
 					break;
-				case StimulusSource::IMAGE:
+				case HStimulusSource::IMAGE:
 					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
 					break;
 				default:
@@ -230,10 +230,10 @@ void HabitVideoImagePlayer::play(int number)
 	
 }
 
-void HabitVideoImagePlayer::onPrefinishMarkReached(qint32 msec)
+void HVideoImagePlayer::onPrefinishMarkReached(qint32 msec)
 {
 	Q_UNUSED(msec);
-	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim)).type() == StimulusSource::VIDEO && (m_sources.at(m_iCurrentStim)).isLooped())
+	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim)).type() == HStimulusSource::VIDEO && (m_sources.at(m_iCurrentStim)).isLooped())
 	{
 		m_pMediaObject->pause();
 		m_pMediaObject->seek(0);

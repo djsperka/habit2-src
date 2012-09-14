@@ -1,5 +1,5 @@
 /*
- *  HabitAudioPlayer.h
+ *  HAudioPlayer.h
  *  myp
  *
  *  Created by Oakes Lab on 6/4/12.
@@ -17,18 +17,18 @@
 #include <Phonon/MediaObject>
 #include <Phonon/AudioOutput>
 #include "StimulusSource.h"
-#include "HabitPlayer.h"
+#include "HPlayer.h"
 
-class HabitAudioPlayer : public HabitPlayer
+class HAudioPlayer : public HPlayer
 {
 	Q_OBJECT
 	
 public:
-	HabitAudioPlayer(int id = 0, QWidget* w = 0);
-	~HabitAudioPlayer() {};
+	HAudioPlayer(int id = 0, QWidget* w = 0);
+	~HAudioPlayer() {};
 	virtual void play(int number);
 	virtual void stop(); 
-	friend QTextStream& operator<<(QTextStream& out, const HabitAudioPlayer& player);
+	friend QTextStream& operator<<(QTextStream& out, const HAudioPlayer& player);
 	
 private:
 	Phonon::MediaObject *m_pMediaObject;

@@ -1,5 +1,5 @@
 /*
- *  HabitNonPlayer.h
+ *  HNonPlayer.h
  *  habutil
  *
  *  Created by Oakes Lab on 8/24/12.
@@ -16,16 +16,16 @@
 #include "StimulusSource.h"
 #include "HabitPlayer.h"
 
-class HabitNonPlayer : public HabitPlayer
+class HNonPlayer : public HabitPlayer
 {
 	Q_OBJECT
 	
 public:
-	HabitNonPlayer(int id = 0, QWidget* w = 0) { Q_UNUSED(id); Q_UNUSED(w); };
-	~HabitNonPlayer() {};
+	HNonPlayer(int id = 0, QWidget* w = 0) { Q_UNUSED(id); Q_UNUSED(w); };
+	~HNonPlayer() {};
 	virtual void play(int number);
 	virtual void stop(); 
-	friend QTextStream& operator<<(QTextStream& out, const HabitNonPlayer& player);
+	friend QTextStream& operator<<(QTextStream& out, const HNonPlayer& player);
 	
 private:
 	

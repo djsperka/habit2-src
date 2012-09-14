@@ -1,5 +1,5 @@
 /*
- *  HabitMediaManager.h
+ *  HMediaManager.h
  *  habutil
  *
  *  Created by Oakes Lab on 7/20/12.
@@ -10,23 +10,23 @@
 
 #include <QObject>
 #include <QList>
-#include "HabitPlayer.h"
+#include "HPlayer.h"
 
-class HabitMediaManager : public QObject
+class HMediaManager : public QObject
 {
 	Q_OBJECT
 
 private:
-	QList<HabitPlayer *> m_players;
+	QList<HPlayer *> m_players;
 	bool m_pendingStartSignal;
 	bool m_pendingAGStartSignal;
 	
 public:
 
-	HabitMediaManager(): QObject(), m_pendingStartSignal(false), m_pendingAGStartSignal(false) {};
-	~HabitMediaManager() {};	// TODO: should this destructor do something? 
+	HMediaManager(): QObject(), m_pendingStartSignal(false), m_pendingAGStartSignal(false) {};
+	~HMediaManager() {};	// TODO: should this destructor do something? 
 
-	void addPlayer(HabitPlayer* player);
+	void addPlayer(HPlayer* player);
 	
 public slots:
 

@@ -1,5 +1,5 @@
 /*
- *  HabitPlayer.h
+ *  HPlayer.h
  *  myp
  *
  *  Created by Oakes Lab on 6/4/12.
@@ -13,24 +13,24 @@
 #include <QtGui/QLabel>
 #include <QList>
 #include <QTextStream>
-#include "StimulusSource.h"
+#include "HStimulusSource.h"
 
 
 
-// The HabitPlayer plays stimuli for Habit. 
+// The HPlayer plays stimuli for Habit. 
 // The player holds a list of stimuli and plays them via play(int)
 // and playAG(). Internally, the stimuli are stored in a QList. 
 // The attention getter stim (AG) is always at index 0, and the others
 // are at index>0. This is a convenience for Habit, which allows users
 // to number stimuli with positive integers. 
 
-class HabitPlayer : public QLabel
+class HPlayer : public QLabel
 {
 	Q_OBJECT
 	
 public:
-	HabitPlayer(int ID = 0, QWidget* w = 0);
-	~HabitPlayer() {};
+	HPlayer(int ID = 0, QWidget* w = 0);
+	~HPlayer() {};
 
 	
 	/// Play the stim at index 'number'. Out of range index defaults to background.
@@ -90,6 +90,6 @@ signals:
 };
 
 
-QTextStream& operator<<(QTextStream& out, const HabitPlayer& player);
+QTextStream& operator<<(QTextStream& out, const HPlayer& player);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- *  HabitVideoImagePlayer.h
+ *  HVideoImagePlayer.h
  *  myp
  *
  *  Created by Oakes Lab on 6/4/12.
@@ -18,12 +18,12 @@
 #include <Phonon/VideoWidget>
 #include <Phonon/AudioOutput>
 #include <Phonon/MediaSource>
-#include "ImageWidget.h"
-#include "StimulusSource.h"
-#include "HabitPlayer.h"
+#include "HImageWidget.h"
+#include "HStimulusSource.h"
+#include "HPlayer.h"
 
 
-// This class implements the HabitPlayer interface to play images and video stimuli. 
+// This class implements the HPlayer interface to play images and video stimuli. 
 // It has an ugly hack which I found necessary - that is the usage of the parent widget 
 // pointer. It appears that when this class plays a video at full screen, the VideoWidget
 // object takes the focus. That's a problem when using this class in an experimental 
@@ -37,16 +37,16 @@
 // difference when the focus is on them or something else. 
 
 
-class HabitVideoImagePlayer : public HabitPlayer
+class HVideoImagePlayer : public HPlayer
 {
 	Q_OBJECT
 	
 public:
-	HabitVideoImagePlayer(int id = 0, QWidget* w = 0, bool fullscreen = true, bool maintainAspectRatio = true);
-	~HabitVideoImagePlayer() {};
+	HVideoImagePlayer(int id = 0, QWidget* w = 0, bool fullscreen = true, bool maintainAspectRatio = true);
+	~HVideoImagePlayer() {};
 	virtual void play(int number);
 	virtual void stop(); 
-	friend QTextStream& operator<<(QTextStream& out, const HabitVideoImagePlayer& player);
+	friend QTextStream& operator<<(QTextStream& out, const HVideoImagePlayer& player);
 	bool eventFilter(QObject *object, QEvent *event);
 
 protected:
