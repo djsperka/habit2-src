@@ -1,5 +1,5 @@
 /*
- *  ImageWidget.cpp
+ *  HImageWidget.cpp
  *  myp
  *
  *  Created by Oakes Lab on 5/22/12.
@@ -7,24 +7,24 @@
  *
  */
 
-#include "ImageWidget.h"
+#include "HImageWidget.h"
 
 #include <QtGui/QPainter>
 #include <QtCore/QDebug>
 
-ImageWidget::ImageWidget(QWidget *parent, bool fullScreen, bool aspectRatio)
+HImageWidget::HImageWidget(QWidget *parent, bool fullScreen, bool aspectRatio)
 : QWidget(parent), m_fullscreen(fullScreen), m_maintainAspectRatio(aspectRatio)
 {	
 	setAutoFillBackground(true);
-	setObjectName("ImageWidget");
+	setObjectName("HImageWidget");
 }
 
-ImageWidget::~ImageWidget()
+HImageWidget::~HImageWidget()
 {
 	
 }
 
-void ImageWidget::setCurrentSource(const QString& filename)
+void HImageWidget::setCurrentSource(const QString& filename)
 {
 	m_image.load(filename);
 	QSize size = m_image.size();
@@ -57,7 +57,7 @@ void ImageWidget::setCurrentSource(const QString& filename)
 	return;
 }
 
-void ImageWidget::paintEvent(QPaintEvent* event) 
+void HImageWidget::paintEvent(QPaintEvent* event) 
 { 
 	Q_UNUSED(event);
     QPainter painter(this); 

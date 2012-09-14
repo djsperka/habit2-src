@@ -15,18 +15,18 @@
 #include <QTextStream>
 #include <QBuffer>
 
-class StimulusSource
+class HStimulusSource
 {
 public:
 	
-	enum StimulusSourceType {
+	enum HStimulusSourceType {
 		BACKGROUND = 0, VIDEO, IMAGE, AUDIO, EMPTY, ERROR
 	};
 	
-	StimulusSource();
-	StimulusSource(const QString& filename, int audioBalance, bool islooped=false);
+	HStimulusSource();
+	HStimulusSource(const QString& filename, int audioBalance, bool islooped=false);
 
-	~StimulusSource();
+	~HStimulusSource();
 	bool isVideo() { return (m_type == VIDEO); };
 //	Phonon::MediaSource& video() { return *m_pVideo; };
 	QBuffer* buffer() { return m_pBuffer; };
@@ -35,7 +35,7 @@ public:
 	bool isEmpty() { return (m_type == EMPTY); };
 	QImage* image() { return m_pImage; };
 	bool isBackground() { return (m_type == BACKGROUND); };
-	const StimulusSourceType type() const { return m_type; };
+	const HStimulusSourceType type() const { return m_type; };
 	const QString& filename() const { return m_filename; };
 	const bool isLooped() const { return m_isLooped; };
 	const int getAudioBalance() const { return m_audioBalance; };
@@ -43,7 +43,7 @@ public:
 private:
 	bool isImageFile(const QString& filename);
 	bool isAudioFile(const QString& filename);
-	StimulusSourceType m_type;
+	HStimulusSourceType m_type;
 	QBuffer *m_pBuffer;
 	QImage *m_pImage;
 	QString m_filename;
@@ -52,6 +52,6 @@ private:
 };
 
 
-QTextStream& operator<<(QTextStream& out, const StimulusSource& ss);
+QTextStream& operator<<(QTextStream& out, const HStimulusSource& ss);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- *  StimulusSource.cpp
+ *  HStimulusSource.cpp
  *  myp
  *
  *  Created by Oakes Lab on 5/25/12.
@@ -7,7 +7,7 @@
  *
  */
 
-#include "StimulusSource.h"
+#include "HStimulusSource.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
@@ -16,22 +16,22 @@
 QTextStream& operator<<(QTextStream& out, const StimulusSource& ss)
 {
 	switch (ss.type()) {
-		case StimulusSource::BACKGROUND:
+		case HStimulusSource::BACKGROUND:
 			out << "BACKGROUND";
 			break;
-		case StimulusSource::VIDEO:
+		case HStimulusSource::VIDEO:
 			out << "VIDEO: " << ss.filename();
 			break;
-		case StimulusSource::IMAGE:
+		case HStimulusSource::IMAGE:
 			out << "IMAGE: " << ss.filename();
 			break;
-		case StimulusSource::AUDIO:
+		case HStimulusSource::AUDIO:
 			out << "AUDIO: " << ss.filename();
 			break;
-		case StimulusSource::EMPTY:
+		case HStimulusSource::EMPTY:
 			out << "EMPTY: ";
 			break;
-		case StimulusSource::ERROR:
+		case HStimulusSource::ERROR:
 			out << "ERROR: " << ss.filename();
 			break;
 		default:
@@ -40,7 +40,7 @@ QTextStream& operator<<(QTextStream& out, const StimulusSource& ss)
 	return out;
 }
 
-StimulusSource::StimulusSource(const QString& filename, int audioBalance, bool isLooped) : m_type(BACKGROUND), m_pBuffer(0), m_pImage(0), m_audioBalance(audioBalance), m_isLooped(isLooped)
+HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool isLooped) : m_type(BACKGROUND), m_pBuffer(0), m_pImage(0), m_audioBalance(audioBalance), m_isLooped(isLooped)
 {
 	QFile file(filename);
 	m_filename = filename;
@@ -72,14 +72,14 @@ StimulusSource::StimulusSource(const QString& filename, int audioBalance, bool i
 }
 
 
-StimulusSource::~StimulusSource()
+HStimulusSource::~HStimulusSource()
 {
 //	if (m_pVideo) delete m_pVideo;
 //	if (m_pBuffer) delete m_pBuffer;
 //	if (m_pImage) delete m_pImage;
 }
 
-bool StimulusSource::isImageFile(const QString& filename)
+bool HStimulusSource::isImageFile(const QString& filename)
 {
 	QFileInfo fileInfo(filename);
 	QString suffix = fileInfo.suffix().toUpper();
@@ -98,7 +98,7 @@ bool StimulusSource::isImageFile(const QString& filename)
 	(suffix == "PICT") ;
 }
 
-bool StimulusSource::isAudioFile(const QString& filename)
+bool HStimulusSource::isAudioFile(const QString& filename)
 {
 	QFileInfo fileInfo(filename);
 	QString suffix = fileInfo.suffix().toUpper();

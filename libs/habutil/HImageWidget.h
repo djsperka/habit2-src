@@ -13,13 +13,13 @@
 #include <QtGui/QWidget>
 #include <QtGui/QImage>
 
-class ImageWidget : public QWidget
+class HImageWidget : public QWidget
 {
 	Q_OBJECT
 	
 public:
-	ImageWidget(QWidget *parent = 0, bool fullScreen = false, bool aspectRatio = false);
-	~ImageWidget();
+	HImageWidget(QWidget *parent = 0, bool fullScreen = false, bool aspectRatio = false);
+	~HImageWidget();
 	void setCurrentSource(const QString& filename);
 protected:
 	void paintEvent ( QPaintEvent * event );
