@@ -24,7 +24,7 @@ public:
 	};
 	
 	StimulusSource();
-	StimulusSource(const QString& filename, bool islooped=false);
+	StimulusSource(const QString& filename, int audioBalance, bool islooped=false);
 
 	~StimulusSource();
 	bool isVideo() { return (m_type == VIDEO); };
@@ -38,6 +38,7 @@ public:
 	const StimulusSourceType type() const { return m_type; };
 	const QString& filename() const { return m_filename; };
 	const bool isLooped() const { return m_isLooped; };
+	const int getAudioBalance() const { return m_audioBalance; };
 	
 private:
 	bool isImageFile(const QString& filename);
@@ -47,6 +48,7 @@ private:
 	QImage *m_pImage;
 	QString m_filename;
 	bool m_isLooped;
+	int m_audioBalance;
 };
 
 

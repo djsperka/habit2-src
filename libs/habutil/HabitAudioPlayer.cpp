@@ -38,6 +38,7 @@ void HabitAudioPlayer::play(int number)
 	if (number >= 0 && number < m_sources.count())
 	{
 		m_pMediaObject->setCurrentSource((m_sources[number].filename()));
+		m_pAudioOutput->setVolume(m_sources[number].getAudioBalance());
 		m_pMediaObject->play();
 		m_iCurrentStim = number;
 	}

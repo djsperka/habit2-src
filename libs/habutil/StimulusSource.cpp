@@ -40,7 +40,7 @@ QTextStream& operator<<(QTextStream& out, const StimulusSource& ss)
 	return out;
 }
 
-StimulusSource::StimulusSource(const QString& filename, bool isLooped) : m_type(BACKGROUND), m_pBuffer(0), m_pImage(0), m_isLooped(isLooped)
+StimulusSource::StimulusSource(const QString& filename, int audioBalance, bool isLooped) : m_type(BACKGROUND), m_pBuffer(0), m_pImage(0), m_audioBalance(audioBalance), m_isLooped(isLooped)
 {
 	QFile file(filename);
 	m_filename = filename;

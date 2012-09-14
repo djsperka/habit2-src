@@ -10,31 +10,15 @@
 #include "HabitPlayer.h"
 #include <QFocusEvent>
 
-bool HabitPlayer::eventFilter(QObject *object, QEvent *event)
-{
-    if (event->type() == QEvent::FocusIn)
-    {
-		QFocusEvent* f = dynamic_cast<QFocusEvent*> (event);
-		qDebug() << "HabitPlayer - Got FocusIn Event " << f->reason();
-    }
-    else if (event->type() == QEvent::FocusOut)
-    {
-		QFocusEvent* f = dynamic_cast<QFocusEvent*> (event);
-		qDebug() << "Habitplayer - Got FocusOut Event " << f->reason();		
-    }
-    return false;
-}
-
 HabitPlayer::HabitPlayer(int ID, QWidget *w) : QLabel(w), m_id(ID), m_iCurrentStim(0)
 {
-	m_sources.append(StimulusSource(""));	// dummy placeholder for attention getter stim. 
+	m_sources.append(StimulusSource("", 0));	// dummy placeholder for attention getter stim. 
 	setObjectName("HabitPlayer");
-	installEventFilter(this);
 }
 
-int HabitPlayer::addStimulus(QString filename, bool isLooped)
+int HabitPlayer::addStimulus(QString filename, int volume, bool isLooped)
 {
-	StimulusSource s(filename, isLooped);
+	StimulusSource s(filename, volume, isLooped);
 	m_sources.append(s);
 	
 	// note: The QList m_sources always has at least 1 element - the attention getter placeholder is 
@@ -42,18 +26,18 @@ int HabitPlayer::addStimulus(QString filename, bool isLooped)
 	return m_sources.count()-1;
 }
 
-int HabitPlayer::addAG(QString filename, bool isLooped)
+int HabitPlayer::addAG(QString filename, int volume, bool isLooped)
 {
-	StimulusSource s(filename, isLooped);
+	StimulusSource s(filename, volume, isLooped);
 	m_sources[0] = s;
 	return 0;
 }
 
-StimulusSource::StimulusSourceType HabitPlayer::getCurrentType()
+StimulusSource::StimulusSourceType HabitPlayer::getStimulusType(int index)
 {
 	StimulusSource::StimulusSourceType type = StimulusSource::BACKGROUND;
-	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count())
-		type = (m_sources.at(m_iCurrentStim)).type();
+	if (index > -1 && index < m_sources.count())
+		type = (m_sources.at(index)).type();
 	return type;
 }
 

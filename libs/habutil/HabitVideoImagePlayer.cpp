@@ -92,12 +92,6 @@ HabitPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioO
 	m_pVideoWidget->setObjectName("VideoWidget");
 	m_pAudioOutput = new Phonon::AudioOutput(Phonon::VideoCategory, this);
 	
-	// temp test
-	//m_pImageWidget->installEventFilter(this);
-	m_pVideoWidget->setFocusPolicy(Qt::NoFocus);
-	m_pVideoWidget->installEventFilter(this);
-	installEventFilter(this);
-	
 	// connect media object slot to handle looped video when needed
 	
 	connect(m_pMediaObject, SIGNAL(prefinishMarkReached(qint32)), this, SLOT(onPrefinishMarkReached(qint32)));
@@ -157,125 +151,83 @@ void HabitVideoImagePlayer::stop()
 
 void HabitVideoImagePlayer::play(int number)
 {
-	if (number >= 0 && number < m_sources.count())
+	StimulusSource::StimulusSourceType newType = getStimulusType(number);
+	switch (getCurrentStimulusType()) 
 	{
-		switch (getCurrentType()) 
-		{
-			case StimulusSource::BACKGROUND:
-				// Init state, or background state
-				switch (m_sources[number].type()) {
-					case StimulusSource::VIDEO:
-						m_pMediaObject->setCurrentSource((m_sources.at(number)).filename());
-						m_pVideoWidget->setGeometry(geometry());
-						m_pVideoWidget->show();
-						m_pImageWidget->hide();
-						m_pMediaObject->play();
-						m_pVideoWidget->setFullScreen(m_isFullScreen);
-						break;
-					case StimulusSource::IMAGE:
-						m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
-						m_pImageWidget->show();	
-						m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
-						break;
-					default:
-						break;
-				}
-				break;
-			case StimulusSource::VIDEO:
-				// showing video - stop it
-				stop();
-				switch (m_sources[number].type()) {
-					case StimulusSource::BACKGROUND:
-						m_pVideoWidget->hide();
-						break;
-					case StimulusSource::VIDEO:
-						m_pMediaObject->setCurrentSource((m_sources[number].filename()));
-						m_pVideoWidget->setGeometry(geometry());
-						m_pVideoWidget->show();
-						m_pImageWidget->hide();
-						m_pMediaObject->play();
-						m_pVideoWidget->setFullScreen(m_isFullScreen);
-						break;
-					case StimulusSource::IMAGE:
-						m_pVideoWidget->hide();
-						m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
-						m_pImageWidget->show();	
-						m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
-						break;					
-					default:
-						break;
-				}
-				break;
-			case StimulusSource::IMAGE:
-				// showing image
-				switch (m_sources[number].type()) {
-					case StimulusSource::BACKGROUND:
-						m_pImageWidget->hide();
-						break;
-					case StimulusSource::VIDEO:
-#if 0
-						m_pMediaObject->setCurrentSource((m_sources[number].filename()));
-						m_pVideoWidget->setGeometry(geometry());
-						m_pVideoWidget->show();
-						m_pImageWidget->hide();
-						m_pMediaObject->play();
-						m_pVideoWidget->setFullScreen(m_isFullScreen);
-#endif
-						m_pMediaObject->setCurrentSource((m_sources[number].filename()));
-						m_pVideoWidget->setGeometry(geometry());
-						m_pImageWidget->hide();
-						m_pVideoWidget->show();
-						m_pMediaObject->play();
-						m_pVideoWidget->setFullScreen(m_isFullScreen);
-						m_parent->activateWindow();//HACK
-						break;
-					case StimulusSource::IMAGE:
-						m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
-						break;
-					default:
-						break;
-				}
-			default:
-				break;		
-		}
-		m_iCurrentStim = number;
-	}
-	
-	// find what has the focus.
-	
-	if (!QApplication::activeWindow())
-	{
-		qDebug("There is no active window!");
-	}
-	else 
-	{
-		qDebug() << "There IS an active window - classname " << QApplication::activeWindow()->metaObject()->className();
-		foreach (QWidget *widget, QApplication::allWidgets())
-		{
-			if (widget == QApplication::focusWidget())
-			{
-				qDebug() << "Found active window - classname " << widget->metaObject()->className();
-				if (widget == m_pImageWidget) qDebug("image widget is active window");
-				if (widget == m_pVideoWidget) qDebug("video widget is active window");
-				if (widget == this) qDebug("VideoimagePlayer is active window");
+		case StimulusSource::BACKGROUND:
+			// Init state, or background state
+			switch (newType) {
+				case StimulusSource::VIDEO:
+					m_pMediaObject->setCurrentSource((m_sources.at(number)).filename());
+					m_pVideoWidget->setGeometry(geometry());
+					m_pVideoWidget->show();
+					m_pAudioOutput->setVolume(m_sources.at(number).getAudioBalance());
+					m_pImageWidget->hide();
+					m_pMediaObject->play();
+					m_pVideoWidget->setFullScreen(m_isFullScreen);
+					break;
+				case StimulusSource::IMAGE:
+					m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
+					m_pImageWidget->show();	
+					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
+					break;
+				default:
+					break;
 			}
-		}
-	}
-	
-	if (!QApplication::focusWidget())
-	{
-		qDebug("HabitVideoImagePlayer::play - no widget has focus!");
-	}
-	else 
-	{
-		foreach (QWidget *widget, QApplication::allWidgets())
-		{
-			if (widget == QApplication::focusWidget())
-			{
-				qDebug("Found focus widget");
+			break;
+		case StimulusSource::VIDEO:
+			// showing video - stop it
+			stop();
+			switch (newType) {
+				case StimulusSource::BACKGROUND:
+					m_pVideoWidget->hide();
+					break;
+				case StimulusSource::VIDEO:
+					m_pMediaObject->setCurrentSource((m_sources[number].filename()));
+					m_pVideoWidget->setGeometry(geometry());
+					m_pVideoWidget->show();
+					m_pAudioOutput->setVolume(m_sources.at(number).getAudioBalance());
+					m_pImageWidget->hide();
+					m_pMediaObject->play();
+					m_pVideoWidget->setFullScreen(m_isFullScreen);
+					break;
+				case StimulusSource::IMAGE:
+					m_pVideoWidget->hide();
+					m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
+					m_pImageWidget->show();	
+					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
+					break;					
+				default:
+					break;
 			}
-		}
+			break;
+		case StimulusSource::IMAGE:
+			// showing image
+			switch (newType) {
+				case StimulusSource::BACKGROUND:
+					m_pImageWidget->hide();
+					break;
+				case StimulusSource::VIDEO:
+					m_pMediaObject->setCurrentSource((m_sources[number].filename()));
+					m_pVideoWidget->setGeometry(geometry());
+					m_pImageWidget->hide();
+					m_pVideoWidget->show();
+					m_pAudioOutput->setVolume(m_sources.at(number).getAudioBalance());
+					m_pMediaObject->play();
+					m_pVideoWidget->setFullScreen(m_isFullScreen);
+					m_parent->activateWindow(); //Hack Alert!
+					break;
+				case StimulusSource::IMAGE:
+					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
+					break;
+				default:
+					break;
+			}
+		default:
+			break;		
 	}
+	m_iCurrentStim = number;
+	
 }
 
 void HabitVideoImagePlayer::onPrefinishMarkReached(qint32 msec)
