@@ -11,10 +11,9 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QTextStream>
-#include "HabitVideoImagePlayer.h"
-#include "HabitAudioPlayer.h"
+#include "HVideoImagePlayer.h"
+#include "HAudioPlayer.h"
 
 
 PlayerControlDialog::PlayerControlDialog(QWidget* w) : QDialog(w)
@@ -61,84 +60,74 @@ void PlayerControlDialog::btnCreateClicked()
 	QTextStream out(stdout);
 	
 	// create media manager
-	pmm = new HabitMediaManager();
+	pmm = new HMediaManager();
 	
 	// What screens to show it on?
 	iScreen = pspinboxScreen->value();
 
 	if (iScreen == 1 || iScreen == 3)
 	{
-		HabitVideoImagePlayer* player1 = new HabitVideoImagePlayer(1, this);
-		rect = QApplication::desktop()->screenGeometry(1);
-		player1->setGeometry(rect);
-		player1->move(rect.x(), rect.y());
+		HVideoImagePlayer* player1 = new HVideoImagePlayer(1, this);
 		
-		player1->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov", true);
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov");
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/mainecoon.jpg");
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/husky.jpg");
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/multicolor_box_bubble.mov");
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg");
+		player1->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov", 10, true);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov", 10);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/mainecoon.jpg", 0);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/husky.jpg", 0);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/multicolor_box_bubble.mov", 10);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg", 0);
 		
-		out << (HabitPlayer&)(*player1) << endl;
+		out << (HPlayer&)(*player1) << endl;
 		
-		pmm->addPlayer(player1);
+		pmm->addPlayer(player1, 1);
 	}
 	
 	if (iScreen == 2 || iScreen == 3)
 	{
 		//player2 = new MyPlayer(this);
-		HabitVideoImagePlayer* player2 = new HabitVideoImagePlayer(2, this);
-		rect = QApplication::desktop()->screenGeometry(2);
-		player2->setGeometry(rect);
-		player2->move(rect.x(), rect.y());
-		player2->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov");
-		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/husky.jpg");
-		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/multicolor_box_bubble.mov", true);
-		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov", true);
-		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/mainecoon.jpg");
-		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg");
+		HVideoImagePlayer* player2 = new HVideoImagePlayer(2, this);
+		player2->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov", 10);
+		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/husky.jpg", 0);
+		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/multicolor_box_bubble.mov", 10, true);
+		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov", 10, true);
+		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/mainecoon.jpg", 0);
+		player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg", 0);
 
-		out << (HabitPlayer&)(*player2) << endl;
+		out << (HPlayer&)(*player2) << endl;
 		
-		pmm->addPlayer(player2);
+		pmm->addPlayer(player2, 2);
 	}
 	
 	if (iScreen == 4)
 	{
-		HabitVideoImagePlayer* player1 = new HabitVideoImagePlayer(1, this);
-		rect = QApplication::desktop()->screenGeometry(1);
-		player1->setGeometry(rect);
-		player1->move(rect.x(), rect.y());
+		HVideoImagePlayer* player1 = new HVideoImagePlayer(1, this);
 		
-		player1->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov", true);
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov");
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/mainecoon.jpg");
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/husky.jpg");
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/multicolor_box_bubble.mov");
-		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg");
+		player1->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov", 10, true);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov", 10);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/mainecoon.jpg", 0);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/husky.jpg", 0);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/multicolor_box_bubble.mov", 10);
+		player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg", 0);
 		
-		out << (HabitPlayer&)(*player1) << endl;
+		out << (HPlayer&)(*player1) << endl;
 		
-		pmm->addPlayer(player1);
+		pmm->addPlayer(player1, 1);
 
-		HabitAudioPlayer* player3 = new HabitAudioPlayer(0, this);
-		player3->setGeometry(QRect(0, 0, 0, 0));
-		player3->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov", true);
+		HAudioPlayer* player3 = new HAudioPlayer(0, this);
+		player3->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov", 10, true);
 		player3->addStimulus("");
-		player3->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/dog2.wav", true);
+		player3->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/dog2.wav", 10, true);
 		player3->addStimulus("");
-		player3->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/2minbeeping copy.aiff");
-		player3->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg");
+		player3->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/2minbeeping copy.aiff", 10);
+		player3->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg", 0);
 
-		out << (HabitPlayer&)(*player3) << endl;
+		out << (HPlayer&)(*player3) << endl;
 		
 		pmm->addPlayer(player3);
 	}
 		
 	
 	connect(this, SIGNAL(playStim(int)), pmm, SLOT(stim(int)));
-	connect(pmm, SIGNAL(started()), this, SLOT(stimStarted()));
+	connect(pmm, SIGNAL(stimStarted()), this, SLOT(stimStarted()));
 	
 	// disable create button and spinbox
 	pbtnCreate->setEnabled(false);

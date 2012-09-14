@@ -13,7 +13,7 @@
 #include <QtGui/QLabel>
 #include <QtGui/QCheckBox>
 #include <QList>
-#include "HabitMediaManager.h"
+#include "HMediaManager.h"
 
 class PlayerControlDialog : public QDialog
 {
@@ -27,7 +27,7 @@ private:
 	QPushButton* pbtnCreate;
 	QSpinBox* pspinboxScreen;
 	QCheckBox* pcheckboxShowImage;
-	HabitMediaManager* pmm;
+	HMediaManager* pmm;
 	QPushButton* pbtnPlay;
 	QPushButton* pbtnStop;
 	QPushButton* pbtnRewind;
