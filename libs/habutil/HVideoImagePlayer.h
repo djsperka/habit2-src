@@ -37,13 +37,14 @@
 // difference when the focus is on them or something else. 
 
 
+
 class HVideoImagePlayer : public HPlayer
 {
 	Q_OBJECT
 	
 public:
 	HVideoImagePlayer(int id = 0, QWidget* w = 0, bool fullscreen = true, bool maintainAspectRatio = true);
-	~HVideoImagePlayer() {};
+	~HVideoImagePlayer();
 	virtual void play(int number);
 	virtual void stop(); 
 	friend QTextStream& operator<<(QTextStream& out, const HVideoImagePlayer& player);
@@ -56,7 +57,7 @@ private:
 	Phonon::MediaObject *m_pMediaObject;
 	Phonon::VideoWidget *m_pVideoWidget;
 	Phonon::AudioOutput *m_pAudioOutput;
-	ImageWidget *m_pImageWidget;
+	HImageWidget *m_pImageWidget;
 	bool m_isFullScreen;
 	bool m_maintainAspectRatio;
 

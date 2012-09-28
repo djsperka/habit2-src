@@ -8,6 +8,10 @@
  */
 
 #include "HControlPanel.h"
+#include "HMediaManagerUtil.h"
+#include "HPhase.h"
+#include "HKeypadLookDetector.h"
+#include "HTrialGenerator.h"
 #include "maindao.h"
 #include <QtCore/QTDebug>
 #include <QHBoxLayout>
@@ -20,6 +24,9 @@ HControlPanel::HControlPanel(const Habit::SubjectSettings& ss, const Habit::RunS
 : QDialog(w)
 , m_runSettings(runSettings)
 , m_subjectSettings(ss)
+, m_psPreTest(0)
+, m_psHabituation(0)
+, m_psTest(0)
 {
 	
 	// generate gui elements and make it look pretty
@@ -67,7 +74,7 @@ void HControlPanel::makeConnections()
 {
 	connect(m_pbStartTrials, SIGNAL(clicked()), this, SLOT(onStartTrials()));
 	connect(m_pbNextTrial, SIGNAL(clicked()), this, SLOT(onNextTrial()));
-	connect(m_pbStopTrials, SIGNAL(clicked()), this, SLOT(onStopTrials()));
+	//connect(m_pbStopTrials, SIGNAL(clicked()), this, SLOT(onStopTrials()));
 }
 
 void HControlPanel::doLayout()
@@ -108,16 +115,156 @@ void HControlPanel::doLayout()
 	mainLayout->addStretch();
 }
 
+
+void HControlPanel::closeEvent(QCloseEvent* e)
+{
+	qDebug("HControlPanel::closeEvent");
+	if (m_pmm)
+	{
+		delete m_pmm;
+		m_pmm = NULL;
+	}
+	e->accept();
+}
+
+
 void HControlPanel::createExperiment()
 {
 	// First make sure all info is loaded from db. I'd rather this were done before HControlPanel were instantiated, 
 	// but this is how it was originally written so there. 
 	loadFromDB();
 	
-	// Now create media manager
-	m_pmm = createMediaManager();
+	// These will hold stim numbers for stimuli available to each phase.
+	QVector<int> v1, v2, v3;
+
+	// These will hold stim numbers for the trials in each phase.
+	QList<int> lTrials;
+	
+	// Create media manager. Note we are not passing a parent! 
+	m_pmm = createMediaManager(m_experimentSettings, NULL, v1, v2, v3);
+	
+	// Get info for creating look detector and phase(s). 
+	Habit::DesignSettings ds = m_experimentSettings.getDesignSettings();
+	Habit::TrialsInfo tiPreTest = ds.getPretestTrialsInfo();
+	Habit::TrialsInfo tiHabituation = ds.getHabituationTrialsInfo();
+	Habit::TrialsInfo tiTest = ds.getTestTrialsInfo();
+	Habit::AttentionGetterSettings ags = m_experimentSettings.getAttentionGetterSettings();
+	
+	// Create look detector
+	int lookTimeMS = tiPreTest.getLookTimes() * 100;
+	int lookAwayTimeMS = tiHabituation.getLookTimes() * 100;
+	int noLookTimeMS = tiTest.getLookTimes() * 100;
+	m_pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, this);
+	
+	
+	// Construct state machine.
+	m_psm = new QStateMachine();
+	
+	// connect the state machine's finished() signal to this dialog's close() slot
+	connect(m_psm, SIGNAL(finished()), this, SLOT(close()));
+		
+	// This is a single super-state that holds all the phases.
+	HExperimentState* sExperiment = new HExperimentState();
+	m_psm->addState(sExperiment);
+	m_psm->setInitialState(sExperiment);
+	QFinalState* sFinal = new QFinalState;
+	m_psm->addState(sFinal);
+	sExperiment->addTransition(sExperiment, SIGNAL(finished()), sFinal);
+ 	QObject::connect(sExperiment, SIGNAL(playStim(int)), m_pmm, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
+
+	// transition from experiment on the "Stop Trials" button being clicked()
+	sExperiment->addTransition(m_pbStopTrials, SIGNAL(clicked()), sFinal);
+	
+	// Create phases	
+	if (tiPreTest.getNumberOfTrials() > 0)
+	{
+		HTrialGenerator htg(v1.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
+		lTrials.clear();
+		for (unsigned int i=0; i<tiPreTest.getNumberOfTrials(); i++)
+		{
+			lTrials.append(v1.at(htg.next()));
+		}
+
+		m_psPreTest = new HPhase(lTrials, m_pmm, m_pld, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+	}
+
+	if (tiHabituation.getNumberOfTrials() > 0)
+	{
+		HTrialGenerator htg(v2.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
+		lTrials.clear();
+		for (unsigned int i=0; i<tiHabituation.getNumberOfTrials(); i++)
+		{
+			lTrials.append(v2.at(htg.next()));
+		}
+		
+		m_psHabituation = new HPhase(lTrials, m_pmm, m_pld, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+	}
+	
+	if (tiTest.getNumberOfTrials() > 0)
+	{
+		HTrialGenerator htg(v3.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
+		lTrials.clear();
+		for (unsigned int i=0; i<tiTest.getNumberOfTrials(); i++)
+		{
+			lTrials.append(v3.at(htg.next()));
+		}
+		
+		m_psTest = new HPhase(lTrials, m_pmm, m_pld, tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+	}
 
 	
+	// Now assemble the experiment.
+	QState* plast = NULL;
+	if (m_psPreTest)
+	{
+		if (plast)
+		{
+			plast->addTransition(plast, SIGNAL(finished()), m_psPreTest);
+			plast = m_psPreTest;
+		}
+		else 
+		{
+			sExperiment->setInitialState(m_psPreTest);
+			plast = m_psPreTest;
+		}
+	}
+	if (m_psHabituation)
+	{
+		if (plast)
+		{
+			plast->addTransition(plast, SIGNAL(finished()), m_psHabituation);
+			plast = m_psHabituation;
+		}
+		else 
+		{
+			sExperiment->setInitialState(m_psHabituation);
+			plast = m_psHabituation;
+		}
+	}
+	if (m_psTest)
+	{
+		if (plast)
+		{
+			plast->addTransition(plast, SIGNAL(finished()), m_psTest);
+			plast = m_psTest;
+		}
+		else 
+		{
+			sExperiment->setInitialState(m_psTest);
+			plast = m_psTest;
+		}
+	}
+
+	QFinalState* sExperimentFinal = new QFinalState(sExperiment);
+	if (plast)
+	{
+		plast->addTransition(plast, SIGNAL(finished()), sExperimentFinal);
+	}
+	else 
+	{
+		// This is a trivial case
+		sExperiment->setInitialState(sExperimentFinal);
+	}
 	
 }
 
@@ -135,28 +282,21 @@ void HControlPanel::onStartTrials()
 	m_pbStopTrials->setEnabled(true);
 	m_pbNextTrial->setEnabled(true);
 	m_pbStartTrials->setEnabled(false);
+	m_psm->start();
 }
 
 void HControlPanel::onNextTrial()
 {
 	qDebug("HControlPanel::onNextTrial()");
+	m_psm->postEvent(new HAbortTrialEvent());
 }
 
 void HControlPanel::onStopTrials()
 {
 	qDebug("HControlPanel::onStopTrials()");
+	m_psm->stop();
 }
 
-
-HabitMediaManager* HControlPanel::createMediaManager()
-{
-	// Create the media manager. its an empty shell at this point - we will add players for the screens later.....
-	m_pmm = new HabitMediaManager();
-	
-	// Will a player for 
-	
-	return m_pmm;
-}
 
 
 #if 0

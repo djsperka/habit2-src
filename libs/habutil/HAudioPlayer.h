@@ -16,7 +16,7 @@
 #include <QTextStream>
 #include <Phonon/MediaObject>
 #include <Phonon/AudioOutput>
-#include "StimulusSource.h"
+#include "HStimulusSource.h"
 #include "HPlayer.h"
 
 class HAudioPlayer : public HPlayer

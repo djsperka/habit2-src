@@ -10,17 +10,24 @@
 #include "HPhase.h"
 #include <QFinalState>
 
-HPhase::HPhase(const QList<int>& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, bool bFixedLength, bool bUseAG, HState* parent) 
+HPhase::HPhase(const QList<int>& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent) 
 	: HState("Phase", parent), m_stimuli(stimuli), m_itrial(0)
 {
-	m_sTrial = new HTrial(pMediaManager, pLD, maxTrialLengthMS, bFixedLength, bUseAG, this);
+	QAbstractTransition* trans;
+	m_sTrial = new HTrial(pMediaManager, pLD, maxTrialLengthMS, maxNoLookTimeMS, bFixedLength, bUseAG, this);
 	setInitialState(m_sTrial);
 	HPhaseTrialCompleteState* sTrialComplete = new HPhaseTrialCompleteState(this);
 	m_sTrial->addTransition(m_sTrial, SIGNAL(finished()), sTrialComplete);
 	QFinalState* sFinal = new QFinalState(this);
 	
+	// There is a transition from the trial state to trial complete state when user wants
+	// to skip/abort a trial
+	trans = new HAbortTrialTransition();
+	trans->setTargetState(sTrialComplete);
+	m_sTrial->addTransition(trans);
+	
 	// There are two event transitions from the TrialComplete state. 
-	QAbstractTransition* trans = new HAllTrialsDoneTransition();
+	trans = new HAllTrialsDoneTransition();
 	trans->setTargetState(sFinal);
 	sTrialComplete->addTransition(trans);
 	trans = new HNewTrialTransition();

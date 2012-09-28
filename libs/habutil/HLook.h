@@ -35,5 +35,9 @@ private:
 QTextStream& operator<<(QTextStream& out, const LookTransType& type);
 QTextStream& operator<<(QTextStream& out, const LookDirection& direction);
 QTextStream& operator<<(QTextStream& out, const HLook& l);
-	
+
+QDebug operator<<(QDebug dbg, const LookTransType& type);
+QDebug operator<<(QDebug dbg, const LookDirection& direction);
+QDebug operator<<(QDebug dbg, const HLook& l);
+
 #endif

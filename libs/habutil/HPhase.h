@@ -13,7 +13,6 @@
 #include "HTrial.h"
 #include <QList>
 
-
 class HPhase: public HState
 {
 	Q_OBJECT
@@ -22,7 +21,7 @@ class HPhase: public HState
 	int m_itrial;
 	HTrial* m_sTrial;
 public:
-	HPhase(const QList<int>& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, bool bFixedLength, bool bUseAG, HState* parent=0);
+	HPhase(const QList<int>& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
 	virtual ~HPhase() {};
 	bool advance();
 	inline int currentTrialNumber() { return m_itrial; };	
@@ -42,6 +41,13 @@ struct HNewTrialEvent : public QEvent
 	HNewTrialEvent() : QEvent(Type(NewTrialType)) {};
 	~HNewTrialEvent() {};
 	enum { NewTrialType = QEvent::User + 2 };
+};
+
+struct HAbortTrialEvent : public QEvent
+{
+	HAbortTrialEvent() : QEvent(Type(AbortTrialType)) {};
+	~HAbortTrialEvent() {};
+	enum { AbortTrialType = QEvent::User + 3 };
 };
 
 class HAllTrialsDoneTransition: public QAbstractTransition
@@ -75,6 +81,25 @@ protected:
 		Q_UNUSED(event);
 	};
 };
+
+
+class HAbortTrialTransition: public QAbstractTransition
+{
+public:
+	HAbortTrialTransition() {};
+	~HAbortTrialTransition() {};
+protected:
+	virtual bool eventTest(QEvent *event)
+	{
+		return (event->type() == QEvent::Type(HAbortTrialEvent::AbortTrialType));
+	};
+	virtual void onTransition(QEvent* event)
+	{
+		Q_UNUSED(event);
+	};
+};
+
+
 
 class HPhaseTrialCompleteState: public HState
 {

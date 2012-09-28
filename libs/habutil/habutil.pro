@@ -12,15 +12,17 @@ HEADERS +=	HLook.h \
 			HTrial.h \
 			HPhase.h \
 			HElapsedTimer.h \
-			HabitPlayer.h \
-			HabitAudioPlayer.h \
-			HabitVideoImagePlayer.h \
-			HabitNonPlayer.h \
-			StimulusSource.h \
-			ImageWidget.h \
-			HabitMediaManager.h \
+			HPlayer.h \
+			HAudioPlayer.h \
+			HVideoImagePlayer.h \
+			HNonPlayer.h \
+			HStimulusSource.h \
+			HImageWidget.h \
+			HMediaManager.h \
 			HControlPanel.h \
 			HApp.h \
+			HMediaManagerUtil.h \
+			HTrialGenerator.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -84,15 +86,17 @@ SOURCES +=	HLook.cpp \
 			HTrial.cpp \
 			HPhase.cpp \
 			HElapsedTimer.cpp \
-			HabitPlayer.cpp \
-			HabitAudioPlayer.cpp \
-			HabitVideoImagePlayer.cpp \
-			HabitNonPlayer.cpp \
-			StimulusSource.cpp \
-			ImageWidget.cpp \
-			HabitMediaManager.cpp \
+			HPlayer.cpp \
+			HAudioPlayer.cpp \
+			HVideoImagePlayer.cpp \
+			HNonPlayer.cpp \
+			HStimulusSource.cpp \
+			HImageWidget.cpp \
+			HMediaManager.cpp \
 			HControlPanel.cpp \
 			HApp.cpp \
+			HMediaManagerUtil.cpp \
+			HTrialGenerator.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \

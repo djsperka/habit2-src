@@ -24,11 +24,10 @@ public:
 	};
 	
 	HStimulusSource();
-	HStimulusSource(const QString& filename, int audioBalance, bool islooped=false);
+	HStimulusSource(const QString& filename, int audioBalance = 0, bool islooped=false);
 
 	~HStimulusSource();
 	bool isVideo() { return (m_type == VIDEO); };
-//	Phonon::MediaSource& video() { return *m_pVideo; };
 	QBuffer* buffer() { return m_pBuffer; };
 	bool isImage() { return (m_type == IMAGE); };
 	bool isAudio() { return (m_type == AUDIO); };
@@ -47,8 +46,8 @@ private:
 	QBuffer *m_pBuffer;
 	QImage *m_pImage;
 	QString m_filename;
-	bool m_isLooped;
 	int m_audioBalance;
+	bool m_isLooped;
 };
 
 

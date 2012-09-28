@@ -71,7 +71,7 @@ bool HVideoImagePlayer::eventFilter(QObject *object, QEvent *event)
 
 
 HVideoImagePlayer::HVideoImagePlayer(int id, QWidget *w, bool fullscreen, bool maintainAspectRatio) : 
-HabitPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
+HPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
 {
 	// This combination needed to get the "close window when app exits"
 	// right. Make sure to call with the parent as the thing that should 
@@ -84,7 +84,7 @@ HabitPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioO
 	// Generate image widget, media object, video widget, audio output
 	// Special case is when this player is for audio only stimuli (as for control player and ISS stim)
 	
-	m_pImageWidget = new ImageWidget(this, true, true);
+	m_pImageWidget = new HImageWidget(this, true, true);
 	m_pImageWidget->setObjectName("ImageWidget");
 	m_pMediaObject = new Phonon::MediaObject(this);
 	m_pMediaObject->setObjectName("MediaObject");
@@ -127,6 +127,24 @@ HabitPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioO
 	Phonon::createPath(m_pMediaObject, m_pAudioOutput);
 	
 }
+
+
+HVideoImagePlayer::~HVideoImagePlayer()
+{
+	qDebug("HVideoImagePlayer::~HVideoImagePlayer()");
+	m_pVideoWidget->hide();
+	m_pVideoWidget->close();
+    delete m_pVideoWidget;
+    m_pVideoWidget = 0;
+	
+    delete m_pAudioOutput;
+    m_pAudioOutput = 0;
+	
+    delete m_pMediaObject;
+    m_pMediaObject = 0;
+}
+
+
 
 void HVideoImagePlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
 {
@@ -215,7 +233,7 @@ void HVideoImagePlayer::play(int number)
 					m_pAudioOutput->setVolume(m_sources.at(number).getAudioBalance());
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
-					m_parent->activateWindow(); //Hack Alert!
+					if (m_parent) m_parent->activateWindow(); //Hack Alert!
 					break;
 				case HStimulusSource::IMAGE:
 					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());

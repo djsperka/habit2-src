@@ -16,7 +16,6 @@ HImageWidget::HImageWidget(QWidget *parent, bool fullScreen, bool aspectRatio)
 : QWidget(parent), m_fullscreen(fullScreen), m_maintainAspectRatio(aspectRatio)
 {	
 	setAutoFillBackground(true);
-	setObjectName("HImageWidget");
 }
 
 HImageWidget::~HImageWidget()

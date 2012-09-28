@@ -1,5 +1,5 @@
 /*
- *  HabitPlayer.cpp
+ *  HPlayer.cpp
  *  myp
  *
  *  Created by Oakes Lab on 6/4/12.
@@ -7,18 +7,22 @@
  *
  */
 
-#include "HabitPlayer.h"
+#include "HPlayer.h"
 #include <QFocusEvent>
 
-HabitPlayer::HabitPlayer(int ID, QWidget *w) : QLabel(w), m_id(ID), m_iCurrentStim(0)
+HPlayer::HPlayer(int ID, QWidget *w) : QWidget(w), m_id(ID), m_iCurrentStim(0)
 {
-	m_sources.append(StimulusSource("", 0));	// dummy placeholder for attention getter stim. 
-	setObjectName("HabitPlayer");
+	m_sources.append(HStimulusSource("", 0));	// dummy placeholder for attention getter stim. 
 }
 
-int HabitPlayer::addStimulus(QString filename, int volume, bool isLooped)
+HPlayer::~HPlayer()
 {
-	StimulusSource s(filename, volume, isLooped);
+	qDebug("HPlayer::~HPlayer");
+}
+
+int HPlayer::addStimulus(QString filename, int volume, bool isLooped)
+{
+	HStimulusSource s(filename, volume, isLooped);
 	m_sources.append(s);
 	
 	// note: The QList m_sources always has at least 1 element - the attention getter placeholder is 
@@ -26,22 +30,30 @@ int HabitPlayer::addStimulus(QString filename, int volume, bool isLooped)
 	return m_sources.count()-1;
 }
 
-int HabitPlayer::addAG(QString filename, int volume, bool isLooped)
+int HPlayer::addStimulus()
 {
-	StimulusSource s(filename, volume, isLooped);
+	HStimulusSource s;
+	m_sources.append(s);
+	return m_sources.count()-1;
+}
+
+
+int HPlayer::addAG(QString filename, int volume, bool isLooped)
+{
+	HStimulusSource s(filename, volume, isLooped);
 	m_sources[0] = s;
 	return 0;
 }
 
-StimulusSource::StimulusSourceType HabitPlayer::getStimulusType(int index)
+HStimulusSource::HStimulusSourceType HPlayer::getStimulusType(int index)
 {
-	StimulusSource::StimulusSourceType type = StimulusSource::BACKGROUND;
+	HStimulusSource::HStimulusSourceType type = HStimulusSource::BACKGROUND;
 	if (index > -1 && index < m_sources.count())
 		type = (m_sources.at(index)).type();
 	return type;
 }
 
-QTextStream& operator<<(QTextStream& out, const HabitPlayer& player)
+QTextStream& operator<<(QTextStream& out, const HPlayer& player)
 {
 	out << "Player has " << player.count() << " sources:" << endl;
 	for (int i=0; i<player.count(); i++)

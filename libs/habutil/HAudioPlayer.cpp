@@ -10,7 +10,7 @@
 #include "HAudioPlayer.h"
 
 HAudioPlayer::HAudioPlayer(int id, QWidget *w) : 
-HabitPlayer(id, w), m_pMediaObject(0), m_pAudioOutput(0)
+HPlayer(id, w), m_pMediaObject(0), m_pAudioOutput(0)
 {
 	// Generate image widget, media object, video widget, audio output
 	// Special case is when this player is for audio only stimuli (as for control player and ISS stim)
@@ -47,7 +47,7 @@ void HAudioPlayer::play(int number)
 void HAudioPlayer::onPrefinishMarkReached(qint32 msec)
 {
 	Q_UNUSED(msec);
-	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim)).type() == StimulusSource::AUDIO && (m_sources.at(m_iCurrentStim)).isLooped())
+	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim)).type() == HStimulusSource::AUDIO && (m_sources.at(m_iCurrentStim)).isLooped())
 	{
 		m_pMediaObject->pause();
 		m_pMediaObject->seek(0);

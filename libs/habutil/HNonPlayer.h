@@ -13,10 +13,10 @@
 #include <QtGui/QLabel>
 #include <QList>
 #include <QTextStream>
-#include "StimulusSource.h"
-#include "HabitPlayer.h"
+#include "HStimulusSource.h"
+#include "HPlayer.h"
 
-class HNonPlayer : public HabitPlayer
+class HNonPlayer : public HPlayer
 {
 	Q_OBJECT
 	

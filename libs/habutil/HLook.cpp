@@ -70,3 +70,61 @@ QTextStream& operator<<(QTextStream& out, const HLook& l)
 	return out;
 };
 
+QDebug operator<<(QDebug dbg, const LookTransType& lt)
+{
+	switch (lt) {
+		case NoneLeft:
+			dbg.nospace() << "NoneLeft";
+			break;
+		case LeftNone:
+			dbg.nospace() << "LeftNone";
+			break;
+		case NoneCenter:
+			dbg.nospace() << "NoneCenter";
+			break;
+		case CenterNone:
+			dbg.nospace() << "CenterNone";
+			break;
+		case NoneRight:
+			dbg.nospace() << "NoneRight";
+			break;
+		case RightNone:
+			dbg.nospace() << "RightNone";
+			break;
+		case NoneNone:
+			dbg.nospace() << "NoneNone";
+			break;
+		default:
+			dbg.nospace() << "Unknown";
+			break;
+	}
+	return dbg.space();
+};
+
+QDebug operator<<(QDebug dbg, const LookDirection& direction)
+{
+	switch (direction) {
+		case NoLook:
+			dbg.nospace() << "NoLook";
+			break;
+		case LookLeft:
+			dbg.nospace() << "LookLeft";
+			break;
+		case LookRight:
+			dbg.nospace() << "LookRight";
+			break;
+		case LookCenter:
+			dbg.nospace() << "LookCenter";
+			break;
+		default:
+			dbg.nospace() << "UnknownLookDirection";
+			break;
+	}	
+	return dbg.space();
+}
+
+QDebug operator<<(QDebug dbg, const HLook& l)
+{
+	dbg.nospace() << l.direction() << ":" << l.startMS() << "-" << l.endMS();
+	return dbg.space();
+}

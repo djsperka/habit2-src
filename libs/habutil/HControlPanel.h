@@ -17,7 +17,10 @@
 #include "subjectsettings.h"
 #include "OutputGenerator.h"
 
-#include "HabitMediaManager.h"
+#include "HMediaManager.h"
+#include "HLookDetector.h"
+#include "HStateMachine.h"
+#include "HPhase.h"
 
 #include <QtGui/QDialog>
 
@@ -41,7 +44,6 @@ private:
 	void doLayout();
 	void createExperiment();
 	void loadFromDB();
-	HabitMediaManager* createMediaManager();
 	
 //		void determineControlPanelSettings();
 //		void fillStimulus(const QString& order, const Habit::StimuliSettings& ss, int type);
@@ -53,14 +55,19 @@ private slots:
 	void onStopTrials();
 	
 protected:
-	//void closeEvent (QCloseEvent * e); 
+	void closeEvent (QCloseEvent * e); 
 	//bool eventFilter(QObject *target, QEvent *event);
 	
 private:
 	Habit::RunSettings m_runSettings;
 	Habit::SubjectSettings m_subjectSettings;
 	Habit::ExperimentSettings m_experimentSettings;
-	HabitMediaManager* m_pmm;
+	HMediaManager* m_pmm;
+	HLookDetector* m_pld;
+	QStateMachine* m_psm;
+	HPhase* m_psPreTest;
+	HPhase* m_psHabituation;
+	HPhase* m_psTest;
 	
 	QPushButton* m_pbStartTrials;
 	QPushButton* m_pbNextTrial;

@@ -21,6 +21,18 @@
 #include <QStateMachine>
 
 
+class HExperimentState: public HState
+{
+	Q_OBJECT
+	
+public:
+	HExperimentState(QState* parent = 0) : HState("HExperimentState", parent) {};
+	~HExperimentState() {};
+	void onExit(QEvent* e);
+signals:
+	void playStim(int);
+};
+
 class HStimRequestState: public HState
 {
 	Q_OBJECT
@@ -51,16 +63,18 @@ class HTrial: public HState
 	Q_OBJECT
 	
 public:
-	HTrial(QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, bool bFixedLength, bool bUseAG, HState* parent);
+	HTrial(QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent);
 	~HTrial() {};
 	void setNextStim(int i);
 protected:
 private:
 	HLookDetector* m_pLD;
 	int m_maxTrialLengthMS;
+	int m_maxNoLookTimeMS;
 	bool m_bFixedLength;
 	bool m_bAG;
-	QTimer* m_ptimer;	
+	QTimer* m_ptimerMaxTrialLength;	
+	QTimer* m_ptimerMaxNoLookTime;
 	HStimRequestState* m_sStimRequest;
 	
 public slots:
@@ -101,6 +115,25 @@ public:
 };
 
 
+
+class HNoLookTransition: public QAbstractTransition
+{
+	Q_OBJECT
+	
+public:
+	HNoLookTransition(int timerId) : m_timerId(timerId), m_bGotLook(false){};
+	~HNoLookTransition() {};
+	void gotLook() { m_bGotLook = true; };
+	void reset() { m_bGotLook = false; };
+protected:
+	bool eventTest(QEvent* e);
+	void onTransition(QEvent* e) { Q_UNUSED(e); };
+private:
+	int m_timerId;
+	bool m_bGotLook;
+};
+
+
 /**
  State entered when stim starts playing. Starts a timer on entry.
  */
@@ -108,16 +141,22 @@ public:
 class HStimRunningState: public HState
 {
 public:
-	HStimRunningState(int ms, QTimer* ptimer, QState *parent=0) : HState("HStimRunning", parent), m_ms(ms), m_ptimer(ptimer) {};
+	HStimRunningState(int msMax, HNoLookTransition* ptrans, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook, QState *parent=0) : HState("HStimRunning", parent), m_ptransNoLook(ptrans), m_msMax(msMax), m_ptimerMax(ptimerMax), m_msNoLook(msNoLook), m_ptimerNoLook(ptimerNoLook)  {};
 	~HStimRunningState() {};
 	
 protected:
 	// Start timer on entry to this state
 	void onEntry(QEvent* e);
+	void onExit(QEvent* e);
 
 private:
-	int m_ms;
-	QTimer* m_ptimer;
+	HNoLookTransition* m_ptransNoLook;
+	int m_msMax;
+	QTimer* m_ptimerMax;
+	int m_msNoLook;
+	QTimer* m_ptimerNoLook;
 };
+
+
 
 #endif

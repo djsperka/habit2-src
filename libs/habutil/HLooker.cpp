@@ -9,7 +9,7 @@
 
 #include "HLooker.h"
 #include "HElapsedTimer.h"
-#include <QDebug>
+#include <QtDebug>
 
 HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms) : 
 m_bLive(true), m_indexAt(0), m_minLookTimeMS(minlooktime_ms), m_minLookAwayTimeMS(minlookawaytime_ms), m_bLookStarted(false), m_direction(NoLook), m_bLookAwayStarted(false)

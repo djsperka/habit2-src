@@ -8,7 +8,16 @@
  */
 
 #include "HTrial.h"
+#include "HElapsedTimer.h"
 #include <QFinalState>
+#include <QTimerEvent>
+
+void HExperimentState::onExit(QEvent* e)
+{
+	Q_UNUSED(e);
+	// on exiting experiment, tell Media Manager to put up blank screen.
+	emit playStim(-1);
+};
 
 void HStimRequestState::setNextStim(int i) 
 { 
@@ -38,21 +47,46 @@ void HStimRunningState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	m_ptimer->start(m_ms);
+	if (m_ptimerMax->isActive()) m_ptimerMax->stop();
+	if (m_ptimerNoLook->isActive()) m_ptimerNoLook->stop();
+	m_ptimerMax->start(m_msMax);
+	m_ptimerNoLook->start(m_msNoLook);
+	m_ptransNoLook->reset();
+	qDebug("HStimRunningState::onEntry: timers started max %d nolook %d elapsed %d", m_msMax, m_msNoLook, HElapsedTimer::elapsed());
 };
 
+void HStimRunningState::onExit(QEvent* e)
+{
+	Q_UNUSED(e);
+	HState::onExit(e);
+	qDebug("HStimRunningState::onExit: elapsed %d", HElapsedTimer::elapsed());
+}
 
-HTrial::HTrial(QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, bool bFixedLength, bool bUseAG, HState* parent=0) :
+bool HNoLookTransition::eventTest(QEvent* e)
+{
+	bool bVal = false;
+	if (!m_bGotLook && (e->type() == QEvent::Type(QEvent::Timer)))
+	{
+		QTimerEvent* te = static_cast<QTimerEvent*>(e);
+		bVal = (te->timerId() == m_timerId);
+	}
+	return bVal;
+}
+
+HTrial::HTrial(QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0) :
 	HState("HTrial", parent), 
 	m_pLD(pLD),
 	m_maxTrialLengthMS(maxTrialLengthMS), 
+	m_maxNoLookTimeMS(maxNoLookTimeMS),
 	m_bFixedLength(bFixedLength), 
 	m_bAG(bUseAG)
 {
 	// create timer for stim
-	m_ptimer = new QTimer();
-	m_ptimer->setSingleShot(true);
-	
+	m_ptimerMaxTrialLength = new QTimer();
+	m_ptimerMaxTrialLength->setSingleShot(true);
+
+	m_ptimerMaxNoLookTime = new QTimer();
+	m_ptimerMaxNoLookTime->setSingleShot(true);
 	
 	// Create initial state. Do not define its transition yet. 
 	HState* sInitial = new HState("sInitial", this);
@@ -64,7 +98,8 @@ HTrial::HTrial(QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS,
 
 	// Stim request state and StimRunning states are similar to AGRequest and AGRunning. 
 	m_sStimRequest = new HStimRequestState(this);
-	HState* sStimRunning = new HStimRunningState(maxTrialLengthMS, m_ptimer, this);
+	HNoLookTransition* pNoLookTrans = new HNoLookTransition(m_ptimerMaxNoLookTime->timerId());
+	HState* sStimRunning = new HStimRunningState(maxTrialLengthMS, pNoLookTrans, m_ptimerMaxTrialLength, maxNoLookTimeMS, m_ptimerMaxNoLookTime, this);
 
 	// Create final and bail state. Bail state is for timed-out trials, and leads to repeating the same trial.
 	HState* sBail = new HState("stateBail", this);
@@ -100,11 +135,11 @@ HTrial::HTrial(QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS,
 	// aborted on a timeout signal. 
 	if (bFixedLength)
 	{			
-		sStimRunning->addTransition(m_ptimer, SIGNAL(timeout()), sFinal);
+		sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sFinal);
 	}
 	else
 	{
-		sStimRunning->addTransition(m_ptimer, SIGNAL(timeout()), sBail);
+		sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sBail);
 		sStimRunning->addTransition(pLD, SIGNAL(look(HLook)), sFinal);
 	}
 	

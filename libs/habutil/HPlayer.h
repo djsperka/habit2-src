@@ -10,7 +10,7 @@
 #ifndef HABITPLAYER_H
 #define HABITPLAYER_H
 
-#include <QtGui/QLabel>
+#include <QtGui>
 #include <QList>
 #include <QTextStream>
 #include "HStimulusSource.h"
@@ -24,13 +24,13 @@
 // are at index>0. This is a convenience for Habit, which allows users
 // to number stimuli with positive integers. 
 
-class HPlayer : public QLabel
+class HPlayer : public QWidget
 {
 	Q_OBJECT
 	
 public:
 	HPlayer(int ID = 0, QWidget* w = 0);
-	~HPlayer() {};
+	virtual ~HPlayer();
 
 	
 	/// Play the stim at index 'number'. Out of range index defaults to background.
@@ -49,14 +49,17 @@ public:
 	// stim, so even if no AG has been added, the first stim added will still be 
 	// at position 1. The return value is the stim position number, and should 
 	// be used in a call to play(). 
-	virtual int addStimulus(QString filename, int volume, bool isLooped = false);
+	virtual int addStimulus(QString filename, int volume=0, bool isLooped = false);
+	
+	// add dummy (background) stimulus
+	virtual int addStimulus();
 	
 	// Add an attention getter stimulus to the player. The AG will always have
 	// index 0. It can be played by calling play(0) or playAG().
-	virtual int addAG(QString filename, int volume, bool isLooped = false);
+	virtual int addAG(QString filename, int volume=0, bool isLooped = false);
 
 	int count() const { return m_sources.count(); };
-	const StimulusSource& source(int i) const
+	const HStimulusSource& source(int i) const
 	{
 		return m_sources.at(i);
 	};
@@ -67,16 +70,16 @@ protected:
 	
 	/// List of stimulus sources to be used. The [0] index is used as the attention getter, 
 	/// so calling addAG() always replaces the current attention getter.
-	QList<StimulusSource> m_sources;
+	QList<HStimulusSource> m_sources;
 	
 	/// index of currently playing stim. An out of range index defaults to playing background.
 	int m_iCurrentStim;
 	
 	/// Gets the type of stim corresponding to index
-	StimulusSource::StimulusSourceType getStimulusType(int index);
+	HStimulusSource::HStimulusSourceType getStimulusType(int index);
 	
 	/// Gets the type of the stim corresponding to m_iCurrentStim.
-	StimulusSource::StimulusSourceType getCurrentStimulusType()
+	HStimulusSource::HStimulusSourceType getCurrentStimulusType()
 	{
 		return getStimulusType(m_iCurrentStim);
 	};

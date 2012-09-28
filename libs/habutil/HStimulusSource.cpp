@@ -13,7 +13,7 @@
 #include <QTextStream>
 #include <QBuffer>
 
-QTextStream& operator<<(QTextStream& out, const StimulusSource& ss)
+QTextStream& operator<<(QTextStream& out, const HStimulusSource& ss)
 {
 	switch (ss.type()) {
 		case HStimulusSource::BACKGROUND:
@@ -40,34 +40,43 @@ QTextStream& operator<<(QTextStream& out, const StimulusSource& ss)
 	return out;
 }
 
+HStimulusSource::HStimulusSource() : m_type(BACKGROUND), m_pBuffer(0), m_pImage(0), m_audioBalance(0), m_isLooped(false)
+{
+}
+
+
 HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool isLooped) : m_type(BACKGROUND), m_pBuffer(0), m_pImage(0), m_audioBalance(audioBalance), m_isLooped(isLooped)
 {
-	QFile file(filename);
-	m_filename = filename;
-	if (file.exists()) 
+	// Zero length filename implies BACKGROUND. 
+	if (filename.length() > 0)
 	{
-		if (isImageFile(filename))
+		QFile file(filename);
+		m_filename = filename;
+		if (file.exists()) 
 		{
-			m_pImage = new QImage(filename);
-			m_type = IMAGE;
-		}
-		else if (isAudioFile(filename))
-		{
-			m_type = AUDIO;
+			if (isImageFile(filename))
+			{
+				m_pImage = new QImage(filename);
+				m_type = IMAGE;
+			}
+			else if (isAudioFile(filename))
+			{
+				m_type = AUDIO;
+			}
+			else 
+			{
+				//file.open(QIODevice::ReadOnly);
+				//m_pVideo = new Phonon::MediaSource(file.readAll());
+				//QByteArray ba = file.readAll();
+				//m_pBuffer = new QBuffer(&ba);
+				m_type = VIDEO;
+				//file.close();
+			}
 		}
 		else 
 		{
-			//file.open(QIODevice::ReadOnly);
-			//m_pVideo = new Phonon::MediaSource(file.readAll());
-			//QByteArray ba = file.readAll();
-			//m_pBuffer = new QBuffer(&ba);
-			m_type = VIDEO;
-			//file.close();
+			m_type = ERROR;
 		}
-	}
-	else 
-	{
-		m_type = ERROR;
 	}
 }
 
