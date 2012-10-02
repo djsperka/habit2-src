@@ -10,7 +10,7 @@
 #include "HPhase.h"
 #include <QFinalState>
 
-HPhase::HPhase(const QList<int>& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent) 
+HPhase::HPhase(const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent) 
 	: HState("Phase", parent), m_stimuli(stimuli), m_itrial(0)
 {
 	QAbstractTransition* trans;
@@ -35,7 +35,7 @@ HPhase::HPhase(const QList<int>& stimuli, QObject* pMediaManager, HLookDetector*
 	sTrialComplete->addTransition(trans);
 	
 	// set next stim for first trial
-	m_sTrial->setNextStim(m_stimuli.at(0));
+	m_sTrial->setNextStim(m_stimuli.at(0).first, m_stimuli.at(0).second);
 };
 
 bool HPhase::advance()
@@ -48,8 +48,8 @@ bool HPhase::advance()
 	}
 	else 
 	{
-		qDebug() << "HPhase::advance() - trial " << m_itrial << " setNextStim " << m_stimuli.at(m_itrial);
-		m_sTrial->setNextStim(m_stimuli.at(m_itrial));
+		qDebug() << "HPhase::advance() - trial " << m_itrial << " setNextStim " << m_stimuli.at(m_itrial).first;
+		m_sTrial->setNextStim(m_stimuli.at(m_itrial).first, m_stimuli.at(m_itrial).second);
 	}
 	return b;
 };

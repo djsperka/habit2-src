@@ -9,6 +9,7 @@
 
 #include "HTrial.h"
 #include "HElapsedTimer.h"
+#include "HOutputGenerator.h"
 #include <QFinalState>
 #include <QTimerEvent>
 
@@ -19,9 +20,10 @@ void HExperimentState::onExit(QEvent* e)
 	emit playStim(-1);
 };
 
-void HStimRequestState::setNextStim(int i) 
+void HStimRequestState::setNextStim(int i, const Habit::StimulusSettings& ss) 
 { 
 	m_nextStimID = i; 
+	m_nextStimulusSettings = ss;
 };
 
 void HStimRequestState::onEntry(QEvent* e) 
@@ -33,6 +35,8 @@ void HStimRequestState::onEntry(QEvent* e)
 		qWarning("HStimRequestState::onEntry : must call setNextStim with valid stimID");
 	}
 	qDebug() << "HStimRequestState::onEntry : emit playStim(" << m_nextStimID << ")";
+	HOutputGenerator::instance()->changeTrial(m_nextStimulusSettings.getStimulusType());
+	HOutputGenerator::instance()->setStimulusSettings(m_nextStimulusSettings);
 	emit playStim(m_nextStimID);
 };
 
@@ -89,8 +93,11 @@ HTrial::HTrial(QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS,
 	m_ptimerMaxNoLookTime->setSingleShot(true);
 	
 	// Create initial state. Do not define its transition yet. 
-	HState* sInitial = new HState("sInitial", this);
+	HState* sInitial = new HInitialState(HTrialLogItem::NEW_TRIAL, this);
 	setInitialState(sInitial);
+	
+	// This is an initial state for repeated trials
+	HState* sBailInitial = new HInitialState(HTrialLogItem::NEW_TRIAL_REPEAT, this);
 
 	// AG states
 	HAGRequestState* sAGRequest = new HAGRequestState(this);
@@ -147,19 +154,19 @@ HTrial::HTrial(QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS,
 	if (bUseAG)
 	{
 		sInitial->addTransition(sAGRequest);
+		sBailInitial->addTransition(sAGRequest);
 	}
 	else 
 	{
 		sInitial->addTransition(m_sStimRequest);
+		sBailInitial->addTransition(m_sStimRequest);
 	}
-	sBail->addTransition(sInitial);															// bailed trial automatically repeats
-	
-	
+	sBail->addTransition(sBailInitial);					// bailed trial automatically repeats		
 }
 
-void HTrial::setNextStim(int i)	
+void HTrial::setNextStim(int i, const Habit::StimulusSettings& ss)	
 { 
-	m_sStimRequest->setNextStim(i); 
+	m_sStimRequest->setNextStim(i, ss); 
 }
 
 void HTrial::onStimRunningEntered()

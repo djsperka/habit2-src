@@ -23,6 +23,7 @@ HEADERS +=	HLook.h \
 			HApp.h \
 			HMediaManagerUtil.h \
 			HTrialGenerator.h \
+			HOutputGenerator.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -97,6 +98,7 @@ SOURCES +=	HLook.cpp \
 			HApp.cpp \
 			HMediaManagerUtil.cpp \
 			HTrialGenerator.cpp \
+			HOutputGenerator.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \

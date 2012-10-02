@@ -12,6 +12,8 @@
 
 #include "HState.h"
 #include "HLookDetector.h"
+#include "stimulussettings.h"
+#include "HOutputGenerator.h"
 #include <QObject>
 #include <QTimer>
 #include <QEvent>
@@ -33,17 +35,36 @@ signals:
 	void playStim(int);
 };
 
+class HInitialState: public HState
+{
+	Q_OBJECT
+	
+	int m_newrepeat;
+	
+public:
+	HInitialState(int new_repeat, QState* parent=0) : HState("HInitialState", parent), m_newrepeat(new_repeat) {};
+	~HInitialState() {};
+	
+protected:
+	void onEntry(QEvent* e)
+	{
+		Q_UNUSED(e);
+		HOutputGenerator::instance()->addLogItem(m_newrepeat, 0);
+	};
+};
+
 class HStimRequestState: public HState
 {
 	Q_OBJECT
 	
 	int m_nextStimID;
+	Habit::StimulusSettings m_nextStimulusSettings;
 	
 public:
 	
 	HStimRequestState(QState* parent = 0) : HState("HStimRequestState", parent), m_nextStimID(-1) {};
 	~HStimRequestState() {};	
-	void setNextStim(int i);
+	void setNextStim(int i, const Habit::StimulusSettings& ss);
 signals:
 	void playStim(int);	
 protected:
@@ -65,7 +86,7 @@ class HTrial: public HState
 public:
 	HTrial(QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent);
 	~HTrial() {};
-	void setNextStim(int i);
+	void setNextStim(int i, const Habit::StimulusSettings& ss);
 protected:
 private:
 	HLookDetector* m_pLD;

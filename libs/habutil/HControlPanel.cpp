@@ -8,6 +8,7 @@
  */
 
 #include "HControlPanel.h"
+#include "HOutputGenerator.h"
 #include "HMediaManagerUtil.h"
 #include "HPhase.h"
 #include "HKeypadLookDetector.h"
@@ -135,13 +136,13 @@ void HControlPanel::createExperiment()
 	loadFromDB();
 	
 	// These will hold stim numbers for stimuli available to each phase.
-	QVector<int> v1, v2, v3;
+	Habit::StimulusSettingsList l1, l2, l3;
 
 	// These will hold stim numbers for the trials in each phase.
-	QList<int> lTrials;
+	Habit::StimulusSettingsList lTrials;
 	
 	// Create media manager. Note we are not passing a parent! 
-	m_pmm = createMediaManager(m_experimentSettings, NULL, v1, v2, v3);
+	m_pmm = createMediaManager(m_experimentSettings, NULL, l1, l2, l3);
 	
 	// Get info for creating look detector and phase(s). 
 	Habit::DesignSettings ds = m_experimentSettings.getDesignSettings();
@@ -178,11 +179,11 @@ void HControlPanel::createExperiment()
 	// Create phases	
 	if (tiPreTest.getNumberOfTrials() > 0)
 	{
-		HTrialGenerator htg(v1.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
+		HTrialGenerator htg(l1.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
 		lTrials.clear();
 		for (unsigned int i=0; i<tiPreTest.getNumberOfTrials(); i++)
 		{
-			lTrials.append(v1.at(htg.next()));
+			lTrials.append(l1.at(htg.next()));
 		}
 
 		m_psPreTest = new HPhase(lTrials, m_pmm, m_pld, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
@@ -190,11 +191,11 @@ void HControlPanel::createExperiment()
 
 	if (tiHabituation.getNumberOfTrials() > 0)
 	{
-		HTrialGenerator htg(v2.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
+		HTrialGenerator htg(l2.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
 		lTrials.clear();
 		for (unsigned int i=0; i<tiHabituation.getNumberOfTrials(); i++)
 		{
-			lTrials.append(v2.at(htg.next()));
+			lTrials.append(l2.at(htg.next()));
 		}
 		
 		m_psHabituation = new HPhase(lTrials, m_pmm, m_pld, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
@@ -202,11 +203,11 @@ void HControlPanel::createExperiment()
 	
 	if (tiTest.getNumberOfTrials() > 0)
 	{
-		HTrialGenerator htg(v3.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
+		HTrialGenerator htg(l3.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
 		lTrials.clear();
 		for (unsigned int i=0; i<tiTest.getNumberOfTrials(); i++)
 		{
-			lTrials.append(v3.at(htg.next()));
+			lTrials.append(l3.at(htg.next()));
 		}
 		
 		m_psTest = new HPhase(lTrials, m_pmm, m_pld, tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
@@ -282,6 +283,11 @@ void HControlPanel::onStartTrials()
 	m_pbStopTrials->setEnabled(true);
 	m_pbNextTrial->setEnabled(true);
 	m_pbStartTrials->setEnabled(false);
+	
+	HOutputGenerator::instance()->setExperiment(m_runSettings.getExperimentId());
+	HOutputGenerator::instance()->setRunSettings(m_runSettings);
+	HOutputGenerator::instance()->setSubjectInformation(m_subjectSettings);
+
 	m_psm->start();
 }
 
@@ -296,95 +302,3 @@ void HControlPanel::onStopTrials()
 	qDebug("HControlPanel::onStopTrials()");
 	m_psm->stop();
 }
-
-
-
-#if 0
-void TestPhaseDialog::goClicked()
-{
-	bool bValue;
-	qDebug() << "goClicked()" << lineeditLook->text().toInt(&bValue) <<  " " << lineeditLookAway->text().toInt(&bValue) << endl;
-	checkboxAG->setDisabled(true);
-	checkboxFixed->setDisabled(true);
-	pushbuttonGo->setDisabled(true);
-	lineeditLook->setDisabled(true);
-	lineeditLookAway->setDisabled(true);
-	lineeditMaxMS->setDisabled(true);
-	m_bGoClicked = true;
-	
-	// create looker object and connect it to our own slot. 
-	// note that this connection isn't needed for the trial class to function - we do it to display
-	// looks signals only. 
-	
-	//ld = new HKeypadLookDetector(lineeditLook->text().toInt(&bValue), lineeditLookAway->text().toInt(&bValue), listWidget, true, false, true);
-	ld = new HKeypadLookDetector(lineeditLook->text().toInt(&bValue), lineeditLookAway->text().toInt(&bValue), this, true, true, true);
-	connect(ld, SIGNAL(look(HLook)), this, SLOT(gotLook(HLook)));
-	
-	// create media manager
-	HabitMediaManager* pmm = createMediaManager();
-	
-	// Now create a trial, phase and state machine
-	HStateMachine* machine = new HStateMachine();
-	
-	QList<int> stimuli;
-	stimuli.append(1);
-	stimuli.append(2);
-	stimuli.append(3);
-	stimuli.append(4);
-	
-	phase = new HPhase(stimuli, pmm, ld, lineeditMaxMS->text().toInt(&bValue), checkboxFixed->isChecked(), checkboxAG->isChecked());
-	machine->addState(phase);
-	QFinalState* sFinal = new QFinalState;
-	machine->addState(sFinal);
-	phase->addTransition(phase, SIGNAL(finished()), sFinal);
-	machine->setInitialState(phase);
-	machine->start();
-	
-	return;
-};
-
-HabitMediaManager* TestPhaseDialog::createMediaManager()
-{
-	// create media manager
-	HabitMediaManager* pmm = new HabitMediaManager();
-	
-#if USE_FAKE_PLAYER
-	pmm->addPlayer(new HabitNonPlayer(1, this));
-#else
-	HabitVideoImagePlayer* player1 = new HabitVideoImagePlayer(1, this);
-	QRect rect = QApplication::desktop()->screenGeometry(1);
-	player1->setGeometry(rect);
-	player1->move(rect.x(), rect.y());
-	
-	//player1->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov", true);
-	player1->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov", true);
-	player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/mainecoon.jpg");
-	player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov");
-	player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/husky.jpg");
-	player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/multicolor_box_bubble.mov");
-	player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg");
-	player1->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg");
-	
-	pmm->addPlayer(player1);
-#if 0
-	HabitVideoImagePlayer* player2 = new HabitVideoImagePlayer(2, this);
-	rect = QApplication::desktop()->screenGeometry(2);
-	player2->setGeometry(rect);
-	player2->move(rect.x(), rect.y());
-	player2->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov", true);
-	//player2->addAG("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/Green AG Movie bell.mov");
-	player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/husky.jpg");
-	player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/multicolor_box_bubble.mov", true);
-	player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/crank_nutchop_crumble.mov", true);
-	player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/mainecoon.jpg");
-	player2->addStimulus("/Users/Oakeslab/Desktop/New Habit Testing Stimuli/van.jpg");
-	
-	pmm->addPlayer(player2);
-#endif
-#endif
-	
-	return pmm;
-}
-
-
-#endif

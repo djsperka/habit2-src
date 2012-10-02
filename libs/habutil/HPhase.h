@@ -11,21 +11,24 @@
 #define _HPHASE_H_
 
 #include "HTrial.h"
+#include "stimulusSettings.h"
 #include <QList>
 
 class HPhase: public HState
 {
 	Q_OBJECT
 	
-	QList<int> m_stimuli;
+	//QList<int> m_stimuli;
+	QList<QPair<int, Habit::StimulusSettings> > m_stimuli;
 	int m_itrial;
 	HTrial* m_sTrial;
 public:
-	HPhase(const QList<int>& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
+	HPhase(const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
 	virtual ~HPhase() {};
 	bool advance();
 	inline int currentTrialNumber() { return m_itrial; };	
-	inline int currentStimNumber() { return m_stimuli.at(m_itrial); };
+	inline int currentStimNumber() { return m_stimuli.at(m_itrial).first; };
+	inline Habit::StimulusSettings currentStimulusSettings() { return m_stimuli.at(m_itrial).second; };
 };
 
 
@@ -99,7 +102,16 @@ protected:
 	};
 };
 
-
+class HPhaseTrialStartingState: public HState
+{
+	Q_OBJECT
+	
+private:
+	HPhase* m_sPhase;
+	
+public:
+	HPhaseTrialStartingState(HPhase* phase);
+};
 
 class HPhaseTrialCompleteState: public HState
 {

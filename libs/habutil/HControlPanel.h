@@ -37,7 +37,6 @@ public:
 	HControlPanel(const Habit::SubjectSettings& ss, const Habit::RunSettings& runSettings, QWidget* w = 0);
 	~HControlPanel() {};
 	
-	Habit::OutputGenerator getOutputGenerator() { return m_outputGenerator; }
 private:
 	void createComponents();
 	void makeConnections();
@@ -95,8 +94,6 @@ private:
 	QLabel* m_labelCenterMonitorFileValue;
 	QLabel* m_labelRightMonitorFileValue;
 	QLabel* m_labelSoundFileValue;
-	
-	Habit::OutputGenerator m_outputGenerator;
 };
 	
 #endif // HCONTROLPANEL_H

@@ -11,18 +11,19 @@
 #include "HVideoImagePlayer.h"
 #include "HAudioPlayer.h"
 
-void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& ss, QVector<int>& vecStimNumbers, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl);
+void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& ss, Habit::StimulusSettingsList& listStim, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl);
 
 
 HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* parent)
 {
-	QVector<int> v1, v2, v3;
-	return createMediaManager(es, parent, v1, v2, v3);
+	Habit::StimulusSettingsList l1, l2, l3;
+	return createMediaManager(es, parent, l1, l2, l3);
 }
 
 
-HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* parent, QVector<int>& vecStimNumbersPreTest, QVector<int>& vecStimNumbersHabituation, QVector<int>& vecStimNumbersTest)
+HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* parent, Habit::StimulusSettingsList& listStimPreTest, Habit::StimulusSettingsList& listStimHabituation, Habit::StimulusSettingsList& listStimTest)
 {
+	Q_UNUSED(parent);
 	HMediaManager* pmm = new HMediaManager();
 	HPlayer *playerLeft = NULL;
 	HPlayer *playerCenter = NULL;
@@ -131,15 +132,15 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 	// requested, each of the configured players should play that stimulus on each configured screen.
 	//
 	
-	populatePlayers(tiPreTest, ssPreTest, vecStimNumbersPreTest, playerLeft, playerCenter, playerRight, playerControl);
-	populatePlayers(tiHabituation, ssHabituation, vecStimNumbersHabituation, playerLeft, playerCenter, playerRight, playerControl);
-	populatePlayers(tiTest, ssTest, vecStimNumbersTest, playerLeft, playerCenter, playerRight, playerControl);
+	populatePlayers(tiPreTest, ssPreTest, listStimPreTest, playerLeft, playerCenter, playerRight, playerControl);
+	populatePlayers(tiHabituation, ssHabituation, listStimHabituation, playerLeft, playerCenter, playerRight, playerControl);
+	populatePlayers(tiTest, ssTest, listStimTest, playerLeft, playerCenter, playerRight, playerControl);
 	
 	return pmm;
 }
 
 
-void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& ss, QVector<int>& vecStimNumbers, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl)
+void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& ss, Habit::StimulusSettingsList& listStim, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl)
 {
 	int iStimNumber=0;
 	int iTemp = 0;
@@ -203,7 +204,7 @@ void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& 
 				}
 				if (iStimNumber==0) iStimNumber = iTemp;
 			}
-			vecStimNumbers.append(iStimNumber);
+			listStim.append(QPair<int, Habit::StimulusSettings>(iStimNumber, settings));
 		}
 	}
 	return;
