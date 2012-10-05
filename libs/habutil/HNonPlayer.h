@@ -25,9 +25,11 @@ public:
 	~HNonPlayer() {};
 	virtual void play(int number);
 	virtual void stop(); 
+	virtual void clear();
 	friend QTextStream& operator<<(QTextStream& out, const HNonPlayer& player);
 	
 private:
+
 	
 };
 

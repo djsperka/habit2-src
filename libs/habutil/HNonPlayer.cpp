@@ -19,3 +19,9 @@ void HNonPlayer::stop()
 {
 }
 
+void HNonPlayer::clear()
+{
+	emit cleared(m_id);
+}
+
+

@@ -47,22 +47,25 @@ private:
 	QList<HPlayer *> m_players;
 	bool m_pendingStartSignal;
 	bool m_pendingAGStartSignal;
-	
+	bool m_pendingClearSignal;
+	int m_pendingStimNumber;
 public:
 
-	HMediaManager(): QObject(), m_pendingStartSignal(false), m_pendingAGStartSignal(false) {};
+	HMediaManager(): QObject(), m_pendingStartSignal(false), m_pendingAGStartSignal(false), m_pendingClearSignal(false), m_pendingStimNumber(-1) {};
 	~HMediaManager();
 	void addPlayer(HPlayer* player, int screenIndex=-1);
-	
+	void clear();
 public slots:
 
 	void stim(int);
 	void ag();
 	void playerStarted(int i);
+	void playerCleared(int i);
 
 signals:
 	void agStarted();
-	void stimStarted();
+	void stimStarted(int);
+	void cleared();
 };
 
 #endif

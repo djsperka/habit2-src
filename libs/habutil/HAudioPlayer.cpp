@@ -10,7 +10,7 @@
 #include "HAudioPlayer.h"
 
 HAudioPlayer::HAudioPlayer(int id, QWidget *w) : 
-HPlayer(id, w), m_pMediaObject(0), m_pAudioOutput(0)
+HPlayer(id, w), m_pendingStop(false), m_pMediaObject(0), m_pAudioOutput(0)
 {
 	// Generate image widget, media object, video widget, audio output
 	// Special case is when this player is for audio only stimuli (as for control player and ISS stim)
@@ -44,6 +44,20 @@ void HAudioPlayer::play(int number)
 	}
 }
 
+
+void HAudioPlayer::clear()
+{
+	if (m_pMediaObject->state() == Phonon::StoppedState)
+	{
+		emit cleared(m_id);
+	}
+	else 
+	{
+		m_pendingStop = true;
+		m_pMediaObject->stop();
+	}
+}
+
 void HAudioPlayer::onPrefinishMarkReached(qint32 msec)
 {
 	Q_UNUSED(msec);
@@ -58,9 +72,20 @@ void HAudioPlayer::onPrefinishMarkReached(qint32 msec)
 void HAudioPlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
 {
 	Q_UNUSED(oldState);
-	if (newState == Phonon::PlayingState)
+	if (m_pendingStop)
 	{
-		emit started(m_id);
-	}		
+		if (newState == Phonon::StoppedState)
+		{
+			m_pendingStop = false;
+			emit cleared(m_id);
+		}
+	}
+	else
+	{
+		if (newState == Phonon::PlayingState)
+		{
+			emit started(m_id);
+		}		
+	}
 	return;
 }

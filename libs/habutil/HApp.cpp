@@ -95,10 +95,11 @@ void HApp::runExperimentResults()
 	form.exec();
 }
 
+
 void HApp::runSavedExperiment()
 {
     GUILib::RunSettingsForm runSettingsForm(this/* runSettings*/);
-	
+
 	// Initialize output generator
 	HOutputGenerator::initialize();
 	if(runSettingsForm.exec() == QDialog::Accepted) {

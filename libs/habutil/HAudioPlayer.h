@@ -28,9 +28,11 @@ public:
 	~HAudioPlayer() {};
 	virtual void play(int number);
 	virtual void stop(); 
+	virtual void clear();
 	friend QTextStream& operator<<(QTextStream& out, const HAudioPlayer& player);
 	
 private:
+	bool m_pendingStop;
 	Phonon::MediaObject *m_pMediaObject;
 	Phonon::AudioOutput *m_pAudioOutput;
 

@@ -44,10 +44,21 @@ void HMediaManager::addPlayer(HPlayer* player, int screenIndex)
 void HMediaManager::stim(int i)
 {
 	m_pendingStartSignal = true;
+	m_pendingStimNumber = i;
 	QListIterator<HPlayer *> it(m_players);
 	while (it.hasNext())
 	{
 		it.next()->play(i);
+	}
+}
+
+void HMediaManager::clear()
+{
+	m_pendingClearSignal = true;
+	QListIterator<HPlayer *> it(m_players);
+	while (it.hasNext())
+	{
+		it.next()->clear();
 	}
 }
 
@@ -68,10 +79,21 @@ void HMediaManager::playerStarted(int id)
 		}
 		else
 		{
-			emit stimStarted();
+			emit stimStarted(m_pendingStimNumber);
 		}
 		m_pendingStartSignal = false;
 		m_pendingAGStartSignal = false;
+		m_pendingStimNumber = -1;
+	}
+}
+
+void HMediaManager::playerCleared(int id)
+{
+	Q_UNUSED(id);
+	if (m_pendingClearSignal)
+	{
+		m_pendingClearSignal = false;
+		emit cleared();
 	}
 }
 

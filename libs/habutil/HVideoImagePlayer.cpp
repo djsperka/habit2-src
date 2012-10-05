@@ -71,7 +71,7 @@ bool HVideoImagePlayer::eventFilter(QObject *object, QEvent *event)
 
 
 HVideoImagePlayer::HVideoImagePlayer(int id, QWidget *w, bool fullscreen, bool maintainAspectRatio) : 
-HPlayer(id, w), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
+HPlayer(id, w), m_pendingClear(false), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
 {
 	// This combination needed to get the "close window when app exits"
 	// right. Make sure to call with the parent as the thing that should 
@@ -158,13 +158,34 @@ void HVideoImagePlayer::onStateChanged(Phonon::State newState, Phonon::State old
 
 void HVideoImagePlayer::onImagePainted()
 {
-	emit started(m_id);
+	if (m_pendingClear)
+	{
+		m_pendingClear = false;
+		emit cleared(m_id);
+	}
+	else 
+	{
+		emit started(m_id);
+	}
 	return;
 }
 		
 void HVideoImagePlayer::stop()
 {
 	m_pMediaObject->stop();
+}
+
+void HVideoImagePlayer::clear()
+{
+	if (getCurrentStimulusType() == HStimulusSource::BACKGROUND)
+	{
+		emit cleared(m_id);
+	}
+	else 
+	{
+		m_pendingClear = true;
+		play(-1);
+	}
 }
 
 void HVideoImagePlayer::play(int number)

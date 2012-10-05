@@ -26,6 +26,7 @@ public:
 	HPhase(const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
 	virtual ~HPhase() {};
 	bool advance();
+	HTrial* getHTrial() { return m_sTrial; };
 	inline int currentTrialNumber() { return m_itrial; };	
 	inline int currentStimNumber() { return m_stimuli.at(m_itrial).first; };
 	inline Habit::StimulusSettings currentStimulusSettings() { return m_stimuli.at(m_itrial).second; };

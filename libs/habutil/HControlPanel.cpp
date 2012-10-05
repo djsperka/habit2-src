@@ -42,6 +42,7 @@ HControlPanel::HControlPanel(const Habit::SubjectSettings& ss, const Habit::RunS
 	
 	createExperiment();
 
+	
 }
 
 void HControlPanel::createComponents()
@@ -119,13 +120,18 @@ void HControlPanel::doLayout()
 
 void HControlPanel::closeEvent(QCloseEvent* e)
 {
+	Q_UNUSED(e);
+#if 0
 	qDebug("HControlPanel::closeEvent");
+	connect(m_pmm, SIGNAL(cleared()), this, SLOT(accept()));
+	m_pmm->clear();
 	if (m_pmm)
 	{
 		delete m_pmm;
 		m_pmm = NULL;
 	}
 	e->accept();
+#endif
 }
 
 
@@ -140,10 +146,7 @@ void HControlPanel::createExperiment()
 
 	// These will hold stim numbers for the trials in each phase.
 	Habit::StimulusSettingsList lTrials;
-	
-	// Create media manager. Note we are not passing a parent! 
-	m_pmm = createMediaManager(m_experimentSettings, NULL, l1, l2, l3);
-	
+
 	// Get info for creating look detector and phase(s). 
 	Habit::DesignSettings ds = m_experimentSettings.getDesignSettings();
 	Habit::TrialsInfo tiPreTest = ds.getPretestTrialsInfo();
@@ -151,18 +154,32 @@ void HControlPanel::createExperiment()
 	Habit::TrialsInfo tiTest = ds.getTestTrialsInfo();
 	Habit::AttentionGetterSettings ags = m_experimentSettings.getAttentionGetterSettings();
 	
+	
+	// Create media manager. Note we are not passing a parent! 
+	m_pmm = createMediaManager(m_experimentSettings, NULL, l1, l2, l3);
+	
+	// Save the lists of stimuli for use in updating labels.
+	populateSSMap(ags, l1, l2, l3);
+	
+	// Connect media manager signals to slots here so we can update display labels.
+	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(onAGStarted()));
+	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(onStimStarted(int)));
+	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onCleared()));
+	
 	// Create look detector
 	int lookTimeMS = tiPreTest.getLookTimes() * 100;
 	int lookAwayTimeMS = tiHabituation.getLookTimes() * 100;
 	int noLookTimeMS = tiTest.getLookTimes() * 100;
 	m_pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, this);
-	
+
+	// connect look() signal to a slot so we can forward the info to the output generator
+	connect(m_pld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
 	
 	// Construct state machine.
 	m_psm = new QStateMachine();
 	
 	// connect the state machine's finished() signal to this dialog's close() slot
-	connect(m_psm, SIGNAL(finished()), this, SLOT(close()));
+	connect(m_psm, SIGNAL(finished()), this, SLOT(onExperimentFinished()));
 		
 	// This is a single super-state that holds all the phases.
 	HExperimentState* sExperiment = new HExperimentState();
@@ -267,13 +284,150 @@ void HControlPanel::createExperiment()
 		sExperiment->setInitialState(sExperimentFinal);
 	}
 	
+	
+	// Finally, text properties of labels can be assigned on entry to various states.
+	sExperiment->assignProperty(m_labelExperimentStatusValue, "text", "Running");
+	if (m_psPreTest)
+		m_psPreTest->assignProperty(m_labelCurrentPhaseValue, "text", "PreTest");
+	if (m_psHabituation)
+		m_psHabituation->assignProperty(m_labelCurrentPhaseValue, "text", "Habituation");
+	if (m_psTest)
+		m_psTest->assignProperty(m_labelCurrentPhaseValue, "text", "Test");
+	
 }
+
+void HControlPanel::populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::StimulusSettingsList& l1, const Habit::StimulusSettingsList& l2, const Habit::StimulusSettingsList& l3)
+{
+	if (ags.isAttentionGetterUsed())
+	{
+		m_mapSS[0] = ags.getAttentionGetterStimulus();
+	}
+	
+	QListIterator< QPair<int, Habit::StimulusSettings> > it1(l1);
+	while (it1.hasNext())
+	{
+		QPair<int, Habit::StimulusSettings> p = it1.next();
+		m_mapSS[p.first] = p.second;
+	}
+	
+	QListIterator< QPair<int, Habit::StimulusSettings> > it2(l2);
+	while (it2.hasNext())
+	{
+		QPair<int, Habit::StimulusSettings> p = it2.next();
+		m_mapSS[p.first] = p.second;
+	}
+	QListIterator< QPair<int, Habit::StimulusSettings> > it3(l3);
+	while (it3.hasNext())
+	{
+		QPair<int, Habit::StimulusSettings> p = it3.next();
+		m_mapSS[p.first] = p.second;
+	}
+};
+
+void HControlPanel::updateFileStatusLabels(Habit::StimulusSettings& ss)
+{
+	
+	if (ss.isLeftEnabled())
+	{
+		m_labelLeftMonitorFileValue->setText(ss.getLeftStimulusInfo().getFileName());
+	}
+	else 
+	{
+		m_labelLeftMonitorFileValue->setText("unused");
+	}
+	
+	if (ss.isCenterEnabled())
+	{
+		m_labelCenterMonitorFileValue->setText(ss.getCenterStimulusInfo().getFileName());
+	}
+	else 
+	{
+		m_labelCenterMonitorFileValue->setText("unused");
+	}
+	
+	if (ss.isRightEnabled())
+	{
+		m_labelRightMonitorFileValue->setText(ss.getRightStimulusInfo().getFileName());
+	}
+	else 
+	{
+		m_labelRightMonitorFileValue->setText("unused");
+	}
+	
+	if (ss.isIndependentSoundEnabled())
+	{
+		m_labelSoundFileValue->setText(ss.getIndependentSoundInfo().getFileName());
+	}
+	else 
+	{
+		m_labelSoundFileValue->setText("unused");
+	}
+	
+}
+
+void HControlPanel::onAGStarted()
+{
+	Habit::StimulusSettings ss = m_mapSS[0];
+	m_labelAttentionGetterStatusValue->setText("Running ");
+	m_labelCurrentStimulusValue->setText("Idle");
+	updateFileStatusLabels(ss);
+}
+
+void HControlPanel::onStimStarted(int i)
+{
+	Habit::StimulusSettings ss = m_mapSS[i];
+	QString s("Running (" + ss.getName() + ")");
+	m_labelAttentionGetterStatusValue->setText("Idle");
+	m_labelCurrentStimulusValue->setText(s);
+	updateFileStatusLabels(ss);
+}
+
+void HControlPanel::onCleared()
+{
+	m_labelAttentionGetterStatusValue->setText("Idle");
+	m_labelCurrentStimulusValue->setText("Idle");
+	m_labelLeftMonitorFileValue->setText("");
+	m_labelCenterMonitorFileValue->setText("");
+	m_labelRightMonitorFileValue->setText("");
+	m_labelSoundFileValue->setText("");
+}
+
+void HControlPanel::onLook(HLook l)
+{
+	switch (l.direction())
+	{
+		case LookLeft:
+			HOutputGenerator::instance()->addLogItem(HTrialLogItem::LEFT_LOOK, l.lookMS());
+			m_labelLookStatusValue->setText("Look Left");
+			break;
+		case LookCenter:
+			HOutputGenerator::instance()->addLogItem(HTrialLogItem::CENTER_LOOK, l.lookMS());
+			m_labelLookStatusValue->setText("Look Center");
+			break;
+		case LookRight:
+			HOutputGenerator::instance()->addLogItem(HTrialLogItem::RIGHT_LOOK, l.lookMS());
+			m_labelLookStatusValue->setText("Look Right");
+			break;
+		case NoLook:
+			HOutputGenerator::instance()->addLogItem(HTrialLogItem::AWAY_LOOK, l.lookMS());
+			m_labelLookStatusValue->setText("No Look");
+			break;
+	}
+}
+			
 
 void HControlPanel::loadFromDB()
 {
 	Habit::MainDao dao;
+	qDebug("HControlPanel::loadFromDB(): get exp settings.");
 	m_experimentSettings = dao.getExperimentSettingsById(m_runSettings.getExperimentId());
 	m_experimentSettings.loadFromDB();
+	
+	qDebug() << m_experimentSettings.getPreTestStimuliSettings();
+	qDebug() << m_experimentSettings.getHabituationStimuliSettings();
+	qDebug() << m_experimentSettings.getTestStimuliSettings();
+	
+	qDebug("HControlPanel::loadFromDB(): get exp settings - Done.");
 }
 	
 	
@@ -301,4 +455,17 @@ void HControlPanel::onStopTrials()
 {
 	qDebug("HControlPanel::onStopTrials()");
 	m_psm->stop();
+	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onExperimentFinished()));
+	m_pmm->clear();
 }
+
+void HControlPanel::onExperimentFinished()
+{
+	if (m_pmm)
+	{
+		delete m_pmm;
+		m_pmm = NULL;
+	}
+	accept();
+}
+

@@ -47,12 +47,14 @@ public:
 	~HVideoImagePlayer();
 	virtual void play(int number);
 	virtual void stop(); 
+	virtual void clear();
 	friend QTextStream& operator<<(QTextStream& out, const HVideoImagePlayer& player);
 	bool eventFilter(QObject *object, QEvent *event);
 
 protected:
 	
 private:
+	bool m_pendingClear;
 	QWidget* m_parent;
 	Phonon::MediaObject *m_pMediaObject;
 	Phonon::VideoWidget *m_pVideoWidget;
@@ -61,8 +63,8 @@ private:
 	bool m_isFullScreen;
 	bool m_maintainAspectRatio;
 
-signals:
-	void started(int);
+//signals:
+//	void started(int);
 	
 public slots:
 	void onPrefinishMarkReached(qint32);

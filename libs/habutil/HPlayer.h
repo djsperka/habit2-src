@@ -43,6 +43,9 @@ public:
 	/// on an image or background. 
 	virtual void stop() = 0; 
 	
+	/// Clear screen or equivalent. Emit cleared() when operation complete. 
+	virtual void clear() = 0;	
+
 	// Add a stimulus to the player. This function stores the stimuli at index
 	// positions 1, 2, .... By default, the first position, index 0, is reserved
 	// for the attention getter (AG). That position is initialized with an empty
@@ -85,10 +88,9 @@ protected:
 	};
 
 
-private:
-	
 signals:
 	void started(int i);
+	void cleared(int i);
 
 };
 

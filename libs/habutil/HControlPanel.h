@@ -22,7 +22,8 @@
 #include "HStateMachine.h"
 #include "HPhase.h"
 
-#include <QtGui/QDialog>
+#include <QDialog>
+#include <QMap>
 
 class QPushButton;
 class QLabel;
@@ -43,15 +44,18 @@ private:
 	void doLayout();
 	void createExperiment();
 	void loadFromDB();
-	
-//		void determineControlPanelSettings();
-//		void fillStimulus(const QString& order, const Habit::StimuliSettings& ss, int type);
-//		void checkControlBarOptions(const Habit::ControlBarOptions& cbo);
+	void populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::StimulusSettingsList& l1, const Habit::StimulusSettingsList& l2, const Habit::StimulusSettingsList& l3);
+	void updateFileStatusLabels(Habit::StimulusSettings& ss);
 	
 private slots:
 	void onStartTrials();
 	void onNextTrial();
 	void onStopTrials();
+	void onLook(HLook l);
+	void onExperimentFinished();
+	void onAGStarted();
+	void onStimStarted(int i);
+	void onCleared();
 	
 protected:
 	void closeEvent (QCloseEvent * e); 
@@ -61,12 +65,14 @@ private:
 	Habit::RunSettings m_runSettings;
 	Habit::SubjectSettings m_subjectSettings;
 	Habit::ExperimentSettings m_experimentSettings;
+	QMap<int, Habit::StimulusSettings> m_mapSS;
 	HMediaManager* m_pmm;
 	HLookDetector* m_pld;
 	QStateMachine* m_psm;
 	HPhase* m_psPreTest;
 	HPhase* m_psHabituation;
 	HPhase* m_psTest;
+	Habit::StimulusSettingsList m_pStimulusSettingsList;
 	
 	QPushButton* m_pbStartTrials;
 	QPushButton* m_pbNextTrial;

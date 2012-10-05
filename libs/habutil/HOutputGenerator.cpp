@@ -114,6 +114,7 @@ void HOutputGenerator::setResultViewerSettings(const Habit::ResultViewerSettings
 	
 void HOutputGenerator::changeTrial(int st) 
 {
+	qDebug("HOutputGenerator::changeTrial: currentTrial_ %d st %d", currentTrial_, st);
 	if(currentTrial_ != st) {
 		switch(currentTrial_) {
 			case StimulusSettings::HABITUATION :
@@ -149,6 +150,7 @@ void HOutputGenerator::summarize()
 	
 void HOutputGenerator::addLogItem(int type, int duration)
 {
+	qDebug("HOutputGenerator::addLogItem(type=%d, duration=%d)", type, duration);
 	currentTrialInfo_.addLogItem(type, duration, stimulusSettings_);
 }
 	
@@ -725,7 +727,7 @@ bool HOutputGenerator::isHabituated()
 	}
 	int habitType = (experimentSettings_.getHabituationSettings().getHabituationType());
 	
-	if (totTimes.count() >= experimentSettings_.getDesignSettings().getHabituationTrialsInfo().getNumberOfTrials())
+	if (totTimes.count() >= (int)experimentSettings_.getDesignSettings().getHabituationTrialsInfo().getNumberOfTrials())
 	{
 		habituationResult_ = QString("Not Habituated - max trial count of %1 trials").arg(totTimes.count());
 		return false;

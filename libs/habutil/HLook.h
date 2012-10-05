@@ -26,6 +26,7 @@ public:
 	LookDirection direction() const { return m_direction; };
 	int startMS() const { return m_startMS; };
 	int endMS() const { return m_endMS; };
+	int lookMS() const { return m_endMS - m_startMS; };
 private:
 	LookDirection m_direction;
 	int m_startMS;

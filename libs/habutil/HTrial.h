@@ -22,6 +22,34 @@
 #include <QDebug>
 #include <QStateMachine>
 
+class HAGRequestState: public HState
+{
+	Q_OBJECT
+	
+public:
+	
+	HAGRequestState(QState* parent = 0) : HState("HAGRequestState", parent) {};
+	~HAGRequestState() {};
+	
+signals:
+	
+	void playAG();
+	
+protected:
+	// on entry emit playAG() - media manager should act on that. 
+	void onEntry(QEvent* e);
+};
+
+class HAGRunningState: public HState
+{
+	Q_OBJECT
+	
+public:
+	
+	HAGRunningState(QState* parent = 0) : HState("HAGRunningState", parent) {};
+	~HAGRunningState() {};
+	
+};
 
 class HExperimentState: public HState
 {
@@ -73,67 +101,22 @@ protected:
 	void onEntry(QEvent* e);
 };
 
-
-/**
- Superstate class that contains all states required for a single trial. 
- The HTrial is a single state which will conduct a single trial. 
-*/
-
-class HTrial: public HState
+class HBailState: public HState
 {
 	Q_OBJECT
 	
 public:
-	HTrial(QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent);
-	~HTrial() {};
-	void setNextStim(int i, const Habit::StimulusSettings& ss);
-protected:
-private:
-	HLookDetector* m_pLD;
-	int m_maxTrialLengthMS;
-	int m_maxNoLookTimeMS;
-	bool m_bFixedLength;
-	bool m_bAG;
-	QTimer* m_ptimerMaxTrialLength;	
-	QTimer* m_ptimerMaxNoLookTime;
-	HStimRequestState* m_sStimRequest;
-	
-public slots:
-	void onStimRunningEntered();
-	void onAGRunningEntered();
-	void onStimRunningExited();
-	void onAGRunningExited();	
-};
-
-
-class HAGRequestState: public HState
-{
-	Q_OBJECT
-	
-public:
-	
-	HAGRequestState(QState* parent = 0) : HState("HAGRequestState", parent) {};
-	~HAGRequestState() {};
-	
-signals:
-	
-	void playAG();
+	HBailState(QState* parent=0) : HState("BailState", parent) {};
+	~HBailState() {};
 	
 protected:
-	// on entry emit playAG() - media manager should act on that. 
-	void onEntry(QEvent* e);
+	void onEntry(QEvent* e)
+	{
+		Q_UNUSED(e);
+		HOutputGenerator::instance()->addLogItem(HTrialLogItem::REPEAT_TRIAL, 0);
+	};
 };
 
-class HAGRunningState: public HState
-{
-	Q_OBJECT
-	
-public:
-	
-	HAGRunningState(QState* parent = 0) : HState("HAGRunningState", parent) {};
-	~HAGRunningState() {};
-	
-};
 
 
 
@@ -169,13 +152,61 @@ protected:
 	// Start timer on entry to this state
 	void onEntry(QEvent* e);
 	void onExit(QEvent* e);
-
+	
 private:
 	HNoLookTransition* m_ptransNoLook;
 	int m_msMax;
 	QTimer* m_ptimerMax;
 	int m_msNoLook;
 	QTimer* m_ptimerNoLook;
+};
+
+
+
+
+
+/**
+ Superstate class that contains all states required for a single trial. 
+ The HTrial is a single state which will conduct a single trial. 
+*/
+
+class HTrial: public HState
+{
+	Q_OBJECT
+	
+public:
+	HTrial(QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent);
+	~HTrial() {};
+	void setNextStim(int i, const Habit::StimulusSettings& ss);
+	HStimRequestState* getSStimRequest() { return m_sStimRequest; };
+	HStimRunningState* getSStimRunning() { return m_sStimRunning; };
+	HAGRequestState* getSAGRequest() { return m_sAGRequest; };
+	HAGRunningState* getSAGRunning() { return m_sAGRunning; };
+	HState* getSBail() { return m_sBail; };
+	HState* getSInitial() { return m_sInitial; };
+	HState* getSBailInitial() { return m_sBailInitial; };
+protected:
+private:
+	HLookDetector* m_pLD;
+	int m_maxTrialLengthMS;
+	int m_maxNoLookTimeMS;
+	bool m_bFixedLength;
+	bool m_bAG;
+	QTimer* m_ptimerMaxTrialLength;	
+	QTimer* m_ptimerMaxNoLookTime;
+	HStimRequestState* m_sStimRequest;
+	HStimRunningState* m_sStimRunning;
+	HAGRequestState* m_sAGRequest;
+	HAGRunningState* m_sAGRunning;
+	HState* m_sBail;
+	HState* m_sInitial;
+	HState* m_sBailInitial;
+	
+public slots:
+	void onStimRunningEntered();
+	void onAGRunningEntered();
+	void onStimRunningExited();
+	void onAGRunningExited();	
 };
 
 
