@@ -53,6 +53,7 @@
 		64C0F4BAEE918360AF85D36D /* moc_stimulusdisplayform.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 242948C38F7CDD51D27B95EC /* moc_stimulusdisplayform.cpp */; settings = {ATTRIBUTES = (); }; };
 		65CD80E4327D795CCF1F5418 /* habituationstimulitable.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 003231F660FE5F2A6795AAA2 /* habituationstimulitable.cpp */; settings = {ATTRIBUTES = (); }; };
 		682CB50023D3B6523E6F682F /* moc_HNonPlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = F4555CC0BF4EB5D487EFAB54 /* moc_HNonPlayer.cpp */; settings = {ATTRIBUTES = (); }; };
+		699B9810ED80FCDAB947A7AB /* HPhaseCriteria.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 7E5F12BAAA320F613AE56A80 /* HPhaseCriteria.cpp */; settings = {ATTRIBUTES = (); }; };
 		6B4E749109E23E0094D8973F /* HLook.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 6004E75CB4CADACB84004E6D /* HLook.cpp */; settings = {ATTRIBUTES = (); }; };
 		6B61B5F29B95F3542E9DC01E /* HVideoImagePlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = CCBF65C04B9E2C5A4C3A43F3 /* HVideoImagePlayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		6C02C989A17EDC535B391CE2 /* HImageWidget.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 4ACDDE9D9FE419267F4CC804 /* HImageWidget.cpp */; settings = {ATTRIBUTES = (); }; };
@@ -76,6 +77,7 @@
 		9783DFCED66040C1BA8FB7CE /* moc_experimentresultsform.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 1E0689075E90CC961E2BDAD0 /* moc_experimentresultsform.cpp */; settings = {ATTRIBUTES = (); }; };
 		97A652D34E6E99ECE447F106 /* designsetupform.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 43E1782DF87301B0B2F4CB2C /* designsetupform.cpp */; settings = {ATTRIBUTES = (); }; };
 		9890EBD28F3FF4BFD79B85CC /* imagewidget_original.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = D1F25D4A1AC40156497A361F /* imagewidget_original.cpp */; settings = {ATTRIBUTES = (); }; };
+		995F70F7AE255EBAE3419B37 /* moc_HPhaseCriteria.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 7817581446ED29153541B42B /* moc_HPhaseCriteria.cpp */; settings = {ATTRIBUTES = (); }; };
 		9C1EAA32F0B07929C448C8D3 /* HTrialGenerator.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = E553B188655CBB72EB30D0E5 /* HTrialGenerator.cpp */; settings = {ATTRIBUTES = (); }; };
 		9F9D8FABD663CFFAA701D47A /* moc_cloneexperimentdialog.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = F10C35EB80A1432D65DE9C0A /* moc_cloneexperimentdialog.cpp */; settings = {ATTRIBUTES = (); }; };
 		A100C199BCDFABD339596BCE /* viewexperimentresultform.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 7FF804524787A5FCE70731BC /* viewexperimentresultform.cpp */; settings = {ATTRIBUTES = (); }; };
@@ -149,7 +151,7 @@
 		18343DA64FD871D5C58D8B96 /* mediaplayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mediaplayer.h; path = habit/mediaplayer.h; sourceTree = "<group>"; };
 		1954133F51CAC3AD0C01810A /* HTrialGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HTrialGenerator.h; sourceTree = "<group>"; };
 		1A99CAFDB279A87A2F2F5CAE /* viewexperimentresultform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = viewexperimentresultform.h; path = habit/viewexperimentresultform.h; sourceTree = "<group>"; };
-		1BEDCFAD161A4CAA0056567F /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B8FC5FA1627A6A5005B2840 /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DB843A27517106274BF1269 /* HPhase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HPhase.cpp; sourceTree = "<group>"; };
 		1E0689075E90CC961E2BDAD0 /* moc_experimentresultsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_experimentresultsform.cpp; sourceTree = "<group>"; };
 		1FD15338F4EDFD4BBD1E1034 /* designsettings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = designsettings.cpp; path = habit/designsettings.cpp; sourceTree = "<group>"; };
@@ -222,12 +224,14 @@
 		7613D866BEEAC2C75C7BB800 /* HControlPanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HControlPanel.h; sourceTree = "<group>"; };
 		77B88E15AA9B4C755060BC4D /* resource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = resource.h; path = habit/resource.h; sourceTree = "<group>"; };
 		77BFA6EA0DD6F9BDD0F4F6DB /* HOutputGenerator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HOutputGenerator.cpp; sourceTree = "<group>"; };
+		7817581446ED29153541B42B /* moc_HPhaseCriteria.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HPhaseCriteria.cpp; sourceTree = "<group>"; };
 		78AE4F2A51A770852DE0BBA7 /* moc_habituationsetupform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_habituationsetupform.cpp; sourceTree = "<group>"; };
 		79BD9240B44F312F275A0C5C /* HLookDetector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HLookDetector.h; sourceTree = "<group>"; };
 		79F113765A8F7C9E88D6B8ED /* moc_HPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HPlayer.cpp; sourceTree = "<group>"; };
 		7A95304C54BD4E3F708355E3 /* moc_resultviewerform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_resultviewerform.cpp; sourceTree = "<group>"; };
 		7C27F841E05714A80B8433C5 /* resultviewerform.ui */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = resultviewerform.ui; path = habit/resultviewerform.ui; sourceTree = "<group>"; };
 		7D36484BD1228D9352082DB2 /* resource1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = resource1.h; path = habit/resource1.h; sourceTree = "<group>"; };
+		7E5F12BAAA320F613AE56A80 /* HPhaseCriteria.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HPhaseCriteria.cpp; sourceTree = "<group>"; };
 		7FF804524787A5FCE70731BC /* viewexperimentresultform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = viewexperimentresultform.cpp; path = habit/viewexperimentresultform.cpp; sourceTree = "<group>"; };
 		81F9C869E660FFA9BB41D484 /* habituationsetupform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = habituationsetupform.cpp; path = habit/habituationsetupform.cpp; sourceTree = "<group>"; };
 		8224AE1656885CF2D614F12A /* stimulusdisplayinfo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = stimulusdisplayinfo.cpp; path = habit/stimulusdisplayinfo.cpp; sourceTree = "<group>"; };
@@ -261,6 +265,7 @@
 		A3177C11ED518AF87E8549BC /* runsettings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = runsettings.cpp; path = habit/runsettings.cpp; sourceTree = "<group>"; };
 		A31FD32F16BCFAA1B2E59D70 /* attentionsetupform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = attentionsetupform.cpp; path = habit/attentionsetupform.cpp; sourceTree = "<group>"; };
 		A3E2A6E6059411915D8D25C8 /* monitorsettingsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = monitorsettingsform.cpp; path = habit/monitorsettingsform.cpp; sourceTree = "<group>"; };
+		A4341C6B6A570916C812B6B3 /* HPhaseCriteria.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HPhaseCriteria.h; sourceTree = "<group>"; };
 		A77453A6AF736806F3727BC2 /* habituationsettings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = habituationsettings.cpp; path = habit/habituationsettings.cpp; sourceTree = "<group>"; };
 		A93604CF7630823D0DAB51B9 /* stimulusinfoform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = stimulusinfoform.cpp; path = habit/stimulusinfoform.cpp; sourceTree = "<group>"; };
 		A937A4E9F70E4E3FE03DF479 /* mediamanager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mediamanager.cpp; path = habit/mediamanager.cpp; sourceTree = "<group>"; };
@@ -363,15 +368,15 @@
 				7CABE3C80E79AD2B307756D2 /* Sources [qmake] */,
 				52C235EBF1C9B07808119459 /* Sources [RCC] */,
 				EEC299C65D5017EB9DD513B0 /* Sources [UIC] */,
-				1BEDCFAE161A4CAA0056567F /* Products */,
+				1B8FC5FB1627A6A5005B2840 /* Products */,
 			);
 			name = habutil;
 			sourceTree = "<group>";
 		};
-		1BEDCFAE161A4CAA0056567F /* Products */ = {
+		1B8FC5FB1627A6A5005B2840 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1BEDCFAD161A4CAA0056567F /* libhabutil.a */,
+				1B8FC5FA1627A6A5005B2840 /* libhabutil.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -470,6 +475,7 @@
 				F05E0F0950070768B170E076 /* moc_HMediaManager.cpp */,
 				0666BBB20FBC195CC6965FF9 /* moc_HControlPanel.cpp */,
 				B9B534D9C004E26BF9D0B12E /* moc_HApp.cpp */,
+				7817581446ED29153541B42B /* moc_HPhaseCriteria.cpp */,
 				E00DB7F7CC277429EBFDAE3D /* moc_attentionsetupform.cpp */,
 				F10C35EB80A1432D65DE9C0A /* moc_cloneexperimentdialog.cpp */,
 				F370F2097B1BBEEB39EF3C0C /* moc_controlbaroptionsform.cpp */,
@@ -554,6 +560,7 @@
 				FCF948CD3648C92F2A23404A /* HMediaManagerUtil.h */,
 				1954133F51CAC3AD0C01810A /* HTrialGenerator.h */,
 				40AC58C341250654BC018FD9 /* HOutputGenerator.h */,
+				A4341C6B6A570916C812B6B3 /* HPhaseCriteria.h */,
 				3C52AE251A37811ADDFD17EF /* habit */,
 			);
 			name = Headers;
@@ -657,6 +664,7 @@
 				94AB9C489A7CC078324A7E7A /* HMediaManagerUtil.cpp */,
 				E553B188655CBB72EB30D0E5 /* HTrialGenerator.cpp */,
 				77BFA6EA0DD6F9BDD0F4F6DB /* HOutputGenerator.cpp */,
+				7E5F12BAAA320F613AE56A80 /* HPhaseCriteria.cpp */,
 				DDB47C48C6459BE7607188BC /* habit */,
 			);
 			name = Sources;
@@ -682,7 +690,7 @@
 			name = habutil;
 			productInstallPath = ../../lib/;
 			productName = habutil;
-			productReference = 1BEDCFAD161A4CAA0056567F /* libhabutil.a */;
+			productReference = 1B8FC5FA1627A6A5005B2840 /* libhabutil.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -701,7 +709,7 @@
 				German,
 			);
 			mainGroup = 05596AB53D8D521C69802C27 /* habutil */;
-			productRefGroup = 1BEDCFAE161A4CAA0056567F /* Products */;
+			productRefGroup = 1B8FC5FB1627A6A5005B2840 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -773,6 +781,7 @@
 				009FE71066929D7DC3687CF9 /* HMediaManagerUtil.cpp in Build Sources */,
 				9C1EAA32F0B07929C448C8D3 /* HTrialGenerator.cpp in Build Sources */,
 				884F7978E5F5515AA3223F0B /* HOutputGenerator.cpp in Build Sources */,
+				699B9810ED80FCDAB947A7AB /* HPhaseCriteria.cpp in Build Sources */,
 				A1E77CBB722F0375BD31E64A /* attentiongettersettings.cpp in Build Sources */,
 				290C3624A1E7E470CBD04572 /* attentionsetupform.cpp in Build Sources */,
 				191F38D395E5BF9D4FBACA26 /* cloneexperimentdialog.cpp in Build Sources */,
@@ -839,6 +848,7 @@
 				E705790645E599834D563C10 /* moc_HMediaManager.cpp in Build Sources */,
 				A739004E4E20C529ACF6376F /* moc_HControlPanel.cpp in Build Sources */,
 				555D65E3ADF379D6E6D0E600 /* moc_HApp.cpp in Build Sources */,
+				995F70F7AE255EBAE3419B37 /* moc_HPhaseCriteria.cpp in Build Sources */,
 				AF264F624168825091A70AF2 /* moc_attentionsetupform.cpp in Build Sources */,
 				9F9D8FABD663CFFAA701D47A /* moc_cloneexperimentdialog.cpp in Build Sources */,
 				44019B65D03D337A9D76D096 /* moc_controlbaroptionsform.cpp in Build Sources */,

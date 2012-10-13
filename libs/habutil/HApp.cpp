@@ -112,8 +112,8 @@ void HApp::runSavedExperiment()
 		box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 		if (box.exec() == QMessageBox::Yes)
 		{
-			QString fileName = QFileDialog::getSaveFileName(this, tr("Save Experient Result"),
-															"", tr("Experient Result File (*.res)"));
+			QString fileName = QFileDialog::getSaveFileName(this, tr("Save Experiment Result"),
+															"", tr("Experiment Result File (*.res)"));
 			if (!fileName.isNull() && !fileName.isEmpty())
 			{
 				HOutputGenerator::instance()->setSettingsFileName("Typed");

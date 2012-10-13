@@ -24,6 +24,7 @@ HEADERS +=	HLook.h \
 			HMediaManagerUtil.h \
 			HTrialGenerator.h \
 			HOutputGenerator.h \
+			HPhaseCriteria.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -99,6 +100,7 @@ SOURCES +=	HLook.cpp \
 			HMediaManagerUtil.cpp \
 			HTrialGenerator.cpp \
 			HOutputGenerator.cpp \
+			HPhaseCriteria.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \
