@@ -620,7 +620,6 @@ void TestHabutil::testTrialGenerator()
 		QCOMPARE(l3.at(i), (unsigned int)11);
 	}
 	
-	
 }
 
 
