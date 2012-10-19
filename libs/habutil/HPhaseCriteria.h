@@ -22,13 +22,15 @@ class TrialLooks : public QList<HLook>
 {
 public:
 	enum TrialStatus {
-		TrialCompleted, TrialRunning
+		TrialCompleted, TrialRunning, TrialFailed, TrialAborted
 	};
 	TrialLooks(): m_status(TrialRunning) {};
 	~TrialLooks() {};
 	bool isCompleted() const;
 	int totalLookingTime() const;
 	void completed() { m_status = TrialCompleted; };
+	void failed() { m_status = TrialFailed; };
+	void aborted() { m_status = TrialAborted; };
 private:
 	TrialStatus m_status;
 };
@@ -50,6 +52,7 @@ protected slots:
 	void trialStarted();
 	void trialCompleted();
 	void trialAborted();
+	void trialFailed();
 	void gotLook(HLook l);
 protected:
 	QList<TrialLooks> m_trials;

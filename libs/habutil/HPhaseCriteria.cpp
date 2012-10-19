@@ -57,7 +57,13 @@ void HPhaseCriteria::trialCompleted()
 void HPhaseCriteria::trialAborted()
 {
 	if (!m_trials.isEmpty())
-		m_trials.removeLast();
+		m_trials.back().aborted();
+};
+
+void HPhaseCriteria::trialFailed()
+{
+	if (!m_trials.isEmpty())
+		m_trials.back().failed();
 };
 
 void HPhaseCriteria::gotLook(HLook l)
@@ -135,7 +141,7 @@ bool HPhaseHabituationCriteria::getBasisSum(int& iBasisSum, int& iBasisWindowSta
 			iStep = m_c.getWindowSize();
 		iBasisWindowStart = -1;
 		
-		for (int i=0; i<(m_trials.size()-(int)m_c.getWindowSize()); i++)
+		for (int i=0; i<(m_trials.size()-(int)m_c.getWindowSize()+1); i++)
 		{
 			if (getWindowSum(itemp, i) && itemp > bmax) 
 			{

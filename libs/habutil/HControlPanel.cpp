@@ -412,6 +412,9 @@ void HControlPanel::onLook(HLook l)
 			HOutputGenerator::instance()->addLogItem(HTrialLogItem::AWAY_LOOK, l.lookMS());
 			m_labelLookStatusValue->setText("No Look");
 			break;
+		case UnknownLookDirection:
+			qWarning("HControlPanel::onLook: UnknownLookDirection");
+			break;
 	}
 }
 			

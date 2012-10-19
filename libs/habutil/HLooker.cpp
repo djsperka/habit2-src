@@ -45,6 +45,7 @@ LookDirection HLooker::directionTo(LookTransType type)
 		case CenterNone:
 		case RightNone:
 		case NoneNone:
+		case UnknownLookTrans:
 			break;
 	}
 	return ld;
