@@ -94,6 +94,7 @@
 		B0C5B5A12A8673F183DE54A0 /* moc_designsetupform.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 170F358CDFD1DBE839BC30F5 /* moc_designsetupform.cpp */; settings = {ATTRIBUTES = (); }; };
 		B18EFFCF713DF90484FC8E4A /* experimentsettings.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 0283611435F93915B4C0B9B1 /* experimentsettings.cpp */; settings = {ATTRIBUTES = (); }; };
 		B24C36255862302C619B2E90 /* moc_exportmultipleresults.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 656B77B2E523FE195A3977C0 /* moc_exportmultipleresults.cpp */; settings = {ATTRIBUTES = (); }; };
+		B52D6256C0B3DC7474F882EF /* HTrialLog.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 2B04E108B312D2F7DD4162DE /* HTrialLog.cpp */; settings = {ATTRIBUTES = (); }; };
 		B969017E2483740F9122FB6F /* HKeypadLookDetector.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 56129180C95B205F3060F3CE /* HKeypadLookDetector.cpp */; settings = {ATTRIBUTES = (); }; };
 		BA5C20510EC8D01875D395F6 /* moc_mediaplayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 8E58FA21BCA7C25A30794452 /* moc_mediaplayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		BB6941A28DD1F2A2F424F407 /* moc_habitapp.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 5755A7C9E40D3AB70281C35B /* moc_habitapp.cpp */; settings = {ATTRIBUTES = (); }; };
@@ -151,7 +152,7 @@
 		18343DA64FD871D5C58D8B96 /* mediaplayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mediaplayer.h; path = habit/mediaplayer.h; sourceTree = "<group>"; };
 		1954133F51CAC3AD0C01810A /* HTrialGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HTrialGenerator.h; sourceTree = "<group>"; };
 		1A99CAFDB279A87A2F2F5CAE /* viewexperimentresultform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = viewexperimentresultform.h; path = habit/viewexperimentresultform.h; sourceTree = "<group>"; };
-		1B8FC5FA1627A6A5005B2840 /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B703D181630AE5D003ACD18 /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DB843A27517106274BF1269 /* HPhase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HPhase.cpp; sourceTree = "<group>"; };
 		1E0689075E90CC961E2BDAD0 /* moc_experimentresultsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_experimentresultsform.cpp; sourceTree = "<group>"; };
 		1FD15338F4EDFD4BBD1E1034 /* designsettings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = designsettings.cpp; path = habit/designsettings.cpp; sourceTree = "<group>"; };
@@ -159,6 +160,7 @@
 		242948C38F7CDD51D27B95EC /* moc_stimulusdisplayform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_stimulusdisplayform.cpp; sourceTree = "<group>"; };
 		27C50122EB0FE9C1844DCF22 /* moc_mediasoundpreviewplayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_mediasoundpreviewplayer.cpp; sourceTree = "<group>"; };
 		288DD2FC66AF75F555589CA3 /* stimulusdisplayform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = stimulusdisplayform.cpp; path = habit/stimulusdisplayform.cpp; sourceTree = "<group>"; };
+		2B04E108B312D2F7DD4162DE /* HTrialLog.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HTrialLog.cpp; sourceTree = "<group>"; };
 		2E9F29C2E58F5F6CA80AFEE5 /* HStimulusSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HStimulusSource.cpp; sourceTree = "<group>"; };
 		30CE06EF15D73D3C563D0DE5 /* experimentresultsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = experimentresultsform.cpp; path = habit/experimentresultsform.cpp; sourceTree = "<group>"; };
 		323AB11027AF653027645BBD /* moc_treewizard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_treewizard.cpp; sourceTree = "<group>"; };
@@ -226,6 +228,7 @@
 		77BFA6EA0DD6F9BDD0F4F6DB /* HOutputGenerator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HOutputGenerator.cpp; sourceTree = "<group>"; };
 		7817581446ED29153541B42B /* moc_HPhaseCriteria.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HPhaseCriteria.cpp; sourceTree = "<group>"; };
 		78AE4F2A51A770852DE0BBA7 /* moc_habituationsetupform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_habituationsetupform.cpp; sourceTree = "<group>"; };
+		7988921C10B53D3DBCF1269E /* HTrialLog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HTrialLog.h; sourceTree = "<group>"; };
 		79BD9240B44F312F275A0C5C /* HLookDetector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HLookDetector.h; sourceTree = "<group>"; };
 		79F113765A8F7C9E88D6B8ED /* moc_HPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HPlayer.cpp; sourceTree = "<group>"; };
 		7A95304C54BD4E3F708355E3 /* moc_resultviewerform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_resultviewerform.cpp; sourceTree = "<group>"; };
@@ -368,15 +371,15 @@
 				7CABE3C80E79AD2B307756D2 /* Sources [qmake] */,
 				52C235EBF1C9B07808119459 /* Sources [RCC] */,
 				EEC299C65D5017EB9DD513B0 /* Sources [UIC] */,
-				1B8FC5FB1627A6A5005B2840 /* Products */,
+				1B703D191630AE5D003ACD18 /* Products */,
 			);
 			name = habutil;
 			sourceTree = "<group>";
 		};
-		1B8FC5FB1627A6A5005B2840 /* Products */ = {
+		1B703D191630AE5D003ACD18 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1B8FC5FA1627A6A5005B2840 /* libhabutil.a */,
+				1B703D181630AE5D003ACD18 /* libhabutil.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -561,6 +564,7 @@
 				1954133F51CAC3AD0C01810A /* HTrialGenerator.h */,
 				40AC58C341250654BC018FD9 /* HOutputGenerator.h */,
 				A4341C6B6A570916C812B6B3 /* HPhaseCriteria.h */,
+				7988921C10B53D3DBCF1269E /* HTrialLog.h */,
 				3C52AE251A37811ADDFD17EF /* habit */,
 			);
 			name = Headers;
@@ -665,6 +669,7 @@
 				E553B188655CBB72EB30D0E5 /* HTrialGenerator.cpp */,
 				77BFA6EA0DD6F9BDD0F4F6DB /* HOutputGenerator.cpp */,
 				7E5F12BAAA320F613AE56A80 /* HPhaseCriteria.cpp */,
+				2B04E108B312D2F7DD4162DE /* HTrialLog.cpp */,
 				DDB47C48C6459BE7607188BC /* habit */,
 			);
 			name = Sources;
@@ -690,7 +695,7 @@
 			name = habutil;
 			productInstallPath = ../../lib/;
 			productName = habutil;
-			productReference = 1B8FC5FA1627A6A5005B2840 /* libhabutil.a */;
+			productReference = 1B703D181630AE5D003ACD18 /* libhabutil.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -709,7 +714,7 @@
 				German,
 			);
 			mainGroup = 05596AB53D8D521C69802C27 /* habutil */;
-			productRefGroup = 1B8FC5FB1627A6A5005B2840 /* Products */;
+			productRefGroup = 1B703D191630AE5D003ACD18 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -782,6 +787,7 @@
 				9C1EAA32F0B07929C448C8D3 /* HTrialGenerator.cpp in Build Sources */,
 				884F7978E5F5515AA3223F0B /* HOutputGenerator.cpp in Build Sources */,
 				699B9810ED80FCDAB947A7AB /* HPhaseCriteria.cpp in Build Sources */,
+				B52D6256C0B3DC7474F882EF /* HTrialLog.cpp in Build Sources */,
 				A1E77CBB722F0375BD31E64A /* attentiongettersettings.cpp in Build Sources */,
 				290C3624A1E7E470CBD04572 /* attentionsetupform.cpp in Build Sources */,
 				191F38D395E5BF9D4FBACA26 /* cloneexperimentdialog.cpp in Build Sources */,

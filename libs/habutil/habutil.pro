@@ -25,6 +25,7 @@ HEADERS +=	HLook.h \
 			HTrialGenerator.h \
 			HOutputGenerator.h \
 			HPhaseCriteria.h \
+			HTrialLog.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -101,6 +102,7 @@ SOURCES +=	HLook.cpp \
 			HTrialGenerator.cpp \
 			HOutputGenerator.cpp \
 			HPhaseCriteria.cpp \
+			HTrialLog.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \
