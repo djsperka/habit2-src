@@ -1,5 +1,8 @@
 #include "testmisc.h"
 #include "HTrialGenerator.h"
+#include "HTrialLog.h"
+#include <QTemporaryFile>
+#include "HOutputGenerator.h"
 
 TestHabutil::TestHabutil()
 : QObject()
@@ -7,21 +10,86 @@ TestHabutil::TestHabutil()
 }
 
 
-void TestHabutil::initTestCase()
+void TestHabutil::testTrialLog()
 {
-	m_looksCompleted.append(HLook(LookLeft, 100, 1100));
-	m_looksCompleted.append(HLook(LookLeft, 2200, 3200));
-	m_looksCompleted.append(HLook(LookLeft, 3300, 4300));
-	m_looksCompleted.append(HLook(LookLeft, 4400, 5400));
-	m_looksCompleted.completed();
+	Habit::StimulusSettings settings;
+	Habit::StimulusInfo leftSI;
+	Habit::StimulusInfo centerSI;
+	Habit::StimulusInfo rightSI;
+	Habit::StimulusInfo soundSI;
+
+	leftSI.setName("LeftName");
+	leftSI.setFileName("LeftFileName");
+	leftSI.setLoopPlayBack(true);
+	leftSI.setAudioBalance(99);
+
+	rightSI.setName("RightName");
+	rightSI.setFileName("RightFileName");
+	rightSI.setLoopPlayBack(true);
+	rightSI.setAudioBalance(98);
+
+	centerSI.setName("CenterName");
+	centerSI.setFileName("CenterFileName");
+	centerSI.setLoopPlayBack(false);
+	centerSI.setAudioBalance(97);
+
+	soundSI.setName("SoundName");
+	soundSI.setFileName("SoundFileName");
+	soundSI.setLoopPlayBack(true);
+	soundSI.setAudioBalance(96);
 	
-	m_looksNotCompleted.append(HLook(LookLeft, 100, 1100));
-	m_looksNotCompleted.append(HLook(LookLeft, 2200, 3200));
-	m_looksNotCompleted.append(HLook(LookLeft, 3300, 4300));
-	m_looksNotCompleted.append(HLook(LookLeft, 4400, 5400));
+	settings.setName("TestSettings");
+	settings.setId(1);
+	settings.setLeftEnabled(true);
+	settings.setLeftStimulusInfo(leftSI);
+	settings.setCenterEnabled(true);
+	settings.setCenterStimulusInfo(centerSI);
+	settings.setRightEnabled(true);
+	settings.setRightStimulusInfo(rightSI);
+	settings.setIndependentSoundEnabled(true);
+	settings.setIndependentSoundInfo(soundSI);
+	settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
+
+	HTrialLog tlog(settings);
+	tlog.append(HLook(LookLeft, 100, 1100));
+	tlog.append(HLook(LookLeft, 2200, 3200));
+	tlog.append(HLook(LookLeft, 3300, 4300));
+	tlog.append(HLook(LookLeft, 4400, 5400));
+	tlog.setCompleted();	
+	
+	QVERIFY(tlog.isCompleted());
+	QCOMPARE(tlog.totalLookingTime(), 4000);
+	
+	
+	// Test output and input...
+	QTemporaryFile file;
+	
+	HTrialLog tlog2(settings);
+	
+	// doesnt compile 
+	// HTrialLog tlog2(Habit::StimulusSettings());
+	
+	// compiles fine
+	// HTrialLog tlog2;
+	
+	if (file.open())
+	{
+		QDataStream stream(&file);
+		stream << tlog;
+		file.setAutoRemove(false);
+		file.seek(0);
+		stream >> tlog2;
+		QVERIFY(tlog==tlog2);
+		file.close();
+	}
+	else 
+	{
+		QFAIL("Cannot open temp file");
+	}
 	
 }
 
+#if 0
 void TestHabutil::testTrialLooks()
 {
 	QVERIFY(m_looksCompleted.isCompleted());
@@ -573,7 +641,7 @@ void TestHabutil::testHabituationLongestSliding()
 	
 	disconnect(&c);
 }
-
+#endif
 
 void TestHabutil::testTrialGenerator()
 {
@@ -624,4 +692,4 @@ void TestHabutil::testTrialGenerator()
 
 
 QTEST_MAIN(TestHabutil)
-#include "testmisc.moc"
+//#include "testmisc.moc"

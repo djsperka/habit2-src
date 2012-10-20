@@ -22,16 +22,15 @@ signals:
 	void trialStarted();
 	void trialCompleted();
 private slots:
-	void initTestCase();
-	void testTrialLooks();
-	void testFixedN();
-	void testTotalLookingTime();
-	void testHabituationFirstFixed();
-	void testHabituationLongestFixed();
-	void testHabituationFirstSliding();
-	void testHabituationLongestSliding();
+//	void initTestCase();
+//	void testTrialLooks();
+//	void testFixedN();
+//	void testTotalLookingTime();
+//	void testHabituationFirstFixed();
+//	void testHabituationLongestFixed();
+//	void testHabituationFirstSliding();
+//	void testHabituationLongestSliding();
+	void testTrialLog();
 	void testTrialGenerator();
 private:
-	TrialLooks m_looksNotCompleted;
-	TrialLooks m_looksCompleted;
 }; 
