@@ -1,8 +1,10 @@
 #include "testmisc.h"
 #include "HTrialGenerator.h"
 #include "HTrialLog.h"
+#include "HPhaseLog.h"
+#include "HPhaseCriteria.h"
 #include <QTemporaryFile>
-#include "HOutputGenerator.h"
+//#include "HOutputGenerator.h"
 
 TestHabutil::TestHabutil()
 : QObject()
@@ -88,6 +90,303 @@ void TestHabutil::testTrialLog()
 	}
 	
 }
+
+void TestHabutil::createStimulusSettings(int i, Habit::StimulusSettings& settings)
+{
+	Habit::StimulusInfo leftSI;
+	Habit::StimulusInfo centerSI;
+	Habit::StimulusInfo rightSI;
+	Habit::StimulusInfo soundSI;
+	switch (i)
+	{
+		case 0:
+		{
+			leftSI.setName("LeftName0");
+			leftSI.setFileName("LeftFileName0");
+			leftSI.setLoopPlayBack(true);
+			leftSI.setAudioBalance(1);
+			
+			rightSI.setName("RightName0");
+			rightSI.setFileName("RightFileName0");
+			rightSI.setLoopPlayBack(true);
+			rightSI.setAudioBalance(1);
+			
+			centerSI.setName("CenterName0");
+			centerSI.setFileName("CenterFileName0");
+			centerSI.setLoopPlayBack(false);
+			centerSI.setAudioBalance(2);
+			
+			soundSI.setName("SoundName0");
+			soundSI.setFileName("SoundFileName0");
+			soundSI.setLoopPlayBack(true);
+			soundSI.setAudioBalance(3);
+			
+			settings.setName("TestSettings0");
+			settings.setId(1);
+			settings.setLeftEnabled(true);
+			settings.setLeftStimulusInfo(leftSI);
+			settings.setCenterEnabled(true);
+			settings.setCenterStimulusInfo(centerSI);
+			settings.setRightEnabled(true);
+			settings.setRightStimulusInfo(rightSI);
+			settings.setIndependentSoundEnabled(true);
+			settings.setIndependentSoundInfo(soundSI);
+			settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
+			
+			break;
+		}			
+		case 1:
+		{
+			leftSI.setName("LeftName1");
+			leftSI.setFileName("LeftFileName1");
+			leftSI.setLoopPlayBack(true);
+			leftSI.setAudioBalance(11);
+			
+			rightSI.setName("RightName1");
+			rightSI.setFileName("RightFileName1");
+			rightSI.setLoopPlayBack(true);
+			rightSI.setAudioBalance(12);
+			
+			centerSI.setName("CenterName1");
+			centerSI.setFileName("CenterFileName1");
+			centerSI.setLoopPlayBack(false);
+			centerSI.setAudioBalance(13);
+			
+			soundSI.setName("SoundName1");
+			soundSI.setFileName("SoundFileName1");
+			soundSI.setLoopPlayBack(true);
+			soundSI.setAudioBalance(14);
+			
+			settings.setName("TestSettings1");
+			settings.setId(1);
+			settings.setLeftEnabled(true);
+			settings.setLeftStimulusInfo(leftSI);
+			settings.setCenterEnabled(true);
+			settings.setCenterStimulusInfo(centerSI);
+			settings.setRightEnabled(true);
+			settings.setRightStimulusInfo(rightSI);
+			settings.setIndependentSoundEnabled(true);
+			settings.setIndependentSoundInfo(soundSI);
+			settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
+			
+			break;
+		}			
+		case 2:
+		{
+			leftSI.setName("LeftName2");
+			leftSI.setFileName("LeftFileName2");
+			leftSI.setLoopPlayBack(true);
+			leftSI.setAudioBalance(21);
+			
+			rightSI.setName("RightName2");
+			rightSI.setFileName("RightFileName2");
+			rightSI.setLoopPlayBack(true);
+			rightSI.setAudioBalance(22);
+			
+			centerSI.setName("CenterName2");
+			centerSI.setFileName("CenterFileName2");
+			centerSI.setLoopPlayBack(false);
+			centerSI.setAudioBalance(23);
+			
+			soundSI.setName("SoundName2");
+			soundSI.setFileName("SoundFileName2");
+			soundSI.setLoopPlayBack(true);
+			soundSI.setAudioBalance(24);
+			
+			settings.setName("TestSettings2");
+			settings.setId(21);
+			settings.setLeftEnabled(true);
+			settings.setLeftStimulusInfo(leftSI);
+			settings.setCenterEnabled(true);
+			settings.setCenterStimulusInfo(centerSI);
+			settings.setRightEnabled(true);
+			settings.setRightStimulusInfo(rightSI);
+			settings.setIndependentSoundEnabled(true);
+			settings.setIndependentSoundInfo(soundSI);
+			settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
+			
+			break;
+		}			
+		case 3:
+		default:
+		{
+			leftSI.setName("LeftName3");
+			leftSI.setFileName("LeftFileName3");
+			leftSI.setLoopPlayBack(true);
+			leftSI.setAudioBalance(31);
+			
+			rightSI.setName("RightName3");
+			rightSI.setFileName("RightFileName3");
+			rightSI.setLoopPlayBack(true);
+			rightSI.setAudioBalance(32);
+			
+			centerSI.setName("CenterName3");
+			centerSI.setFileName("CenterFileName3");
+			centerSI.setLoopPlayBack(false);
+			centerSI.setAudioBalance(33);
+			
+			soundSI.setName("SoundName3");
+			soundSI.setFileName("SoundFileName3");
+			soundSI.setLoopPlayBack(true);
+			soundSI.setAudioBalance(34);
+			
+			settings.setName("TestSettings3");
+			settings.setId(31);
+			settings.setLeftEnabled(true);
+			settings.setLeftStimulusInfo(leftSI);
+			settings.setCenterEnabled(true);
+			settings.setCenterStimulusInfo(centerSI);
+			settings.setRightEnabled(true);
+			settings.setRightStimulusInfo(rightSI);
+			settings.setIndependentSoundEnabled(true);
+			settings.setIndependentSoundInfo(soundSI);
+			settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
+			
+			break;
+		}			
+	}
+	return;
+}
+
+void TestHabutil::testPhaseLog()
+{
+	HPhaseLog l;
+	Habit::StimulusSettings settings0;
+	Habit::StimulusSettings settings1;
+	Habit::StimulusSettings settings2;
+	Habit::StimulusSettings settings3;
+	
+	connect(this, SIGNAL(trialStarted(Habit::StimulusSettings&)), &l, SLOT(trialStarted(Habit::StimulusSettings&)));
+	connect(this, SIGNAL(trialCompleted()), &l, SLOT(trialCompleted()));
+	connect(this, SIGNAL(look(HLook)), &l, SLOT(gotLook(HLook)));
+
+	createStimulusSettings(0, settings0);
+	emit trialStarted(settings0);
+	emit look(HLook(LookLeft, 100, 1100));
+	emit look(HLook(LookLeft, 2200, 3200));
+	emit look(HLook(LookLeft, 3300, 4300));
+	emit look(HLook(LookLeft, 4400, 5400));
+	emit trialCompleted();	
+	
+	createStimulusSettings(1, settings1);
+	emit trialStarted(settings1);
+	emit look(HLook(LookLeft, 10100, 11100));
+	emit look(HLook(LookLeft, 12200, 13200));
+	emit look(HLook(LookLeft, 13300, 14300));
+	emit look(HLook(LookLeft, 14400, 15400));
+	emit trialCompleted();	
+
+	createStimulusSettings(2, settings2);
+	emit trialStarted(settings2);
+	emit look(HLook(LookLeft, 20100, 21100));
+	emit look(HLook(LookLeft, 22200, 23200));
+	emit look(HLook(LookLeft, 23300, 24300));
+	emit look(HLook(LookLeft, 24400, 25400));
+	emit trialCompleted();	
+
+	createStimulusSettings(3, settings3);
+	emit trialStarted(settings3);
+	emit look(HLook(LookLeft, 30100, 31100));
+	emit look(HLook(LookLeft, 32200, 33200));
+	emit look(HLook(LookLeft, 33300, 34300));
+	emit look(HLook(LookLeft, 34400, 35400));
+	emit trialCompleted();	
+	
+	disconnect(&l);
+
+	
+	// test counts
+	QCOMPARE(l.nCompleted(), 4);
+	QCOMPARE(l.totalLookingTime(), 16000);
+	
+	// Test output and input...
+	QTemporaryFile file;
+	if (file.open())
+	{
+		HPhaseLog ll;
+		QDataStream stream(&file);
+		stream << l;
+		file.setAutoRemove(false);
+		file.seek(0);
+		stream >> ll;
+		QVERIFY(l==ll);
+		file.close();
+	}
+	else 
+	{
+		QFAIL("Cannot open temp file");
+	}
+	
+}
+
+
+
+void TestHabutil::testFixedNCriteria()
+{
+	HPhaseFixedNCriteria l(4);
+	Habit::StimulusSettings settings0;
+	Habit::StimulusSettings settings1;
+	Habit::StimulusSettings settings2;
+	Habit::StimulusSettings settings3;
+	
+	connect(this, SIGNAL(trialStarted(Habit::StimulusSettings&)), &l, SLOT(trialStarted(Habit::StimulusSettings&)));
+	connect(this, SIGNAL(trialCompleted()), &l, SLOT(trialCompleted()));
+	connect(this, SIGNAL(look(HLook)), &l, SLOT(gotLook(HLook)));
+	
+	createStimulusSettings(0, settings0);
+	emit trialStarted(settings0);
+	emit look(HLook(LookLeft, 100, 1100));
+	emit look(HLook(LookLeft, 2200, 3200));
+	emit look(HLook(LookLeft, 3300, 4300));
+	emit look(HLook(LookLeft, 4400, 5400));
+	emit trialCompleted();	
+
+	QCOMPARE(l.nCompleted(), 1);
+	QVERIFY(!l.isPhaseComplete());
+
+	
+	createStimulusSettings(1, settings1);
+	emit trialStarted(settings1);
+	emit look(HLook(LookLeft, 10100, 11100));
+	emit look(HLook(LookLeft, 12200, 13200));
+	emit look(HLook(LookLeft, 13300, 14300));
+	emit look(HLook(LookLeft, 14400, 15400));
+	emit trialCompleted();	
+
+	QCOMPARE(l.nCompleted(), 2);
+	QVERIFY(!l.isPhaseComplete());
+
+	
+	createStimulusSettings(2, settings2);
+	emit trialStarted(settings2);
+	emit look(HLook(LookLeft, 20100, 21100));
+	emit look(HLook(LookLeft, 22200, 23200));
+	emit look(HLook(LookLeft, 23300, 24300));
+	emit look(HLook(LookLeft, 24400, 25400));
+	emit trialCompleted();	
+
+	QCOMPARE(l.nCompleted(), 3);
+	QVERIFY(!l.isPhaseComplete());
+
+	createStimulusSettings(3, settings3);
+	emit trialStarted(settings3);
+	emit look(HLook(LookLeft, 30100, 31100));
+	emit look(HLook(LookLeft, 32200, 33200));
+	emit look(HLook(LookLeft, 33300, 34300));
+	emit look(HLook(LookLeft, 34400, 35400));
+	emit trialCompleted();	
+	
+	disconnect(&l);
+	
+	
+	// test counts
+	QCOMPARE(l.nCompleted(), 4);
+	QVERIFY(l.isPhaseComplete());
+	
+}
+
+
+
 
 #if 0
 void TestHabutil::testTrialLooks()
