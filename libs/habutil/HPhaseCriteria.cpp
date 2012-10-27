@@ -9,75 +9,8 @@
 
 #include "HPhaseCriteria.h"
 
+
 using namespace Habit;
-
-bool TrialLooks::isCompleted() const
-{
-	return m_status == TrialCompleted;
-}
-
-int TrialLooks::totalLookingTime() const
-{
-	int total = 0;
-	for (int i=0; i<size(); i++)
-	{
-		total += at(i).lookMS();
-	}
-	return total;
-}
-
-int HPhaseCriteria::nCompleted()
-{
-	int n=0;
-	for (int i=0; i<m_trials.size(); i++)
-		if (m_trials.at(i).isCompleted()) n++;
-	return n;
-};
-
-int HPhaseCriteria::totalLookingTime()
-{
-	int total=0;
-	for (int i=0; i<m_trials.size(); i++)
-		if (m_trials.at(i).isCompleted()) total += m_trials.at(i).totalLookingTime();
-	return total;
-};
-	
-void HPhaseCriteria::trialStarted()
-{
-	TrialLooks t;
-	m_trials.append(t);
-};
-
-void HPhaseCriteria::trialCompleted()
-{
-	if (!m_trials.isEmpty())
-		m_trials.back().completed();
-};
-
-void HPhaseCriteria::trialAborted()
-{
-	if (!m_trials.isEmpty())
-		m_trials.back().aborted();
-};
-
-void HPhaseCriteria::trialFailed()
-{
-	if (!m_trials.isEmpty())
-		m_trials.back().failed();
-};
-
-void HPhaseCriteria::gotLook(HLook l)
-{
-	if (!m_trials.isEmpty())
-	{
-		m_trials.back().append(l);
-	}
-	else 
-	{
-		qWarning("HPhaseCriteria: cannot add look - no trial running.");
-	}
-};
-	
 
 bool HPhaseFixedNCriteria::isPhaseComplete()
 {
@@ -89,31 +22,6 @@ bool HPhaseTotalLookingTimeCriteria::isPhaseComplete()
 	return totalLookingTime() >= m_msTotal;
 };
 
-bool HPhaseHabituationCriteria::isPhaseComplete()
-{
-	bool bval = false;
-	int iWindowStart = -1;
-	int basisSum = 0;
-	int windowSum;
-	double threshold;
-	int iStep = 1;
-	if (getBasisSum(basisSum, iWindowStart))
-	{
-		threshold = (double)basisSum * m_c.getPercent() / 100.0;
-		if (m_c.getWindowType() == CriterionSettings::eFixedWindow)
-			iStep = m_c.getWindowSize();
-		for (int i=iWindowStart; i<m_trials.size(); i+=iStep)
-		{
-			if (getWindowSum(windowSum, i) && windowSum < threshold)
-			{
-				bval = true;
-				break;
-			}
-		}
-	}
-	return bval;
-};
-
 bool HPhaseHabituationCriteria::getBasisSum(int& iBasisSum, int& iBasisWindowStart)
 {
 	bool bval = false;
@@ -121,7 +29,7 @@ bool HPhaseHabituationCriteria::getBasisSum(int& iBasisSum, int& iBasisWindowSta
 	iBasisWindowStart = -1;
 	if (m_c.getBasis() == CriterionSettings::eFirstN)
 	{
-		if (m_trials.size() >= (int)m_c.getWindowSize())
+		if (m_triallogs.size() >= (int)m_c.getWindowSize())
 		{
 			bval = getWindowSum(iBasisSum, 0);
 			if (bval)
@@ -141,7 +49,7 @@ bool HPhaseHabituationCriteria::getBasisSum(int& iBasisSum, int& iBasisWindowSta
 			iStep = m_c.getWindowSize();
 		iBasisWindowStart = -1;
 		
-		for (int i=0; i<(m_trials.size()-(int)m_c.getWindowSize()+1); i++)
+		for (int i=0; i<(m_triallogs.size()-(int)m_c.getWindowSize()+1); i++)
 		{
 			if (getWindowSum(itemp, i) && itemp > bmax) 
 			{
@@ -154,18 +62,18 @@ bool HPhaseHabituationCriteria::getBasisSum(int& iBasisSum, int& iBasisWindowSta
 	}
 	return bval;
 };
-	
+
 bool HPhaseHabituationCriteria::getWindowSum(int& sum, int ifirst)
 {
 	bool bval = false;
 	unsigned int n = 0;
 	sum = 0;
-	if (ifirst >= m_trials.size()) return false;
+	if (ifirst >= m_triallogs.size()) return false;
 	else 
 	{
-		for (int i=ifirst; i<m_trials.size() && n < m_c.getWindowSize(); i++)
+		for (int i=ifirst; i<m_triallogs.size() && n < m_c.getWindowSize(); i++)
 		{
-			if (m_trials.at(i).isCompleted()) sum += m_trials.at(i).totalLookingTime();
+			if (m_triallogs.at(i).isCompleted()) sum += m_triallogs.at(i).totalLookingTime();
 			n++;
 		}
 	}
@@ -174,3 +82,27 @@ bool HPhaseHabituationCriteria::getWindowSum(int& sum, int ifirst)
 	return bval;
 };
 
+bool HPhaseHabituationCriteria::isPhaseComplete()
+{
+	bool bval = false;
+	int iWindowStart = -1;
+	int basisSum = 0;
+	int windowSum;
+	double threshold;
+	int iStep = 1;
+	if (getBasisSum(basisSum, iWindowStart))
+	{
+		threshold = (double)basisSum * m_c.getPercent() / 100.0;
+		if (m_c.getWindowType() == CriterionSettings::eFixedWindow)
+			iStep = m_c.getWindowSize();
+		for (int i=iWindowStart; i<m_triallogs.size(); i+=iStep)
+		{
+			if (getWindowSum(windowSum, i) && windowSum < threshold)
+			{
+				bval = true;
+				break;
+			}
+		}
+	}
+	return bval;
+};

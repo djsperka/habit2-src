@@ -10,52 +10,21 @@
 #ifndef _HPHASECRITERIA_H_
 #define _HPHASECRITERIA_H_
 
-#include "HLook.h"
+#include "HPhaseLog.h"
 #include "criterionsettings.h"
-#include <QList>
 
-
-// TrialLooks saves a list of looks for a given trial. 
-// Has some convenience functions for computing things about the looks. 
-
-class TrialLooks : public QList<HLook>
-{
-public:
-	enum TrialStatus {
-		TrialCompleted, TrialRunning, TrialFailed, TrialAborted
-	};
-	TrialLooks(): m_status(TrialRunning) {};
-	~TrialLooks() {};
-	bool isCompleted() const;
-	int totalLookingTime() const;
-	void completed() { m_status = TrialCompleted; };
-	void failed() { m_status = TrialFailed; };
-	void aborted() { m_status = TrialAborted; };
-private:
-	TrialStatus m_status;
-};
 
 
 // Abstract class used for determining whether a phase is completed.
 // Subclasses must implement isPhaseComplete(). 
 
-class HPhaseCriteria: public QObject
+class HPhaseCriteria : public HPhaseLog
 {
 	Q_OBJECT
 public:
-	HPhaseCriteria() : QObject() {};
+	HPhaseCriteria() : HPhaseLog() {};
 	virtual ~HPhaseCriteria() {};
 	virtual bool isPhaseComplete() = 0;
-	int nCompleted();
-	int totalLookingTime();
-protected slots:
-	void trialStarted();
-	void trialCompleted();
-	void trialAborted();
-	void trialFailed();
-	void gotLook(HLook l);
-protected:
-	QList<TrialLooks> m_trials;
 };
 
 
@@ -88,6 +57,9 @@ public:
 	HPhaseHabituationCriteria(Habit::CriterionSettings c) : HPhaseCriteria(), m_c(c) {};
 	virtual ~HPhaseHabituationCriteria() {};
 	bool isPhaseComplete();
+	
+	// Get the sum used as basis for the habituation criteria. 
+	
 	bool getBasisSum(int& iBasisSum, int& iBasisWindowStart);
 	
 	// Get the total looking time for the trials 'window' starting at the trial with index 'ifirst'. 
@@ -95,8 +67,7 @@ public:
 	
 	bool getWindowSum(int& iWindowSum, int ifirst);
 private:
-	Habit::CriterionSettings m_c;
-	
+	Habit::CriterionSettings m_c;	
 };	
 
 

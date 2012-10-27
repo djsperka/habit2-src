@@ -37,6 +37,8 @@ void HStimRequestState::onEntry(QEvent* e)
 	HOutputGenerator::instance()->changeTrial(m_nextStimulusSettings.getStimulusType());
 	HOutputGenerator::instance()->setStimulusSettings(m_nextStimulusSettings);
 	emit playStim(m_nextStimID);
+	
+	// TODO emit TrialStarted(m_nextStimulusSettings)
 };
 
 void HAGRequestState::onEntry(QEvent* e) 
