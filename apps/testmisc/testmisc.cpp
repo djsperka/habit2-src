@@ -386,6 +386,51 @@ void TestHabutil::testFixedNCriteria()
 }
 
 
+void TestHabutil::testTotalLookingTimeCriteria()
+{
+	HPhaseTotalLookingTimeCriteria c(5000);
+	
+	connect(this, SIGNAL(look(HLook)), &c, SLOT(gotLook(HLook)));
+	connect(this, SIGNAL(trialStarted()), &c, SLOT(trialStarted()));
+	connect(this, SIGNAL(trialCompleted()), &c, SLOT(trialCompleted()));
+	
+	// trial 1 - 2000ms
+	emit trialStarted();
+	emit look(HLook(LookLeft, 100, 1100));
+	emit look(HLook(LookLeft, 1200, 2200));
+	emit trialCompleted();
+	
+	QCOMPARE(c.totalLookingTime(), 2000);
+	QCOMPARE(c.isPhaseComplete(), false);
+	
+	// trial 2 - 2000ms
+	emit trialStarted();
+	emit look(HLook(LookRight, 2300, 3300));
+	emit look(HLook(LookRight, 3400, 4400));
+	emit trialCompleted();
+	
+	QCOMPARE(c.totalLookingTime(), 4000);
+	QCOMPARE(c.isPhaseComplete(), false);
+	
+	// trial 3 - 500ms
+	emit trialStarted();
+	emit look(HLook(LookRight, 4500, 5000));
+	emit trialCompleted();
+	
+	QCOMPARE(c.totalLookingTime(), 4500);
+	QCOMPARE(c.isPhaseComplete(), false);
+	
+	// trial 4 - 1500ms
+	emit trialStarted();
+	emit look(HLook(LookRight, 5000, 6000));
+	emit look(HLook(LookRight, 7000, 7500));
+	emit trialCompleted();
+	
+	QCOMPARE(c.totalLookingTime(), 6000);
+	QCOMPARE(c.isPhaseComplete(), true);
+	
+	disconnect(&c);
+}
 
 
 #if 0

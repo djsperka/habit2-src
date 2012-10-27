@@ -9,8 +9,8 @@
 
 
 #include <QtTest/QtTest>
-#include "HPhaseCriteria.h"
-
+#include "HLook.h"
+#include "stimulussettings.h"
 
 class TestHabutil: public QObject
 {
@@ -19,9 +19,9 @@ public:
 	TestHabutil();
 signals:
 	void look(HLook);
-	void trialStarted();
+	void trialStarted(Habit::StimulusSettings& s);
 	void trialCompleted();
-private slots:
+	private slots:
 //	void initTestCase();
 //	void testTrialLooks();
 //	void testFixedN();
@@ -31,6 +31,10 @@ private slots:
 //	void testHabituationFirstSliding();
 //	void testHabituationLongestSliding();
 	void testTrialLog();
+	void testPhaseLog();
+	void testFixedNCriteria();
+	void testTotalLookingTimeCriteria();
 	void testTrialGenerator();
 private:
+	void createStimulusSettings(int i, Habit::StimulusSettings& settings);
 }; 
