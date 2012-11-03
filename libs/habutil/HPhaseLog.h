@@ -16,33 +16,22 @@
 #include <QDataStream>
 
 
-class HPhaseLog: public QObject
+
+namespace habit2
 {
-	Q_OBJECT
-	
-public:
-	HPhaseLog() : QObject(), m_triallogs() {};
-	virtual ~HPhaseLog() {};
 
-	int nCompleted() const;
-	int totalLookingTime() const;
+	// List of integers. Each int is the total looking time for a single
+	// completed trial. 
+	class HPhaseLog: public QList<int>
+	{
 
-	friend QDataStream & operator << (QDataStream& stream, const HPhaseLog &plog);
-	friend QDataStream & operator >> (QDataStream& stream, HPhaseLog& tlog);
-	friend bool operator==(const HPhaseLog& lhs, const HPhaseLog& rhs);
-	
-protected slots:
-	void trialStarted(Habit::StimulusSettings& settings);
-	void trialCompleted();
-	void trialAborted();
-	void trialFailed();
-	void gotLook(HLook l);
-protected:
-	QList<HTrialLog> m_triallogs;
+	public:
+		HPhaseLog() : QList<int>() {};
+		virtual ~HPhaseLog() {};
+
+		int nCompleted() const { return size(); };
+		int totalLookingTime() const;
+	};
+
 };
-
-QDataStream & operator << (QDataStream& stream, const HPhaseLog &plog);
-QDataStream & operator >> (QDataStream& stream, HPhaseLog& tlog);
-bool operator==(const HPhaseLog& lhs, const HPhaseLog& rhs);
-
 #endif

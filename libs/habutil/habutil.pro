@@ -27,6 +27,7 @@ HEADERS +=	HLook.h \
 			HPhaseCriteria.h \
 			HTrialLog.h \
 			HPhaseLog.h \
+			HEventLog.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -85,6 +86,7 @@ SOURCES +=	HLook.cpp \
 			HLooker.cpp \
 			HLookDetector.cpp \
 			HKeypadLookDetector.cpp \
+			HEvents.cpp \
 			HState.cpp \
 			HStateMachine.cpp \
 			HTrial.cpp \
@@ -105,6 +107,7 @@ SOURCES +=	HLook.cpp \
 			HPhaseCriteria.cpp \
 			HTrialLog.cpp \
 			HPhaseLog.cpp \
+			HEventLog.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \

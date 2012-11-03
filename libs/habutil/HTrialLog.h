@@ -16,25 +16,17 @@
 #include <QDataStream>
 
 
-class HTrialLog : public QList<HLook>
+class HTrialLog : public QList<const HLook *>
 {
 public:
-	HTrialLog(const Habit::StimulusSettings& settings)
-	: QList<HLook>()
+	HTrialLog()
+	: QList<const HLook *>()
 	, m_status(TrialRunning)
-	, m_settings(settings)
 	{};
 	
-	HTrialLog()
-	: QList<HLook>()
-	, m_status(UnknownTrialStatus),
-	m_settings(Habit::StimulusSettings())
-	{};
-		
 	HTrialLog(const HTrialLog& l)
-	: QList<HLook>(l)
+	: QList<const HLook *>(l)
 	{
-		setStimulusSettings(l.getStimulusSettings());
 		setStatus(l.getStatus());
 	};
 	virtual ~HTrialLog() {};
@@ -51,11 +43,8 @@ public:
 	void setRunning() { m_status = TrialRunning; };
 	TrialStatus getStatus() const { return m_status; };
 	void setStatus(TrialStatus status) { m_status = status; };
-	const Habit::StimulusSettings& getStimulusSettings() const { return m_settings; };
-	void setStimulusSettings(Habit::StimulusSettings settings) { m_settings = settings; };
 private:
 	TrialStatus m_status;
-	Habit::StimulusSettings m_settings;
 };
 
 Q_DECLARE_METATYPE(HTrialLog);

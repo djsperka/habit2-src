@@ -12,26 +12,26 @@
 
 using namespace Habit;
 
-bool HPhaseFixedNCriteria::isPhaseComplete()
+bool habit2::HPhaseFixedNCriteria::isPhaseComplete(const habit2::HPhaseLog& log)
 {
-	return nCompleted() >= m_N;
+	return log.nCompleted() >= m_N;
 };
 
-bool HPhaseTotalLookingTimeCriteria::isPhaseComplete()
+bool habit2::HPhaseTotalLookingTimeCriteria::isPhaseComplete(const habit2::HPhaseLog& log)
 {
-	return totalLookingTime() >= m_msTotal;
+	return log.totalLookingTime() >= m_msTotal;
 };
 
-bool HPhaseHabituationCriteria::getBasisSum(int& iBasisSum, int& iBasisWindowStart)
+bool habit2::HPhaseHabituationCriteria::getBasisSum(const habit2::HPhaseLog& log, int& iBasisSum, int& iBasisWindowStart)
 {
 	bool bval = false;
 	iBasisSum = 0;
 	iBasisWindowStart = -1;
 	if (m_c.getBasis() == CriterionSettings::eFirstN)
 	{
-		if (m_triallogs.size() >= (int)m_c.getWindowSize())
+		if (log.size() >= (int)m_c.getWindowSize())
 		{
-			bval = getWindowSum(iBasisSum, 0);
+			bval = getWindowSum(log, iBasisSum, 0);
 			if (bval)
 				iBasisWindowStart = 0;
 		}
@@ -49,9 +49,9 @@ bool HPhaseHabituationCriteria::getBasisSum(int& iBasisSum, int& iBasisWindowSta
 			iStep = m_c.getWindowSize();
 		iBasisWindowStart = -1;
 		
-		for (int i=0; i<(m_triallogs.size()-(int)m_c.getWindowSize()+1); i++)
+		for (int i=0; i<(log.size()-(int)m_c.getWindowSize()+1); i++)
 		{
-			if (getWindowSum(itemp, i) && itemp > bmax) 
+			if (getWindowSum(log, itemp, i) && itemp > bmax) 
 			{
 				bmax = itemp;
 				iBasisWindowStart = i;
@@ -63,26 +63,19 @@ bool HPhaseHabituationCriteria::getBasisSum(int& iBasisSum, int& iBasisWindowSta
 	return bval;
 };
 
-bool HPhaseHabituationCriteria::getWindowSum(int& sum, int ifirst)
+bool habit2::HPhaseHabituationCriteria::getWindowSum(const habit2::HPhaseLog& log, int& sum, int ifirst)
 {
-	bool bval = false;
-	unsigned int n = 0;
 	sum = 0;
-	if (ifirst >= m_triallogs.size()) return false;
+	if (ifirst >= log.size() || (ifirst + (int)m_c.getWindowSize() >= log.size())) return false;
 	else 
 	{
-		for (int i=ifirst; i<m_triallogs.size() && n < m_c.getWindowSize(); i++)
-		{
-			if (m_triallogs.at(i).isCompleted()) sum += m_triallogs.at(i).totalLookingTime();
-			n++;
-		}
+		for (int i=ifirst; i < ifirst + (int)m_c.getWindowSize(); i++)
+			sum += log.at(i);
 	}
-	// If there weren't enough to fill the window, return 0
-	bval = (n == m_c.getWindowSize());
-	return bval;
+	return true;
 };
 
-bool HPhaseHabituationCriteria::isPhaseComplete()
+bool habit2::HPhaseHabituationCriteria::isPhaseComplete(const habit2::HPhaseLog& log)
 {
 	bool bval = false;
 	int iWindowStart = -1;
@@ -90,14 +83,14 @@ bool HPhaseHabituationCriteria::isPhaseComplete()
 	int windowSum;
 	double threshold;
 	int iStep = 1;
-	if (getBasisSum(basisSum, iWindowStart))
+	if (getBasisSum(log, basisSum, iWindowStart))
 	{
 		threshold = (double)basisSum * m_c.getPercent() / 100.0;
 		if (m_c.getWindowType() == CriterionSettings::eFixedWindow)
 			iStep = m_c.getWindowSize();
-		for (int i=iWindowStart; i<m_triallogs.size(); i+=iStep)
+		for (int i=iWindowStart; i<log.size(); i+=iStep)
 		{
-			if (getWindowSum(windowSum, i) && windowSum < threshold)
+			if (getWindowSum(log, windowSum, i) && windowSum < threshold)
 			{
 				bval = true;
 				break;
