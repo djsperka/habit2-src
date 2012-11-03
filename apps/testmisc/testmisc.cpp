@@ -1,991 +1,271 @@
 #include "testmisc.h"
+#include "HEventLog.h"
+#include "HEvents.h"
 #include "HTrialGenerator.h"
-#include "HTrialLog.h"
 #include "HPhaseLog.h"
 #include "HPhaseCriteria.h"
 #include <QTemporaryFile>
-//#include "HOutputGenerator.h"
+
+using namespace habit2;
 
 TestHabutil::TestHabutil()
 : QObject()
 {
 }
 
-
-void TestHabutil::testTrialLog()
+void TestHabutil::testEventLog()
 {
-	Habit::StimulusSettings settings;
-	Habit::StimulusInfo leftSI;
-	Habit::StimulusInfo centerSI;
-	Habit::StimulusInfo rightSI;
-	Habit::StimulusInfo soundSI;
+	HEventLog& elog = HEventLog::instance();
+	HPhaseLog plog;
+	HPhaseFixedNCriteria fixedNCriteria(4);
+	HPhaseTotalLookingTimeCriteria totalLookingTimeCriteria(10000);
+	Habit::CriterionSettings csFirstNFixed(Habit::CriterionSettings::eFirstN, 50, 3, Habit::CriterionSettings::eFixedWindow);
+	HPhaseHabituationCriteria criteriaFirstNFixed(csFirstNFixed);
+	Habit::CriterionSettings csLongestNFixed(Habit::CriterionSettings::eLongestN, 50, 3, Habit::CriterionSettings::eFixedWindow);
+	HPhaseHabituationCriteria criteriaLongestNFixed(csLongestNFixed);
+	Habit::CriterionSettings csFirstNSliding(Habit::CriterionSettings::eFirstN, 50, 3, Habit::CriterionSettings::eSlidingWindow);
+	HPhaseHabituationCriteria criteriaFirstNSliding(csFirstNSliding);
+	Habit::CriterionSettings csLongestNSliding(Habit::CriterionSettings::eLongestN, 50, 3, Habit::CriterionSettings::eSlidingWindow);
+	HPhaseHabituationCriteria criteriaLongestNSliding(csLongestNSliding);
 
-	leftSI.setName("LeftName");
-	leftSI.setFileName("LeftFileName");
-	leftSI.setLoopPlayBack(true);
-	leftSI.setAudioBalance(99);
+	
+	// test empty event log
+	plog = elog.getPhaseLog(QString("PreTest"));
+	QVERIFY(plog.size()==0);
+	QCOMPARE(plog.totalLookingTime(), 0);
+	QVERIFY(!fixedNCriteria.isPhaseComplete(plog));
+	QVERIFY(!totalLookingTimeCriteria.isPhaseComplete(plog));
 
-	rightSI.setName("RightName");
-	rightSI.setFileName("RightFileName");
-	rightSI.setLoopPlayBack(true);
-	rightSI.setAudioBalance(98);
+	plog = elog.getPhaseLog(QString(""));
+	QVERIFY(plog.size()==0);
+	QCOMPARE(plog.totalLookingTime(), 0);
+	QVERIFY(!fixedNCriteria.isPhaseComplete(plog));
+	QVERIFY(!totalLookingTimeCriteria.isPhaseComplete(plog));
+	
+	// Now add some events
+	elog.append(new HPhaseStartEvent((char *)"PreTest", 1));
+	elog.append(new HStimRequestEvent(1, 2));
+	elog.append(new HStimStartEvent(1, 1, 4));
+	elog.append(new HStimStartEvent(1, 2, 5));
+	elog.append(new HStimStartEvent(1, 3, 6));
+	elog.append(new HTrialStartEvent(1, 0, 10));
+	elog.append(new HLookEvent(HLook(LookLeft, 100, 1100), 1100));
+	elog.append(new HLookEvent(HLook(LookLeft, 2200, 3200), 3200));
+	
+	// Phase log should still be empty as no trials have ended.
+	plog = elog.getPhaseLog(QString("PreTest"));
+	QVERIFY(plog.size()==0);
+	QCOMPARE(plog.totalLookingTime(), 0);
+	QVERIFY(!fixedNCriteria.isPhaseComplete(plog));
+	QVERIFY(!totalLookingTimeCriteria.isPhaseComplete(plog));
+	
+	elog.append(new HLookEvent(HLook(LookLeft, 3300, 4300), 4300));
+	elog.append(new HLookEvent(HLook(LookLeft, 4400, 5400), 5400));
+	elog.append(new HTrialEndEvent());
 
-	centerSI.setName("CenterName");
-	centerSI.setFileName("CenterFileName");
-	centerSI.setLoopPlayBack(false);
-	centerSI.setAudioBalance(97);
+	// Phase log should have 4000ms of looking
+	plog = elog.getPhaseLog(QString("PreTest"));
+	QVERIFY(plog.size()==1);
+	QCOMPARE(plog.totalLookingTime(), 4000);
+	QVERIFY(!fixedNCriteria.isPhaseComplete(plog));
+	QVERIFY(!totalLookingTimeCriteria.isPhaseComplete(plog));
 
-	soundSI.setName("SoundName");
-	soundSI.setFileName("SoundFileName");
-	soundSI.setLoopPlayBack(true);
-	soundSI.setAudioBalance(96);
+	elog.append(new HStimRequestEvent(1, 7000));
+	elog.append(new HStimStartEvent(1, 1, 7001));
+	elog.append(new HStimStartEvent(1, 2, 7002));
+	elog.append(new HStimStartEvent(1, 3, 7003));
+	elog.append(new HTrialStartEvent(2, 0, 7010));
+	elog.append(new HLookEvent(HLook(LookLeft, 10100, 11100), 11100));
+	elog.append(new HLookEvent(HLook(LookLeft, 12200, 13200), 13200));
+	elog.append(new HLookEvent(HLook(LookLeft, 13300, 14300), 14300));
+	elog.append(new HLookEvent(HLook(LookLeft, 14400, 15400), 15400));
+	elog.append(new HTrialEndEvent());
 	
-	settings.setName("TestSettings");
-	settings.setId(1);
-	settings.setLeftEnabled(true);
-	settings.setLeftStimulusInfo(leftSI);
-	settings.setCenterEnabled(true);
-	settings.setCenterStimulusInfo(centerSI);
-	settings.setRightEnabled(true);
-	settings.setRightStimulusInfo(rightSI);
-	settings.setIndependentSoundEnabled(true);
-	settings.setIndependentSoundInfo(soundSI);
-	settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
+	// Phase log should have 8000ms of looking
+	plog = elog.getPhaseLog(QString("PreTest"));
+	QVERIFY(plog.size()==2);
+	QCOMPARE(plog.totalLookingTime(), 8000);
+	QVERIFY(!fixedNCriteria.isPhaseComplete(plog));
+	QVERIFY(!totalLookingTimeCriteria.isPhaseComplete(plog));
 
-	HTrialLog tlog(settings);
-	tlog.append(HLook(LookLeft, 100, 1100));
-	tlog.append(HLook(LookLeft, 2200, 3200));
-	tlog.append(HLook(LookLeft, 3300, 4300));
-	tlog.append(HLook(LookLeft, 4400, 5400));
-	tlog.setCompleted();	
 	
-	QVERIFY(tlog.isCompleted());
-	QCOMPARE(tlog.totalLookingTime(), 4000);
+	elog.append(new HStimRequestEvent(1, 17000));
+	elog.append(new HStimStartEvent(1, 1, 17001));
+	elog.append(new HStimStartEvent(1, 2, 17002));
+	elog.append(new HStimStartEvent(1, 3, 17003));
+	elog.append(new HTrialStartEvent(3, 0, 17010));
+	elog.append(new HLookEvent(HLook(LookLeft, 17100, 18100), 18100));
+	elog.append(new HLookEvent(HLook(LookLeft, 18200, 19200), 19200));
+	elog.append(new HTrialEndEvent(kTrialEndFail));
+	
+	// Phase log should have 8000ms of looking, with just 2 trials.
+	// The last trial failed - should not count
+	plog = elog.getPhaseLog(QString("PreTest"));
+	QVERIFY(plog.size()==2);
+	QCOMPARE(plog.totalLookingTime(), 8000);
+	QVERIFY(!fixedNCriteria.isPhaseComplete(plog));
+	QVERIFY(!totalLookingTimeCriteria.isPhaseComplete(plog));
 	
 	
-	// Test output and input...
-	QTemporaryFile file;
+	elog.append(new HStimRequestEvent(1, 20000));
+	elog.append(new HStimStartEvent(1, 1, 20001));
+	elog.append(new HStimStartEvent(1, 2, 20002));
+	elog.append(new HStimStartEvent(1, 3, 20003));
+	elog.append(new HTrialStartEvent(3, 1, 20010));
+	elog.append(new HLookEvent(HLook(LookLeft, 20100, 21100)));
+	elog.append(new HLookEvent(HLook(LookLeft, 22200, 23200)));
+	elog.append(new HLookEvent(HLook(LookLeft, 23300, 24300)));
+	elog.append(new HLookEvent(HLook(LookLeft, 24400, 25400)));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 25400));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==3);
+	QCOMPARE(plog.totalLookingTime(), 12000);
+	QVERIFY(!fixedNCriteria.isPhaseComplete(plog));
+	QVERIFY(totalLookingTimeCriteria.isPhaseComplete(plog));
+
+
 	
-	HTrialLog tlog2(settings);
+	elog.append(new HStimRequestEvent(1, 30000));
+	elog.append(new HStimStartEvent(1, 1, 30001));
+	elog.append(new HStimStartEvent(1, 2, 30002));
+	elog.append(new HStimStartEvent(1, 3, 30003));
+	elog.append(new HTrialStartEvent(4, 0, 30010));
+	elog.append(new HLookEvent(HLook(LookLeft, 30100, 31100)));
+	elog.append(new HLookEvent(HLook(LookLeft, 32200, 33200)));
+	elog.append(new HLookEvent(HLook(LookLeft, 33300, 34300)));
+	elog.append(new HLookEvent(HLook(LookLeft, 34400, 35400)));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 35401));
+	elog.append(new HPhaseEndEvent());
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==4);
+	QCOMPARE(plog.totalLookingTime(), 16000);
+	QVERIFY(fixedNCriteria.isPhaseComplete(plog));
+	QVERIFY(totalLookingTimeCriteria.isPhaseComplete(plog));
 	
-	// doesnt compile 
-	// HTrialLog tlog2(Habit::StimulusSettings());
 	
-	// compiles fine
-	// HTrialLog tlog2;
+	// Start habituation phase. 
+	// Test all four habituation criteria here. 
 	
-	if (file.open())
-	{
-		QDataStream stream(&file);
-		stream << tlog;
-		file.setAutoRemove(false);
-		file.seek(0);
-		stream >> tlog2;
-		QVERIFY(tlog==tlog2);
-		file.close();
-	}
-	else 
-	{
-		QFAIL("Cannot open temp file");
-	}
+	// Now add some events
+	elog.append(new HPhaseStartEvent((char *)"Habituation", 100000));
+	elog.append(new HStimRequestEvent(1, 100002));
+	elog.append(new HStimStartEvent(1, 1, 100004));
+	elog.append(new HStimStartEvent(1, 2, 100005));
+	elog.append(new HStimStartEvent(1, 3, 100006));
+
+	elog.append(new HTrialStartEvent(1, 0, 100010));
+	elog.append(new HLookEvent(HLook(LookLeft, 101000, 102000), 102000));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 102000));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==1);
+	QCOMPARE(plog.totalLookingTime(), 1000);
+	QVERIFY(!criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog));
+
+	
+	elog.append(new HTrialStartEvent(2, 0, 102000));
+	elog.append(new HLookEvent(HLook(LookLeft, 102000, 104000), 104000));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 104000));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==2);
+	QCOMPARE(plog.totalLookingTime(), 3000);
+	QVERIFY(!criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog));
+	
+	elog.append(new HTrialStartEvent(3, 0, 104000));
+	elog.append(new HLookEvent(HLook(LookLeft, 104000, 107000), 107000));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 107000));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==3);
+	QCOMPARE(plog.totalLookingTime(), 6000);
+	QVERIFY(!criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog));
+	
+	elog.append(new HTrialStartEvent(4, 0, 107000));
+	elog.append(new HLookEvent(HLook(LookLeft, 107000, 108000), 108000));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 108000));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==4);
+	QCOMPARE(plog.totalLookingTime(), 7000);
+	QVERIFY(!criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog));
+	
+	elog.append(new HTrialStartEvent(5, 0, 108000));
+	elog.append(new HLookEvent(HLook(LookLeft, 108000, 110000), 110000));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 110000));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==5);
+	QCOMPARE(plog.totalLookingTime(), 9000);
+	QVERIFY(!criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog));
+	
+	elog.append(new HTrialStartEvent(6, 0, 110000));
+	elog.append(new HLookEvent(HLook(LookLeft, 110000, 112000), 112000));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 112000));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==6);
+	QCOMPARE(plog.totalLookingTime(), 11000);
+	QVERIFY(!criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog));
+	
+	elog.append(new HTrialStartEvent(7, 0, 111000));
+	elog.append(new HLookEvent(HLook(LookLeft, 111000, 112000), 112000));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 112000));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==7);
+	QCOMPARE(plog.totalLookingTime(), 12000);
+	QVERIFY(!criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog));
+	
+	elog.append(new HTrialStartEvent(8, 0, 112000));
+	elog.append(new HLookEvent(HLook(LookLeft, 112000, 113000), 113000));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 113000));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==8);
+	QCOMPARE(plog.totalLookingTime(), 13000);
+	QVERIFY(!criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog));
+	
+	elog.append(new HTrialStartEvent(9, 0, 113000));
+	elog.append(new HLookEvent(HLook(LookLeft, 113000, 113500), 113500));
+	elog.append(new HTrialEndEvent(kTrialEndSuccess, 113500));
+
+	plog = elog.getPhaseLog();
+	QVERIFY(plog.size()==9);
+	QCOMPARE(plog.totalLookingTime(), 13500);
+	QVERIFY(criteriaFirstNFixed.isPhaseComplete(plog));
+	QVERIFY(criteriaFirstNSliding.isPhaseComplete(plog));
+	QVERIFY(criteriaLongestNFixed.isPhaseComplete(plog));
+	QVERIFY(criteriaLongestNSliding.isPhaseComplete(plog));
 	
 }
 
-void TestHabutil::createStimulusSettings(int i, Habit::StimulusSettings& settings)
-{
-	Habit::StimulusInfo leftSI;
-	Habit::StimulusInfo centerSI;
-	Habit::StimulusInfo rightSI;
-	Habit::StimulusInfo soundSI;
-	switch (i)
-	{
-		case 0:
-		{
-			leftSI.setName("LeftName0");
-			leftSI.setFileName("LeftFileName0");
-			leftSI.setLoopPlayBack(true);
-			leftSI.setAudioBalance(1);
-			
-			rightSI.setName("RightName0");
-			rightSI.setFileName("RightFileName0");
-			rightSI.setLoopPlayBack(true);
-			rightSI.setAudioBalance(1);
-			
-			centerSI.setName("CenterName0");
-			centerSI.setFileName("CenterFileName0");
-			centerSI.setLoopPlayBack(false);
-			centerSI.setAudioBalance(2);
-			
-			soundSI.setName("SoundName0");
-			soundSI.setFileName("SoundFileName0");
-			soundSI.setLoopPlayBack(true);
-			soundSI.setAudioBalance(3);
-			
-			settings.setName("TestSettings0");
-			settings.setId(1);
-			settings.setLeftEnabled(true);
-			settings.setLeftStimulusInfo(leftSI);
-			settings.setCenterEnabled(true);
-			settings.setCenterStimulusInfo(centerSI);
-			settings.setRightEnabled(true);
-			settings.setRightStimulusInfo(rightSI);
-			settings.setIndependentSoundEnabled(true);
-			settings.setIndependentSoundInfo(soundSI);
-			settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
-			
-			break;
-		}			
-		case 1:
-		{
-			leftSI.setName("LeftName1");
-			leftSI.setFileName("LeftFileName1");
-			leftSI.setLoopPlayBack(true);
-			leftSI.setAudioBalance(11);
-			
-			rightSI.setName("RightName1");
-			rightSI.setFileName("RightFileName1");
-			rightSI.setLoopPlayBack(true);
-			rightSI.setAudioBalance(12);
-			
-			centerSI.setName("CenterName1");
-			centerSI.setFileName("CenterFileName1");
-			centerSI.setLoopPlayBack(false);
-			centerSI.setAudioBalance(13);
-			
-			soundSI.setName("SoundName1");
-			soundSI.setFileName("SoundFileName1");
-			soundSI.setLoopPlayBack(true);
-			soundSI.setAudioBalance(14);
-			
-			settings.setName("TestSettings1");
-			settings.setId(1);
-			settings.setLeftEnabled(true);
-			settings.setLeftStimulusInfo(leftSI);
-			settings.setCenterEnabled(true);
-			settings.setCenterStimulusInfo(centerSI);
-			settings.setRightEnabled(true);
-			settings.setRightStimulusInfo(rightSI);
-			settings.setIndependentSoundEnabled(true);
-			settings.setIndependentSoundInfo(soundSI);
-			settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
-			
-			break;
-		}			
-		case 2:
-		{
-			leftSI.setName("LeftName2");
-			leftSI.setFileName("LeftFileName2");
-			leftSI.setLoopPlayBack(true);
-			leftSI.setAudioBalance(21);
-			
-			rightSI.setName("RightName2");
-			rightSI.setFileName("RightFileName2");
-			rightSI.setLoopPlayBack(true);
-			rightSI.setAudioBalance(22);
-			
-			centerSI.setName("CenterName2");
-			centerSI.setFileName("CenterFileName2");
-			centerSI.setLoopPlayBack(false);
-			centerSI.setAudioBalance(23);
-			
-			soundSI.setName("SoundName2");
-			soundSI.setFileName("SoundFileName2");
-			soundSI.setLoopPlayBack(true);
-			soundSI.setAudioBalance(24);
-			
-			settings.setName("TestSettings2");
-			settings.setId(21);
-			settings.setLeftEnabled(true);
-			settings.setLeftStimulusInfo(leftSI);
-			settings.setCenterEnabled(true);
-			settings.setCenterStimulusInfo(centerSI);
-			settings.setRightEnabled(true);
-			settings.setRightStimulusInfo(rightSI);
-			settings.setIndependentSoundEnabled(true);
-			settings.setIndependentSoundInfo(soundSI);
-			settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
-			
-			break;
-		}			
-		case 3:
-		default:
-		{
-			leftSI.setName("LeftName3");
-			leftSI.setFileName("LeftFileName3");
-			leftSI.setLoopPlayBack(true);
-			leftSI.setAudioBalance(31);
-			
-			rightSI.setName("RightName3");
-			rightSI.setFileName("RightFileName3");
-			rightSI.setLoopPlayBack(true);
-			rightSI.setAudioBalance(32);
-			
-			centerSI.setName("CenterName3");
-			centerSI.setFileName("CenterFileName3");
-			centerSI.setLoopPlayBack(false);
-			centerSI.setAudioBalance(33);
-			
-			soundSI.setName("SoundName3");
-			soundSI.setFileName("SoundFileName3");
-			soundSI.setLoopPlayBack(true);
-			soundSI.setAudioBalance(34);
-			
-			settings.setName("TestSettings3");
-			settings.setId(31);
-			settings.setLeftEnabled(true);
-			settings.setLeftStimulusInfo(leftSI);
-			settings.setCenterEnabled(true);
-			settings.setCenterStimulusInfo(centerSI);
-			settings.setRightEnabled(true);
-			settings.setRightStimulusInfo(rightSI);
-			settings.setIndependentSoundEnabled(true);
-			settings.setIndependentSoundInfo(soundSI);
-			settings.setStimulusType(Habit::StimulusSettings::HABITUATION);
-			
-			break;
-		}			
-	}
-	return;
-}
-
-void TestHabutil::testPhaseLog()
-{
-	HPhaseLog l;
-	Habit::StimulusSettings settings0;
-	Habit::StimulusSettings settings1;
-	Habit::StimulusSettings settings2;
-	Habit::StimulusSettings settings3;
-	
-	connect(this, SIGNAL(trialStarted(Habit::StimulusSettings&)), &l, SLOT(trialStarted(Habit::StimulusSettings&)));
-	connect(this, SIGNAL(trialCompleted()), &l, SLOT(trialCompleted()));
-	connect(this, SIGNAL(look(HLook)), &l, SLOT(gotLook(HLook)));
-
-	createStimulusSettings(0, settings0);
-	emit trialStarted(settings0);
-	emit look(HLook(LookLeft, 100, 1100));
-	emit look(HLook(LookLeft, 2200, 3200));
-	emit look(HLook(LookLeft, 3300, 4300));
-	emit look(HLook(LookLeft, 4400, 5400));
-	emit trialCompleted();	
-	
-	createStimulusSettings(1, settings1);
-	emit trialStarted(settings1);
-	emit look(HLook(LookLeft, 10100, 11100));
-	emit look(HLook(LookLeft, 12200, 13200));
-	emit look(HLook(LookLeft, 13300, 14300));
-	emit look(HLook(LookLeft, 14400, 15400));
-	emit trialCompleted();	
-
-	createStimulusSettings(2, settings2);
-	emit trialStarted(settings2);
-	emit look(HLook(LookLeft, 20100, 21100));
-	emit look(HLook(LookLeft, 22200, 23200));
-	emit look(HLook(LookLeft, 23300, 24300));
-	emit look(HLook(LookLeft, 24400, 25400));
-	emit trialCompleted();	
-
-	createStimulusSettings(3, settings3);
-	emit trialStarted(settings3);
-	emit look(HLook(LookLeft, 30100, 31100));
-	emit look(HLook(LookLeft, 32200, 33200));
-	emit look(HLook(LookLeft, 33300, 34300));
-	emit look(HLook(LookLeft, 34400, 35400));
-	emit trialCompleted();	
-	
-	disconnect(&l);
-
-	
-	// test counts
-	QCOMPARE(l.nCompleted(), 4);
-	QCOMPARE(l.totalLookingTime(), 16000);
-	
-	// Test output and input...
-	QTemporaryFile file;
-	if (file.open())
-	{
-		HPhaseLog ll;
-		QDataStream stream(&file);
-		stream << l;
-		file.setAutoRemove(false);
-		file.seek(0);
-		stream >> ll;
-		QVERIFY(l==ll);
-		file.close();
-	}
-	else 
-	{
-		QFAIL("Cannot open temp file");
-	}
-	
-}
-
-
-
-void TestHabutil::testFixedNCriteria()
-{
-	HPhaseFixedNCriteria l(4);
-	Habit::StimulusSettings settings0;
-	Habit::StimulusSettings settings1;
-	Habit::StimulusSettings settings2;
-	Habit::StimulusSettings settings3;
-	
-	connect(this, SIGNAL(trialStarted(Habit::StimulusSettings&)), &l, SLOT(trialStarted(Habit::StimulusSettings&)));
-	connect(this, SIGNAL(trialCompleted()), &l, SLOT(trialCompleted()));
-	connect(this, SIGNAL(look(HLook)), &l, SLOT(gotLook(HLook)));
-	
-	createStimulusSettings(0, settings0);
-	emit trialStarted(settings0);
-	emit look(HLook(LookLeft, 100, 1100));
-	emit look(HLook(LookLeft, 2200, 3200));
-	emit look(HLook(LookLeft, 3300, 4300));
-	emit look(HLook(LookLeft, 4400, 5400));
-	emit trialCompleted();	
-
-	QCOMPARE(l.nCompleted(), 1);
-	QVERIFY(!l.isPhaseComplete());
-
-	
-	createStimulusSettings(1, settings1);
-	emit trialStarted(settings1);
-	emit look(HLook(LookLeft, 10100, 11100));
-	emit look(HLook(LookLeft, 12200, 13200));
-	emit look(HLook(LookLeft, 13300, 14300));
-	emit look(HLook(LookLeft, 14400, 15400));
-	emit trialCompleted();	
-
-	QCOMPARE(l.nCompleted(), 2);
-	QVERIFY(!l.isPhaseComplete());
-
-	
-	createStimulusSettings(2, settings2);
-	emit trialStarted(settings2);
-	emit look(HLook(LookLeft, 20100, 21100));
-	emit look(HLook(LookLeft, 22200, 23200));
-	emit look(HLook(LookLeft, 23300, 24300));
-	emit look(HLook(LookLeft, 24400, 25400));
-	emit trialCompleted();	
-
-	QCOMPARE(l.nCompleted(), 3);
-	QVERIFY(!l.isPhaseComplete());
-
-	createStimulusSettings(3, settings3);
-	emit trialStarted(settings3);
-	emit look(HLook(LookLeft, 30100, 31100));
-	emit look(HLook(LookLeft, 32200, 33200));
-	emit look(HLook(LookLeft, 33300, 34300));
-	emit look(HLook(LookLeft, 34400, 35400));
-	emit trialCompleted();	
-	
-	disconnect(&l);
-	
-	
-	// test counts
-	QCOMPARE(l.nCompleted(), 4);
-	QVERIFY(l.isPhaseComplete());
-	
-}
-
-
-void TestHabutil::testTotalLookingTimeCriteria()
-{
-	HPhaseTotalLookingTimeCriteria c(5000);
-	
-	connect(this, SIGNAL(look(HLook)), &c, SLOT(gotLook(HLook)));
-	connect(this, SIGNAL(trialStarted()), &c, SLOT(trialStarted()));
-	connect(this, SIGNAL(trialCompleted()), &c, SLOT(trialCompleted()));
-	
-	// trial 1 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 100, 1100));
-	emit look(HLook(LookLeft, 1200, 2200));
-	emit trialCompleted();
-	
-	QCOMPARE(c.totalLookingTime(), 2000);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 2 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 2300, 3300));
-	emit look(HLook(LookRight, 3400, 4400));
-	emit trialCompleted();
-	
-	QCOMPARE(c.totalLookingTime(), 4000);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 3 - 500ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 4500, 5000));
-	emit trialCompleted();
-	
-	QCOMPARE(c.totalLookingTime(), 4500);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 4 - 1500ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 5000, 6000));
-	emit look(HLook(LookRight, 7000, 7500));
-	emit trialCompleted();
-	
-	QCOMPARE(c.totalLookingTime(), 6000);
-	QCOMPARE(c.isPhaseComplete(), true);
-	
-	disconnect(&c);
-}
-
-
-#if 0
-void TestHabutil::testTrialLooks()
-{
-	QVERIFY(m_looksCompleted.isCompleted());
-	QCOMPARE(m_looksNotCompleted.isCompleted(), false);
-	QCOMPARE(m_looksCompleted.totalLookingTime(), 4000);
-}
-
-void TestHabutil::testFixedN()
-{
-	HPhaseFixedNCriteria c(3);
-	
-	connect(this, SIGNAL(look(HLook)), &c, SLOT(gotLook(HLook)));
-	connect(this, SIGNAL(trialStarted()), &c, SLOT(trialStarted()));
-	connect(this, SIGNAL(trialCompleted()), &c, SLOT(trialCompleted()));
-
-	// Trial 1 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 100, 1100));
-	emit trialCompleted();
-
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// Trial 2 1000ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 1200, 2200));
-	emit trialCompleted();
-
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	emit trialStarted();
-	emit look(HLook(LookCenter, 2300, 3300));
-	emit trialCompleted();
-
-	QCOMPARE(c.isPhaseComplete(), true);
-
-	disconnect(&c);
-}
-
-
-
-void TestHabutil::testTotalLookingTime()
-{
-	HPhaseTotalLookingTimeCriteria c(5000);
-	
-	connect(this, SIGNAL(look(HLook)), &c, SLOT(gotLook(HLook)));
-	connect(this, SIGNAL(trialStarted()), &c, SLOT(trialStarted()));
-	connect(this, SIGNAL(trialCompleted()), &c, SLOT(trialCompleted()));
-	
-	// trial 1 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 100, 1100));
-	emit look(HLook(LookLeft, 1200, 2200));
-	emit trialCompleted();
-
-	QCOMPARE(c.totalLookingTime(), 2000);
-	QCOMPARE(c.isPhaseComplete(), false);
-
-	// trial 2 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 2300, 3300));
-	emit look(HLook(LookRight, 3400, 4400));
-	emit trialCompleted();
-
-	QCOMPARE(c.totalLookingTime(), 4000);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 3 - 500ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 4500, 5000));
-	emit trialCompleted();
-	
-	QCOMPARE(c.totalLookingTime(), 4500);
-	QCOMPARE(c.isPhaseComplete(), false);
-
-	// trial 4 - 1500ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 5000, 6000));
-	emit look(HLook(LookRight, 7000, 7500));
-	emit trialCompleted();
-	
-	QCOMPARE(c.totalLookingTime(), 6000);
-	QCOMPARE(c.isPhaseComplete(), true);
-	
-	disconnect(&c);
-}
-
-void TestHabutil::testHabituationFirstFixed()
-{
-	Habit::CriterionSettings cs(Habit::CriterionSettings::eFirstN, 50, 3, Habit::CriterionSettings::eFixedWindow);
-	HPhaseHabituationCriteria c(cs);
-	int itemp;
-	int isum;
-	
-	// Basis - firstN  - FixedWindow 
-	// first 3 trials form basis. Second fixed window fails, but third is OK.
-	connect(this, SIGNAL(look(HLook)), &c, SLOT(gotLook(HLook)));
-	connect(this, SIGNAL(trialStarted()), &c, SLOT(trialStarted()));
-	connect(this, SIGNAL(trialCompleted()), &c, SLOT(trialCompleted()));
-	
-	// Trial 1 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 100, 1100));
-	emit trialCompleted();
-
-	QVERIFY(!c.getBasisSum(isum, itemp));
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 2 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 1200, 3200));
-	emit trialCompleted();
-
-	QVERIFY(!c.getBasisSum(isum, itemp));
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 3 - 3000ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 2300, 3300));
-	emit look(HLook(LookRight, 3400, 4400));
-	emit look(HLook(LookRight, 4500, 5500));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// Now we have a basis - first 3 have 6000ms. The percent is 50, so we need a window
-	// with less than 3000ms to complete. 
-	// The next 3 trials will have 5000ms - no habituation.
-	
-	// Trial 4 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 6100, 7100));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 5 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 7200, 9200));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 6 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 10300, 11300));
-	emit look(HLook(LookRight, 12400, 13400));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// now make the next 3 trials have just 2500ms - should be complete then.
-	// Trial 7 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 15000, 16000));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 8 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 20000, 21000));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 9 - 500ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 24000, 24500));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), true);
-	
-	//Third 3 2500ms - should succeed.
-	disconnect(&c);	
-	
-}
-
-void TestHabutil::testHabituationLongestFixed()
-{
-	Habit::CriterionSettings cs(Habit::CriterionSettings::eLongestN, 50, 3, Habit::CriterionSettings::eFixedWindow);
-	HPhaseHabituationCriteria c(cs);
-	int itemp;
-	int isum;
-	
-	// Basis - longestN  - FixedWindow 
-	// Trial 1-3 2000ms
-	// Trial 4-6 5000ms (longest)
-	// Trial 7-9 3000ms 
-	// Trial 10-12 2000ms (success)
-	
-	connect(this, SIGNAL(look(HLook)), &c, SLOT(gotLook(HLook)));
-	connect(this, SIGNAL(trialStarted()), &c, SLOT(trialStarted()));
-	connect(this, SIGNAL(trialCompleted()), &c, SLOT(trialCompleted()));
-	
-	// Trial 1 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 100, 1100));
-	emit trialCompleted();
-	
-	QVERIFY(!c.getBasisSum(isum, itemp));
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 2 - 500ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 1200, 1700));
-	emit trialCompleted();
-	
-	QVERIFY(!c.getBasisSum(isum, itemp));
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 3 - 500ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 2300, 2800));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 2000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// Trial 4 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 6100, 7100));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 2000);
-	QCOMPARE(itemp, 0);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 5 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 7200, 9200));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 3500);
-	QCOMPARE(itemp, 2);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 6 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 10300, 11300));
-	emit look(HLook(LookRight, 12400, 13400));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 5000);
-	QCOMPARE(itemp, 3);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// Trial 7 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 15000, 16000));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 5000);
-	QCOMPARE(itemp, 3);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 8 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 20000, 21000));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 5000);
-	QCOMPARE(itemp, 3);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// trial 9 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookRight, 24000, 24500));
-	emit look(HLook(LookRight, 25000, 25500));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 5000);
-	QCOMPARE(itemp, 3);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// Trial 10 - 500ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 26000, 26500));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 5000);
-	QCOMPARE(itemp, 3);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// Trial 11 - 500ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 27000, 27500));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 5000);
-	QCOMPARE(itemp, 3);
-	QCOMPARE(c.isPhaseComplete(), false);
-	
-	// Trial 12 - 1000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 28000, 29000));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 5000);
-	QCOMPARE(itemp, 3);
-	QCOMPARE(c.isPhaseComplete(), true);
-	
-	disconnect(&c);
-	
-	
-}
-
-void TestHabutil::testHabituationFirstSliding()
-{
-	Habit::CriterionSettings cs(Habit::CriterionSettings::eFirstN, 50, 3, Habit::CriterionSettings::eSlidingWindow);
-	HPhaseHabituationCriteria c(cs);
-	int itemp;
-	int isum;
-	
-	connect(this, SIGNAL(look(HLook)), &c, SLOT(gotLook(HLook)));
-	connect(this, SIGNAL(trialStarted()), &c, SLOT(trialStarted()));
-	connect(this, SIGNAL(trialCompleted()), &c, SLOT(trialCompleted()));
-	
-	// Trial 1 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 100, 2100));
-	emit trialCompleted();
-	
-	QVERIFY(!c.getBasisSum(isum, itemp));
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 2 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 2200, 2800));
-	emit look(HLook(LookLeft, 3100, 3500));
-	emit look(HLook(LookLeft, 3600, 4600));
-	emit trialCompleted();
-	
-	QVERIFY(!c.getBasisSum(isum, itemp));
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 3 - 2000ms. Basis sum = 6000, start trial 0
-	emit trialStarted();
-	emit look(HLook(LookLeft, 4000, 4800));
-	emit look(HLook(LookLeft, 5000, 6200));
-	emit trialCompleted();
-
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 4 - 4000ms, Basis sum = 6000, start trial 0, sliding window 8000
-	emit trialStarted();
-	emit look(HLook(LookLeft, 7500, 9000));
-	emit look(HLook(LookLeft, 9100, 10100));
-	emit look(HLook(LookLeft, 11000, 12500));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 5 - 1000ms. basis sum 6000,start trial 0. Sliding window 7000.
-	emit trialStarted();
-	emit look(HLook(LookLeft, 13000, 14000));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 6 - 1500ms, basis sum 6000,start trial 0. Sliding window 6500
-	emit trialStarted();
-	emit look(HLook(LookLeft, 15000, 16500));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 7 - 2000ms, basis sum 6000, start trial 0, sliding window 4500
-	emit trialStarted();
-	emit look(HLook(LookLeft, 16000, 17000));
-	emit look(HLook(LookLeft, 18000, 19000));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 8 - 1000ms, basis sum 6000, start trial 0, sliding window 4500
-	emit trialStarted();
-	emit look(HLook(LookLeft, 20000, 21000));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 9 - 500ms, basis sum 6000, start trial 0, sliding window 3500
-	emit trialStarted();
-	emit look(HLook(LookLeft, 22000, 22500));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QVERIFY(!c.isPhaseComplete());
-
-	// Trial 10 - 1000ms, basis sum 6000, start trial 0, sliding window 2500 (complete)
-	emit trialStarted();
-	emit look(HLook(LookLeft, 23000, 24000));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(isum, 6000);
-	QCOMPARE(itemp, 0);
-	QVERIFY(c.isPhaseComplete());
-	
-	disconnect(&c);
-}
-
-void TestHabutil::testHabituationLongestSliding()
-{
-	Habit::CriterionSettings cs(Habit::CriterionSettings::eLongestN, 50, 3, Habit::CriterionSettings::eSlidingWindow);
-	HPhaseHabituationCriteria c(cs);
-	int itemp;
-	int isum;
-	
-	connect(this, SIGNAL(look(HLook)), &c, SLOT(gotLook(HLook)));
-	connect(this, SIGNAL(trialStarted()), &c, SLOT(trialStarted()));
-	connect(this, SIGNAL(trialCompleted()), &c, SLOT(trialCompleted()));
-	
-	// Trial 1 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 100, 2100));
-	emit trialCompleted();
-	
-	QVERIFY(!c.getBasisSum(isum, itemp));
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 2 - 2000ms
-	emit trialStarted();
-	emit look(HLook(LookLeft, 2200, 2800));
-	emit look(HLook(LookLeft, 3100, 3500));
-	emit look(HLook(LookLeft, 3600, 4600));
-	emit trialCompleted();
-	
-	QVERIFY(!c.getBasisSum(isum, itemp));
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 3 - 2000ms, basis sum 6000, start trial 0, sliding window 6000 (not complete)
-	emit trialStarted();
-	emit look(HLook(LookLeft, 4700, 6200));
-	emit look(HLook(LookLeft, 6500, 7000));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(itemp, 0);
-	QCOMPARE(isum, 6000);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial  - 4000ms, basis sum 8000, start trial 1, sliding window 8000 (not complete)
-	emit trialStarted();
-	emit look(HLook(LookLeft, 7500, 9000));
-	emit look(HLook(LookLeft, 9100, 10100));
-	emit look(HLook(LookLeft, 11000, 12500));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(itemp, 1);
-	QCOMPARE(isum, 8000);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 5 - 1500ms, basis sum 8000, start trial 1, sliding window 7500 (not complete)
-	emit trialStarted();
-	emit look(HLook(LookLeft, 13000, 14000));
-	emit look(HLook(LookLeft, 14100, 14600));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(itemp, 1);
-	QCOMPARE(isum, 8000);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 6 - 500ms, basis sum 8000, start trial 1, sliding window 6000 (not complete)
-	emit trialStarted();
-	emit look(HLook(LookLeft, 15000, 15300));
-	emit look(HLook(LookLeft, 15500, 15700));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(itemp, 1);
-	QCOMPARE(isum, 8000);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 7 - 2200ms, basis sum 8000, start trial 1, sliding window 4200 (not complete)
-	emit trialStarted();
-	emit look(HLook(LookLeft, 16000, 17000));
-	emit look(HLook(LookLeft, 18000, 19200));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(itemp, 1);
-	QCOMPARE(isum, 8000);
-	QVERIFY(!c.isPhaseComplete());
-	
-	// Trial 8 - 1000ms, basis sum 8000, start trial 1, sliding window 3700 (complete)
-	emit trialStarted();
-	emit look(HLook(LookLeft, 20000, 21000));
-	emit trialCompleted();
-	
-	QVERIFY(c.getBasisSum(isum, itemp));
-	QCOMPARE(itemp, 1);
-	QCOMPARE(isum, 8000);
-	QVERIFY(c.isPhaseComplete());
-	
-	disconnect(&c);
-}
-#endif
 
 void TestHabutil::testTrialGenerator()
 {
