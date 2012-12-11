@@ -66,7 +66,7 @@ bool habit2::HPhaseHabituationCriteria::getBasisSum(const habit2::HPhaseLog& log
 bool habit2::HPhaseHabituationCriteria::getWindowSum(const habit2::HPhaseLog& log, int& sum, int ifirst)
 {
 	sum = 0;
-	if (ifirst >= log.size() || (ifirst + (int)m_c.getWindowSize() >= log.size())) return false;
+	if (ifirst + (int)m_c.getWindowSize() > log.size()) return false;
 	else 
 	{
 		for (int i=ifirst; i < ifirst + (int)m_c.getWindowSize(); i++)
