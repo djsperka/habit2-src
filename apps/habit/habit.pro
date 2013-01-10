@@ -15,7 +15,6 @@ CONFIG(debug) {
 INCLUDEPATH += ../../libs/habutil
 INCLUDEPATH += ../../libs/habutil/habit
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit
-DESTDIR = ../../bin
 SOURCES			=	main.cpp 
 HEADERS			=	version.h
 					

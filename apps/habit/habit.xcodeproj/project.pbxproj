@@ -7,46 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1B89A6FA1672D20A0018640B /* phonon.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CFEBBA93E6ACC9FEF582C3A2 /* phonon.framework */; };
-		1B89A6FB1672D20E0018640B /* QtGui.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = A22E40FA9FF2AC675E273EBB /* QtGui.framework */; };
-		1B89A6FC1672D2120018640B /* QtCore.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = ABD7D43C27568E737BDBEFDC /* QtCore.framework */; };
-		1B89A6FD1672D2150018640B /* QtSql.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = CD133CB9E74B2D62CC965A2E /* QtSql.framework */; };
-		1B89A7301676A8100018640B /* habiticon.icns in Bundle Resources */ = {isa = PBXBuildFile; fileRef = 1B89A72F1676A8100018640B /* habiticon.icns */; };
-		1B89A74B1676AC210018640B /* QtSql.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = CD133CB9E74B2D62CC965A2E /* QtSql.framework */; };
-		1B89A74C1676AC2F0018640B /* QtCore.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = ABD7D43C27568E737BDBEFDC /* QtCore.framework */; };
-		1B89A74D1676AC5B0018640B /* QtGui.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = A22E40FA9FF2AC675E273EBB /* QtGui.framework */; };
-		1B89A74E1676AC8F0018640B /* phonon.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = CFEBBA93E6ACC9FEF582C3A2 /* phonon.framework */; };
+		0DB2E48916B4FB077B7A688F /* QtSql.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = CD133CB9E74B2D62CC965A2E /* QtSql.framework */; };
+		1B89A89C167A69F90018640B /* habiticon.icns in Bundle Resources */ = {isa = PBXBuildFile; fileRef = 1B89A89B167A69F90018640B /* habiticon.icns */; };
 		2B093CA6F071B023A473CED0 /* main.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 118FCBAABA162BA17933C789 /* main.cpp */; settings = {ATTRIBUTES = (); }; };
+		C28DE529BCF325A846D5AF29 /* phonon.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = CFEBBA93E6ACC9FEF582C3A2 /* phonon.framework */; };
+		D87CFE1BA23D68AF2605A490 /* QtGui.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = A22E40FA9FF2AC675E273EBB /* QtGui.framework */; };
+		E16A1545B0F0502D0704CD14 /* QtCore.framework in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = ABD7D43C27568E737BDBEFDC /* QtCore.framework */; };
 		FE99BDBE06AB61841DE4D7FE /* habutil in Frameworks & Libraries */ = {isa = PBXBuildFile; fileRef = 4723CB00D094CB9C68E5D1A4 /* habutil */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		1B89A6F71672D1540018640B /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				1B89A6FD1672D2150018640B /* QtSql.framework in CopyFiles */,
-				1B89A6FC1672D2120018640B /* QtCore.framework in CopyFiles */,
-				1B89A6FB1672D20E0018640B /* QtGui.framework in CopyFiles */,
-				1B89A6FA1672D20A0018640B /* phonon.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		118FCBAABA162BA17933C789 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		1B89A72F1676A8100018640B /* habiticon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = habiticon.icns; sourceTree = "<group>"; };
-		1BEDD480161CF22B0056567F /* habit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = habit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B89A88B1679605B0018640B /* habit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = habit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B89A89B167A69F90018640B /* habiticon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = habiticon.icns; sourceTree = "<group>"; };
 		4723CB00D094CB9C68E5D1A4 /* habutil */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = habutil; path = ../../libs/habutil/build/Debug/libhabutil.a; sourceTree = "<group>"; };
 		54A8EF2BA3764F116CADCC19 /* habit.pro */ = {isa = PBXFileReference; lastKnownFileType = text; path = habit.pro; sourceTree = "<group>"; };
 		60A3232DE3747FDC63AC7F82 /* version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
 		A22E40FA9FF2AC675E273EBB /* QtGui.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtGui.framework; path = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtGui.framework"; sourceTree = "<absolute>"; };
 		ABD7D43C27568E737BDBEFDC /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework"; sourceTree = "<absolute>"; };
 		CD133CB9E74B2D62CC965A2E /* QtSql.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtSql.framework; path = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework"; sourceTree = "<absolute>"; };
-		CFEBBA93E6ACC9FEF582C3A2 /* phonon.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = phonon.framework; path = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/phonon.framework"; sourceTree = "<absolute>"; };
+		CFEBBA93E6ACC9FEF582C3A2 /* phonon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = phonon.framework; path = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/phonon.framework"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,10 +35,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE99BDBE06AB61841DE4D7FE /* habutil in Frameworks & Libraries */,
-				1B89A74E1676AC8F0018640B /* phonon.framework in Frameworks & Libraries */,
-				1B89A74D1676AC5B0018640B /* QtGui.framework in Frameworks & Libraries */,
-				1B89A74C1676AC2F0018640B /* QtCore.framework in Frameworks & Libraries */,
-				1B89A74B1676AC210018640B /* QtSql.framework in Frameworks & Libraries */,
+				C28DE529BCF325A846D5AF29 /* phonon.framework in Frameworks & Libraries */,
+				D87CFE1BA23D68AF2605A490 /* QtGui.framework in Frameworks & Libraries */,
+				E16A1545B0F0502D0704CD14 /* QtCore.framework in Frameworks & Libraries */,
+				0DB2E48916B4FB077B7A688F /* QtSql.framework in Frameworks & Libraries */,
 			);
 			name = "Frameworks & Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -69,30 +49,30 @@
 		05596AB53D8D521C69802C27 /* habit */ = {
 			isa = PBXGroup;
 			children = (
-				1B89A72C1676A6CF0018640B /* Resources */,
+				1B89A89A167A69DC0018640B /* Resources */,
 				FB61758D0F0FDA4BA867C3D5 /* Sources */,
 				883D7615C4D2DE3FA1218F12 /* Headers */,
 				7CABE3C80E79AD2B307756D2 /* Sources [qmake] */,
 				ED1E82605DD74B483AF3C982 /* External Frameworks and Libraries */,
-				1BEDD481161CF22B0056567F /* Products */,
+				1B89A88C1679605B0018640B /* Products */,
 			);
 			name = habit;
 			sourceTree = "<group>";
 		};
-		1B89A72C1676A6CF0018640B /* Resources */ = {
+		1B89A88C1679605B0018640B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1B89A72F1676A8100018640B /* habiticon.icns */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
-		1BEDD481161CF22B0056567F /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				1BEDD480161CF22B0056567F /* habit.app */,
+				1B89A88B1679605B0018640B /* habit.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		1B89A89A167A69DC0018640B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1B89A89B167A69F90018640B /* habiticon.icns */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		7CABE3C80E79AD2B307756D2 /* Sources [qmake] */ = {
@@ -138,22 +118,20 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 17B3380A4D6A7D415E7F2E1E /* Build configuration list for PBXNativeTarget "habit" */;
 			buildPhases = (
-				1B89A6F71672D1540018640B /* CopyFiles */,
-				1B89A7551676AF190018640B /* ShellScript */,
 				D7BA7D76DAB5DD13389D6332 /* Qt Qmake */,
 				A0A52A2ADF7A1E2A99738674 /* Qt Preprocessors */,
 				C29B8785722055ED95EF7B57 /* Build Sources */,
 				2A1043669E6E5A7426EA502A /* Frameworks & Libraries */,
 				3787F99312C85FF0073FD7BA /* Bundle Resources */,
+				1BF7CF11167BE05300DB8C61 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = habit;
-			productInstallPath = ../../bin/;
 			productName = habit;
-			productReference = 1BEDD480161CF22B0056567F /* habit.app */;
+			productReference = 1B89A88B1679605B0018640B /* habit.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -172,7 +150,7 @@
 				German,
 			);
 			mainGroup = 05596AB53D8D521C69802C27 /* habit */;
-			productRefGroup = 1BEDD481161CF22B0056567F /* Products */;
+			productRefGroup = 1B89A88C1679605B0018640B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -186,7 +164,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1B89A7301676A8100018640B /* habiticon.icns in Bundle Resources */,
+				1B89A89C167A69F90018640B /* habiticon.icns in Bundle Resources */,
 			);
 			name = "Bundle Resources";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -194,7 +172,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1B89A7551676AF190018640B /* ShellScript */ = {
+		1BF7CF11167BE05300DB8C61 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -205,7 +183,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\nEXECFILE=${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\nLIBPATH=${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\nNEWLIBPATH=\"@loader_path/../Frameworks\"\n\n# space separated list of libraries\nTARGETS=\"phonon QtGui QtCore QtSql\"\nfor TARGET in ${TARGETS} ; do\nLIBFILE=${LIBPATH}/${TARGET}.framework/${TARGET}\nTARGETID=`otool -DX ${LIBFILE}`\nNEWTARGETID=${NEWLIBPATH}/${TARGET}.framework/${TARGET}\ninstall_name_tool -id ${NEWTARGETID} ${LIBFILE}\ninstall_name_tool -change ${TARGETID} ${NEWTARGETID} ${EXECFILE}\ndone";
+			shellScript = "/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/bin/macdeployqt ${BUILT_PRODUCTS_DIR}/habit.app -verbose=2\n";
 		};
 		A0A52A2ADF7A1E2A99738674 /* Qt Preprocessors */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -273,7 +251,6 @@
 					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/mkspecs/macx-xcode",
 				);
 				INFOPLIST_FILE = Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
 					../../libs/habutil/build/Debug,
@@ -320,11 +297,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = habit;
 			};
@@ -334,11 +306,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = habit;
@@ -375,7 +342,6 @@
 					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/mkspecs/macx-xcode",
 				);
 				INFOPLIST_FILE = Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib",
 					../../libs/habutil/build/Debug,
