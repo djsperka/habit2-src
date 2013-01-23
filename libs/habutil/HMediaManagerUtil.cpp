@@ -128,7 +128,7 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 	// stimuli only. For each, save the stimuli numbers as they are added to the players. 
 	//
 	// Habit does not require that stimuli be configured for each monitor that will be used. Whether its inadvertent or not, we must allow this 
-	// to occur. One assumption we are making is that each of the players will have the same number of stimuli configured. Thus, if stimulus 10 is 
+	// to occur. One assumption we are making is that each of the players will have the same number of stimuli configured. Thus, if stimulus '10' is 
 	// requested, each of the configured players should play that stimulus on each configured screen.
 	//
 	

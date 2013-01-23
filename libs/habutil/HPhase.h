@@ -18,10 +18,10 @@ class HPhase: public HState
 {
 	Q_OBJECT
 	
-	//QList<int> m_stimuli;
 	QList<QPair<int, Habit::StimulusSettings> > m_stimuli;
 	int m_itrial;
 	HTrial* m_sTrial;
+
 public:
 	HPhase(const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
 	virtual ~HPhase() {};

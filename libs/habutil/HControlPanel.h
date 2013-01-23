@@ -72,7 +72,6 @@ private:
 	HPhase* m_psPreTest;
 	HPhase* m_psHabituation;
 	HPhase* m_psTest;
-	Habit::StimulusSettingsList m_pStimulusSettingsList;
 	
 	QPushButton* m_pbStartTrials;
 	QPushButton* m_pbNextTrial;

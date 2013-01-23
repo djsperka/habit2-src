@@ -18,12 +18,7 @@ namespace habit2
 {
 	class HEventLog: public QList<HEvent*>
 	{
-	public:
-		static HEventLog& instance();
-		HPhaseLog getPhaseLog(QString s = QString(""));
-		
-		private:
-		
+	public:		
 		HEventLog()
 		: QList<HEvent*>()
 		{};
@@ -34,6 +29,7 @@ namespace habit2
 
 		virtual ~HEventLog();	// must destroy all events
 
+		HPhaseLog getPhaseLog(QString s = QString(""));
 	};
 };
 

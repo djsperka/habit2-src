@@ -15,14 +15,6 @@ habit2::HEventLog::~HEventLog()
 		delete takeFirst();
 };
 
-
-habit2::HEventLog& habit2::HEventLog::instance()
-{
-	static habit2::HEventLog c_instance;
-	return c_instance;
-};
-
-
 habit2::HPhaseLog habit2::HEventLog::getPhaseLog(QString phase)
 {
 	bool bHavePhaseStart=false;

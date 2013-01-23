@@ -141,10 +141,12 @@ void HControlPanel::createExperiment()
 	// but this is how it was originally written so there. 
 	loadFromDB();
 	
-	// These will hold stim numbers for stimuli available to each phase.
+	// These will hold stim numbers for stimuli _available_ to each phase, as configured
+	// for the experiment. 
 	Habit::StimulusSettingsList l1, l2, l3;
 
-	// These will hold stim numbers for the trials in each phase.
+	// These will hold stim numbers for the trials in each phase, as they are configured/randomized
+	// on a particular run.
 	Habit::StimulusSettingsList lTrials;
 
 	// Get info for creating look detector and phase(s). 
