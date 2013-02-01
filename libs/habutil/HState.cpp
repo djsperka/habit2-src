@@ -12,10 +12,17 @@
 #include <QDebug>
 #include <QAbstractTransition>
 
-HState::HState( const QString& name, QState* parent )
-: QState( parent ), m_name( name )
-{
-}
+HState::HState(const QString& name, QState* parent )
+: QState(parent)
+, m_name(name)
+, m_prefix("")
+{};
+
+HState::HState(const QString& name, const QString& prefix, QState* parent)
+: QState(parent)
+, m_name(name)
+, m_prefix(prefix)
+{};
 
 void HState::onEntry( QEvent* e )
 {

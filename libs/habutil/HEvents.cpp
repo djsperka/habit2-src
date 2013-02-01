@@ -8,18 +8,9 @@
  */
 
 
-/*
- *  habit2.cpp
- *  habutil
- *
- *  Created by Oakes Lab on 10/30/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
- *
- */
-
 #include "HEvents.h"
 
-QTextStream& habit2::operator<<(QTextStream& out, const habit2::HEventType& type)
+QTextStream& operator<<(QTextStream& out, const HEventType& type)
 {
 	switch (type) {
 		case kPhaseStart:
@@ -60,7 +51,7 @@ QTextStream& habit2::operator<<(QTextStream& out, const habit2::HEventType& type
 	return out;
 };
 
-QTextStream& habit2::operator<<(QTextStream& out, const habit2::HTrialEndType& etype)
+QTextStream& operator<<(QTextStream& out, const HTrialEndType& etype)
 {
 	switch (etype)
 	{
@@ -82,28 +73,28 @@ QTextStream& habit2::operator<<(QTextStream& out, const habit2::HTrialEndType& e
 			
 
 
-QTextStream& habit2::operator<<(QTextStream& out, const habit2::HEvent& e)
+QTextStream& operator<<(QTextStream& out, const HEvent& e)
 {
 	out << qSetFieldWidth(7) << right << e.timestamp() << " " << qSetFieldWidth(20) << left << e.type() << " " << qSetFieldWidth(0) << e.eventInfo() << endl;
 	return out;
 };
 
-QString habit2::HPhaseStartEvent::eventInfo() const 
+QString HPhaseStartEvent::eventInfo() const 
 {
 	return m_phase;
 };
 
-QString habit2::HPhaseEndEvent::eventInfo() const 
+QString HPhaseEndEvent::eventInfo() const 
 {
 	return QString("Phase ended");
 };
 
-QString habit2::HTrialStartEvent::eventInfo() const 
+QString HTrialStartEvent::eventInfo() const 
 {
 	return QString("Trial %1 repeat %2").arg(trialnumber()).arg(repeatnumber());
 };
 
-QString habit2::HTrialEndEvent::eventInfo() const
+QString HTrialEndEvent::eventInfo() const
 {
 	QString s;
 	switch (m_endtype)
@@ -124,32 +115,32 @@ QString habit2::HTrialEndEvent::eventInfo() const
 	return s;
 };
 
-QString habit2::HStimRequestEvent::eventInfo() const
+QString HStimRequestEvent::eventInfo() const
 {
 	return QString("Request stim index %1").arg(m_stimindex);
 };
 
-QString habit2::HStimStartEvent::eventInfo() const
+QString HStimStartEvent::eventInfo() const
 {
 	return QString("Stim index %1 started on player %2").arg(m_stimindex).arg(m_playerid);
 };
 
-QString habit2::HStimulusSettingsEvent::eventInfo() const
+QString HStimulusSettingsEvent::eventInfo() const
 {
 	return QString("Stim index: %1  Name: %2").arg(m_stimindex, 2).arg(m_settings.getName());
 };
 
-QString habit2::HStimulusInfoEvent::eventInfo() const
+QString HStimulusInfoEvent::eventInfo() const
 {
 	return QString("Stim index: %1  File: %2 Loop: %3 Volume: %4").arg(m_stimindex).arg(m_info.getFileName()).arg(m_info.isLoopPlayBack()).arg(m_info.getAudioBalance());
 };
 
-QString habit2::HAttentionEvent::eventInfo() const
+QString HAttentionEvent::eventInfo() const
 {
 	return QString("");
 };
 
-QString habit2::HLookEvent::eventInfo() const
+QString HLookEvent::eventInfo() const
 {
 	QString s;
 	QTextStream tmp(&s);

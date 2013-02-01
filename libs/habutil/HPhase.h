@@ -11,10 +11,14 @@
 #define _HPHASE_H_
 
 #include "HTrial.h"
+#include "HEventLog.h"
+#include "HLookDetector.h"
 #include "stimulusSettings.h"
 #include <QList>
+#include <QEvent>
+#include <QAbstractTransition>
 
-class HPhase: public HState
+class HPhase: public HLogState
 {
 	Q_OBJECT
 	
@@ -23,7 +27,7 @@ class HPhase: public HState
 	HTrial* m_sTrial;
 
 public:
-	HPhase(const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
+	HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
 	virtual ~HPhase() {};
 	bool advance();
 	HTrial* getHTrial() { return m_sTrial; };
@@ -100,54 +104,6 @@ protected:
 	virtual void onTransition(QEvent* event)
 	{
 		Q_UNUSED(event);
-	};
-};
-
-class HPhaseTrialStartingState: public HState
-{
-	Q_OBJECT
-	
-private:
-	HPhase* m_sPhase;
-	
-public:
-	HPhaseTrialStartingState(HPhase* phase);
-};
-
-class HPhaseTrialCompleteState: public HState
-{
-	Q_OBJECT
-
-private:
-	HPhase* m_sPhase;
-	
-public:
-	
-	HPhaseTrialCompleteState(HPhase* phase) : HState("HPhaseTrialCompleteState", phase), m_sPhase(phase) {};
-	~HPhaseTrialCompleteState() {};
-	
-signals:
-	
-	
-protected:
-	// on entry to this state we request that the stim be played. 
-	// Update: Make request by sending a signal (emit) to media controller. 
-	
-	void onEntry(QEvent* e) 
-	{
-		Q_UNUSED(e);
-		HState::onEntry(e);
-		
-		if (m_sPhase->advance())
-		{
-			qDebug() << "HPhaseTrialCompleteState::onEntry - advance OK, post NewTrialEvent";
-			machine()->postEvent(new HNewTrialEvent());
-		}
-		else 
-		{
-			qDebug() << "HPhaseTrialCompleteState::onEntry - all trials done, post AllTrialsDoneEvent";
-			machine()->postEvent(new HAllTrialsDoneEvent());
-		}
 	};
 };
 

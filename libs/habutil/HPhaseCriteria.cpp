@@ -12,17 +12,17 @@
 
 using namespace Habit;
 
-bool habit2::HPhaseFixedNCriteria::isPhaseComplete(const habit2::HPhaseLog& log)
+bool HPhaseFixedNCriteria::isPhaseComplete(const HPhaseLog& log)
 {
 	return log.nCompleted() >= m_N;
 };
 
-bool habit2::HPhaseTotalLookingTimeCriteria::isPhaseComplete(const habit2::HPhaseLog& log)
+bool HPhaseTotalLookingTimeCriteria::isPhaseComplete(const HPhaseLog& log)
 {
 	return log.totalLookingTime() >= m_msTotal;
 };
 
-bool habit2::HPhaseHabituationCriteria::getBasisSum(const habit2::HPhaseLog& log, int& iBasisSum, int& iBasisWindowStart)
+bool HPhaseHabituationCriteria::getBasisSum(const HPhaseLog& log, int& iBasisSum, int& iBasisWindowStart)
 {
 	bool bval = false;
 	iBasisSum = 0;
@@ -63,7 +63,7 @@ bool habit2::HPhaseHabituationCriteria::getBasisSum(const habit2::HPhaseLog& log
 	return bval;
 };
 
-bool habit2::HPhaseHabituationCriteria::getWindowSum(const habit2::HPhaseLog& log, int& sum, int ifirst)
+bool HPhaseHabituationCriteria::getWindowSum(const HPhaseLog& log, int& sum, int ifirst)
 {
 	sum = 0;
 	if (ifirst + (int)m_c.getWindowSize() > log.size()) return false;
@@ -75,7 +75,7 @@ bool habit2::HPhaseHabituationCriteria::getWindowSum(const habit2::HPhaseLog& lo
 	return true;
 };
 
-bool habit2::HPhaseHabituationCriteria::isPhaseComplete(const habit2::HPhaseLog& log)
+bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log)
 {
 	bool bval = false;
 	int iWindowStart = -1;

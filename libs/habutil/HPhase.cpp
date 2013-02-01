@@ -10,13 +10,15 @@
 #include "HPhase.h"
 #include <QFinalState>
 
-HPhase::HPhase(const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent) 
-	: HState("Phase", parent), m_stimuli(stimuli), m_itrial(0)
+HPhase::HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent) 
+	: HLogState(log, "Phase", parent)
+	, m_stimuli(stimuli)
+	, m_itrial(0)
 {
 	QAbstractTransition* trans;
-	m_sTrial = new HTrial(pMediaManager, pLD, maxTrialLengthMS, maxNoLookTimeMS, bFixedLength, bUseAG, this);
+	m_sTrial = new HTrial(*this, log, pMediaManager, pLD, maxTrialLengthMS, maxNoLookTimeMS, bFixedLength, bUseAG, this);
 	setInitialState(m_sTrial);
-	HPhaseTrialCompleteState* sTrialComplete = new HPhaseTrialCompleteState(this);
+	HPhaseTrialCompleteState* sTrialComplete = new HPhaseTrialCompleteState(*this, log);
 	m_sTrial->addTransition(m_sTrial, SIGNAL(finished()), sTrialComplete);
 	QFinalState* sFinal = new QFinalState(this);
 	

@@ -184,7 +184,7 @@ void HControlPanel::createExperiment()
 	connect(m_psm, SIGNAL(finished()), this, SLOT(onExperimentFinished()));
 		
 	// This is a single super-state that holds all the phases.
-	HExperimentState* sExperiment = new HExperimentState();
+	HExperiment* sExperiment = new HExperiment();
 	m_psm->addState(sExperiment);
 	m_psm->setInitialState(sExperiment);
 	QFinalState* sFinal = new QFinalState;
@@ -424,29 +424,42 @@ void HControlPanel::onLook(HLook l)
 void HControlPanel::loadFromDB()
 {
 	Habit::MainDao dao;
-	qDebug("HControlPanel::loadFromDB(): get exp settings.");
+//	qDebug("HControlPanel::loadFromDB(): get exp settings.");
 	m_experimentSettings = dao.getExperimentSettingsById(m_runSettings.getExperimentId());
 	m_experimentSettings.loadFromDB();
 	
+#ifdef NO_LONGER_USED
 	qDebug() << m_experimentSettings.getPreTestStimuliSettings();
 	qDebug() << m_experimentSettings.getHabituationStimuliSettings();
 	qDebug() << m_experimentSettings.getTestStimuliSettings();
+#endif
 	
-	qDebug("HControlPanel::loadFromDB(): get exp settings - Done.");
+//	qDebug("HControlPanel::loadFromDB(): get exp settings - Done.");
 }
 	
 	
 void HControlPanel::onStartTrials()
 {
+	
+	/*
+	 * Set control buttons enabled/disabled as necessary
+	 */
+	
 	qDebug("HControlPanel::onStartTrials()");
 	m_pbStopTrials->setEnabled(true);
 	m_pbNextTrial->setEnabled(true);
 	m_pbStartTrials->setEnabled(false);
-	
+
+#ifdef NO_LONGER_USED
 	HOutputGenerator::instance()->setExperiment(m_runSettings.getExperimentId());
 	HOutputGenerator::instance()->setRunSettings(m_runSettings);
 	HOutputGenerator::instance()->setSubjectInformation(m_subjectSettings);
+#endif
 
+	/*
+	 * Start the state machine
+	 */
+	
 	m_psm->start();
 }
 

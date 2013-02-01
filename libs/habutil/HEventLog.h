@@ -14,23 +14,20 @@
 #include "HPhaseLog.h"
 #include <QList>
 
-namespace habit2
+class HEventLog: public QList<HEvent*>
 {
-	class HEventLog: public QList<HEvent*>
-	{
-	public:		
-		HEventLog()
-		: QList<HEvent*>()
-		{};
+public:		
+	HEventLog()
+	: QList<HEvent*>()
+	{};
 
-		HEventLog(const HEventLog& l)
-		: QList<HEvent*>(l)
-		{};
+	HEventLog(const HEventLog& l)
+	: QList<HEvent*>(l)
+	{};
 
-		virtual ~HEventLog();	// must destroy all events
+	virtual ~HEventLog();	// must destroy all events
 
-		HPhaseLog getPhaseLog(QString s = QString(""));
-	};
+	HPhaseLog getPhaseLog(QString s = QString(""));
 };
 
 #endif

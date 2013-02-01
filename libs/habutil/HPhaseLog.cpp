@@ -10,7 +10,7 @@
 #include "HPhaseLog.h"
 #include <QListIterator>
 
-int habit2::HPhaseLog::totalLookingTime() const
+int HPhaseLog::totalLookingTime() const
 {
 	int total=0;
 	QListIterator<int> iterator(*this);

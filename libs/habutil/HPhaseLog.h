@@ -25,21 +25,16 @@
 // 
 
 
-namespace habit2
+// List of integers. Each int is the total looking time for a single
+// completed trial. 
+class HPhaseLog: public QList<int>
 {
 
-	// List of integers. Each int is the total looking time for a single
-	// completed trial. 
-	class HPhaseLog: public QList<int>
-	{
+public:
+	HPhaseLog() : QList<int>() {};
+	virtual ~HPhaseLog() {};
 
-	public:
-		HPhaseLog() : QList<int>() {};
-		virtual ~HPhaseLog() {};
-
-		int nCompleted() const { return size(); };
-		int totalLookingTime() const;
-	};
-
+	int nCompleted() const { return size(); };
+	int totalLookingTime() const;
 };
 #endif

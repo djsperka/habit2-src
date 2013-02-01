@@ -9,17 +9,17 @@
 
 #include "HEventLog.h"
 
-habit2::HEventLog::~HEventLog()
+HEventLog::~HEventLog()
 {
 	while (!isEmpty())
 		delete takeFirst();
 };
 
-habit2::HPhaseLog habit2::HEventLog::getPhaseLog(QString phase)
+HPhaseLog HEventLog::getPhaseLog(QString phase)
 {
 	bool bHavePhaseStart=false;
 	HPhaseLog phaselog;
-	QListIterator<habit2::HEvent*> events(*this);
+	QListIterator<HEvent*> events(*this);
 	// Move iterator to phase start event
 	if (phase == "")
 	{
@@ -59,7 +59,7 @@ habit2::HPhaseLog habit2::HEventLog::getPhaseLog(QString phase)
 		bool bInterTrial = true;
 		bool bPhaseEnd = false;
 		int iTotal = 0;
-		habit2::HEvent* pevent;
+		HEvent* pevent;
 		while (events.hasNext() && !bPhaseEnd)
 		{
 			pevent = events.next();
@@ -69,13 +69,13 @@ habit2::HPhaseLog habit2::HEventLog::getPhaseLog(QString phase)
 				// TrialStart event
 				switch (pevent->type())
 				{
-					case habit2::kTrialStart:						
+					case kTrialStart:						
 					{
 						bInterTrial = false;
 						iTotal = 0;
 						break;
 					}
-					case habit2::kPhaseEnd:
+					case kPhaseEnd:
 					{
 						bPhaseEnd = true;
 						break;
@@ -94,7 +94,7 @@ habit2::HPhaseLog habit2::HEventLog::getPhaseLog(QString phase)
 				{
 					case kTrialEnd:
 					{
-						habit2::HTrialEndEvent* pte = static_cast<habit2::HTrialEndEvent*>(pevent);
+						HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(pevent);
 						if (pte->endtype() == kTrialEndSuccess)
 						{
 							phaselog.append(iTotal);
@@ -105,7 +105,7 @@ habit2::HPhaseLog habit2::HEventLog::getPhaseLog(QString phase)
 					}
 					case kLook:
 					{
-						habit2::HLookEvent* plook = static_cast<habit2::HLookEvent*>(pevent);
+						HLookEvent* plook = static_cast<HLookEvent*>(pevent);
 						iTotal += plook->look().lookMS();
 						break;
 					}

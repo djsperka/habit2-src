@@ -13,13 +13,6 @@
 #include <QFinalState>
 #include <QTimerEvent>
 
-void HExperimentState::onExit(QEvent* e)
-{
-	Q_UNUSED(e);
-	// on exiting experiment, tell Media Manager to put up blank screen.
-	emit playStim(-1);
-};
-
 void HStimRequestState::setNextStim(int i, const Habit::StimulusSettings& ss) 
 { 
 	m_nextStimID = i; 
@@ -76,13 +69,13 @@ bool HNoLookTransition::eventTest(QEvent* e)
 	return bVal;
 }
 
-HTrial::HTrial(QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0) :
-	HState("HTrial", parent), 
-	m_pLD(pLD),
-	m_maxTrialLengthMS(maxTrialLengthMS), 
-	m_maxNoLookTimeMS(maxNoLookTimeMS),
-	m_bFixedLength(bFixedLength), 
-	m_bAG(bUseAG)
+HTrial::HTrial(HPhase& phase, HEventLog& log, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG) 
+	: HPhaseChildState(phase, log, "HTrial")
+	, m_pLD(pLD)
+	, m_maxTrialLengthMS(maxTrialLengthMS)
+	, m_maxNoLookTimeMS(maxNoLookTimeMS)
+	, m_bFixedLength(bFixedLength)
+	, m_bAG(bUseAG)
 {
 	// create timer for stim
 	m_ptimerMaxTrialLength = new QTimer();
