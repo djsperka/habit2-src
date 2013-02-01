@@ -8,6 +8,7 @@ HEADERS +=	HLook.h \
 			HKeypadLookDetector.h \
 			HEvents.h \
 			HState.h \
+			HLogState.h \
 			HStateMachine.h \
 			HTrial.h \
 			HPhase.h \
@@ -28,6 +29,10 @@ HEADERS +=	HLook.h \
 			HTrialLog.h \
 			HPhaseLog.h \
 			HEventLog.h \
+			HExperiment.h \
+			HExperimentChildState.h \
+			HPhaseChildState.h \
+			HTrialChildState.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \

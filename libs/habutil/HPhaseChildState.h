@@ -19,8 +19,7 @@ class HPhaseChildState: public HLogState
 	Q_OBJECT
 	
 public:
-//	HPhaseChildState(HPhase& phase, HEventLog& log, const QString& name)
-	HPhaseChildState(HEventLog& log, const QString& name)
+	HPhaseChildState(HPhase& phase, HEventLog& log, const QString& name)
 	: HLogState(log, name, &phase)
 	, m_phase(phase)
 	{};

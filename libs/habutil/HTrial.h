@@ -10,7 +10,8 @@
 #ifndef _HTRIAL_H_
 #define _HTRIAL_H_
 
-#include "HState.h"
+#include "HTrialChildState.h"
+#include "HPhaseChildState.h"
 #include "HLookDetector.h"
 #include "stimulussettings.h"
 #include "HOutputGenerator.h"
@@ -22,13 +23,32 @@
 #include <QDebug>
 #include <QStateMachine>
 
-class HAGRequestState: public HState
+
+class HInitialState: public HTrialChildState
+{
+	Q_OBJECT
+	
+	int m_newrepeat;
+	
+public:
+	HInitialState(HTrial& trial, HEventLog& log, int new_repeat, QState* parent=0) : HTrialChildState(trial, log, "HInitialState", parent), m_newrepeat(new_repeat) {};
+	~HInitialState() {};
+	
+protected:
+	void onEntry(QEvent* e)
+	{
+		Q_UNUSED(e);
+		HOutputGenerator::instance()->addLogItem(m_newrepeat, 0);
+	};
+};
+
+class HAGRequestState: public HTrialChildState
 {
 	Q_OBJECT
 	
 public:
 	
-	HAGRequestState(QState* parent = 0) : HState("HAGRequestState", parent) {};
+	HAGRequestState(HTrial& trial, HEventLog& log, QState* parent = 0) : HTrialChildState(trial, log, "HAGRequestState", parent) {};
 	~HAGRequestState() {};
 	
 signals:
@@ -40,48 +60,22 @@ protected:
 	void onEntry(QEvent* e);
 };
 
-class HAGRunningState: public HState
+class HAGRunningState: public HTrialChildState
 {
 	Q_OBJECT
 	
 public:
 	
-	HAGRunningState(QState* parent = 0) : HState("HAGRunningState", parent) {};
+	HAGRunningState(HTrial& trial, HEventLog& log, QState* parent = 0) : HTrialChildState(trial, log, "HAGRunningState", parent) {};
 	~HAGRunningState() {};
-	
+
+	// on entry generate kAGStarted event 
+	void onEntry(QEvent* e);
+
 };
 
-class HExperimentState: public HState
-{
-	Q_OBJECT
-	
-public:
-	HExperimentState(QState* parent = 0) : HState("HExperimentState", parent) {};
-	~HExperimentState() {};
-	void onExit(QEvent* e);
-signals:
-	void playStim(int);
-};
 
-class HInitialState: public HState
-{
-	Q_OBJECT
-	
-	int m_newrepeat;
-	
-public:
-	HInitialState(int new_repeat, QState* parent=0) : HState("HInitialState", parent), m_newrepeat(new_repeat) {};
-	~HInitialState() {};
-	
-protected:
-	void onEntry(QEvent* e)
-	{
-		Q_UNUSED(e);
-		HOutputGenerator::instance()->addLogItem(m_newrepeat, 0);
-	};
-};
-
-class HStimRequestState: public HState
+class HStimRequestState: public HTrialChildState
 {
 	Q_OBJECT
 	
@@ -90,7 +84,7 @@ class HStimRequestState: public HState
 	
 public:
 	
-	HStimRequestState(QState* parent = 0) : HState("HStimRequestState", parent), m_nextStimID(-1) {};
+	HStimRequestState(HTrial& trial, HEventLog& log, QState* parent = 0) : HTrialChildState(trial, log, "HStimRequestState", parent), m_nextStimID(-1) {};
 	~HStimRequestState() {};	
 	void setNextStim(int i, const Habit::StimulusSettings& ss);
 signals:
@@ -101,12 +95,46 @@ protected:
 	void onEntry(QEvent* e);
 };
 
-class HBailState: public HState
+/**
+ State entered when stim starts playing. Starts a timer on entry.
+ */
+
+class HNoLookTransition;
+
+class HStimRunningState: public HTrialChildState
+{
+public:
+	HStimRunningState(HTrial& trial, HEventLog& log, int msMax, HNoLookTransition* ptrans, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook, QState *parent=0) 
+	: HTrialChildState(trial, log, "HStimRunning", parent)
+	, m_ptransNoLook(ptrans)
+	, m_msMax(msMax)
+	, m_ptimerMax(ptimerMax)
+	, m_msNoLook(msNoLook)
+	, m_ptimerNoLook(ptimerNoLook)  
+	{};
+	~HStimRunningState() {};
+	
+protected:
+	// Start timer on entry to this state. Also generate kStimRunning event. 
+	void onEntry(QEvent* e);
+	void onExit(QEvent* e);
+	
+private:
+	HNoLookTransition* m_ptransNoLook;
+	int m_msMax;
+	QTimer* m_ptimerMax;
+	int m_msNoLook;
+	QTimer* m_ptimerNoLook;
+};
+
+
+class HBailState: public HTrialChildState
 {
 	Q_OBJECT
 	
 public:
-	HBailState(QState* parent=0) : HState("BailState", parent) {};
+	HBailState(HTrial& trial, HEventLog& log, QState* parent=0) 
+	: HTrialChildState(trial, log, "BailState", parent) {};
 	~HBailState() {};
 	
 protected:
@@ -116,9 +144,6 @@ protected:
 		HOutputGenerator::instance()->addLogItem(HTrialLogItem::REPEAT_TRIAL, 0);
 	};
 };
-
-
-
 
 class HNoLookTransition: public QAbstractTransition
 {
@@ -138,30 +163,6 @@ private:
 };
 
 
-/**
- State entered when stim starts playing. Starts a timer on entry.
- */
-
-class HStimRunningState: public HState
-{
-public:
-	HStimRunningState(int msMax, HNoLookTransition* ptrans, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook, QState *parent=0) : HState("HStimRunning", parent), m_ptransNoLook(ptrans), m_msMax(msMax), m_ptimerMax(ptimerMax), m_msNoLook(msNoLook), m_ptimerNoLook(ptimerNoLook)  {};
-	~HStimRunningState() {};
-	
-protected:
-	// Start timer on entry to this state
-	void onEntry(QEvent* e);
-	void onExit(QEvent* e);
-	
-private:
-	HNoLookTransition* m_ptransNoLook;
-	int m_msMax;
-	QTimer* m_ptimerMax;
-	int m_msNoLook;
-	QTimer* m_ptimerNoLook;
-};
-
-
 
 
 
@@ -170,12 +171,12 @@ private:
  The HTrial is a single state which will conduct a single trial. 
 */
 
-class HTrial: public HState
+class HTrial: public HPhaseChildState
 {
 	Q_OBJECT
 	
 public:
-	HTrial(QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent);
+	HTrial(HPhase& phase, HEventLog& log, QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG);
 	~HTrial() {};
 	void setNextStim(int i, const Habit::StimulusSettings& ss);
 	HStimRequestState* getSStimRequest() { return m_sStimRequest; };
