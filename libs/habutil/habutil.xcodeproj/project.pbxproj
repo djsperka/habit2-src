@@ -161,6 +161,7 @@
 		18E228A648EB2A9746BE8BFC /* HExperiment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HExperiment.h; sourceTree = "<group>"; };
 		1954133F51CAC3AD0C01810A /* HTrialGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HTrialGenerator.h; sourceTree = "<group>"; };
 		1A99CAFDB279A87A2F2F5CAE /* viewexperimentresultform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = viewexperimentresultform.h; path = habit/viewexperimentresultform.h; sourceTree = "<group>"; };
+		1B326E5316BC333B002226BC /* HQEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HQEvents.h; sourceTree = "<group>"; };
 		1BFF0CEF16B9F15E001EBBA3 /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DB843A27517106274BF1269 /* HPhase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HPhase.cpp; sourceTree = "<group>"; };
 		1E0689075E90CC961E2BDAD0 /* moc_experimentresultsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_experimentresultsform.cpp; sourceTree = "<group>"; };
@@ -598,6 +599,7 @@
 				25727435DD094534B298C9C8 /* HPhaseChildState.h */,
 				CE038FC2579A3F5C9AC46C74 /* HTrialChildState.h */,
 				3C52AE251A37811ADDFD17EF /* habit */,
+				1B326E5316BC333B002226BC /* HQEvents.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";

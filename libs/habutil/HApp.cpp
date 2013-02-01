@@ -8,7 +8,7 @@
  */
 
 #include "HApp.h"
-
+#include "HEventLog.h"
 #include "experimentsettingsform.h"
 #include "resultsvieweroptions.h"
 #include "experimentresultsform.h"
@@ -44,11 +44,12 @@ void HApp::runReliability()
 		GUILib::ReliabilitiesForm form(this);
 		if (form.exec() == QDialog::Accepted)
 		{
+			HEventLog log;
 			HOutputGenerator::initialize();
 			HOutputGenerator::instance()->load(fileName);
 			RunSettings runSettings = HOutputGenerator::instance()->getRunSettings();
 			SubjectSettings subjectSettings = HOutputGenerator::instance()->getSubjectSettings();
-			HControlPanel habitControlPanel(subjectSettings, runSettings, this);
+			HControlPanel habitControlPanel(log, subjectSettings, runSettings, this);
 			
 			if (habitControlPanel.exec() != QDialog::Accepted)
 				return;
@@ -103,7 +104,8 @@ void HApp::runSavedExperiment()
 	// Initialize output generator
 	HOutputGenerator::initialize();
 	if(runSettingsForm.exec() == QDialog::Accepted) {
-		HControlPanel habitControlPanel(runSettingsForm.getSubjectSettings(), runSettingsForm.getRunSettings(), this);
+		HEventLog log;
+		HControlPanel habitControlPanel(log, runSettingsForm.getSubjectSettings(), runSettingsForm.getRunSettings(), this);
 		if (habitControlPanel.exec() != QDialog::Accepted)
 			return;
 		QMessageBox box;

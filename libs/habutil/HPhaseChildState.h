@@ -11,8 +11,12 @@
 #define _HPHASECHILDSTATE_H_
 
 #include <QString>
+#include <QStateMachine>
 #include "HLogState.h"
-#include "HPhase.h"
+#include "HQEvents.h"
+//#include "HPhase.h"
+
+class HPhase;
 
 class HPhaseChildState: public HLogState
 {
@@ -20,7 +24,7 @@ class HPhaseChildState: public HLogState
 	
 public:
 	HPhaseChildState(HPhase& phase, HEventLog& log, const QString& name)
-	: HLogState(log, name, &phase)
+	: HLogState(log, name, (QState*)&phase)
 	, m_phase(phase)
 	{};
 	
@@ -63,7 +67,8 @@ protected:
 	
 	// TODO: this is where we apply the HPhaseCriteria to see if the phase has ended. 
 	
-	void onEntry(QEvent* e) 
+	void onEntry(QEvent* e);
+#ifdef FIX_THIS
 	{
 		Q_UNUSED(e);
 		HState::onEntry(e);
@@ -79,6 +84,7 @@ protected:
 			machine()->postEvent(new HAllTrialsDoneEvent());
 		}
 	};
+#endif
 };
 
 

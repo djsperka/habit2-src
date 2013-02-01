@@ -16,6 +16,14 @@
 #include "stimulusinfo.h"
 #include "HLook.h"
 
+
+/*
+ * These are events for the HEventLog. They are NOT events in the Qt sense - 
+ * they don't derive from QEvent!!! 
+ * There is a set of QEvent derived events in HQEvents.h
+ */
+
+
 enum HEventType
 {
 	kPhaseStart = 0,

@@ -8,6 +8,7 @@
  */
 
 #include "HTrial.h"
+#include "HTrialChildState.h"
 #include "HElapsedTimer.h"
 #include "HOutputGenerator.h"
 #include <QFinalState>
@@ -85,48 +86,48 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, QObject* pMediaManager, HLookDetec
 	m_ptimerMaxNoLookTime->setSingleShot(true);
 	
 	// Create initial state. Do not define its transition yet. 
-	HState* m_sInitial = new HInitialState(HTrialLogItem::NEW_TRIAL, this);
-	setInitialState(m_sInitial);
+	HState* sInitial = new HInitialState(*this, log, HTrialLogItem::NEW_TRIAL, this);
+	setInitialState(sInitial);
 	
 	// This is an initial state for repeated trials
-	HState* m_sBailInitial = new HInitialState(HTrialLogItem::NEW_TRIAL_REPEAT, this);
+	HState* sBailInitial = new HInitialState(*this, log, HTrialLogItem::NEW_TRIAL_REPEAT, this);
 
 	// AG states
-	m_sAGRequest = new HAGRequestState(this);
-	m_sAGRunning = new HAGRunningState(this);
+	HAGRequestState* sAGRequest = new HAGRequestState(*this, log, this);
+	HAGRunningState* sAGRunning = new HAGRunningState(*this, log, this);
 
 	// Stim request state and StimRunning states are similar to AGRequest and AGRunning. 
-	m_sStimRequest = new HStimRequestState(this);
+	HStimRequestState* sStimRequest = new HStimRequestState(*this, log, this);
 	HNoLookTransition* pNoLookTrans = new HNoLookTransition(m_ptimerMaxNoLookTime->timerId());
-	m_sStimRunning = new HStimRunningState(maxTrialLengthMS, pNoLookTrans, m_ptimerMaxTrialLength, maxNoLookTimeMS, m_ptimerMaxNoLookTime, this);
+	HStimRunningState* sStimRunning = new HStimRunningState(*this, log, maxTrialLengthMS, pNoLookTrans, m_ptimerMaxTrialLength, maxNoLookTimeMS, m_ptimerMaxNoLookTime, this);
 
 	// Create final and bail state. Bail state is for timed-out trials, and leads to repeating the same trial.
-	HState* m_sBail = new HBailState(this);
+	HState* sBail = new HBailState(*this, log, this);
 	QFinalState* sFinal = new QFinalState(this);
 		
 	// Set connection for AGRequest state, which emits playAG() in its 'onEntry' method. 
 	// That goes to the media manager, which starts the playhing of the AG.
-	QObject::connect(m_sAGRequest, SIGNAL(playAG()), pMediaManager, SLOT(ag()));
+	QObject::connect(sAGRequest, SIGNAL(playAG()), pMediaManager, SLOT(ag()));
 
 	// Once that happens the media manager starts playing the ag, it emits
 	// agStarted(). We use that signal as a transition to the AGRunning state. 
-	m_sAGRequest->addTransition(pMediaManager, SIGNAL(agStarted()), m_sAGRunning);
+	sAGRequest->addTransition(pMediaManager, SIGNAL(agStarted()), sAGRunning);
 	
 	// When AGRunning state is entered, it tells the look detector to start looking for 
 	// attention. It will emit an attention() signal when that happens (see below). 
-	QObject::connect(m_sAGRunning, SIGNAL(entered()), this, SLOT(onAGRunningEntered()));
-	QObject::connect(m_sAGRunning, SIGNAL(exited()), this, SLOT(onAGRunningExited()));
+	QObject::connect(sAGRunning, SIGNAL(entered()), this, SLOT(onAGRunningEntered()));
+	QObject::connect(sAGRunning, SIGNAL(exited()), this, SLOT(onAGRunningExited()));
 
 	// When the look detector emits the attention() signal enter StimRequest state. 
-	m_sAGRunning->addTransition(pLD, SIGNAL(attention()), m_sStimRequest);
+	sAGRunning->addTransition(pLD, SIGNAL(attention()), sStimRequest);
 		
 	// StimRequest emits a playStim() signal, which is connected to the media manager. 
 	// When media manager starts playing the stim it emits stimStarted(). That signal 
 	// is used to exit to StimRunning.
- 	QObject::connect(m_sStimRequest, SIGNAL(playStim(int)), pMediaManager, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
-	QObject::connect(m_sStimRunning, SIGNAL(entered()), this, SLOT(onStimRunningEntered()));
-	QObject::connect(m_sStimRunning, SIGNAL(exited()), this, SLOT(onStimRunningExited()));
-	m_sStimRequest->addTransition(pMediaManager, SIGNAL(stimStarted(int)), m_sStimRunning);		// on entry, emits playStim()
+ 	QObject::connect(sStimRequest, SIGNAL(playStim(int)), pMediaManager, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
+	QObject::connect(sStimRunning, SIGNAL(entered()), this, SLOT(onStimRunningEntered()));
+	QObject::connect(sStimRunning, SIGNAL(exited()), this, SLOT(onStimRunningExited()));
+	sStimRequest->addTransition(pMediaManager, SIGNAL(stimStarted(int)), sStimRunning);		// on entry, emits playStim()
 
 	// Transition from sStimRunning depends on what the trial type is.
 	// Fixed length trials end on a timeout signal (and we don't bother with look signals).
@@ -134,31 +135,31 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, QObject* pMediaManager, HLookDetec
 	// aborted on a timeout signal. 
 	if (bFixedLength)
 	{			
-		m_sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sFinal);
+		sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sFinal);
 	}
 	else
 	{
-		m_sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), m_sBail);
-		m_sStimRunning->addTransition(pLD, SIGNAL(look(HLook)), sFinal);
+		sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sBail);
+		sStimRunning->addTransition(pLD, SIGNAL(look(HLook)), sFinal);
 	}
 
 	
 	if (bUseAG)
 	{
-		m_sInitial->addTransition(m_sAGRequest);
-		m_sBailInitial->addTransition(m_sAGRequest);
+		sInitial->addTransition(sAGRequest);
+		sBailInitial->addTransition(sAGRequest);
 	}
 	else 
 	{
-		m_sInitial->addTransition(m_sStimRequest);
-		m_sBailInitial->addTransition(m_sStimRequest);
+		sInitial->addTransition(sStimRequest);
+		sBailInitial->addTransition(sStimRequest);
 	}
-	m_sBail->addTransition(m_sBailInitial);					// bailed trial automatically repeats		
+	sBail->addTransition(sBailInitial);					// bailed trial automatically repeats		
 }
 
 void HTrial::setNextStim(int i, const Habit::StimulusSettings& ss)	
 { 
-	m_sStimRequest->setNextStim(i, ss); 
+//FIX THIS	m_sStimRequest->setNextStim(i, ss); 
 }
 
 void HTrial::onStimRunningEntered()

@@ -20,7 +20,8 @@
 #include "HMediaManager.h"
 #include "HLookDetector.h"
 #include "HStateMachine.h"
-#include "HPhase.h"
+#include "HExperiment.h"
+#include "HEventLog.h"
 
 #include <QDialog>
 #include <QMap>
@@ -35,14 +36,14 @@ class HControlPanel : public QDialog
 	Q_OBJECT
 	
 public:
-	HControlPanel(const Habit::SubjectSettings& ss, const Habit::RunSettings& runSettings, QWidget* w = 0);
+	HControlPanel(HEventLog& log, const Habit::SubjectSettings& ss, const Habit::RunSettings& runSettings, QWidget* w = 0);
 	~HControlPanel() {};
 	
 private:
 	void createComponents();
 	void makeConnections();
 	void doLayout();
-	void createExperiment();
+	void createExperiment(HEventLog& log);
 	void loadFromDB();
 	void populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::StimulusSettingsList& l1, const Habit::StimulusSettingsList& l2, const Habit::StimulusSettingsList& l3);
 	void updateFileStatusLabels(Habit::StimulusSettings& ss);
@@ -62,6 +63,7 @@ protected:
 	//bool eventFilter(QObject *target, QEvent *event);
 	
 private:
+	HEventLog& m_log;
 	Habit::RunSettings m_runSettings;
 	Habit::SubjectSettings m_subjectSettings;
 	Habit::ExperimentSettings m_experimentSettings;

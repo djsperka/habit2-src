@@ -36,28 +36,6 @@ public:
 	inline Habit::StimulusSettings currentStimulusSettings() { return m_stimuli.at(m_itrial).second; };
 };
 
-
-struct HAllTrialsDoneEvent : public QEvent
-{
-	HAllTrialsDoneEvent() : QEvent(Type(AllTrialsDoneType)) {};
-	~HAllTrialsDoneEvent() {};
-	enum { AllTrialsDoneType = QEvent::User + 1 };
-};
-
-struct HNewTrialEvent : public QEvent
-{
-	HNewTrialEvent() : QEvent(Type(NewTrialType)) {};
-	~HNewTrialEvent() {};
-	enum { NewTrialType = QEvent::User + 2 };
-};
-
-struct HAbortTrialEvent : public QEvent
-{
-	HAbortTrialEvent() : QEvent(Type(AbortTrialType)) {};
-	~HAbortTrialEvent() {};
-	enum { AbortTrialType = QEvent::User + 3 };
-};
-
 class HAllTrialsDoneTransition: public QAbstractTransition
 {
 public:

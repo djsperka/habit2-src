@@ -16,7 +16,7 @@ HPhase::HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >
 	, m_itrial(0)
 {
 	QAbstractTransition* trans;
-	m_sTrial = new HTrial(*this, log, pMediaManager, pLD, maxTrialLengthMS, maxNoLookTimeMS, bFixedLength, bUseAG, this);
+	m_sTrial = new HTrial(*this, log, pMediaManager, pLD, maxTrialLengthMS, maxNoLookTimeMS, bFixedLength, bUseAG);
 	setInitialState(m_sTrial);
 	HPhaseTrialCompleteState* sTrialComplete = new HPhaseTrialCompleteState(*this, log);
 	m_sTrial->addTransition(m_sTrial, SIGNAL(finished()), sTrialComplete);

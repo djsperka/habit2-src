@@ -21,8 +21,9 @@
 #include <QLabel>
 
 
-HControlPanel::HControlPanel(const Habit::SubjectSettings& ss, const Habit::RunSettings& runSettings, QWidget* w)
+HControlPanel::HControlPanel(HEventLog& log, const Habit::SubjectSettings& ss, const Habit::RunSettings& runSettings, QWidget* w)
 : QDialog(w)
+, m_log(log)
 , m_runSettings(runSettings)
 , m_subjectSettings(ss)
 , m_psPreTest(0)
@@ -40,7 +41,7 @@ HControlPanel::HControlPanel(const Habit::SubjectSettings& ss, const Habit::RunS
 	
 	// Generate the state machine and associated machinery that make the experiment run 
 	
-	createExperiment();
+	createExperiment(log);
 
 	
 }
@@ -135,7 +136,7 @@ void HControlPanel::closeEvent(QCloseEvent* e)
 }
 
 
-void HControlPanel::createExperiment()
+void HControlPanel::createExperiment(HEventLog& log)
 {
 	// First make sure all info is loaded from db. I'd rather this were done before HControlPanel were instantiated, 
 	// but this is how it was originally written so there. 
@@ -184,7 +185,7 @@ void HControlPanel::createExperiment()
 	connect(m_psm, SIGNAL(finished()), this, SLOT(onExperimentFinished()));
 		
 	// This is a single super-state that holds all the phases.
-	HExperiment* sExperiment = new HExperiment();
+	HExperiment* sExperiment = new HExperiment(log);
 	m_psm->addState(sExperiment);
 	m_psm->setInitialState(sExperiment);
 	QFinalState* sFinal = new QFinalState;
@@ -205,7 +206,7 @@ void HControlPanel::createExperiment()
 			lTrials.append(l1.at(htg.next()));
 		}
 
-		m_psPreTest = new HPhase(lTrials, m_pmm, m_pld, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psPreTest = new HPhase(log, lTrials, m_pmm, m_pld, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
 	}
 
 	if (tiHabituation.getNumberOfTrials() > 0)
@@ -217,7 +218,7 @@ void HControlPanel::createExperiment()
 			lTrials.append(l2.at(htg.next()));
 		}
 		
-		m_psHabituation = new HPhase(lTrials, m_pmm, m_pld, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psHabituation = new HPhase(log, lTrials, m_pmm, m_pld, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
 	}
 	
 	if (tiTest.getNumberOfTrials() > 0)
@@ -229,7 +230,7 @@ void HControlPanel::createExperiment()
 			lTrials.append(l3.at(htg.next()));
 		}
 		
-		m_psTest = new HPhase(lTrials, m_pmm, m_pld, tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psTest = new HPhase(log, lTrials, m_pmm, m_pld, tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
 	}
 
 	

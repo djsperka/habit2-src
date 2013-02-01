@@ -7,6 +7,7 @@ HEADERS +=	HLook.h \
 			HLookDetector.h \
 			HKeypadLookDetector.h \
 			HEvents.h \
+			HQEvents.h \
 			HState.h \
 			HLogState.h \
 			HStateMachine.h \
