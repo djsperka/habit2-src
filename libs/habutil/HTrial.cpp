@@ -10,7 +10,6 @@
 #include "HTrial.h"
 #include "HTrialChildState.h"
 #include "HElapsedTimer.h"
-#include "HOutputGenerator.h"
 #include <QFinalState>
 #include <QTimerEvent>
 
@@ -28,8 +27,6 @@ void HStimRequestState::onEntry(QEvent* e)
 	{
 		qWarning("HStimRequestState::onEntry : must call setNextStim with valid stimID");
 	}
-	HOutputGenerator::instance()->changeTrial(m_nextStimulusSettings.getStimulusType());
-	HOutputGenerator::instance()->setStimulusSettings(m_nextStimulusSettings);
 	emit playStim(m_nextStimID);
 	
 	// TODO emit TrialStarted(m_nextStimulusSettings)
@@ -86,11 +83,11 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, QObject* pMediaManager, HLookDetec
 	m_ptimerMaxNoLookTime->setSingleShot(true);
 	
 	// Create initial state. Do not define its transition yet. 
-	HState* sInitial = new HInitialState(*this, log, HTrialLogItem::NEW_TRIAL, this);
+	HTrialInitialState* sInitial = new HTrialInitialState(*this, log, this);
 	setInitialState(sInitial);
 	
 	// This is an initial state for repeated trials
-	HState* sBailInitial = new HInitialState(*this, log, HTrialLogItem::NEW_TRIAL_REPEAT, this);
+	HTrialBailInitialState* sBailInitial = new HTrialBailInitialState(*this, log, this);
 
 	// AG states
 	HAGRequestState* sAGRequest = new HAGRequestState(*this, log, this);
@@ -156,6 +153,11 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, QObject* pMediaManager, HLookDetec
 	}
 	sBail->addTransition(sBailInitial);					// bailed trial automatically repeats		
 }
+
+void HTrial::onEntry(QEvent* e)
+{
+	Q_UNUSED(e);
+	eventLog().append(new HTrialStartEvent(
 
 void HTrial::setNextStim(int i, const Habit::StimulusSettings& ss)	
 { 

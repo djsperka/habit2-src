@@ -68,7 +68,7 @@ protected:
 	// TODO: this is where we apply the HPhaseCriteria to see if the phase has ended. 
 	
 	void onEntry(QEvent* e);
-#ifdef FIX_THIS
+#if 0
 	{
 		Q_UNUSED(e);
 		HState::onEntry(e);

@@ -8,7 +8,6 @@
  */
 
 #include "HControlPanel.h"
-#include "HOutputGenerator.h"
 #include "HMediaManagerUtil.h"
 #include "HPhase.h"
 #include "HKeypadLookDetector.h"
@@ -206,7 +205,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 			lTrials.append(l1.at(htg.next()));
 		}
 
-		m_psPreTest = new HPhase(log, lTrials, m_pmm, m_pld, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psPreTest = new HPhase(log, lTrials, m_pmm, m_pld, "Pretest", tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
 	}
 
 	if (tiHabituation.getNumberOfTrials() > 0)
@@ -218,7 +217,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 			lTrials.append(l2.at(htg.next()));
 		}
 		
-		m_psHabituation = new HPhase(log, lTrials, m_pmm, m_pld, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psHabituation = new HPhase(log, lTrials, m_pmm, m_pld, "Habituation", tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
 	}
 	
 	if (tiTest.getNumberOfTrials() > 0)
@@ -230,7 +229,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 			lTrials.append(l3.at(htg.next()));
 		}
 		
-		m_psTest = new HPhase(log, lTrials, m_pmm, m_pld, tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psTest = new HPhase(log, lTrials, m_pmm, m_pld, "Test", tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
 	}
 
 	
@@ -400,19 +399,15 @@ void HControlPanel::onLook(HLook l)
 	switch (l.direction())
 	{
 		case LookLeft:
-			HOutputGenerator::instance()->addLogItem(HTrialLogItem::LEFT_LOOK, l.lookMS());
 			m_labelLookStatusValue->setText("Look Left");
 			break;
 		case LookCenter:
-			HOutputGenerator::instance()->addLogItem(HTrialLogItem::CENTER_LOOK, l.lookMS());
 			m_labelLookStatusValue->setText("Look Center");
 			break;
 		case LookRight:
-			HOutputGenerator::instance()->addLogItem(HTrialLogItem::RIGHT_LOOK, l.lookMS());
 			m_labelLookStatusValue->setText("Look Right");
 			break;
 		case NoLook:
-			HOutputGenerator::instance()->addLogItem(HTrialLogItem::AWAY_LOOK, l.lookMS());
 			m_labelLookStatusValue->setText("No Look");
 			break;
 		case UnknownLookDirection:
@@ -450,12 +445,6 @@ void HControlPanel::onStartTrials()
 	m_pbStopTrials->setEnabled(true);
 	m_pbNextTrial->setEnabled(true);
 	m_pbStartTrials->setEnabled(false);
-
-#ifdef NO_LONGER_USED
-	HOutputGenerator::instance()->setExperiment(m_runSettings.getExperimentId());
-	HOutputGenerator::instance()->setRunSettings(m_runSettings);
-	HOutputGenerator::instance()->setSubjectInformation(m_subjectSettings);
-#endif
 
 	/*
 	 * Start the state machine

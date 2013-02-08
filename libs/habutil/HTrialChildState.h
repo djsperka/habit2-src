@@ -36,23 +36,36 @@ private:
 	HTrial& m_trial;
 };
 
-class HInitialState: public HTrialChildState
+class HTrialInitialState: public HTrialChildState
 {
 	Q_OBJECT
 	
-	int m_newrepeat;
-	
 public:
-	HInitialState(HTrial& trial, HEventLog& log, int new_repeat, QState* parent=0) : HTrialChildState(trial, log, "HInitialState", parent), m_newrepeat(new_repeat) {};
-	~HInitialState() {};
+	HTrialInitialState(HTrial& trial, HEventLog& log, QState* parent=0) : HTrialChildState(trial, log, "HInitialState", parent) {};
+	~HTrialInitialState() {};
 	
 protected:
 	void onEntry(QEvent* e)
 	{
 		Q_UNUSED(e);
-//		HOutputGenerator::instance()->addLogItem(m_newrepeat, 0);
 	};
 };
+
+class HTrialBailInitialState: public HTrialChildState
+{
+	Q_OBJECT
+	
+public:
+	HTrialBailInitialState(HTrial& trial, HEventLog& log, QState* parent=0) : HTrialChildState(trial, log, "HInitialState", parent) {};
+	~HTrialBailInitialState() {};
+	
+protected:
+	void onEntry(QEvent* e)
+	{
+		Q_UNUSED(e);
+	};
+};
+
 
 class HAGRequestState: public HTrialChildState
 {
@@ -173,7 +186,6 @@ protected:
 	void onEntry(QEvent* e)
 	{
 		Q_UNUSED(e);
-//		HOutputGenerator::instance()->addLogItem(HTrialLogItem::REPEAT_TRIAL, 0);
 	};
 };
 

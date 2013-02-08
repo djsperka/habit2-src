@@ -13,7 +13,6 @@
 #include "HPhaseChildState.h"
 #include "HLookDetector.h"
 #include "stimulussettings.h"
-#include "HOutputGenerator.h"
 #include <QObject>
 #include <QTimer>
 #include <QEvent>
@@ -37,17 +36,11 @@ public:
 	HTrial(HPhase& phase, HEventLog& log, QObject* pMediaPlayer, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG);
 	~HTrial() {};
 	void setNextStim(int i, const Habit::StimulusSettings& ss);
-#ifdef NO_LONGER_USED
-	HStimRequestState* getSStimRequest() { return m_sStimRequest; };
-	HStimRunningState* getSStimRunning() { return m_sStimRunning; };
-	HAGRequestState* getSAGRequest() { return m_sAGRequest; };
-	HAGRunningState* getSAGRunning() { return m_sAGRunning; };
-	HState* getSBail() { return m_sBail; };
-	HState* getSInitial() { return m_sInitial; };
-	HState* getSBailInitial() { return m_sBailInitial; };
-#endif
 
 protected:
+	virtual void onEntry(QEvent* e);
+	virtual void onExit(QEvent* e);
+	
 private:
 	HLookDetector* m_pLD;
 	int m_maxTrialLengthMS;
@@ -56,15 +49,6 @@ private:
 	bool m_bAG;
 	QTimer* m_ptimerMaxTrialLength;	
 	QTimer* m_ptimerMaxNoLookTime;
-#ifdef NO_LONGER_USED
-	HStimRequestState* m_sStimRequest;
-	HStimRunningState* m_sStimRunning;
-	HAGRequestState* m_sAGRequest;
-	HAGRunningState* m_sAGRunning;
-#endif
-	HState* m_sBail;
-	HState* m_sInitial;
-	HState* m_sBailInitial;
 	
 public slots:
 	void onStimRunningEntered();

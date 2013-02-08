@@ -8,11 +8,13 @@
  */
 
 #include "HPhase.h"
+#include "HElapsedTimer.h"
 #include <QFinalState>
 
-HPhase::HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent) 
+HPhase::HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, char *name, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent) 
 	: HLogState(log, "Phase", parent)
 	, m_stimuli(stimuli)
+	, m_name(name)
 	, m_itrial(0)
 {
 	QAbstractTransition* trans;
@@ -35,10 +37,37 @@ HPhase::HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >
 	trans = new HNewTrialTransition();
 	trans->setTargetState(m_sTrial);
 	sTrialComplete->addTransition(trans);
-	
+
+	// set up connection for entry into trialCompleted state - that slot will test for phase completion
+	// and increment the trial number and stimulus. 
+	QObject::connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
+
 	// set next stim for first trial
 	m_sTrial->setNextStim(m_stimuli.at(0).first, m_stimuli.at(0).second);
 };
+
+void HPhase::onTrialCompleteEntered()
+{
+	// Send log event to indicate trial complete. 
+	// TODO: There is no way to distinguish aborted trials!!!
+
+	eventLog().append(new HTrialEndEvent(HElapsedTimer::elapsed()));
+	
+}
+
+
+void HPhase::onEntry(QEvent* e)
+{
+	eventLog().append(new HPhaseStartEvent(m_name, HElapsedTimer::elapsed()));
+	Q_UNUSED(e);
+};
+
+void HPhase::onExit(QEvent* e)
+{
+	eventLog().append(new HPhaseEndEvent(HElapsedTimer::elapsed()));
+	Q_UNUSED(e);
+};
+
 
 bool HPhase::advance()
 {

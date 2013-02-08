@@ -15,7 +15,6 @@
 #include "runsettingsform.h"
 #include "experimentsettings.h"
 #include "HControlPanel.h"
-#include "HOutputGenerator.h"
 #include "exportmultipleresults.h"
 #include "viewexperimentresultform.h"
 #include "reliabilitiesform.h"
@@ -45,10 +44,12 @@ void HApp::runReliability()
 		if (form.exec() == QDialog::Accepted)
 		{
 			HEventLog log;
-			HOutputGenerator::initialize();
-			HOutputGenerator::instance()->load(fileName);
-			RunSettings runSettings = HOutputGenerator::instance()->getRunSettings();
-			SubjectSettings subjectSettings = HOutputGenerator::instance()->getSubjectSettings();
+//			RunSettings runSettings = HOutputGenerator::instance()->getRunSettings();
+//			SubjectSettings subjectSettings = HOutputGenerator::instance()->getSubjectSettings();
+			
+			qWarning("RELIABILITY IS BROKEN AND, WELL, UNRELIABLE!");
+			RunSettings runSettings;
+			SubjectSettings subjectSettings;
 			HControlPanel habitControlPanel(log, subjectSettings, runSettings, this);
 			
 			if (habitControlPanel.exec() != QDialog::Accepted)
@@ -67,12 +68,12 @@ void HApp::runReliability()
 					reliabilitySettings.setObserver(form.getObserver());
 					reliabilitySettings.setDate(form.getDate());
 					reliabilitySettings.setComment(form.getComment());
-					HOutputGenerator::instance()->setSettingsFileName("Typed");
-					HOutputGenerator::instance()->setResultsFileName(QFileInfo(fileName).fileName());
-					HOutputGenerator::instance()->setResultsType("RELIABILITY RUN");
-					HOutputGenerator::instance()->setReliabilitiesSettings(reliabilitySettings);
-					
-					HOutputGenerator::instance()->save(fileName);
+//					HOutputGenerator::instance()->setSettingsFileName("Typed");
+//					HOutputGenerator::instance()->setResultsFileName(QFileInfo(fileName).fileName());
+//					HOutputGenerator::instance()->setResultsType("RELIABILITY RUN");
+//					HOutputGenerator::instance()->setReliabilitiesSettings(reliabilitySettings);
+//					
+//					HOutputGenerator::instance()->save(fileName);
 					GUILib::ExperimentResultsForm experForm(subjectSettings, runSettings, this);
 					experForm.exec();
 				}
@@ -101,8 +102,6 @@ void HApp::runSavedExperiment()
 {
     GUILib::RunSettingsForm runSettingsForm(this/* runSettings*/);
 
-	// Initialize output generator
-	HOutputGenerator::initialize();
 	if(runSettingsForm.exec() == QDialog::Accepted) {
 		HEventLog log;
 		HControlPanel habitControlPanel(log, runSettingsForm.getSubjectSettings(), runSettingsForm.getRunSettings(), this);
@@ -118,10 +117,10 @@ void HApp::runSavedExperiment()
 															"", tr("Experiment Result File (*.res)"));
 			if (!fileName.isNull() && !fileName.isEmpty())
 			{
-				HOutputGenerator::instance()->setSettingsFileName("Typed");
-				HOutputGenerator::instance()->setResultsFileName(QFileInfo(fileName).fileName());
-				HOutputGenerator::instance()->setResultsType("ORIGINAL RUN");
-				HOutputGenerator::instance()->save(fileName);
+//				HOutputGenerator::instance()->setSettingsFileName("Typed");
+//				HOutputGenerator::instance()->setResultsFileName(QFileInfo(fileName).fileName());
+//				HOutputGenerator::instance()->setResultsType("ORIGINAL RUN");
+//				HOutputGenerator::instance()->save(fileName);
 				GUILib::ExperimentResultsForm resultForm(runSettingsForm.getSubjectSettings(), runSettingsForm.getRunSettings(), this);
 				resultForm.exec();
 			}

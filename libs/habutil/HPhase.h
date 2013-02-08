@@ -23,17 +23,26 @@ class HPhase: public HLogState
 	Q_OBJECT
 	
 	QList<QPair<int, Habit::StimulusSettings> > m_stimuli;
+	QString m_name;
 	int m_itrial;
 	HTrial* m_sTrial;
 
 public:
-	HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
+	HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, char *name, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
 	virtual ~HPhase() {};
 	bool advance();
 	HTrial* getHTrial() { return m_sTrial; };
 	inline int currentTrialNumber() { return m_itrial; };	
 	inline int currentStimNumber() { return m_stimuli.at(m_itrial).first; };
 	inline Habit::StimulusSettings currentStimulusSettings() { return m_stimuli.at(m_itrial).second; };
+	
+protected:
+	virtual void onEntry(QEvent* e);
+	virtual void onExit(QEvent* e);
+	
+public slots:
+	void onTrialCompleteEntered();
+
 };
 
 class HAllTrialsDoneTransition: public QAbstractTransition
