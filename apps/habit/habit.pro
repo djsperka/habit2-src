@@ -4,7 +4,7 @@ TEMPLATE = app
 QT += phonon sql
 CONFIG += qt debug_and_release
 
-CONFIG(debug) {
+CONFIG(debug, debug|release) {
 	LIBS += -L../../libs/habutil/build/Debug -lhabutil
 	PRE_TARGETDEPS += ../../libs/habutil/build/Debug/libhabutil.a
 } else {

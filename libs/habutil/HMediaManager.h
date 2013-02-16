@@ -66,6 +66,7 @@ signals:
 	void agStarted();
 	void stimStarted(int);
 	void cleared();
+	void screen(int);
 };
 
 #endif

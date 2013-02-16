@@ -43,11 +43,14 @@ enum HEventType
 	kUndefined
 };
 
+// These are supplied when creating HTrialEndEvent
+
 enum HTrialEndType
 {
-	kTrialEndSuccess,
+	kTrialEndGotLook,
+	kTrialEndFixedTimeout,
+	kTrialEndNoLookTimeout,
 	kTrialEndAbort,
-	kTrialEndFail
 };
 	
 
@@ -170,7 +173,7 @@ private:
 class HTrialEndEvent: public HEvent
 {
 public:
-	HTrialEndEvent(HTrialEndType endtype = kTrialEndSuccess, int timestamp = 0) 
+	HTrialEndEvent(HTrialEndType endtype, int timestamp = 0) 
 	: HEvent(kTrialEnd, timestamp)
 	, m_endtype(endtype)
 	{};
@@ -208,28 +211,44 @@ private:
 	int m_stimindex;
 };
 
+class HAGStartEvent: public HEvent
+{
+public:
+	HAGStartEvent(int playerid = -1, int timestamp = 0)
+	: HEvent(kAGStart, timestamp)
+	, m_playerid(playerid)
+	{};
+	
+	HAGStartEvent(const HAGStartEvent& e)
+	: HEvent(kAGStart, e.timestamp())
+	, m_playerid(e.playerid())
+	{};
+	
+	QString eventInfo() const;
+	int playerid() const { return m_playerid; };
+private:
+	int m_playerid;
+};
+
+
 class HStimStartEvent: public HEvent
 {
 public:
-	HStimStartEvent(int stimindex=-2, int playerid=-1, int timestamp=0)
+	HStimStartEvent(int playerid=-1, int timestamp=0)
 	: HEvent(kStimStart, timestamp)
-	, m_stimindex(stimindex)
 	, m_playerid(playerid)
 	{};
 	
 	HStimStartEvent(const HStimStartEvent& e)
 	: HEvent(kStimStart, e.timestamp())
-	, m_stimindex(e.stimindex())
 	, m_playerid(e.playerid())
 	{};
 	
 	virtual ~HStimStartEvent() {};
 	
 	QString eventInfo() const;
-	int stimindex() const { return m_stimindex; };
 	int playerid() const { return m_playerid; };
 private:
-	int m_stimindex;
 	int m_playerid;
 };
 

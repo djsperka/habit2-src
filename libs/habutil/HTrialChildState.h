@@ -23,8 +23,8 @@ class HTrialChildState: public HLogState
 	Q_OBJECT
 	
 public:
-	HTrialChildState(HTrial& trial, HEventLog& log, const QString& name, QState* parent = 0)
-	: HLogState(log, name, parent)
+	HTrialChildState(HTrial& trial, HEventLog& log, const QString& name)
+	: HLogState(log, name)
 	, m_trial(trial)
 	{};
 	
@@ -41,23 +41,8 @@ class HTrialInitialState: public HTrialChildState
 	Q_OBJECT
 	
 public:
-	HTrialInitialState(HTrial& trial, HEventLog& log, QState* parent=0) : HTrialChildState(trial, log, "HInitialState", parent) {};
+	HTrialInitialState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HInitialState") {};
 	~HTrialInitialState() {};
-	
-protected:
-	void onEntry(QEvent* e)
-	{
-		Q_UNUSED(e);
-	};
-};
-
-class HTrialBailInitialState: public HTrialChildState
-{
-	Q_OBJECT
-	
-public:
-	HTrialBailInitialState(HTrial& trial, HEventLog& log, QState* parent=0) : HTrialChildState(trial, log, "HInitialState", parent) {};
-	~HTrialBailInitialState() {};
 	
 protected:
 	void onEntry(QEvent* e)
@@ -73,7 +58,7 @@ class HAGRequestState: public HTrialChildState
 	
 public:
 	
-	HAGRequestState(HTrial& trial, HEventLog& log, QState* parent = 0) : HTrialChildState(trial, log, "HAGRequestState", parent) {};
+	HAGRequestState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HAGRequestState") {};
 	~HAGRequestState() {};
 	
 signals:
@@ -91,11 +76,11 @@ class HAGRunningState: public HTrialChildState
 	
 public:
 	
-	HAGRunningState(HTrial& trial, HEventLog& log, QState* parent = 0) : HTrialChildState(trial, log, "HAGRunningState", parent) {};
+	HAGRunningState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HAGRunningState") {};
 	~HAGRunningState() {};
 	
 	// on entry generate kAGStarted event 
-	void onEntry(QEvent* e);
+	//void onEntry(QEvent* e);
 	
 };
 
@@ -104,22 +89,62 @@ class HStimRequestState: public HTrialChildState
 {
 	Q_OBJECT
 	
-	int m_nextStimID;
-	Habit::StimulusSettings m_nextStimulusSettings;
-	
 public:
 	
-	HStimRequestState(HTrial& trial, HEventLog& log, QState* parent = 0) : HTrialChildState(trial, log, "HStimRequestState", parent), m_nextStimID(-1) {};
+	HStimRequestState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HStimRequestState") {};
 	~HStimRequestState() {};	
-	void setNextStim(int i, const Habit::StimulusSettings& ss);
-signals:
-	void playStim(int);	
+
 protected:
 	// on entry to this state we request that the stim be played. 
 	// by emiting a signal to media controller. 	
 	void onEntry(QEvent* e);
 };
 
+
+class HGotLookState: public HTrialChildState
+{
+	Q_OBJECT
+
+public:
+	HGotLookState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HGotLookState") {};
+	virtual ~HGotLookState() {};
+	
+protected:
+	
+	// onEntry - append kTrialEnd event
+	void onEntry(QEvent* e);
+};
+
+class HFixedTimeoutState: public HTrialChildState
+{
+	Q_OBJECT
+	
+public:
+	HFixedTimeoutState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HFixedTimeoutState") {};
+	virtual ~HFixedTimeoutState() {};
+	
+protected:
+	
+	// onEntry - append kTrialEnd event
+	void onEntry(QEvent* e);
+};
+
+class HNoLookTimeoutState: public HTrialChildState
+{
+	Q_OBJECT
+	
+public:
+	HNoLookTimeoutState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HNoLookTimeoutState") {};
+	virtual ~HNoLookTimeoutState() {};
+	
+protected:
+	
+	// onEntry - append kTrialEnd event
+	void onEntry(QEvent* e);
+};
+
+	
+	
 class HNoLookTransition: public QAbstractTransition
 {
 	Q_OBJECT
@@ -149,8 +174,8 @@ private:
 class HStimRunningState: public HTrialChildState
 {
 public:
-	HStimRunningState(HTrial& trial, HEventLog& log, int msMax, HNoLookTransition* ptrans, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook, QState *parent=0) 
-	: HTrialChildState(trial, log, "HStimRunning", parent)
+	HStimRunningState(HTrial& trial, HEventLog& log, int msMax, HNoLookTransition* ptrans, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook) 
+	: HTrialChildState(trial, log, "HStimRunning")
 	, m_ptransNoLook(ptrans)
 	, m_msMax(msMax)
 	, m_ptimerMax(ptimerMax)
@@ -170,23 +195,6 @@ private:
 	QTimer* m_ptimerMax;
 	int m_msNoLook;
 	QTimer* m_ptimerNoLook;
-};
-
-
-class HBailState: public HTrialChildState
-{
-	Q_OBJECT
-	
-public:
-	HBailState(HTrial& trial, HEventLog& log, QState* parent=0) 
-	: HTrialChildState(trial, log, "BailState", parent) {};
-	~HBailState() {};
-	
-protected:
-	void onEntry(QEvent* e)
-	{
-		Q_UNUSED(e);
-	};
 };
 
 

@@ -95,7 +95,7 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 					case kTrialEnd:
 					{
 						HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(pevent);
-						if (pte->endtype() == kTrialEndSuccess)
+						if (pte->endtype() == kTrialEndGotLook || pte->endtype() == kTrialEndFixedTimeout)
 						{
 							phaselog.append(iTotal);
 						}

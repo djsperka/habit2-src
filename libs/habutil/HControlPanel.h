@@ -52,6 +52,7 @@ private slots:
 	void onStartTrials();
 	void onNextTrial();
 	void onStopTrials();
+	void onAttention();
 	void onLook(HLook l);
 	void onExperimentFinished();
 	void onAGStarted();

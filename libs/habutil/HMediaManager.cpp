@@ -70,7 +70,7 @@ void HMediaManager::ag()
 
 void HMediaManager::playerStarted(int id)
 {
-	Q_UNUSED(id);
+	emit screen(id);
 	if (m_pendingStartSignal)
 	{
 		if (m_pendingAGStartSignal)

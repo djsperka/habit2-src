@@ -10,25 +10,32 @@
 #ifndef _HPHASE_H_
 #define _HPHASE_H_
 
-#include "HTrial.h"
-#include "HEventLog.h"
+#include "HExperimentChildState.h"
 #include "HLookDetector.h"
+#include "HQEvents.h"
 #include "stimulusSettings.h"
 #include <QList>
 #include <QEvent>
 #include <QAbstractTransition>
 
-class HPhase: public HLogState
+
+// HPhase
+//
+// 
+
+class HTrial;
+
+class HPhase: public HExperimentChildState
 {
 	Q_OBJECT
 	
 	QList<QPair<int, Habit::StimulusSettings> > m_stimuli;
 	QString m_name;
-	int m_itrial;
+	int m_itrial;		// this is the current trial. First trial is '0'. Stim found at m_stimuli[m_itrial].second
 	HTrial* m_sTrial;
 
 public:
-	HPhase(HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, QObject* pMediaManager, HLookDetector* pLD, char *name, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG, HState* parent=0);
+	HPhase(HExperiment& exp, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const char *name, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG);
 	virtual ~HPhase() {};
 	bool advance();
 	HTrial* getHTrial() { return m_sTrial; };
@@ -36,12 +43,16 @@ public:
 	inline int currentStimNumber() { return m_stimuli.at(m_itrial).first; };
 	inline Habit::StimulusSettings currentStimulusSettings() { return m_stimuli.at(m_itrial).second; };
 	
+	void requestCurrentStim();
+	void requestAG();
+
 protected:
 	virtual void onEntry(QEvent* e);
 	virtual void onExit(QEvent* e);
 	
 public slots:
 	void onTrialCompleteEntered();
+	void screenStarted(int);
 
 };
 

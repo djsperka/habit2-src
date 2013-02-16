@@ -14,9 +14,10 @@
 #include <QStateMachine>
 #include "HLogState.h"
 #include "HQEvents.h"
-//#include "HPhase.h"
+#include "HPhase.h"
+#include "HExperimentChildState.h"
 
-class HPhase;
+class HExperiment;
 
 class HPhaseChildState: public HLogState
 {

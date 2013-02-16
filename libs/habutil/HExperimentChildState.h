@@ -18,8 +18,8 @@ class HExperimentChildState: public HLogState
 	Q_OBJECT
 	
 public:
-	HExperimentChildState(HExperiment& exp, HEventLog& log, const QString& name, QState* parent = 0) 
-	: HLogState(log, name, parent)
+	HExperimentChildState(HExperiment& exp, HEventLog& log, const QString& name) 
+	: HLogState(log, name, &exp)
 	, m_exp(exp)
 	{};
 

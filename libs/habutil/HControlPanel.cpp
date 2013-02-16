@@ -12,6 +12,7 @@
 #include "HPhase.h"
 #include "HKeypadLookDetector.h"
 #include "HTrialGenerator.h"
+#include "HElapsedTimer.h"
 #include "maindao.h"
 #include <QtCore/QTDebug>
 #include <QHBoxLayout>
@@ -174,7 +175,8 @@ void HControlPanel::createExperiment(HEventLog& log)
 	int noLookTimeMS = tiTest.getLookTimes() * 100;
 	m_pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, this);
 
-	// connect look() signal to a slot so we can forward the info to the output generator
+	// connect attention() and look() signals to a slot so we can forward the info to the event log
+	connect(m_pld, SIGNAL(attention()), this, SLOT(onAttention()));
 	connect(m_pld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
 	
 	// Construct state machine.
@@ -184,7 +186,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 	connect(m_psm, SIGNAL(finished()), this, SLOT(onExperimentFinished()));
 		
 	// This is a single super-state that holds all the phases.
-	HExperiment* sExperiment = new HExperiment(log);
+	HExperiment* sExperiment = new HExperiment(log, *m_pmm, *m_pld);
 	m_psm->addState(sExperiment);
 	m_psm->setInitialState(sExperiment);
 	QFinalState* sFinal = new QFinalState;
@@ -205,7 +207,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 			lTrials.append(l1.at(htg.next()));
 		}
 
-		m_psPreTest = new HPhase(log, lTrials, m_pmm, m_pld, "Pretest", tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psPreTest = new HPhase(*sExperiment, log, lTrials, "Pretest", tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	if (tiHabituation.getNumberOfTrials() > 0)
@@ -217,7 +219,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 			lTrials.append(l2.at(htg.next()));
 		}
 		
-		m_psHabituation = new HPhase(log, lTrials, m_pmm, m_pld, "Habituation", tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psHabituation = new HPhase(*sExperiment, log, lTrials, "Habituation", tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
 	}
 	
 	if (tiTest.getNumberOfTrials() > 0)
@@ -229,7 +231,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 			lTrials.append(l3.at(htg.next()));
 		}
 		
-		m_psTest = new HPhase(log, lTrials, m_pmm, m_pld, "Test", tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed(), sExperiment);
+		m_psTest = new HPhase(*sExperiment, log, lTrials, "Test", tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	
@@ -394,8 +396,15 @@ void HControlPanel::onCleared()
 	m_labelSoundFileValue->setText("");
 }
 
+void HControlPanel::onAttention()
+{
+	m_log.append(new HAttentionEvent(HElapsedTimer::elapsed()));
+}
+
+
 void HControlPanel::onLook(HLook l)
 {
+	m_log.append(new HLookEvent(l, HElapsedTimer::elapsed()));
 	switch (l.direction())
 	{
 		case LookLeft:

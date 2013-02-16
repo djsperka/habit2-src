@@ -55,11 +55,14 @@ QTextStream& operator<<(QTextStream& out, const HTrialEndType& etype)
 {
 	switch (etype)
 	{
-		case kTrialEndSuccess:
-			out << "Success";
+		case kTrialEndGotLook:
+			out << "GotLook";
 			break;
-		case kTrialEndFail:
-			out << "Fail";
+		case kTrialEndFixedTimeout:
+			out << "FixedTimeout";
+			break;
+		case kTrialEndNoLookTimeout:
+			out << "NoLookTimeout";
 			break;
 		case kTrialEndAbort:
 			out << "Abort";
@@ -70,8 +73,6 @@ QTextStream& operator<<(QTextStream& out, const HTrialEndType& etype)
 	}
 	return out;
 };
-			
-
 
 QTextStream& operator<<(QTextStream& out, const HEvent& e)
 {
@@ -99,14 +100,17 @@ QString HTrialEndEvent::eventInfo() const
 	QString s;
 	switch (m_endtype)
 	{
-		case kTrialEndSuccess:
-			s = "Success";
+		case kTrialEndGotLook:
+			s = "GotLook";
 			break;
-		case kTrialEndFail:
-			s = "Fail";
+		case kTrialEndFixedTimeout:
+			s = "FixedTimeout";
+			break;
+		case kTrialEndNoLookTimeout:
+			s = "NoLookTimeout";
 			break;
 		case kTrialEndAbort:
-			s = "Abort";
+			s = "TrialAborted";
 			break;
 		default:
 			s = "Unknown reason";
@@ -115,6 +119,7 @@ QString HTrialEndEvent::eventInfo() const
 	return s;
 };
 
+
 QString HStimRequestEvent::eventInfo() const
 {
 	return QString("Request stim index %1").arg(m_stimindex);
@@ -122,7 +127,12 @@ QString HStimRequestEvent::eventInfo() const
 
 QString HStimStartEvent::eventInfo() const
 {
-	return QString("Stim index %1 started on player %2").arg(m_stimindex).arg(m_playerid);
+	return QString("Stim started on player %1").arg(m_playerid);
+};
+
+QString HAGStartEvent::eventInfo() const
+{
+	return QString("AG started on player %1").arg(m_playerid);
 };
 
 QString HStimulusSettingsEvent::eventInfo() const
