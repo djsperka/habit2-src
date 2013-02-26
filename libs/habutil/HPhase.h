@@ -25,6 +25,7 @@
 
 class HTrial;
 
+
 class HPhase: public HExperimentChildState
 {
 	Q_OBJECT

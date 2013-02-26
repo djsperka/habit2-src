@@ -11,12 +11,35 @@
 #include "HElapsedTimer.h"
 #include <QKeyEvent>
 
+
+HKeypadLookDetector::HKeypadLookDetector(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight) 
+: HLookDetector(minlooktime_ms, minlookawaytime_ms, log)
+, m_pdialog(pdialog)
+, m_bUseLeft(bUseLeft)
+, m_bUseCenter(bUseCenter)
+, m_bUseRight(bUseRight)
+{
+	qDebug() << "HKeypadLookDetector: grab keyboard and install self.";
+	m_pdialog->grabKeyboard();
+	m_pdialog->installEventFilter(this);
+};																																							  
+
+HKeypadLookDetector::~HKeypadLookDetector() 
+{ 
+	qDebug() << "HKeypadLookDetector: release keyboard and remove self.";
+	m_pdialog->releaseKeyboard();
+	m_pdialog->removeEventFilter(this); 
+};
+
+
+
 bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 {
 	Q_UNUSED(obj);
 	int t = HElapsedTimer::elapsed();
 	QKeyEvent *keyEvent;
 	bool bVal = false;
+	
 	switch (event->type()) 
 	{
 		case QEvent::KeyPress:
@@ -34,6 +57,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 					{
 						if (isAGLookEnabled())
 						{
+							qDebug() << "Emit attention() signal...";
 							emit attention();
 							bVal = true;
 						}

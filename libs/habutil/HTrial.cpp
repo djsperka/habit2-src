@@ -27,7 +27,13 @@ void HAGRequestState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	trial().phase().requestCurrentStim();
+	trial().phase().requestAG();
+};
+
+void HAGRunningState::onEntry(QEvent* e) 
+{
+	Q_UNUSED(e);
+	HState::onEntry(e);
 };
 
 void HStimRunningState::onEntry(QEvent* e) 
@@ -130,7 +136,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 	QObject::connect(sAGRunning, SIGNAL(exited()), this, SLOT(onAGRunningExited()));
 
 	// When the look detector emits the attention() signal enter StimRequest state. 
-	sAGRunning->addTransition(&phase.experiment().getMediaManager(), SIGNAL(attention()), sStimRequest);
+	sAGRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(attention()), sStimRequest);
 		
 	// StimRequest emits a playStim() signal, which is connected to the media manager. 
 	// When media manager starts playing the stim it emits stimStarted(). That signal 
@@ -158,7 +164,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 		HNoLookTimeoutState* sNoLookTimeout = new HNoLookTimeoutState(*this, log);
 		sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sNoLookTimeout);
 		sNoLookTimeout->addTransition(sInitial);	// trial is repeated
-		sStimRunning->addTransition(&phase.experiment().getMediaManager(), SIGNAL(look(HLook)), sGotLook);
+		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(look(HLook)), sGotLook);
 		sGotLook->addTransition(sFinal);
 	}
 
@@ -188,27 +194,31 @@ void HTrial::incrementRepeatNumber()
 void HTrial::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
-	eventLog().append(new HTrialStartEvent());
-										   
+	
+	// Post to log - console-type debug log, not event log 
+	HState::onEntry(e);
+
+	// post to event log
+	eventLog().append(new HTrialStartEvent());										   
 }
 
 
 void HTrial::onStimRunningEntered()
 {
-	m_pLD->enableLook();
+	phase().experiment().getLookDetector().enableLook();
 }
 
 void HTrial::onStimRunningExited()
 {
-	m_pLD->disable();
+	phase().experiment().getLookDetector().disable();
 }
 
 void HTrial::onAGRunningEntered()
 {
-	m_pLD->enableAGLook();
+	phase().experiment().getLookDetector().enableAGLook();
 }
 
 void HTrial::onAGRunningExited()
 {
-	m_pLD->disable();
+	phase().experiment().getLookDetector().disable();
 }

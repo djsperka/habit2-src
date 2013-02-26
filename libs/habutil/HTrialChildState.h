@@ -24,7 +24,7 @@ class HTrialChildState: public HLogState
 	
 public:
 	HTrialChildState(HTrial& trial, HEventLog& log, const QString& name)
-	: HLogState(log, name)
+	: HLogState(log, name, (QState *)&trial)
 	, m_trial(trial)
 	{};
 	
@@ -45,10 +45,6 @@ public:
 	~HTrialInitialState() {};
 	
 protected:
-	void onEntry(QEvent* e)
-	{
-		Q_UNUSED(e);
-	};
 };
 
 
@@ -79,8 +75,7 @@ public:
 	HAGRunningState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HAGRunningState") {};
 	~HAGRunningState() {};
 	
-	// on entry generate kAGStarted event 
-	//void onEntry(QEvent* e);
+	void onEntry(QEvent* e);
 	
 };
 

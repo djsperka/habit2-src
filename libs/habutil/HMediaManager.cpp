@@ -64,12 +64,14 @@ void HMediaManager::clear()
 
 void HMediaManager::ag()
 {
+	m_pendingStartSignal = true;
 	m_pendingAGStartSignal = true;
 	stim(0);
 }
 
 void HMediaManager::playerStarted(int id)
 {
+	qDebug() << "HMediaManager::playerStarted(int id = " << id << ") pendingStart " << m_pendingStartSignal << " pendingAGStart " << m_pendingAGStartSignal;
 	emit screen(id);
 	if (m_pendingStartSignal)
 	{

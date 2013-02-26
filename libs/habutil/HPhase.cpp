@@ -54,6 +54,9 @@ void HPhase::screenStarted(int playerid)
 void HPhase::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
+	
+	// Post to log
+	HState::onEntry(e);
 
 	// post 'phase start' event to event log.
 	eventLog().append(new HPhaseStartEvent(m_name, HElapsedTimer::elapsed()));
@@ -67,6 +70,9 @@ void HPhase::onEntry(QEvent* e)
 void HPhase::onExit(QEvent* e)
 {
 	Q_UNUSED(e);
+
+	// Post to log
+	HState::onExit(e);
 
 	// post 'phase end' event to event log. 
 	eventLog().append(new HPhaseEndEvent(HElapsedTimer::elapsed()));
@@ -99,7 +105,7 @@ void HPhase::requestAG()
 	// TODO: createMediaManager should ensure that position 0 is always ag or a blank screen. 
 	// config should ensure that trials with no ag configured will not request stim(0). 
 	
-	experiment().getMediaManager().stim(0);
+	experiment().getMediaManager().ag();
 	eventLog().append(new HStimRequestEvent(0, HElapsedTimer::elapsed()));
 }
 
@@ -118,3 +124,10 @@ bool HPhase::advance()
 	}
 	return b;
 };
+
+void HPhase::onTrialCompleteEntered()
+{
+	// what to do here. 
+	// PhaseCriteria/kTrialEnd - that was done in prev states
+};
+

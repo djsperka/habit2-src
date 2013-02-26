@@ -157,3 +157,11 @@ QString HLookEvent::eventInfo() const
 	tmp << m_look;
 	return s;
 };
+
+QString HLookTransEvent::eventInfo() const
+{
+	QString s;
+	QTextStream tmp(&s);
+	tmp << transtype();
+	return s;
+};

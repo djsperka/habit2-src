@@ -11,8 +11,15 @@
 #include "HElapsedTimer.h"
 #include <QtDebug>
 
-HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms) : 
-m_bLive(true), m_indexAt(0), m_minLookTimeMS(minlooktime_ms), m_minLookAwayTimeMS(minlookawaytime_ms), m_bLookStarted(false), m_direction(NoLook), m_bLookAwayStarted(false)
+HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log) 
+: m_minLookTimeMS(minlooktime_ms)
+, m_minLookAwayTimeMS(minlookawaytime_ms)
+, m_log(log)
+, m_bLive(true)
+, m_indexAt(0)
+, m_bLookStarted(false)
+, m_direction(NoLook)
+, m_bLookAwayStarted(false)
 {
 	m_ptimer = new QTimer();
 	m_ptimer->setInterval(minlookawaytime_ms);
@@ -20,9 +27,9 @@ m_bLive(true), m_indexAt(0), m_minLookTimeMS(minlooktime_ms), m_minLookAwayTimeM
 	QObject::connect(m_ptimer, SIGNAL(timeout()), this, SLOT(timeout()));
 };
 
-
 void HLooker::addTrans(LookTransType type, int tMS)
 {
+	m_log.append(new HLookTransEvent(type, tMS));
 	m_transitions.append(qMakePair(type, tMS));
 	update();
 	return;

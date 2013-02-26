@@ -40,6 +40,7 @@ enum HEventType
 	kStimulusInfo,
 	kAttention,
 	kLook,
+	kLookTrans,
 	kUndefined
 };
 
@@ -344,5 +345,28 @@ public:
 private:
 	HLook m_look;
 };
-		
+	
+
+class HLookTransEvent: public HEvent
+{
+public:
+	HLookTransEvent(LookTransType lt = UnknownLookTrans, int timestamp=0)
+	: HEvent(kLookTrans, timestamp)
+	, m_type(lt)
+	{};
+	
+	HLookTransEvent(const HLookTransEvent& e)
+	: HEvent(kLookTrans, e.timestamp())
+	, m_type(e.transtype())
+	{};
+	
+	virtual ~HLookTransEvent() {};
+	
+	const LookTransType& transtype() const { return m_type; };
+	QString eventInfo() const;
+	
+private:
+	LookTransType m_type;
+};
+
 #endif

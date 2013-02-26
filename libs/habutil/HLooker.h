@@ -14,6 +14,7 @@
 #include <QTimer>
 #include <QTextStream>
 #include "HLook.h"
+#include "HEventLog.h"
 
 
 class HLooker : public QObject
@@ -21,15 +22,16 @@ class HLooker : public QObject
 	Q_OBJECT
 
 public:
-	HLooker(int minlooktime_ms, int minlookawaytime_ms);
+	HLooker(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log);
 	~HLooker() {};
 	void addTrans(LookTransType type, int tMS);	
 	
 private:
-	bool m_bLive;
-	int m_indexAt;
 	int m_minLookTimeMS;
 	int m_minLookAwayTimeMS;
+	HEventLog& m_log;
+	bool m_bLive;
+	int m_indexAt;
 	bool m_bLookStarted;
 	LookDirection m_direction;
 	bool m_bLookAwayStarted;

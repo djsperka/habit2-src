@@ -173,7 +173,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 	int lookTimeMS = tiPreTest.getLookTimes() * 100;
 	int lookAwayTimeMS = tiHabituation.getLookTimes() * 100;
 	int noLookTimeMS = tiTest.getLookTimes() * 100;
-	m_pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, this);
+	m_pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, log, this);
 
 	// connect attention() and look() signals to a slot so we can forward the info to the event log
 	connect(m_pld, SIGNAL(attention()), this, SLOT(onAttention()));

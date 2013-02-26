@@ -41,10 +41,10 @@ public:
 	int getRepeatNumber() { return m_repeatNumber; };
 protected:
 	virtual void onEntry(QEvent* e);
-	virtual void onExit(QEvent* e);
+//	virtual void onExit(QEvent* e);
 	
 private:
-	HLookDetector* m_pLD;
+//	HLookDetector* m_pLD;
 	int m_maxTrialLengthMS;
 	int m_maxNoLookTimeMS;
 	bool m_bFixedLength;
