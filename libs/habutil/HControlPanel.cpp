@@ -206,8 +206,8 @@ void HControlPanel::createExperiment(HEventLog& log)
 		{
 			lTrials.append(l1.at(htg.next()));
 		}
-
-		m_psPreTest = new HPhase(*sExperiment, log, lTrials, "Pretest", tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
+		m_pcritPreTest = new HPhaseFixedNCriteria(tiPreTest.getNumberOfTrials());
+		m_psPreTest = new HPhase(*sExperiment, m_pcritPreTest, log, lTrials, HPhaseType::PreTest, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	if (tiHabituation.getNumberOfTrials() > 0)
@@ -219,7 +219,9 @@ void HControlPanel::createExperiment(HEventLog& log)
 			lTrials.append(l2.at(htg.next()));
 		}
 		
-		m_psHabituation = new HPhase(*sExperiment, log, lTrials, "Habituation", tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
+		// Create habituation criteria object. 
+		m_pcritHabituation = new HPhaseHabituationCriteria();
+		m_psHabituation = new HPhase(*sExperiment, m_pcritHabituation, log, lTrials, HPhaseType::Habituation, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
 	}
 	
 	if (tiTest.getNumberOfTrials() > 0)
@@ -231,7 +233,8 @@ void HControlPanel::createExperiment(HEventLog& log)
 			lTrials.append(l3.at(htg.next()));
 		}
 		
-		m_psTest = new HPhase(*sExperiment, log, lTrials, "Test", tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
+		m_pcritTest = new HPhaseFixedNCriteria(tiTest.getNumberOfTrials());
+		m_psTest = new HPhase(*sExperiment, m_pcritTest, log, lTrials, HPhaseType::Test, tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	

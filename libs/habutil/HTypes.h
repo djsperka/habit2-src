@@ -6,7 +6,12 @@
  *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
+
+#ifndef _HTYPES_H_
+#define _HTYPES_H_
+
 #include <QString>
+#include <vector>
 
 class HPhaseType
 {
@@ -15,7 +20,6 @@ public:
 	static const HPhaseType PreTest;
 	static const HPhaseType Habituation;
 	static const HPhaseType Test;
-	static const HPhaseType AttentionGetter;	// Not really a phase, but makes this class useful for stim types as well as phase. 
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
 	
@@ -69,6 +73,59 @@ private:
 const HPhaseType& getPhaseType(int i);
 const HLookTrans& getLookTransType(int i);
 const HLookDirection& getLookDirection(int i);
+
+
+// Stim context refers to when stim is to be played. 
+
+class HStimContext
+{
+public:
+	static const HStimContext UnknownContext;
+	static const HStimContext PreTestPhase;
+	static const HStimContext HabituationPhase;
+	static const HStimContext TestPhase;
+	static const HStimContext AttentionGetter;	// Not really a phase, but makes this class useful for stim types as well as phase. 
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+
+	friend bool operator==(const HStimContext& lhs, const HStimContext& rhs);
+	
+private:
+	explicit HStimContext(int t, const char *name): m_t(t), m_s(name) {}
+	int m_t;
+	QString m_s;
+};
+
+const HStimContext& getStimContext(int i);
+
+class HHabituationType
+{
+public:
+	static const HHabituationType HHabituationTypeUnknown;
+	static const HHabituationType HHabituationTypeFixedN;
+	static const HHabituationType HHabituationTypeCriterion;
+	static const HHabituationType HHabituationTypeTotalLookingTime;
+	
+	// This array is used in handling the ComboBox in HabituationSetupForm
+	// See HTypes.cpp.
+	static const HHabituationType *A[3];
+
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	const QString& label() const { return m_l; }
+	friend bool operator==(const HHabituationType& lhs, const HHabituationType& rhs);
+	
+private:
+	explicit HHabituationType(int t, const char *name, const char *label): m_t(t), m_s(name), m_l(label) {}
+	int m_t;
+	QString m_s;
+	QString m_l;
+};
+
+const HHabituationType& getHabituationType(int number_value);
+
+
+#endif
 
 
 

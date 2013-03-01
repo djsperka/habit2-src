@@ -15,6 +15,7 @@
 #include "stimulussettings.h"
 #include "stimulusinfo.h"
 #include "HLook.h"
+#include "HTypes.h"
 
 
 /*
@@ -98,31 +99,27 @@ QTextStream& operator<<(QTextStream& out, const HEvent& e);
 class HPhaseStartEvent: public HEvent
 {
 public:
-	HPhaseStartEvent(QString& phase, int timestamp = 0) 
+	HPhaseStartEvent(const HPhaseType& ptype, int timestamp = 0) 
 	: HEvent(kPhaseStart, timestamp)
-	, m_phase(phase)
+	, m_ptype(ptype)
 	{};
 
-	HPhaseStartEvent(char* phase, int timestamp = 0) 
-	: HEvent(kPhaseStart, timestamp)
-	, m_phase(phase)
-	{};
-	
 	HPhaseStartEvent()
 	: HEvent(kPhaseStart)
-	, m_phase("Unknown")
+	, m_ptype(HPhaseType::UnknownPhase)
 	{};
 	
 	HPhaseStartEvent(const HPhaseStartEvent& e)
 	: HEvent(e.type(), e.timestamp())
-	, m_phase("Unknown")
+	, m_ptype(e.ptype())
 	{};
 	
 	virtual ~HPhaseStartEvent() {};
-	const QString& phase() const { return m_phase; };
+	const QString& phase() const { return m_ptype.name(); };
+	const HPhaseType& ptype() const { return m_ptype; };
 	QString eventInfo() const;
 private:
-	QString m_phase;
+	const HPhaseType& m_ptype;
 };
 
 class HPhaseEndEvent: public HEvent

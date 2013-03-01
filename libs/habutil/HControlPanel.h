@@ -30,6 +30,7 @@ class QPushButton;
 class QLabel;
 class QVBoxLayout;
 class QString;
+class HPhaseCriteria;
 
 class HControlPanel : public QDialog
 {
@@ -75,6 +76,9 @@ private:
 	HPhase* m_psPreTest;
 	HPhase* m_psHabituation;
 	HPhase* m_psTest;
+	HPhaseCriteria* m_pcritPreTest;
+	HPhaseCriteria* m_pcritHabituation;
+	HPhaseCriteria* m_pcritTest;
 	
 	QPushButton* m_pbStartTrials;
 	QPushButton* m_pbNextTrial;

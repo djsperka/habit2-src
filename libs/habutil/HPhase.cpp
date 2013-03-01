@@ -14,10 +14,11 @@
 #include <QFinalState>
 
 
-HPhase::HPhase(HExperiment& exp, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const char *name, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG)
+HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const HPhaseType& ptype, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG)
 	: HExperimentChildState(exp, log, "Phase")
+	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
-	, m_name(name)
+	, m_ptype(ptype)
 	, m_itrial(0)
 {
 	QAbstractTransition* trans;
@@ -59,7 +60,7 @@ void HPhase::onEntry(QEvent* e)
 	HState::onEntry(e);
 
 	// post 'phase start' event to event log.
-	eventLog().append(new HPhaseStartEvent(m_name, HElapsedTimer::elapsed()));
+	eventLog().append(new HPhaseStartEvent(ptype(), HElapsedTimer::elapsed()));
 	
 	// connect media manager signal screen(int) to slot screenStarted(int)
 	// disconnect onExit() from this state.

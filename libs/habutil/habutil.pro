@@ -25,7 +25,7 @@ HEADERS +=	HLook.h \
 			HApp.h \
 			HMediaManagerUtil.h \
 			HTrialGenerator.h \
-			HOutputGenerator.h \
+#			HOutputGenerator.h \
 			HPhaseCriteria.h \
 			HTrialLog.h \
 			HPhaseLog.h \
@@ -50,20 +50,20 @@ HEADERS +=	HLook.h \
 			habit/experimentsettingsform.h \
 			habit/exportmultipleresults.h \
 			habit/habitapp.h \
-			habit/habitcontrolpanel.h \
+#			habit/habitcontrolpanel.h \
 			habit/habituationsettings.h \
 			habit/habituationsetupform.h \
 			habit/habituationstimuliform.h \
 			habit/habituationstimulitable.h \
 			habit/imagewidget_original.h \
 			habit/maindao.h \
-			habit/mediamanager.h \
-			habit/mediaplayer.h \
+#			habit/mediamanager.h \
+#			habit/mediaplayer.h \
 			habit/mediasoundpreviewplayer.h \
 			habit/monitormanager.h \
 			habit/monitorsettings.h \
 			habit/monitorsettingsform.h \
-			habit/OutputGenerator.h \
+#			habit/OutputGenerator.h \
 			habit/reliabilitiesform.h \
 			habit/reliabilitysettings.h \
 			habit/resource.h \
@@ -110,11 +110,12 @@ SOURCES +=	HLook.cpp \
 			HApp.cpp \
 			HMediaManagerUtil.cpp \
 			HTrialGenerator.cpp \
-			HOutputGenerator.cpp \
+#			HOutputGenerator.cpp \
 			HPhaseCriteria.cpp \
 			HTrialLog.cpp \
 			HPhaseLog.cpp \
 			HEventLog.cpp \
+			HPhaseChildState.cpp \
 			HTypes.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
@@ -131,7 +132,7 @@ SOURCES +=	HLook.cpp \
 			habit/experimentsettingsform.cpp \
 			habit/exportmultipleresults.cpp \
 			habit/habitapp.cpp \
-			habit/habitcontrolpanel.cpp \
+#			habit/habitcontrolpanel.cpp \
 			habit/habituationsettings.cpp \
 			habit/habituationsetupform.cpp \
 			habit/habituationstimuliform.cpp \
@@ -139,13 +140,13 @@ SOURCES +=	HLook.cpp \
 			habit/imagewidget_original.cpp \
 			habit/main.cpp \
 			habit/maindao.cpp \
-			habit/mediamanager.cpp \
-			habit/mediaplayer.cpp \
+#			habit/mediamanager.cpp \
+#			habit/mediaplayer.cpp \
 			habit/mediasoundpreviewplayer.cpp \
 			habit/monitormanager.cpp \
 			habit/monitorsettings.cpp \
 			habit/monitorsettingsform.cpp \
-			habit/OutputGenerator.cpp \
+#			habit/OutputGenerator.cpp \
 			habit/reliabilitiesform.cpp \
 			habit/reliabilitysettings.cpp \
 			habit/resultsvieweroptions.cpp \

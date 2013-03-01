@@ -13,6 +13,8 @@
 #include "HExperimentChildState.h"
 #include "HLookDetector.h"
 #include "HQEvents.h"
+#include "HTypes.h"
+#include "HPhaseCriteria.h"
 #include "stimulusSettings.h"
 #include <QList>
 #include <QEvent>
@@ -24,6 +26,7 @@
 // 
 
 class HTrial;
+class HPhaseCriteria;
 
 
 class HPhase: public HExperimentChildState
@@ -31,12 +34,13 @@ class HPhase: public HExperimentChildState
 	Q_OBJECT
 	
 	QList<QPair<int, Habit::StimulusSettings> > m_stimuli;
-	QString m_name;
+	const HPhaseType& m_ptype;
 	int m_itrial;		// this is the current trial. First trial is '0'. Stim found at m_stimuli[m_itrial].second
 	HTrial* m_sTrial;
+	HPhaseCriteria *m_pcriteria;
 
 public:
-	HPhase(HExperiment& exp, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const char *name, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG);
+	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const HPhaseType& ptype, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG);
 	virtual ~HPhase() {};
 	bool advance();
 	HTrial* getHTrial() { return m_sTrial; };
@@ -46,6 +50,7 @@ public:
 	
 	void requestCurrentStim();
 	void requestAG();
+	const HPhaseType& ptype() const { return m_ptype; };
 
 protected:
 	virtual void onEntry(QEvent* e);

@@ -82,7 +82,7 @@ QTextStream& operator<<(QTextStream& out, const HEvent& e)
 
 QString HPhaseStartEvent::eventInfo() const 
 {
-	return m_phase;
+	return phase();
 };
 
 QString HPhaseEndEvent::eventInfo() const 
