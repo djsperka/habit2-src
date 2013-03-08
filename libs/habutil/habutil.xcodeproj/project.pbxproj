@@ -59,6 +59,7 @@
 		6B61B5F29B95F3542E9DC01E /* HVideoImagePlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = CCBF65C04B9E2C5A4C3A43F3 /* HVideoImagePlayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		6C02C989A17EDC535B391CE2 /* HImageWidget.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 4ACDDE9D9FE419267F4CC804 /* HImageWidget.cpp */; settings = {ATTRIBUTES = (); }; };
 		6D534CF8A656207E6395325B /* stimulusinfoform.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = A93604CF7630823D0DAB51B9 /* stimulusinfoform.cpp */; settings = {ATTRIBUTES = (); }; };
+		74360A3483910BB26FC42FED /* HPhaseCriteriaUtil.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 37FA43BC26C41F0F9D8D357D /* HPhaseCriteriaUtil.cpp */; settings = {ATTRIBUTES = (); }; };
 		7969A1AB2EAEF8AF8577BD6E /* moc_HPlayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 79F113765A8F7C9E88D6B8ED /* moc_HPlayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		7CE7DE26217C97EE294489EF /* moc_HKeypadLookDetector.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = BEE6FC9475CBCB99D8858A95 /* moc_HKeypadLookDetector.cpp */; settings = {ATTRIBUTES = (); }; };
 		7E023273474CB5BBFCC39562 /* moc_habituationsetupform.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 78AE4F2A51A770852DE0BBA7 /* moc_habituationsetupform.cpp */; settings = {ATTRIBUTES = (); }; };
@@ -154,7 +155,7 @@
 		18E228A648EB2A9746BE8BFC /* HExperiment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HExperiment.h; sourceTree = "<group>"; };
 		1954133F51CAC3AD0C01810A /* HTrialGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HTrialGenerator.h; sourceTree = "<group>"; };
 		1A99CAFDB279A87A2F2F5CAE /* viewexperimentresultform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = viewexperimentresultform.h; path = habit/viewexperimentresultform.h; sourceTree = "<group>"; };
-		1B889A2616E0039A0097D65A /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BAD5E2216E8240B00EB19AD /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DB843A27517106274BF1269 /* HPhase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HPhase.cpp; sourceTree = "<group>"; };
 		1E0689075E90CC961E2BDAD0 /* moc_experimentresultsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_experimentresultsform.cpp; sourceTree = "<group>"; };
 		1FD15338F4EDFD4BBD1E1034 /* designsettings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = designsettings.cpp; path = habit/designsettings.cpp; sourceTree = "<group>"; };
@@ -175,6 +176,7 @@
 		357698727FF9004AF4A4E38B /* subjectinformation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = subjectinformation.cpp; path = habit/subjectinformation.cpp; sourceTree = "<group>"; };
 		362D0FFF9C9A9143408F1468 /* moc_HLooker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_HLooker.cpp; sourceTree = "<group>"; };
 		3631B49F38A400DBD16E2712 /* HApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HApp.h; sourceTree = "<group>"; };
+		37FA43BC26C41F0F9D8D357D /* HPhaseCriteriaUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HPhaseCriteriaUtil.cpp; sourceTree = "<group>"; };
 		3959C493CF406F74571C12F6 /* HQEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HQEvents.h; sourceTree = "<group>"; };
 		39FF19599494DEEC516B4070 /* treewizard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = treewizard.cpp; path = habit/treewizard.cpp; sourceTree = "<group>"; };
 		3A61F8EEE1ED39B16E262954 /* designsetupform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = designsetupform.h; path = habit/designsetupform.h; sourceTree = "<group>"; };
@@ -222,6 +224,7 @@
 		6B309201C43C8D247C47324E /* controlbaroptionsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = controlbaroptionsform.cpp; path = habit/controlbaroptionsform.cpp; sourceTree = "<group>"; };
 		6B89EA6BC5CB733959BBD822 /* moc_runsettingsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_runsettingsform.cpp; sourceTree = "<group>"; };
 		6D9BC2C69D929DCF70039571 /* stimulusdisplayinfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = stimulusdisplayinfo.h; path = habit/stimulusdisplayinfo.h; sourceTree = "<group>"; };
+		6F1B9449958554A1045D11BD /* HPhaseCriteriaUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HPhaseCriteriaUtil.h; sourceTree = "<group>"; };
 		6F3E5EFD2276F7D78841FB29 /* ui_monitorsettingsform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ui_monitorsettingsform.h; sourceTree = "<group>"; };
 		726CB1DE3A85105F378E6B20 /* HPhase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HPhase.h; sourceTree = "<group>"; };
 		72D71294DFCE1CFBEDB98F9B /* habitapp.ui */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = habitapp.ui; path = habit/habitapp.ui; sourceTree = "<group>"; };
@@ -377,15 +380,15 @@
 				7CABE3C80E79AD2B307756D2 /* Sources [qmake] */,
 				52C235EBF1C9B07808119459 /* Sources [RCC] */,
 				EEC299C65D5017EB9DD513B0 /* Sources [UIC] */,
-				1B889A2716E0039A0097D65A /* Products */,
+				1BAD5E2316E8240B00EB19AD /* Products */,
 			);
 			name = habutil;
 			sourceTree = "<group>";
 		};
-		1B889A2716E0039A0097D65A /* Products */ = {
+		1BAD5E2316E8240B00EB19AD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1B889A2616E0039A0097D65A /* libhabutil.a */,
+				1BAD5E2216E8240B00EB19AD /* libhabutil.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -568,6 +571,7 @@
 				FCF948CD3648C92F2A23404A /* HMediaManagerUtil.h */,
 				1954133F51CAC3AD0C01810A /* HTrialGenerator.h */,
 				A4341C6B6A570916C812B6B3 /* HPhaseCriteria.h */,
+				6F1B9449958554A1045D11BD /* HPhaseCriteriaUtil.h */,
 				7988921C10B53D3DBCF1269E /* HTrialLog.h */,
 				B8ACBFABB53961CBFC245F1E /* HPhaseLog.h */,
 				A3DE7CA2A40F382C32AD5548 /* HEventLog.h */,
@@ -676,6 +680,7 @@
 				94AB9C489A7CC078324A7E7A /* HMediaManagerUtil.cpp */,
 				E553B188655CBB72EB30D0E5 /* HTrialGenerator.cpp */,
 				7E5F12BAAA320F613AE56A80 /* HPhaseCriteria.cpp */,
+				37FA43BC26C41F0F9D8D357D /* HPhaseCriteriaUtil.cpp */,
 				2B04E108B312D2F7DD4162DE /* HTrialLog.cpp */,
 				2B0EB803B96DB31E5B5D3A68 /* HPhaseLog.cpp */,
 				0A7899D43A4166F408E0B54D /* HEventLog.cpp */,
@@ -697,16 +702,14 @@
 				A0A52A2ADF7A1E2A99738674 /* Qt Preprocessors */,
 				C29B8785722055ED95EF7B57 /* Build Sources */,
 				2A1043669E6E5A7426EA502A /* Frameworks & Libraries */,
-				F6069D5A5DA8AA28EDB8B3C6 /* Project Copy */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = habutil;
-			productInstallPath = ../../lib/;
 			productName = habutil;
-			productReference = 1B889A2616E0039A0097D65A /* libhabutil.a */;
+			productReference = 1BAD5E2216E8240B00EB19AD /* libhabutil.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -725,7 +728,7 @@
 				German,
 			);
 			mainGroup = 05596AB53D8D521C69802C27 /* habutil */;
-			productRefGroup = 1B889A2716E0039A0097D65A /* Products */;
+			productRefGroup = 1BAD5E2316E8240B00EB19AD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -754,20 +757,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "make -C /Users/Oakeslab/work/habit2/libs/habutil -f 'habutil.xcodeproj/qt_makeqmake.mak'";
-		};
-		F6069D5A5DA8AA28EDB8B3C6 /* Project Copy */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Project Copy";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "cp -r $BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME /Users/Oakeslab/work/habit2/lib";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -798,6 +787,7 @@
 				009FE71066929D7DC3687CF9 /* HMediaManagerUtil.cpp in Build Sources */,
 				9C1EAA32F0B07929C448C8D3 /* HTrialGenerator.cpp in Build Sources */,
 				699B9810ED80FCDAB947A7AB /* HPhaseCriteria.cpp in Build Sources */,
+				74360A3483910BB26FC42FED /* HPhaseCriteriaUtil.cpp in Build Sources */,
 				B52D6256C0B3DC7474F882EF /* HTrialLog.cpp in Build Sources */,
 				B74DDACA6AFFFEE916D61425 /* HPhaseLog.cpp in Build Sources */,
 				D119363A890698CA394B192D /* HEventLog.cpp in Build Sources */,

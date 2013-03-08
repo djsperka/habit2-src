@@ -27,7 +27,7 @@ bool HPhaseHabituationCriteria::getBasisSum(const HPhaseLog& log, int& iBasisSum
 	bool bval = false;
 	iBasisSum = 0;
 	iBasisWindowStart = -1;
-	if (m_c.getBasis() == CriterionSettings::eFirstN)
+	if (m_c.getBasis() == HCriterionBasisType::HCriterionBasisFirstN)
 	{
 		if (log.size() >= (int)m_c.getWindowSize())
 		{
@@ -45,7 +45,7 @@ bool HPhaseHabituationCriteria::getBasisSum(const HPhaseLog& log, int& iBasisSum
 		int bmax = 0;
 		int itemp;
 		int iStep = 1;
-		if (m_c.getWindowType() == CriterionSettings::eFixedWindow)
+		if (m_c.getWindowType() == HCriterionWindowType::HCriterionWindowFixed)
 			iStep = m_c.getWindowSize();
 		iBasisWindowStart = -1;
 		
@@ -86,7 +86,7 @@ bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log)
 	if (getBasisSum(log, basisSum, iWindowStart))
 	{
 		threshold = (double)basisSum * m_c.getPercent() / 100.0;
-		if (m_c.getWindowType() == CriterionSettings::eFixedWindow)
+		if (m_c.getWindowType() == HCriterionWindowType::HCriterionWindowFixed)
 			iStep = m_c.getWindowSize();
 		for (int i=iWindowStart; i<log.size(); i+=iStep)
 		{

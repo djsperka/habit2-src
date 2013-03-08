@@ -28,6 +28,8 @@ public:
 	virtual ~HEventLog();	// must destroy all events
 
 	HPhaseLog getPhaseLog(QString s = QString(""));
+	
+	bool saveToCSV(QString& filename);
 };
 
 #endif

@@ -7,9 +7,8 @@
 #include <QtCore/QFile>
 #include <QtCore/QTDebug>
 #include <iostream>
-//#include <fstream>
 
-//using namespace std;
+using namespace std;
 QTextStream logfile; 
 
 void SimpleLoggingHandler(QtMsgType type, const char *msg) 
@@ -32,10 +31,35 @@ void SimpleLoggingHandler(QtMsgType type, const char *msg)
 	}
 }
 
+void ScreenLoggingHandler(QtMsgType type, const char* msg)
+{
+    const char symbols[] = { 'I', 'E', '!', 'X' };
+    QString output = QString("[%1] %2").arg( symbols[type] ).arg( msg );
+    std::cerr << output.toStdString() << std::endl;
+    if( type == QtFatalMsg ) abort();
+}
 
 int main(int argc, char *argv[])
 {
-	qInstallMsgHandler(SimpleLoggingHandler);
+	int i;
+	bool bs = false;
+	for (i=0; i<argc; i++)
+	{
+		cout << argv[i] << endl;
+		if (!strcmp(argv[i], "-s"))
+		{
+			bs = true;
+		}
+	}
+	if (bs)
+	{
+		qInstallMsgHandler(ScreenLoggingHandler);
+	}
+	else 
+	{
+		qInstallMsgHandler(SimpleLoggingHandler);
+	}
+	
     QApplication a(argc, argv);
 	a.setApplicationVersion(HABIT_VERSION);
 	a.setApplicationName("Habit");

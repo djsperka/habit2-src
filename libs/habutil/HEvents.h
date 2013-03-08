@@ -19,40 +19,70 @@
 
 
 /*
- * These are events for the HEventLog. They are NOT events in the Qt sense - 
+ * These are event types for the HEventLog. They are NOT events in the Qt sense - 
  * they don't derive from QEvent!!! 
  * There is a set of QEvent derived events in HQEvents.h
  */
 
 
-enum HEventType
+class HEventType
 {
-	kPhaseStart = 0,
-	kPhaseEnd,
-	kTrialStart,
-	kTrialEnd,
-	kAGRequest,
-	kAGStart,
-	kAGEnd,
-	kStimRequest,
-	kStimStart,
-	kStimEnd,
-	kStimulusSettings,
-	kStimulusInfo,
-	kAttention,
-	kLook,
-	kLookTrans,
-	kUndefined
-};
+public:
+	static const HEventType HEventPhaseStart;
+	static const HEventType HEventPhaseEnd;
+	static const HEventType HEventTrialStart;
+	static const HEventType HEventTrialEnd;
+	static const HEventType HEventAGRequest;
+	static const HEventType HEventAGStart;
+	static const HEventType HEventAGEnd;
+	static const HEventType HEventStimRequest;
+	static const HEventType HEventStimStart;
+	static const HEventType HEventStimEnd;
+	static const HEventType HEventStimulusSettings;
+	static const HEventType HEventStimulusInfo;
+	static const HEventType HEventAttention;
+	static const HEventType HEventLook;
+	static const HEventType HEventLookTrans;
+	static const HEventType HEventUndefined;
+
+	// undefined event not in A[]
+	static const HEventType* A[15];
+	
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	friend bool operator==(const HEventType& lhs, const HEventType& rhs);
+	
+private:
+	explicit HEventType(int t, const char* s): m_t(t), m_s(s) {};
+	int m_t;
+	QString m_s;
+};	
+
+const HEventType& getEventType(int number_value);
+
 
 // These are supplied when creating HTrialEndEvent
 
-enum HTrialEndType
+class HTrialEndType
 {
-	kTrialEndGotLook,
-	kTrialEndFixedTimeout,
-	kTrialEndNoLookTimeout,
-	kTrialEndAbort,
+public:
+	static const HTrialEndType HTrialEndGotLook;
+	static const HTrialEndType HTrialEndFixedTimeout;
+	static const HTrialEndType HTrialEndNoLookTimeout;
+	static const HTrialEndType HTrialEndAbort;
+	static const HTrialEndType HTrialEndUndefined;
+	
+	// Undefined type not in A
+	static const HTrialEndType* A[4];
+	
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	friend bool operator==(const HTrialEndType& lhs, const HTrialEndType& rhs);
+	
+private:
+	explicit HTrialEndType(int t, const char* s): m_t(t), m_s(s) {};
+	int m_t;
+	QString m_s;
 };
 	
 
@@ -63,34 +93,41 @@ QTextStream& operator<<(QTextStream& out, const HEventType& type);
 class HEvent
 {
 public:
-	HEvent(HEventType type, int timestamp=0)
-	: m_type(type)
+	HEvent(const HEventType& type, int timestamp=0)
+	: m_ptype(&type)
 	, m_timestamp(timestamp)
 	{};		
 	virtual ~HEvent() {};
 
 	// default constructor and copy constructor
 	HEvent()
-	: m_type(kUndefined)
+	: m_ptype(&HEventType::HEventUndefined)
 	, m_timestamp(0)
 	{};
 	
 	HEvent(const HEvent& e)
-	: m_type(e.type())
+	: m_ptype(&e.type())
 	, m_timestamp(e.timestamp())
 	{};
 			 
 	
 	int timestamp() const { return m_timestamp; };
-	HEventType type() const { return m_type; };
+	const HEventType& type() const { return *m_ptype; };
+	void setEventType(const HEventType& type) { m_ptype = &type; };
 	
 	// Each event should give pretty output of its content. NOT the type or time!
 	virtual QString eventInfo() const = 0;
 	
+	// Each event should also give pretty CSV output of its content. Default behavior
+	// is to add nothing. When overriding, omit the leading comma, and double-quote
+	// strings.
+	QString eventCSV() const;
+	virtual QString eventCSVAdditional() const;		// override this to add more fields
+	
 	friend QTextStream& operator<<(QTextStream& out, const HEvent& e);
 	
 private:
-	HEventType m_type;
+	const HEventType* m_ptype;
 	int m_timestamp;
 };
 
@@ -99,38 +136,41 @@ QTextStream& operator<<(QTextStream& out, const HEvent& e);
 class HPhaseStartEvent: public HEvent
 {
 public:
-	HPhaseStartEvent(const HPhaseType& ptype, int timestamp = 0) 
-	: HEvent(kPhaseStart, timestamp)
-	, m_ptype(ptype)
+	HPhaseStartEvent(const HPhaseType& type, int timestamp = 0) 
+	: HEvent(HEventType::HEventPhaseStart, timestamp)
+	, m_pphasetype(&type)
 	{};
 
 	HPhaseStartEvent()
-	: HEvent(kPhaseStart)
-	, m_ptype(HPhaseType::UnknownPhase)
+	: HEvent(HEventType::HEventPhaseStart)
+	, m_pphasetype(&HPhaseType::UnknownPhase)
 	{};
 	
 	HPhaseStartEvent(const HPhaseStartEvent& e)
 	: HEvent(e.type(), e.timestamp())
-	, m_ptype(e.ptype())
+	, m_pphasetype(&e.phasetype())
 	{};
 	
 	virtual ~HPhaseStartEvent() {};
-	const QString& phase() const { return m_ptype.name(); };
-	const HPhaseType& ptype() const { return m_ptype; };
+	const QString& phase() const { return m_pphasetype->name(); };
+	const HPhaseType& phasetype() const { return *m_pphasetype; };
 	QString eventInfo() const;
+	
+	virtual QString eventCSVAdditional() const;		// override this to add more fields
+
 private:
-	const HPhaseType& m_ptype;
+	const HPhaseType* m_pphasetype;
 };
 
 class HPhaseEndEvent: public HEvent
 {
 public:
 	HPhaseEndEvent(int timestamp = 0) 
-	: HEvent(kPhaseEnd, timestamp)
+	: HEvent(HEventType::HEventPhaseEnd, timestamp)
 	{};
 	
 	HPhaseEndEvent(const HPhaseEndEvent& e)
-	: HEvent(kPhaseEnd, e.timestamp())
+	: HEvent(HEventType::HEventPhaseEnd, e.timestamp())
 	{};
 	
 	~HPhaseEndEvent() {};
@@ -142,25 +182,26 @@ class HTrialStartEvent: public HEvent
 {
 public:
 	HTrialStartEvent(int trialnumber, int repeatnumber=0, int timestamp=0)
-	: HEvent(kTrialStart, timestamp)
+	: HEvent(HEventType::HEventTrialStart, timestamp)
 	, m_trialnumber(trialnumber)
 	, m_repeatnumber(repeatnumber)
 	{};
 	
 	HTrialStartEvent()
-	: HEvent(kTrialStart)
+	: HEvent(HEventType::HEventTrialStart)
 	, m_trialnumber(-1)
 	, m_repeatnumber(-1)
 	{};
 	
 	HTrialStartEvent(const HTrialStartEvent& e)
-	: HEvent(kTrialStart, e.timestamp())
+	: HEvent(HEventType::HEventTrialStart, e.timestamp())
 	, m_trialnumber(e.trialnumber())
 	, m_repeatnumber(e.repeatnumber())
 	{};
 	
 	virtual ~HTrialStartEvent() {};
 	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;		// override this to add more fields
 	int trialnumber() const { return m_trialnumber; };
 	int repeatnumber() const { return m_trialnumber; };
 private:
@@ -171,39 +212,42 @@ private:
 class HTrialEndEvent: public HEvent
 {
 public:
-	HTrialEndEvent(HTrialEndType endtype, int timestamp = 0) 
-	: HEvent(kTrialEnd, timestamp)
-	, m_endtype(endtype)
+	HTrialEndEvent(const HTrialEndType& endtype = HTrialEndType::HTrialEndUndefined, int timestamp = 0) 
+	: HEvent(HEventType::HEventTrialEnd, timestamp)
+	, m_pendtype(&endtype)
 	{};
 	
 	HTrialEndEvent(const HTrialEndEvent& e)
-	: HEvent(kPhaseEnd, e.timestamp())
-	, m_endtype(e.endtype())
+	: HEvent(HEventType::HEventTrialEnd, e.timestamp())
+	, m_pendtype(&e.endtype())
 	{};
 	
 	virtual ~HTrialEndEvent() {};
-	HTrialEndType endtype() const { return m_endtype; };
+	const HTrialEndType& endtype() const { return *m_pendtype; };
+	void setEndType(const HTrialEndType& endtype) { m_pendtype = &endtype; };
 	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
 private:
-	HTrialEndType m_endtype;
+	const HTrialEndType* m_pendtype;
 };	
 
 class HStimRequestEvent: public HEvent
 {
 public:
 	HStimRequestEvent(int stimindex=-2, int timestamp=0)
-	: HEvent(kStimRequest, timestamp)
+	: HEvent(HEventType::HEventStimRequest, timestamp)
 	, m_stimindex(stimindex)
 	{};
 	
 	HStimRequestEvent(const HStimRequestEvent& e)
-	: HEvent(kStimRequest, e.timestamp())
+	: HEvent(HEventType::HEventStimRequest, e.timestamp())
 	, m_stimindex(e.stimindex())
 	{};
 	
 	virtual ~HStimRequestEvent() {};
 	
 	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
 	int stimindex() const { return m_stimindex; };
 private:
 	int m_stimindex;
@@ -213,16 +257,17 @@ class HAGStartEvent: public HEvent
 {
 public:
 	HAGStartEvent(int playerid = -1, int timestamp = 0)
-	: HEvent(kAGStart, timestamp)
+	: HEvent(HEventType::HEventAGStart, timestamp)
 	, m_playerid(playerid)
 	{};
 	
 	HAGStartEvent(const HAGStartEvent& e)
-	: HEvent(kAGStart, e.timestamp())
+	: HEvent(HEventType::HEventAGStart, e.timestamp())
 	, m_playerid(e.playerid())
 	{};
 	
 	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
 	int playerid() const { return m_playerid; };
 private:
 	int m_playerid;
@@ -233,18 +278,19 @@ class HStimStartEvent: public HEvent
 {
 public:
 	HStimStartEvent(int playerid=-1, int timestamp=0)
-	: HEvent(kStimStart, timestamp)
+	: HEvent(HEventType::HEventStimStart, timestamp)
 	, m_playerid(playerid)
 	{};
 	
 	HStimStartEvent(const HStimStartEvent& e)
-	: HEvent(kStimStart, e.timestamp())
+	: HEvent(HEventType::HEventStimStart, e.timestamp())
 	, m_playerid(e.playerid())
 	{};
 	
 	virtual ~HStimStartEvent() {};
 	
 	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
 	int playerid() const { return m_playerid; };
 private:
 	int m_playerid;
@@ -255,13 +301,13 @@ class HStimulusSettingsEvent: public HEvent
 {
 public:
 	HStimulusSettingsEvent(Habit::StimulusSettings settings = Habit::StimulusSettings(), int stimindex=-2, int timestamp=0)
-	: HEvent(kStimulusSettings, timestamp)
+	: HEvent(HEventType::HEventStimulusSettings, timestamp)
 	, m_settings(settings)
 	, m_stimindex(stimindex)
 	{};
 	
 	HStimulusSettingsEvent(const HStimulusSettingsEvent& e)
-	: HEvent(kStimulusSettings, e.timestamp())
+	: HEvent(HEventType::HEventStimulusSettings, e.timestamp())
 	, m_settings(e.settings())
 	, m_stimindex(e.stimindex())
 	{};
@@ -280,14 +326,14 @@ class HStimulusInfoEvent: public HEvent
 {
 public:
 	HStimulusInfoEvent(QString whichstim = QString("Unknown"), Habit::StimulusInfo info = Habit::StimulusInfo(), int stimindex=-2, int timestamp=0)
-	: HEvent(kStimulusInfo, timestamp)
+	: HEvent(HEventType::HEventStimulusInfo, timestamp)
 	, m_whichstim(whichstim)
 	, m_info(info)
 	, m_stimindex(stimindex)
 	{};
 	
 	HStimulusInfoEvent(const HStimulusInfoEvent& e)
-	: HEvent(kStimulusInfo, e.timestamp())
+	: HEvent(HEventType::HEventStimulusInfo, e.timestamp())
 	, m_whichstim(e.whichstim())
 	, m_info(e.info())
 	, m_stimindex(e.stimindex())
@@ -309,11 +355,11 @@ class HAttentionEvent: public HEvent
 {
 public:
 	HAttentionEvent(int timestamp=0)
-	: HEvent(kAttention, timestamp)
+	: HEvent(HEventType::HEventAttention, timestamp)
 	{};
 	
 	HAttentionEvent(const HAttentionEvent& e)
-	: HEvent(kAttention, e.timestamp())
+	: HEvent(HEventType::HEventAttention, e.timestamp())
 	{};
 	
 	virtual ~HAttentionEvent() {};
@@ -325,12 +371,12 @@ class HLookEvent: public HEvent
 {
 public:
 	HLookEvent(HLook look = HLook(), int timestamp=0)
-	: HEvent(kLook, timestamp)
+	: HEvent(HEventType::HEventLook, timestamp)
 	, m_look(look)
 	{};
 	
 	HLookEvent(const HLookEvent& e)
-	: HEvent(kLook, e.timestamp())
+	: HEvent(HEventType::HEventLook, e.timestamp())
 	, m_look(e.look())
 	{};
 	
@@ -338,6 +384,7 @@ public:
 	
 	const HLook& look() const { return m_look; };
 	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
 	
 private:
 	HLook m_look;
@@ -348,12 +395,12 @@ class HLookTransEvent: public HEvent
 {
 public:
 	HLookTransEvent(LookTransType lt = UnknownLookTrans, int timestamp=0)
-	: HEvent(kLookTrans, timestamp)
+	: HEvent(HEventType::HEventLookTrans, timestamp)
 	, m_type(lt)
 	{};
 	
 	HLookTransEvent(const HLookTransEvent& e)
-	: HEvent(kLookTrans, e.timestamp())
+	: HEvent(HEventType::HEventLookTrans, e.timestamp())
 	, m_type(e.transtype())
 	{};
 	
@@ -361,7 +408,7 @@ public:
 	
 	const LookTransType& transtype() const { return m_type; };
 	QString eventInfo() const;
-	
+	virtual QString eventCSVAdditional() const;
 private:
 	LookTransType m_type;
 };

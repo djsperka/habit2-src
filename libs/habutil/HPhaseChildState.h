@@ -48,6 +48,8 @@ public:
 	{};
 };
 
+
+// See HPhase::onTrialCompleteEntered - test against criteria done there. 
 class HPhaseTrialCompleteState: public HPhaseChildState
 {
 	Q_OBJECT
@@ -63,29 +65,6 @@ signals:
 	
 	
 protected:
-	// on entry to this state we request that the stim be played. 
-	// Update: Make request by sending a signal (emit) to media controller. 
-	
-	// TODO: this is where we apply the HPhaseCriteria to see if the phase has ended. 
-	
-	void onEntry(QEvent* e);
-#if 0
-	{
-		Q_UNUSED(e);
-		HState::onEntry(e);
-		
-		if (phase().advance())
-		{
-			qDebug() << "HPhaseTrialCompleteState::onEntry - advance OK, post NewTrialEvent";
-			machine()->postEvent(new HNewTrialEvent());
-		}
-		else 
-		{
-			qDebug() << "HPhaseTrialCompleteState::onEntry - all trials done, post AllTrialsDoneEvent";
-			machine()->postEvent(new HAllTrialsDoneEvent());
-		}
-	};
-#endif
 };
 
 

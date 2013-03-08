@@ -10,6 +10,7 @@
 #include "HControlPanel.h"
 #include "HMediaManagerUtil.h"
 #include "HPhase.h"
+#include "HPhaseCriteriaUtil.h"
 #include "HKeypadLookDetector.h"
 #include "HTrialGenerator.h"
 #include "HElapsedTimer.h"
@@ -220,7 +221,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 		}
 		
 		// Create habituation criteria object. 
-		m_pcritHabituation = new HPhaseHabituationCriteria();
+		m_pcritHabituation = createPhaseCriteria(m_experimentSettings.getHabituationSettings(), tiHabituation.getNumberOfTrials());
 		m_psHabituation = new HPhase(*sExperiment, m_pcritHabituation, log, lTrials, HPhaseType::Habituation, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
 	}
 	

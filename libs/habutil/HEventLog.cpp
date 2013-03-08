@@ -8,6 +8,8 @@
  */
 
 #include "HEventLog.h"
+#include <QFile>
+#include <QTextStream>
 
 HEventLog::~HEventLog()
 {
@@ -27,7 +29,7 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 		while (events.hasPrevious())
 		{
 			HEvent* e = events.previous();
-			if (e->type() == kPhaseStart)
+			if (e->type() == HEventType::HEventPhaseStart)
 			{
 				bHavePhaseStart = true;
 				events.next();			// leave iterator after the phase start event
@@ -41,7 +43,7 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 		while (events.hasNext())
 		{
 			HEvent* e = events.next();
-			if (e->type() == kPhaseStart)
+			if (e->type() == HEventType::HEventPhaseStart)
 			{
 				HPhaseStartEvent* pse = static_cast<HPhaseStartEvent*>(e);
 				if (pse->phase() == phase)
@@ -67,52 +69,34 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 			{
 				// if we are between trials, looking for 
 				// TrialStart event
-				switch (pevent->type())
+				if (pevent->type() == HEventType::HEventTrialStart)
 				{
-					case kTrialStart:						
-					{
-						bInterTrial = false;
-						iTotal = 0;
-						break;
-					}
-					case kPhaseEnd:
-					{
-						bPhaseEnd = true;
-						break;
-					}
-					default:
-					{
-						break;
-					}
+					bInterTrial = false;
+					iTotal = 0;
+				}
+				else if (pevent->type() == HEventType::HEventPhaseEnd)
+				{
+					bPhaseEnd = true;
 				}
 			}
 			else 
 			{
 				// if we are not between trials, then we are in one.
 				// We are looking for look events and TrialEnd events. 
-				switch (pevent->type())
+				if (pevent->type() == HEventType::HEventTrialEnd)
 				{
-					case kTrialEnd:
+					HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(pevent);
+					if (pte->endtype() == HTrialEndType::HTrialEndGotLook || pte->endtype() == HTrialEndType::HTrialEndFixedTimeout)
 					{
-						HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(pevent);
-						if (pte->endtype() == kTrialEndGotLook || pte->endtype() == kTrialEndFixedTimeout)
-						{
-							phaselog.append(iTotal);
-						}
-						iTotal = 0;
-						bInterTrial = true;
-						break;
+						phaselog.append(iTotal);
 					}
-					case kLook:
-					{
-						HLookEvent* plook = static_cast<HLookEvent*>(pevent);
-						iTotal += plook->look().lookMS();
-						break;
-					}
-					default:
-					{
-						break;
-					}
+					iTotal = 0;
+					bInterTrial = true;
+				}
+				else if (pevent->type() == HEventType::HEventLook)
+				{
+					HLookEvent* plook = static_cast<HLookEvent*>(pevent);
+					iTotal += plook->look().lookMS();
 				}
 			}
 		}
@@ -120,3 +104,23 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 	return phaselog;
 }
 
+
+bool HEventLog::saveToCSV(QString& filename)
+{
+	bool b = false;
+	QFile file(filename);
+	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+	{
+		QTextStream out(&file);
+		QListIterator<HEvent*> events(*this);
+		events.toFront();
+		while (events.hasNext())
+		{
+			HEvent* e = events.next();
+			out << e->eventCSV() << endl;
+		}
+		file.close();
+		b = true;
+	}					
+	return b;
+}

@@ -114,15 +114,12 @@ void HApp::runSavedExperiment()
 		if (box.exec() == QMessageBox::Yes)
 		{
 			QString fileName = QFileDialog::getSaveFileName(this, tr("Save Experiment Result"),
-															"", tr("Experiment Result File (*.res)"));
+															"", tr("Experiment Result File (*.csv)"));
 			if (!fileName.isNull() && !fileName.isEmpty())
 			{
-//				HOutputGenerator::instance()->setSettingsFileName("Typed");
-//				HOutputGenerator::instance()->setResultsFileName(QFileInfo(fileName).fileName());
-//				HOutputGenerator::instance()->setResultsType("ORIGINAL RUN");
-//				HOutputGenerator::instance()->save(fileName);
-				GUILib::ExperimentResultsForm resultForm(runSettingsForm.getSubjectSettings(), runSettingsForm.getRunSettings(), this);
-				resultForm.exec();
+				log.saveToCSV(fileName);
+				//GUILib::ExperimentResultsForm resultForm(runSettingsForm.getSubjectSettings(), runSettingsForm.getRunSettings(), this);
+				//resultForm.exec();
 			}
 		}
     }

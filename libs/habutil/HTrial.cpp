@@ -57,7 +57,7 @@ void HGotLookState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	eventLog().append(new HTrialEndEvent(kTrialEndGotLook, HElapsedTimer::elapsed()));
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, HElapsedTimer::elapsed()));
 };
 
 void HNoLookTimeoutState::onEntry(QEvent* e)
@@ -65,14 +65,14 @@ void HNoLookTimeoutState::onEntry(QEvent* e)
 	Q_UNUSED(e);
 	HState::onEntry(e);
 	trial().incrementRepeatNumber();
-	eventLog().append(new HTrialEndEvent(kTrialEndNoLookTimeout, HElapsedTimer::elapsed()));
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndNoLookTimeout, HElapsedTimer::elapsed()));
 };
 
 void HFixedTimeoutState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	eventLog().append(new HTrialEndEvent(kTrialEndFixedTimeout, HElapsedTimer::elapsed()));
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndFixedTimeout, HElapsedTimer::elapsed()));
 };
 	
 					  

@@ -41,6 +41,9 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	trans = new HNewTrialTransition();
 	trans->setTargetState(m_sTrial);
 	sTrialComplete->addTransition(trans);
+	
+	// signal when trial complete entered must be caught
+	connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
 };
 
 
@@ -58,6 +61,10 @@ void HPhase::onEntry(QEvent* e)
 	
 	// Post to log
 	HState::onEntry(e);
+
+	// Set trial number
+	m_itrial = 0;
+	m_sTrial->setTrialNumber(m_itrial);
 
 	// post 'phase start' event to event log.
 	eventLog().append(new HPhaseStartEvent(ptype(), HElapsedTimer::elapsed()));
@@ -110,25 +117,19 @@ void HPhase::requestAG()
 	eventLog().append(new HStimRequestEvent(0, HElapsedTimer::elapsed()));
 }
 
-bool HPhase::advance()
+void HPhase::onTrialCompleteEntered()
 {
-	bool b = true;
-	m_itrial++;
-	if (m_itrial == m_stimuli.size())
+	qDebug() << "HPhase::onTrialCompleteEntered()";
+	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog()))
 	{
-		b = false;
+		qDebug() << "HPhase::onTrialCompleteEntered - all trials done, post AllTrialsDoneEvent";
+		machine()->postEvent(new HAllTrialsDoneEvent());
 	}
 	else 
 	{
-		m_sTrial->setTrialNumber(m_itrial);
-		qDebug() << "HPhase::advance() - trial " << m_itrial << " stimindex " << m_stimuli.at(m_itrial).first;
+		qDebug() << "HPhase::onTrialCompleteEntered - advance OK, post NewTrialEvent";
+		m_sTrial->setTrialNumber(++m_itrial);
+		machine()->postEvent(new HNewTrialEvent());
 	}
-	return b;
-};
-
-void HPhase::onTrialCompleteEntered()
-{
-	// what to do here. 
-	// PhaseCriteria/kTrialEnd - that was done in prev states
 };
 

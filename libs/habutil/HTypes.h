@@ -125,6 +125,56 @@ private:
 const HHabituationType& getHabituationType(int number_value);
 
 
+class HCriterionWindowType
+{
+public:
+	static const HCriterionWindowType HCriterionWindowUnknown;
+	static const HCriterionWindowType HCriterionWindowFixed;
+	static const HCriterionWindowType HCriterionWindowSliding;
+	
+	// The contents of this array are used to populate the radio buttons. 
+	static const HCriterionWindowType* A[2];
+	
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	const QString& label() const { return m_l; }
+	friend bool operator==(const HCriterionWindowType& lhs, const HCriterionWindowType& rhs);
+	
+private:
+	explicit HCriterionWindowType(int t, const char* name, const char* label): m_t(t), m_s(name), m_l(label) {};
+	int m_t;
+	const QString m_s;
+	const QString m_l;
+};
+
+const HCriterionWindowType& getCriterionWindowType(int number_value);
+
+
+class HCriterionBasisType
+{
+public:
+	static const HCriterionBasisType HCriterionBasisUnknown;
+	static const HCriterionBasisType HCriterionBasisFirstN;
+	static const HCriterionBasisType HCriterionBasisLongestN;
+	
+	// The contents of this array are used to populate the radio buttons. 
+	static const HCriterionBasisType* A[2];
+	
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	const QString& label() const { return m_l; }
+	friend bool operator==(const HCriterionBasisType& lhs, const HCriterionBasisType& rhs);
+	
+private:
+	explicit HCriterionBasisType(int t, const char* name, const char* label): m_t(t), m_s(name), m_l(label) {};
+	int m_t;
+	const QString& m_s;
+	const QString& m_l;
+};
+
+const HCriterionBasisType& getCriterionBasisType(int number_value);
+
+
 #endif
 
 

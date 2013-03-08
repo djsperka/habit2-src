@@ -97,12 +97,12 @@ const HStimContext& getStimContext(int i)
 bool operator==(const HStimContext& lhs, const HStimContext& rhs)
 {
 	return lhs.number() == rhs.number();
-}
+};
 
 bool operator==(const HHabituationType& lhs, const HHabituationType& rhs)
 {
 	return lhs.number() == rhs.number();
-}
+};
 
 const HHabituationType HHabituationType::HHabituationTypeUnknown(-1, "HabituationTypeUnknown", "Unknown");
 const HHabituationType HHabituationType::HHabituationTypeFixedN(0, "HabituationTypeFixedN", "Fixed Number");
@@ -128,7 +128,63 @@ const HHabituationType *HHabituationType::A[3] =
 const HHabituationType& getHabituationType(int number_value)
 {
 	const HHabituationType* result = &HHabituationType::HHabituationTypeUnknown;
-	for (int i=0; i<sizeof(HHabituationType::A)/sizeof(HHabituationType*) && result==&HHabituationType::HHabituationTypeUnknown; i++)
+	for (unsigned int i=0; i<sizeof(HHabituationType::A)/sizeof(HHabituationType*) && result==&HHabituationType::HHabituationTypeUnknown; i++)
 		if (number_value == HHabituationType::A[i]->number()) result = HHabituationType::A[i];
+	return *result;
+};
+
+
+
+const HCriterionWindowType HCriterionWindowType::HCriterionWindowUnknown(-1, "CriterionWindowUnknown", "Unknown window type");
+const HCriterionWindowType HCriterionWindowType::HCriterionWindowFixed(0, "CriterionWindowFixed", "Fixed window");
+const HCriterionWindowType HCriterionWindowType::HCriterionWindowSliding(1, "CriterionWindowSliding", "Sliding window");
+
+// The contents of this array are used to populate the radio buttons. 
+const HCriterionWindowType* HCriterionWindowType::A[2] = 
+{
+	&HCriterionWindowType::HCriterionWindowFixed, 
+	&HCriterionWindowType::HCriterionWindowSliding
+};
+
+bool operator==(const HCriterionWindowType& lhs, const HCriterionWindowType& rhs)
+{
+	return lhs.number() == rhs.number();
+};
+
+
+const HCriterionWindowType& getCriterionWindowType(int number_value)
+{
+	using ::HCriterionWindowType;
+	const HCriterionWindowType* result = &HCriterionWindowType::HCriterionWindowUnknown;
+	for (unsigned int i=0; i<sizeof(HCriterionWindowType::A)/sizeof(HCriterionWindowType*) && result==&HCriterionWindowType::HCriterionWindowUnknown; i++)
+		if (number_value == HCriterionWindowType::A[i]->number()) result = HCriterionWindowType::A[i];
+	return *result;
+}
+
+
+
+
+
+const HCriterionBasisType HCriterionBasisType::HCriterionBasisUnknown(-1, "CriterionBasisUnknown", "Unknown");
+const HCriterionBasisType HCriterionBasisType::HCriterionBasisFirstN(0, "CriterionBasisFirstN", "Base criterion on first n trials");
+const HCriterionBasisType HCriterionBasisType::HCriterionBasisLongestN(1, "CriterionBasisLongestN", "Base criterion on longest n trials");
+
+// The contents of this array are used to populate the radio buttons. 
+const HCriterionBasisType* HCriterionBasisType::A[2] = 
+{
+	&HCriterionBasisType::HCriterionBasisFirstN, 
+	&HCriterionBasisType::HCriterionBasisLongestN
+};
+
+bool operator==(const HCriterionBasisType& lhs, const HCriterionBasisType& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HCriterionBasisType& getCriterionBasisType(int number_value)
+{
+	const HCriterionBasisType* result = &HCriterionBasisType::HCriterionBasisUnknown;
+	for (unsigned int i=0; i<sizeof(HCriterionBasisType::A)/sizeof(HCriterionBasisType*) && result==&HCriterionBasisType::HCriterionBasisUnknown; i++)
+		if (number_value == HCriterionBasisType::A[i]->number()) result = HCriterionBasisType::A[i];
 	return *result;
 }

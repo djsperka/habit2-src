@@ -1,7 +1,7 @@
 TEMPLATE = lib
 CONFIG += qt staticlib debug_and_release
 QMAKE_CXXFLAGS += -fvisibility=hidden
-DESTDIR = ../../lib
+#DESTDIR = ../../lib
 HEADERS +=	HLook.h \
 			HLooker.h \
 			HLookDetector.h \
@@ -27,6 +27,7 @@ HEADERS +=	HLook.h \
 			HTrialGenerator.h \
 #			HOutputGenerator.h \
 			HPhaseCriteria.h \
+			HPhaseCriteriaUtil.h \
 			HTrialLog.h \
 			HPhaseLog.h \
 			HEventLog.h \
@@ -112,6 +113,7 @@ SOURCES +=	HLook.cpp \
 			HTrialGenerator.cpp \
 #			HOutputGenerator.cpp \
 			HPhaseCriteria.cpp \
+			HPhaseCriteriaUtil.cpp \
 			HTrialLog.cpp \
 			HPhaseLog.cpp \
 			HEventLog.cpp \

@@ -33,11 +33,11 @@ class HPhase: public HExperimentChildState
 {
 	Q_OBJECT
 	
+	HPhaseCriteria *m_pcriteria;
 	QList<QPair<int, Habit::StimulusSettings> > m_stimuli;
 	const HPhaseType& m_ptype;
 	int m_itrial;		// this is the current trial. First trial is '0'. Stim found at m_stimuli[m_itrial].second
 	HTrial* m_sTrial;
-	HPhaseCriteria *m_pcriteria;
 
 public:
 	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const HPhaseType& ptype, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG);
