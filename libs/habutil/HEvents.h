@@ -44,9 +44,11 @@ public:
 	static const HEventType HEventLook;
 	static const HEventType HEventLookTrans;
 	static const HEventType HEventUndefined;
+	static const HEventType HHabituationSuccess;
+	static const HEventType HHabituationFailure;
 
 	// undefined event not in A[]
-	static const HEventType* A[15];
+	static const HEventType* A[17];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -203,7 +205,7 @@ public:
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;		// override this to add more fields
 	int trialnumber() const { return m_trialnumber; };
-	int repeatnumber() const { return m_trialnumber; };
+	int repeatnumber() const { return m_repeatnumber; };
 private:
 	int m_trialnumber;
 	int m_repeatnumber;
@@ -412,5 +414,40 @@ public:
 private:
 	LookTransType m_type;
 };
+
+class HHabituationSuccessEvent: public HEvent
+{
+public:
+	HHabituationSuccessEvent(int timestamp = 0)
+	: HEvent(HEventType::HHabituationSuccess, timestamp)
+	{};
+	
+	HHabituationSuccessEvent(const HHabituationSuccessEvent& e)
+	: HEvent(HEventType::HHabituationSuccess, e.timestamp())
+	{};
+	
+	virtual ~HHabituationSuccessEvent() {};
+	
+	QString eventInfo() const;
+private:
+};
+
+class HHabituationFailureEvent: public HEvent
+{
+public:
+	HHabituationFailureEvent(int timestamp = 0)
+	: HEvent(HEventType::HHabituationFailure, timestamp)
+	{};
+	
+	HHabituationFailureEvent(const HHabituationFailureEvent& e)
+	: HEvent(HEventType::HHabituationFailure, e.timestamp())
+	{};
+	
+	virtual ~HHabituationFailureEvent() {};
+	
+	QString eventInfo() const;
+private:
+};
+
 
 #endif

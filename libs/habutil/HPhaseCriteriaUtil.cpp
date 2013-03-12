@@ -22,12 +22,12 @@ HPhaseCriteria* createPhaseCriteria(const HabituationSettings& habsettings, int 
 	}
 	else if (habsettings.getHabituationType() == HHabituationType::HHabituationTypeCriterion)
 	{
-		pcrit = new HPhaseHabituationCriteria(habsettings.getCriterionSettings());		
+		pcrit = new HPhaseHabituationCriteria(habsettings.getCriterionSettings(), ntrials);		
 	}
 	else if (habsettings.getHabituationType() == HHabituationType::HHabituationTypeTotalLookingTime)
 	{
 		// total look time is currently in 10ths of a sec. Must change that to ms....
-		pcrit = new HPhaseTotalLookingTimeCriteria(100 * habsettings.getTotalLookLengthToEnd());
+		pcrit = new HPhaseTotalLookingTimeCriteria(100 * habsettings.getTotalLookLengthToEnd(), ntrials);
 	}
 	else 
 	{

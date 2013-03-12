@@ -96,13 +96,13 @@ void HPhase::requestCurrentStim()
 {
 	if (m_itrial < m_stimuli.size())
 	{
-		experiment().getMediaManager().stim(m_stimuli.at(m_itrial).first);
 		eventLog().append(new HStimRequestEvent(m_stimuli.at(m_itrial).first, HElapsedTimer::elapsed()));
+		experiment().getMediaManager().stim(m_stimuli.at(m_itrial).first);
 	}
 	else 
 	{
-		experiment().getMediaManager().stim(-1);
 		eventLog().append(new HStimRequestEvent(-1, HElapsedTimer::elapsed()));
+		experiment().getMediaManager().stim(-1);
 		qDebug() << "Bad trial number (" << m_itrial << ")for phase " << m_name << " max " << m_stimuli.size();
 	}
 
@@ -113,17 +113,25 @@ void HPhase::requestAG()
 	// TODO: createMediaManager should ensure that position 0 is always ag or a blank screen. 
 	// config should ensure that trials with no ag configured will not request stim(0). 
 	
-	experiment().getMediaManager().ag();
 	eventLog().append(new HStimRequestEvent(0, HElapsedTimer::elapsed()));
+	experiment().getMediaManager().ag();
 }
 
 void HPhase::onTrialCompleteEntered()
 {
+	bool isHabituated = false;
 	qDebug() << "HPhase::onTrialCompleteEntered()";
-	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog()))
+	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog(), isHabituated))
 	{
 		qDebug() << "HPhase::onTrialCompleteEntered - all trials done, post AllTrialsDoneEvent";
 		machine()->postEvent(new HAllTrialsDoneEvent());
+		if (ptype() == HPhaseType::Habituation)
+		{
+			if (isHabituated)
+				eventLog().append(new HHabituationSuccessEvent(HElapsedTimer::elapsed()));
+			else 
+				eventLog().append(new HHabituationFailureEvent(HElapsedTimer::elapsed()));
+		}
 	}
 	else 
 	{

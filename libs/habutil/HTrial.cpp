@@ -199,7 +199,7 @@ void HTrial::onEntry(QEvent* e)
 	HState::onEntry(e);
 
 	// post to event log
-	eventLog().append(new HTrialStartEvent());										   
+	eventLog().append(new HTrialStartEvent(getTrialNumber(), getRepeatNumber(), HElapsedTimer::elapsed()));										   
 }
 
 

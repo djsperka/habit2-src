@@ -26,6 +26,12 @@ const HPhaseType& getPhaseType(int i)
 	return HPhaseType::UnknownPhase; 
 };
 
+bool operator==(const HPhaseType& lhs, const HPhaseType& rhs)
+{
+	return lhs.number() == rhs.number();
+};
+
+
 const HLookTrans HLookTrans::UnknownLookTrans(0, "UnknownLookTrans");
 const HLookTrans HLookTrans::NoneLeft(1, "NoneLeft");
 const HLookTrans HLookTrans::LeftNone(2, "LeftNone");

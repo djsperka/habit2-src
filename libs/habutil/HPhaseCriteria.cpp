@@ -12,14 +12,33 @@
 
 using namespace Habit;
 
-bool HPhaseFixedNCriteria::isPhaseComplete(const HPhaseLog& log)
+bool HPhaseFixedNCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated)
 {
-	return log.nCompleted() >= m_N;
+	bool b = false;
+	isHabituated = false;
+	if (log.nCompleted() >= m_N)
+	{
+		b = true;
+		isHabituated = true;
+	}
+	return b;
 };
 
-bool HPhaseTotalLookingTimeCriteria::isPhaseComplete(const HPhaseLog& log)
+bool HPhaseTotalLookingTimeCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated)
 {
-	return log.totalLookingTime() >= m_msTotal;
+	bool b = false;
+	bool bdummy=false;	// will be ignored
+	isHabituated = false;
+	if (log.totalLookingTime() >= m_msTotal)
+	{
+		b = true;
+		isHabituated = true;
+	}
+	else if (HPhaseFixedNCriteria::isPhaseComplete(log, bdummy))
+	{
+		b = true;
+	}
+	return b;
 };
 
 bool HPhaseHabituationCriteria::getBasisSum(const HPhaseLog& log, int& iBasisSum, int& iBasisWindowStart)
@@ -75,14 +94,16 @@ bool HPhaseHabituationCriteria::getWindowSum(const HPhaseLog& log, int& sum, int
 	return true;
 };
 
-bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log)
+bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated)
 {
-	bool bval = false;
+	bool b = false;
+	bool bdummy = false;	// will be ignored
 	int iWindowStart = -1;
 	int basisSum = 0;
 	int windowSum;
 	double threshold;
 	int iStep = 1;
+	isHabituated = false;
 	if (getBasisSum(log, basisSum, iWindowStart))
 	{
 		threshold = (double)basisSum * m_c.getPercent() / 100.0;
@@ -92,10 +113,17 @@ bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log)
 		{
 			if (getWindowSum(log, windowSum, i) && windowSum < threshold)
 			{
-				bval = true;
+				b = true;
+				isHabituated = true;
 				break;
 			}
 		}
 	}
-	return bval;
+	
+	// If phase is not complete, check if max number of trials reached.
+	if (!b && HPhaseFixedNCriteria::isPhaseComplete(log, bdummy))
+	{
+		b = true;
+	}
+	return b;
 };

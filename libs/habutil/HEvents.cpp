@@ -30,10 +30,12 @@ const HEventType HEventType::HEventStimulusInfo(11, "StimulusInfo");
 const HEventType HEventType::HEventAttention(12, "Attention");
 const HEventType HEventType::HEventLook(13, "Look");
 const HEventType HEventType::HEventLookTrans(14, "LookTrans");
+const HEventType HEventType::HHabituationSuccess(15, "HabituationSuccess");
+const HEventType HEventType::HHabituationFailure(16, "HabituationFailure");
 const HEventType HEventType::HEventUndefined(-1, "Undefined");
 
 // Note undefined event not in search array.
-const HEventType* HEventType::A[15] =
+const HEventType* HEventType::A[17] =
 {
 	&HEventType::HEventPhaseStart,
 	&HEventType::HEventPhaseEnd,
@@ -49,7 +51,9 @@ const HEventType* HEventType::A[15] =
 	&HEventType::HEventStimulusInfo,
 	&HEventType::HEventAttention,
 	&HEventType::HEventLook,
-	&HEventType::HEventLookTrans
+	&HEventType::HEventLookTrans,
+	&HEventType::HHabituationSuccess,
+	&HEventType::HHabituationFailure
 };
 	
 bool operator==(const HEventType& lhs, const HEventType& rhs)
@@ -258,3 +262,15 @@ QString HLookTransEvent::eventCSVAdditional() const
 	tmp << transtype();
 	return s;
 };
+
+QString HHabituationSuccessEvent::eventInfo() const
+{
+	return QString("HabituationSuccess");
+};
+
+QString HHabituationFailureEvent::eventInfo() const
+{
+	return QString("HabituationFailure");
+};
+
+
