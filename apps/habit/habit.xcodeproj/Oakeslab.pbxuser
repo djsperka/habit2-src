@@ -7,26 +7,6 @@
 			sepNavVisRange = "{1227, 1163}";
 		};
 	};
-	1B085F1716EA6DF0001F4223 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 1B211A2D16EA6CBB0034140E /* Oakeslab.pbxuser */;
-		name = "Oakeslab.pbxuser: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 1030;
-		vrLoc = 0;
-	};
-	1B085F1816EA6DF0001F4223 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 1B211A2D16EA6CBB0034140E /* Oakeslab.pbxuser */;
-		name = "Oakeslab.pbxuser: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 1030;
-		vrLoc = 0;
-	};
 	1B2119F816EA688D0034140E /* experimentsettingsform.cpp:282 */ = {
 		isa = PBXFileBreakpoint;
 		actions = (
@@ -45,72 +25,6 @@
 		originalNumberOfMultipleMatches = 1;
 		state = 1;
 	};
-	1B211A2916EA6CBB0034140E /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 118FCBAABA162BA17933C789 /* main.cpp */;
-		name = "main.cpp: 82";
-		rLen = 56;
-		rLoc = 2261;
-		rType = 0;
-		vrLen = 1163;
-		vrLoc = 1227;
-	};
-	1B211A2A16EA6CBB0034140E /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 1B211A2B16EA6CBB0034140E /* project.pbxproj */;
-		name = "project.pbxproj: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 2490;
-		vrLoc = 0;
-	};
-	1B211A2B16EA6CBB0034140E /* project.pbxproj */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = text.pbxproject;
-		name = project.pbxproj;
-		path = /Users/Oakeslab/work/habit2/apps/habit/habit.xcodeproj/project.pbxproj;
-		sourceTree = "<absolute>";
-	};
-	1B211A2C16EA6CBB0034140E /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 1B211A2D16EA6CBB0034140E /* Oakeslab.pbxuser */;
-		name = "Oakeslab.pbxuser: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 1113;
-		vrLoc = 0;
-	};
-	1B211A2D16EA6CBB0034140E /* Oakeslab.pbxuser */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = text;
-		name = Oakeslab.pbxuser;
-		path = /Users/Oakeslab/work/habit2/apps/habit/habit.xcodeproj/Oakeslab.pbxuser;
-		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1068, 4732}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 1030}";
-		};
-	};
-	1B211A3116EA6D0B0034140E /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 1B211A3216EA6D0B0034140E /* Oakeslab.pbxuser */;
-		name = "Oakeslab.pbxuser: 639";
-		rLen = 0;
-		rLoc = 10423;
-		rType = 0;
-		vrLen = 1113;
-		vrLoc = 0;
-	};
-	1B211A3216EA6D0B0034140E /* Oakeslab.pbxuser */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = text;
-		name = Oakeslab.pbxuser;
-		path = /Users/Oakeslab/work/habit2/apps/habit/habit.xcodeproj/Oakeslab.pbxuser;
-		sourceTree = "<absolute>";
-	};
 	1B8215B115F8F481005F004E /* Source Control */ = {
 		isa = PBXSourceControlManager;
 		fallbackIsa = XCSourceControlManager;
@@ -125,14 +39,14 @@
 		isa = PBXCodeSenseManager;
 		indexTemplatePath = "";
 	};
-	1B89A88D1679605B0018640B /* habit */ = {
+	1B9D981916F388FC00972A0D /* habit */ = {
 		isa = PBXExecutable;
 		activeArgIndices = (
 		);
 		argumentStrings = (
 		);
 		autoAttachOnCrash = 1;
-		breakpointsEnabled = 1;
+		breakpointsEnabled = 0;
 		configStateDict = {
 		};
 		customDataFormattersEnabled = 1;
@@ -141,7 +55,6 @@
 		dataTipSortType = 0;
 		debuggerPlugin = GDBDebugging;
 		disassemblyDisplayState = 0;
-		dylibVariantSuffix = "";
 		enableDebugStr = 1;
 		environmentEntries = (
 		);
@@ -149,23 +62,9 @@
 		executableUserSymbolLevel = 0;
 		libgmallocEnabled = 0;
 		name = habit;
-		savedGlobals = {
-		};
 		showTypeColumn = 0;
 		sourceDirectories = (
 		);
-		variableFormatDictionary = {
-		};
-	};
-	1BA1D57116E9042000078661 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 54A8EF2BA3764F116CADCC19 /* habit.pro */;
-		name = "habit.pro: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 539;
-		vrLoc = 0;
 	};
 	1BA1D5C516E90F5800078661 /* experimentsettingsform.cpp */ = {
 		isa = PBXFileReference;
@@ -199,8 +98,8 @@
 		};
 	};
 	91B15E841AA80083484172DE /* Project object */ = {
-		activeBuildConfigurationName = Debug;
-		activeExecutable = 1B89A88D1679605B0018640B /* habit */;
+		activeBuildConfigurationName = Release;
+		activeExecutable = 1B9D981916F388FC00972A0D /* habit */;
 		activeTarget = BDA6F5019E35C32D45A9B5AC /* habit */;
 		addToTargets = (
 			BDA6F5019E35C32D45A9B5AC /* habit */,
@@ -210,7 +109,7 @@
 		);
 		codeSenseManager = 1B8215B215F8F481005F004E /* Code sense */;
 		executables = (
-			1B89A88D1679605B0018640B /* habit */,
+			1B9D981916F388FC00972A0D /* habit */,
 		);
 		perUserDictionary = {
 			"PBXConfiguration.PBXBreakpointsDataSource.v1:1CA1AED706398EBD00589147" = {
@@ -257,7 +156,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					22,
 					300,
-					849,
+					778,
 				);
 				PBXFileTableDataSourceColumnsKey = (
 					PBXExecutablesDataSource_ActiveFlagID,
@@ -349,17 +248,10 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 384462308;
-			PBXWorkspaceStateSaveDate = 384462308;
+			PBXPerProjectTemplateStateSaveDate = 385059068;
+			PBXWorkspaceStateSaveDate = 385059068;
 		};
 		perUserProjectItems = {
-			1B085F1716EA6DF0001F4223 /* PBXTextBookmark */ = 1B085F1716EA6DF0001F4223 /* PBXTextBookmark */;
-			1B085F1816EA6DF0001F4223 /* PBXTextBookmark */ = 1B085F1816EA6DF0001F4223 /* PBXTextBookmark */;
-			1B211A2916EA6CBB0034140E = 1B211A2916EA6CBB0034140E /* PBXTextBookmark */;
-			1B211A2A16EA6CBB0034140E = 1B211A2A16EA6CBB0034140E /* PBXTextBookmark */;
-			1B211A2C16EA6CBB0034140E = 1B211A2C16EA6CBB0034140E /* PBXTextBookmark */;
-			1B211A3116EA6D0B0034140E = 1B211A3116EA6D0B0034140E /* PBXTextBookmark */;
-			1BA1D57116E9042000078661 = 1BA1D57116E9042000078661 /* PBXTextBookmark */;
 			1BEDD3E6161CE6220056567F = 1BEDD3E6161CE6220056567F /* PBXTextBookmark */;
 		};
 		sourceControlManager = 1B8215B115F8F481005F004E /* Source Control */;
@@ -369,7 +261,7 @@
 	BDA6F5019E35C32D45A9B5AC /* habit */ = {
 		activeExec = 0;
 		executables = (
-			1B89A88D1679605B0018640B /* habit */,
+			1B9D981916F388FC00972A0D /* habit */,
 		);
 	};
 }

@@ -191,6 +191,7 @@ void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& 
 				}
 				if (iStimNumber==0) iStimNumber = iTemp;
 			}
+			
 			if (playerControl)
 			{
 				if (settings.isIndependentSoundEnabled())

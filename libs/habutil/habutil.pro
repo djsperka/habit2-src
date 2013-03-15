@@ -118,6 +118,7 @@ SOURCES +=	HLook.cpp \
 			HPhaseLog.cpp \
 			HEventLog.cpp \
 			HPhaseChildState.cpp \
+			HTrialChildState.cpp \
 			HTypes.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \

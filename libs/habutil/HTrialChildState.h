@@ -45,6 +45,7 @@ public:
 	~HTrialInitialState() {};
 	
 protected:
+	virtual void onEntry(QEvent* e);
 };
 
 

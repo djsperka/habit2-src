@@ -145,6 +145,8 @@ void HControlPanel::createExperiment(HEventLog& log)
 	
 	// These will hold stim numbers for stimuli _available_ to each phase, as configured
 	// for the experiment. 
+	// 	typedef QList<QPair<int, StimulusSettings> > StimulusSettingsList;
+	
 	Habit::StimulusSettingsList l1, l2, l3;
 
 	// These will hold stim numbers for the trials in each phase, as they are configured/randomized
@@ -160,6 +162,10 @@ void HControlPanel::createExperiment(HEventLog& log)
 	
 	
 	// Create media manager. Note we are not passing a parent! 
+	// The stimuli configured for each phase are pulled using the experiment settings. 
+	// One by one the stimuli are added to the media manager's player. As each stim is added, 
+	// its ordinal position in the player's set of stim is paired with the StimulusSettings 
+	// object, and the pair is stored in the StimulusSettingsList objects l1, l2, l3.
 	m_pmm = createMediaManager(m_experimentSettings, NULL, l1, l2, l3);
 	
 	// Save the lists of stimuli for use in updating labels.

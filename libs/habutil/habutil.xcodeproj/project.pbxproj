@@ -70,6 +70,7 @@
 		826760007F2CBF332DC5FB87 /* moc_stimulusplayer.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 32813F748C1859CF54446B48 /* moc_stimulusplayer.cpp */; settings = {ATTRIBUTES = (); }; };
 		82A7FFF00DA424E8336C56D8 /* moc_runsettingsform.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 6B89EA6BC5CB733959BBD822 /* moc_runsettingsform.cpp */; settings = {ATTRIBUTES = (); }; };
 		82BD2146198AB489404625B7 /* moc_HPhase.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 663102FF60486549496226D9 /* moc_HPhase.cpp */; settings = {ATTRIBUTES = (); }; };
+		874761A831416EC1DD148A99 /* HTrialChildState.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = F9E086B3F1930EB12A6532C4 /* HTrialChildState.cpp */; settings = {ATTRIBUTES = (); }; };
 		880A03356D458470927EB2EF /* moc_HExperiment.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 9011ADE2D17B97C760B507F6 /* moc_HExperiment.cpp */; settings = {ATTRIBUTES = (); }; };
 		88205F195FA3F8571AD4DBA8 /* moc_HStateMachine.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 0567C8164C0E59C1D7172532 /* moc_HStateMachine.cpp */; settings = {ATTRIBUTES = (); }; };
 		8B20CA1D793DB23B132A38E0 /* moc_treewizard.cpp in Build Sources */ = {isa = PBXBuildFile; fileRef = 323AB11027AF653027645BBD /* moc_treewizard.cpp */; settings = {ATTRIBUTES = (); }; };
@@ -155,7 +156,7 @@
 		18E228A648EB2A9746BE8BFC /* HExperiment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HExperiment.h; sourceTree = "<group>"; };
 		1954133F51CAC3AD0C01810A /* HTrialGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HTrialGenerator.h; sourceTree = "<group>"; };
 		1A99CAFDB279A87A2F2F5CAE /* viewexperimentresultform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = viewexperimentresultform.h; path = habit/viewexperimentresultform.h; sourceTree = "<group>"; };
-		1BAD5E2216E8240B00EB19AD /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B9D980216F388B800972A0D /* libhabutil.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libhabutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DB843A27517106274BF1269 /* HPhase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HPhase.cpp; sourceTree = "<group>"; };
 		1E0689075E90CC961E2BDAD0 /* moc_experimentresultsform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = moc_experimentresultsform.cpp; sourceTree = "<group>"; };
 		1FD15338F4EDFD4BBD1E1034 /* designsettings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = designsettings.cpp; path = habit/designsettings.cpp; sourceTree = "<group>"; };
@@ -350,6 +351,7 @@
 		F9358756C358EDFE927F3C17 /* HStateMachine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HStateMachine.cpp; sourceTree = "<group>"; };
 		F94FD73189E765D7FA652507 /* designsettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = designsettings.h; path = habit/designsettings.h; sourceTree = "<group>"; };
 		F96B0196578522D8B4417AD2 /* HStimulusSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HStimulusSource.h; sourceTree = "<group>"; };
+		F9E086B3F1930EB12A6532C4 /* HTrialChildState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HTrialChildState.cpp; sourceTree = "<group>"; };
 		FB10D34008BD5B590B6E1005 /* stimulusplayer.ui */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = stimulusplayer.ui; path = habit/stimulusplayer.ui; sourceTree = "<group>"; };
 		FC40E71C2FFEB21DB15B2C44 /* subjectinformationwidget.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = subjectinformationwidget.h; path = habit/subjectinformationwidget.h; sourceTree = "<group>"; };
 		FCF948CD3648C92F2A23404A /* HMediaManagerUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HMediaManagerUtil.h; sourceTree = "<group>"; };
@@ -380,15 +382,15 @@
 				7CABE3C80E79AD2B307756D2 /* Sources [qmake] */,
 				52C235EBF1C9B07808119459 /* Sources [RCC] */,
 				EEC299C65D5017EB9DD513B0 /* Sources [UIC] */,
-				1BAD5E2316E8240B00EB19AD /* Products */,
+				1B9D980316F388B800972A0D /* Products */,
 			);
 			name = habutil;
 			sourceTree = "<group>";
 		};
-		1BAD5E2316E8240B00EB19AD /* Products */ = {
+		1B9D980316F388B800972A0D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1BAD5E2216E8240B00EB19AD /* libhabutil.a */,
+				1B9D980216F388B800972A0D /* libhabutil.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -685,6 +687,7 @@
 				2B0EB803B96DB31E5B5D3A68 /* HPhaseLog.cpp */,
 				0A7899D43A4166F408E0B54D /* HEventLog.cpp */,
 				2EC07F6E6A4E376476BB468B /* HPhaseChildState.cpp */,
+				F9E086B3F1930EB12A6532C4 /* HTrialChildState.cpp */,
 				F5191764759210AAB5852224 /* HTypes.cpp */,
 				DDB47C48C6459BE7607188BC /* habit */,
 			);
@@ -709,7 +712,7 @@
 			);
 			name = habutil;
 			productName = habutil;
-			productReference = 1BAD5E2216E8240B00EB19AD /* libhabutil.a */;
+			productReference = 1B9D980216F388B800972A0D /* libhabutil.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -728,7 +731,7 @@
 				German,
 			);
 			mainGroup = 05596AB53D8D521C69802C27 /* habutil */;
-			productRefGroup = 1BAD5E2316E8240B00EB19AD /* Products */;
+			productRefGroup = 1B9D980316F388B800972A0D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -792,6 +795,7 @@
 				B74DDACA6AFFFEE916D61425 /* HPhaseLog.cpp in Build Sources */,
 				D119363A890698CA394B192D /* HEventLog.cpp in Build Sources */,
 				94FAD0BB8B0985AA5E8F5C08 /* HPhaseChildState.cpp in Build Sources */,
+				874761A831416EC1DD148A99 /* HTrialChildState.cpp in Build Sources */,
 				68C3B12546C67035A42CF410 /* HTypes.cpp in Build Sources */,
 				A1E77CBB722F0375BD31E64A /* attentiongettersettings.cpp in Build Sources */,
 				290C3624A1E7E470CBD04572 /* attentionsetupform.cpp in Build Sources */,
