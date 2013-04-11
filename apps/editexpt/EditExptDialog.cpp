@@ -13,6 +13,7 @@
 #include "trialsinfo.h"
 #include "stimulusdisplayinfo.h"
 #include "HMediaManagerUtil.h"
+#include "HTypes.h"
 
 TestExptDialog::TestExptDialog(QWidget* parent) : QDialog(parent)
 {
@@ -112,23 +113,24 @@ void TestExptDialog::onDump()
 
 	Habit::HabituationSettings hs = es.getHabituationSettings();
 	qDebug() << "HabituationSettings::getHabituationType() " << 
-	(hs.getHabituationType() == Habit::HabituationSettings::eFixedNumberOfTrials ? "Habit::HabituationSettings::eFixedNumberOfTrials" : "") << 
-	(hs.getHabituationType() == Habit::HabituationSettings::eUseCriterionToEnd ? "Habit::HabituationSettings::eUseCriterionToEnd" : "") << 
-	(hs.getHabituationType() == Habit::HabituationSettings::eUseTotalLookingTimeToEnd ? "Habit::HabituationSettings::eUseTotalLookingTimeToEnd" : "");
+	(hs.getHabituationType() == HHabituationType::HHabituationTypeFixedN ? "HHabituationType::HHabituationTypeFixedN" : "") << 
+	(hs.getHabituationType() == HHabituationType::HHabituationTypeCriterion ? "HHabituationType::HHabituationTypeCriterion" : "") << 
+	(hs.getHabituationType() == HHabituationType::HHabituationTypeTotalLookingTime ? "HHabituationType::HHabituationTypeTotalLookingTime" : "");
+
 	
 	qDebug() << "HabituationSettings::getTotalLookLengthToEnd() " << hs.getTotalLookLengthToEnd();
 	
 	// fetch CriterionSettings
 	Habit::CriterionSettings cs = hs.getCriterionSettings();
 	qDebug() << "CriterionSettings::getBasis() " << 
-	(cs.getBasis() == Habit::CriterionSettings::eFirstN ? "Habit::CriterionSettings::eFirstN" : "") <<
-	(cs.getBasis() == Habit::CriterionSettings::eLongestN ? "Habit::CriterionSettings::eLongestN" : "");
+	(cs.getBasis() == HCriterionBasisType::HCriterionBasisFirstN ? "HCriterionBasisType::HCriterionBasisFirstN" : "") <<
+	(cs.getBasis() == HCriterionBasisType::HCriterionBasisLongestN ? "HCriterionBasisType::HCriterionBasisLongestN" : "");
 	
 	qDebug() << "CriterionSettings::getPercent() " << cs.getPercent();
 	qDebug() << "CriterionSettings::getWindowSize() " << cs.getWindowSize();
 	qDebug() << "CriterionSettings::getWindowType() " << 
-	(cs.getWindowType() == Habit::CriterionSettings::eFixedWindow ? "Habit::CriterionSettings::eFixedWindow" : "") <<
-	(cs.getWindowType() == Habit::CriterionSettings::eSlidingWindow ? "Habit::CriterionSettings::eSlidingWindow" : "");
+	(cs.getWindowType() == HCriterionWindowType::HCriterionWindowFixed ? "HCriterionWindowType::HCriterionWindowFixed" : "") <<
+	(cs.getWindowType() == HCriterionWindowType::HCriterionWindowSliding ? "HCriterionWindowType::HCriterionWindowSliding" : "");
 
 	Habit::StimulusDisplayInfo sdi = es.getStimulusDisplayInfo();
 	
@@ -165,27 +167,26 @@ void TestExptDialog::onDump()
 
 void TestExptDialog::dumpStimuliSettings(Habit::StimuliSettings ss, const QString& sText)
 {
-	QString s;
-	switch (ss.getType()) {
-		case Habit::StimuliSettings::PRETEST:
-			s = "PreTest";
-			break;
-		case Habit::StimuliSettings::HABITUATION:
-			s = "Habituation";
-			break;
-		case Habit::StimuliSettings::TEST:
-			s = "Test";
-			break;
-		case Habit::StimuliSettings::ATTENTION_GETTER:
-			s = "AttentionGetter";
-			break;			
-		default:
-			s = "Unknown";
-			break;
+	QString s = "???";
+	if (ss.getStimContext() == HStimContext::PreTestPhase)
+	{
+		s = "PreTest";
+	}
+	else if (ss.getStimContext() == HStimContext::HabituationPhase)
+	{
+		s = "Habituation";
+	}
+	else if (ss.getStimContext() == HStimContext::TestPhase)
+	{
+		s = "Test";
+	}
+	else if (ss.getStimContext() == HStimContext::AttentionGetter)
+	{
+		s = "AttentionGetter";
 	}
 
 	qDebug() << endl << "=========================================================" << endl;
-	qDebug() << "StimuliSettings for type " << ss.getType() << " " << sText;
+	qDebug() << "StimuliSettings context " << s << " " << sText;
 	qDebug() << "There are " << ss.getStimuli().size() << " stimuli.";
 	for (int i=0; i<ss.getStimuli().size(); i++)
 	{
@@ -200,7 +201,7 @@ void TestExptDialog::dumpStimulusSettings(Habit::StimulusSettings s, const QStri
 {
 	qDebug() << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 	qDebug() << "StimulusSettings for " << sStimType;
-	qDebug() << "StimulusSettings::getName() " << s.getName() << " id " << s.getId() << " type " << s.getStimulusType();
+	qDebug() << "StimulusSettings::getName() " << s.getName() << " id " << s.getId() << " type " << s.getContext()->name();
 	qDebug() << "StimulusSettings::isLeftEnabled() " << s.isLeftEnabled();
 	if (s.isLeftEnabled()) dumpStimulusInfo(s.getLeftStimulusInfo(), "Left");
 	qDebug() << "StimulusSettings::isCenterEnabled() " << s.isCenterEnabled();
