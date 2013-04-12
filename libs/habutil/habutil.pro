@@ -1,7 +1,13 @@
 TEMPLATE = lib
 CONFIG += qt staticlib debug_and_release
 QMAKE_CXXFLAGS += -fvisibility=hidden
-#DESTDIR = ../../lib
+INCLUDEPATH += . ./habit
+CONFIG(debug, debug|release) {
+	DESTDIR = debug
+} else {
+	DESTDIR = release
+}
+
 HEADERS +=	HLook.h \
 			HLooker.h \
 			HLookDetector.h \
