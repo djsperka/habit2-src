@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ViewExperimentResultFormClass</class>
+ <widget class="QDialog" name="ViewExperimentResultFormClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>184</width>
+    <height>85</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>ViewExperimentResultForm</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetMinAndMaxSize</enum>
+   </property>
+   <item>
+    <widget class="QPushButton" name="viewExperimentResultButton">
+     <property name="text">
+      <string>View Experiment Results...</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="exprortMultipleResultsButton">
+     <property name="text">
+      <string>Export Multiple Results...</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>viewExperimentResultButton</sender>
+   <signal>pressed()</signal>
+   <receiver>ViewExperimentResultFormClass</receiver>
+   <slot>onViewExperimentResults()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>154</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>179</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exprortMultipleResultsButton</sender>
+   <signal>pressed()</signal>
+   <receiver>ViewExperimentResultFormClass</receiver>
+   <slot>onExportMultipleResults()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>55</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>177</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onViewExperimentResults()</slot>
+  <slot>onExportMultipleResults()</slot>
+ </slots>
+</ui>

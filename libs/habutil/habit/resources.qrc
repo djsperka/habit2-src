@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/">
+    <file>resources/sound_test.wav</file>
+    <file>resources/pensil.png</file>
+    <file>resources/rims.png</file>
+    <file>resources/gear_wheel.png</file>
+    <file>resources/analysis.png</file>
+  </qresource>
+</RCC>

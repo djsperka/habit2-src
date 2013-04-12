@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ResultViewerFormClass</class>
+ <widget class="QDialog" name="ResultViewerFormClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>599</width>
+    <height>388</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ResultViewerForm</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTextBrowser" name="logBrowser"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="saveButton">
+       <property name="text">
+        <string>Save</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="printButton">
+       <property name="text">
+        <string>Print</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeButton">
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>pressed()</signal>
+   <receiver>ResultViewerFormClass</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>496</x>
+     <y>366</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>591</x>
+     <y>331</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveButton</sender>
+   <signal>pressed()</signal>
+   <receiver>ResultViewerFormClass</receiver>
+   <slot>onSavePressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>91</x>
+     <y>364</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>9</x>
+     <y>333</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>printButton</sender>
+   <signal>pressed()</signal>
+   <receiver>ResultViewerFormClass</receiver>
+   <slot>onPrintPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>304</x>
+     <y>355</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>201</x>
+     <y>345</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onSavePressed()</slot>
+  <slot>onPrintPressed()</slot>
+ </slots>
+</ui>
