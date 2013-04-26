@@ -9,6 +9,35 @@ Habit::AttentionGetterSettings::AttentionGetterSettings()
 {
 }
 
+QDataStream & Habit::operator<< (QDataStream& stream, const AttentionGetterSettings& settings)
+{
+	stream << settings.getId() << settings.isAttentionGetterUsed() << settings.getAttentionGetterStimulus() << settings.getBackGroundColor();
+	return stream;
+}
+
+QDataStream & Habit::operator>> (QDataStream& stream, AttentionGetterSettings& settings)
+{
+	int id;
+	bool b;
+	StimulusSettings ss;
+	QColor color;
+	stream >> id >> b >> ss >> color;
+	settings.setId(id);
+	settings.setUseAttentionGetter(b);
+	settings.setAttentionGetterStimulus(ss);
+	settings.setBackGroundColor(color);
+	return stream;
+}
+
+bool Habit::operator==(const Habit::AttentionGetterSettings& lhs, const Habit::AttentionGetterSettings& rhs)
+{
+	return (lhs.getId() == rhs.getId() &&
+			lhs.isAttentionGetterUsed() == rhs.isAttentionGetterUsed() &&
+			lhs.getBackGroundColor() == rhs.getBackGroundColor() &&
+			lhs.getAttentionGetterStimulus() == rhs.getAttentionGetterStimulus());
+}
+
+
 int Habit::AttentionGetterSettings::getId() const {
 	return id_;
 }

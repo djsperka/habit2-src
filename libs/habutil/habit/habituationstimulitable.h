@@ -21,7 +21,8 @@ public:
 	~HabituationStimuliTable();
 
 public:
-	void initializeTable(const Habit::StimuliSettings& ss);
+	void initializeTable();
+	void initializeTable(const Habit::StimuliSettings& stimuliSettings);
 
 	// External interface
 public:
@@ -30,12 +31,14 @@ public:
 	bool updateStimulus(const Habit::StimulusSettings&);
 	bool addNewStimulus(const Habit::StimulusSettings&);
 	QString getSelectedStimulusName();
+	Habit::StimulusSettings* findStimulusByName(QString name);
+	int findStimulusIndexByName(QString name);
 	Habit::StimuliSettings getConfigurationStimuliObject();
 	bool isStimulusNameExists(const QString& name);
 private:
-	stimulus_container m_container;
+	Habit::StimulusSettingsList m_listSS;
+	const HStimContext* m_pcontext;
 	size_t columnCount_;
-	Habit::StimuliSettings settings_;
 	QTableWidgetItem*  m_current_item;
 };
 }

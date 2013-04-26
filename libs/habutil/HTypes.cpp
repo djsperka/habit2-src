@@ -194,3 +194,79 @@ const HCriterionBasisType& getCriterionBasisType(int number_value)
 		if (number_value == HCriterionBasisType::A[i]->number()) result = HCriterionBasisType::A[i];
 	return *result;
 }
+
+
+const HTrialCompletionType HTrialCompletionType::HTrialCompletionUnknown(-1, "TrialCompletionUnknown", "Unknown");
+const HTrialCompletionType HTrialCompletionType::HTrialCompletionFixedLength(0, "TrialCompletionFixedLength", "Fixed Length");
+const HTrialCompletionType HTrialCompletionType::HTrialCompletionSubjectControlled(1, "TrialCompletionSubjectControlled", "Subject Controlled");
+
+// The contents of this array are used to populate the radio buttons.
+const HTrialCompletionType* HTrialCompletionType::A[2] =
+{
+	&HTrialCompletionType::HTrialCompletionFixedLength,
+	&HTrialCompletionType::HTrialCompletionSubjectControlled
+};
+
+bool operator==(const HTrialCompletionType& lhs, const HTrialCompletionType& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HTrialCompletionType& getTrialCompletionType(int number_value)
+{
+	const HTrialCompletionType* result = &HTrialCompletionType::HTrialCompletionUnknown;
+	for (unsigned int i=0; i<sizeof(HTrialCompletionType::A)/sizeof(HTrialCompletionType*) && result==&HTrialCompletionType::HTrialCompletionUnknown; i++)
+		if (number_value == HTrialCompletionType::A[i]->number()) result = HTrialCompletionType::A[i];
+	return *result;
+};
+
+
+
+const HPresentationStyle HPresentationStyle::HPresentationStyleUnknown(-1, "PresentationStyleUnknown", "Unknown");
+const HPresentationStyle HPresentationStyle::HPresentationStyleMonitorDefined(0, "PresentationStyleMonitorDefined", "Monitor Defined");
+const HPresentationStyle HPresentationStyle::HPresentationStyleSingleMovable(1, "PresentationStyleSingleMovable", "Single Movable");
+
+// The contents of this array are used to populate the radio buttons.
+const HPresentationStyle* HPresentationStyle::A[2] =
+{
+	&HPresentationStyle::HPresentationStyleMonitorDefined,
+	&HPresentationStyle::HPresentationStyleSingleMovable
+};
+
+bool operator==(const HPresentationStyle& lhs, const HPresentationStyle& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HPresentationStyle& getPresentationStyle(int number_value)
+{
+	const HPresentationStyle* result = &HPresentationStyle::HPresentationStyleUnknown;
+	for (unsigned int i=0; i<sizeof(HPresentationStyle::A)/sizeof(HPresentationStyle*) && result==&HPresentationStyle::HPresentationStyleUnknown; i++)
+		if (number_value == HPresentationStyle::A[i]->number()) result = HPresentationStyle::A[i];
+	return *result;
+};
+
+
+const HDisplayType HDisplayType::HDisplayTypeUnknown(-1, "DisplayTypeUnknown", "Unknown");
+const HDisplayType HDisplayType::HDisplayTypeFullScreen(0, "DisplayTypeFullScreen", "Full Screen");
+const HDisplayType HDisplayType::HDisplayTypeOriginalSize(1, "DisplayTypeOriginalSize", "Original Size");
+
+// The contents of this array are used to populate the radio buttons.
+const HDisplayType* HDisplayType::A[2] =
+{
+	&HDisplayType::HDisplayTypeFullScreen,
+	&HDisplayType::HDisplayTypeOriginalSize
+};
+
+bool operator==(const HDisplayType& lhs, const HDisplayType& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HDisplayType& getDisplayType(int number_value)
+{
+	const HDisplayType* result = &HDisplayType::HDisplayTypeUnknown;
+	for (unsigned int i=0; i<sizeof(HDisplayType::A)/sizeof(HDisplayType*) && result==&HDisplayType::HDisplayTypeUnknown; i++)
+		if (number_value == HDisplayType::A[i]->number()) result = HDisplayType::A[i];
+	return *result;
+};

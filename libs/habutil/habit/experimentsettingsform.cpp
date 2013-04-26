@@ -144,20 +144,22 @@ void GUILib::ExperimentSettingsForm::onExperimentChoose(const QString& name) {
 			experimentSettings_.setAttentionGetterSettings(attentionGetterSettings);
 
 			Habit::StimuliSettings pretestSS = experimentSettings_.getPreTestStimuliSettings();
-			Habit::StimuliSettings::stimulus_container preSSList = pretestSS.getStimuli();
-			for (int i = 0; i < preSSList.count(); i++)
-				preSSList[i].setId(-1);
+			Habit::StimulusSettingsList preSSList = pretestSS.getStimuli();
+			for (Habit::StimulusSettingsListIterator it = preSSList.begin(); it!= preSSList.end(); it++)
+				it->setId(-1);
 			pretestSS.setStimuli(preSSList);
+
 			Habit::StimuliSettings habituationSS = experimentSettings_.getHabituationStimuliSettings();
-			Habit::StimuliSettings::stimulus_container habitSSList = habituationSS.getStimuli();
-			for (int i = 0; i < habitSSList.count(); i++)
-				habitSSList[i].setId(-1);
+			Habit::StimulusSettingsList habitSSList = habituationSS.getStimuli();
+			for (Habit::StimulusSettingsListIterator it = habitSSList.begin(); it!= habitSSList.end(); it++)
+				it->setId(-1);
 			habituationSS.setStimuli(habitSSList);
 			Habit::StimuliSettings testSS = experimentSettings_.getTestStimuliSettings();
-			Habit::StimuliSettings::stimulus_container teSSList = testSS.getStimuli();
-			for (int i = 0; i < teSSList.count(); i++)
-				teSSList[i].setId(-1);
+			Habit::StimulusSettingsList teSSList = testSS.getStimuli();
+			for (Habit::StimulusSettingsListIterator it = teSSList.begin(); it!= teSSList.end(); it++)
+				it->setId(-1);
 			testSS.setStimuli(teSSList);
+
 			experimentSettings_.setPreTestStimuliSettings(pretestSS);
 			experimentSettings_.setHabituationStimuliSettings(habituationSS);
 			experimentSettings_.setTestStimuliSettings(testSS);
@@ -228,6 +230,7 @@ void GUILib::ExperimentSettingsForm::onDone() {
 	}
 }
 
+#if 0
 void fillStimulus(QVector<Habit::StimulusSettings>& v, const Habit::StimuliSettings& si) {
 	typedef Habit::StimuliSettings::stimulus_container M;
 	M sc = si.getStimuli();
@@ -235,23 +238,22 @@ void fillStimulus(QVector<Habit::StimulusSettings>& v, const Habit::StimuliSetti
 		v.append(*it);
 	}
 }
+#endif
 
 bool GUILib::ExperimentSettingsForm::validateMonitorSettings() {
-	QVector<Habit::StimulusSettings> stimulus;
-	stimulus.push_back(experimentSettings_.getAttentionGetterSettings().getAttentionGetterStimulus());
-	fillStimulus(stimulus, experimentSettings_.getHabituationStimuliSettings());
-	fillStimulus(stimulus, experimentSettings_.getPreTestStimuliSettings());
-	fillStimulus(stimulus, experimentSettings_.getTestStimuliSettings());
+	Habit::StimulusSettingsList ssList;
+	//QVector<Habit::StimulusSettings> stimulus;
+	ssList.append(experimentSettings_.getAttentionGetterSettings().getAttentionGetterStimulus());
+	ssList.append(experimentSettings_.getHabituationStimuliSettings().getStimuli());
+	ssList.append(experimentSettings_.getPreTestStimuliSettings().getStimuli());
+	ssList.append(experimentSettings_.getTestStimuliSettings().getStimuli());
 	bool result = true;
-	for(QVector<Habit::StimulusSettings>::iterator it = stimulus.begin(); it != stimulus.end() && result; ++it) {
-		Habit::StimulusSettings ss = *it;
-		if(ss.isLeftEnabled() && experimentSettings_.getMonitorSettings().getLeftMonitorIndex() < 0 ||
-			ss.isCenterEnabled() && experimentSettings_.getMonitorSettings().getCenterMonitorIndex() < 0 ||
-			ss.isRightEnabled() && experimentSettings_.getMonitorSettings().getRightMonitorIndex() < 0 ||
-			ss.isIndependentSoundEnabled() && experimentSettings_.getMonitorSettings().getControlMonitorIndex() < 0) {
+	for (Habit::StimulusSettingsListConstIterator it = ssList.begin(); it != ssList.end(); it++)
+		if (it->isLeftEnabled() && experimentSettings_.getMonitorSettings().getLeftMonitorIndex() < 0 ||
+			it->isCenterEnabled() && experimentSettings_.getMonitorSettings().getCenterMonitorIndex() < 0 ||
+			it->isRightEnabled() && experimentSettings_.getMonitorSettings().getRightMonitorIndex() < 0 ||
+			it->isIndependentSoundEnabled() && experimentSettings_.getMonitorSettings().getControlMonitorIndex() < 0)
 				result = false;
-		}
-	}
 	return result;
 }
 

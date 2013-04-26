@@ -3,17 +3,48 @@
 #include <maindao.h>
 
 Habit::StimulusDisplayInfo::StimulusDisplayInfo() 
+: id_(-1)
+, pstyle_(&HPresentationStyle::HPresentationStyleUnknown)
+, pdtype_(&HDisplayType::HDisplayTypeFullScreen)
+, isOriginalAspectRatioMaintained_(true)
+, backGroundColor_(0, 0, 0, 255)
 {
-    presentationStyle_ = eMonitorDefined;
-    displayType_ = eFullScreen;
-    isOriginalAspectRatioMaintained_ = true;
-    backGroundColor_ = QColor(0, 0, 0, 255);
-	id_ = -1;
 }
 
 Habit::StimulusDisplayInfo::~StimulusDisplayInfo()
 {
 }
+
+
+QDataStream & Habit::operator<< (QDataStream& stream, Habit::StimulusDisplayInfo d)
+{
+	stream << d.getId() << d.getPresentationStyle().number() << d.getDisplayType().number() << d.isOriginalAspectRatioMaintained() << d.getBackGroundColor();
+	return stream;
+}
+
+QDataStream & Habit::operator>> (QDataStream& stream, Habit::StimulusDisplayInfo& d)
+{
+	int id, istyle, itype;
+	bool b;
+	QColor color;
+	stream >> id >> istyle >> itype >> b >> color;
+	d.setId(id);
+	d.setPresentationStyle(getPresentationStyle(istyle));
+	d.setDisplayType(getDisplayType(itype));
+	d.setMaintainOriginalAspectRatio(b);
+	d.setBackGroundColor(color);
+	return stream;
+}
+
+bool Habit::operator==(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs)
+{
+	return (lhs.getId() == rhs.getId() &&
+			lhs.getPresentationStyle() == rhs.getPresentationStyle() &&
+			lhs.getDisplayType() == rhs.getDisplayType() &&
+			lhs.isOriginalAspectRatioMaintained() == rhs.isOriginalAspectRatioMaintained() &&
+			lhs.getBackGroundColor() == rhs.getBackGroundColor());
+}
+
 
 int Habit::StimulusDisplayInfo::getId() const {
 	return id_;
@@ -23,24 +54,24 @@ void Habit::StimulusDisplayInfo::setId(int id) {
 	id_ = id;
 }
 
-int Habit::StimulusDisplayInfo::getPresentationStyle() const
+const HPresentationStyle& Habit::StimulusDisplayInfo::getPresentationStyle() const
 {
-    return presentationStyle_;
+    return *pstyle_;
 }
 
-void Habit::StimulusDisplayInfo::setPresentationStyle(int style)
+void Habit::StimulusDisplayInfo::setPresentationStyle(const HPresentationStyle& style)
 {
-    presentationStyle_ = style;
+    pstyle_ = &style;
 }
 
-int Habit::StimulusDisplayInfo::getDisplayType() const
+const HDisplayType& Habit::StimulusDisplayInfo::getDisplayType() const
 {
-    return displayType_;
+    return *pdtype_;
 }
 
-void Habit::StimulusDisplayInfo::setDisplayType(int displayType)
+void Habit::StimulusDisplayInfo::setDisplayType(const HDisplayType& dtype)
 {
-    displayType_ = displayType;
+    pdtype_ = &dtype;
 }
 
 bool Habit::StimulusDisplayInfo::isOriginalAspectRatioMaintained() const

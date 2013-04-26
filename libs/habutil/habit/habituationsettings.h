@@ -6,7 +6,7 @@
 /// \brief Declaraction of class Habit::HabituationSettings
 
 #include "criterionsettings.h"
-#include <stdlib.h>
+#include <QDataStream>
 #include "HTypes.h"
 
 /// Common namespace for all entities of the Habit
@@ -21,13 +21,6 @@ public:
     ~HabituationSettings();
 
 public:
-#if 0	
-    enum HabituationType {
-        eFixedNumberOfTrials = 0,
-        eUseCriterionToEnd = 1,
-        eUseTotalLookingTimeToEnd  = 2
-    };
-#endif
 	int getId() const;
 	void setId(int);
 
@@ -47,6 +40,10 @@ private:
 	const HHabituationType* phtype_;
 	CriterionSettings criterionsettings_;
 };
+
+QDataStream & operator<< (QDataStream& stream, Habit::HabituationSettings d);
+QDataStream & operator>> (QDataStream& stream, Habit::HabituationSettings& d);
+bool operator==(const Habit::HabituationSettings& lhs, const Habit::HabituationSettings& rhs);
 
 } // namespace Habit
 

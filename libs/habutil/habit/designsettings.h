@@ -6,7 +6,7 @@
 /// \brief Declaraction of class Habit::DesignSettings
 
 #include "trialsinfo.h"
-#include <stdlib.h>
+#include <QDataStream>
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -40,6 +40,10 @@ private:
 	Habit::TrialsInfo habituationTrialsInfo_;
 	Habit::TrialsInfo testTrialsInfo_;
 };
+
+QDataStream & operator<< (QDataStream& stream, Habit::DesignSettings d);
+QDataStream & operator>> (QDataStream& stream, Habit::DesignSettings& d);
+bool operator==(const Habit::DesignSettings& lhs, const Habit::DesignSettings& rhs);
 
 } // namespace Habit
 

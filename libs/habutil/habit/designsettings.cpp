@@ -15,6 +15,36 @@ Habit::DesignSettings::DesignSettings()
 Habit::DesignSettings::~DesignSettings()
 {}
 
+QDataStream & Habit::operator<< (QDataStream& stream, Habit::DesignSettings d)
+{
+	stream << d.getId() << d.getPretestTrialsInfo() << d.getHabituationTrialsInfo() << d.getTestTrialsInfo();
+	return stream;
+}
+
+QDataStream & Habit::operator>> (QDataStream& stream, Habit::DesignSettings& d)
+{
+	int id;
+	Habit::TrialsInfo pti, hti, tti;
+	stream >> id >> pti >> hti >> tti;
+	d.setId(id);
+	d.setPretestTrialsInfo(pti);
+	d.setHabituationTrialsInfo(hti);
+	d.setTestTrialsInfo(tti);
+	return stream;
+}
+
+bool Habit::operator==(const Habit::DesignSettings& lhs, const Habit::DesignSettings& rhs)
+{
+	return (lhs.getId() == rhs.getId() &&
+			lhs.getPretestTrialsInfo() == rhs.getPretestTrialsInfo() &&
+			lhs.getHabituationTrialsInfo() == rhs.getHabituationTrialsInfo() &&
+			lhs.getTestTrialsInfo() == rhs.getTestTrialsInfo());
+}
+
+
+
+
+
 int Habit::DesignSettings::getId() const {
 	return id_;
 }

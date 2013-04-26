@@ -46,7 +46,7 @@ private:
 	void doLayout();
 	void createExperiment(HEventLog& log);
 	void loadFromDB();
-	void populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::StimulusSettingsList& l1, const Habit::StimulusSettingsList& l2, const Habit::StimulusSettingsList& l3);
+	void populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::IdStimulusSettingsPairList& idsp1, const Habit::IdStimulusSettingsPairList& idsp2, const Habit::IdStimulusSettingsPairList& idsp3);
 	void updateFileStatusLabels(Habit::StimulusSettings& ss);
 	
 private slots:
@@ -69,7 +69,7 @@ private:
 	Habit::RunSettings m_runSettings;
 	Habit::SubjectSettings m_subjectSettings;
 	Habit::ExperimentSettings m_experimentSettings;
-	QMap<int, Habit::StimulusSettings> m_mapSS;
+	Habit::StimulusSettingsMap m_mapSS;
 	HMediaManager* m_pmm;
 	HLookDetector* m_pld;
 	QStateMachine* m_psm;

@@ -7,6 +7,7 @@
 
 #include "stimulussettings.h"
 #include <QColor>
+#include <QDataStream>
 
 namespace Habit {
 
@@ -35,6 +36,11 @@ private:
 	StimulusSettings attentionGetterStimulus_;
 	QColor backGroundColor_;
 };
+
+QDataStream & operator<< (QDataStream& stream, const AttentionGetterSettings& settings);
+QDataStream & operator>> (QDataStream& stream, AttentionGetterSettings& settings);
+bool operator==(const Habit::AttentionGetterSettings& lhs, const Habit::AttentionGetterSettings& rhs);
+
 
 } // namespace Habit
 

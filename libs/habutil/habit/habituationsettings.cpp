@@ -12,11 +12,41 @@ Habit::HabituationSettings::~HabituationSettings()
 {
 }
 
-int Habit::HabituationSettings::getId() const {
+QDataStream & Habit::operator<< (QDataStream& stream, Habit::HabituationSettings d)
+{
+	stream << d.getId() << d.getTotalLookLengthToEnd() << d.getHabituationType().number() << d.getCriterionSettings();
+	return stream;
+}
+
+QDataStream & Habit::operator>> (QDataStream& stream, Habit::HabituationSettings& d)
+{
+	int id, lookTime,itype;
+	CriterionSettings c;
+	stream >> id >> lookTime >> itype >> c;
+	d.setId(id);
+	d.setTotalLookLengthToEnd(lookTime);
+	d.setHabituationType(getHabituationType(itype));
+	d.setCriterionSettings(c);
+	return stream;
+}
+
+bool Habit::operator==(const Habit::HabituationSettings& lhs, const Habit::HabituationSettings& rhs)
+{
+	return (lhs.getId() == rhs.getId() &&
+			lhs.getTotalLookLengthToEnd() == rhs.getTotalLookLengthToEnd() &&
+			lhs.getHabituationType() == rhs.getHabituationType() &&
+			lhs.getCriterionSettings() == rhs.getCriterionSettings());
+}
+
+
+
+int Habit::HabituationSettings::getId() const
+{
 	return id_;
 }
 
-void Habit::HabituationSettings::setId(int id) {
+void Habit::HabituationSettings::setId(int id)
+{
 	id_ = id;
 }
 

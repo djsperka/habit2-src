@@ -4,7 +4,7 @@
 using namespace Habit;
 
 StimuliSettings::StimuliSettings(const HStimContext& context)
-: stimuliSettings_()
+: ssList_()
 , pcontext_(&context)
 {}
 
@@ -13,9 +13,31 @@ StimuliSettings::~StimuliSettings()
 
 }
 
-StimuliSettings::stimulus_container Habit::StimuliSettings::getStimuli() const 
+QDataStream & Habit::operator<< (QDataStream& stream, StimuliSettings settings)
 {
-    return stimuliSettings_;
+	stream << settings.getStimuli() << settings.getStimContext().number();
+	return stream;
+}
+
+QDataStream & Habit::operator>> (QDataStream& stream, StimuliSettings& settings)
+{
+	Habit::StimulusSettingsList list;
+	int icontext;
+	stream >> list >> icontext;
+	settings.setStimuli(list);
+	settings.setStimContext(getStimContext(icontext));
+	return stream;
+}
+
+bool Habit::operator==(const Habit::StimuliSettings&lhs, const Habit::StimuliSettings& rhs)
+{
+	return (lhs.getStimContext() == rhs.getStimContext() &&
+			lhs.getStimuli() == rhs.getStimuli());
+}
+
+StimulusSettingsList StimuliSettings::getStimuli() const
+{
+    return ssList_;
 }
 
 const HStimContext& StimuliSettings::getStimContext() const
@@ -23,14 +45,18 @@ const HStimContext& StimuliSettings::getStimContext() const
 	return *pcontext_;
 }
 
-
-void StimuliSettings::setStimuli(const Habit::StimuliSettings::stimulus_container& stimuli)
+void StimuliSettings::setStimContext(const HStimContext& context)
 {
-    stimuliSettings_ = stimuli;
+	pcontext_ = &context;
+}
+
+void StimuliSettings::setStimuli(const StimulusSettingsList& stimuli)
+{
+    ssList_ = stimuli;
 }
 
 void StimuliSettings::addStimuli(const StimulusSettings& settings) {
-	stimuliSettings_.append(settings);
+	ssList_.append(settings);
 }
 
 void StimuliSettings::loadFromDB(int experimentId) 
@@ -58,7 +84,7 @@ bool Habit::StimuliSettings::saveToDB(size_t id_)
 
 QDebug Habit::operator<<(QDebug dbg, const StimuliSettings& ss)
 {
-	QVector<Habit::StimulusSettings> c = ss.getStimuli();
+	StimulusSettingsList c = ss.getStimuli();
 	dbg.nospace() << "StimuliSettings: context " << ss.getStimContext().name() << endl;
 	for (int i=0; i<c.size(); i++)
 	{

@@ -1,5 +1,6 @@
 #include "controlbaroptions.h"
 #include "maindao.h"
+#include <QDataStream>
 
 Habit::ControlBarOptions::ControlBarOptions() 
 {
@@ -14,11 +15,39 @@ Habit::ControlBarOptions::~ControlBarOptions()
 
 }
 
-int Habit::ControlBarOptions::getId() const {
+QDataStream & Habit::operator<< (QDataStream& stream, Habit::ControlBarOptions cbo)
+{
+	stream << cbo.getId() << cbo.isControlBarUsed() << cbo.isCurrentExperimentDisplayed() << cbo.isCurrentStimulusDisplayed();
+	return stream;
+}
+
+QDataStream & Habit::operator>> (QDataStream& stream, ControlBarOptions& cbo)
+{
+	int id;
+	bool bControlBar, bCurrExp, bCurrStim;
+	stream >> id >> bControlBar >> bCurrExp >> bCurrStim;
+	cbo.setId(id);
+	cbo.setUseControlBar(bControlBar);
+	cbo.setDisplayCurrentExperiment(bCurrExp);
+	cbo.setDisplayCurrentStimulus(bCurrStim);
+	return stream;
+}
+
+bool Habit::operator==(const Habit::ControlBarOptions& lhs, const Habit::ControlBarOptions& rhs)
+{
+	return (lhs.getId() == rhs.getId() &&
+			lhs.isControlBarUsed() == rhs.isControlBarUsed() &&
+			lhs.isCurrentExperimentDisplayed() == rhs.isCurrentExperimentDisplayed() &&
+			lhs.isCurrentStimulusDisplayed() == rhs.isCurrentStimulusDisplayed());
+}
+
+int Habit::ControlBarOptions::getId() const
+{
 	return id_;
 }
 
-void Habit::ControlBarOptions::setId(int id) {
+void Habit::ControlBarOptions::setId(int id)
+{
 	id_ = id;
 }
 

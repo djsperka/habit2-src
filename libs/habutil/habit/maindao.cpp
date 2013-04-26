@@ -123,9 +123,9 @@ bool MainDao::addOrUpdateDesignSetting(size_t experimentId, Habit::DesignSetting
 	Habit::TrialsInfo ht = settings->getHabituationTrialsInfo();
 	Habit::TrialsInfo pt = settings->getPretestTrialsInfo();
 	Habit::TrialsInfo tt = settings->getTestTrialsInfo();
-	q.addBindValue(pt.getType());
-	q.addBindValue(ht.getType());
-	q.addBindValue(tt.getType());
+	q.addBindValue(pt.getTrialCompletionType().number());
+	q.addBindValue(ht.getTrialCompletionType().number());
+	q.addBindValue(tt.getTrialCompletionType().number());
 	q.addBindValue(pt.getLength());
 	q.addBindValue(ht.getLength());
 	q.addBindValue(tt.getLength());
@@ -208,12 +208,12 @@ bool MainDao::addOrUpdateStimuliSetting(size_t experiment_id, Habit::StimuliSett
 
 	bool result = true;
 	if(!table_name.isEmpty()) {
-		typedef Habit::StimuliSettings::stimulus_container st_list;
-		Habit::StimuliSettings::stimulus_container stimulus = settings->getStimuli();
-		for(st_list::iterator it = stimulus.begin(); it != stimulus.end() && result; ++it) {
-			Habit::StimulusSettings ss = *it;
-			int id = ss.getId();
-			result = result && addOrUpdateStimulusSetting(id, experiment_id, ss, table_name, "experiment_id");
+		StimulusSettingsList ssList = settings->getStimuli();
+		QListIterator<StimulusSettings> it(ssList);
+		while (it.hasNext() && result)
+		{
+			Habit::StimulusSettings ss = it.next();
+			result = result && addOrUpdateStimulusSetting(ss.getId(), experiment_id, ss, table_name, "experiment_id");
 		}
 	} else {
 		result = false;
@@ -278,8 +278,8 @@ bool MainDao::addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::Stim
 			" values(?, ?, ?, ?, ?)";
 	}
 	QSqlQuery q = con->exec(sql);
-	q.addBindValue(settings->getPresentationStyle());
-	q.addBindValue(settings->getDisplayType());
+	q.addBindValue(settings->getPresentationStyle().number());
+	q.addBindValue(settings->getDisplayType().number());
 	q.addBindValue(settings->isOriginalAspectRatioMaintained());
 	q.addBindValue(settings->getBackGroundColor());
 	if(id > 0) {
@@ -391,7 +391,7 @@ void MainDao::getDesignSettingsForExperiment(size_t experimentId, DesignSettings
 		int habituationTrialLength = q.value(q.record().indexOf("habituation_trial_length")).toInt();
 		int habituationLookTimes = q.value(q.record().indexOf("minimum_look_away_time")).toInt();
 		int habituationNumberOfTrials = q.value(q.record().indexOf("habituation_number_of_trials")).toInt();
-		habituationTrials.setType(habituationTrialType);
+		habituationTrials.setTrialCompletionType(getTrialCompletionType(habituationTrialType));
 		habituationTrials.setLength(habituationTrialLength);
 		habituationTrials.setLookTimes(habituationLookTimes);
 		habituationTrials.setNumberOfTrials(habituationNumberOfTrials);
@@ -401,7 +401,7 @@ void MainDao::getDesignSettingsForExperiment(size_t experimentId, DesignSettings
 		int pretestTrialLength = q.value(q.record().indexOf("pretest_trial_length")).toInt();
 		int pretestLookTimes = q.value(q.record().indexOf("minimum_look_time")).toInt();
 		int pretestNumberOfTrials = q.value(q.record().indexOf("pretest_number_of_trials")).toInt();
-		pretestTrials.setType(pretestTrialType);
+		pretestTrials.setTrialCompletionType(getTrialCompletionType(pretestTrialType));
 		pretestTrials.setLength(pretestTrialLength);
 		pretestTrials.setLookTimes(pretestLookTimes);
 		pretestTrials.setNumberOfTrials(pretestNumberOfTrials);
@@ -411,7 +411,7 @@ void MainDao::getDesignSettingsForExperiment(size_t experimentId, DesignSettings
 		int testTrialLength = q.value(q.record().indexOf("test_trial_length")).toInt();
 		int testLookTimes = q.value(q.record().indexOf("minimum_no_look_time")).toInt();
 		int testNumberOfTrials = q.value(q.record().indexOf("test_number_of_trials")).toInt();
-		testTrials.setType(testTrialType);
+		testTrials.setTrialCompletionType(getTrialCompletionType(testTrialType));
 		testTrials.setLength(testTrialLength);
 		testTrials.setLookTimes(testLookTimes);
 		testTrials.setNumberOfTrials(testNumberOfTrials);
@@ -471,8 +471,8 @@ void MainDao::getStimulusDisplayInfoForExperiment(size_t experimentId, Habit::St
 		int displayType = q.value(q.record().indexOf("display_type")).toInt();
 		bool isOrigAspectRatio = q.value(q.record().indexOf("is_original_aspect_ratio")).toBool();
 		QString color = q.value(q.record().indexOf("background_color")).toString();
-		stimulusDisplayInfo->setPresentationStyle(presentationStyle);
-		stimulusDisplayInfo->setDisplayType(displayType);
+		stimulusDisplayInfo->setPresentationStyle(getPresentationStyle(presentationStyle));
+		stimulusDisplayInfo->setDisplayType(getDisplayType(displayType));
 		stimulusDisplayInfo->setMaintainOriginalAspectRatio(isOrigAspectRatio);
 		stimulusDisplayInfo->setBackGroundColor(QColor(color));
 	}

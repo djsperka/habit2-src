@@ -143,15 +143,12 @@ void HControlPanel::createExperiment(HEventLog& log)
 	// but this is how it was originally written so there. 
 	loadFromDB();
 	
-	// These will hold stim numbers for stimuli _available_ to each phase, as configured
-	// for the experiment. 
-	// 	typedef QList<QPair<int, StimulusSettings> > StimulusSettingsList;
-	
-	Habit::StimulusSettingsList l1, l2, l3;
+	// For each phase, save the StimulusSettings and the index at which they are added to the players.
+	// The index will be used by the phases to request stim be played.
+	Habit::IdStimulusSettingsPairList idspList1, idspList2, idspList3;
 
-	// These will hold stim numbers for the trials in each phase, as they are configured/randomized
-	// on a particular run.
-	Habit::StimulusSettingsList lTrials;
+	// These will hold stim numbers for all stimuli
+	Habit::IdStimulusSettingsPairList idStimPairList;
 
 	// Get info for creating look detector and phase(s). 
 	Habit::DesignSettings ds = m_experimentSettings.getDesignSettings();
@@ -166,10 +163,11 @@ void HControlPanel::createExperiment(HEventLog& log)
 	// One by one the stimuli are added to the media manager's player. As each stim is added, 
 	// its ordinal position in the player's set of stim is paired with the StimulusSettings 
 	// object, and the pair is stored in the StimulusSettingsList objects l1, l2, l3.
-	m_pmm = createMediaManager(m_experimentSettings, NULL, l1, l2, l3);
+	m_pmm = createMediaManager(m_experimentSettings, NULL, idspList1, idspList2, idspList3);
 	
 	// Save the lists of stimuli for use in updating labels.
-	populateSSMap(ags, l1, l2, l3);
+	m_mapSS.clear();
+	populateSSMap(ags, idspList1, idspList2, idspList3);
 	
 	// Connect media manager signals to slots here so we can update display labels.
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(onAGStarted()));
@@ -207,41 +205,41 @@ void HControlPanel::createExperiment(HEventLog& log)
 	// Create phases	
 	if (tiPreTest.getNumberOfTrials() > 0)
 	{
-		HTrialGenerator htg(l1.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
-		lTrials.clear();
+		HTrialGenerator htg(idspList1.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
+		idStimPairList.clear();
 		for (unsigned int i=0; i<tiPreTest.getNumberOfTrials(); i++)
 		{
-			lTrials.append(l1.at(htg.next()));
+			idStimPairList.append(idspList1.at(htg.next()));
 		}
 		m_pcritPreTest = new HPhaseFixedNCriteria(tiPreTest.getNumberOfTrials());
-		m_psPreTest = new HPhase(*sExperiment, m_pcritPreTest, log, lTrials, HPhaseType::PreTest, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
+		m_psPreTest = new HPhase(*sExperiment, m_pcritPreTest, log, idStimPairList, HPhaseType::PreTest, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	if (tiHabituation.getNumberOfTrials() > 0)
 	{
-		HTrialGenerator htg(l2.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
-		lTrials.clear();
+		HTrialGenerator htg(idspList2.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
+		idStimPairList.clear();
 		for (unsigned int i=0; i<tiHabituation.getNumberOfTrials(); i++)
 		{
-			lTrials.append(l2.at(htg.next()));
+			idStimPairList.append(idspList2.at(htg.next()));
 		}
 		
 		// Create habituation criteria object. 
 		m_pcritHabituation = createPhaseCriteria(m_experimentSettings.getHabituationSettings(), tiHabituation.getNumberOfTrials());
-		m_psHabituation = new HPhase(*sExperiment, m_pcritHabituation, log, lTrials, HPhaseType::Habituation, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
+		m_psHabituation = new HPhase(*sExperiment, m_pcritHabituation, log, idStimPairList, HPhaseType::Habituation, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 	
 	if (tiTest.getNumberOfTrials() > 0)
 	{
-		HTrialGenerator htg(l3.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
-		lTrials.clear();
+		HTrialGenerator htg(idspList3.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
+		idStimPairList.clear();
 		for (unsigned int i=0; i<tiTest.getNumberOfTrials(); i++)
 		{
-			lTrials.append(l3.at(htg.next()));
+			idStimPairList.append(idspList3.at(htg.next()));
 		}
 		
 		m_pcritTest = new HPhaseFixedNCriteria(tiTest.getNumberOfTrials());
-		m_psTest = new HPhase(*sExperiment, m_pcritTest, log, lTrials, HPhaseType::Test, tiTest.getLength() * 100, noLookTimeMS, tiTest.getType() == Habit::TrialsInfo::eFixedLength, ags.isAttentionGetterUsed());
+		m_psTest = new HPhase(*sExperiment, m_pcritTest, log, idStimPairList, HPhaseType::Test, tiTest.getLength() * 100, noLookTimeMS, tiTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	
@@ -310,31 +308,23 @@ void HControlPanel::createExperiment(HEventLog& log)
 	
 }
 
-void HControlPanel::populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::StimulusSettingsList& l1, const Habit::StimulusSettingsList& l2, const Habit::StimulusSettingsList& l3)
+void HControlPanel::populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::IdStimulusSettingsPairList& idsp1, const Habit::IdStimulusSettingsPairList& idsp2, const Habit::IdStimulusSettingsPairList& idsp3)
 {
 	if (ags.isAttentionGetterUsed())
 	{
 		m_mapSS[0] = ags.getAttentionGetterStimulus();
 	}
-	
-	QListIterator< QPair<int, Habit::StimulusSettings> > it1(l1);
-	while (it1.hasNext())
+	for (Habit::IdStimulusSettingsPairList::const_iterator it = idsp1.begin(); it != idsp1.end(); it++)
 	{
-		QPair<int, Habit::StimulusSettings> p = it1.next();
-		m_mapSS[p.first] = p.second;
+		m_mapSS.insert(it->first, it->second);
 	}
-	
-	QListIterator< QPair<int, Habit::StimulusSettings> > it2(l2);
-	while (it2.hasNext())
+	for (Habit::IdStimulusSettingsPairList::const_iterator it = idsp2.begin(); it != idsp2.end(); it++)
 	{
-		QPair<int, Habit::StimulusSettings> p = it2.next();
-		m_mapSS[p.first] = p.second;
+		m_mapSS.insert(it->first, it->second);
 	}
-	QListIterator< QPair<int, Habit::StimulusSettings> > it3(l3);
-	while (it3.hasNext())
+	for (Habit::IdStimulusSettingsPairList::const_iterator it = idsp3.begin(); it != idsp3.end(); it++)
 	{
-		QPair<int, Habit::StimulusSettings> p = it3.next();
-		m_mapSS[p.first] = p.second;
+		m_mapSS.insert(it->first, it->second);
 	}
 };
 
