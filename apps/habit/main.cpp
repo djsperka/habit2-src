@@ -11,6 +11,7 @@
 using namespace std;
 QTextStream logfile; 
 
+
 void SimpleLoggingHandler(QtMsgType type, const char *msg) 
 {    
 	switch (type) 

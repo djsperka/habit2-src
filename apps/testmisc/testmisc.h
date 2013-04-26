@@ -36,6 +36,18 @@ signals:
 //	void testFixedNCriteria();
 //	void testTotalLookingTimeCriteria();
 	void testTrialGenerator();
+	void testMonitorSettings();
+	void testControlBarOptions();
+	void testTrialsInfo();
+	void testDesignSettings();
+	void testCriterionSettings();
+	void testHabituationSettings();
+	void testStimulusDisplayInfo();
+	void testStimulusInfo();
+	void testStimulusSettings();
+	void testAttentionGetterSettings();
+	void testStimuliSettings();
 private:
 //	void createStimulusSettings(int i, Habit::StimulusSettings& settings);
+
 }; 
