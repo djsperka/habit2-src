@@ -14,9 +14,411 @@
 #include "stimulussettings.h"
 #include "attentiongettersettings.h"
 #include "stimulisettings.h"
+#include "experimentsettings.h"
+#include "runsettings.h"
+#include "subjectsettings.h"
 #include <QBuffer>
 #include <QDataStream>
 
+Habit::StimulusSettings TestHabutil::getSS()
+{
+	Habit::StimulusSettings ss0("stim 0", HStimContext::PreTestPhase);
+	Habit::StimulusInfo left("left", QString("left/file/name"), true, 95);
+	Habit::StimulusInfo center("center", QString("center/file/name"), true, 93);
+	Habit::StimulusInfo right("right", QString("right/file/name"), true, 91);
+	Habit::StimulusInfo iss("iss", QString("iss/file/name"), true, 97);
+	ss0.setId(888);
+	ss0.setLeftEnabled(true);
+	ss0.setLeftStimulusInfo(left);
+	ss0.setCenterEnabled(true);
+	ss0.setCenterStimulusInfo(center);
+	ss0.setRightEnabled(true);
+	ss0.setRightStimulusInfo(right);
+	ss0.setIndependentSoundEnabled(true);
+	ss0.setIndependentSoundInfo(iss);
+	return ss0;
+}
+
+void TestHabutil::testEventLogRW()
+{
+	HEvent* eventPhaseStart = new HPhaseStartEvent(HPhaseType::PreTest, 12345);
+	HEvent* eventPhaseEnd = new HPhaseEndEvent(23456);
+	HEvent* eventTrialStart = new HTrialStartEvent(5, 8, 23459);
+	HEvent* eventTrialEnd = new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 9878);
+	HEvent* eventAGRequest = new HAGRequestEvent(3332);
+	HEvent* eventAGStart = new HAGStartEvent(2, 8888);
+	HEvent* eventStimRequest = new HStimRequestEvent(3, 8122);
+	HEvent* eventStimStart = new HStimStartEvent(1, 8234);
+	Habit::StimulusSettings ss(getSS());
+	HEvent* eventSS = new HStimulusSettingsEvent(ss, 5, 7654);
+	HEvent* eventAttention = new HAttentionEvent(3499);
+	HEvent* eventLook = new HLookEvent(HLook(LookLeft, 2377, 3499), 3500);
+	HEvent* eventLookTrans = new HLookTransEvent(NoneCenter, 6633);
+	HEvent* eventHabituationSuccess = new HHabituationSuccessEvent(8347);
+	HEvent* eventHabituationFailure = new HHabituationFailureEvent(8348);
+
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    buffer.open(QIODevice::WriteOnly);
+    QDataStream out(&buffer);
+    out << *eventPhaseStart;
+    out << *eventPhaseEnd;
+    out << *eventTrialStart;
+    out << *eventTrialEnd;
+    out << *eventAGRequest;
+    out << *eventAGStart;
+    out << *eventStimRequest;
+    out << *eventStimStart;
+    out << *eventSS;
+    out << *eventAttention;
+    out << *eventLook;
+    out << *eventLookTrans;
+    out << *eventHabituationSuccess;
+    out << *eventHabituationFailure;
+    buffer.close();
+
+
+    buffer.open(QIODevice::ReadOnly);
+    QDataStream in(&buffer);
+
+    HEvent* pPhaseStart = NULL;
+    HEvent* pPhaseEnd = NULL;
+    HEvent* pTrialStart = NULL;
+    HEvent* pTrialEnd = NULL;
+    HEvent* pAGRequest = NULL;
+    HEvent* pAGStart = NULL;
+    HEvent* pStimRequest = NULL;
+    HEvent* pStimStart = NULL;
+    HEvent* pSS = NULL;
+    HEvent* pAttention = NULL;
+    HEvent* pLook = NULL;
+    HEvent* pLookTrans = NULL;
+    HEvent* pHabituationSuccess = NULL;
+    HEvent* pHabituationFailure = NULL;
+
+    pPhaseStart = HEvent::getEvent(in);
+    QVERIFY(pPhaseStart);
+    pPhaseEnd = HEvent::getEvent(in);
+    QVERIFY(pPhaseEnd);
+    pTrialStart = HEvent::getEvent(in);
+    QVERIFY(pTrialStart);
+    pTrialEnd = HEvent::getEvent(in);
+    QVERIFY(pTrialEnd);
+    pAGRequest = HEvent::getEvent(in);
+    QVERIFY(pAGRequest);
+    pAGStart = HEvent::getEvent(in);
+    QVERIFY(pAGStart);
+    pStimRequest = HEvent::getEvent(in);
+    QVERIFY(pStimRequest);
+    pStimStart = HEvent::getEvent(in);
+    QVERIFY(pStimStart);
+    pSS = HEvent::getEvent(in);
+    QVERIFY(pSS);
+    pAttention = HEvent::getEvent(in);
+    QVERIFY(pAttention);
+    pLook = HEvent::getEvent(in);
+    QVERIFY(pLook);
+    pLookTrans = HEvent::getEvent(in);
+    QVERIFY(pLookTrans);
+    pHabituationSuccess = HEvent::getEvent(in);
+    QVERIFY(pHabituationSuccess);
+    pHabituationFailure = HEvent::getEvent(in);
+    QVERIFY(pHabituationFailure);
+    buffer.close();
+
+//    qDebug() << eventPhaseStart->eventCSV();
+ //   qDebug() << p_readFromBuffer->eventCSV();
+
+    QVERIFY(*eventPhaseStart == *pPhaseStart);
+    QVERIFY(*eventPhaseEnd == *pPhaseEnd);
+    QVERIFY(*eventTrialStart == *pTrialStart);
+    QVERIFY(*eventTrialEnd == *pTrialEnd);
+    QVERIFY(*eventAGRequest == *pAGRequest);
+    QVERIFY(*eventAGStart == *pAGStart);
+    QVERIFY(*eventStimRequest == *pStimRequest);
+    QVERIFY(*eventStimStart == *pStimStart);
+    QVERIFY(*eventSS == *pSS);
+    QVERIFY(*eventAttention == *pAttention);
+    QVERIFY(*eventLook == *pLook);
+    QVERIFY(*eventLookTrans == *pLookTrans);
+    QVERIFY(*eventHabituationSuccess == *pHabituationSuccess);
+    QVERIFY(*eventHabituationFailure == *pHabituationFailure);
+
+    HEventLog log;
+    log.append(eventPhaseStart);
+    log.append(eventPhaseEnd);
+    log.append(eventTrialStart);
+    log.append(eventTrialEnd);
+    log.append(eventAGRequest);
+    log.append(eventAGStart);
+    log.append(eventStimRequest);
+    log.append(eventStimStart);
+    log.append(eventSS);
+    log.append(eventAttention);
+    log.append(eventLook);
+    log.append(eventLookTrans);
+    log.append(eventHabituationSuccess);
+    log.append(eventHabituationFailure);
+
+    buffer.open(QIODevice::WriteOnly);
+    QDataStream out2(&buffer);
+    out2 << log;
+    buffer.close();
+
+    HEventLog log2;
+    buffer.open(QIODevice::ReadOnly);
+    QDataStream in2(&buffer);
+    in2 >> log2;
+    QVERIFY(log.size() == log2.size());
+
+	QListIterator<HEvent *> it(log);
+	QListIterator<HEvent *> it2(log2);
+	while (it.hasNext() && it2.hasNext())
+		QVERIFY(*it.next() == *it2.next());
+}
+
+
+void TestHabutil::testSubjectSettings()
+{
+	Habit::SubjectSettings ss;
+	ss.setId(345);
+	ss.setSubjectName(QString("John Smith"));
+	ss.setBirthDate(QDateTime(QDate(2013, 4, 30)));
+	ss.setTestDate(QDateTime(QDate(2013, 5, 1)));
+	ss.setCondition("whatever");
+	ss.setObserver("whomever");
+	ss.setCellNumber(QString("111-111-1111"));
+	ss.setComments(QString("Comments here"));
+
+	Habit::SubjectSettings ss1(ss);
+	QVERIFY(ss == ss1);
+
+	ss1.setTestDate(QDateTime(QDate(2012, 1, 31)));
+	QVERIFY(!(ss == ss1));
+
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    buffer.open(QIODevice::WriteOnly);
+    QDataStream out(&buffer);
+    out << ss;
+    buffer.close();
+
+    Habit::SubjectSettings ss_readFromBuffer;
+    buffer.open(QIODevice::ReadOnly);
+    QDataStream in(&buffer);
+    in >> ss_readFromBuffer;
+    buffer.close();
+    QVERIFY(ss == ss_readFromBuffer);
+
+}
+
+
+void TestHabutil::testRunSettings()
+{
+	Habit::RunSettings rs;
+	rs.setId(234);
+	rs.setExperimentId(123);
+	rs.setSubjectId(945);
+	rs.setHabituationOrder(QString("1 2 3 4 5 6 7"));
+	rs.setHabituationRandomized(true);
+	rs.setHabituationRandomizeMethod(1);
+
+	rs.setPretestOrder(QString("1 2 3 4 5"));
+	rs.setPretestRandomized(false);
+	rs.setPretestRandomizeMethod(0);
+
+	rs.setTestOrder(QString("3 4 5 6 7"));
+	rs.setTestRandomized(false);
+	rs.setTestRandomizeMethod(1);
+
+	Habit::RunSettings rs1(rs);
+	QVERIFY(rs == rs1);
+
+	rs1.setPretestOrder(QString("2 30 12"));
+	QVERIFY(!(rs == rs1));
+
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    buffer.open(QIODevice::WriteOnly);
+    QDataStream out(&buffer);
+    out << rs;
+    buffer.close();
+
+    Habit::RunSettings rs_readFromBuffer;
+    buffer.open(QIODevice::ReadOnly);
+    QDataStream in(&buffer);
+    in >> rs_readFromBuffer;
+    buffer.close();
+    QVERIFY(rs == rs_readFromBuffer);
+}
+
+void TestHabutil::testExperimentSettings()
+{
+	Habit::ExperimentSettings e0;
+	QString name("TestExperiment");
+
+	Habit::MonitorSettings m0;
+	m0.setId(999);
+	m0.setControlMonitorIndex(3);
+    m0.setLeftMonitorIndex(2);
+    m0.setCenterMonitorIndex(1);
+    m0.setRightMonitorIndex(0);
+
+    e0.setMonitorSettings(m0);
+
+    // Control Bar Options
+
+	Habit::ControlBarOptions cbo0;
+	cbo0.setId(998);
+	cbo0.setUseControlBar(true);
+    cbo0.setDisplayCurrentExperiment(true);
+    cbo0.setDisplayCurrentStimulus(false);
+
+    e0.setControlBarOptions(cbo0);
+
+    // design settings
+
+	Habit::DesignSettings ds0;
+	Habit::TrialsInfo pti, hti, tti;
+	ds0.setId(99);
+	pti.setTrialCompletionType(HTrialCompletionType::HTrialCompletionSubjectControlled);
+	pti.setLength(333);
+	pti.setLookTimes(222);
+	pti.setNumberOfTrials(5);
+	ds0.setPretestTrialsInfo(pti);
+
+	hti.setTrialCompletionType(HTrialCompletionType::HTrialCompletionSubjectControlled);
+	hti.setLength(337);
+	hti.setLookTimes(2255);
+	hti.setNumberOfTrials(3);
+	ds0.setHabituationTrialsInfo(hti);
+
+	tti.setTrialCompletionType(HTrialCompletionType::HTrialCompletionSubjectControlled);
+	tti.setLength(555);
+	tti.setLookTimes(467);
+	tti.setNumberOfTrials(7);
+	ds0.setTestTrialsInfo(tti);
+
+	e0.setDesignSettings(ds0);
+
+	// Habituation settings
+
+	Habit::HabituationSettings hs0;
+	hs0.setId(2);
+	hs0.setTotalLookLengthToEnd(234);
+	hs0.setHabituationType(HHabituationType::HHabituationTypeFixedN);
+	Habit::CriterionSettings c0;
+	c0.setBasis(HCriterionBasisType::HCriterionBasisLongestN);
+	c0.setPercent(44);
+	c0.setWindowSize(6);
+	c0.setWindowType(HCriterionWindowType::HCriterionWindowFixed);
+	hs0.setCriterionSettings(c0);
+
+	e0.setHabituationSettings(hs0);
+
+	// stimulus display info
+
+	Habit::StimulusDisplayInfo sd0;
+	sd0.setId(4);
+	sd0.setDisplayType(HDisplayType::HDisplayTypeFullScreen);
+	sd0.setBackGroundColor(QColor(100, 200, 100));
+	sd0.setMaintainOriginalAspectRatio(true);
+	sd0.setPresentationStyle(HPresentationStyle::HPresentationStyleMonitorDefined);
+
+	e0.setStimulusDisplayInfo(sd0);
+
+	// attention getter
+
+	Habit::AttentionGetterSettings ags;
+	Habit::StimulusSettings ss0("ags", HStimContext::AttentionGetter);
+	Habit::StimulusInfo left("left", QString("left/file/name"), true, 95);
+	Habit::StimulusInfo center("center", QString("center/file/name"), true, 93);
+	Habit::StimulusInfo right("right", QString("right/file/name"), true, 91);
+	Habit::StimulusInfo iss("iss", QString("iss/file/name"), true, 97);
+	ss0.setId(888);
+	ss0.setLeftEnabled(true);
+	ss0.setLeftStimulusInfo(left);
+	ss0.setCenterEnabled(true);
+	ss0.setCenterStimulusInfo(center);
+	ss0.setRightEnabled(true);
+	ss0.setRightStimulusInfo(right);
+	ss0.setIndependentSoundEnabled(true);
+	ss0.setIndependentSoundInfo(iss);
+	ags.setAttentionGetterStimulus(ss0);
+	ags.setId(832);
+	ags.setBackGroundColor(QColor(123, 111, 109));
+	ags.setUseAttentionGetter(true);
+
+	e0.setAttentionGetterSettings(ags);
+
+	// pretest stimuli - leave along (default constructor?)
+
+
+	// habituation stimuli
+	Habit::StimuliSettings hstimuli(HStimContext::HabituationPhase);
+	Habit::StimulusSettings ss("1", HStimContext::HabituationPhase);
+	ss.setId(456);
+	ss.setLeftEnabled(true);
+	ss.setLeftStimulusInfo(Habit::StimulusInfo("1.left", "1.left/file/name", true, 23));
+	ss.setRightEnabled(true);
+	ss.setRightStimulusInfo(Habit::StimulusInfo("1.right", "1.right/file/name", true, 24));
+	ss.setCenterEnabled(true);
+	ss.setCenterStimulusInfo(Habit::StimulusInfo("1.center", "1.center/file/name", true, 25));
+	ss.setIndependentSoundEnabled(true);
+	ss.setIndependentSoundInfo(Habit::StimulusInfo("1.iss", "1.iss/file/name", true, 26));
+	hstimuli.addStimuli(ss);
+
+	ss.setId(234);
+	ss.setIndependentSoundEnabled(false);
+	ss.setRightStimulusInfo(Habit::StimulusInfo("2.right", "file/name/aaa", false, 20));
+	hstimuli.addStimuli(ss);
+
+	e0.setHabituationStimuliSettings(hstimuli);
+
+	// test stimuli
+	Habit::StimuliSettings tstimuli(HStimContext::HabituationPhase);
+	ss.setId(456);
+	ss.setLeftEnabled(true);
+	ss.setLeftStimulusInfo(Habit::StimulusInfo("1.left", "1.left/file/name/test", true, 25));
+	ss.setRightEnabled(true);
+	ss.setRightStimulusInfo(Habit::StimulusInfo("1.right", "1.right/file/name/test", true, 724));
+	ss.setCenterEnabled(true);
+	ss.setCenterStimulusInfo(Habit::StimulusInfo("1.center", "1.center/file/name/test", true, 285));
+	ss.setIndependentSoundEnabled(true);
+	ss.setIndependentSoundInfo(Habit::StimulusInfo("1.iss", "1.iss/file/name/test", true, 26));
+	tstimuli.addStimuli(ss);
+
+	ss.setId(234);
+	ss.setIndependentSoundEnabled(false);
+	ss.setRightStimulusInfo(Habit::StimulusInfo("2.right", "file/name/aaaaaaa", false, 20));
+	tstimuli.addStimuli(ss);
+
+	e0.setPreTestStimuliSettings(tstimuli);
+
+
+	// NOW start tests....
+	Habit::ExperimentSettings e1(e0);
+	QVERIFY(e0 == e1);
+
+
+	m0.setLeftMonitorIndex(222);
+	e1.setMonitorSettings(m0);
+	QVERIFY(!(e0 == e1));
+
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    buffer.open(QIODevice::WriteOnly);
+    QDataStream out(&buffer);
+    out << e0;
+    buffer.close();
+
+    Habit::ExperimentSettings e_readFromBuffer;
+    buffer.open(QIODevice::ReadOnly);
+    QDataStream in(&buffer);
+    in >> e_readFromBuffer;
+    buffer.close();
+    QVERIFY(e0 == e_readFromBuffer);
+}
 
 void TestHabutil::testStimuliSettings()
 {
@@ -720,5 +1122,5 @@ void TestHabutil::testTrialGenerator()
 }
 
 
-QTEST_MAIN(TestHabutil)
+QTEST_MAIN(TestHabutil);
 //#include "testmisc.moc"

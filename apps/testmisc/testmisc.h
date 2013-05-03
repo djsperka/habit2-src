@@ -9,6 +9,7 @@
 
 
 #include <QtTest/QtTest>
+#include <QObject>
 #include "HEventLog.h"
 #include "HLook.h"
 #include "stimulussettings.h"
@@ -16,25 +17,15 @@
 class TestHabutil: public QObject
 {
 	Q_OBJECT
+
 public:
 	TestHabutil();
-signals:
-//	void look(HLook);
-//	void trialStarted(Habit::StimulusSettings& s);
-//	void trialCompleted();
-	private slots:
+	Habit::StimulusSettings getSS();
+
+private slots:
 //	void initTestCase();
-//	void testTrialLooks();
-//	void testFixedN();
-//	void testTotalLookingTime();
-//	void testHabituationFirstFixed();
-//	void testHabituationLongestFixed();
-//	void testHabituationFirstSliding();
-//	void testHabituationLongestSliding();
-//	void testTrialLog();
 	void testEventLog();
-//	void testFixedNCriteria();
-//	void testTotalLookingTimeCriteria();
+	void testEventLogRW();
 	void testTrialGenerator();
 	void testMonitorSettings();
 	void testControlBarOptions();
@@ -47,7 +38,7 @@ signals:
 	void testStimulusSettings();
 	void testAttentionGetterSettings();
 	void testStimuliSettings();
-private:
-//	void createStimulusSettings(int i, Habit::StimulusSettings& settings);
-
+	void testExperimentSettings();
+	void testRunSettings();
+	void testSubjectSettings();
 }; 
