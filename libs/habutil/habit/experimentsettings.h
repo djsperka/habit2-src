@@ -4,7 +4,8 @@
 
 /// \file experimentsettings.h
 /// \brief Declaraction of class Habit::ExperimentSettings
-#include <QtCore/QString>
+#include <QString>
+#include <QDataStream>
 #include "monitorsettings.h"
 #include "controlbaroptions.h"
 #include "designsettings.h"
@@ -64,6 +65,11 @@ private:
 	StimuliSettings testStimuliSettings_;	
 
 };
+
+
+QDataStream & operator<< (QDataStream& stream, const ExperimentSettings& settings);
+QDataStream & operator>> (QDataStream& stream, ExperimentSettings& settings);
+bool operator==(const Habit::ExperimentSettings& lhs, const Habit::ExperimentSettings& rhs);
 
 }  //namespace Habit
 

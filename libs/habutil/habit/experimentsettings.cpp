@@ -16,6 +16,63 @@ Habit::ExperimentSettings::~ExperimentSettings()
 {
 }
 
+QDataStream & Habit::operator<< (QDataStream& stream, const Habit::ExperimentSettings& settings)
+{
+	stream << (int)settings.getId() << settings.getName() <<
+			settings.getMonitorSettings() << settings.getControlBarOptions() << settings.getDesignSettings() <<
+			settings.getHabituationSettings() << settings.getStimulusDisplayInfo() <<
+			settings.getAttentionGetterSettings() <<
+			settings.getPreTestStimuliSettings() <<
+			settings.getHabituationStimuliSettings() <<
+			settings.getTestStimuliSettings();
+	return stream;
+}
+
+QDataStream & Habit::operator>> (QDataStream& stream, Habit::ExperimentSettings& settings)
+{
+	int id;
+	QString name;
+	Habit::MonitorSettings monitorSettings;
+	Habit::ControlBarOptions controlBarOptions;
+	Habit::DesignSettings designSettings;
+	Habit::HabituationSettings habituationSettings;
+	Habit::StimulusDisplayInfo stimulusDisplayInfo;
+	Habit::AttentionGetterSettings attentionGetterSettings;
+	Habit::StimuliSettings pretestStimuliSettings(HStimContext::PreTestPhase);
+	Habit::StimuliSettings habituationStimuliSettings(HStimContext::HabituationPhase);
+	Habit::StimuliSettings testStimuliSettings(HStimContext::TestPhase);
+	stream >> id >> name >> monitorSettings >> controlBarOptions >> designSettings >> habituationSettings >>
+		stimulusDisplayInfo >> attentionGetterSettings >>
+		pretestStimuliSettings >> habituationStimuliSettings >> testStimuliSettings;
+	settings.setId(id);
+	settings.setName(name);
+	settings.setMonitorSettings(monitorSettings);
+	settings.setControlBarOptions(controlBarOptions);
+	settings.setDesignSettings(designSettings);
+	settings.setHabituationSettings(habituationSettings);
+	settings.setStimulusDisplayInfo(stimulusDisplayInfo);
+	settings.setAttentionGetterSettings(attentionGetterSettings);
+	settings.setPreTestStimuliSettings(pretestStimuliSettings);
+	settings.setHabituationStimuliSettings(habituationStimuliSettings);
+	settings.setTestStimuliSettings(testStimuliSettings);
+	return stream;
+}
+
+bool Habit::operator==(const Habit::ExperimentSettings& lhs, const Habit::ExperimentSettings& rhs)
+{
+	return (lhs.getId() == rhs.getId() &&
+			lhs.getName() == rhs.getName() &&
+			lhs.getMonitorSettings() == rhs.getMonitorSettings() &&
+			lhs.getControlBarOptions() == rhs.getControlBarOptions() &&
+			lhs.getDesignSettings() == rhs.getDesignSettings() &&
+			lhs.getHabituationSettings() == rhs.getHabituationSettings() &&
+			lhs.getStimulusDisplayInfo() == rhs.getStimulusDisplayInfo() &&
+			lhs.getAttentionGetterSettings() == rhs.getAttentionGetterSettings() &&
+			lhs.getPreTestStimuliSettings() == rhs.getPreTestStimuliSettings() &&
+			lhs.getHabituationStimuliSettings() == rhs.getHabituationStimuliSettings() &&
+			lhs.getTestStimuliSettings() == rhs.getTestStimuliSettings());
+}
+
 void Habit::ExperimentSettings::setId(size_t id) {
 	id_ = id;
 }

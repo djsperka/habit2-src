@@ -11,7 +11,6 @@
 #define _HTYPES_H_
 
 #include <QString>
-#include <vector>
 
 class HPhaseType
 {

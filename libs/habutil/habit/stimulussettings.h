@@ -6,7 +6,6 @@
 /// \brief Declaraction of class Habit::StimulusSettings
 
 #include "stimulusinfo.h"
-#include "stimulussettings.h"
 #include "HTypes.h"
 #include <QString>
 #include <QDataStream>

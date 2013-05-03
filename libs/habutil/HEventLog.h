@@ -13,6 +13,7 @@
 #include "HEvents.h"
 #include "HPhaseLog.h"
 #include <QList>
+#include <QDataStream>
 
 class HEventLog: public QList<HEvent*>
 {
@@ -31,5 +32,8 @@ public:
 	
 	bool saveToCSV(QString& filename);
 };
+
+QDataStream& operator<< (QDataStream& stream, HEventLog log);
+QDataStream& operator>> (QDataStream& stream, HEventLog& log);
 
 #endif

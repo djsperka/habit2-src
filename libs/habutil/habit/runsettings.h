@@ -66,6 +66,7 @@ namespace Habit
 
 	QDataStream & operator << (QDataStream& stream, RunSettings settings);
 	QDataStream & operator >> (QDataStream& stream, RunSettings& settings);
+	bool operator==(const RunSettings& lhs, const RunSettings& rhs);
 
 
 } // namespace Habit

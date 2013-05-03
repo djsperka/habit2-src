@@ -12,6 +12,7 @@
 
 #include <QString>
 #include <QTextStream>
+#include <QDataStream>
 #include "stimulussettings.h"
 #include "stimulusinfo.h"
 #include "HLook.h"
@@ -60,7 +61,7 @@ private:
 	QString m_s;
 };	
 
-const HEventType& getEventType(int number_value);
+const HEventType& getHEventType(int number_value);
 
 
 // These are supplied when creating HTrialEndEvent
@@ -87,6 +88,7 @@ private:
 	QString m_s;
 };
 	
+const HTrialEndType& getHTrialEndType(int number_value);
 
 QTextStream& operator<<(QTextStream& out, const HTrialEndType& etype);
 QTextStream& operator<<(QTextStream& out, const HEventType& type);
@@ -127,13 +129,24 @@ public:
 	virtual QString eventCSVAdditional() const;		// override this to add more fields
 	
 	friend QTextStream& operator<<(QTextStream& out, const HEvent& e);
-	
+
+	// base class insertion operator will put out the event type number() and timestamp. Then the method putAdditional()
+	// is called. Derived classes should override the default putAdditional() (which does nothing).
+	// When reading events, the type and timestamp are first read.
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+
+	// We will have to read without an overloaded >>. I think this isn't possible with a pure virtual base class.
+	// Should return NULL on failure. May throw exception....TODO handle this
+	static HEvent* getEvent(QDataStream& stream);
+
 private:
 	const HEventType* m_ptype;
 	int m_timestamp;
 };
 
+bool operator==(const HEvent& lhs, const HEvent& rhs);
 QTextStream& operator<<(QTextStream& out, const HEvent& e);
+QDataStream& operator<<(QDataStream& out, const HEvent& e);
 
 class HPhaseStartEvent: public HEvent
 {
@@ -160,6 +173,10 @@ public:
 	
 	virtual QString eventCSVAdditional() const;		// override this to add more fields
 
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+
+	static HPhaseStartEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 	const HPhaseType* m_pphasetype;
 };
@@ -178,6 +195,7 @@ public:
 	~HPhaseEndEvent() {};
 	
 	QString eventInfo() const;
+	static HPhaseEndEvent* getEvent(QDataStream& stream, int timestamp);
 };
 
 class HTrialStartEvent: public HEvent
@@ -204,6 +222,8 @@ public:
 	virtual ~HTrialStartEvent() {};
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;		// override this to add more fields
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HTrialStartEvent* getEvent(QDataStream& stream, int timestamp);
 	int trialnumber() const { return m_trialnumber; };
 	int repeatnumber() const { return m_repeatnumber; };
 private:
@@ -229,6 +249,8 @@ public:
 	void setEndType(const HTrialEndType& endtype) { m_pendtype = &endtype; };
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HTrialEndEvent* getEvent(QDataStream& stream, int timestamp);
 private:
 	const HTrialEndType* m_pendtype;
 };	
@@ -251,8 +273,32 @@ public:
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
 	int stimindex() const { return m_stimindex; };
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HStimRequestEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 	int m_stimindex;
+};
+
+
+class HAGRequestEvent: public HEvent
+{
+public:
+	HAGRequestEvent(int timestamp=0)
+	: HEvent(HEventType::HEventAGRequest, timestamp)
+	{};
+
+	HAGRequestEvent(const HAGRequestEvent& e)
+	: HEvent(HEventType::HEventAGRequest, e.timestamp())
+	{};
+
+	virtual ~HAGRequestEvent() {};
+
+	QString eventInfo() const;
+	//virtual QString eventCSVAdditional() const;
+	static HAGRequestEvent* getEvent(QDataStream& stream, int timestamp);
+private:
 };
 
 class HAGStartEvent: public HEvent
@@ -271,6 +317,10 @@ public:
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
 	int playerid() const { return m_playerid; };
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HAGStartEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 	int m_playerid;
 };
@@ -294,6 +344,10 @@ public:
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
 	int playerid() const { return m_playerid; };
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HStimStartEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 	int m_playerid;
 };
@@ -319,6 +373,10 @@ public:
 	const Habit::StimulusSettings& settings() const { return m_settings; };
 	int stimindex() const { return m_stimindex; };
 	QString eventInfo() const;
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HStimulusSettingsEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 	Habit::StimulusSettings m_settings;
 	int m_stimindex;
@@ -347,6 +405,7 @@ public:
 	const Habit::StimulusInfo& info() const { return m_info; };
 	int stimindex() const { return m_stimindex; };
 	QString eventInfo() const;
+
 private:
 	QString m_whichstim;
 	Habit::StimulusInfo m_info;
@@ -367,6 +426,10 @@ public:
 	virtual ~HAttentionEvent() {};
 	
 	QString eventInfo() const;
+
+	// not needed for this class virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HAttentionEvent* getEvent(QDataStream& stream, int timestamp);
+
 };
 
 class HLookEvent: public HEvent
@@ -387,7 +450,10 @@ public:
 	const HLook& look() const { return m_look; };
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
-	
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HLookEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 	HLook m_look;
 };
@@ -411,6 +477,10 @@ public:
 	const LookTransType& transtype() const { return m_type; };
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HLookTransEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 	LookTransType m_type;
 };
@@ -429,6 +499,10 @@ public:
 	virtual ~HHabituationSuccessEvent() {};
 	
 	QString eventInfo() const;
+
+	// not needed for this event type: virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HHabituationSuccessEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 };
 
@@ -446,6 +520,10 @@ public:
 	virtual ~HHabituationFailureEvent() {};
 	
 	QString eventInfo() const;
+
+	// not needed for this event type: virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HHabituationFailureEvent* getEvent(QDataStream& stream, int timestamp);
+
 private:
 };
 
