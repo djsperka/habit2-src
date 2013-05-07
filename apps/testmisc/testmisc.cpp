@@ -170,11 +170,7 @@ void TestHabutil::testEventLogRW()
     QDataStream in2(&buffer);
     in2 >> log2;
     QVERIFY(log.size() == log2.size());
-
-	QListIterator<HEvent *> it(log);
-	QListIterator<HEvent *> it2(log2);
-	while (it.hasNext() && it2.hasNext())
-		QVERIFY(*it.next() == *it2.next());
+    QVERIFY(log == log2);
 }
 
 
