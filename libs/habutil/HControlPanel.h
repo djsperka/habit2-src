@@ -40,6 +40,8 @@ public:
 	HControlPanel(HEventLog& log, const Habit::SubjectSettings& ss, const Habit::RunSettings& runSettings, QWidget* w = 0);
 	~HControlPanel() {};
 	
+	const Habit::ExperimentSettings& getExperimentSettings() { return m_experimentSettings; };
+
 private:
 	void createComponents();
 	void makeConnections();

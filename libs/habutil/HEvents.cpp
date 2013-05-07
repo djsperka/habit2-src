@@ -9,7 +9,7 @@
 
 
 #include "HEvents.h"
-
+#include <QtDebug>
 
 /* 
  * Constants for event types and trial end types 
@@ -165,6 +165,11 @@ QDataStream& HEvent::putAdditional(QDataStream& stream) const
 
 bool operator==(const HEvent& lhs, const HEvent& rhs)
 {
+#if 0
+	qDebug() << "lhs " << lhs.eventCSV();
+	qDebug() << "rhs " << rhs.eventCSV();
+	qDebug() << "test " << (lhs.eventCSV() == rhs.eventCSV());
+#endif
 	return (lhs.eventCSV() == rhs.eventCSV());
 }
 
@@ -413,9 +418,25 @@ QString HStimulusSettingsEvent::eventInfo() const
 	return QString("Stim index: %1  Name: %2").arg(m_stimindex, 2).arg(m_settings.getName());
 };
 
+QString HStimulusSettingsEvent::eventCSVAdditional() const
+{
+	const Habit::StimulusInfo& left = settings().getLeftStimulusInfo();
+	const Habit::StimulusInfo& center = settings().getCenterStimulusInfo();
+	const Habit::StimulusInfo& right = settings().getRightStimulusInfo();
+	const Habit::StimulusInfo& iss = settings().getIndependentSoundInfo();
+
+	return QString("%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,%21,%22,%23").
+			arg(stimindex()).arg(settings().getId()).arg(settings().getName()).arg(settings().isLeftEnabled()).
+			arg(settings().isCenterEnabled()).arg(settings().isRightEnabled()).arg(settings().isIndependentSoundEnabled()).
+			arg(left.getName()).arg(left.getFileName()).arg(left.isLoopPlayBack()).arg(left.getAudioBalance()).
+			arg(center.getName()).arg(center.getFileName()).arg(center.isLoopPlayBack()).arg(center.getAudioBalance()).
+			arg(right.getName()).arg(right.getFileName()).arg(right.isLoopPlayBack()).arg(right.getAudioBalance()).
+			arg(iss.getName()).arg(iss.getFileName()).arg(iss.isLoopPlayBack()).arg(iss.getAudioBalance());
+};
+
 QDataStream& HStimulusSettingsEvent::putAdditional(QDataStream& stream) const
 {
-	stream << settings() << stimindex();
+	stream << stimindex() << settings();
 	return stream;
 }
 
@@ -423,7 +444,7 @@ HStimulusSettingsEvent* HStimulusSettingsEvent::getEvent(QDataStream& stream, in
 {
 	Habit::StimulusSettings settings;
 	int stimid;
-	stream >> settings >> stimid;
+	stream >> stimid >> settings;
 	return new HStimulusSettingsEvent(settings, stimid, timestamp);
 }
 

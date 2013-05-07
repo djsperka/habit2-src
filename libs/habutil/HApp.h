@@ -13,6 +13,15 @@
 #include <QtGui/QMainWindow>
 #include "ui_habitapp.h"
 
+namespace Habit
+{
+	class ExperimentSettings;
+	class RunSettings;
+	class SubjectSettings;
+};
+
+class HEventLog;
+
 class HApp : public QMainWindow
 {
     Q_OBJECT
@@ -29,7 +38,6 @@ public:
 	
 private:
     Ui::HabitAppClass ui;
-	
 };
 
 #endif // HABITAPP_H

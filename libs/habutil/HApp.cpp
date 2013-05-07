@@ -19,6 +19,7 @@
 #include "viewexperimentresultform.h"
 #include "reliabilitiesform.h"
 #include "reliabilitysettings.h"
+#include "HResultsUtil.h"
 #include <QtGui/QMessageBox>
 #include <QtGui/QFileDialog>
 #include <QtCore/QTextStream>
@@ -114,16 +115,19 @@ void HApp::runSavedExperiment()
 		if (box.exec() == QMessageBox::Yes)
 		{
 			QString fileName = QFileDialog::getSaveFileName(this, tr("Save Experiment Result"),
-															"", tr("Experiment Result File (*.csv)"));
+															"", tr("Experiment Result File (*.hab)"));
 			if (!fileName.isNull() && !fileName.isEmpty())
 			{
-				log.saveToCSV(fileName);
+				saveExperimentResults(fileName, habitControlPanel.getExperimentSettings(),
+						runSettingsForm.getRunSettings(), runSettingsForm.getSubjectSettings(), log);
+				//log.saveToCSV(fileName);
 				//GUILib::ExperimentResultsForm resultForm(runSettingsForm.getSubjectSettings(), runSettingsForm.getRunSettings(), this);
 				//resultForm.exec();
 			}
 		}
     }
 }
+
 
 HApp::~HApp()
 {

@@ -33,6 +33,7 @@ public:
 	bool saveToCSV(QString& filename);
 };
 
+bool operator==(const HEventLog& log0, const HEventLog& log1);
 QDataStream& operator<< (QDataStream& stream, HEventLog log);
 QDataStream& operator>> (QDataStream& stream, HEventLog& log);
 

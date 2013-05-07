@@ -373,7 +373,7 @@ public:
 	const Habit::StimulusSettings& settings() const { return m_settings; };
 	int stimindex() const { return m_stimindex; };
 	QString eventInfo() const;
-
+	QString eventCSVAdditional() const;
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HStimulusSettingsEvent* getEvent(QDataStream& stream, int timestamp);
 
