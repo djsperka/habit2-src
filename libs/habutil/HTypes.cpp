@@ -269,3 +269,32 @@ const HDisplayType& getDisplayType(int number_value)
 		if (number_value == HDisplayType::A[i]->number()) result = HDisplayType::A[i];
 	return *result;
 };
+
+
+
+const HResultsType HResultsType::HResultsTypeUnknown(-1, "Unknown Results Type");
+const HResultsType HResultsType::HResultsTypeOriginalRun(0, "Original Run");
+const HResultsType HResultsType::HResultsTypeTestRun(1, "Test Run");
+const HResultsType HResultsType::HResultsTypeReliabilityRun(2, "Reliability Run");
+
+const HResultsType* HResultsType::A[3] =
+{
+	&HResultsType::HResultsTypeOriginalRun,
+	&HResultsType::HResultsTypeTestRun,
+	&HResultsType::HResultsTypeReliabilityRun
+};
+
+bool operator==(const HResultsType& lhs, const HResultsType& rhs)
+{
+	return (lhs.number() == rhs.number());
+}
+
+const HResultsType& getResultsType(int number_value)
+{
+	const HResultsType* result = &HResultsType::HResultsTypeUnknown;
+	for (unsigned int i=0; i<sizeof(HResultsType::A)/sizeof(HResultsType *) && result==&HResultsType::HResultsTypeUnknown; i++)
+		if (number_value == HResultsType::A[i]->number()) result = HResultsType::A[i];
+	return *result;
+};
+
+

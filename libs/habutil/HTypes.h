@@ -256,6 +256,28 @@ const HDisplayType& getDisplayType(int number_value);
 
 
 
+class HResultsType
+{
+public:
+	static const HResultsType HResultsTypeOriginalRun;
+	static const HResultsType HResultsTypeTestRun;
+	static const HResultsType HResultsTypeReliabilityRun;
+	static const HResultsType HResultsTypeUnknown;
+
+	static const HResultsType* A[3];
+
+	int number() const { return m_t; };
+	const QString& name() const { return m_s; };
+
+private:
+	explicit HResultsType(int t, const char* name): m_t(t), m_s(name) {};
+	int m_t;
+	const QString m_s;
+};
+
+bool operator==(const HResultsType& lhs, const HResultsType& rhs);
+const HResultsType& getResultsType(int number_value);
+
 #endif
 
 
