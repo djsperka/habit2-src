@@ -130,7 +130,10 @@ QDataStream& operator<<(QDataStream& stream, HEventLog log)
 	stream << log.size();
 	QListIterator<HEvent *> it(log);
 	while (it.hasNext())
-		stream << *it.next();
+	{
+		HEvent* event = it.next();
+		stream << *event;
+	}
 	return stream;
 }
 
@@ -140,7 +143,10 @@ QDataStream& operator>>(QDataStream& stream, HEventLog& log)
 	int n, i;
 	stream >> n;
 	for (i=0; i<n; i++)
-		log.append(HEvent::getEvent(stream));
+	{
+		HEvent* event = HEvent::getEvent(stream);
+		log.append(event);
+	}
 	return stream;
 }
 
