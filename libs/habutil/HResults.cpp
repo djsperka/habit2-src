@@ -18,7 +18,7 @@ HResults::HResults()
 {}
 
 HResults::HResults(HResults& r)
-: m_version("")
+: m_version(r.version())
 , m_originalFilename(r.originalFilename())
 , m_reliabilityFilename(r.reliabilityFilename())
 , m_pResultsType(&r.type())
@@ -62,6 +62,7 @@ HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings
 , m_pResultsType(&HResultsType::HResultsTypeReliabilityRun)
 , m_experimentSettings(es)
 , m_runSettings(rs)
+, m_reliabilitySettings(bs)
 , m_log(log)
 {};
 
@@ -126,6 +127,7 @@ HResults* HResults::load(const QString& filename)
 	Habit::ReliabilitySettings bs;
 	HEventLog log;
 	HResults* results = NULL;
+	log.clear();
 	if (file.open(QIODevice::ReadOnly))
 	{
 		QDataStream in(&file);
