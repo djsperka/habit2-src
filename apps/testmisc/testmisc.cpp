@@ -41,21 +41,21 @@ Habit::StimulusSettings TestHabutil::getSS()
 
 void TestHabutil::testEventLogRW()
 {
-	HEvent* eventPhaseStart = new HPhaseStartEvent(HPhaseType::PreTest, 12345);
-	HEvent* eventPhaseEnd = new HPhaseEndEvent(23456);
-	HEvent* eventTrialStart = new HTrialStartEvent(5, 8, 23459);
-	HEvent* eventTrialEnd = new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 9878);
-	HEvent* eventAGRequest = new HAGRequestEvent(3332);
-	HEvent* eventAGStart = new HAGStartEvent(2, 8888);
-	HEvent* eventStimRequest = new HStimRequestEvent(3, 8122);
-	HEvent* eventStimStart = new HStimStartEvent(1, 8234);
+	HPhaseStartEvent* eventPhaseStart = new HPhaseStartEvent(HPhaseType::PreTest, 12345);
+	HPhaseEndEvent* eventPhaseEnd = new HPhaseEndEvent(23456);
+	HTrialStartEvent* eventTrialStart = new HTrialStartEvent(5, 8, 23459);
+	HTrialEndEvent* eventTrialEnd = new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 9878);
+	HAGRequestEvent* eventAGRequest = new HAGRequestEvent(3332);
+	HAGStartEvent* eventAGStart = new HAGStartEvent(2, 8888);
+	HStimRequestEvent* eventStimRequest = new HStimRequestEvent(3, 8122);
+	HStimStartEvent* eventStimStart = new HStimStartEvent(1, 8234);
 	Habit::StimulusSettings ss(getSS());
-	HEvent* eventSS = new HStimulusSettingsEvent(ss, 5, 7654);
-	HEvent* eventAttention = new HAttentionEvent(3499);
-	HEvent* eventLook = new HLookEvent(HLook(LookLeft, 2377, 3499), 3500);
-	HEvent* eventLookTrans = new HLookTransEvent(NoneCenter, 6633);
-	HEvent* eventHabituationSuccess = new HHabituationSuccessEvent(8347);
-	HEvent* eventHabituationFailure = new HHabituationFailureEvent(8348);
+	HStimulusSettingsEvent* eventSS = new HStimulusSettingsEvent(ss, 5, 7654);
+	HAttentionEvent* eventAttention = new HAttentionEvent(3499);
+	HLookEvent* eventLook = new HLookEvent(HLook(LookLeft, 2377, 3499), 3500);
+	HLookTransEvent* eventLookTrans = new HLookTransEvent(NoneCenter, 6633);
+	HHabituationSuccessEvent* eventHabituationSuccess = new HHabituationSuccessEvent(8347);
+	HHabituationFailureEvent* eventHabituationFailure = new HHabituationFailureEvent(8348);
 
     QByteArray byteArray;
     QBuffer buffer(&byteArray);
@@ -126,23 +126,20 @@ void TestHabutil::testEventLogRW()
     QVERIFY(pHabituationFailure);
     buffer.close();
 
-//    qDebug() << eventPhaseStart->eventCSV();
- //   qDebug() << p_readFromBuffer->eventCSV();
-
-    QVERIFY(*eventPhaseStart == *pPhaseStart);
-    QVERIFY(*eventPhaseEnd == *pPhaseEnd);
-    QVERIFY(*eventTrialStart == *pTrialStart);
-    QVERIFY(*eventTrialEnd == *pTrialEnd);
-    QVERIFY(*eventAGRequest == *pAGRequest);
-    QVERIFY(*eventAGStart == *pAGStart);
-    QVERIFY(*eventStimRequest == *pStimRequest);
-    QVERIFY(*eventStimStart == *pStimStart);
-    QVERIFY(*eventSS == *pSS);
-    QVERIFY(*eventAttention == *pAttention);
-    QVERIFY(*eventLook == *pLook);
-    QVERIFY(*eventLookTrans == *pLookTrans);
-    QVERIFY(*eventHabituationSuccess == *pHabituationSuccess);
-    QVERIFY(*eventHabituationFailure == *pHabituationFailure);
+    QVERIFY(*eventPhaseStart == *static_cast<HPhaseStartEvent*>(pPhaseStart));
+    QVERIFY(*eventPhaseEnd == *static_cast<HPhaseEndEvent*>(pPhaseEnd));
+    QVERIFY(*eventTrialStart == *static_cast<HTrialStartEvent*>(pTrialStart));
+    QVERIFY(*eventTrialEnd == *static_cast<HTrialEndEvent*>(pTrialEnd));
+    QVERIFY(*eventAGRequest == *static_cast<HAGRequestEvent*>(pAGRequest));
+    QVERIFY(*eventAGStart == *static_cast<HAGStartEvent*>(pAGStart));
+    QVERIFY(*eventStimRequest == *static_cast<HStimRequestEvent*>(pStimRequest));
+    QVERIFY(*eventStimStart == *static_cast<HStimStartEvent*>(pStimStart));
+    QVERIFY(*eventSS == *static_cast<HStimulusSettingsEvent*>(pSS));
+    QVERIFY(*eventAttention == *static_cast<HAttentionEvent*>(pAttention));
+    QVERIFY(*eventLook == *static_cast<HLookEvent*>(pLook));
+    QVERIFY(*eventLookTrans == *static_cast<HLookTransEvent*>(pLookTrans));
+    QVERIFY(*eventHabituationSuccess == *static_cast<HHabituationSuccessEvent*>(pHabituationSuccess));
+    QVERIFY(*eventHabituationFailure == *static_cast<HHabituationFailureEvent*>(pHabituationFailure));
 
     HEventLog log;
     log.append(eventPhaseStart);
@@ -171,6 +168,41 @@ void TestHabutil::testEventLogRW()
     in2 >> log2;
     QVERIFY(log.size() == log2.size());
     QVERIFY(log == log2);
+
+	QListIterator<HEvent*> events(log);
+	events.toFront();
+	HPhaseStartEvent* e1 = static_cast<HPhaseStartEvent*>(events.next());
+	qDebug() << e1->eventCSV();
+	QVERIFY(*e1 == *eventPhaseStart);
+	HPhaseEndEvent* e2 = static_cast<HPhaseEndEvent*>(events.next());
+	QVERIFY(*e2 == *eventPhaseEnd);
+	QVERIFY(!(*e2 == *eventPhaseStart));
+	HTrialStartEvent* e3 = static_cast<HTrialStartEvent*>(events.next());
+	QVERIFY(*e3 == *eventTrialStart);
+	HTrialEndEvent* e4 = static_cast<HTrialEndEvent*>(events.next());
+	QVERIFY(*e4 == *eventTrialEnd);
+	HAGRequestEvent* e5 = static_cast<HAGRequestEvent*>(events.next());
+	QVERIFY(*e5 == *eventAGRequest);
+	HAGStartEvent* e6 = static_cast<HAGStartEvent*>(events.next());
+	QVERIFY(*e6 == *eventAGStart);
+	HStimRequestEvent* e7 = static_cast<HStimRequestEvent*>(events.next());
+	QVERIFY(*e7 == *eventStimRequest);
+	HStimStartEvent* e8 = static_cast<HStimStartEvent*>(events.next());
+	QVERIFY(*e8 == *eventStimStart);
+	HStimulusSettingsEvent* e9 = static_cast<HStimulusSettingsEvent*>(events.next());
+	QVERIFY(*e9 == *eventSS);
+	HAttentionEvent* e10 = static_cast<HAttentionEvent*>(events.next());
+	QVERIFY(*e10 == *eventAttention);
+	HLookEvent* e11 = static_cast<HLookEvent*>(events.next());
+	QVERIFY(*e11 == *eventLook);
+	HLookTransEvent* e12 = static_cast<HLookTransEvent*>(events.next());
+	QVERIFY(*e12 == *eventLookTrans);
+	HHabituationSuccessEvent* e13 = static_cast<HHabituationSuccessEvent*>(events.next());
+	QVERIFY(*e13 == *eventHabituationSuccess);
+	HHabituationFailureEvent* e14 = static_cast<HHabituationFailureEvent*>(events.next());
+	QVERIFY(*e14 == *eventHabituationFailure);
+
+
 }
 
 
