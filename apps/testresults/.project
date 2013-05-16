@@ -3,6 +3,7 @@
 	<name>testresults</name>
 	<comment></comment>
 	<projects>
+		<project>habutil</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
