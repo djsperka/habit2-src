@@ -26,9 +26,8 @@ QDataStream & Habit::operator >> (QDataStream& stream, Habit::SubjectSettings& s
 {
 	int id;
 	QString sname, condition, observer, cellNumber, comments;
-	bool b;
 	QDateTime bdate, tdate;
-	stream >> id >> sname >> bdate >> tdate >> condition >> observer >> cellNumber >> comments >> b;
+	stream >> id >> sname >> bdate >> tdate >> condition >> observer >> cellNumber >> comments;
 	settings.setId(id);
 	settings.setSubjectName(sname);
 	settings.setBirthDate(bdate);
