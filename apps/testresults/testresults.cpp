@@ -198,7 +198,7 @@ QTextEdit* createSummary(const HResults* results)
 			cursor.insertText(QString("%1").arg(iRepeatNumber), textFormat);
 			cell = table->cellAt(table->rows()-1, 3);
 			cursor = cell.firstCursorPosition();
-			cursor.insertText("TODO", textFormat);
+			cursor.insertText(ps->look().direction().name(), textFormat);
 			cell = table->cellAt(table->rows()-1, 4);
 			cursor = cell.firstCursorPosition();
 			cursor.insertText(QString("%1").arg(ps->look().lookMS()), textFormat);

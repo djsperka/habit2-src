@@ -52,8 +52,8 @@ void TestHabutil::testEventLogRW()
 	Habit::StimulusSettings ss(getSS());
 	HStimulusSettingsEvent* eventSS = new HStimulusSettingsEvent(ss, 5, 7654);
 	HAttentionEvent* eventAttention = new HAttentionEvent(3499);
-	HLookEvent* eventLook = new HLookEvent(HLook(LookLeft, 2377, 3499), 3500);
-	HLookTransEvent* eventLookTrans = new HLookTransEvent(NoneCenter, 6633);
+	HLookEvent* eventLook = new HLookEvent(HLook(HLookDirection::LookLeft, 2377, 3499), 3500);
+	HLookTransEvent* eventLookTrans = new HLookTransEvent(HLookTrans::NoneCenter, 6633);
 	HHabituationSuccessEvent* eventHabituationSuccess = new HHabituationSuccessEvent(8347);
 	HHabituationFailureEvent* eventHabituationFailure = new HHabituationFailureEvent(8348);
 
@@ -883,8 +883,8 @@ void TestHabutil::testEventLog()
 	elog.append(new HStimStartEvent(2, 5));
 	elog.append(new HStimStartEvent(3, 6));
 	elog.append(new HTrialStartEvent(1, 0, 10));
-	elog.append(new HLookEvent(HLook(LookLeft, 100, 1100), 1100));
-	elog.append(new HLookEvent(HLook(LookLeft, 2200, 3200), 3200));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 100, 1100), 1100));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 2200, 3200), 3200));
 	
 	// Phase log should still be empty as no trials have ended.
 	plog = elog.getPhaseLog(QString("PreTest"));
@@ -893,8 +893,8 @@ void TestHabutil::testEventLog()
 	QVERIFY(!fixedNCriteria.isPhaseComplete(plog, isHabituated));
 	QVERIFY(!totalLookingTimeCriteria.isPhaseComplete(plog, isHabituated));
 	
-	elog.append(new HLookEvent(HLook(LookLeft, 3300, 4300), 4300));
-	elog.append(new HLookEvent(HLook(LookLeft, 4400, 5400), 5400));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 3300, 4300), 4300));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 4400, 5400), 5400));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndFixedTimeout));
 
 	// Phase log should have 4000ms of looking, 1 trial
@@ -910,10 +910,10 @@ void TestHabutil::testEventLog()
 	elog.append(new HStimStartEvent(2, 7002));
 	elog.append(new HStimStartEvent(3, 7003));
 	elog.append(new HTrialStartEvent(2, 0, 7010));
-	elog.append(new HLookEvent(HLook(LookLeft, 10100, 11100), 11100));
-	elog.append(new HLookEvent(HLook(LookLeft, 12200, 13200), 13200));
-	elog.append(new HLookEvent(HLook(LookLeft, 13300, 14300), 14300));
-	elog.append(new HLookEvent(HLook(LookLeft, 14400, 15400), 15400));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 10100, 11100), 11100));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 12200, 13200), 13200));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 13300, 14300), 14300));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 14400, 15400), 15400));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndFixedTimeout));
 	
 	// Phase log should have 8000ms of looking, 2 trials
@@ -929,8 +929,8 @@ void TestHabutil::testEventLog()
 	elog.append(new HStimStartEvent(2, 17002));
 	elog.append(new HStimStartEvent(3, 17003));
 	elog.append(new HTrialStartEvent(3, 0, 17010));
-	elog.append(new HLookEvent(HLook(LookLeft, 17100, 18100), 18100));
-	elog.append(new HLookEvent(HLook(LookLeft, 18200, 19200), 19200));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 17100, 18100), 18100));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 18200, 19200), 19200));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndAbort));
 	
 	// Phase log should have 8000ms of looking, with just 2 trials.
@@ -947,10 +947,10 @@ void TestHabutil::testEventLog()
 	elog.append(new HStimStartEvent(2, 20002));
 	elog.append(new HStimStartEvent(3, 20003));
 	elog.append(new HTrialStartEvent(3, 1, 20010));
-	elog.append(new HLookEvent(HLook(LookLeft, 20100, 21100)));
-	elog.append(new HLookEvent(HLook(LookLeft, 22200, 23200)));
-	elog.append(new HLookEvent(HLook(LookLeft, 23300, 24300)));
-	elog.append(new HLookEvent(HLook(LookLeft, 24400, 25400)));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 20100, 21100)));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 22200, 23200)));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 23300, 24300)));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 24400, 25400)));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 25400));
 
 	plog = elog.getPhaseLog();
@@ -966,10 +966,10 @@ void TestHabutil::testEventLog()
 	elog.append(new HStimStartEvent(2, 30002));
 	elog.append(new HStimStartEvent(3, 30003));
 	elog.append(new HTrialStartEvent(4, 0, 30010));
-	elog.append(new HLookEvent(HLook(LookLeft, 30100, 31100)));
-	elog.append(new HLookEvent(HLook(LookLeft, 32200, 33200)));
-	elog.append(new HLookEvent(HLook(LookLeft, 33300, 34300)));
-	elog.append(new HLookEvent(HLook(LookLeft, 34400, 35400)));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 30100, 31100)));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 32200, 33200)));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 33300, 34300)));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 34400, 35400)));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 35401));
 	elog.append(new HPhaseEndEvent());
 
@@ -991,7 +991,7 @@ void TestHabutil::testEventLog()
 	elog.append(new HStimStartEvent(3, 100006));
 
 	elog.append(new HTrialStartEvent(1, 0, 100010));
-	elog.append(new HLookEvent(HLook(LookLeft, 101000, 102000), 102000));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 101000, 102000), 102000));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 102000));
 
 	plog = elog.getPhaseLog();
@@ -1004,7 +1004,7 @@ void TestHabutil::testEventLog()
 
 	
 	elog.append(new HTrialStartEvent(2, 0, 102000));
-	elog.append(new HLookEvent(HLook(LookLeft, 102000, 104000), 104000));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 102000, 104000), 104000));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 104000));
 
 	plog = elog.getPhaseLog();
@@ -1016,7 +1016,7 @@ void TestHabutil::testEventLog()
 	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog, isHabituated) && !isHabituated);
 	
 	elog.append(new HTrialStartEvent(3, 0, 104000));
-	elog.append(new HLookEvent(HLook(LookLeft, 104000, 107000), 107000));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 104000, 107000), 107000));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 107000));
 
 	plog = elog.getPhaseLog();
@@ -1028,7 +1028,7 @@ void TestHabutil::testEventLog()
 	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog, isHabituated) && !isHabituated);
 	
 	elog.append(new HTrialStartEvent(4, 0, 107000));
-	elog.append(new HLookEvent(HLook(LookLeft, 107000, 108000), 108000));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 107000, 108000), 108000));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 108000));
 
 	plog = elog.getPhaseLog();
@@ -1040,7 +1040,7 @@ void TestHabutil::testEventLog()
 	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog, isHabituated) && !isHabituated);
 	
 	elog.append(new HTrialStartEvent(5, 0, 108000));
-	elog.append(new HLookEvent(HLook(LookLeft, 108000, 110000), 110000));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 108000, 110000), 110000));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 110000));
 
 	plog = elog.getPhaseLog();
@@ -1052,7 +1052,7 @@ void TestHabutil::testEventLog()
 	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog, isHabituated) && !isHabituated);
 	
 	elog.append(new HTrialStartEvent(6, 0, 110000));
-	elog.append(new HLookEvent(HLook(LookLeft, 110000, 112000), 112000));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 110000, 112000), 112000));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 112000));
 
 	plog = elog.getPhaseLog();
@@ -1064,7 +1064,7 @@ void TestHabutil::testEventLog()
 	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog, isHabituated) && !isHabituated);
 	
 	elog.append(new HTrialStartEvent(7, 0, 111000));
-	elog.append(new HLookEvent(HLook(LookLeft, 111000, 112000), 112000));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 111000, 112000), 112000));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 112000));
 
 	plog = elog.getPhaseLog();
@@ -1076,7 +1076,7 @@ void TestHabutil::testEventLog()
 	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog, isHabituated) && !isHabituated);
 	
 	elog.append(new HTrialStartEvent(8, 0, 112000));
-	elog.append(new HLookEvent(HLook(LookLeft, 112000, 113000), 113000));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 112000, 113000), 113000));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 113000));
 
 	plog = elog.getPhaseLog();
@@ -1088,7 +1088,7 @@ void TestHabutil::testEventLog()
 	QVERIFY(!criteriaLongestNSliding.isPhaseComplete(plog, isHabituated) && !isHabituated);
 	
 	elog.append(new HTrialStartEvent(9, 0, 113000));
-	elog.append(new HLookEvent(HLook(LookLeft, 113000, 113500), 113500));
+	elog.append(new HLookEvent(HLook(HLookDirection::LookLeft, 113000, 113500), 113500));
 	elog.append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, 113500));
 
 	plog = elog.getPhaseLog();
