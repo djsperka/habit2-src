@@ -16,11 +16,13 @@
 
 namespace GUILib {
 
+#if 0
 const QString StimulusDisplayForm::MONITOR_DEFINED = "Monitor Defined";
 const QString StimulusDisplayForm::SINGLE_MOVABLE = "Single Movable";
 
 const QString StimulusDisplayForm::FULL_SCREEN = "Full Screen";
 const QString StimulusDisplayForm::ORIGINAL_SIZE = "Original Size";
+#endif
 
 StimulusDisplayForm::StimulusDisplayForm(const Habit::StimulusDisplayInfo& settings, QWidget* w)
 	: QWidget(w)
@@ -40,13 +42,23 @@ void StimulusDisplayForm::createComponents()
 	mainTitle_ = new QLabel(tr("Stimulus Display"));
 	presentationGroup_= new QGroupBox(tr("Presentation Style"));
 	presentationCombo_ = new QComboBox(presentationGroup_);
-	presentationCombo_->addItem(MONITOR_DEFINED);
-	presentationCombo_->addItem(SINGLE_MOVABLE);
+	qDebug() << "StimulusDisplayForm create presentation stylecombo " << sizeof(HPresentationStyle::A)/sizeof(HPresentationStyle*);
+	for (unsigned int i=0; i<sizeof(HPresentationStyle::A)/sizeof(HPresentationStyle*); i++)
+	{
+		const HPresentationStyle* ap = HPresentationStyle::A[i];
+		presentationCombo_->addItem(ap->label(), ap->number());
+		qDebug() << "Type combo item " << ap->label() << " " << ap->number();
+	}
 	displayGroup_ = new QGroupBox(tr("Display Type")); 
 	displayCombo_= new QComboBox(displayGroup_);
-	displayCombo_->addItem(FULL_SCREEN);
-	displayCombo_->addItem(ORIGINAL_SIZE);
-	
+	qDebug() << "StimulusDisplayForm create display type combo " << sizeof(HDisplayType::A)/sizeof(HDisplayType*);
+	for (unsigned int i=0; i<sizeof(HDisplayType::A)/sizeof(HDisplayType*); i++)
+	{
+		const HDisplayType* ap = HDisplayType::A[i];
+		displayCombo_->addItem(ap->label(), ap->number());
+		qDebug() << "Type combo item " << ap->label() << " " << ap->number();
+	}
+
 	displayCheck_ = new QCheckBox(tr("Maintain Original Aspect Ratio"));
 	colorGroup_ = new QGroupBox(tr("Background Color"));
 	colorButton_ = new QPushButton();
@@ -58,7 +70,7 @@ void StimulusDisplayForm::createComponents()
 
 void StimulusDisplayForm::onDisplayComboIndexChanged(const QString& index)
 {
-	displayCheck_->setEnabled(index == FULL_SCREEN);
+	displayCheck_->setEnabled(index == HDisplayType::HDisplayTypeFullScreen.name());
 }
 
 void StimulusDisplayForm::setLabelsFont()
@@ -127,8 +139,8 @@ void StimulusDisplayForm::onColorChooserClick() {
 }
 
 void StimulusDisplayForm::initialize() {
-	presentationCombo_->setCurrentIndex(settings_.getPresentationStyle());
-	displayCombo_->setCurrentIndex(settings_.getDisplayType());
+	presentationCombo_->setCurrentIndex(settings_.getPresentationStyle().number());
+	displayCombo_->setCurrentIndex(settings_.getDisplayType().number());
 	displayCheck_->setChecked(settings_.isOriginalAspectRatioMaintained());
 	QPalette p = colorButton_->palette();
 	p.setColor(QPalette::Button, settings_.getBackGroundColor());
@@ -141,10 +153,8 @@ void StimulusDisplayForm::initialize() {
 Habit::StimulusDisplayInfo StimulusDisplayForm::getConfigurationObject() {
 	Habit::StimulusDisplayInfo settings;
 	settings.setId(settings_.getId());
-	settings.setPresentationStyle(presentationCombo_->currentText() == MONITOR_DEFINED ? Habit::StimulusDisplayInfo::eMonitorDefined 
-																					   : Habit::StimulusDisplayInfo::eSingleMovable);
-	settings.setDisplayType(displayCombo_->currentText() == FULL_SCREEN ? Habit::StimulusDisplayInfo::eFullScreen 
-																		: Habit::StimulusDisplayInfo::eOriginalSize);
+	settings.setPresentationStyle(getPresentationStyle(presentationCombo_->currentIndex()));
+	settings.setDisplayType(getDisplayType(displayCombo_->currentIndex()));
 	settings.setMaintainOriginalAspectRatio(displayCheck_->isChecked());
 	settings.setBackGroundColor(colorButton_->palette().color(QPalette::Button));
 	return settings;

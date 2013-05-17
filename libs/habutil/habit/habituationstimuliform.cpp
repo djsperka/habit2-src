@@ -144,7 +144,6 @@ void HabituationStimuliForm::doLayout()
 void HabituationStimuliForm::initialize()
 {
 	stimuliSettingsTable_->initializeTable(settings_); 
-
 }
 
 Habit::StimuliSettings HabituationStimuliForm::getConfigurationObject()

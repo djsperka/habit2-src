@@ -38,7 +38,7 @@ void Habit::StimulusSettings::setId(int id) {
 	id_ = id;
 }
 
-QString Habit::StimulusSettings::getName() const 
+const QString& Habit::StimulusSettings::getName() const
 {
     return name_;
 }
@@ -170,16 +170,13 @@ void StimulusSettings::setContext(const HStimContext& context)
 
 QDataStream & Habit::operator<< (QDataStream& stream, StimulusSettings settings)
 {
-	stream << settings.getId();
-	stream << settings.getName();
-	stream << settings.isLeftEnabled();
-	stream << settings.isCenterEnabled();
-	stream << settings.isRightEnabled();
-	stream << settings.isIndependentSoundEnabled();
-	stream << settings.getLeftStimulusInfo();
-	stream << settings.getCenterStimulusInfo();
-	stream << settings.getRightStimulusInfo();
-	stream << settings.getIndependentSoundInfo();
+	stream << settings.getId() << settings.getName() <<
+			settings.isLeftEnabled() << settings.isCenterEnabled() << settings.isRightEnabled() << settings.isIndependentSoundEnabled() <<
+			settings.getLeftStimulusInfo() <<
+			settings.getCenterStimulusInfo() <<
+			settings.getRightStimulusInfo() <<
+			settings.getIndependentSoundInfo() <<
+			settings.getContext()->number();
 	return stream;
 }
 
@@ -195,18 +192,9 @@ QDataStream & Habit::operator>> (QDataStream& stream, StimulusSettings& settings
 	StimulusInfo centerStimulusInfo;
 	StimulusInfo rightStimulusInfo;
 	StimulusInfo independentSoundInfo;
-	int stimulusType;
-	stream >> id;
-	stream >> name;
-	stream >> isLeftEnabled;
-	stream >> isCenterEnabled;
-	stream >> isRightEnabled;
-	stream >> isIndependentSoundEnabled;
-	stream >> leftStimulusInfo;
-	stream >> centerStimulusInfo;
-	stream >> rightStimulusInfo;
-	stream >> independentSoundInfo;
-	stream >> stimulusType;
+	int icontext;
+	stream >> id >> name >> isLeftEnabled >> isCenterEnabled >> isRightEnabled >> isIndependentSoundEnabled >>
+			leftStimulusInfo >> centerStimulusInfo >> rightStimulusInfo >> independentSoundInfo >> icontext;
 	settings.setId(id);
 	settings.setName(name);
 	settings.setLeftEnabled(isLeftEnabled);
@@ -217,7 +205,7 @@ QDataStream & Habit::operator>> (QDataStream& stream, StimulusSettings& settings
 	settings.setCenterStimulusInfo(centerStimulusInfo);
 	settings.setRightStimulusInfo(rightStimulusInfo);
 	settings.setIndependentSoundInfo(independentSoundInfo);
-//	settings.setStimulusType(stimulusType);
+	settings.setContext(getStimContext(icontext));
 	return stream;
 
 }
@@ -268,7 +256,7 @@ bool Habit::operator==(const Habit::StimulusSettings& lhs, const Habit::Stimulus
 		bsound = (lhs.isIndependentSoundEnabled_ == rhs.isIndependentSoundEnabled_);
 	
 	bother = (lhs.id_ == rhs.id_ &&	lhs.name_ == rhs.name_ && *lhs.getContext() == *rhs.getContext());
-	
+
 	return bleft && bcenter && bright && bsound && bother;
 }
 

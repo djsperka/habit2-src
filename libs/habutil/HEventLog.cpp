@@ -13,8 +13,8 @@
 
 HEventLog::~HEventLog()
 {
-	while (!isEmpty())
-		delete takeFirst();
+//	while (!isEmpty())
+//		delete takeFirst();
 };
 
 HPhaseLog HEventLog::getPhaseLog(QString phase)
@@ -122,5 +122,52 @@ bool HEventLog::saveToCSV(QString& filename)
 		file.close();
 		b = true;
 	}					
+	return b;
+}
+
+QDataStream& operator<<(QDataStream& stream, HEventLog log)
+{
+	stream << log.size();
+	QListIterator<HEvent *> it(log);
+	while (it.hasNext())
+	{
+		HEvent* event = it.next();
+		stream << *event;
+	}
+	return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, HEventLog& log)
+{
+	// TODO: Should operator>> first clear() the log?
+	int n, i;
+	stream >> n;
+	for (i=0; i<n; i++)
+	{
+		HEvent* event = HEvent::getEvent(stream);
+		log.append(event);
+	}
+	return stream;
+}
+
+bool operator==(const HEventLog& log0, const HEventLog& log1)
+{
+	bool b = false;
+	if (log0.size() == log1.size())
+	{
+		QListIterator<HEvent *> it0(log0);
+		QListIterator<HEvent *> it1(log1);
+		b = true;
+		while (it0.hasNext() && it1.hasNext())
+		{
+			HEvent* e0 = it0.next();
+			HEvent* e1 = it1.next();
+			if (e0->eventCSV() != e1->eventCSV())
+			{
+				b = false;
+				break;
+			}
+		}
+	}
 	return b;
 }

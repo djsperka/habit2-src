@@ -6,6 +6,7 @@
 /// \brief Declaraction of class Habit::StimulusDisplayInfo
 
 #include <QtGui/QColor>
+#include "HTypes.h"
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -19,21 +20,12 @@ public:
     ~StimulusDisplayInfo();
 
 public:
-    enum PresentationStyle {
-        eMonitorDefined = 0,
-        eSingleMovable
-    };
-    enum DisplayType {
-        eFullScreen = 0,
-        eOriginalSize
-    };
-
 	int getId() const;
 	void setId(int id);
-    int getPresentationStyle() const;
-    void setPresentationStyle(int style);
-    int getDisplayType() const;
-    void setDisplayType(int displayType);
+    const HPresentationStyle& getPresentationStyle() const;
+    void setPresentationStyle(const HPresentationStyle& style);
+    const HDisplayType& getDisplayType() const;
+    void setDisplayType(const HDisplayType& type);
     bool isOriginalAspectRatioMaintained() const;
     void setMaintainOriginalAspectRatio(bool maintainOriginalaspectRatio);
     QColor getBackGroundColor() const;
@@ -43,11 +35,16 @@ public:
 
 private:
 	int id_;
-	int presentationStyle_;
-	int displayType_;
+	const HPresentationStyle* pstyle_;
+	const HDisplayType* pdtype_;
 	bool isOriginalAspectRatioMaintained_;
 	QColor backGroundColor_;
 };
+
+QDataStream & operator<< (QDataStream& stream, Habit::StimulusDisplayInfo d);
+QDataStream & operator>> (QDataStream& stream, Habit::StimulusDisplayInfo& d);
+bool operator==(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs);
+
 
 } //namespace Habit
 

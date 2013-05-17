@@ -9,7 +9,7 @@
 
 
 #include "HEvents.h"
-
+#include <QtDebug>
 
 /* 
  * Constants for event types and trial end types 
@@ -151,6 +151,115 @@ QString HEvent::eventCSVAdditional() const		// default behavior
 	return QString("");
 }
 
+QDataStream& operator<<(QDataStream& out, const HEvent& e)
+{
+	out << e.type().number() << e.timestamp();
+	e.putAdditional(out);
+	return out;
+}
+
+QDataStream& HEvent::putAdditional(QDataStream& stream) const
+{
+	return stream;
+}
+
+bool operator==(const HEvent& lhs, const HEvent& rhs)
+{
+#if 0
+	qDebug() << "lhs " << lhs.eventCSV();
+	qDebug() << "rhs " << rhs.eventCSV();
+	qDebug() << "test " << (lhs.eventCSV() == rhs.eventCSV());
+#endif
+	return (lhs.eventCSV() == rhs.eventCSV());
+}
+
+HEvent* HEvent::getEvent(QDataStream& stream)
+{
+	HEvent* pevent = NULL;
+	int n, ts;
+	stream >> n >> ts;
+	const HEventType& etype = getHEventType(n);
+	if (etype == HEventType::HEventPhaseStart)
+	{
+		pevent = HPhaseStartEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventPhaseEnd)
+	{
+		pevent = HPhaseEndEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventTrialStart)
+	{
+		pevent = HTrialStartEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventTrialEnd)
+	{
+		pevent = HTrialEndEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventAGRequest)
+	{
+		pevent = HAGRequestEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventAGStart)
+	{
+		pevent = HAGStartEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventStimRequest)
+	{
+		pevent = HStimRequestEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventStimStart)
+	{
+		pevent = HStimStartEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventStimulusSettings)
+	{
+		pevent = HStimulusSettingsEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventAttention)
+	{
+		pevent = HAttentionEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventLook)
+	{
+		pevent = HLookEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventLookTrans)
+	{
+		pevent = HLookTransEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HHabituationSuccess)
+	{
+		pevent = HHabituationSuccessEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HHabituationFailure)
+	{
+		pevent = HHabituationFailureEvent::getEvent(stream, ts);
+	}
+	else
+	{
+		// this is an error.
+
+	}
+	return pevent;
+}
+
+QDataStream& HPhaseStartEvent::putAdditional(QDataStream& stream) const
+{
+	stream << phasetype().number();
+	return stream;
+}
+
+HPhaseStartEvent* HPhaseStartEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int n;
+	stream >> n;
+	const HPhaseType& phasetype = getPhaseType(n);
+	return new HPhaseStartEvent(phasetype, timestamp);
+}
+
+
+
+
 QString HPhaseStartEvent::eventInfo() const 
 {
 	return phase();
@@ -166,6 +275,13 @@ QString HPhaseEndEvent::eventInfo() const
 	return QString("Phase ended");
 };
 
+HPhaseEndEvent* HPhaseEndEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HPhaseEndEvent(timestamp);
+}
+
+
 QString HTrialStartEvent::eventInfo() const 
 {
 	return QString("Trial %1 repeat %2").arg(trialnumber()).arg(repeatnumber());
@@ -175,6 +291,19 @@ QString HTrialStartEvent::eventCSVAdditional() const
 {
 	return QString("%1,%2").arg(trialnumber()).arg(repeatnumber());
 };
+
+QDataStream& HTrialStartEvent::putAdditional(QDataStream& stream) const
+{
+	stream << trialnumber() << repeatnumber();
+	return stream;
+}
+
+HTrialStartEvent* HTrialStartEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int trialnumber, repeatnumber;
+	stream >> trialnumber >> repeatnumber;
+	return new HTrialStartEvent(trialnumber, repeatnumber, timestamp);
+}
 
 QString HTrialEndEvent::eventInfo() const
 {
@@ -186,6 +315,21 @@ QString HTrialEndEvent::eventCSVAdditional() const
 	return endtype().name();
 };
 
+QDataStream& HTrialEndEvent::putAdditional(QDataStream& stream) const
+{
+	stream << endtype().number();
+	return stream;
+}
+
+HTrialEndEvent* HTrialEndEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int n;
+	stream >> n;
+	const HTrialEndType& endType = getHTrialEndType(n);
+	return new HTrialEndEvent(endType, timestamp);
+}
+
+
 QString HStimRequestEvent::eventInfo() const
 {
 	return QString("Request stim index %1").arg(m_stimindex);
@@ -195,6 +339,20 @@ QString HStimRequestEvent::eventCSVAdditional() const
 {
 	return QString("%1").arg(m_stimindex);
 };
+
+QDataStream& HStimRequestEvent::putAdditional(QDataStream& stream) const
+{
+	stream << stimindex();
+	return stream;
+}
+
+HStimRequestEvent* HStimRequestEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int stimid;
+	stream >> stimid;
+	return new HStimRequestEvent(stimid, timestamp);
+}
+
 
 QString HStimStartEvent::eventInfo() const
 {
@@ -206,6 +364,31 @@ QString HStimStartEvent::eventCSVAdditional() const
 	return QString("%1").arg(m_playerid);
 };
 
+QDataStream& HStimStartEvent::putAdditional(QDataStream& stream) const
+{
+	stream << playerid();
+	return stream;
+}
+
+HStimStartEvent* HStimStartEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int stimid;
+	stream >> stimid;
+	return new HStimStartEvent(stimid, timestamp);
+}
+
+
+QString HAGRequestEvent::eventInfo() const
+{
+	return QString("AG Request");
+}
+
+HAGRequestEvent* HAGRequestEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HAGRequestEvent(timestamp);
+}
+
 QString HAGStartEvent::eventInfo() const
 {
 	return QString("AG started on player %1").arg(m_playerid);
@@ -216,10 +399,54 @@ QString HAGStartEvent::eventCSVAdditional() const
 	return QString("%1").arg(m_playerid);
 };
 
+QDataStream& HAGStartEvent::putAdditional(QDataStream& stream) const
+{
+	stream << playerid();
+	return stream;
+}
+
+HAGStartEvent* HAGStartEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int id;
+	stream >> id;
+	return new HAGStartEvent(id, timestamp);
+}
+
+
 QString HStimulusSettingsEvent::eventInfo() const
 {
 	return QString("Stim index: %1  Name: %2").arg(m_stimindex, 2).arg(m_settings.getName());
 };
+
+QString HStimulusSettingsEvent::eventCSVAdditional() const
+{
+	const Habit::StimulusInfo& left = settings().getLeftStimulusInfo();
+	const Habit::StimulusInfo& center = settings().getCenterStimulusInfo();
+	const Habit::StimulusInfo& right = settings().getRightStimulusInfo();
+	const Habit::StimulusInfo& iss = settings().getIndependentSoundInfo();
+
+	return QString("%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,%21,%22,%23").
+			arg(stimindex()).arg(settings().getId()).arg(settings().getName()).arg(settings().isLeftEnabled()).
+			arg(settings().isCenterEnabled()).arg(settings().isRightEnabled()).arg(settings().isIndependentSoundEnabled()).
+			arg(left.getName()).arg(left.getFileName()).arg(left.isLoopPlayBack()).arg(left.getAudioBalance()).
+			arg(center.getName()).arg(center.getFileName()).arg(center.isLoopPlayBack()).arg(center.getAudioBalance()).
+			arg(right.getName()).arg(right.getFileName()).arg(right.isLoopPlayBack()).arg(right.getAudioBalance()).
+			arg(iss.getName()).arg(iss.getFileName()).arg(iss.isLoopPlayBack()).arg(iss.getAudioBalance());
+};
+
+QDataStream& HStimulusSettingsEvent::putAdditional(QDataStream& stream) const
+{
+	stream << stimindex() << settings();
+	return stream;
+}
+
+HStimulusSettingsEvent* HStimulusSettingsEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Habit::StimulusSettings settings;
+	int stimid;
+	stream >> stimid >> settings;
+	return new HStimulusSettingsEvent(settings, stimid, timestamp);
+}
 
 QString HStimulusInfoEvent::eventInfo() const
 {
@@ -231,6 +458,12 @@ QString HAttentionEvent::eventInfo() const
 	return QString("");
 };
 
+HAttentionEvent* HAttentionEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HAttentionEvent(timestamp);
+}
+
 QString HLookEvent::eventInfo() const
 {
 	QString s;
@@ -238,6 +471,20 @@ QString HLookEvent::eventInfo() const
 	tmp << m_look;
 	return s;
 };
+
+
+QDataStream& HLookEvent::putAdditional(QDataStream& stream) const
+{
+	stream << look();
+	return stream;
+}
+
+HLookEvent* HLookEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	HLook look;
+	stream >> look;
+	return new HLookEvent(look, timestamp);
+}
 
 QString HLookEvent::eventCSVAdditional() const
 {
@@ -263,14 +510,38 @@ QString HLookTransEvent::eventCSVAdditional() const
 	return s;
 };
 
+QDataStream& HLookTransEvent::putAdditional(QDataStream& stream) const
+{
+	stream << transtype();
+	return stream;
+}
+
+HLookTransEvent* HLookTransEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int type;
+	stream >> type;
+	return new HLookTransEvent((LookTransType)type, timestamp);
+}
+
 QString HHabituationSuccessEvent::eventInfo() const
 {
 	return QString("HabituationSuccess");
 };
+
+HHabituationSuccessEvent* HHabituationSuccessEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HHabituationSuccessEvent(timestamp);
+}
 
 QString HHabituationFailureEvent::eventInfo() const
 {
 	return QString("HabituationFailure");
 };
 
+HHabituationFailureEvent* HHabituationFailureEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HHabituationFailureEvent(timestamp);
+}
 

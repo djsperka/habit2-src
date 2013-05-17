@@ -82,3 +82,32 @@ bool Habit::MonitorSettings::saveToDB(size_t id_) {
 	Habit::MainDao dao;
 	return dao.addOrUpdateMonitorSetting(id_, this);
 }
+
+
+QDataStream& Habit::operator<< (QDataStream& stream, Habit::MonitorSettings settings)
+{
+	stream << settings.getId() << settings.getControlMonitorIndex() << settings.getLeftMonitorIndex() << settings.getCenterMonitorIndex() << settings.getRightMonitorIndex();
+	return stream;
+}
+
+QDataStream& Habit::operator>> (QDataStream& stream, Habit::MonitorSettings& settings)
+{
+	int id, control, left, center, right;
+	stream >> id >> control >> left >> center >> right;
+	settings.setId(id);
+	settings.setControlMonitorIndex(control);
+	settings.setLeftMonitorIndex(left);
+	settings.setCenterMonitorIndex(center);
+	settings.setRightMonitorIndex(right);
+	return stream;
+}
+
+bool Habit::operator==(const Habit::MonitorSettings& lhs, const Habit::MonitorSettings& rhs)
+{
+	return (lhs.getId() == rhs.getId() &&
+			lhs.getControlMonitorIndex() == rhs.getControlMonitorIndex() &&
+			lhs.getLeftMonitorIndex() == rhs.getLeftMonitorIndex() &&
+			lhs.getCenterMonitorIndex() == rhs.getCenterMonitorIndex() &&
+			lhs.getRightMonitorIndex() == rhs.getRightMonitorIndex());
+}
+

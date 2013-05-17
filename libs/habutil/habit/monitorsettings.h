@@ -3,6 +3,7 @@
 #define HABIT_MONITOR_SETTINGS_H
 
 #include <stdlib.h>
+#include <QDataStream>
 
 /// \file monitorsettings.h
 /// \brief Declaraction of class Habit::MonitorSettings
@@ -39,6 +40,11 @@ private:
 	int centerMonitorIndex_;
 	int rightMonitorIndex_;
 };
+
+QDataStream & operator<< (QDataStream& stream, MonitorSettings settings);
+QDataStream & operator>> (QDataStream& stream, MonitorSettings& settings);
+bool operator==(const Habit::MonitorSettings& lhs, const Habit::MonitorSettings& rhs);
+
 
 } //namespace Habit
 

@@ -2,20 +2,24 @@
 #include "designsettings.h"
 #include "trialsinfo.h"
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QGroupBox>
-#include <QtGui/QBoxLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QFont>
-#include <QtGui/QIntValidator>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QGroupBox>
+#include <QBoxLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QFont>
+#include <QIntValidator>
+#include <QDebug>
 
 namespace GUILib {
+
+#if 0
 const QString DesignSetupForm::SUBJECT_CONTROLLED = "Subject Controlled";
 const QString DesignSetupForm::FIXED_LENGTH = "Fixed Length";
+#endif
 
 DesignSetupForm::DesignSetupForm(const Habit::DesignSettings& settings, QWidget *w)
 	: QWidget(w)
@@ -45,14 +49,32 @@ void DesignSetupForm::createTrialType() {
 	trialHabituationGroup_ = new QGroupBox(tr("Habituation"));
 	trialTestGroup_ = new QGroupBox(tr("Test"));
 	pretestCombo_ = new QComboBox();
-	pretestCombo_->addItem(FIXED_LENGTH);
-	pretestCombo_->addItem(SUBJECT_CONTROLLED);
 	habituationCombo_ = new QComboBox();
-	habituationCombo_->addItem(FIXED_LENGTH);
-	habituationCombo_->addItem(SUBJECT_CONTROLLED);
 	testCombo_ = new QComboBox();
-	testCombo_->addItem(FIXED_LENGTH);
-	testCombo_->addItem(SUBJECT_CONTROLLED);
+
+	//HACK
+
+	qDebug() << "HaCK CRITERIONWindowType " << sizeof(HCriterionWindowType::A)/sizeof(HCriterionWindowType*);
+	for (unsigned int i=0; i<sizeof(HCriterionWindowType::A)/sizeof(HCriterionWindowType*); i++)
+	{
+		const HCriterionWindowType* ap = HCriterionWindowType::A[i];
+		qDebug() << "WType combo item " << ap->label() << " " << ap->number();
+	}
+
+
+	const HTrialCompletionType& testtype = HTrialCompletionType::HTrialCompletionSubjectControlled;
+	qDebug() << "testtype " << testtype.number() << " " << testtype.label() << " " << testtype.name();
+	//ENDHACK
+
+
+	for (unsigned int i=0; i<sizeof(HTrialCompletionType::A)/sizeof(HTrialCompletionType*); i++)
+	{
+		const HTrialCompletionType* ap = HTrialCompletionType::A[i];
+		qDebug() << "TrialType combo item " << ap->number() << " " << ap->label() << " " << ap->name();
+		pretestCombo_->addItem(ap->label(), ap->number());
+		habituationCombo_->addItem(ap->label(), ap->number());
+		testCombo_->addItem(ap->label(), ap->number());
+	}
 }
 
 void DesignSetupForm::createTrialLength() {
@@ -190,9 +212,9 @@ void DesignSetupForm::doNumberOfTrialsLayout() {
 }
 
 void DesignSetupForm::initialize() {
-	pretestCombo_->setCurrentIndex(settings_.getPretestTrialsInfo().getType());
-	habituationCombo_->setCurrentIndex(settings_.getHabituationTrialsInfo().getType());
-	testCombo_->setCurrentIndex(settings_.getTestTrialsInfo().getType());
+	pretestCombo_->setCurrentIndex(settings_.getPretestTrialsInfo().getTrialCompletionType().number());
+	habituationCombo_->setCurrentIndex(settings_.getHabituationTrialsInfo().getTrialCompletionType().number());
+	testCombo_->setCurrentIndex(settings_.getTestTrialsInfo().getTrialCompletionType().number());
 	pretestEdit_->setText(QString("%1").arg(settings_.getPretestTrialsInfo().getLength()));
 	habituationEdit_->setText(QString("%1").arg(settings_.getHabituationTrialsInfo().getLength()));
 	testEdit_->setText(QString("%1").arg(settings_.getTestTrialsInfo().getLength()));
@@ -208,17 +230,20 @@ Habit::DesignSettings DesignSetupForm::getConfigurationObject() {
 	Habit::DesignSettings ds;
 	ds.setId(settings_.getId());
 	Habit::TrialsInfo pretest;
-	pretest.setType(pretestCombo_->currentText() == SUBJECT_CONTROLLED ? Habit::TrialsInfo::eSubjectControlled : Habit::TrialsInfo::eFixedLength);
+	pretest.setTrialCompletionType(*HTrialCompletionType::A[pretestCombo_->currentIndex()]);
+	//pretest.setType(pretestCombo_->currentText() == SUBJECT_CONTROLLED ? Habit::TrialsInfo::eSubjectControlled : Habit::TrialsInfo::eFixedLength);
 	pretest.setLength(pretestEdit_->text().toUInt());
 	pretest.setLookTimes(minLookTimeEdit_->text().toUInt());
 	pretest.setNumberOfTrials(pretestTrialsEdit_->text().toUInt());
 	Habit::TrialsInfo habituation;
-	habituation.setType(habituationCombo_->currentText() == SUBJECT_CONTROLLED ? Habit::TrialsInfo::eSubjectControlled : Habit::TrialsInfo::eFixedLength);
+	habituation.setTrialCompletionType(*HTrialCompletionType::A[habituationCombo_->currentIndex()]);
+	//habituation.setType(habituationCombo_->currentText() == SUBJECT_CONTROLLED ? Habit::TrialsInfo::eSubjectControlled : Habit::TrialsInfo::eFixedLength);
 	habituation.setLength(habituationEdit_->text().toUInt());
 	habituation.setLookTimes(minLookAwayTimeEdit_->text().toUInt());
 	habituation.setNumberOfTrials(habituationTrialsEdit_->text().toUInt());
 	Habit::TrialsInfo test;
-	test.setType(testCombo_->currentText() == SUBJECT_CONTROLLED ? Habit::TrialsInfo::eSubjectControlled : Habit::TrialsInfo::eFixedLength);
+	test.setTrialCompletionType(*HTrialCompletionType::A[testCombo_->currentIndex()]);
+	//test.setType(testCombo_->currentText() == SUBJECT_CONTROLLED ? Habit::TrialsInfo::eSubjectControlled : Habit::TrialsInfo::eFixedLength);
 	test.setLength(testEdit_->text().toUInt());
 	test.setLookTimes(minNoLookTimeEdit_->text().toUInt());
 	test.setNumberOfTrials(testTrialsEdit_->text().toUInt());

@@ -7,6 +7,7 @@
 
 
 #include "HTypes.h"
+#include <QDataStream>
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -16,17 +17,6 @@ namespace Habit
 class CriterionSettings
 {
 public:
-#if 0
-    enum WindowType {
-        eFixedWindow = 0,
-        eSlidingWindow
-    };
-    enum Basis {
-        eFirstN = 0,    // Base criterion on first n trials
-        eLongestN       // Base criterion on longest n trials
-    };
-#endif
-
     CriterionSettings(const HCriterionBasisType& basis = HCriterionBasisType::HCriterionBasisFirstN, unsigned int percent=50, unsigned int windowSize=3, const HCriterionWindowType& windowType = HCriterionWindowType::HCriterionWindowFixed);
     ~CriterionSettings();
     //CriterionSettings& operator = (const CriterionSettings&);
@@ -43,11 +33,16 @@ public:
 
 private:
 	const HCriterionBasisType* pbasis_;
-	//int basis_;
 	unsigned int percent_;
 	unsigned int windowSize_;
 	const HCriterionWindowType* pwindowType_;
 };
+
+QDataStream & operator<< (QDataStream& stream, Habit::CriterionSettings d);
+QDataStream & operator>> (QDataStream& stream, Habit::CriterionSettings& d);
+bool operator==(const Habit::CriterionSettings& lhs, const Habit::CriterionSettings& rhs);
+
+
 
 } // namespace Habit
 

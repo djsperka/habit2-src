@@ -18,7 +18,6 @@ public:
 	StimulusInfo(const QString& name, const QString& filename, bool is_loop, float audio);
     StimulusInfo(const StimulusInfo& );
     ~StimulusInfo();
-    //StimulusInfo& operator = (const StimulusInfo&);
 
 public:
     QString getName() const;

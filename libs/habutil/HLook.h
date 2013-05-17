@@ -15,8 +15,8 @@
 #include <QTextStream>
 #include <QDebug>
 
-enum LookTransType { NoneLeft=0, LeftNone, NoneCenter, CenterNone, NoneRight, RightNone, NoneNone, UnknownLookTrans };
-enum LookDirection { NoLook=0, LookLeft, LookRight, LookCenter, UnknownLookDirection };
+enum LookTransType { UnknownLookTrans=-1, NoneLeft, LeftNone, NoneCenter, CenterNone, NoneRight, RightNone, NoneNone};
+enum LookDirection { UnknownLookDirection=-1, NoLook, LookLeft, LookRight, LookCenter};
 
 class HLook
 {
@@ -37,7 +37,8 @@ public:
 	int startMS() const { return m_startMS; };
 	int endMS() const { return m_endMS; };
 	int lookMS() const { return m_endMS - m_startMS; };
-	
+
+	// TODO These do not need to be friends. Use member functions!
 	friend QDataStream& operator<<(QDataStream& out, const HLook& l);
 	friend QDataStream& operator>>(QDataStream& out, HLook& l);
 	friend bool operator==(const HLook& lhs, const HLook& rhs);

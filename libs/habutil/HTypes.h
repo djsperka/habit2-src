@@ -11,7 +11,6 @@
 #define _HTYPES_H_
 
 #include <QString>
-#include <vector>
 
 class HPhaseType
 {
@@ -168,12 +167,116 @@ public:
 private:
 	explicit HCriterionBasisType(int t, const char* name, const char* label): m_t(t), m_s(name), m_l(label) {};
 	int m_t;
-	const QString& m_s;
-	const QString& m_l;
+	const QString m_s;
+	const QString m_l;
 };
 
 const HCriterionBasisType& getCriterionBasisType(int number_value);
 
+class HTrialCompletionType
+{
+public:
+	static const HTrialCompletionType HTrialCompletionUnknown;
+	static const HTrialCompletionType HTrialCompletionFixedLength;
+	static const HTrialCompletionType HTrialCompletionSubjectControlled;
+
+	// The contents of this array are used to populate the radio buttons.
+	static const HTrialCompletionType* A[2];
+
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	const QString& label() const { return m_l; }
+
+private:
+	explicit HTrialCompletionType(int t, const char* name, const char* label): m_t(t), m_s(name), m_l(label) {};
+	int m_t;
+	const QString m_s;
+	const QString m_l;
+};
+
+bool operator==(const HTrialCompletionType& lhs, const HTrialCompletionType& rhs);
+
+const HTrialCompletionType& getTrialCompletionType(int number_value);
+
+
+
+//======
+
+
+
+class HPresentationStyle
+{
+public:
+	static const HPresentationStyle HPresentationStyleUnknown;
+	static const HPresentationStyle HPresentationStyleMonitorDefined;
+	static const HPresentationStyle HPresentationStyleSingleMovable;
+
+	// The contents of this array are used to populate the radio buttons.
+	static const HPresentationStyle* A[2];
+
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	const QString& label() const { return m_l; }
+
+private:
+	explicit HPresentationStyle(int t, const char* name, const char* label): m_t(t), m_s(name), m_l(label) {};
+	int m_t;
+	const QString m_s;
+	const QString m_l;
+};
+
+bool operator==(const HPresentationStyle& lhs, const HPresentationStyle& rhs);
+
+const HPresentationStyle& getPresentationStyle(int number_value);
+
+
+class HDisplayType
+{
+public:
+	static const HDisplayType HDisplayTypeUnknown;
+	static const HDisplayType HDisplayTypeFullScreen;
+	static const HDisplayType HDisplayTypeOriginalSize;
+
+	// The contents of this array are used to populate the radio buttons.
+	static const HDisplayType* A[2];
+
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	const QString& label() const { return m_l; }
+
+private:
+	explicit HDisplayType(int t, const char* name, const char* label): m_t(t), m_s(name), m_l(label) {};
+	int m_t;
+	const QString m_s;
+	const QString m_l;
+};
+
+bool operator==(const HDisplayType& lhs, const HDisplayType& rhs);
+const HDisplayType& getDisplayType(int number_value);
+
+
+
+class HResultsType
+{
+public:
+	static const HResultsType HResultsTypeOriginalRun;
+	static const HResultsType HResultsTypeTestRun;
+	static const HResultsType HResultsTypeReliabilityRun;
+	static const HResultsType HResultsTypeUnknown;
+
+	static const HResultsType* A[3];
+
+	int number() const { return m_t; };
+	const QString& name() const { return m_s; };
+
+private:
+	explicit HResultsType(int t, const char* name): m_t(t), m_s(name) {};
+	int m_t;
+	const QString m_s;
+};
+
+bool operator==(const HResultsType& lhs, const HResultsType& rhs);
+const HResultsType& getResultsType(int number_value);
 
 #endif
 

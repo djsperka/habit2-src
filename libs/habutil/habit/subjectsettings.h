@@ -2,8 +2,9 @@
 #ifndef HABIT_SUBJECT_SETTINGS_H
 #define HABIT_SUBJECT_SETTINGS_H
 
-#include <QtCore/QString>
-#include <QtCore/QDateTime>
+#include <QString>
+#include <QDateTime>
+#include <QDataStream>
 
 namespace Habit {
 
@@ -31,7 +32,6 @@ public:
 	QString getComments() const;
 	void setComments(const QString& s);
 	bool isOk();
-	bool isNameChanged();
 
 private:
 	int id_;
@@ -42,8 +42,11 @@ private:
 	QString observer_;
 	QString cellNumber_;
 	QString comments_;
-	bool isNameChanged_;
 };
+
+QDataStream & operator << (QDataStream& stream, SubjectSettings settings);
+QDataStream & operator >> (QDataStream& stream, SubjectSettings& settings);
+bool operator==(const SubjectSettings& lhs, const SubjectSettings& rhs);
 
 
 } // namespace Habit

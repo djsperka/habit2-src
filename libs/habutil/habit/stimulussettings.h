@@ -6,16 +6,11 @@
 /// \brief Declaraction of class Habit::StimulusSettings
 
 #include "stimulusinfo.h"
-#include "stimulussettings.h"
 #include "HTypes.h"
-#include <QtCore/QString>
-#include <QtCore/QDataStream>
+#include <QString>
+#include <QDataStream>
 #include <QList>
-#include <QPair>
 
-
-
-/// Common namespace for all entities of the Habit
 namespace Habit {
 	   
 	/// Stores stimuli settings for a trial.
@@ -29,7 +24,7 @@ namespace Habit {
 	public:
 		int getId() const;
 		void setId(int id);
-		QString getName() const;
+		const QString& getName() const;
 		void setName(const QString& name);
 		bool isLeftEnabled() const;
 		void setLeftEnabled(bool isLeftEnabled);
@@ -72,10 +67,14 @@ namespace Habit {
 	QDataStream & operator<< (QDataStream& stream, StimulusSettings settings);
 	QDataStream & operator>> (QDataStream& stream, StimulusSettings& settings);
 	bool operator==(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
-	
-	typedef QList<QPair<int, StimulusSettings> > StimulusSettingsList;
 
-	
+	typedef QList<StimulusSettings> StimulusSettingsList;
+	typedef QList<StimulusSettings>::iterator StimulusSettingsListIterator;
+	typedef QList<StimulusSettings>::const_iterator StimulusSettingsListConstIterator;
+	typedef QList<QPair<int, StimulusSettings> > IdStimulusSettingsPairList;
+	typedef QMap<int, StimulusSettings> StimulusSettingsMap;
+	typedef QMap<QString, StimulusSettings> StimulusSettingsNameMap;
+	typedef QMap<QString, StimulusSettings>::iterator StimulusSettingsNameMapIterator;
 	QDebug operator<<(QDebug dbg, const StimulusSettings& ss);
 	
 

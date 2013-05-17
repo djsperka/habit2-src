@@ -18,7 +18,8 @@ namespace Habit
 	class StimuliSettings
 	{
 	public:
-		typedef QVector<Habit::StimulusSettings> stimulus_container;
+		// djs The preferred way of storing a list of StimulusSettings is StimulusSettingsList (see stimulussettings.h)
+		//typedef QVector<Habit::StimulusSettings> stimulus_container;
 
 	public:
 		StimuliSettings(const HStimContext& context);
@@ -26,18 +27,22 @@ namespace Habit
 
 	public:
 		const HStimContext& getStimContext() const;
-		stimulus_container getStimuli() const;
-		void setStimuli(const stimulus_container& basis);
+		void setStimContext(const HStimContext& context);
+		StimulusSettingsList getStimuli() const;
+		void setStimuli(const StimulusSettingsList& basis);
 		void addStimuli(const StimulusSettings& settings);
 		void loadFromDB(int experimentId);
 		bool saveToDB(size_t id_);
 
 	private:
-		stimulus_container stimuliSettings_;
+		StimulusSettingsList ssList_;
 		const HStimContext* pcontext_;
 	};
 
 	QDebug operator<<(QDebug dbg, const StimuliSettings& ss);
+	QDataStream & operator<< (QDataStream& stream, StimuliSettings settings);
+	QDataStream & operator>> (QDataStream& stream, StimuliSettings& settings);
+	bool operator==(const Habit::StimuliSettings&lhs, const Habit::StimuliSettings& rhs);
 	
 } //namespace Habit
 

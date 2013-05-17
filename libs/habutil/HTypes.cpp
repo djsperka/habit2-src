@@ -31,38 +31,37 @@ bool operator==(const HPhaseType& lhs, const HPhaseType& rhs)
 	return lhs.number() == rhs.number();
 };
 
-
-const HLookTrans HLookTrans::UnknownLookTrans(0, "UnknownLookTrans");
-const HLookTrans HLookTrans::NoneLeft(1, "NoneLeft");
-const HLookTrans HLookTrans::LeftNone(2, "LeftNone");
-const HLookTrans HLookTrans::NoneCenter(3, "NoneCenter");
-const HLookTrans HLookTrans::CenterNone(4, "CenterNone");
-const HLookTrans HLookTrans::NoneRight(5, "NoneRight");
-const HLookTrans HLookTrans::RightNone(6, "RightNone");
-const HLookTrans HLookTrans::NoneNone(7, "NoneNone");
+const HLookTrans HLookTrans::UnknownLookTrans(-1, "UnknownLookTrans");
+const HLookTrans HLookTrans::NoneLeft(0, "NoneLeft");
+const HLookTrans HLookTrans::LeftNone(1, "LeftNone");
+const HLookTrans HLookTrans::NoneCenter(2, "NoneCenter");
+const HLookTrans HLookTrans::CenterNone(3, "CenterNone");
+const HLookTrans HLookTrans::NoneRight(4, "NoneRight");
+const HLookTrans HLookTrans::RightNone(5, "RightNone");
+const HLookTrans HLookTrans::NoneNone(6, "NoneNone");
 
 const HLookTrans& getLookTransType(int i)
 {
 	switch(i)
 	{
-		case 0: return HLookTrans::UnknownLookTrans; break;
-		case 1: return HLookTrans::NoneLeft; break;
-		case 2: return HLookTrans::LeftNone; break;
-		case 3: return HLookTrans::NoneCenter; break;
-		case 4: return HLookTrans::CenterNone; break;
-		case 5: return HLookTrans::NoneRight; break;
-		case 6: return HLookTrans::RightNone; break;
-		case 7: return HLookTrans::NoneNone; break;
+		case -1: return HLookTrans::UnknownLookTrans; break;
+		case 0: return HLookTrans::NoneLeft; break;
+		case 1: return HLookTrans::LeftNone; break;
+		case 2: return HLookTrans::NoneCenter; break;
+		case 3: return HLookTrans::CenterNone; break;
+		case 4: return HLookTrans::NoneRight; break;
+		case 5: return HLookTrans::RightNone; break;
+		case 6: return HLookTrans::NoneNone; break;
 		default: return HLookTrans::UnknownLookTrans; break;
 	}
 	return HLookTrans::UnknownLookTrans;
 };
 
-const HLookDirection HLookDirection::UnknownLookDirection(0, "UnknownLookDirection");
-const HLookDirection HLookDirection::NoLook(1, "NoLook");
-const HLookDirection HLookDirection::LookLeft(2, "LookLeft");
-const HLookDirection HLookDirection::LookRight(3, "LookRight");
-const HLookDirection HLookDirection::LookCenter(4, "LookCenter");
+const HLookDirection HLookDirection::UnknownLookDirection(-1, "UnknownLookDirection");
+const HLookDirection HLookDirection::NoLook(0, "NoLook");
+const HLookDirection HLookDirection::LookLeft(1, "LookLeft");
+const HLookDirection HLookDirection::LookRight(2, "LookRight");
+const HLookDirection HLookDirection::LookCenter(3, "LookCenter");
 
 const HLookDirection& getLookDirection(int i)
 {
@@ -194,3 +193,108 @@ const HCriterionBasisType& getCriterionBasisType(int number_value)
 		if (number_value == HCriterionBasisType::A[i]->number()) result = HCriterionBasisType::A[i];
 	return *result;
 }
+
+
+const HTrialCompletionType HTrialCompletionType::HTrialCompletionUnknown(-1, "TrialCompletionUnknown", "Unknown");
+const HTrialCompletionType HTrialCompletionType::HTrialCompletionFixedLength(0, "TrialCompletionFixedLength", "Fixed Length");
+const HTrialCompletionType HTrialCompletionType::HTrialCompletionSubjectControlled(1, "TrialCompletionSubjectControlled", "Subject Controlled");
+
+// The contents of this array are used to populate the radio buttons.
+const HTrialCompletionType* HTrialCompletionType::A[2] =
+{
+	&HTrialCompletionType::HTrialCompletionFixedLength,
+	&HTrialCompletionType::HTrialCompletionSubjectControlled
+};
+
+bool operator==(const HTrialCompletionType& lhs, const HTrialCompletionType& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HTrialCompletionType& getTrialCompletionType(int number_value)
+{
+	const HTrialCompletionType* result = &HTrialCompletionType::HTrialCompletionUnknown;
+	for (unsigned int i=0; i<sizeof(HTrialCompletionType::A)/sizeof(HTrialCompletionType*) && result==&HTrialCompletionType::HTrialCompletionUnknown; i++)
+		if (number_value == HTrialCompletionType::A[i]->number()) result = HTrialCompletionType::A[i];
+	return *result;
+};
+
+
+
+const HPresentationStyle HPresentationStyle::HPresentationStyleUnknown(-1, "PresentationStyleUnknown", "Unknown");
+const HPresentationStyle HPresentationStyle::HPresentationStyleMonitorDefined(0, "PresentationStyleMonitorDefined", "Monitor Defined");
+const HPresentationStyle HPresentationStyle::HPresentationStyleSingleMovable(1, "PresentationStyleSingleMovable", "Single Movable");
+
+// The contents of this array are used to populate the radio buttons.
+const HPresentationStyle* HPresentationStyle::A[2] =
+{
+	&HPresentationStyle::HPresentationStyleMonitorDefined,
+	&HPresentationStyle::HPresentationStyleSingleMovable
+};
+
+bool operator==(const HPresentationStyle& lhs, const HPresentationStyle& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HPresentationStyle& getPresentationStyle(int number_value)
+{
+	const HPresentationStyle* result = &HPresentationStyle::HPresentationStyleUnknown;
+	for (unsigned int i=0; i<sizeof(HPresentationStyle::A)/sizeof(HPresentationStyle*) && result==&HPresentationStyle::HPresentationStyleUnknown; i++)
+		if (number_value == HPresentationStyle::A[i]->number()) result = HPresentationStyle::A[i];
+	return *result;
+};
+
+
+const HDisplayType HDisplayType::HDisplayTypeUnknown(-1, "DisplayTypeUnknown", "Unknown");
+const HDisplayType HDisplayType::HDisplayTypeFullScreen(0, "DisplayTypeFullScreen", "Full Screen");
+const HDisplayType HDisplayType::HDisplayTypeOriginalSize(1, "DisplayTypeOriginalSize", "Original Size");
+
+// The contents of this array are used to populate the radio buttons.
+const HDisplayType* HDisplayType::A[2] =
+{
+	&HDisplayType::HDisplayTypeFullScreen,
+	&HDisplayType::HDisplayTypeOriginalSize
+};
+
+bool operator==(const HDisplayType& lhs, const HDisplayType& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HDisplayType& getDisplayType(int number_value)
+{
+	const HDisplayType* result = &HDisplayType::HDisplayTypeUnknown;
+	for (unsigned int i=0; i<sizeof(HDisplayType::A)/sizeof(HDisplayType*) && result==&HDisplayType::HDisplayTypeUnknown; i++)
+		if (number_value == HDisplayType::A[i]->number()) result = HDisplayType::A[i];
+	return *result;
+};
+
+
+
+const HResultsType HResultsType::HResultsTypeUnknown(-1, "Unknown Results Type");
+const HResultsType HResultsType::HResultsTypeOriginalRun(0, "Original Run");
+const HResultsType HResultsType::HResultsTypeTestRun(1, "Test Run");
+const HResultsType HResultsType::HResultsTypeReliabilityRun(2, "Reliability Run");
+
+const HResultsType* HResultsType::A[3] =
+{
+	&HResultsType::HResultsTypeOriginalRun,
+	&HResultsType::HResultsTypeTestRun,
+	&HResultsType::HResultsTypeReliabilityRun
+};
+
+bool operator==(const HResultsType& lhs, const HResultsType& rhs)
+{
+	return (lhs.number() == rhs.number());
+}
+
+const HResultsType& getResultsType(int number_value)
+{
+	const HResultsType* result = &HResultsType::HResultsTypeUnknown;
+	for (unsigned int i=0; i<sizeof(HResultsType::A)/sizeof(HResultsType *) && result==&HResultsType::HResultsTypeUnknown; i++)
+		if (number_value == HResultsType::A[i]->number()) result = HResultsType::A[i];
+	return *result;
+};
+
+

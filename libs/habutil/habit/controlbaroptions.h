@@ -3,6 +3,7 @@
 #define HABIT_CONTROL_BAR_OPTIONS_H
 
 #include <stdlib.h>
+#include <QDataStream>
 
 /// \file controlbaroptions.h
 /// \brief Declaraction of class Habit::ControlBarOptions
@@ -38,6 +39,10 @@ private:
 	bool displayCurrentExperiment_;
 	bool displayCurrentStimulus_;
 };
+
+QDataStream & operator<< (QDataStream& stream, ControlBarOptions settings);
+QDataStream & operator>> (QDataStream& stream, ControlBarOptions& settings);
+bool operator==(const Habit::ControlBarOptions& lhs, const Habit::ControlBarOptions& rhs);
 
 } // namespace Habit
 

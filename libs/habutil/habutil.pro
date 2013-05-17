@@ -42,6 +42,8 @@ HEADERS +=	HLook.h \
 			HPhaseChildState.h \
 			HTrialChildState.h \
 			HTypes.h \
+			HResultsUtil.h \
+			HResults.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -126,6 +128,8 @@ SOURCES +=	HLook.cpp \
 			HPhaseChildState.cpp \
 			HTrialChildState.cpp \
 			HTypes.cpp \
+			HResultsUtil.cpp \
+			HResults.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \
