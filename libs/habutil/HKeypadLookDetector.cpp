@@ -67,7 +67,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 					{
 						if (isLookEnabled() && m_bUseLeft)
 						{
-							addTrans(NoneLeft, t);
+							addTrans(HLookTrans::NoneLeft, t);
 							bVal = true;
 						}
 						break;
@@ -76,7 +76,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 					{
 						if (isLookEnabled() && m_bUseCenter)
 						{
-							addTrans(NoneCenter, t);
+							addTrans(HLookTrans::NoneCenter, t);
 							bVal = true;
 						}
 						break;
@@ -85,7 +85,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 					{
 						if (isLookEnabled() && m_bUseRight)
 						{
-							addTrans(NoneRight, t);
+							addTrans(HLookTrans::NoneRight, t);
 							bVal = true;
 						}
 						break;
@@ -114,7 +114,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 				{
 					if (isLookEnabled() && m_bUseLeft)
 					{
-						addTrans(LeftNone, t);
+						addTrans(HLookTrans::LeftNone, t);
 						bVal = true;
 					}
 					break;
@@ -123,7 +123,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 				{
 					if (isLookEnabled() && m_bUseCenter)
 					{
-						addTrans(CenterNone, t);
+						addTrans(HLookTrans::CenterNone, t);
 						bVal = true;
 					}
 					break;
@@ -132,7 +132,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 				{
 					if (isLookEnabled() && m_bUseRight)
 					{
-						addTrans(RightNone, t);
+						addTrans(HLookTrans::RightNone, t);
 						bVal = true;
 					}
 					break;

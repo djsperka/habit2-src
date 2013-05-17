@@ -10,55 +10,64 @@
 
 #include "HLook.h"
 
-QTextStream& operator<<(QTextStream& out, const LookTransType& lt)
+QTextStream& operator<<(QTextStream& out, const HLookTrans& lt)
 {
-	switch (lt) {
-		case NoneLeft:
-			out << "NoneLeft";
-			break;
-		case LeftNone:
-			out << "LeftNone";
-			break;
-		case NoneCenter:
-			out << "NoneCenter";
-			break;
-		case CenterNone:
-			out << "CenterNone";
-			break;
-		case NoneRight:
-			out << "NoneRight";
-			break;
-		case RightNone:
-			out << "RightNone";
-			break;
-		case NoneNone:
-			out << "NoneNone";
-			break;
-		default:
-			out << "Unknown";
-			break;
+	if (lt == HLookTrans::NoneLeft)
+	{
+		out << "NoneLeft";
+	}
+	else if (lt == HLookTrans::LeftNone)
+	{
+		out << "LeftNone";
+	}
+	else if (lt == HLookTrans::NoneCenter)
+	{
+		out << "NoneCenter";
+	}
+	else if (lt == HLookTrans::CenterNone)
+	{
+		out << "CenterNone";
+	}
+	else if (lt == HLookTrans::NoneRight)
+	{
+		out << "NoneRight";
+	}
+	else if (lt == HLookTrans::RightNone)
+	{
+		out << "RightNone";
+	}
+	else if (lt == HLookTrans::NoneNone)
+	{
+		out << "NoneNone";
+	}
+	else
+	{
+		out << "Unknown";
 	}
 	return out;
 }
 
-QTextStream& operator<<(QTextStream& out, const LookDirection& direction)
+QTextStream& operator<<(QTextStream& out, const HLookDirection& direction)
 {
-	switch (direction) {
-		case NoLook:
-			out << "NoLook";
-			break;
-		case LookLeft:
-			out << "LookLeft";
-			break;
-		case LookRight:
-			out << "LookRight";
-			break;
-		case LookCenter:
-			out << "LookCenter";
-			break;
-		default:
-			out << "UnknownLookDirection";
-			break;
+	if (direction == HLookDirection::NoLook)
+	{
+		out << "NoLook";
+	}
+	else if (direction == HLookDirection::LookLeft)
+	{
+		out << "LookLeft";
+	}
+	else if (direction == HLookDirection::LookRight)
+	{
+		out << "LookRight";
+	}
+	else if (direction == HLookDirection::LookCenter)
+	{
+		out << "LookCenter";
+	}
+	else
+	{
+		out << "UnknownLookDirection";
 	}
 	return out;
 };
@@ -71,28 +80,28 @@ QTextStream& operator<<(QTextStream& out, const HLook& l)
 };
 
 
-
-
-QDataStream& operator<<(QDataStream& out, const LookTransType& lt)
-{
-	out << (qint32)lt;
-	return out;
-}
-
-QDataStream& operator<<(QDataStream& out, const LookDirection& direction)
-{
-	out << (qint32)direction;
-	return out;	
-}
-
 QDataStream& operator<<(QDataStream& out, const HLook& l)
 {
-	out << l.m_direction << l.m_startMS << l.m_endMS;
+	out << l.direction().number() << l.startMS() << l.endMS();
 	return out;
 };
 
+#if THESE_NO_LONGER_USED
+// THESE METHODS NOW HANDLED IN LOOK I/O
 
-QDataStream& operator>>(QDataStream& in, LookTransType& type)
+QDataStream& operator<<(QDataStream& out, const HLookTransType& lt)
+{
+	out << lt.number();
+	return out;
+}
+
+QDataStream& operator<<(QDataStream& out, const HLookDirection& direction)
+{
+	out << direction.number();
+	return out;	
+}
+
+QDataStream& operator>>(QDataStream& in, HLookTransType& type)
 {
 	in >> (qint32 &)type;
 	return in;
@@ -104,66 +113,80 @@ QDataStream& operator>>(QDataStream& in, LookDirection& direction)
 	in >> (qint32 &)direction;
 	return in;
 }
+#endif
 
 QDataStream& operator>>(QDataStream& in, HLook& l)
 {
-	in >> l.m_direction >> l.m_startMS >> l.m_endMS;
+	int d, t0, t1;
+	in >> d >> t0 >> t1;
+	l.setDirection(getLookDirection(d));
+	l.setStartMS(t0);
+	l.setEndMS(t1);
 	return in;
 }
 
 
 
 
-QDebug operator<<(QDebug dbg, const LookTransType& lt)
+QDebug operator<<(QDebug dbg, const HLookTrans& lt)
 {
-	switch (lt) {
-		case NoneLeft:
-			dbg.nospace() << "NoneLeft";
-			break;
-		case LeftNone:
-			dbg.nospace() << "LeftNone";
-			break;
-		case NoneCenter:
-			dbg.nospace() << "NoneCenter";
-			break;
-		case CenterNone:
-			dbg.nospace() << "CenterNone";
-			break;
-		case NoneRight:
-			dbg.nospace() << "NoneRight";
-			break;
-		case RightNone:
-			dbg.nospace() << "RightNone";
-			break;
-		case NoneNone:
-			dbg.nospace() << "NoneNone";
-			break;
-		default:
-			dbg.nospace() << "Unknown";
-			break;
+	if (lt == HLookTrans::NoneLeft)
+	{
+		dbg.nospace() << "NoneLeft";
+	}
+	else if (lt == HLookTrans::LeftNone)
+	{
+		dbg.nospace() << "LeftNone";
+	}
+	else if (lt == HLookTrans::NoneCenter)
+	{
+		dbg.nospace() << "NoneCenter";
+	}
+	else if (lt == HLookTrans::CenterNone)
+	{
+		dbg.nospace() << "CenterNone";
+	}
+	else if (lt == HLookTrans::NoneRight)
+	{
+		dbg.nospace() << "NoneRight";
+	}
+	else if (lt == HLookTrans::RightNone)
+	{
+		dbg.nospace() << "RightNone";
+	}
+	else if (lt == HLookTrans::NoneNone)
+	{
+		dbg.nospace() << "NoneNone";
+	}
+	else
+	{
+		dbg.nospace() << "Unknown";
 	}
 	return dbg.space();
 };
 
-QDebug operator<<(QDebug dbg, const LookDirection& direction)
+QDebug operator<<(QDebug dbg, const HLookDirection& direction)
 {
-	switch (direction) {
-		case NoLook:
-			dbg.nospace() << "NoLook";
-			break;
-		case LookLeft:
-			dbg.nospace() << "LookLeft";
-			break;
-		case LookRight:
-			dbg.nospace() << "LookRight";
-			break;
-		case LookCenter:
-			dbg.nospace() << "LookCenter";
-			break;
-		default:
-			dbg.nospace() << "UnknownLookDirection";
-			break;
-	}	
+	if (direction == HLookDirection::NoLook)
+	{
+		dbg.nospace() << "NoLook";
+	}
+	else if (direction == HLookDirection::LookLeft)
+	{
+		dbg.nospace() << "LookLeft";
+	}
+	else if (direction == HLookDirection::LookRight)
+	{
+		dbg.nospace() << "LookRight";
+	}
+	else if (direction == HLookDirection::LookCenter)
+	{
+		dbg.nospace() << "LookCenter";
+	}
+	else
+	{
+		dbg.nospace() << "UnknownLookDirection";
+	}
 	return dbg.space();
 }
 
@@ -175,7 +198,7 @@ QDebug operator<<(QDebug dbg, const HLook& l)
 
 bool operator==(const HLook& lhs, const HLook& rhs)
 {
-	return lhs.m_direction == rhs.m_direction && lhs.m_startMS == rhs.m_startMS && lhs.m_endMS == rhs.m_endMS;
+	return lhs.direction() == rhs.direction() && lhs.startMS() == rhs.startMS() && lhs.endMS() == rhs.endMS();
 }
 	
 

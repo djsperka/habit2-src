@@ -24,7 +24,7 @@ class HLooker : public QObject
 public:
 	HLooker(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log);
 	~HLooker() {};
-	void addTrans(LookTransType type, int tMS);	
+	void addTrans(const HLookTrans& type, int tMS);
 	
 private:
 	int m_minLookTimeMS;
@@ -33,7 +33,7 @@ private:
 	bool m_bLive;
 	int m_indexAt;
 	bool m_bLookStarted;
-	LookDirection m_direction;
+	const HLookDirection* m_pdirectionPendingLook;
 	bool m_bLookAwayStarted;
 
 	QTimer *m_ptimer;
@@ -41,11 +41,11 @@ private:
 	int m_lookStartTimeMS;
 	int m_lookAwayStartIndex;
 	int m_lookAwayStartTimeMS;
-	QList< QPair<LookTransType, int> > m_transitions;
+	QList< QPair<const HLookTrans*, int> > m_transitions;
 	QList< HLook > m_looks;
 	
-	LookDirection directionTo(LookTransType type);
-	bool isTransToLook(LookTransType type);
+	const HLookDirection& directionTo(const HLookTrans& type);
+	bool isTransToLook(const HLookTrans& type);
 	void update();
 	
 private slots:

@@ -512,7 +512,7 @@ QString HLookTransEvent::eventCSVAdditional() const
 
 QDataStream& HLookTransEvent::putAdditional(QDataStream& stream) const
 {
-	stream << transtype();
+	stream << transtype().number();
 	return stream;
 }
 
@@ -520,7 +520,7 @@ HLookTransEvent* HLookTransEvent::getEvent(QDataStream& stream, int timestamp)
 {
 	int type;
 	stream >> type;
-	return new HLookTransEvent((LookTransType)type, timestamp);
+	return new HLookTransEvent(getLookTrans(type), timestamp);
 }
 
 QString HHabituationSuccessEvent::eventInfo() const

@@ -405,23 +405,26 @@ void HControlPanel::onAttention()
 void HControlPanel::onLook(HLook l)
 {
 	m_log.append(new HLookEvent(l, HElapsedTimer::elapsed()));
-	switch (l.direction())
+	if (l.direction() == HLookDirection::LookLeft)
 	{
-		case LookLeft:
-			m_labelLookStatusValue->setText("Look Left");
-			break;
-		case LookCenter:
-			m_labelLookStatusValue->setText("Look Center");
-			break;
-		case LookRight:
-			m_labelLookStatusValue->setText("Look Right");
-			break;
-		case NoLook:
-			m_labelLookStatusValue->setText("No Look");
-			break;
-		case UnknownLookDirection:
-			qWarning("HControlPanel::onLook: UnknownLookDirection");
-			break;
+		m_labelLookStatusValue->setText("Look Left");
+	}
+	else if (l.direction() == HLookDirection::LookCenter)
+	{
+		m_labelLookStatusValue->setText("Look Center");
+	}
+	else if (l.direction() == HLookDirection::LookRight)
+	{
+		m_labelLookStatusValue->setText("Look Right");
+	}
+	else if (l.direction() == HLookDirection::NoLook)
+	{
+		m_labelLookStatusValue->setText("No Look");
+	}
+	else
+	{
+		qWarning("HControlPanel::onLook: UnknownLookDirection");
+		m_labelLookStatusValue->setText("ERROR: Unknown dir");
 	}
 }
 			
