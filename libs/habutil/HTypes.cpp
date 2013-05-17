@@ -40,7 +40,7 @@ const HLookTrans HLookTrans::NoneRight(4, "NoneRight");
 const HLookTrans HLookTrans::RightNone(5, "RightNone");
 const HLookTrans HLookTrans::NoneNone(6, "NoneNone");
 
-const HLookTrans& getLookTransType(int i)
+const HLookTrans& getLookTrans(int i)
 {
 	switch(i)
 	{
@@ -67,17 +67,25 @@ const HLookDirection& getLookDirection(int i)
 {
 	switch (i)
 	{
-		case 0: return HLookDirection::UnknownLookDirection; break;
-		case 1: return HLookDirection::NoLook; break;
-		case 2: return HLookDirection::LookLeft; break;
-		case 3: return HLookDirection::LookRight; break;
-		case 4: return HLookDirection::LookCenter; break;
+		case -1: return HLookDirection::UnknownLookDirection; break;
+		case 0: return HLookDirection::NoLook; break;
+		case 1: return HLookDirection::LookLeft; break;
+		case 2: return HLookDirection::LookRight; break;
+		case 3: return HLookDirection::LookCenter; break;
 		default: return HLookDirection::UnknownLookDirection; break;
 	}
 	return HLookDirection::UnknownLookDirection;
 };
 
+bool operator==(const HLookDirection& lhs, const HLookDirection& rhs)
+{
+	return (lhs.number() == rhs.number());
+}
 
+bool operator==(const HLookTrans& lhs, const HLookTrans& rhs)
+{
+	return (lhs.number() == rhs.number());
+}
 
 const HStimContext HStimContext::UnknownContext(0, "UnknownContext");
 const HStimContext HStimContext::PreTestPhase(1, "PreTestStim");

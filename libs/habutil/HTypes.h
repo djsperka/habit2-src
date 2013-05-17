@@ -70,9 +70,10 @@ private:
 
 	
 const HPhaseType& getPhaseType(int i);
-const HLookTrans& getLookTransType(int i);
+const HLookTrans& getLookTrans(int i);
 const HLookDirection& getLookDirection(int i);
-
+bool operator==(const HLookDirection& lhs, const HLookDirection& rhs);
+bool operator==(const HLookTrans& lhs, const HLookTrans& rhs);
 
 // Stim context refers to when stim is to be played. 
 

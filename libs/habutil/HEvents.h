@@ -462,7 +462,7 @@ private:
 class HLookTransEvent: public HEvent
 {
 public:
-	HLookTransEvent(LookTransType lt = UnknownLookTrans, int timestamp=0)
+	HLookTransEvent(const HLookTrans& lt = HLookTrans::UnknownLookTrans, int timestamp=0)
 	: HEvent(HEventType::HEventLookTrans, timestamp)
 	, m_type(lt)
 	{};
@@ -474,7 +474,7 @@ public:
 	
 	virtual ~HLookTransEvent() {};
 	
-	const LookTransType& transtype() const { return m_type; };
+	const HLookTrans& transtype() const { return m_type; };
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
 
@@ -482,7 +482,7 @@ public:
 	static HLookTransEvent* getEvent(QDataStream& stream, int timestamp);
 
 private:
-	LookTransType m_type;
+	const HLookTrans& m_type;
 };
 
 class HHabituationSuccessEvent: public HEvent
