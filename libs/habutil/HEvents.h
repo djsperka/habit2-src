@@ -47,9 +47,10 @@ public:
 	static const HEventType HEventUndefined;
 	static const HEventType HHabituationSuccess;
 	static const HEventType HHabituationFailure;
+	static const HEventType HEventExperimentStarted;
 
 	// undefined event not in A[]
-	static const HEventType* A[17];
+	static const HEventType* A[18];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -525,6 +526,33 @@ public:
 	static HHabituationFailureEvent* getEvent(QDataStream& stream, int timestamp);
 
 private:
+};
+
+
+class HExperimentStartedEvent: public HEvent
+{
+public:
+	HExperimentStartedEvent(int offset, int timestamp)
+	: HEvent(HEventType::HEventExperimentStarted, timestamp)
+	, m_offset(offset)
+	{};
+
+	HExperimentStartedEvent(const HExperimentStartedEvent& e)
+	: HEvent(HEventType::HEventExperimentStarted, e.timestamp())
+	, m_offset(e.offset())
+	{};
+
+	virtual ~HExperimentStartedEvent() {};
+
+	QString eventInfo() const;
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HExperimentStartedEvent* getEvent(QDataStream& stream, int timestamp);
+	virtual QString eventCSVAdditional() const;
+
+	int offset() const { return m_offset; };
+
+private:
+	int m_offset;
 };
 
 

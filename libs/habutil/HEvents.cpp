@@ -32,10 +32,11 @@ const HEventType HEventType::HEventLook(13, "Look");
 const HEventType HEventType::HEventLookTrans(14, "LookTrans");
 const HEventType HEventType::HHabituationSuccess(15, "HabituationSuccess");
 const HEventType HEventType::HHabituationFailure(16, "HabituationFailure");
+const HEventType HEventType::HEventExperimentStarted(17, "ExperimentStarted");
 const HEventType HEventType::HEventUndefined(-1, "Undefined");
 
 // Note undefined event not in search array.
-const HEventType* HEventType::A[17] =
+const HEventType* HEventType::A[18] =
 {
 	&HEventType::HEventPhaseStart,
 	&HEventType::HEventPhaseEnd,
@@ -53,7 +54,8 @@ const HEventType* HEventType::A[17] =
 	&HEventType::HEventLook,
 	&HEventType::HEventLookTrans,
 	&HEventType::HHabituationSuccess,
-	&HEventType::HHabituationFailure
+	&HEventType::HHabituationFailure,
+	&HEventType::HEventExperimentStarted
 };
 	
 bool operator==(const HEventType& lhs, const HEventType& rhs)
@@ -545,3 +547,25 @@ HHabituationFailureEvent* HHabituationFailureEvent::getEvent(QDataStream& stream
 	return new HHabituationFailureEvent(timestamp);
 }
 
+QString HExperimentStartedEvent::eventInfo() const
+{
+	return QString("HExperimentStarted offset %1").arg(m_offset);
+}
+
+HExperimentStartedEvent* HExperimentStartedEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int offset;
+	stream >> offset;
+	return new HExperimentStartedEvent(offset, timestamp);
+}
+
+QDataStream& HExperimentStartedEvent::putAdditional(QDataStream& stream) const
+{
+	stream << offset();
+	return stream;
+}
+
+QString HExperimentStartedEvent::eventCSVAdditional() const
+{
+	return QString("%1").arg(offset());
+}
