@@ -22,13 +22,13 @@ namespace Habit
 
 class HEventLog;
 
-class HApp : public QMainWindow
+class HMainWindow : public QMainWindow
 {
     Q_OBJECT
 	
 public:
-    HApp(QWidget *parent = 0, Qt::WFlags flags = 0);
-    ~HApp();
+    HMainWindow(QWidget *parent = 0, Qt::WFlags flags = 0);
+    ~HMainWindow() {};
 	
 	public slots:
     void newExperiment();

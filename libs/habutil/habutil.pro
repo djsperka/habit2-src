@@ -28,7 +28,7 @@ HEADERS +=	HLook.h \
 			HImageWidget.h \
 			HMediaManager.h \
 			HControlPanel.h \
-			HApp.h \
+			HMainWindow.h \
 			HMediaManagerUtil.h \
 			HTrialGenerator.h \
 #			HOutputGenerator.h \
@@ -44,6 +44,9 @@ HEADERS +=	HLook.h \
 			HTypes.h \
 			HResultsUtil.h \
 			HResults.h \
+			HResultsWidget.h \
+			HResultsDialog.h \
+			HApplication.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -116,7 +119,7 @@ SOURCES +=	HLook.cpp \
 			HImageWidget.cpp \
 			HMediaManager.cpp \
 			HControlPanel.cpp \
-			HApp.cpp \
+			HMainWindow.cpp \
 			HMediaManagerUtil.cpp \
 			HTrialGenerator.cpp \
 #			HOutputGenerator.cpp \
@@ -130,6 +133,9 @@ SOURCES +=	HLook.cpp \
 			HTypes.cpp \
 			HResultsUtil.cpp \
 			HResults.cpp \
+			HResultsWidget.cpp \
+			HResultsDialog.cpp \
+			HApplication.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \

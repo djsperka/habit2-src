@@ -1,5 +1,5 @@
 /*
- *  HApp.cpp
+ *  HMainWindow.cpp
  *  habutil
  *
  *  Created by Oakes Lab on 9/11/12.
@@ -7,7 +7,7 @@
  *
  */
 
-#include "HApp.h"
+#include "HMainWindow.h"
 #include "HEventLog.h"
 #include "experimentsettingsform.h"
 #include "resultsvieweroptions.h"
@@ -19,7 +19,8 @@
 #include "viewexperimentresultform.h"
 #include "reliabilitiesform.h"
 #include "reliabilitysettings.h"
-#include "HResults.h"
+#include "HResultsDialog.h"
+#include "HResultsWidget.h"
 #include <QtGui/QMessageBox>
 #include <QtGui/QFileDialog>
 #include <QtCore/QTextStream>
@@ -28,30 +29,28 @@
 
 using namespace Habit;
 
-HApp::HApp(QWidget *parent, Qt::WFlags flags)
+HMainWindow::HMainWindow(QWidget *parent, Qt::WFlags flags)
 : QMainWindow(parent, flags)
 {
     ui.setupUi(this);
 	setWindowTitle(QString("%1 - %2").arg("Habit").arg(QCoreApplication::instance()->applicationVersion()));
 }
 
-void HApp::runReliability()
+void HMainWindow::runReliability()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Select Experient File"),
-													"", tr("Experient Result File (*.res)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select Results File"),
+													"", tr("Habit Results File (*.hab)"));
 	if (!fileName.isNull() && !fileName.isEmpty())
 	{
 		GUILib::ReliabilitiesForm form(this);
 		if (form.exec() == QDialog::Accepted)
 		{
 			HEventLog log;
-//			RunSettings runSettings = HOutputGenerator::instance()->getRunSettings();
-//			SubjectSettings subjectSettings = HOutputGenerator::instance()->getSubjectSettings();
 			
 			qWarning("RELIABILITY IS BROKEN AND, WELL, UNRELIABLE!");
 			RunSettings runSettings;
 			SubjectSettings subjectSettings;
-			HControlPanel habitControlPanel(log, subjectSettings, runSettings, this);
+			HControlPanel habitControlPanel(log, runSettings, this);
 			
 			if (habitControlPanel.exec() != QDialog::Accepted)
 				return;
@@ -69,12 +68,7 @@ void HApp::runReliability()
 					reliabilitySettings.setObserver(form.getObserver());
 					reliabilitySettings.setDate(form.getDate());
 					reliabilitySettings.setComment(form.getComment());
-//					HOutputGenerator::instance()->setSettingsFileName("Typed");
-//					HOutputGenerator::instance()->setResultsFileName(QFileInfo(fileName).fileName());
-//					HOutputGenerator::instance()->setResultsType("RELIABILITY RUN");
-//					HOutputGenerator::instance()->setReliabilitiesSettings(reliabilitySettings);
-//					
-//					HOutputGenerator::instance()->save(fileName);
+
 					GUILib::ExperimentResultsForm experForm(subjectSettings, runSettings, this);
 					experForm.exec();
 				}
@@ -83,7 +77,7 @@ void HApp::runReliability()
 	}
 }
 
-void HApp::newExperiment()
+void HMainWindow::newExperiment()
 {
     Habit::ExperimentSettings experimentSettings;
     GUILib::ExperimentSettingsForm experimentSettingsForm(experimentSettings, this);
@@ -92,22 +86,43 @@ void HApp::newExperiment()
     }
 }
 
-void HApp::runExperimentResults()
+void HMainWindow::runExperimentResults()
 {
-	ViewExperimentResultForm form(this);
-	form.exec();
+	QString filename = QFileDialog::getOpenFileName(NULL, "Open File", "~/Desktop", "Habit Results Files (*.hab)");
+	if (!filename.isNull())
+	{
+		HResults* results = HResults::load(filename);
+		if (!results)
+		{
+			QMessageBox msgBox;
+			msgBox.setText("Cannot load data.");
+			msgBox.exec();
+		}
+		else
+		{
+			HResultsDialog dialog(*results, NULL);
+			dialog.exec();
+			delete results;
+		}
+	}
 }
 
-
-void HApp::runSavedExperiment()
+void HMainWindow::runSavedExperiment()
 {
     GUILib::RunSettingsForm runSettingsForm(this/* runSettings*/);
 
 	if(runSettingsForm.exec() == QDialog::Accepted) {
 		HEventLog log;
-		HControlPanel habitControlPanel(log, runSettingsForm.getSubjectSettings(), runSettingsForm.getRunSettings(), this);
+		HControlPanel habitControlPanel(log, runSettingsForm.getRunSettings(), this);
 		if (habitControlPanel.exec() != QDialog::Accepted)
 			return;
+		HResults* results = new HResults(habitControlPanel.getExperimentSettings(), runSettingsForm.getRunSettings(),
+				runSettingsForm.getSubjectSettings(), log, QCoreApplication::instance()->applicationVersion());
+
+		// display results
+		HResultsDialog dialog(*results, this);
+		dialog.exec();
+
 		QMessageBox box;
 		box.setText("Save the results of this experiment?");
 		box.setWindowTitle("End of experiment");
@@ -118,9 +133,10 @@ void HApp::runSavedExperiment()
 															"", tr("Experiment Result File (*.hab)"));
 			if (!fileName.isNull() && !fileName.isEmpty())
 			{
-				if (!HResults::save(habitControlPanel.getExperimentSettings(), runSettingsForm.getRunSettings(),
-						runSettingsForm.getSubjectSettings(), log, fileName,
-						QCoreApplication::instance()->applicationVersion()))
+				if (!results->save(fileName))
+//				if (!HResults::save(habitControlPanel.getExperimentSettings(), runSettingsForm.getRunSettings(),
+//						runSettingsForm.getSubjectSettings(), log, fileName,
+//						QCoreApplication::instance()->applicationVersion()))
 				{
 					qCritical() << "Error - cannot save data to file " << fileName;
 				}
@@ -129,8 +145,3 @@ void HApp::runSavedExperiment()
     }
 }
 
-
-HApp::~HApp()
-{
-	
-}
