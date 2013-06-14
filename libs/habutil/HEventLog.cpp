@@ -105,7 +105,7 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 }
 
 
-bool HEventLog::saveToCSV(QString& filename)
+bool HEventLog::saveToCSV(QString& filename) const
 {
 	bool b = false;
 	QFile file(filename);

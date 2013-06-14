@@ -30,7 +30,7 @@ public:
 
 	HPhaseLog getPhaseLog(QString s = QString(""));
 	
-	bool saveToCSV(QString& filename);
+	bool saveToCSV(QString& filename) const;
 };
 
 bool operator==(const HEventLog& log0, const HEventLog& log1);
