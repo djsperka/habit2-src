@@ -21,8 +21,10 @@
 // The LookDetector is the only interface through which habit gets info on
 // looking behavior. The LookDetector has two types of 'looks' that it 
 // detects: attention looks and 'real looks'. Attention looks occur when the 
-// subject actually looks at a target (determined by the experimenter). 
-// 'Real' looks occur according to the rules laid out in the Habit documentation.
+// subject actually begins looking at a target (as determined by the experimenter).
+// An attention look is just a time, not a duration. 'Real' looks occur according
+// to the rules for lookaways, etc., controlled here by parameters in the
+// constructor. Real looks have a start and end time - a duration.
 //
 // Each type of look detection can be turned on and off. It is the responsibility 
 // of subclasses to implement the method of input to the Looker, e.g. keypad or 
