@@ -13,14 +13,14 @@
 
 HResults::HResults()
 : m_originalFilename("")
-, m_reliabilityFilename("")
+, m_filename("NOT_SAVED")
 , m_pResultsType(&HResultsType::HResultsTypeUnknown)
 {}
 
 HResults::HResults(HResults& r)
 : m_version(r.version())
 , m_originalFilename(r.originalFilename())
-, m_reliabilityFilename(r.reliabilityFilename())
+, m_filename(r.filename())
 , m_pResultsType(&r.type())
 , m_experimentSettings(r.experimentSettings())
 , m_runSettings(r.runSettings())
@@ -33,8 +33,8 @@ HResults::HResults(HResults& r)
 // This constructor used for ORIGINAL RUN. The filename is the results filename the settings and log are taken from.
 HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::SubjectSettings& ss, const HEventLog& log, const QString filename, const QString version)
 : m_version(version)
-, m_originalFilename(filename)
-, m_reliabilityFilename("")
+, m_originalFilename("NOT_SAVED")
+, m_filename(filename)
 , m_pResultsType(&HResultsType::HResultsTypeOriginalRun)
 , m_experimentSettings(es)
 , m_runSettings(rs)
@@ -45,8 +45,8 @@ HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings
 // This constructor used for TEST RUN. The filename is the results filename the settings and log are taken from.
 HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const HEventLog& log, const QString filename, const QString version)
 : m_version(version)
-, m_originalFilename(filename)
-, m_reliabilityFilename("")
+, m_originalFilename("")
+, m_filename(filename)
 , m_pResultsType(&HResultsType::HResultsTypeTestRun)
 , m_experimentSettings(es)
 , m_runSettings(rs)
@@ -55,10 +55,10 @@ HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings
 
 
 // This constructor used for RELIABILTY RUN
-HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::ReliabilitySettings& bs, const HEventLog& log, const QString origFilename, const QString& reliabilityFilename, const QString version)
+HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::ReliabilitySettings& bs, const HEventLog& log, const QString origFilename, const QString filename, const QString version)
 : m_version(version)
 , m_originalFilename(origFilename)
-, m_reliabilityFilename(reliabilityFilename)
+, m_filename(filename)
 , m_pResultsType(&HResultsType::HResultsTypeReliabilityRun)
 , m_experimentSettings(es)
 , m_runSettings(rs)
@@ -68,48 +68,34 @@ HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings
 
 HResults::~HResults() {};
 
-// Save ORIGINAL RUN
-bool HResults::save(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::SubjectSettings& ss, const HEventLog& log, const QString& filename, const QString& version)
+// Save
+bool HResults::save(const QString& filename) const
 {
 	bool b = false;
 	QFile file(filename);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
 	{
 		QDataStream out(&file);
-		out << version << HResultsType::HResultsTypeOriginalRun.number();
-		out << es << rs << ss << log;
+		out << version() << type().number();
 		b = true;
-	}
-	return b;
-}
-
-// Save TEST RUN
-bool HResults::save(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const HEventLog& log, const QString& filename, const QString& version)
-{
-	bool b = false;
-	QFile file(filename);
-	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-	{
-		QDataStream out(&file);
-		out << version << HResultsType::HResultsTypeTestRun.number();
-		out << es << rs << log;
-		b = true;
-	}
-	return b;
-}
-
-// Save RELIABILITY RUN
-bool HResults::save(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::ReliabilitySettings& bs, const HEventLog& log, const QString& filename, const QString& origFilename, const QString& version)
-{
-	bool b = false;
-	QFile file(filename);
-	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-	{
-		QDataStream out(&file);
-		out << version << HResultsType::HResultsTypeReliabilityRun.number();
-		out << origFilename;
-		out << es << rs << bs << log;
-		b = true;
+		if (type() == HResultsType::HResultsTypeOriginalRun)
+		{
+			out << experimentSettings() << runSettings() << subjectSettings() << eventLog();
+		}
+		else if (type() == HResultsType::HResultsTypeTestRun)
+		{
+			out << experimentSettings() << runSettings() << eventLog();
+		}
+		else if (type() == HResultsType::HResultsTypeReliabilityRun)
+		{
+			out << originalFilename();
+			out << experimentSettings() << runSettings() << reliabilitySettings() << eventLog();
+		}
+		else
+		{
+			b = false;
+		}
+		file.close();
 	}
 	return b;
 }
@@ -135,7 +121,7 @@ HResults* HResults::load(const QString& filename)
 		if (itype == HResultsType::HResultsTypeOriginalRun.number())
 		{
 			in >> es >> rs >> ss >> log;
-			results = new HResults(es, rs, ss, log, filename);
+			results = new HResults(es, rs, ss, log, filename, version);
 		}
 		else if (itype == HResultsType::HResultsTypeTestRun.number())
 		{
