@@ -32,11 +32,18 @@ const HEventType HEventType::HEventLook(13, "Look");
 const HEventType HEventType::HEventLookTrans(14, "LookTrans");
 const HEventType HEventType::HHabituationSuccess(15, "HabituationSuccess");
 const HEventType HEventType::HHabituationFailure(16, "HabituationFailure");
-const HEventType HEventType::HEventExperimentStarted(17, "ExperimentStarted");
+const HEventType HEventType::HEventExperimentStart(17, "ExperimentStart");
+const HEventType HEventType::HEventExperimentEnd(18, "ExperimentEnd");
+const HEventType HEventType::HEventReliabilityStart(19, "ReliabilityStart");
+const HEventType HEventType::HEventReliabilityEnd(20, "ReliabilityEnd");
+const HEventType HEventType::HEventLookEnabled(21, "LookEnabled");
+const HEventType HEventType::HEventAGLookEnabled(22, "AGLookEnabled");
+const HEventType HEventType::HEventLookDisabled(23, "LookDisabled");
+const HEventType HEventType::HEventScreenStart(24, "ScreenStart");
 const HEventType HEventType::HEventUndefined(-1, "Undefined");
 
 // Note undefined event not in search array.
-const HEventType* HEventType::A[18] =
+const HEventType* HEventType::A[25] =
 {
 	&HEventType::HEventPhaseStart,
 	&HEventType::HEventPhaseEnd,
@@ -55,7 +62,14 @@ const HEventType* HEventType::A[18] =
 	&HEventType::HEventLookTrans,
 	&HEventType::HHabituationSuccess,
 	&HEventType::HHabituationFailure,
-	&HEventType::HEventExperimentStarted
+	&HEventType::HEventExperimentStart,
+	&HEventType::HEventExperimentEnd,
+	&HEventType::HEventReliabilityStart,
+	&HEventType::HEventReliabilityEnd,
+	&HEventType::HEventLookEnabled,
+	&HEventType::HEventAGLookEnabled,
+	&HEventType::HEventLookDisabled,
+	&HEventType::HEventScreenStart
 };
 	
 bool operator==(const HEventType& lhs, const HEventType& rhs)
@@ -205,6 +219,10 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	{
 		pevent = HAGStartEvent::getEvent(stream, ts);
 	}
+	else if (etype == HEventType::HEventAGEnd)
+	{
+		pevent = HAGEndEvent::getEvent(stream, ts);
+	}
 	else if (etype == HEventType::HEventStimRequest)
 	{
 		pevent = HStimRequestEvent::getEvent(stream, ts);
@@ -212,6 +230,10 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	else if (etype == HEventType::HEventStimStart)
 	{
 		pevent = HStimStartEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventStimEnd)
+	{
+		pevent = HStimEndEvent::getEvent(stream, ts);
 	}
 	else if (etype == HEventType::HEventStimulusSettings)
 	{
@@ -237,10 +259,42 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	{
 		pevent = HHabituationFailureEvent::getEvent(stream, ts);
 	}
+	else if (etype == HEventType::HEventReliabilityStart)
+	{
+		pevent = HReliabilityStartEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventReliabilityEnd)
+	{
+		pevent = HReliabilityEndEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventExperimentStart)
+	{
+		pevent = HExperimentStartEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventExperimentEnd)
+	{
+		pevent = HExperimentEndEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventLookEnabled)
+	{
+		pevent = HLookEnabledEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventAGLookEnabled)
+	{
+		pevent = HAGLookEnabledEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventLookDisabled)
+	{
+		pevent = HLookDisabledEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventScreenStart)
+	{
+		pevent = HScreenStartEvent::getEvent(stream, ts);
+	}
 	else
 	{
 		// this is an error.
-
+		qCritical() << "Unknown event type (" << etype.name() << ", " << etype.number() << ")";
 	}
 	return pevent;
 }
@@ -358,26 +412,50 @@ HStimRequestEvent* HStimRequestEvent::getEvent(QDataStream& stream, int timestam
 
 QString HStimStartEvent::eventInfo() const
 {
-	return QString("Stim started on player %1").arg(m_playerid);
+	return QString("Stim started on player %1").arg(stimid());
 };
 
 QString HStimStartEvent::eventCSVAdditional() const
 {
-	return QString("%1").arg(m_playerid);
+	return QString("%1").arg(stimid());
 };
 
 QDataStream& HStimStartEvent::putAdditional(QDataStream& stream) const
 {
-	stream << playerid();
+	stream << stimid();
 	return stream;
 }
 
 HStimStartEvent* HStimStartEvent::getEvent(QDataStream& stream, int timestamp)
 {
+	int playerid;
+	stream >> playerid;
+	return new HStimStartEvent(playerid, timestamp);
+}
+
+QString HStimEndEvent::eventInfo() const
+{
+	return QString("Stim ended on player %1").arg(m_playerid);
+};
+
+QString HStimEndEvent::eventCSVAdditional() const
+{
+	return QString("%1").arg(m_playerid);
+};
+
+QDataStream& HStimEndEvent::putAdditional(QDataStream& stream) const
+{
+	stream << playerid();
+	return stream;
+}
+
+HStimEndEvent* HStimEndEvent::getEvent(QDataStream& stream, int timestamp)
+{
 	int stimid;
 	stream >> stimid;
-	return new HStimStartEvent(stimid, timestamp);
+	return new HStimEndEvent(stimid, timestamp);
 }
+
 
 
 QString HAGRequestEvent::eventInfo() const
@@ -412,6 +490,30 @@ HAGStartEvent* HAGStartEvent::getEvent(QDataStream& stream, int timestamp)
 	int id;
 	stream >> id;
 	return new HAGStartEvent(id, timestamp);
+}
+
+
+QString HAGEndEvent::eventInfo() const
+{
+	return QString("AG ended on player %1").arg(m_playerid);
+};
+
+QString HAGEndEvent::eventCSVAdditional() const
+{
+	return QString("%1").arg(m_playerid);
+};
+
+QDataStream& HAGEndEvent::putAdditional(QDataStream& stream) const
+{
+	stream << playerid();
+	return stream;
+}
+
+HAGEndEvent* HAGEndEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int id;
+	stream >> id;
+	return new HAGEndEvent(id, timestamp);
 }
 
 
@@ -547,25 +649,102 @@ HHabituationFailureEvent* HHabituationFailureEvent::getEvent(QDataStream& stream
 	return new HHabituationFailureEvent(timestamp);
 }
 
-QString HExperimentStartedEvent::eventInfo() const
+QString HExperimentStartEvent::eventInfo() const
 {
-	return QString("HExperimentStarted offset %1").arg(m_offset);
+	return QString("HExperimentStart");
 }
 
-HExperimentStartedEvent* HExperimentStartedEvent::getEvent(QDataStream& stream, int timestamp)
+HExperimentStartEvent* HExperimentStartEvent::getEvent(QDataStream& stream, int timestamp)
 {
-	int offset;
-	stream >> offset;
-	return new HExperimentStartedEvent(offset, timestamp);
+	Q_UNUSED(stream);
+	return new HExperimentStartEvent(timestamp);
 }
 
-QDataStream& HExperimentStartedEvent::putAdditional(QDataStream& stream) const
+QString HExperimentEndEvent::eventInfo() const
 {
-	stream << offset();
+	return QString("HExperimentEnd");
+}
+
+HExperimentEndEvent* HExperimentEndEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HExperimentEndEvent(timestamp);
+}
+
+QString HReliabilityStartEvent::eventInfo() const
+{
+	return QString("HReliabilityStart");
+}
+
+HReliabilityStartEvent* HReliabilityStartEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HReliabilityStartEvent(timestamp);
+}
+
+QString HReliabilityEndEvent::eventInfo() const
+{
+	return QString("HReliabilityEnd");
+}
+
+HReliabilityEndEvent* HReliabilityEndEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HReliabilityEndEvent(timestamp);
+}
+
+QString HLookEnabledEvent::eventInfo() const
+{
+	return QString("HLookEnabled");
+}
+
+HLookEnabledEvent* HLookEnabledEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HLookEnabledEvent(timestamp);
+}
+
+QString HAGLookEnabledEvent::eventInfo() const
+{
+	return QString("HAGLookEnabled");
+}
+
+HAGLookEnabledEvent* HAGLookEnabledEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HAGLookEnabledEvent(timestamp);
+}
+
+QString HLookDisabledEvent::eventInfo() const
+{
+	return QString("HLookDisabled");
+}
+
+HLookDisabledEvent* HLookDisabledEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HLookDisabledEvent(timestamp);
+}
+
+QString HScreenStartEvent::eventInfo() const
+{
+	return QString("Screen started for player %1").arg(playerid());
+};
+
+QString HScreenStartEvent::eventCSVAdditional() const
+{
+	return QString("%1").arg(playerid());
+};
+
+QDataStream& HScreenStartEvent::putAdditional(QDataStream& stream) const
+{
+	stream << playerid();
 	return stream;
 }
 
-QString HExperimentStartedEvent::eventCSVAdditional() const
+HScreenStartEvent* HScreenStartEvent::getEvent(QDataStream& stream, int timestamp)
 {
-	return QString("%1").arg(offset());
+	int playerid;
+	stream >> playerid;
+	return new HScreenStartEvent(playerid, timestamp);
 }

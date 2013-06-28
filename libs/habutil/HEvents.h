@@ -47,10 +47,17 @@ public:
 	static const HEventType HEventUndefined;
 	static const HEventType HHabituationSuccess;
 	static const HEventType HHabituationFailure;
-	static const HEventType HEventExperimentStarted;
+	static const HEventType HEventReliabilityStart;
+	static const HEventType HEventReliabilityEnd;
+	static const HEventType HEventExperimentStart;
+	static const HEventType HEventExperimentEnd;
+	static const HEventType HEventLookEnabled;
+	static const HEventType HEventAGLookEnabled;
+	static const HEventType HEventLookDisabled;
+	static const HEventType HEventScreenStart;
 
 	// undefined event not in A[]
-	static const HEventType* A[18];
+	static const HEventType* A[25];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -136,6 +143,11 @@ public:
 	// When reading events, the type and timestamp are first read.
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 
+	// clone the event. All derived classes must do this!
+	// Cloning can also be done with a new timestamp - as it is done in reliability.
+	// If timestamp is negative, use the timestamp in this event.
+	virtual HEvent* clone(int timestamp = 0) const = 0;
+
 	// We will have to read without an overloaded >>. I think this isn't possible with a pure virtual base class.
 	// Should return NULL on failure. May throw exception....TODO handle this
 	static HEvent* getEvent(QDataStream& stream);
@@ -178,6 +190,12 @@ public:
 
 	static HPhaseStartEvent* getEvent(QDataStream& stream, int timestamp);
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HPhaseStartEvent(phasetype(), t);
+	};
+
 private:
 	const HPhaseType* m_pphasetype;
 };
@@ -197,6 +215,12 @@ public:
 	
 	QString eventInfo() const;
 	static HPhaseEndEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HPhaseEndEvent(t);
+	};
 };
 
 class HTrialStartEvent: public HEvent
@@ -227,6 +251,12 @@ public:
 	static HTrialStartEvent* getEvent(QDataStream& stream, int timestamp);
 	int trialnumber() const { return m_trialnumber; };
 	int repeatnumber() const { return m_repeatnumber; };
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HTrialStartEvent(trialnumber(), repeatnumber(), t);
+	};
 private:
 	int m_trialnumber;
 	int m_repeatnumber;
@@ -252,6 +282,13 @@ public:
 	virtual QString eventCSVAdditional() const;
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HTrialEndEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HTrialEndEvent(endtype(), t);
+	};
+
 private:
 	const HTrialEndType* m_pendtype;
 };	
@@ -278,6 +315,12 @@ public:
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HStimRequestEvent* getEvent(QDataStream& stream, int timestamp);
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HStimRequestEvent(stimindex(), t);
+	};
+
 private:
 	int m_stimindex;
 };
@@ -299,6 +342,13 @@ public:
 	QString eventInfo() const;
 	//virtual QString eventCSVAdditional() const;
 	static HAGRequestEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HAGRequestEvent(t);
+	};
+
 private:
 };
 
@@ -322,32 +372,108 @@ public:
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HAGStartEvent* getEvent(QDataStream& stream, int timestamp);
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HAGStartEvent(playerid(), t);
+	};
+
+private:
+	int m_playerid;
+};
+
+class HAGEndEvent: public HEvent
+{
+public:
+	HAGEndEvent(int playerid = -1, int timestamp = 0)
+	: HEvent(HEventType::HEventAGStart, timestamp)
+	, m_playerid(playerid)
+	{};
+
+	HAGEndEvent(const HAGStartEvent& e)
+	: HEvent(HEventType::HEventAGStart, e.timestamp())
+	, m_playerid(e.playerid())
+	{};
+
+	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
+	int playerid() const { return m_playerid; };
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HAGEndEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HAGEndEvent(playerid(), t);
+	};
+
 private:
 	int m_playerid;
 };
 
 
+
 class HStimStartEvent: public HEvent
 {
 public:
-	HStimStartEvent(int playerid=-1, int timestamp=0)
+	HStimStartEvent(int stimid=-1, int timestamp=0)
 	: HEvent(HEventType::HEventStimStart, timestamp)
-	, m_playerid(playerid)
+	, m_stimid(stimid)
 	{};
 	
 	HStimStartEvent(const HStimStartEvent& e)
 	: HEvent(HEventType::HEventStimStart, e.timestamp())
-	, m_playerid(e.playerid())
+	, m_stimid(e.stimid())
 	{};
 	
 	virtual ~HStimStartEvent() {};
 	
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
-	int playerid() const { return m_playerid; };
+	int stimid() const { return m_stimid; };
 
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HStimStartEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HStimStartEvent(stimid(), t);
+	};
+
+private:
+	int m_stimid;
+};
+
+
+class HStimEndEvent: public HEvent
+{
+public:
+	HStimEndEvent(int playerid=-1, int timestamp=0)
+	: HEvent(HEventType::HEventStimEnd, timestamp)
+	, m_playerid(playerid)
+	{};
+
+	HStimEndEvent(const HStimEndEvent& e)
+	: HEvent(HEventType::HEventStimEnd, e.timestamp())
+	, m_playerid(e.playerid())
+	{};
+
+	virtual ~HStimEndEvent() {};
+
+	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
+	int playerid() const { return m_playerid; };
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HStimEndEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HStimEndEvent(playerid(), t);
+	};
 
 private:
 	int m_playerid;
@@ -378,6 +504,12 @@ public:
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HStimulusSettingsEvent* getEvent(QDataStream& stream, int timestamp);
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HStimulusSettingsEvent(settings(), stimindex(), t);
+	};
+
 private:
 	Habit::StimulusSettings m_settings;
 	int m_stimindex;
@@ -407,6 +539,12 @@ public:
 	int stimindex() const { return m_stimindex; };
 	QString eventInfo() const;
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HStimulusInfoEvent(whichstim(), info(), stimindex(), t);
+	};
+
 private:
 	QString m_whichstim;
 	Habit::StimulusInfo m_info;
@@ -431,6 +569,12 @@ public:
 	// not needed for this class virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HAttentionEvent* getEvent(QDataStream& stream, int timestamp);
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HAttentionEvent(t);
+	};
+
 };
 
 class HLookEvent: public HEvent
@@ -454,6 +598,12 @@ public:
 
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HLookEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HLookEvent(look(), t);
+	};
 
 private:
 	HLook m_look;
@@ -482,6 +632,12 @@ public:
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HLookTransEvent* getEvent(QDataStream& stream, int timestamp);
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HLookTransEvent(transtype(), t);
+	};
+
 private:
 	const HLookTrans& m_type;
 };
@@ -504,6 +660,12 @@ public:
 	// not needed for this event type: virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HHabituationSuccessEvent* getEvent(QDataStream& stream, int timestamp);
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HHabituationSuccessEvent(t);
+	};
+
 private:
 };
 
@@ -525,34 +687,241 @@ public:
 	// not needed for this event type: virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HHabituationFailureEvent* getEvent(QDataStream& stream, int timestamp);
 
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HHabituationFailureEvent(t);
+	};
+
 private:
 };
 
 
-class HExperimentStartedEvent: public HEvent
+class HExperimentStartEvent: public HEvent
 {
 public:
-	HExperimentStartedEvent(int offset, int timestamp)
-	: HEvent(HEventType::HEventExperimentStarted, timestamp)
-	, m_offset(offset)
+	HExperimentStartEvent(int timestamp)
+	: HEvent(HEventType::HEventExperimentStart, timestamp)
 	{};
 
-	HExperimentStartedEvent(const HExperimentStartedEvent& e)
-	: HEvent(HEventType::HEventExperimentStarted, e.timestamp())
-	, m_offset(e.offset())
+	HExperimentStartEvent(const HExperimentStartEvent& e)
+	: HEvent(HEventType::HEventExperimentStart, e.timestamp())
 	{};
 
-	virtual ~HExperimentStartedEvent() {};
+	virtual ~HExperimentStartEvent() {};
 
 	QString eventInfo() const;
-	virtual QDataStream& putAdditional(QDataStream& stream) const;
-	static HExperimentStartedEvent* getEvent(QDataStream& stream, int timestamp);
-	virtual QString eventCSVAdditional() const;
+	//virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HExperimentStartEvent* getEvent(QDataStream& stream, int timestamp);
+	//virtual QString eventCSVAdditional() const;
 
-	int offset() const { return m_offset; };
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HExperimentStartEvent(t);
+	};
 
 private:
-	int m_offset;
+};
+
+class HExperimentEndEvent: public HEvent
+{
+public:
+	HExperimentEndEvent(int timestamp)
+	: HEvent(HEventType::HEventExperimentEnd, timestamp)
+	{};
+
+	HExperimentEndEvent(const HExperimentEndEvent& e)
+	: HEvent(HEventType::HEventExperimentEnd, e.timestamp())
+	{};
+
+	virtual ~HExperimentEndEvent() {};
+
+	QString eventInfo() const;
+	//virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HExperimentEndEvent* getEvent(QDataStream& stream, int timestamp);
+	//virtual QString eventCSVAdditional() const;
+
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HExperimentEndEvent(t);
+	};
+
+private:
+};
+
+
+class HReliabilityStartEvent: public HEvent
+{
+public:
+	HReliabilityStartEvent(int timestamp)
+	: HEvent(HEventType::HEventReliabilityStart, timestamp)
+	{};
+
+	HReliabilityStartEvent(const HReliabilityStartEvent& e)
+	: HEvent(HEventType::HEventReliabilityStart, e.timestamp())
+	{};
+
+	virtual ~HReliabilityStartEvent() {};
+
+	QString eventInfo() const;
+	//virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HReliabilityStartEvent* getEvent(QDataStream& stream, int timestamp);
+	//virtual QString eventCSVAdditional() const;
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HReliabilityStartEvent(t);
+	};
+
+private:
+};
+
+class HReliabilityEndEvent: public HEvent
+{
+public:
+	HReliabilityEndEvent(int timestamp)
+	: HEvent(HEventType::HEventReliabilityEnd, timestamp)
+	{};
+
+	HReliabilityEndEvent(const HReliabilityEndEvent& e)
+	: HEvent(HEventType::HEventReliabilityEnd, e.timestamp())
+	{};
+
+	virtual ~HReliabilityEndEvent() {};
+
+	QString eventInfo() const;
+	//virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HReliabilityEndEvent* getEvent(QDataStream& stream, int timestamp);
+	//virtual QString eventCSVAdditional() const;
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HReliabilityEndEvent(t);
+	};
+
+private:
+};
+
+
+class HLookEnabledEvent: public HEvent
+{
+public:
+	HLookEnabledEvent(int timestamp)
+	: HEvent(HEventType::HEventLookEnabled, timestamp)
+	{};
+
+	HLookEnabledEvent(const HLookEnabledEvent& e)
+	: HEvent(HEventType::HEventLookEnabled, e.timestamp())
+	{};
+
+	virtual ~HLookEnabledEvent() {};
+
+	QString eventInfo() const;
+	//virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HLookEnabledEvent* getEvent(QDataStream& stream, int timestamp);
+	//virtual QString eventCSVAdditional() const;
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HLookEnabledEvent(t);
+	};
+
+private:
+};
+
+
+class HAGLookEnabledEvent: public HEvent
+{
+public:
+	HAGLookEnabledEvent(int timestamp)
+	: HEvent(HEventType::HEventAGLookEnabled, timestamp)
+	{};
+
+	HAGLookEnabledEvent(const HAGLookEnabledEvent& e)
+	: HEvent(HEventType::HEventAGLookEnabled, e.timestamp())
+	{};
+
+	virtual ~HAGLookEnabledEvent() {};
+
+	QString eventInfo() const;
+	//virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HAGLookEnabledEvent* getEvent(QDataStream& stream, int timestamp);
+	//virtual QString eventCSVAdditional() const;
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HAGLookEnabledEvent(t);
+	};
+
+private:
+};
+
+
+class HLookDisabledEvent: public HEvent
+{
+public:
+	HLookDisabledEvent(int timestamp)
+	: HEvent(HEventType::HEventLookDisabled, timestamp)
+	{};
+
+	HLookDisabledEvent(const HLookDisabledEvent& e)
+	: HEvent(HEventType::HEventLookDisabled, e.timestamp())
+	{};
+
+	virtual ~HLookDisabledEvent() {};
+
+	QString eventInfo() const;
+	//virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HLookDisabledEvent* getEvent(QDataStream& stream, int timestamp);
+	//virtual QString eventCSVAdditional() const;
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HLookDisabledEvent(t);
+	};
+
+private:
+};
+
+class HScreenStartEvent: public HEvent
+{
+public:
+	HScreenStartEvent(int playerid=-1, int timestamp=0)
+	: HEvent(HEventType::HEventScreenStart, timestamp)
+	, m_playerid(playerid)
+	{};
+
+	HScreenStartEvent(const HScreenStartEvent& e)
+	: HEvent(HEventType::HEventScreenStart, e.timestamp())
+	, m_playerid(e.playerid())
+	{};
+
+	virtual ~HScreenStartEvent() {};
+
+	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
+	int playerid() const { return m_playerid; };
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HScreenStartEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HScreenStartEvent(playerid(), t);
+	};
+
+private:
+	int m_playerid;
 };
 
 
