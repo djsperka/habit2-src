@@ -18,11 +18,13 @@ CONFIG(debug, debug|release) {
 ICON = ./habiticon.icns
 QMAKE_INFO_PLIST = habit.plist
 
-
 # take care of copying icons into app directory. 
 win32 {
 }
 macx {
+#    IconFiles.files = habit-large.png habit-small.png
+#    IconFiles.path = Contents/MacOS
+#    QMAKE_BUNDLE_DATA += MediaFiles
 }
 
 INCLUDEPATH += ../../libs/habutil

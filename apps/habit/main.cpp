@@ -1,11 +1,13 @@
-#include "HApp.h"
+#include "HApplication.h"
+#include "HMainWindow.h"
 #include "version.h"
-#include <QtGui/QApplication>
-#include <QtCore/QTime>
-#include <QtGui/QDesktopServices>
-#include <QtCore/QTextStream>
-#include <QtCore/QFile>
-#include <QtCore/QTDebug>
+#include <QApplication>
+#include <QTime>
+#include <QDesktopServices>
+#include <QTextStream>
+#include <QFile>
+#include <QtDebug>
+#include <QMenuBar>
 #include <iostream>
 
 using namespace std;
@@ -60,12 +62,12 @@ int main(int argc, char *argv[])
 	{
 		qInstallMsgHandler(SimpleLoggingHandler);
 	}
-	
-    QApplication a(argc, argv);
-	a.setApplicationVersion(HABIT_VERSION);
-	a.setApplicationName("Habit");
-	a.setOrganizationName("Infant Cognition Lab");
-	a.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
+
+    HApplication h(argc, argv);
+	h.setApplicationVersion(HABIT_VERSION);
+	h.setApplicationName("Habit");
+	h.setOrganizationName("Infant Cognition Lab");
+	h.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
 
 	// Generate filename after application object initialized -- this sets data location based on application/organization name.
 	QString file_name = QDesktopServices::storageLocation(QDesktopServices::DataLocation) ;
@@ -80,10 +82,11 @@ int main(int argc, char *argv[])
 	file.open(QIODevice::Append | QIODevice::Text);
 	logfile.setDevice(&file);
 	logfile.flush();
-	qDebug() << "Application Start version " << "1.10.01";
-	HApp w;
+	qDebug() << "Application Start version " << HABIT_VERSION;
+	HMainWindow w;
+	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
 	Q_INIT_RESOURCE(resources);
     w.show();
-    return a.exec();
+    return h.exec();
 }
 
