@@ -14,8 +14,6 @@
 #include "stimulussettings.h"
 #include "stimulisettings.h"
 #include "experimentsettings.h"
-#include "subjectsettings.h"
-#include "OutputGenerator.h"
 
 #include "HMediaManager.h"
 #include "HLookDetector.h"
@@ -37,7 +35,7 @@ class HControlPanel : public QDialog
 	Q_OBJECT
 	
 public:
-	HControlPanel(HEventLog& log, const Habit::SubjectSettings& ss, const Habit::RunSettings& runSettings, QWidget* w = 0);
+	HControlPanel(HEventLog& log, const Habit::RunSettings& runSettings, QWidget* w = 0);
 	~HControlPanel() {};
 	
 	const Habit::ExperimentSettings& getExperimentSettings() { return m_experimentSettings; };
@@ -58,6 +56,7 @@ private slots:
 	void onAttention();
 	void onLook(HLook l);
 	void onExperimentFinished();
+	void onExperimentStarted();
 	void onAGStarted();
 	void onStimStarted(int i);
 	void onCleared();
@@ -69,7 +68,6 @@ protected:
 private:
 	HEventLog& m_log;
 	Habit::RunSettings m_runSettings;
-	Habit::SubjectSettings m_subjectSettings;
 	Habit::ExperimentSettings m_experimentSettings;
 	Habit::StimulusSettingsMap m_mapSS;
 	HMediaManager* m_pmm;

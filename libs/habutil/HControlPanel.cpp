@@ -22,11 +22,10 @@
 #include <QLabel>
 
 
-HControlPanel::HControlPanel(HEventLog& log, const Habit::SubjectSettings& ss, const Habit::RunSettings& runSettings, QWidget* w)
+HControlPanel::HControlPanel(HEventLog& log, const Habit::RunSettings& runSettings, QWidget* w)
 : QDialog(w)
 , m_log(log)
 , m_runSettings(runSettings)
-, m_subjectSettings(ss)
 , m_psPreTest(0)
 , m_psHabituation(0)
 , m_psTest(0)
@@ -189,7 +188,8 @@ void HControlPanel::createExperiment(HEventLog& log)
 	
 	// connect the state machine's finished() signal to this dialog's close() slot
 	connect(m_psm, SIGNAL(finished()), this, SLOT(onExperimentFinished()));
-		
+	connect(m_psm, SIGNAL(started()), this, SLOT(onExperimentStarted()));
+
 	// This is a single super-state that holds all the phases.
 	HExperiment* sExperiment = new HExperiment(log, *m_pmm, *m_pld);
 	m_psm->addState(sExperiment);
@@ -481,6 +481,7 @@ void HControlPanel::onStopTrials()
 
 void HControlPanel::onExperimentFinished()
 {
+	m_log.append(new HExperimentEndEvent(HElapsedTimer::elapsed()));
 	if (m_pmm)
 	{
 		delete m_pmm;
@@ -489,3 +490,10 @@ void HControlPanel::onExperimentFinished()
 	accept();
 }
 
+void HControlPanel::onExperimentStarted()
+{
+	// post event to log to have offset of elapsed timer at exp start.
+	// Obviously this is not to be taken as an absolute offset, but for
+	// the purposes of reliability it will be useful.
+	m_log.append(new HExperimentStartEvent(HElapsedTimer::elapsed()));
+}
