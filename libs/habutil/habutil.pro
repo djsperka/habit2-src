@@ -47,6 +47,7 @@ HEADERS +=	HLook.h \
 			HResultsWidget.h \
 			HResultsDialog.h \
 			HApplication.h \
+			HReliability.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -136,6 +137,7 @@ SOURCES +=	HLook.cpp \
 			HResultsWidget.cpp \
 			HResultsDialog.cpp \
 			HApplication.cpp \
+			HReliability.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \
