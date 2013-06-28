@@ -18,6 +18,8 @@ public:
 	~HApplication() {};
 protected:
 	bool event(QEvent* event);
+signals:
+	void showResultsFile(QString filename);
 };
 
 #endif /* HAPPLICATION_H_ */
