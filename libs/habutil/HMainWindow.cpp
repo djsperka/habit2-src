@@ -91,20 +91,26 @@ void HMainWindow::runExperimentResults()
 	QString filename = QFileDialog::getOpenFileName(NULL, "Open File", "~/Desktop", "Habit Results Files (*.hab)");
 	if (!filename.isNull())
 	{
-		HResults* results = HResults::load(filename);
-		if (!results)
-		{
-			QMessageBox msgBox;
-			msgBox.setText("Cannot load data.");
-			msgBox.exec();
-		}
-		else
-		{
-			HResultsDialog dialog(*results, NULL);
-			dialog.exec();
-			delete results;
-		}
+		showResultsFile(filename);
 	}
+}
+
+void HMainWindow::showResultsFile(const QString filename)
+{
+	HResults* results = HResults::load(filename);
+	if (!results)
+	{
+		QMessageBox msgBox;
+		msgBox.setText("Cannot load data.");
+		msgBox.exec();
+	}
+	else
+	{
+		HResultsDialog dialog(*results, NULL);
+		dialog.exec();
+		delete results;
+	}
+	return;
 }
 
 void HMainWindow::runSavedExperiment()

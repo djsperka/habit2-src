@@ -110,6 +110,7 @@ void HLooker::update()
 						m_bLookAwayStarted = false;
 						m_indexAt = m_lookAwayStartIndex + 1;
 						qDebug() << "update(): look complete " << *m_pdirectionPendingLook;
+						//m_log.append(new HLookEvent(l, HElapsedTimer::elapsed()));
 						emit look(l);						
 					}
 					else 
@@ -174,3 +175,41 @@ void HLooker::timeout()
 	return;
 }
 
+bool HLooker::flush(int tMS)
+{
+	bool bValue = false;
+
+	// is a look pending, and is it long enough (at tMS) to consider completed?
+	if (m_bLookStarted)
+	{
+		if ((m_bLookAwayStarted && ((m_lookAwayStartTimeMS - m_lookStartTimeMS) >= m_minLookTimeMS)) ||
+			(!m_bLookAwayStarted && ((tMS - m_lookStartTimeMS) >= m_minLookTimeMS)))
+		{
+			bValue = true;
+			int endMS = (m_bLookAwayStarted ? m_lookAwayStartTimeMS : tMS);
+
+			// new look
+			HLook l(*m_pdirectionPendingLook, m_lookStartTimeMS, endMS);
+			m_looks.append(l);
+			m_bLookStarted = false;
+			m_bLookAwayStarted = false;
+			m_indexAt = m_lookAwayStartIndex + 1;
+			qDebug() << "flush(): look complete " << *m_pdirectionPendingLook;
+			emit look(l);
+
+			clear();
+		}
+	}
+	return bValue;
+}
+
+void HLooker::clear()
+{
+	// repeat initializations in constructor - ones that matter. Clear list.
+	m_transitions.clear();
+	m_indexAt = 0;
+	m_bLookStarted = false;
+	m_pdirectionPendingLook = &HLookDirection::NoLook;
+	m_bLookAwayStarted = false;
+	return;
+}

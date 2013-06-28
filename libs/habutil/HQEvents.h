@@ -12,6 +12,7 @@
 
 
 #include <QEvent>
+class HEvent;
 
 
 struct HAllTrialsDoneEvent : public QEvent
@@ -35,7 +36,22 @@ struct HAbortTrialEvent : public QEvent
 	enum { AbortTrialType = QEvent::User + 3 };
 };
 
+class HReliabilityQEvent : public QEvent
+{
+public:
+	HReliabilityQEvent(HEvent* phevent) : QEvent(Type(ReliabilityType)), m_phevent(phevent) {};
+	~HReliabilityQEvent() {};
+	enum { ReliabilityType = QEvent::User + 4 };
+	HEvent* hevent() { return m_phevent; };
+private:
+	HEvent* m_phevent;
+};
 
-
+struct HReliabilityEndQEvent : public QEvent
+{
+	HReliabilityEndQEvent() : QEvent(Type(ReliabilityEndType)) {};
+	~HReliabilityEndQEvent() {};
+	enum { ReliabilityEndType = QEvent::User + 5 };
+};
 
 #endif

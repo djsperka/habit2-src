@@ -11,10 +11,12 @@
 #include "HTrialChildState.h"
 #include "HPhase.h"
 #include "HExperiment.h"
+#include "HEvents.h"
 #include "HElapsedTimer.h"
 #include "HMediaManager.h"
 #include <QFinalState>
 #include <QTimerEvent>
+#include <QtDebug>
 
 void HStimRequestState::onEntry(QEvent* e) 
 {
@@ -44,7 +46,6 @@ void HStimRunningState::onEntry(QEvent* e)
 	if (m_ptimerNoLook->isActive()) m_ptimerNoLook->stop();
 	m_ptimerMax->start(m_msMax);
 	m_ptimerNoLook->start(m_msNoLook);
-	m_ptransNoLook->reset();
 };
 
 void HStimRunningState::onExit(QEvent* e)
@@ -80,13 +81,27 @@ void HFixedTimeoutState::onEntry(QEvent* e)
 bool HNoLookTransition::eventTest(QEvent* e)
 {
 	bool bVal = false;
-	if (!m_bGotLook && (e->type() == QEvent::Type(QEvent::Timer)))
+
+	// Make sure this is the correct signal. If not get out and block transition.
+    if (!QSignalTransition::eventTest(e))
+        return false;
+
+	// OK so our timer event has fired.
+	// If there is a look pending, we don't want the transition to fire (return false)
+	// If there is no look pending, let it fire (return true)
+
+	if (m_ld.flush(HElapsedTimer::elapsed()))
 	{
-		QTimerEvent* te = static_cast<QTimerEvent*>(e);
-		bVal = (te->timerId() == m_timerId);
+		bVal = false;
 	}
+	else
+	{
+		bVal = true;
+	}
+
 	return bVal;
 }
+
 
 HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG) 
 	: HPhaseChildState(phase, log, "HTrial")
@@ -100,7 +115,6 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 	// create timer for stim
 	m_ptimerMaxTrialLength = new QTimer();
 	m_ptimerMaxTrialLength->setSingleShot(true);
-
 	m_ptimerMaxNoLookTime = new QTimer();
 	m_ptimerMaxNoLookTime->setSingleShot(true);
 	
@@ -114,8 +128,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 
 	// Stim request state and StimRunning states are similar to AGRequest and AGRunning. 
 	HStimRequestState* sStimRequest = new HStimRequestState(*this, log);
-	HNoLookTransition* pNoLookTrans = new HNoLookTransition(m_ptimerMaxNoLookTime->timerId());
-	HStimRunningState* sStimRunning = new HStimRunningState(*this, log, maxTrialLengthMS, pNoLookTrans, m_ptimerMaxTrialLength, maxNoLookTimeMS, m_ptimerMaxNoLookTime);
+	HStimRunningState* sStimRunning = new HStimRunningState(*this, log, maxTrialLengthMS, m_ptimerMaxTrialLength, maxNoLookTimeMS, m_ptimerMaxNoLookTime);
 
 	// Create final state.
 	QFinalState* sFinal = new QFinalState(this);
@@ -162,7 +175,17 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 	{
 		HGotLookState* sGotLook = new HGotLookState(*this, log);
 		HNoLookTimeoutState* sNoLookTimeout = new HNoLookTimeoutState(*this, log);
-		sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sNoLookTimeout);
+
+		// the No Look timeout is tricky. If a look is pending, we want that look to count
+		// if the timeout hits. The timeout is supposed to indicate that we've waited long
+		// enough, dammit, for a look and we're quitting the trial. But if a look is in
+		// progress, we will BLOCK this transition and force a look() signal.
+
+		HNoLookTransition* pNoLookTrans = new HNoLookTransition(phase.experiment().getLookDetector(), m_ptimerMaxNoLookTime);
+		pNoLookTrans->setTargetState(sNoLookTimeout);
+		sStimRunning->addTransition(pNoLookTrans);
+
+		//sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sNoLookTimeout);
 		sNoLookTimeout->addTransition(sInitial);	// trial is repeated
 		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(look(HLook)), sGotLook);
 		sGotLook->addTransition(sFinal);
@@ -194,31 +217,30 @@ void HTrial::incrementRepeatNumber()
 void HTrial::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
-	
-	// Post to log - console-type debug log, not event log 
 	HState::onEntry(e);
-
-	// post to event log
-	eventLog().append(new HTrialStartEvent(getTrialNumber(), getRepeatNumber(), HElapsedTimer::elapsed()));										   
 }
 
 
 void HTrial::onStimRunningEntered()
 {
 	phase().experiment().getLookDetector().enableLook();
+	eventLog().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
 }
 
 void HTrial::onStimRunningExited()
 {
 	phase().experiment().getLookDetector().disable();
+	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
 }
 
 void HTrial::onAGRunningEntered()
 {
 	phase().experiment().getLookDetector().enableAGLook();
+	eventLog().append(new HAGLookEnabledEvent(HElapsedTimer::elapsed()));
 }
 
 void HTrial::onAGRunningExited()
 {
 	phase().experiment().getLookDetector().disable();
+	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
 }

@@ -59,7 +59,8 @@ protected:
 public slots:
 	void onTrialCompleteEntered();
 	void screenStarted(int);
-
+	void agStarted();
+	void stimStarted(int);
 };
 
 class HAllTrialsDoneTransition: public QAbstractTransition

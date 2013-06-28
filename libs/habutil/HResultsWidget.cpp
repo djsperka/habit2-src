@@ -133,6 +133,18 @@ void HResultsWidget::addLooksTable(QTextCursor& cursor)
 			slist << sPhase << QString("%1").arg(iTrialNumber) << QString("%1").arg(iRepeatNumber) << ps->look().direction().name() << QString("%1").arg(ps->look().lookMS()) << "look";
 			addTrialRow(table, slist, m_textFormat, cellFormat);
 		}
+		else if (e->type() == HEventType::HHabituationFailure)
+		{
+			slist.clear();
+			slist << sPhase << "" << "" << "" << "" << "Habituation failed";
+			addTrialRow(table, slist, m_textFormat, cellFormat);
+		}
+		else if (e->type() == HEventType::HHabituationSuccess)
+		{
+			slist.clear();
+			slist << sPhase << "" << "" << "" << "" << "Habituation success";
+			addTrialRow(table, slist, m_textFormat, cellFormat);
+		}
 	}
 	return;
 }

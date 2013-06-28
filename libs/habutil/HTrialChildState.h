@@ -13,10 +13,11 @@
 
 #include <QString>
 #include <QTimer>
-#include <QAbstractTransition>
+#include <QSignalTransition>
 #include "HLogState.h"
 
 class HTrial;
+class HLookDetector;
 
 class HTrialChildState: public HLogState
 {
@@ -141,21 +142,19 @@ protected:
 
 	
 	
-class HNoLookTransition: public QAbstractTransition
+class HNoLookTransition: public QSignalTransition
 {
 	Q_OBJECT
 	
 public:
-	HNoLookTransition(int timerId) : m_timerId(timerId), m_bGotLook(false){};
+	HNoLookTransition(HLookDetector& ld, QTimer *ptimer) : QSignalTransition(ptimer, SIGNAL(timeout())), m_ld(ld), m_ptimer(ptimer) {};
 	~HNoLookTransition() {};
-	void gotLook() { m_bGotLook = true; };
-	void reset() { m_bGotLook = false; };
 protected:
 	bool eventTest(QEvent* e);
 	void onTransition(QEvent* e) { Q_UNUSED(e); };
 private:
-	int m_timerId;
-	bool m_bGotLook;
+	HLookDetector& m_ld;
+	QTimer* m_ptimer;
 };
 
 
@@ -170,9 +169,8 @@ private:
 class HStimRunningState: public HTrialChildState
 {
 public:
-	HStimRunningState(HTrial& trial, HEventLog& log, int msMax, HNoLookTransition* ptrans, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook) 
+	HStimRunningState(HTrial& trial, HEventLog& log, int msMax, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook)
 	: HTrialChildState(trial, log, "HStimRunning")
-	, m_ptransNoLook(ptrans)
 	, m_msMax(msMax)
 	, m_ptimerMax(ptimerMax)
 	, m_msNoLook(msNoLook)
@@ -186,7 +184,6 @@ protected:
 	void onExit(QEvent* e);
 	
 private:
-	HNoLookTransition* m_ptransNoLook;
 	int m_msMax;
 	QTimer* m_ptimerMax;
 	int m_msNoLook;

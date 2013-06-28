@@ -51,5 +51,6 @@ void HLookDetector::disable()
 		m_bAGLookEnabled = false;
 		agLookEnabled(false);
 	}
+	clear();
 	return;
 };

@@ -35,6 +35,7 @@ public:
     void runSavedExperiment();
 	void runExperimentResults();
 	void runReliability();
+	void showResultsFile(QString filename);
 	
 private:
     Ui::HabitAppClass ui;

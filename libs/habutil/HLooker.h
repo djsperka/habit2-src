@@ -26,6 +26,12 @@ public:
 	~HLooker() {};
 	void addTrans(const HLookTrans& type, int tMS);
 	
+	// if a look is pending, then act like its completed and force an "emit look"
+	bool flush(int tMS);
+
+	// clear out look transitions list and reset all (leave looks list intact)
+	void clear();
+
 private:
 	int m_minLookTimeMS;
 	int m_minLookAwayTimeMS;
