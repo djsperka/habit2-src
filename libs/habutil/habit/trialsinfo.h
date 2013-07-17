@@ -19,23 +19,22 @@ public:
     ~TrialsInfo();
 
 public:
-#if 0
-    enum TrialType{
-		eFixedLength = 0,
-        eSubjectControlled = 1
-    };
-#endif
     const HTrialCompletionType& getTrialCompletionType() const;
     void setTrialCompletionType(const HTrialCompletionType& ctype);
 
-#if 0
-    int getType() const;
-    void setType(int type);
-#endif
+    // Length of trial in ms.
     unsigned int getLength() const;
     void setLength(unsigned int length);
+
+    // Deceiving. The content of this field depends on the trial type -
+    // Pretest     -> Minumum look time (ms)
+    // Habituation -> Minimum look away time (ms)
+    // Test        -> Maximum no-look time (ms)
+
     unsigned int getLookTimes() const;
     void setLookTimes(unsigned int lookTimes);
+
+    // just the number of trials. Zero indicates this trial type not used.
     unsigned int getNumberOfTrials() const;
     void setNumberOfTrials(unsigned int number);
 
