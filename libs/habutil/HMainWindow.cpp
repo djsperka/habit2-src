@@ -61,7 +61,7 @@ void HMainWindow::runReliability()
 			if (box.exec() == QMessageBox::Yes)
 			{
 				QString fileName = QFileDialog::getSaveFileName(this, tr("Save Reliability Result"),
-																"", tr("Experient Result File (*.res)"));
+																"", tr("Experiment Result File (*.res)"));
 				if (!fileName.isNull() && !fileName.isEmpty())
 				{
 					Habit::ReliabilitySettings reliabilitySettings;
@@ -140,9 +140,6 @@ void HMainWindow::runSavedExperiment()
 			if (!fileName.isNull() && !fileName.isEmpty())
 			{
 				if (!results->save(fileName))
-//				if (!HResults::save(habitControlPanel.getExperimentSettings(), runSettingsForm.getRunSettings(),
-//						runSettingsForm.getSubjectSettings(), log, fileName,
-//						QCoreApplication::instance()->applicationVersion()))
 				{
 					qCritical() << "Error - cannot save data to file " << fileName;
 				}
