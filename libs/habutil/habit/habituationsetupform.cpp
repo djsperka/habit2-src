@@ -65,7 +65,7 @@ void HabituationSetupForm::createComponents()
 	}
 	totalLookLengthToEndGroup_ = new QGroupBox(tr("Total Look Length to End Habituation"));
 	totalLookLengthEdit_ = new QLineEdit();
-	totalLookLengthLabel_ = new QLabel(tr("10ths of a second"));
+	totalLookLengthLabel_ = new QLabel(tr("ms"));
 
 	setLabelsFont();	
 }

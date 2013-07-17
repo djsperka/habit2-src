@@ -183,9 +183,9 @@ void DesignSetupForm::doTrialTypeLayout() {
 
 void DesignSetupForm::doTrialLengthLayout() {
 	QVBoxLayout* m = new QVBoxLayout(trialLengthGroup_);
-	packBoxWithLabel(pretestGroup_, pretestEdit_, new QLabel("10ths of a second"));
-	packBoxWithLabel(habituationGroup_, habituationEdit_, new QLabel("10ths of a second"));
-	packBoxWithLabel(testGroup_, testEdit_, new QLabel("10ths of a second"));
+	packBoxWithLabel(pretestGroup_, pretestEdit_, new QLabel("ms"));
+	packBoxWithLabel(habituationGroup_, habituationEdit_, new QLabel("ms"));
+	packBoxWithLabel(testGroup_, testEdit_, new QLabel("ms"));
 	m->addWidget(pretestGroup_);
 	m->addWidget(habituationGroup_);
 	m->addWidget(testGroup_);
@@ -193,9 +193,9 @@ void DesignSetupForm::doTrialLengthLayout() {
 
 void DesignSetupForm::doLookAwayTimeLayout() {
 	QVBoxLayout* m = new QVBoxLayout(lookTimesGroup_);
-	packBoxWithLabel(minLookTimeGroup_, minLookTimeEdit_, new QLabel("10ths of a second"));
-	packBoxWithLabel(minLookAwayTimeGroup_, minLookAwayTimeEdit_, new QLabel("10ths of a second"));
-	packBoxWithLabel(minNoLookTimeGroup_, minNoLookTimeEdit_, new QLabel("10ths of a second"));
+	packBoxWithLabel(minLookTimeGroup_, minLookTimeEdit_, new QLabel("ms"));
+	packBoxWithLabel(minLookAwayTimeGroup_, minLookAwayTimeEdit_, new QLabel("ms"));
+	packBoxWithLabel(minNoLookTimeGroup_, minNoLookTimeEdit_, new QLabel("ms"));
 	m->addWidget(minLookTimeGroup_);
 	m->addWidget(minLookAwayTimeGroup_);
 	m->addWidget(minNoLookTimeGroup_);
