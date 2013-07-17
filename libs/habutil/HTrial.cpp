@@ -87,10 +87,11 @@ bool HNoLookTransition::eventTest(QEvent* e)
         return false;
 
 	// OK so our timer event has fired.
-	// If there is a look pending, we don't want the transition to fire (return false)
-	// If there is no look pending, let it fire (return true)
+	// If there is a look pending, we don't want the transition to fire (return false).
+    // I assume that the look() signal WILL come, and it will trigger a transition.
+	// If there is no look pending, let this transition happen (return true).
 
-	if (m_ld.flush(HElapsedTimer::elapsed()))
+	if (m_ld.isLookPending(HElapsedTimer::elapsed()))
 	{
 		bVal = false;
 	}
