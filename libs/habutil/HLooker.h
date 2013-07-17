@@ -26,7 +26,11 @@ public:
 	~HLooker() {};
 	void addTrans(const HLookTrans& type, int tMS);
 	
-	// if a look is pending, then act like its completed and force an "emit look"
+	// return true if a look is pending but not complete.
+	bool isLookPending(int tMS);
+
+	// if a look is pending, then act like its completed and force an "emit look".
+	// Returns same value as isLookPending() would.
 	bool flush(int tMS);
 
 	// clear out look transitions list and reset all (leave looks list intact)
