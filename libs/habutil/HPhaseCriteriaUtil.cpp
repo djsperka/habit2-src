@@ -27,7 +27,8 @@ HPhaseCriteria* createPhaseCriteria(const HabituationSettings& habsettings, int 
 	else if (habsettings.getHabituationType() == HHabituationType::HHabituationTypeTotalLookingTime)
 	{
 		// total look time is currently in 10ths of a sec. Must change that to ms....
-		pcrit = new HPhaseTotalLookingTimeCriteria(100 * habsettings.getTotalLookLengthToEnd(), ntrials);
+		// Changed to ms. Do not multiply by 100.  djs 7/15/2013
+		pcrit = new HPhaseTotalLookingTimeCriteria(habsettings.getTotalLookLengthToEnd(), ntrials);
 	}
 	else 
 	{
