@@ -174,9 +174,9 @@ void HControlPanel::createExperiment(HEventLog& log)
 	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onCleared()));
 	
 	// Create look detector
-	int lookTimeMS = tiPreTest.getLookTimes() * 100;
-	int lookAwayTimeMS = tiHabituation.getLookTimes() * 100;
-	int noLookTimeMS = tiTest.getLookTimes() * 100;
+	int lookTimeMS = tiPreTest.getLookTimes();
+	int lookAwayTimeMS = tiHabituation.getLookTimes();
+	int noLookTimeMS = tiTest.getLookTimes();
 	m_pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, log, this);
 
 	// connect attention() and look() signals to a slot so we can forward the info to the event log
@@ -212,7 +212,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 			idStimPairList.append(idspList1.at(htg.next()));
 		}
 		m_pcritPreTest = new HPhaseFixedNCriteria(tiPreTest.getNumberOfTrials());
-		m_psPreTest = new HPhase(*sExperiment, m_pcritPreTest, log, idStimPairList, HPhaseType::PreTest, tiPreTest.getLength() * 100, noLookTimeMS, tiPreTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		m_psPreTest = new HPhase(*sExperiment, m_pcritPreTest, log, idStimPairList, HPhaseType::PreTest, tiPreTest.getLength(), noLookTimeMS, tiPreTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	if (tiHabituation.getNumberOfTrials() > 0)
@@ -226,7 +226,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 		
 		// Create habituation criteria object. 
 		m_pcritHabituation = createPhaseCriteria(m_experimentSettings.getHabituationSettings(), tiHabituation.getNumberOfTrials());
-		m_psHabituation = new HPhase(*sExperiment, m_pcritHabituation, log, idStimPairList, HPhaseType::Habituation, tiHabituation.getLength() * 100, noLookTimeMS, tiHabituation.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		m_psHabituation = new HPhase(*sExperiment, m_pcritHabituation, log, idStimPairList, HPhaseType::Habituation, tiHabituation.getLength(), noLookTimeMS, tiHabituation.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 	
 	if (tiTest.getNumberOfTrials() > 0)
@@ -239,7 +239,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 		}
 		
 		m_pcritTest = new HPhaseFixedNCriteria(tiTest.getNumberOfTrials());
-		m_psTest = new HPhase(*sExperiment, m_pcritTest, log, idStimPairList, HPhaseType::Test, tiTest.getLength() * 100, noLookTimeMS, tiTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		m_psTest = new HPhase(*sExperiment, m_pcritTest, log, idStimPairList, HPhaseType::Test, tiTest.getLength(), noLookTimeMS, tiTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	
