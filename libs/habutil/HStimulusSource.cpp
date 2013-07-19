@@ -65,12 +65,7 @@ HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool
 			}
 			else 
 			{
-				//file.open(QIODevice::ReadOnly);
-				//m_pVideo = new Phonon::MediaSource(file.readAll());
-				//QByteArray ba = file.readAll();
-				//m_pBuffer = new QBuffer(&ba);
 				m_type = VIDEO;
-				//file.close();
 			}
 		}
 		else 

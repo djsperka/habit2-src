@@ -10,7 +10,6 @@
 #ifndef STIMULUSSOURCE_H
 #define STIMULUSSOURCE_H
 
-#include <Phonon/MediaSource>
 #include <QImage>
 #include <QTextStream>
 #include <QBuffer>
