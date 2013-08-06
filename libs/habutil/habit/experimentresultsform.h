@@ -5,7 +5,7 @@
 #include "runsettings.h"
 #include "outputgenerator.h"
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 class QGroupBox;
 class QLabel;

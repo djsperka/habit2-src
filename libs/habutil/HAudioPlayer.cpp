@@ -89,3 +89,4 @@ void HAudioPlayer::onStateChanged(Phonon::State newState, Phonon::State oldState
 	}
 	return;
 }
+

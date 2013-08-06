@@ -1,7 +1,7 @@
 #include "resultviewerform.h"
-#include <QtGui/QFileDialog>
+#include <QFileDialog>
 #include <QtCore/QTextStream>
-#include <QtGui/QPrintDialog>
+#include <QPrintDialog>
 
 ResultViewerForm::ResultViewerForm(QWidget *parent)
 	: QDialog(parent)

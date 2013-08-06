@@ -10,7 +10,7 @@
 #ifndef HAPP_H
 #define HAPP_H
 
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 #include "ui_habitapp.h"
 
 namespace Habit
@@ -27,7 +27,7 @@ class HMainWindow : public QMainWindow
     Q_OBJECT
 	
 public:
-    HMainWindow(QWidget *parent = 0, Qt::WFlags flags = 0);
+    HMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
     ~HMainWindow() {};
 	
 	public slots:

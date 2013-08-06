@@ -1,13 +1,13 @@
 #include "resultsvieweroptions.h"
 #include "maindao.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
-#include <QtGui/QGroupBox>
-#include <QtGui/QListWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
+#include <QCheckBox>
+#include <QLabel>
+#include <QGroupBox>
+#include <QListWidget>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 namespace GUILib {
 

@@ -3,18 +3,11 @@
 
 #include "habituationsettings.h"
 
-#include <QtGui/QWidget>
-
-class QGroupBox;
-class QComboBox;
-class QRadioButton;
-class QLabel;
-class QLineEdit;
-class QVBoxLayout;
-
-namespace Habit {
-	class HabituationSettings;
-}
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 
 namespace GUILib {
 

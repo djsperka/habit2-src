@@ -2,6 +2,8 @@
 #define STIMULUSSETTINGSEDITORDIALOG_H
 
 #include "stimulussettings.h"
+
+#ifndef USING_QT5
 #include "mediasoundpreviewplayer.h"
 #include <QtGui/QDialog>
 
@@ -12,12 +14,14 @@ class QSlider;
 class QComboBox;
 class QGroupBox;
 class QPushButton;
+
+#else
+#include "H5MediaSoundPreviewPlayer.h"
+#include <QtWidgets>
+#endif
+
 class StimulusInfoForm;
 class QVBoxLayout;
-
-namespace System {
-	class MediaPlayer;
-}
 
 namespace GUILib {
 
@@ -56,7 +60,6 @@ private:
 
 private slots:
 	void fillConfigurationObject();
-	//void onSoundSourceChosen(const QString& source);
 	void onSoundPreview();
 	void onPlaybackFinished();
 	void onLeftSliderValueChanged(int vol);
@@ -71,7 +74,6 @@ signals:
 	
 private:
 	QString currentSource_;
-	//QLabel* mainTitle_;
 	QGroupBox* nameGroup_;
 	QLineEdit* stimulusName_;
 	StimulusInfoForm* leftEnabled_;
@@ -81,8 +83,6 @@ private:
 
 	QGroupBox* soundOptionsGroup_;	
 	QPushButton* previewSound_;
-	//QLabel* soundLabel_;
-	//QComboBox* soundCombo_;
 	QGroupBox* audioBalanceGroup_;	
 	QSlider* audioBalance_; 
 
@@ -92,7 +92,6 @@ private:
 
 	Habit::StimulusSettings settings_;
 
-	//static System::MediaPlayer* mediaPlayer_;
 	QSlider * audioBalanceLeft_;
 	QSlider * audioBalanceRight_;
 	QSlider * audioBalanceCenter_;

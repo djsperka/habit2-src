@@ -3,7 +3,12 @@
 
 #include "controlbaroptions.h"
 
+#ifndef USING_QT5
 #include <QtGui/QWidget>
+#else
+#include <QtWidgets>
+#endif
+
 
 namespace Ui {class ControlBarOptionsFormClass;};
 

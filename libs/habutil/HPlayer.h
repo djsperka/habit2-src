@@ -10,7 +10,11 @@
 #ifndef HABITPLAYER_H
 #define HABITPLAYER_H
 
+#ifdef USING_QT5
+#include <QtWidgets>
+#else
 #include <QtGui>
+#endif
 #include <QList>
 #include <QTextStream>
 #include "HStimulusSource.h"

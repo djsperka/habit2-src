@@ -10,7 +10,7 @@
 #ifndef HABITVIDEOIMAGEPLAYER_H
 #define HABITVIDEOIMAGEPLAYER_H
 
-#include <QtGui/QLabel>
+#include <QLabel>
 #include <QList>
 #include <QTextStream>
 #include <QKeyEvent>

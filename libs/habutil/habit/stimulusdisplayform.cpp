@@ -2,17 +2,17 @@
 #include "stimulusdisplayform.h"
 #include "stimulussettings.h"
 
-#include <QtGui/QGroupBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
-#include <QtGui/QFont>
-#include <QtGui/QPushButton>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QPalette>
-#include <QtGui/QColor>
-#include <QtGui/QColorDialog>
-#include <QtCore/QTDebug>
+#include <QGroupBox>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QLabel>
+#include <QFont>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QPalette>
+#include <QColor>
+#include <QColorDialog>
+#include <QtDebug>
 
 namespace GUILib {
 

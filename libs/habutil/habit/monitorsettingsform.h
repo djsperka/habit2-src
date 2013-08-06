@@ -3,7 +3,7 @@
 
 #include "monitorsettings.h"
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 namespace Ui {class MonitorSettingsFormClass;};
 

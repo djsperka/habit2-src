@@ -2,7 +2,7 @@
 #define SUBJECTINFORMATIONWIDGET_H
 
 #include "subjectsettings.h"
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "ui_subjectinformationwidget.h"
 
 class SubjectInformationWidget : public QWidget

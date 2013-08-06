@@ -3,10 +3,11 @@
 #include "stimulussettingseditordialog.h"
 #include "maindao.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QMessageBox>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 
 namespace GUILib {
 

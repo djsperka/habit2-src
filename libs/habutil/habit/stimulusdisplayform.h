@@ -2,16 +2,12 @@
 #define STIMULUSDISPLAYFORM_H
 
 #include "stimulusdisplayinfo.h"
-#include "stimulusdisplayinfo.h"
 
-#include <QtGui/QWidget>
-
-class QGroupBox;
-class QComboBox;
-class QLabel;
-class QCheckBox;
-class QVBoxLayout;
-class QPushButton;
+#ifndef USING_QT5
+#include <QtGuit>
+#else
+#include <QtWidgets>
+#endif
 
 namespace GUILib {
 

@@ -1,8 +1,8 @@
 #ifndef RESULTVIEWERFORM_H
 #define RESULTVIEWERFORM_H
 
-#include <QtGui/QDialog>
-#include <QtCore/QString>
+#include <QWidget>
+#include <QString>
 #include "ui_resultviewerform.h"
 
 class ResultViewerForm : public QDialog

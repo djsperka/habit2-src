@@ -6,6 +6,8 @@
  */
 
 #include "HResultsDialog.h"
+#include <QPrinter>
+#include <QPrintDialog>
 
 HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 : QDialog(parent)

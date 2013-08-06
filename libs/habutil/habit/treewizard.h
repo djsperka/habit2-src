@@ -1,12 +1,11 @@
 #ifndef TREEWIZARD_H
 #define TREEWIZARD_H
 
-#include <QtGui/QWidget>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QScrollArea>
-#include <QtGui/QComboBox>
-#include <QtGui/QStackedWidget>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 
 namespace GUILib
 {

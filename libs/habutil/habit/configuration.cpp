@@ -1,6 +1,11 @@
 #include "configuration.h"
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopServices>
+#include <QApplication>
+
+#ifndef USING_QT5
+#include <QDesktopServices>
+#else
+#include <QStandardPaths>
+#endif
 
 namespace Habit {
 		
@@ -20,8 +25,15 @@ configuration::configuration()
 	load_configuration();
 }
 
-void configuration::load_configuration() {
-	m_database_name = QDesktopServices::storageLocation(QDesktopServices::DataLocation) ;
+void configuration::load_configuration()
+{
+
+#ifndef USING_QT5
+	m_database_name = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+#else
+	m_database_name = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[0];
+#endif
+
 #ifdef Q_OS_MAC
 	m_database_name += "/habit.db3";
 #else

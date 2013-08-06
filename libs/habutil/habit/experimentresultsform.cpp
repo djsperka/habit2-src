@@ -6,14 +6,12 @@
 #include "resultviewerform.h"
 #include "HOutputGenerator.h"
 
-#include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
-#include <QtGui/QWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QFormLayout>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
+
 
 namespace GUILib {
 

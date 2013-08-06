@@ -1,19 +1,19 @@
 
 #include "stimulusinfoform.h"
 #include "stimulussettingseditordialog.h"
-#include "mediaplayer.h"
+//#include "mediaplayer.h"
 
-#include <QtGui/QDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QGroupBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QSlider>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMessageBox>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtCore/QFile>
+#include <QDialog>
+#include <QLabel>
+#include <QPushButton>
+#include <QGroupBox>
+#include <QComboBox>
+#include <QSlider>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFile>
 
 
 namespace GUILib {

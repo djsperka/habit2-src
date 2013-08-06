@@ -13,12 +13,6 @@
 #include "connection.h"
 #include "cloneexperimentdialog.h"
 
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QGroupBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QMessageBox>
-
 using namespace GUILib;
 
 const QString ExperimentSettingsForm::NEW_EXPERIMENT = "-- New Experiment --";

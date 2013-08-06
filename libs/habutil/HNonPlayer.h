@@ -10,10 +10,7 @@
 #define HABITNONPLAYER_H
 
 
-#include <QtGui/QLabel>
-#include <QList>
 #include <QTextStream>
-#include "HStimulusSource.h"
 #include "HPlayer.h"
 
 class HNonPlayer : public HPlayer

@@ -1,5 +1,5 @@
 #include "subjectinformationwidget.h"
-#include <QtGui/QMessageBox>
+#include <QMessageBox>
 
 SubjectInformationWidget::SubjectInformationWidget(QWidget *parent)
 	: QWidget(parent)

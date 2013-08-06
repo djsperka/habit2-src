@@ -3,7 +3,7 @@
 
 #include "experimentsettings.h"
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 class QComboBox;
 

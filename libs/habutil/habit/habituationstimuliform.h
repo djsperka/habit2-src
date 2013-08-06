@@ -2,11 +2,12 @@
 #define HABITUATIONSTIMULIFORM_H
 
 #include "stimulisettings.h"
-#include <QtGui/QWidget>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 
-class QPushButton;
-class QLabel;
-class QVBoxLayout;
 
 namespace GUILib {
 

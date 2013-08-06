@@ -1,23 +1,23 @@
 #include "runsettingsform.h"
 #include "habituationstimulitable.h"
-#include "habitcontrolpanel.h"
+//#include "habitcontrolpanel.h"
 #include "stimulisettings.h"
 #include "maindao.h"
 #include "subjectinformation.h"
 #include "runsettings.h"
 #include "experimentresultsform.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QComboBox>
-#include <QtGui/QGroupBox>
-#include <QtGui/QTextEdit>
-#include <QtGui/QListWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QMessageBox>
-#include <QtCore/QString>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QHBoxLayout>
+#include <QLabel>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QTextEdit>
+#include <QListWidget>
+#include <QPushButton>
+#include <QListWidgetItem>
+#include <QMessageBox>
+#include <QString>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 namespace GUILib {
 

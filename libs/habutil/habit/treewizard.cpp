@@ -1,9 +1,9 @@
 #include "treewizard.h"
 
-#include <QtGui/QGridLayout>
-#include <QtGui/QTreeWidgetItem>
-#include <QtGui/QGroupBox>
-#include <QtGui/QApplication>
+#include <QGridLayout>
+#include <QTreeWidgetItem>
+#include <QGroupBox>
+#include <QApplication>
 
 using namespace GUILib;
 

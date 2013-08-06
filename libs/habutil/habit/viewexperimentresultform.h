@@ -1,7 +1,7 @@
 #ifndef VIEWEXPERIMENTRESULTFORM_H
 #define VIEWEXPERIMENTRESULTFORM_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "ui_viewexperimentresultform.h"
 
 class ViewExperimentResultForm : public QDialog

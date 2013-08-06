@@ -1,5 +1,20 @@
 TEMPLATE = lib
-CONFIG += qt staticlib debug_and_release
+CONFIG += qt staticlib debug_and_release using_qt5
+
+# Check if we are using qt version 5. If so, use Qt Multimedia
+# variants of HAudioPlayer and HVideoImagePlayer
+
+using_qt5 {
+	QT += widgets multimedia multimediawidgets printsupport
+	DEFINES += USING_QT5
+	MM_HEADERS = H5VideoImagePlayer.h H5AudioPlayer.h H5MediaSoundPreviewPlayer.h
+	MM_SOURCES = H5VideoImagePlayer.cpp H5AudioPlayer.cpp H5MediaSoundPreviewPlayer.cpp
+} else {
+	QT += phonon
+	MM_HEADERS = HVideoImagePlayer.h HAudioPlayer.h habit/mediasoundpreviewplayer.h habit/imagewidget_original.h	
+	MM_SOURCES = HVideoImagePlayer.cpp HAudioPlayer.cpp habit/mediasoundpreviewplayer.cpp habit/imagewidget_original.cpp
+}
+
 QMAKE_CXXFLAGS += -fvisibility=hidden
 INCLUDEPATH += . ./habit
 CONFIG(debug, debug|release) {
@@ -21,8 +36,6 @@ HEADERS +=	HLook.h \
 			HPhase.h \
 			HElapsedTimer.h \
 			HPlayer.h \
-			HAudioPlayer.h \
-			HVideoImagePlayer.h \
 			HNonPlayer.h \
 			HStimulusSource.h \
 			HImageWidget.h \
@@ -31,7 +44,6 @@ HEADERS +=	HLook.h \
 			HMainWindow.h \
 			HMediaManagerUtil.h \
 			HTrialGenerator.h \
-#			HOutputGenerator.h \
 			HPhaseCriteria.h \
 			HPhaseCriteriaUtil.h \
 			HTrialLog.h \
@@ -48,6 +60,8 @@ HEADERS +=	HLook.h \
 			HResultsDialog.h \
 			HApplication.h \
 			HReliability.h \
+			$$MM_HEADERS \
+			HNonPlayer.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
 			habit/cloneexperimentdialog.h \
@@ -58,21 +72,19 @@ HEADERS +=	HLook.h \
 			habit/criterionsettings.h \
 			habit/designsettings.h \
 			habit/designsetupform.h \
-			habit/experimentresultsform.h \
+#			habit/experimentresultsform.h \
 			habit/experimentsettings.h \
 			habit/experimentsettingsform.h \
 			habit/exportmultipleresults.h \
-			habit/habitapp.h \
+#			habit/habitapp.h \
 #			habit/habitcontrolpanel.h \
 			habit/habituationsettings.h \
 			habit/habituationsetupform.h \
 			habit/habituationstimuliform.h \
 			habit/habituationstimulitable.h \
-			habit/imagewidget_original.h \
 			habit/maindao.h \
 #			habit/mediamanager.h \
 #			habit/mediaplayer.h \
-			habit/mediasoundpreviewplayer.h \
 			habit/monitormanager.h \
 			habit/monitorsettings.h \
 			habit/monitorsettingsform.h \
@@ -82,7 +94,7 @@ HEADERS +=	HLook.h \
 			habit/resource.h \
 			habit/resource1.h \
 			habit/resultsvieweroptions.h \
-			habit/resultviewerform.h \
+#			habit/resultviewerform.h \
 			habit/resultviewersettings.h \
 			habit/runsettings.h \
 			habit/runsettingsform.h \
@@ -102,6 +114,7 @@ HEADERS +=	HLook.h \
 			habit/trialsinfo.h \
 			habit/viewexperimentresultform.h
 
+
 SOURCES +=	HLook.cpp \
 			HLooker.cpp \
 			HLookDetector.cpp \
@@ -113,9 +126,6 @@ SOURCES +=	HLook.cpp \
 			HPhase.cpp \
 			HElapsedTimer.cpp \
 			HPlayer.cpp \
-			HAudioPlayer.cpp \
-			HVideoImagePlayer.cpp \
-			HNonPlayer.cpp \
 			HStimulusSource.cpp \
 			HImageWidget.cpp \
 			HMediaManager.cpp \
@@ -138,6 +148,8 @@ SOURCES +=	HLook.cpp \
 			HResultsDialog.cpp \
 			HApplication.cpp \
 			HReliability.cpp \
+			$$MM_SOURCES \
+			HNonPlayer.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
 			habit/cloneexperimentdialog.cpp \
@@ -148,22 +160,21 @@ SOURCES +=	HLook.cpp \
 			habit/criterionsettings.cpp \
 			habit/designsettings.cpp \
 			habit/designsetupform.cpp \
-			habit/experimentresultsform.cpp \
+#			habit/experimentresultsform.cpp \
 			habit/experimentsettings.cpp \
 			habit/experimentsettingsform.cpp \
 			habit/exportmultipleresults.cpp \
-			habit/habitapp.cpp \
+#			habit/habitapp.cpp \
 #			habit/habitcontrolpanel.cpp \
 			habit/habituationsettings.cpp \
 			habit/habituationsetupform.cpp \
 			habit/habituationstimuliform.cpp \
 			habit/habituationstimulitable.cpp \
-			habit/imagewidget_original.cpp \
-			habit/main.cpp \
+#			habit/imagewidget_original.cpp \
+#			habit/main.cpp \
 			habit/maindao.cpp \
 #			habit/mediamanager.cpp \
 #			habit/mediaplayer.cpp \
-			habit/mediasoundpreviewplayer.cpp \
 			habit/monitormanager.cpp \
 			habit/monitorsettings.cpp \
 			habit/monitorsettingsform.cpp \
@@ -171,7 +182,7 @@ SOURCES +=	HLook.cpp \
 			habit/reliabilitiesform.cpp \
 			habit/reliabilitysettings.cpp \
 			habit/resultsvieweroptions.cpp \
-			habit/resultviewerform.cpp \
+#			habit/resultviewerform.cpp \
 			habit/resultviewersettings.cpp \
 			habit/runsettings.cpp \
 			habit/runsettingsform.cpp \

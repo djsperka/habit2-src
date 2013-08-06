@@ -2,8 +2,8 @@
 #include "resultsvieweroptions.h"
 #include "resultviewerform.h"
 #include "exportmultipleresults.h"
-#include <QtGui/QFileDialog>
-#include <QtCore/QTextStream>
+#include <QFileDialog>
+#include <QTextStream>
 #include <QMessageBox>
 
 ViewExperimentResultForm::ViewExperimentResultForm(QWidget *parent)

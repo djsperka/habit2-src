@@ -1,7 +1,7 @@
 #ifndef RELIABILITIESFORM_H
 #define RELIABILITIESFORM_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 #include "ui_reliabilitiesform.h"
 
 namespace GUILib {

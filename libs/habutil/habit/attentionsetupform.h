@@ -4,7 +4,7 @@
 #include "attentiongettersettings.h"
 #include "stimulussettings.h"
 
-#include <QtGui/QWidget>
+#include <QtWidgets>
 
 class QGroupBox;
 class QLabel;

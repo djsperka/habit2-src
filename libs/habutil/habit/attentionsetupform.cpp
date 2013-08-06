@@ -1,15 +1,12 @@
 #include "attentionsetupform.h"
 #include "stimulussettingseditordialog.h"
 
-#include <QtGui/QWidget>
-#include <QtGui/QColorDialog>
-#include <QtGui/QFont>
-#include <QtGui/QPushButton>
-#include <QtGui/QCheckBox>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QGroupBox>
-#include <QtGui/QPalette>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
+
 
 namespace GUILib {
 

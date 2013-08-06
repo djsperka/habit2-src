@@ -6,8 +6,8 @@
 #include "runsettings.h"
 #include "subjectinformationwidget.h"
 
-#include <QtGui/QDialog>
-#include <QtGui/QStackedWidget>
+#include <QDialog>
+#include <QStackedWidget>
 
 class QLabel;
 class QComboBox;

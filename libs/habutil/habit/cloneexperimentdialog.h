@@ -1,7 +1,7 @@
 #ifndef CLONEEXPERIMENTDIALOG_H
 #define CLONEEXPERIMENTDIALOG_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 #include "ui_cloneexperimentdialog.h"
 
 namespace GUILib {

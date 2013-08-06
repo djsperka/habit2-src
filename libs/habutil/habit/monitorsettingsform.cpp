@@ -3,8 +3,9 @@
 #include "monitormanager.h"
 #include "monitorsettings.h"
 
-#include <QtGui/QMessageBox>
-#include <QtGui/QDesktopWidget>
+
+#include <QMessageBox>
+#include <QDesktopWidget>
 
 namespace GUILib {
 

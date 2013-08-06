@@ -1,14 +1,14 @@
 #include "subjectinformation.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QTextEdit>
-#include <QtGui/QPushButton>
-#include <QtGui/QDateTimeEdit>
-#include <QtGui/QMessageBox>
-#include <QtGui/QRegExpValidator>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QTextEdit>
+#include <QPushButton>
+#include <QDateTimeEdit>
+#include <QMessageBox>
+#include <QRegExpValidator>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 namespace GUILib {
 

@@ -8,7 +8,7 @@
 #ifndef HRESULTSDIALOG_H_
 #define HRESULTSDIALOG_H_
 
-#include <QtGui>
+#include <QtWidgets>
 #include "HResultsWidget.h"
 
 class HResultsDialog : public QDialog

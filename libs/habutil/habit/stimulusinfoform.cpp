@@ -1,17 +1,7 @@
 #include "stimulusinfoform.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
-#include <QtGui/QFileDialog>
-#include <QtGui/QSlider>
-#include <QtGui/QPushButton>
-#include <QtGui/QLineEdit>
-#include <QtCore/QFileInfo>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtCore/QSettings>
-#include <QtCore/QTDebug>
+#include <QSettings>
+#include <QTDebug>
 
 namespace GUILib {
 

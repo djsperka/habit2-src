@@ -2,10 +2,8 @@
 #define HABITUATIONSTIMULITABLE_H
 
 #include "stimulisettings.h"
-
-#include <QtGui/QTableWidget>
-
-class QTableWidget;
+#include <QTableWidget>
+//class QTableWidget;
 
 namespace GUILib {
 

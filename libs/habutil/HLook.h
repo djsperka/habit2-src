@@ -14,6 +14,7 @@
 #include "HTypes.h"
 #include <QTime>
 #include <QTextStream>
+#include <QDataStream>
 #include <QDebug>
 
 //enum LookTransType { UnknownLookTrans=-1, NoneLeft, LeftNone, NoneCenter, CenterNone, NoneRight, RightNone, NoneNone};

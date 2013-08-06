@@ -3,16 +3,12 @@
 
 #include "designsettings.h"
 
-#include <QtGui/QWidget>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 
-class QComboBox;
-class QGroupBox;
-class QLineEdit;
-class QBoxLayout;
-
-namespace Habit {
-	class DesignSettings;
-}
 
 namespace GUILib {
 

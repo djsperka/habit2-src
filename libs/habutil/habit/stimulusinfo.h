@@ -5,6 +5,7 @@
 /// \file stimulusinfo.h
 /// \brief Declaraction of class Habit::StimulusInfo
 
+#include <QDataStream>
 #include <QDebug>
 
 /// Common namespace for all entities of the Habit

@@ -21,15 +21,15 @@
 #include "reliabilitysettings.h"
 #include "HResultsDialog.h"
 #include "HResultsWidget.h"
-#include <QtGui/QMessageBox>
-#include <QtGui/QFileDialog>
+#include <QMessageBox>
+#include <QFileDialog>
 #include <QtCore/QTextStream>
 #include <QtCore/QCoreApplication>
-#include <QtGui/QApplication>
+#include <QApplication>
 
 using namespace Habit;
 
-HMainWindow::HMainWindow(QWidget *parent, Qt::WFlags flags)
+HMainWindow::HMainWindow(QWidget *parent, Qt::WindowFlags flags)
 : QMainWindow(parent, flags)
 {
     ui.setupUi(this);
@@ -48,6 +48,8 @@ void HMainWindow::runReliability()
 			HEventLog log;
 			
 			qWarning("RELIABILITY IS BROKEN AND, WELL, UNRELIABLE!");
+
+#if 0
 			RunSettings runSettings;
 			SubjectSettings subjectSettings;
 			HControlPanel habitControlPanel(log, runSettings, this);
@@ -73,6 +75,7 @@ void HMainWindow::runReliability()
 					experForm.exec();
 				}
 			}
+#endif
 		}
 	}
 }

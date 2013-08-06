@@ -8,8 +8,13 @@
  */
 
 #include "HMediaManagerUtil.h"
+#ifdef USING_QT5
+#include "H5VideoImagePlayer.h"
+#include "H5AudioPlayer.h"
+#else
 #include "HVideoImagePlayer.h"
 #include "HAudioPlayer.h"
+#endif
 
 void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& ss, Habit::IdStimulusSettingsPairList& idspStim, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl);
 

@@ -3,17 +3,12 @@
 
 #include "stimulusinfo.h"
 
-#include <QtGui/QWidget>
+#ifdef USING_QT5
+#include <QtWidgets>
+#else
+#include <QtGui>
+#endif
 
-class QLabel;
-class QGroupBox;
-class QCheckBox;
-class QFileDialog;
-class QSlider;
-class QPushButton;
-class QLineEdit;
-class QHBoxLayout;
-class QVBoxLayout;
 
 namespace GUILib {
 

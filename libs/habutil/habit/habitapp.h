@@ -1,7 +1,7 @@
 #ifndef HABITAPP_H
 #define HABITAPP_H
 
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 #include "ui_habitapp.h"
 
 class HabitApp : public QMainWindow

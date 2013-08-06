@@ -1,11 +1,11 @@
 #include "habituationstimulitable.h"
 #include "stimulussettings.h"
 
-#include <QtGui/QWidget>
-#include <QtGui/QHeaderView>
-#include <QtGui/QTableWidget>
-#include <QtGui/QTableWidgetItem>
-#include <QtGui/QMessageBox>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 
 namespace GUILib {
 HabituationStimuliTable::HabituationStimuliTable(const Habit::StimuliSettings& settings, QWidget* w)

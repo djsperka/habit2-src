@@ -3,15 +3,12 @@
 
 #include "subjectsettings.h"
 
-#include <QtGui/QDialog>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 
-class QLabel;
-class QLineEdit;
-class QTextEdit;
-class QPushButton;
-class QDateTimeEdit;
-class QVBoxLayout;
-class QGridLayout;
 
 namespace GUILib {
 

@@ -1,7 +1,7 @@
 #ifndef EXPORTMULTIPLERESULTS_H
 #define EXPORTMULTIPLERESULTS_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 class QLabel;
 class QPushButton;

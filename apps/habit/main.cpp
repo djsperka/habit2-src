@@ -8,27 +8,28 @@
 #include <QFile>
 #include <QtDebug>
 #include <QMenuBar>
+#include <QString>
 #include <iostream>
 
 using namespace std;
 QTextStream logfile; 
 
-
+#ifndef USING_QT5
 void SimpleLoggingHandler(QtMsgType type, const char *msg) 
 {    
 	switch (type) 
 	{
 	case QtDebugMsg:
-		logfile << QTime::currentTime().toString().toAscii().data() << " Debug: " << msg << "\n";
+		logfile << QTime::currentTime().toString("hh:mm:ss.zzz") << " Debug: " << msg << "\n";
 		break;
 	case QtCriticalMsg:
-		logfile << QTime::currentTime().toString().toAscii().data() << " Critical: " << msg << "\n";
+		logfile << QTime::currentTime().toString("hh:mm:ss.zzz") << " Critical: " << msg << "\n";
 		break;
 	case QtWarningMsg:
-		logfile << QTime::currentTime().toString().toAscii().data() << " Warning: " << msg << "\n";
+		logfile << QTime::currentTime().toString("hh:mm:ss.zzz") << " Warning: " << msg << "\n";
 		break;
 	case QtFatalMsg:
-		logfile << QTime::currentTime().toString().toAscii().data() <<  " Fatal: " << msg << "\n";
+		logfile << QTime::currentTime().toString("hh:mm:ss.zzz") <<  " Fatal: " << msg << "\n";
 		abort();
 		break;
 	}
@@ -41,6 +42,39 @@ void ScreenLoggingHandler(QtMsgType type, const char* msg)
     std::cerr << output.toStdString() << std::endl;
     if( type == QtFatalMsg ) abort();
 }
+#else
+void SimpleLoggingHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+	Q_UNUSED(context);
+	switch (type)
+	{
+	case QtDebugMsg:
+		logfile << QTime::currentTime().toString("hh:mm:ss.zzz") << " Debug: " << msg << "\n";
+		break;
+	case QtCriticalMsg:
+		logfile << QTime::currentTime().toString("hh:mm:ss.zzz") << " Critical: " << msg << "\n";
+		break;
+	case QtWarningMsg:
+		logfile << QTime::currentTime().toString("hh:mm:ss.zzz") << " Warning: " << msg << "\n";
+		break;
+	case QtFatalMsg:
+		logfile << QTime::currentTime().toString("hh:mm:ss.zzz") <<  " Fatal: " << msg << "\n";
+		abort();
+		break;
+	}
+}
+
+void ScreenLoggingHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+	Q_UNUSED(context);
+    const char symbols[] = { 'I', 'E', '!', 'X' };
+    QString output = QString("[%1] %2").arg( symbols[type] ).arg( msg );
+    std::cerr << output.toStdString() << std::endl;
+    if( type == QtFatalMsg ) abort();
+}
+
+
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -56,11 +90,19 @@ int main(int argc, char *argv[])
 	}
 	if (bs)
 	{
+#ifndef USING_QT5
 		qInstallMsgHandler(ScreenLoggingHandler);
+#else
+		qInstallMessageHandler(ScreenLoggingHandler);
+#endif
 	}
 	else 
 	{
+#ifndef USING_QT5
 		qInstallMsgHandler(SimpleLoggingHandler);
+#else
+		qInstallMessageHandler(SimpleLoggingHandler);
+#endif
 	}
 
     HApplication h(argc, argv);
@@ -70,8 +112,15 @@ int main(int argc, char *argv[])
 	h.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
 
 	// Generate filename after application object initialized -- this sets data location based on application/organization name.
-	QString file_name = QDesktopServices::storageLocation(QDesktopServices::DataLocation) ;
-#ifdef Q_OS_MAC
+	QString file_name;// = QDesktopServices::storageLocation(QDesktopServices::DataLocation) ;
+#ifndef USING_QT5
+	file_name = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+#else
+	file_name = QStandardPaths::standardLocations(QStandardPaths::DataLocation)[0];
+#endif
+
+
+	#ifdef Q_OS_MAC
 	file_name += QString("/habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));
 #else
 	file_name += QString("\\habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));

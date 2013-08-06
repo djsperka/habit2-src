@@ -1,11 +1,10 @@
 #include "exportmultipleresults.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QListWidget>
-#include <QtGui/QVBoxLayout>
-#include <QtCore/QFileInfo>
-#include <QtGui/QFileDialog>
+#ifndef USING_QT5
+#include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 
 namespace GUILib {
 ExportMultipleResults::ExportMultipleResults(QWidget* w)

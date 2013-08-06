@@ -3,7 +3,7 @@
 
 #include "resultviewersettings.h"
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 class QCheckBox;
 class QListWidget;
