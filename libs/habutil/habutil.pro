@@ -34,6 +34,7 @@ HEADERS +=	HLook.h \
 #			HOutputGenerator.h \
 			HPhaseCriteria.h \
 			HPhaseCriteriaUtil.h \
+			HDBUtil.h \
 			HTrialLog.h \
 			HPhaseLog.h \
 			HEventLog.h \
@@ -126,6 +127,7 @@ SOURCES +=	HLook.cpp \
 #			HOutputGenerator.cpp \
 			HPhaseCriteria.cpp \
 			HPhaseCriteriaUtil.cpp \
+			HDBUtil.cpp \
 			HTrialLog.cpp \
 			HPhaseLog.cpp \
 			HEventLog.cpp \
