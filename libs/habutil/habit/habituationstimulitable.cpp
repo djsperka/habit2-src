@@ -27,11 +27,9 @@ void HabituationStimuliTable::initializeTable()
 	header << "Stimulus Name";
 	setHorizontalHeaderLabels(header);
 	horizontalHeader()->setStretchLastSection(true);
-	qDebug() << "HabituationStimuliTable::initializeTable context " << m_pcontext->name();
 	for (Habit::StimulusSettingsListConstIterator it = m_listSS.begin(); it!=m_listSS.end(); it++)
 	{
 		QTableWidgetItem* item = new QTableWidgetItem(it->getName());
-		qDebug() << "HabituationStimuliTable::initializeTable stim=" << it->getName();
 		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 		if(row >= rowCount())
 		{

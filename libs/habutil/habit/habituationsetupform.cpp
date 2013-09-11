@@ -36,12 +36,10 @@ void HabituationSetupForm::createComponents()
 	mainTitle_ = new QLabel(tr("Habituation Setup"));
 	habituationGroup_= new QGroupBox(tr("Type of Habituation"));
 	habituationCombo_ = new QComboBox(habituationGroup_);
-	qDebug() << "HabituationSetupForm::createComponents() HabType " << sizeof(HHabituationType::A)/sizeof(HHabituationType*);
 	for (unsigned int i=0; i<sizeof(HHabituationType::A)/sizeof(HHabituationType*); i++)
 	{
 		const HHabituationType* ap = HHabituationType::A[i];
 		habituationCombo_->addItem(ap->label(), ap->number());
-		qDebug() << "Type combo item " << ap->label() << " " << ap->number();
 	}
 	
 	basisGroup_ = new QGroupBox(tr("Criterion Basis")); 
@@ -56,11 +54,9 @@ void HabituationSetupForm::createComponents()
 	windowSizeEdit_ = new QLineEdit();
 	windowSizeLabel_ = new QLabel(tr("trials"));
 	windowTypeCombo_ = new QComboBox(windowTypeGroup_);
-	qDebug() << "HabituationSetupForm::createComponents() WindowType " << sizeof(HCriterionWindowType::A)/sizeof(HCriterionWindowType*);
 	for (unsigned int i=0; i<sizeof(HCriterionWindowType::A)/sizeof(HCriterionWindowType*); i++)
 	{
 		const HCriterionWindowType* ap = HCriterionWindowType::A[i];
-		qDebug() << "WType combo item " << ap->label() << " " << ap->number();
 		windowTypeCombo_->addItem(ap->label(), ap->number());
 	}
 	totalLookLengthToEndGroup_ = new QGroupBox(tr("Total Look Length to End Habituation"));
@@ -197,7 +193,6 @@ void HabituationSetupForm::initialize()
 	int index;
 	index = habituationCombo_->findData(settings_.getHabituationType().number());
 	
-	qDebug() << "HabituationSetupForm::initialize() getHabituationType().number() = " << settings_.getHabituationType().number() << " name " << settings_.getHabituationType().name() << " index " << index;
 	if (index == -1)
 	{
 		qWarning("HabituationSetupForm::initialize() cannot find habituation type combo item with data value %d", settings_.getHabituationType().number());

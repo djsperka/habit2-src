@@ -42,21 +42,17 @@ void StimulusDisplayForm::createComponents()
 	mainTitle_ = new QLabel(tr("Stimulus Display"));
 	presentationGroup_= new QGroupBox(tr("Presentation Style"));
 	presentationCombo_ = new QComboBox(presentationGroup_);
-	qDebug() << "StimulusDisplayForm create presentation stylecombo " << sizeof(HPresentationStyle::A)/sizeof(HPresentationStyle*);
 	for (unsigned int i=0; i<sizeof(HPresentationStyle::A)/sizeof(HPresentationStyle*); i++)
 	{
 		const HPresentationStyle* ap = HPresentationStyle::A[i];
 		presentationCombo_->addItem(ap->label(), ap->number());
-		qDebug() << "Type combo item " << ap->label() << " " << ap->number();
 	}
 	displayGroup_ = new QGroupBox(tr("Display Type")); 
 	displayCombo_= new QComboBox(displayGroup_);
-	qDebug() << "StimulusDisplayForm create display type combo " << sizeof(HDisplayType::A)/sizeof(HDisplayType*);
 	for (unsigned int i=0; i<sizeof(HDisplayType::A)/sizeof(HDisplayType*); i++)
 	{
 		const HDisplayType* ap = HDisplayType::A[i];
 		displayCombo_->addItem(ap->label(), ap->number());
-		qDebug() << "Type combo item " << ap->label() << " " << ap->number();
 	}
 
 	displayCheck_ = new QCheckBox(tr("Maintain Original Aspect Ratio"));

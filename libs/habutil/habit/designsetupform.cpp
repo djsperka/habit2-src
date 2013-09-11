@@ -52,25 +52,9 @@ void DesignSetupForm::createTrialType() {
 	habituationCombo_ = new QComboBox();
 	testCombo_ = new QComboBox();
 
-	//HACK
-
-	qDebug() << "HaCK CRITERIONWindowType " << sizeof(HCriterionWindowType::A)/sizeof(HCriterionWindowType*);
-	for (unsigned int i=0; i<sizeof(HCriterionWindowType::A)/sizeof(HCriterionWindowType*); i++)
-	{
-		const HCriterionWindowType* ap = HCriterionWindowType::A[i];
-		qDebug() << "WType combo item " << ap->label() << " " << ap->number();
-	}
-
-
-	const HTrialCompletionType& testtype = HTrialCompletionType::HTrialCompletionSubjectControlled;
-	qDebug() << "testtype " << testtype.number() << " " << testtype.label() << " " << testtype.name();
-	//ENDHACK
-
-
 	for (unsigned int i=0; i<sizeof(HTrialCompletionType::A)/sizeof(HTrialCompletionType*); i++)
 	{
 		const HTrialCompletionType* ap = HTrialCompletionType::A[i];
-		qDebug() << "TrialType combo item " << ap->number() << " " << ap->label() << " " << ap->name();
 		pretestCombo_->addItem(ap->label(), ap->number());
 		habituationCombo_->addItem(ap->label(), ap->number());
 		testCombo_->addItem(ap->label(), ap->number());
