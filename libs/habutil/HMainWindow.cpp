@@ -21,11 +21,14 @@
 #include "reliabilitysettings.h"
 #include "HResultsDialog.h"
 #include "HResultsWidget.h"
+#include "HDBUtil.h"
 #include <QtGui/QMessageBox>
 #include <QtGui/QFileDialog>
 #include <QtCore/QTextStream>
 #include <QtCore/QCoreApplication>
 #include <QtGui/QApplication>
+#include <QMenu>
+#include <QAction>
 
 using namespace Habit;
 
@@ -34,7 +37,32 @@ HMainWindow::HMainWindow(QWidget *parent, Qt::WFlags flags)
 {
     ui.setupUi(this);
 	setWindowTitle(QString("%1 - %2").arg("Habit").arg(QCoreApplication::instance()->applicationVersion()));
+	createActions();
+	createMenus();
 }
+
+void HMainWindow::createActions()
+ {
+	m_openDBAct = new QAction(tr("&Open Experiment Database File..."), this);
+	m_openDBAct->setShortcuts(QKeySequence::Open);
+	m_openDBAct->setStatusTip(tr("Open or create another experiment database"));
+	connect(m_openDBAct, SIGNAL(triggered()), this, SLOT(openDBFile()));
+ }
+
+void HMainWindow::openDBFile()
+{
+	if (selectDB())
+	{
+		openDB();
+	}
+}
+
+void HMainWindow::createMenus()
+{
+    m_fileMenu = menuBar()->addMenu(tr("&File"));
+    m_fileMenu->addAction(m_openDBAct);
+}
+
 
 void HMainWindow::runReliability()
 {
@@ -117,6 +145,7 @@ void HMainWindow::runSavedExperiment()
 {
     GUILib::RunSettingsForm runSettingsForm(this/* runSettings*/);
 
+    m_openDBAct->setEnabled(false);
 	if(runSettingsForm.exec() == QDialog::Accepted) {
 		HEventLog log;
 		HControlPanel habitControlPanel(log, runSettingsForm.getRunSettings(), this);
@@ -146,5 +175,6 @@ void HMainWindow::runSavedExperiment()
 			}
 		}
     }
+    m_openDBAct->setEnabled(true);
 }
 

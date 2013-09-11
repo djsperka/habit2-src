@@ -21,6 +21,8 @@ namespace Habit
 };
 
 class HEventLog;
+class QMenu;
+class QAction;
 
 class HMainWindow : public QMainWindow
 {
@@ -37,8 +39,15 @@ public:
 	void runReliability();
 	void showResultsFile(QString filename);
 	
+private slots:
+	void openDBFile();
+
 private:
+	void createMenus();
+	void createActions();
     Ui::HabitAppClass ui;
+    QMenu *m_fileMenu;
+    QAction *m_openDBAct;
 };
 
 #endif // HABITAPP_H
