@@ -1,8 +1,9 @@
 
 #include "maindao.h"
 #include "experimentsettings.h"
-#include "connection.h"
+//#include "connection.h"
 
+#include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
 #include <QtSql/QSqlField>
@@ -24,8 +25,6 @@ MainDao::~MainDao()
 // Settings Add/Update methods
 
 bool MainDao::addOrUpdateMonitorSetting(size_t experimentId, Habit::MonitorSettings* settings) {
-	Habit::connection* con = Habit::connection::get_instance();
-	Q_ASSERT(0 != con);
 	int id = settings->getId();
 	QString sql;
 	if(id > 0) {
@@ -35,7 +34,8 @@ bool MainDao::addOrUpdateMonitorSetting(size_t experimentId, Habit::MonitorSetti
 		sql = "insert into monitor_settings (control_monitor, left_monitor, center_monitor, right_monitor, experiment_id)"
 			" values(?, ?, ?, ?, ?)";
 	}
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(settings->getControlMonitorIndex());
 	q.addBindValue(settings->getLeftMonitorIndex());
 	q.addBindValue(settings->getCenterMonitorIndex());
@@ -45,13 +45,10 @@ bool MainDao::addOrUpdateMonitorSetting(size_t experimentId, Habit::MonitorSetti
 	}
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	return !q.lastError().isValid();
 }
 
 bool MainDao::addOrUpdateAttentionGetterSetting(size_t experimentId, Habit::AttentionGetterSettings* settings) {
-	Habit::connection* con = Habit::connection::get_instance();
-	Q_ASSERT(0 != con);
 	int id = settings->getId();
 	QString sql;
 	if(id > 0) {
@@ -61,7 +58,8 @@ bool MainDao::addOrUpdateAttentionGetterSetting(size_t experimentId, Habit::Atte
 		sql = "insert into attention_setup (use_attention_stimulus, stimulus_name, background_color, experiment_id)"
 			" values(?, ?, ?, ?)";
 	}
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(settings->isAttentionGetterUsed());
 	q.addBindValue(settings->getAttentionGetterStimulus().getName());
 	q.addBindValue(settings->getBackGroundColor().name());
@@ -73,14 +71,11 @@ bool MainDao::addOrUpdateAttentionGetterSetting(size_t experimentId, Habit::Atte
 	if(id < 0) {
 		id = q.lastInsertId().toInt();
 	}
-	qDebug() << q.lastError();
 	Habit::StimulusSettings ss = settings->getAttentionGetterStimulus();
 	return !q.lastError().isValid() && addOrUpdateStimulusSetting(ss.getId(), id, ss, "attention_getting_stimuli", "attention_getter_id");
 }
 
 bool MainDao::addOrUpdateControlBarOption(size_t experimentId, Habit::ControlBarOptions* settings) {
-	Habit::connection* con = Habit::connection::get_instance();
-	Q_ASSERT(0 != con);
 	int id = settings->getId();
 	QString sql;
 	if(id > 0) {
@@ -90,7 +85,8 @@ bool MainDao::addOrUpdateControlBarOption(size_t experimentId, Habit::ControlBar
 		sql = "insert into controlbar_options (is_used, display_current_experiment, display_current_stimulus, experiment_id)"
 			" values(?, ?, ?, ?)";
 	}
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(settings->isControlBarUsed());
 	q.addBindValue(settings->isCurrentExperimentDisplayed());
 	q.addBindValue(settings->isCurrentStimulusDisplayed());
@@ -99,13 +95,10 @@ bool MainDao::addOrUpdateControlBarOption(size_t experimentId, Habit::ControlBar
 	}
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	return !q.lastError().isValid();
 }
 
 bool MainDao::addOrUpdateDesignSetting(size_t experimentId, Habit::DesignSettings* settings) {
-	Habit::connection* con = Habit::connection::get_instance();
-	Q_ASSERT(0 != con);
 	int id = settings->getId();
 	QString sql;
 	if(id > 0) {
@@ -119,7 +112,8 @@ bool MainDao::addOrUpdateDesignSetting(size_t experimentId, Habit::DesignSetting
 			" pretest_number_of_trials, habituation_number_of_trials, test_number_of_trials, experiment_id)"
 			" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	Habit::TrialsInfo ht = settings->getHabituationTrialsInfo();
 	Habit::TrialsInfo pt = settings->getPretestTrialsInfo();
 	Habit::TrialsInfo tt = settings->getTestTrialsInfo();
@@ -140,13 +134,10 @@ bool MainDao::addOrUpdateDesignSetting(size_t experimentId, Habit::DesignSetting
 	}
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	return !q.lastError().isValid();
 }
 
 bool MainDao::addOrUpdateHabituationSetting(size_t experimentId, Habit::HabituationSettings* settings) {
-	Habit::connection* con = Habit::connection::get_instance();
-	Q_ASSERT(0 != con);
 	int id = settings->getId();
 	QString sql;
 	if(id > 0) {
@@ -156,7 +147,8 @@ bool MainDao::addOrUpdateHabituationSetting(size_t experimentId, Habit::Habituat
 		sql = "insert into habituation_settings (habituation_type, criterion_basis, criterion_percent, window_size, window_type, total_look, experiment_id)"
 			" values(?, ?, ?, ?, ?, ?, ?)";
 	}
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(settings->getHabituationType().number());
 	Habit::CriterionSettings cs = settings->getCriterionSettings();
 	q.addBindValue(cs.getBasis().number());
@@ -169,24 +161,21 @@ bool MainDao::addOrUpdateHabituationSetting(size_t experimentId, Habit::Habituat
 	}
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	return !q.lastError().isValid();
 }
 
 void MainDao::deleteAllStimulus(const QString& table_name, int experiment_id) {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "delete from " + table_name + " where experiment_id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(experiment_id);
 	q.exec();
 }
 
 void MainDao::deleteStimulus(const QString& table_name, int id) {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "delete from " + table_name + " where id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(id);
 	q.exec();
 }
@@ -236,9 +225,8 @@ bool MainDao::addOrUpdateStimulusSetting(int id, int parentId, Habit::StimulusSe
 			" independent_audio_balance, " + parentKeyName + ")"
 			" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(ss.getName());
 	q.addBindValue(ss.isLeftEnabled());
 	q.addBindValue(ss.getLeftStimulusInfo().getFileName());
@@ -261,13 +249,10 @@ bool MainDao::addOrUpdateStimulusSetting(int id, int parentId, Habit::StimulusSe
 	}
 	q.addBindValue(parentId);
 	q.exec();
-	qDebug() << q.lastError();
 	return !q.lastError().isValid();
 }
 
 bool MainDao::addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::StimulusDisplayInfo* settings) {
-	Habit::connection* con = Habit::connection::get_instance();
-	Q_ASSERT(0 != con);
 	int id = settings->getId();
 	QString sql;
 	if(id > 0) {
@@ -277,7 +262,8 @@ bool MainDao::addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::Stim
 		sql = "insert into stimulus_display (presentation_style, display_type, is_original_aspect_ratio, background_color, experiment_id)"
 			" values(?, ?, ?, ?, ?)";
 	}
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(settings->getPresentationStyle().number());
 	q.addBindValue(settings->getDisplayType().number());
 	q.addBindValue(settings->isOriginalAspectRatioMaintained());
@@ -287,7 +273,6 @@ bool MainDao::addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::Stim
 	}
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	return !q.lastError().isValid();
 }
 
@@ -300,13 +285,11 @@ bool MainDao::addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::Stim
 void MainDao::getMonitorSettingsForExperiment(size_t experimentId, MonitorSettings* monitorSettings)
 {
 	Q_ASSERT(0 != monitorSettings);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from monitor_settings where experiment_id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		int id = q.value(q.record().indexOf("id")).toInt();
 		monitorSettings->setId(id);
@@ -324,13 +307,11 @@ void MainDao::getMonitorSettingsForExperiment(size_t experimentId, MonitorSettin
 void MainDao::getAttentionGetterSettingsForExperiment(size_t experimentId, AttentionGetterSettings* attentionGetter)
 {
 	Q_ASSERT(0 != attentionGetter);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from attention_setup where experiment_id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		int id = q.value(q.record().indexOf("id")).toInt();
 		attentionGetter->setId(id);
@@ -339,12 +320,13 @@ void MainDao::getAttentionGetterSettingsForExperiment(size_t experimentId, Atten
 		QString backgroundColor = q.value(q.record().indexOf("background_color")).toString();
 		attentionGetter->setBackGroundColor(QColor(backgroundColor));
 		sql = "select * from attention_getting_stimuli where attention_getter_id = ?";
-		q = con->exec(sql);
-		q.addBindValue(id);
-		q.exec();
-		qDebug() << q.lastError();
-		if(q.next()) {
-			Habit::StimulusSettings ss = getStimulusSettings(q);
+		QSqlQuery q2;
+		q2.prepare(sql);
+		q2.addBindValue(id);
+		q2.exec();
+		qDebug() << q2.lastError();
+		if(q2.next()) {
+			Habit::StimulusSettings ss = getStimulusSettings(q2);
 			attentionGetter->setAttentionGetterStimulus(ss);
 		}
 	}
@@ -353,13 +335,11 @@ void MainDao::getAttentionGetterSettingsForExperiment(size_t experimentId, Atten
 void MainDao::getControlBarOptionsForExperiment(size_t experimentId, ControlBarOptions* controlBarOptions)
 {
 	Q_ASSERT(0 != controlBarOptions);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from controlbar_options where experiment_id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		int id = q.value(q.record().indexOf("id")).toInt();
 		controlBarOptions->setId(id);
@@ -375,13 +355,11 @@ void MainDao::getControlBarOptionsForExperiment(size_t experimentId, ControlBarO
 void MainDao::getDesignSettingsForExperiment(size_t experimentId, DesignSettings* designSettings)
 {
 	Q_ASSERT(0 != designSettings);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from designs_settings where experiment_id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		int id = q.value(q.record().indexOf("id")).toInt();
 		designSettings->setId(id);
@@ -426,13 +404,11 @@ void MainDao::getHabituationSettingsForExperiment(size_t experimentId, Habituati
 {
 	int number;
 	Q_ASSERT(0 != habituationSettings);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from habituation_settings where experiment_id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		int id = q.value(q.record().indexOf("id")).toInt();
 		habituationSettings->setId(id);
@@ -457,13 +433,11 @@ void MainDao::getHabituationSettingsForExperiment(size_t experimentId, Habituati
 void MainDao::getStimulusDisplayInfoForExperiment(size_t experimentId, Habit::StimulusDisplayInfo* stimulusDisplayInfo)
 {
 	Q_ASSERT(0 != stimulusDisplayInfo);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from stimulus_display where experiment_id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue((uint)experimentId);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		int id = q.value(q.record().indexOf("id")).toInt();
 		stimulusDisplayInfo->setId(id);
@@ -517,13 +491,11 @@ Habit::StimuliSettings MainDao::getTestStimuliSettingsForExperiment(int experime
 }
 
 Habit::StimuliSettings MainDao::getStimuliSettings(const QString& table_name, const QString& experiment, const HStimContext& context) {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from " + table_name + " inner join experiments e on experiment_id=e.id where e.name=?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(experiment);
 	q.exec();
-	qDebug() << q.lastError();
 	Habit::StimuliSettings result(context);
 	while(q.next()) {
 		Habit::StimulusSettings ss = getStimulusSettings(q);
@@ -592,13 +564,11 @@ void MainDao::getExperimentSettingsByName(ExperimentSettings* experiment)
 {
 	Q_ASSERT(0 != experiment);
 	if(!experiment->getName().isEmpty()) {
-		connection* con = connection::get_instance();
-		Q_ASSERT(0 != con);
 		QString sql = "select * from experiments where name = ?";
-		QSqlQuery q = con->exec(sql);
+		QSqlQuery q;
+		q.prepare(sql);
 		q.addBindValue(experiment->getName());
 		q.exec();
-		qDebug() << q.lastError();
 		if(q.next()) {
 			size_t id = q.value(q.record().indexOf("id")).toInt();
 			experiment->setId(id);
@@ -609,13 +579,11 @@ void MainDao::getExperimentSettingsByName(ExperimentSettings* experiment)
 void MainDao::getExperimentNameById(ExperimentSettings* experiment)
 {
 	Q_ASSERT(0 != experiment);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from experiments where id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue((uint)experiment->getId());
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		QString id = q.value(q.record().indexOf("name")).toString();
 		experiment->setName(id);
@@ -624,10 +592,9 @@ void MainDao::getExperimentNameById(ExperimentSettings* experiment)
 
 
 int MainDao::isExperimentExists(const QString& name) {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * form experiments where name=?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(name);
 	q.exec();
 	int result = 0;
@@ -638,30 +605,26 @@ int MainDao::isExperimentExists(const QString& name) {
 }
 
 void MainDao::insertExperiment(const QString& name) {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	if(!isExperimentExists(name)) {
 		QString sql = "insert into experiments (name) values (?)";
-		QSqlQuery q = con->exec(sql);
+		QSqlQuery q;
+		q.prepare(sql);
 		q.addBindValue(name);
 		q.exec();
-		qDebug() << q.lastError();
 	} else {
 		qDebug() << "Experiment exists";
 	}
 }
 
 void MainDao::updateExperiment(const QString& name) {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	int id = isExperimentExists(name);
 	if(id) {
 		QString sql = "update experiments set name=? where id=?";
-		QSqlQuery q = con->exec(sql);
+		QSqlQuery q;
+		q.prepare(sql);
 		q.addBindValue(name);
 		q.addBindValue(id);
 		q.exec();
-		qDebug() << q.lastError();
 	} else {
 		qDebug() << "Experiment doesn't exist";
 	}
@@ -669,13 +632,11 @@ void MainDao::updateExperiment(const QString& name) {
 
 QString MainDao::getExperimentNameById(int id) {
 	QString result;
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select name from experiments where id=?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(id);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		result = q.value(q.record().indexOf("name")).toString();
 	}
@@ -685,13 +646,11 @@ QString MainDao::getExperimentNameById(int id) {
 Habit::ExperimentSettings MainDao::getExperimentSettingsById(int id)
 {
 	Habit::ExperimentSettings settings;
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from experiments where id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(id);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		QString name = q.value(q.record().indexOf("name")).toString();
 		settings.setName(name);
@@ -703,12 +662,7 @@ Habit::ExperimentSettings MainDao::getExperimentSettingsById(int id)
 QVector<ExperimentSettings> MainDao::getAllExperiments()
 {
 	QVector<ExperimentSettings> experiments;
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
-	QString sql = "select * from experiments";
-	QSqlQuery q = con->exec(sql);
-	q.exec();
-	qDebug() << q.lastError();
+	QSqlQuery q("select * from experiments");
 	while (q.next()) {
 		ExperimentSettings settings;
 		QString name = q.value(q.record().indexOf("name")).toString();
@@ -724,11 +678,9 @@ bool MainDao::insertOrUpdateExperimentSettings(Habit::ExperimentSettings* experi
 {
 	bool result = false;
 	if(0 != experimentSettings) {
-		connection* con = connection::get_instance();
-		Q_ASSERT(0 != con);
 		QString name = experimentSettings->getName();
 		int id = experimentSettings->getId();
-		QSqlQuery q(*con);
+		QSqlQuery q;
 		if(id > 0) {
 			QString sql = "update experiments set name=? where id=?";
 			q.prepare(sql);
@@ -741,8 +693,6 @@ bool MainDao::insertOrUpdateExperimentSettings(Habit::ExperimentSettings* experi
 			q.prepare(sql);
 			q.addBindValue(name);
 			q.exec();
-			qDebug() << q.lastError();
-			qDebug() << q.lastInsertId().toInt();
 			experimentSettings->setId(q.lastInsertId().toInt());
 		}
 		result = !q.lastError().isValid();
@@ -751,12 +701,7 @@ bool MainDao::insertOrUpdateExperimentSettings(Habit::ExperimentSettings* experi
 }
 
 QStringList MainDao::getAllExperimentNames() {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
-	QString sql = "select name from experiments";
-	QSqlQuery q = con->exec(sql);
-	q.exec();
-	qDebug() << q.lastError();
+	QSqlQuery q("select name from experiments");
 	QStringList result;
 	while(q.next()) {
 		QString name = q.value(q.record().indexOf("name")).toString();
@@ -767,12 +712,7 @@ QStringList MainDao::getAllExperimentNames() {
 
 QStringList MainDao::getAllSubjectsNames()
 {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
-	QString sql = "select name from subject_settings";
-	QSqlQuery q = con->exec(sql);
-	q.exec();
-	qDebug() << q.lastError();
+	QSqlQuery q("select name from subject_settings");
 	QStringList result;
 	while(q.next()) {
 		QString name = q.value(q.record().indexOf("name")).toString();
@@ -784,11 +724,10 @@ QStringList MainDao::getAllSubjectsNames()
 void MainDao::insertSubject(Habit::SubjectSettings* subjectSettings)
 {
 	Q_ASSERT(0 != subjectSettings);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "insert into subject_settings (name, birthdate, testdate, condition, observer, cell_number, comments)"
 		" values(?, ?, ?, ?, ?, ?, ?)";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(subjectSettings->getSubjectName());
 	q.addBindValue(subjectSettings->getBirthDate());
 	q.addBindValue(subjectSettings->getTestDate());
@@ -798,16 +737,14 @@ void MainDao::insertSubject(Habit::SubjectSettings* subjectSettings)
 	q.addBindValue(subjectSettings->getComments());
 	q.exec();
 	subjectSettings->setId(q.lastInsertId().toInt());
-	qDebug() << q.lastError();
 }
 
 void MainDao::updateSubject( const Habit::SubjectSettings& subjectSettings )
 {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "update subject_settings set name=?, birthdate=?, testdate=?, condition=?, observer=?, cell_number=?, comments=?"
 		" where id=?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(subjectSettings.getSubjectName());
 	q.addBindValue(subjectSettings.getBirthDate());
 	q.addBindValue(subjectSettings.getTestDate());
@@ -817,29 +754,24 @@ void MainDao::updateSubject( const Habit::SubjectSettings& subjectSettings )
 	q.addBindValue(subjectSettings.getComments());
 	q.addBindValue(subjectSettings.getId());
 	q.exec();
-	qDebug() << q.lastError();
 }
 
 bool MainDao::isSubjectUnique(const Habit::SubjectSettings& subjectSettings)
 {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from subject_settings where name=?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(subjectSettings.getSubjectName());
 	q.exec();
-	qDebug() << q.lastError();
 	return !q.next();
 }
 
 Habit::SubjectSettings MainDao::getSubjectSettings(const QString& subj) {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from subject_settings where name=?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(subj);
 	q.exec();
-	qDebug() << q.lastError();
 	Habit::SubjectSettings ss;
 	if(q.next()) {
 		ss.setId(q.value(q.record().indexOf("id")).toInt());
@@ -855,13 +787,11 @@ Habit::SubjectSettings MainDao::getSubjectSettings(const QString& subj) {
 }
 
 Habit::SubjectSettings MainDao::getSubjectSettings(int id) {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from subject_settings where id=?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(id);
 	q.exec();
-	qDebug() << q.lastError();
 	Habit::SubjectSettings ss;
 	if(q.next()) {
 		ss.setId(q.value(q.record().indexOf("id")).toInt());
@@ -880,14 +810,13 @@ Habit::SubjectSettings MainDao::getSubjectSettings(int id) {
 void MainDao::insertRunSettings(Habit::RunSettings* runSettings)
 {
 	Q_ASSERT(0 != runSettings);
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "insert into run_settings (experiment_id, subject_id, "
 		"habituation_test_order, is_habituation_order_randomized, habituation_randomize_method, "
 		"pretest_test_order, is_pretest_order_randomized, pretest_randomize_method, "
 		"test_order, is_test_order_randomized, test_randomize_method) "
 		" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(runSettings->getExperimentId());
 	q.addBindValue(runSettings->getSubjectId());
 	q.addBindValue(runSettings->getHabituationOrder());
@@ -901,19 +830,17 @@ void MainDao::insertRunSettings(Habit::RunSettings* runSettings)
 	q.addBindValue(runSettings->getTestRandomizeMethod());
 	q.exec();
 	runSettings->setId(q.lastInsertId().toInt());
-	qDebug() << q.lastError();
 }
 
 void MainDao::updateRunSettings(const Habit::RunSettings& runSettings)
 {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "update run_settings set experiment_id=?, subject_id=?, "
 		"habituation_test_order=?, is_habituation_order_randomized=?, habituation_randomize_method=?, "
 		"pretest_test_order=?, is_pretest_order_randomized=?, pretest_randomize_method=?, "
 		"test_order=?, is_test_order_randomized=?, test_randomize_method=? "
 		" where id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(runSettings.getExperimentId());
 	q.addBindValue(runSettings.getSubjectId());
 	q.addBindValue(runSettings.getHabituationOrder());
@@ -927,15 +854,13 @@ void MainDao::updateRunSettings(const Habit::RunSettings& runSettings)
 	q.addBindValue(runSettings.getTestRandomizeMethod());
 	q.addBindValue(runSettings.getId());
 	q.exec();
-	qDebug() << q.lastError();
 }
 
 Habit::RunSettings MainDao::getRunSettingsBySubject(const Habit::SubjectSettings& subjectSettings)
 {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from run_settings where subject_id = ?";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.addBindValue(subjectSettings.getId());
 	q.exec();
 	Habit::RunSettings rs;
@@ -962,35 +887,28 @@ Habit::RunSettings MainDao::getRunSettingsBySubject(const Habit::SubjectSettings
 
 void MainDao::addOrUpdateConfigObject(const Habit::ResultViewerSettings& config)
 {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
 	QString sql = "select * from result_view_settings";
-	QSqlQuery q = con->exec(sql);
+	QSqlQuery q;
+	q.prepare(sql);
 	q.exec();
-	qDebug() << q.lastError();
 	if(q.next()) {
 		sql = "update result_view_settings set settings=?";
-		QSqlQuery q1 = con->exec(sql);
+		QSqlQuery q1;
+		q1.prepare(sql);
 		q1.addBindValue(config.toString());
 		q1.exec();
-		qDebug() << q1.lastError();
 	} else {
 		sql = "insert into result_view_settings (settings) values (?)";
-		QSqlQuery q2 = con->exec(sql);
+		QSqlQuery q2;
+		q2.prepare(sql);
 		q2.addBindValue(config.toString());
 		q2.exec();
-		qDebug() << q2.lastError();
 	}
 }
 
 Habit::ResultViewerSettings MainDao::getResultViewerOptions()
 {
-	connection* con = connection::get_instance();
-	Q_ASSERT(0 != con);
-	QString sql = "select * from result_view_settings";
-	QSqlQuery q = con->exec(sql);
-	q.exec();
-	qDebug() << q.lastError();
+	QSqlQuery q("select * from result_view_settings");
 	Habit::ResultViewerSettings r;
 	if(q.next()) {
 		QString val = q.value(q.record().indexOf("settings")).toString();
