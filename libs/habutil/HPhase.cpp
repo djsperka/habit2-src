@@ -52,9 +52,9 @@ void HPhase::screenStarted(int playerid)
 	eventLog().append(new HScreenStartEvent(playerid, HElapsedTimer::elapsed()));
 }
 
-void HPhase::agStarted()
+void HPhase::agStarted(int id)
 {
-	eventLog().append(new HAGStartEvent(HElapsedTimer::elapsed()));
+	eventLog().append(new HAGStartEvent(id, HElapsedTimer::elapsed()));
 }
 
 void HPhase::stimStarted(int stimid)
@@ -77,11 +77,11 @@ void HPhase::onEntry(QEvent* e)
 	eventLog().append(new HPhaseStartEvent(ptype(), HElapsedTimer::elapsed()));
 	
 	// connect media manager signal screen(int) to slot screenStarted(int)
-	// connect media manager signal agStarted() to slot agStarted()
+	// connect media manager signal agStarted(int) to slot agStarted(int)
 	// connect media manager signal stimStarted(int) to slot stimStarted(int)
 	// disconnect onExit() from this state.
 	QObject::connect(&experiment().getMediaManager(), SIGNAL(screen(int)), this, SLOT(screenStarted(int)));
-	QObject::connect(&experiment().getMediaManager(), SIGNAL(agStarted()), this, SLOT(agStarted()));
+	QObject::connect(&experiment().getMediaManager(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
 	QObject::connect(&experiment().getMediaManager(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	
 };
@@ -99,7 +99,7 @@ void HPhase::onExit(QEvent* e)
 	// connect media manager signal screen(int) to slot screenStarted(int)
 	// disconnect onExit() from this state.
 	QObject::disconnect(&experiment().getMediaManager(), SIGNAL(screen(int)), this, SLOT(screenStarted(int)));	
-	QObject::disconnect(&experiment().getMediaManager(), SIGNAL(agStarted()), this, SLOT(agStarted()));
+	QObject::disconnect(&experiment().getMediaManager(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
 	QObject::disconnect(&experiment().getMediaManager(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	
 };

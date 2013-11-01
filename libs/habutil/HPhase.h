@@ -59,7 +59,7 @@ protected:
 public slots:
 	void onTrialCompleteEntered();
 	void screenStarted(int);
-	void agStarted();
+	void agStarted(int);
 	void stimStarted(int);
 };
 

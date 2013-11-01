@@ -63,7 +63,7 @@ public slots:
 	void playerCleared(int i);
 
 signals:
-	void agStarted();
+	void agStarted(int);
 	void stimStarted(int);
 	void cleared();
 	void screen(int);
