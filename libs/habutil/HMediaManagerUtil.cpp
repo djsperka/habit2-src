@@ -33,6 +33,9 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 	// Monitor settings
 	Habit::MonitorSettings ms = es.getMonitorSettings();
 	
+	// Stimulus Display info
+	Habit::StimulusDisplayInfo sdi = es.getStimulusDisplayInfo();
+
 	// AttentionGetter
 	Habit::AttentionGetterSettings ags = es.getAttentionGetterSettings();
 	
@@ -51,17 +54,17 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 	// Non-NULL player pointers will indicate that a particular player was assigned to a monitor. 
 	if ((ms.getLeftMonitorIndex() > -1)) 
 	{
-		playerLeft = new HVideoImagePlayer(ms.getLeftMonitorIndex());
+		playerLeft = new HVideoImagePlayer(ms.getLeftMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
 		pmm->addPlayer(playerLeft, ms.getLeftMonitorIndex());
 	}
 	if (ms.getCenterMonitorIndex() > -1)
 	{
-		playerCenter = new HVideoImagePlayer(ms.getCenterMonitorIndex());
+		playerCenter = new HVideoImagePlayer(ms.getCenterMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
 		pmm->addPlayer(playerCenter, ms.getCenterMonitorIndex());
 	}
 	if ((ms.getRightMonitorIndex() > -1)) 
 	{
-		playerRight = new HVideoImagePlayer(ms.getRightMonitorIndex());
+		playerRight = new HVideoImagePlayer(ms.getRightMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
 		pmm->addPlayer(playerRight, ms.getRightMonitorIndex());
 	}
 	if ((ms.getControlMonitorIndex() > -1)) 
