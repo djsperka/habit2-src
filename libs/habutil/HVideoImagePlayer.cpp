@@ -77,7 +77,6 @@ HPlayer(id, w), m_pendingClear(false), m_parent(w), m_pMediaObject(0), m_pVideoW
 	// right. Make sure to call with the parent as the thing that should 
 	// kill this window when closed. 
 	
-	setObjectName("HVideoImagePlayer");
 	setWindowFlags(Qt::Window);
 	showFullScreen();
 	
