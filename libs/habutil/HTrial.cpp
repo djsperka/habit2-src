@@ -142,7 +142,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 
 	// Once that happens the media manager starts playing the ag, it emits
 	// agStarted(). We use that signal as a transition to the AGRunning state. 
-	sAGRequest->addTransition(&phase.experiment().getMediaManager(), SIGNAL(agStarted()), sAGRunning);
+	sAGRequest->addTransition(&phase.experiment().getMediaManager(), SIGNAL(agStarted(int)), sAGRunning);
 	
 	// When AGRunning state is entered, it tells the look detector to start looking for 
 	// attention. It will emit an attention() signal when that happens (see below). 

@@ -169,7 +169,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 	populateSSMap(ags, idspList1, idspList2, idspList3);
 	
 	// Connect media manager signals to slots here so we can update display labels.
-	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(onAGStarted()));
+	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(onAGStarted()));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(onStimStarted(int)));
 	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onCleared()));
 	
