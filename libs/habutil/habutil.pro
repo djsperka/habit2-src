@@ -24,6 +24,7 @@ HEADERS +=	HLook.h \
 			HAudioPlayer.h \
 			HVideoImagePlayer.h \
 			HNonPlayer.h \
+			HVIPlayer.h \
 			HStimulusSource.h \
 			HImageWidget.h \
 			HMediaManager.h \
@@ -117,6 +118,7 @@ SOURCES +=	HLook.cpp \
 			HAudioPlayer.cpp \
 			HVideoImagePlayer.cpp \
 			HNonPlayer.cpp \
+			HVIPlayer.cpp \
 			HStimulusSource.cpp \
 			HImageWidget.cpp \
 			HMediaManager.cpp \
