@@ -196,10 +196,10 @@ void HVideoImagePlayer::play(int number)
 			// Init state, or background state
 			switch (newType) {
 				case HStimulusSource::VIDEO:
-					m_pMediaObject->setCurrentSource((m_sources.at(number)).filename());
+					m_pMediaObject->setCurrentSource((m_sources.at(number))->filename());
 					m_pVideoWidget->setGeometry(geometry());
 					m_pVideoWidget->show();
-					m_pAudioOutput->setVolume(m_sources.at(number).getAudioBalance());
+					m_pAudioOutput->setVolume(m_sources.at(number)->getAudioBalance());
 					m_pImageWidget->hide();
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
@@ -207,7 +207,7 @@ void HVideoImagePlayer::play(int number)
 				case HStimulusSource::IMAGE:
 					m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
 					m_pImageWidget->show();	
-					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
+					m_pImageWidget->setCurrentSource((m_sources.at(number))->filename());
 					break;
 				default:
 					break;
@@ -221,10 +221,10 @@ void HVideoImagePlayer::play(int number)
 					m_pVideoWidget->hide();
 					break;
 				case HStimulusSource::VIDEO:
-					m_pMediaObject->setCurrentSource((m_sources[number].filename()));
+					m_pMediaObject->setCurrentSource((m_sources[number]->filename()));
 					m_pVideoWidget->setGeometry(geometry());
 					m_pVideoWidget->show();
-					m_pAudioOutput->setVolume(m_sources.at(number).getAudioBalance());
+					m_pAudioOutput->setVolume(m_sources.at(number)->getAudioBalance());
 					m_pImageWidget->hide();
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
@@ -233,7 +233,7 @@ void HVideoImagePlayer::play(int number)
 					m_pVideoWidget->hide();
 					m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
 					m_pImageWidget->show();	
-					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
+					m_pImageWidget->setCurrentSource((m_sources.at(number))->filename());
 					break;					
 				default:
 					break;
@@ -246,17 +246,17 @@ void HVideoImagePlayer::play(int number)
 					m_pImageWidget->hide();
 					break;
 				case HStimulusSource::VIDEO:
-					m_pMediaObject->setCurrentSource((m_sources[number].filename()));
+					m_pMediaObject->setCurrentSource((m_sources[number]->filename()));
 					m_pVideoWidget->setGeometry(geometry());
 					m_pImageWidget->hide();
 					m_pVideoWidget->show();
-					m_pAudioOutput->setVolume(m_sources.at(number).getAudioBalance());
+					m_pAudioOutput->setVolume(m_sources.at(number)->getAudioBalance());
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
 					if (m_parent) m_parent->activateWindow(); //Hack Alert!
 					break;
 				case HStimulusSource::IMAGE:
-					m_pImageWidget->setCurrentSource((m_sources.at(number)).filename());
+					m_pImageWidget->setCurrentSource((m_sources.at(number))->filename());
 					break;
 				default:
 					break;
@@ -271,7 +271,7 @@ void HVideoImagePlayer::play(int number)
 void HVideoImagePlayer::onPrefinishMarkReached(qint32 msec)
 {
 	Q_UNUSED(msec);
-	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim)).type() == HStimulusSource::VIDEO && (m_sources.at(m_iCurrentStim)).isLooped())
+	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim))->type() == HStimulusSource::VIDEO && (m_sources.at(m_iCurrentStim))->isLooped())
 	{
 		m_pMediaObject->pause();
 		m_pMediaObject->seek(0);

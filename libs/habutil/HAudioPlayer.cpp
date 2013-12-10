@@ -37,8 +37,8 @@ void HAudioPlayer::play(int number)
 {
 	if (number >= 0 && number < m_sources.count())
 	{
-		m_pMediaObject->setCurrentSource((m_sources[number].filename()));
-		m_pAudioOutput->setVolume(m_sources[number].getAudioBalance());
+		m_pMediaObject->setCurrentSource((m_sources[number]->filename()));
+		m_pAudioOutput->setVolume(m_sources[number]->getAudioBalance());
 		m_pMediaObject->play();
 		m_iCurrentStim = number;
 	}
@@ -61,7 +61,7 @@ void HAudioPlayer::clear()
 void HAudioPlayer::onPrefinishMarkReached(qint32 msec)
 {
 	Q_UNUSED(msec);
-	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim)).type() == HStimulusSource::AUDIO && (m_sources.at(m_iCurrentStim)).isLooped())
+	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim))->type() == HStimulusSource::AUDIO && (m_sources.at(m_iCurrentStim))->isLooped())
 	{
 		m_pMediaObject->pause();
 		m_pMediaObject->seek(0);

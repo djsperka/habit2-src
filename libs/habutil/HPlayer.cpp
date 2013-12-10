@@ -12,17 +12,19 @@
 
 HPlayer::HPlayer(int ID, QWidget *w) : QWidget(w), m_id(ID), m_iCurrentStim(0)
 {
-	m_sources.append(HStimulusSource("", 0));	// dummy placeholder for attention getter stim. 
+	m_sources.append(new HStimulusSource("", 0));	// dummy placeholder for attention getter stim.
 }
 
 HPlayer::~HPlayer()
 {
 	qDebug("HPlayer::~HPlayer");
+	while (!m_sources.isEmpty())
+		delete m_sources.takeFirst();
 }
 
 int HPlayer::addStimulus(QString filename, int volume, bool isLooped)
 {
-	HStimulusSource s(filename, volume, isLooped);
+	HStimulusSource *s = new HStimulusSource(filename, volume, isLooped);
 	m_sources.append(s);
 	
 	// note: The QList m_sources always has at least 1 element - the attention getter placeholder is 
@@ -32,7 +34,7 @@ int HPlayer::addStimulus(QString filename, int volume, bool isLooped)
 
 int HPlayer::addStimulus()
 {
-	HStimulusSource s;
+	HStimulusSource *s = new HStimulusSource("", 0);
 	m_sources.append(s);
 	return m_sources.count()-1;
 }
@@ -40,7 +42,7 @@ int HPlayer::addStimulus()
 
 int HPlayer::addAG(QString filename, int volume, bool isLooped)
 {
-	HStimulusSource s(filename, volume, isLooped);
+	HStimulusSource *s = new HStimulusSource(filename, volume, isLooped);
 	m_sources[0] = s;
 	return 0;
 }
@@ -49,7 +51,7 @@ HStimulusSource::HStimulusSourceType HPlayer::getStimulusType(int index)
 {
 	HStimulusSource::HStimulusSourceType type = HStimulusSource::BACKGROUND;
 	if (index > -1 && index < m_sources.count())
-		type = (m_sources.at(index)).type();
+		type = (*m_sources.at(index)).type();
 	return type;
 }
 

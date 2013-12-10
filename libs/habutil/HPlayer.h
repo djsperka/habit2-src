@@ -64,7 +64,7 @@ public:
 	int count() const { return m_sources.count(); };
 	const HStimulusSource& source(int i) const
 	{
-		return m_sources.at(i);
+		return *m_sources.at(i);
 	};
 
 protected:	
@@ -73,7 +73,7 @@ protected:
 	
 	/// List of stimulus sources to be used. The [0] index is used as the attention getter, 
 	/// so calling addAG() always replaces the current attention getter.
-	QList<HStimulusSource> m_sources;
+	QList<HStimulusSource *> m_sources;
 	
 	/// index of currently playing stim. An out of range index defaults to playing background.
 	int m_iCurrentStim;
