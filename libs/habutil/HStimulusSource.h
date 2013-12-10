@@ -13,6 +13,7 @@
 #include <QImage>
 #include <QTextStream>
 #include <QBuffer>
+#include <Phonon/MediaSource>
 
 class HStimulusSource
 {
@@ -28,6 +29,7 @@ public:
 	~HStimulusSource();
 	bool isVideo() { return (m_type == VIDEO); };
 	QBuffer* buffer() { return m_pBuffer; };
+	bool hasBuffer() { return m_pBuffer!=NULL; };
 	bool isImage() { return (m_type == IMAGE); };
 	bool isAudio() { return (m_type == AUDIO); };
 	bool isEmpty() { return (m_type == EMPTY); };
@@ -42,6 +44,7 @@ private:
 	bool isImageFile(const QString& filename);
 	bool isAudioFile(const QString& filename);
 	HStimulusSourceType m_type;
+	QByteArray *m_pByteArray;
 	QBuffer *m_pBuffer;
 	QImage *m_pImage;
 	QString m_filename;

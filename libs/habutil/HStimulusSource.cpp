@@ -40,7 +40,13 @@ QTextStream& operator<<(QTextStream& out, const HStimulusSource& ss)
 	return out;
 }
 
-HStimulusSource::HStimulusSource() : m_type(BACKGROUND), m_pBuffer(0), m_pImage(0), m_audioBalance(0), m_isLooped(false)
+HStimulusSource::HStimulusSource()
+: m_type(BACKGROUND)
+, m_pByteArray(0)
+, m_pBuffer(0)
+, m_pImage(0)
+, m_audioBalance(0)
+, m_isLooped(false)
 {
 }
 
@@ -54,6 +60,17 @@ HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool
 		m_filename = filename;
 		if (file.exists()) 
 		{
+			// Load file into a QByteArray, and create a QBuffer that manages it.
+			if (!file.open(QIODevice::ReadOnly))
+			{
+				qCritical() << "Cannot read stimulus file " << filename;
+	    	}
+			else
+			{
+				m_pByteArray = new QByteArray(file.readAll());
+				m_pBuffer = new QBuffer(m_pByteArray);
+				file.close();
+			}
 			if (isImageFile(filename))
 			{
 				m_pImage = new QImage(filename);
@@ -67,6 +84,7 @@ HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool
 			{
 				m_type = VIDEO;
 			}
+
 		}
 		else 
 		{
@@ -80,7 +98,13 @@ HStimulusSource::~HStimulusSource()
 {
 //	if (m_pVideo) delete m_pVideo;
 //	if (m_pBuffer) delete m_pBuffer;
-//	if (m_pImage) delete m_pImage;
+
+	// TODO Having a lot of trouble getting this cleanup to work without crashing.
+	// In some cases Qt takes ownership of objects, and I think I keep running into double deletes.
+	// I'm just commenting out the delete(s) here, yes its a memory leak. Deal with it.
+	//if (m_pImage) delete m_pImage;
+	//if (m_pBuffer) delete m_pBuffer;
+	//if (m_pByteArray) delete m_pByteArray;
 }
 
 bool HStimulusSource::isImageFile(const QString& filename)
