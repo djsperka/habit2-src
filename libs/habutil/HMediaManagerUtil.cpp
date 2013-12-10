@@ -8,7 +8,11 @@
  */
 
 #include "HMediaManagerUtil.h"
+#ifdef USE_OLD_VIDEOPLAYER
 #include "HVideoImagePlayer.h"
+#else
+#include "HVIPlayer.h"
+#endif
 #include "HAudioPlayer.h"
 
 void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& ss, Habit::IdStimulusSettingsPairList& idspStim, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl);
@@ -54,17 +58,29 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 	// Non-NULL player pointers will indicate that a particular player was assigned to a monitor. 
 	if ((ms.getLeftMonitorIndex() > -1)) 
 	{
+#ifdef USE_OLD_VIDEOPLAYER
 		playerLeft = new HVideoImagePlayer(ms.getLeftMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
+#else
+		playerLeft = new HVIPlayer(ms.getLeftMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
+#endif
 		pmm->addPlayer(playerLeft, ms.getLeftMonitorIndex());
 	}
 	if (ms.getCenterMonitorIndex() > -1)
 	{
+#ifdef USE_OLD_VIDEOPLAYER
 		playerCenter = new HVideoImagePlayer(ms.getCenterMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
+#else
+		playerCenter = new HVIPlayer(ms.getCenterMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
+#endif
 		pmm->addPlayer(playerCenter, ms.getCenterMonitorIndex());
 	}
 	if ((ms.getRightMonitorIndex() > -1)) 
 	{
+#ifdef USE_OLD_VIDEOPLAYER
 		playerRight = new HVideoImagePlayer(ms.getRightMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
+#else
+		playerRight = new HVIPlayer(ms.getRightMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
+#endif
 		pmm->addPlayer(playerRight, ms.getRightMonitorIndex());
 	}
 	if ((ms.getControlMonitorIndex() > -1)) 
