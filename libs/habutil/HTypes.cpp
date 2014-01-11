@@ -306,3 +306,25 @@ const HResultsType& getResultsType(int number_value)
 };
 
 
+const HLookDetectorType HLookDetectorType::UnknownLookDetector(-1, "UnknownLookDetector", "Unknown Type");
+const HLookDetectorType HLookDetectorType::Keypad(0, "Keypad", "Keypad (456Enter)");
+const HLookDetectorType HLookDetectorType::EyeTracker(1, "EyeTracker", "Eye Tracker");
+const HLookDetectorType* HLookDetectorType::A[2] =
+{
+	&HLookDetectorType::Keypad,
+	&HLookDetectorType::EyeTracker
+};
+
+bool operator==(const HLookDetectorType& lhs, const HLookDetectorType& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HLookDetectorType& getLookDetectorType(int number_value)
+{
+	const HLookDetectorType* result = &HLookDetectorType::UnknownLookDetector;
+	for (unsigned int i=0; i<sizeof(HLookDetectorType::A)/sizeof(HLookDetectorType *) && result==&HLookDetectorType::UnknownLookDetector; i++)
+		if (number_value == HLookDetectorType::A[i]->number()) result = HLookDetectorType::A[i];
+	return *result;
+};
+

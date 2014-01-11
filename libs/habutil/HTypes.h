@@ -279,6 +279,30 @@ private:
 bool operator==(const HResultsType& lhs, const HResultsType& rhs);
 const HResultsType& getResultsType(int number_value);
 
+
+class HLookDetectorType
+{
+public:
+	static const HLookDetectorType UnknownLookDetector;
+	static const HLookDetectorType Keypad;
+	static const HLookDetectorType TestFile;
+	static const HLookDetectorType EyeTracker;
+
+	static const HLookDetectorType* A[2];
+
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	const QString& label() const { return m_l; }
+private:
+	explicit HLookDetectorType(int t, const char* name, const char* label): m_t(t), m_s(name), m_l(label) {};
+	int m_t;
+	const QString m_s;
+	const QString m_l;
+};
+
+bool operator==(const HLookDetectorType& lhs, const HLookDetectorType& rhs);
+const HLookDetectorType& getLookDetectorType(int number_value);
+
 #endif
 
 
