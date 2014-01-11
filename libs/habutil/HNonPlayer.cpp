@@ -12,7 +12,7 @@
 void HNonPlayer::play(int number)
 {
 	qDebug() << "HNonPlayer::play(" << number << ")";
-	emit started(number);
+	emit started(number, QString("DUMMY"));
 }
 
 void HNonPlayer::stop()

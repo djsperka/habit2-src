@@ -35,6 +35,7 @@ private:
 	bool m_pendingStop;
 	Phonon::MediaObject *m_pMediaObject;
 	Phonon::AudioOutput *m_pAudioOutput;
+	QString m_nowPlayingFilename;
 
 public slots:
 	void onPrefinishMarkReached(qint32);

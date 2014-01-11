@@ -10,7 +10,7 @@
 #include "HAudioPlayer.h"
 
 HAudioPlayer::HAudioPlayer(int id, QWidget *w) : 
-HPlayer(id, w), m_pendingStop(false), m_pMediaObject(0), m_pAudioOutput(0)
+HPlayer(id, w), m_pendingStop(false), m_pMediaObject(0), m_pAudioOutput(0), m_nowPlayingFilename("NONE")
 {
 	// Generate image widget, media object, video widget, audio output
 	// Special case is when this player is for audio only stimuli (as for control player and ISS stim)
@@ -41,6 +41,7 @@ void HAudioPlayer::play(int number)
 		m_pAudioOutput->setVolume(m_sources[number]->getAudioBalance());
 		m_pMediaObject->play();
 		m_iCurrentStim = number;
+		m_nowPlayingFilename = m_sources[number]->filename();
 	}
 }
 
@@ -84,7 +85,7 @@ void HAudioPlayer::onStateChanged(Phonon::State newState, Phonon::State oldState
 	{
 		if (newState == Phonon::PlayingState)
 		{
-			emit started(m_id);
+			emit started(m_id, m_nowPlayingFilename);
 		}		
 	}
 	return;

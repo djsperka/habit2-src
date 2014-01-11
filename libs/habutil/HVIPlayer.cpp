@@ -8,7 +8,7 @@
 #include "HVIPlayer.h"
 
 HVIPlayer::HVIPlayer(int id, QWidget *w, bool fullscreen, bool maintainAspectRatio) :
-HPlayer(id, w), m_pendingClear(false), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
+HPlayer(id, w), m_pendingClear(false), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio), m_nowPlayingFilename("NONE")
 {
 	// This combination needed to get the "close window when app exits"
 	// right. Make sure to call with the parent as the thing that should
@@ -107,7 +107,7 @@ void HVIPlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
 
 	if (newState == Phonon::PlayingState)
 	{
-		emit started(m_id);
+		emit started(m_id, m_nowPlayingFilename);
 	}
 
 	return;
@@ -122,7 +122,7 @@ void HVIPlayer::onImagePainted()
 	}
 	else
 	{
-		emit started(m_id);
+		emit started(m_id, m_nowPlayingFilename);
 	}
 	return;
 }
@@ -159,6 +159,7 @@ void HVIPlayer::play(int number)
 	{
 		case HStimulusSource::VIDEO:
 			s = m_sources.at(number);
+			m_nowPlayingFilename = s->filename();
 			if (s->hasBuffer())
 			{
 				//m_pMediaObject->setCurrentSource(*s->mediaSource());
@@ -178,6 +179,7 @@ void HVIPlayer::play(int number)
 			break;
 		case HStimulusSource::IMAGE:
 			s = m_sources.at(number);
+			m_nowPlayingFilename = s->filename();
 			m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
 			m_pImageWidget->setCurrentSource(s->filename());
 			m_pStackedLayout->setCurrentIndex(0);
@@ -186,8 +188,10 @@ void HVIPlayer::play(int number)
 			break;
 		case HStimulusSource::BACKGROUND:
 			m_pStackedLayout->setCurrentIndex(-1);
+			m_nowPlayingFilename = "NONE";
 			break;
 		default:
+			m_nowPlayingFilename = "UNKNOWN";
 			break;
 	}
 	m_iCurrentStim = number;

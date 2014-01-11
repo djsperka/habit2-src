@@ -37,7 +37,7 @@ void HMediaManager::addPlayer(HPlayer* player, int screenIndex)
 	{
 		player->setGeometry(QRect(0, 0, 0, 0));
 	}
-	connect(player, SIGNAL(started(int)), this, SLOT(playerStarted(int)));
+	connect(player, SIGNAL(started(int, const QString&)), this, SLOT(playerStarted(int, const QString&)));
 	m_players.append(player);
 }
 
@@ -69,7 +69,7 @@ void HMediaManager::ag()
 	stim(0);
 }
 
-void HMediaManager::playerStarted(int id)
+void HMediaManager::playerStarted(int id, const QString& filename)
 {
 	qDebug() << "HMediaManager::playerStarted(int id = " << id << ") pendingStart " << m_pendingStartSignal << " pendingAGStart " << m_pendingAGStartSignal;
 	emit screen(id);

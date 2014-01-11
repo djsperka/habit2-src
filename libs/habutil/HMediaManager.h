@@ -59,7 +59,7 @@ public slots:
 
 	void stim(int);
 	void ag();
-	void playerStarted(int i);
+	void playerStarted(int i, const QString& filename);
 	void playerCleared(int i);
 
 signals:

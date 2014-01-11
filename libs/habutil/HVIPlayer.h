@@ -54,7 +54,6 @@ protected:
 private:
 	bool m_pendingClear;
 	QWidget* m_parent;
-	//QStackedWidget *m_pStackedWidget;
 	QStackedLayout *m_pStackedLayout;
 	Phonon::MediaObject *m_pMediaObject;
 	Phonon::VideoWidget *m_pVideoWidget;
@@ -62,6 +61,7 @@ private:
 	HImageWidget *m_pImageWidget;
 	bool m_isFullScreen;
 	bool m_maintainAspectRatio;
+	QString m_nowPlayingFilename;
 
 //signals:
 //	void started(int);

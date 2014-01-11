@@ -89,7 +89,7 @@ protected:
 
 
 signals:
-	void started(int i);
+	void started(int i, const QString& filename);
 	void cleared(int i);
 
 };

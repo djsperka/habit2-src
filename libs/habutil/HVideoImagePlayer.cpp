@@ -71,7 +71,7 @@ bool HVideoImagePlayer::eventFilter(QObject *object, QEvent *event)
 
 
 HVideoImagePlayer::HVideoImagePlayer(int id, QWidget *w, bool fullscreen, bool maintainAspectRatio) : 
-HPlayer(id, w), m_pendingClear(false), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio)
+HPlayer(id, w), m_pendingClear(false), m_parent(w), m_pMediaObject(0), m_pVideoWidget(0), m_pAudioOutput(0), m_pImageWidget(0), m_isFullScreen(fullscreen), m_maintainAspectRatio(maintainAspectRatio), m_nowPlayingFilename("NONE")
 {
 	// This combination needed to get the "close window when app exits"
 	// right. Make sure to call with the parent as the thing that should 
@@ -150,7 +150,7 @@ void HVideoImagePlayer::onStateChanged(Phonon::State newState, Phonon::State old
 	Q_UNUSED(oldState);
 	if (newState == Phonon::PlayingState)
 	{
-		emit started(m_id);
+		emit started(m_id, m_nowPlayingFilename);
 	}		
 	return;
 }
@@ -164,7 +164,7 @@ void HVideoImagePlayer::onImagePainted()
 	}
 	else 
 	{
-		emit started(m_id);
+		emit started(m_id, m_nowPlayingFilename);
 	}
 	return;
 }
@@ -203,11 +203,13 @@ void HVideoImagePlayer::play(int number)
 					m_pImageWidget->hide();
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
+					m_nowPlayingFilename = (m_sources.at(number))->filename();
 					break;
 				case HStimulusSource::IMAGE:
 					m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
 					m_pImageWidget->show();	
 					m_pImageWidget->setCurrentSource((m_sources.at(number))->filename());
+					m_nowPlayingFilename = (m_sources.at(number))->filename();
 					break;
 				default:
 					break;
@@ -219,6 +221,7 @@ void HVideoImagePlayer::play(int number)
 			switch (newType) {
 				case HStimulusSource::BACKGROUND:
 					m_pVideoWidget->hide();
+					m_nowPlayingFilename = "NONE";
 					break;
 				case HStimulusSource::VIDEO:
 					m_pMediaObject->setCurrentSource((m_sources[number]->filename()));
@@ -228,12 +231,14 @@ void HVideoImagePlayer::play(int number)
 					m_pImageWidget->hide();
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
+					m_nowPlayingFilename = (m_sources.at(number))->filename();
 					break;
 				case HStimulusSource::IMAGE:
 					m_pVideoWidget->hide();
 					m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
 					m_pImageWidget->show();	
 					m_pImageWidget->setCurrentSource((m_sources.at(number))->filename());
+					m_nowPlayingFilename = (m_sources.at(number))->filename();
 					break;					
 				default:
 					break;
@@ -244,6 +249,7 @@ void HVideoImagePlayer::play(int number)
 			switch (newType) {
 				case HStimulusSource::BACKGROUND:
 					m_pImageWidget->hide();
+					m_nowPlayingFilename = "NONE";
 					break;
 				case HStimulusSource::VIDEO:
 					m_pMediaObject->setCurrentSource((m_sources[number]->filename()));
@@ -254,9 +260,11 @@ void HVideoImagePlayer::play(int number)
 					m_pMediaObject->play();
 					m_pVideoWidget->setFullScreen(m_isFullScreen);
 					if (m_parent) m_parent->activateWindow(); //Hack Alert!
+					m_nowPlayingFilename = (m_sources.at(number))->filename();
 					break;
 				case HStimulusSource::IMAGE:
 					m_pImageWidget->setCurrentSource((m_sources.at(number))->filename());
+					m_nowPlayingFilename = (m_sources.at(number))->filename();
 					break;
 				default:
 					break;

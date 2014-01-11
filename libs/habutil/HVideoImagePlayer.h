@@ -62,6 +62,7 @@ private:
 	HImageWidget *m_pImageWidget;
 	bool m_isFullScreen;
 	bool m_maintainAspectRatio;
+	QString m_nowPlayingFilename;
 
 //signals:
 //	void started(int);
