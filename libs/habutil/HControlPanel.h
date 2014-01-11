@@ -10,6 +10,9 @@
 #ifndef HCONTROLPANEL_H
 #define HCONTROLPANEL_H
 
+#include <QtGui>
+#include <QMap>
+
 #include "runsettings.h"
 #include "stimulussettings.h"
 #include "stimulisettings.h"
@@ -21,14 +24,6 @@
 #include "HExperiment.h"
 #include "HEventLog.h"
 
-#include <QDialog>
-#include <QMap>
-
-class QPushButton;
-class QLabel;
-class QVBoxLayout;
-class QString;
-class HPhaseCriteria;
 
 class HControlPanel : public QDialog
 {
@@ -58,12 +53,11 @@ private slots:
 	void onExperimentFinished();
 	void onExperimentStarted();
 	void onAGStarted();
-	void onStimStarted(int i);
+	void onStimStarted(int i, const QString&);
 	void onCleared();
 	
 protected:
 	void closeEvent (QCloseEvent * e); 
-	//bool eventFilter(QObject *target, QEvent *event);
 	
 private:
 	HEventLog& m_log;
@@ -73,13 +67,7 @@ private:
 	HMediaManager* m_pmm;
 	HLookDetector* m_pld;
 	QStateMachine* m_psm;
-	HPhase* m_psPreTest;
-	HPhase* m_psHabituation;
-	HPhase* m_psTest;
-	HPhaseCriteria* m_pcritPreTest;
-	HPhaseCriteria* m_pcritHabituation;
-	HPhaseCriteria* m_pcritTest;
-	
+
 	QPushButton* m_pbStartTrials;
 	QPushButton* m_pbNextTrial;
 	QPushButton* m_pbStopTrials;

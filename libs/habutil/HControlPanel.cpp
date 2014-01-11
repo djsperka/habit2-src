@@ -26,9 +26,11 @@ HControlPanel::HControlPanel(HEventLog& log, const Habit::RunSettings& runSettin
 : QDialog(w)
 , m_log(log)
 , m_runSettings(runSettings)
+#ifdef MADE_LOCAL
 , m_psPreTest(0)
 , m_psHabituation(0)
 , m_psTest(0)
+#endif
 {
 	
 	// generate gui elements and make it look pretty
@@ -122,22 +124,19 @@ void HControlPanel::doLayout()
 void HControlPanel::closeEvent(QCloseEvent* e)
 {
 	Q_UNUSED(e);
-#if 0
-	qDebug("HControlPanel::closeEvent");
-	connect(m_pmm, SIGNAL(cleared()), this, SLOT(accept()));
-	m_pmm->clear();
-	if (m_pmm)
-	{
-		delete m_pmm;
-		m_pmm = NULL;
-	}
-	e->accept();
-#endif
 }
 
 
 void HControlPanel::createExperiment(HEventLog& log)
 {
+	HPhase* psPreTest = (HPhase *)NULL;
+	HPhase* psHabituation = (HPhase *)NULL;
+	HPhase* psTest = (HPhase *)NULL;
+	HPhaseCriteria* pcritPreTest = (HPhaseCriteria *)NULL;
+	HPhaseCriteria* pcritHabituation = (HPhaseCriteria *)NULL;
+	HPhaseCriteria* pcritTest = (HPhaseCriteria *)NULL;
+
+
 	// First make sure all info is loaded from db. I'd rather this were done before HControlPanel were instantiated, 
 	// but this is how it was originally written so there. 
 	loadFromDB();
@@ -165,12 +164,11 @@ void HControlPanel::createExperiment(HEventLog& log)
 	m_pmm = createMediaManager(m_experimentSettings, NULL, idspList1, idspList2, idspList3);
 	
 	// Save the lists of stimuli for use in updating labels.
-	m_mapSS.clear();
 	populateSSMap(ags, idspList1, idspList2, idspList3);
 	
 	// Connect media manager signals to slots here so we can update display labels.
 	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(onAGStarted()));
-	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(onStimStarted(int)));
+	connect(m_pmm, SIGNAL(stimStarted(int, const QString&)), this, SLOT(onStimStarted(int, const QString&)));
 	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onCleared()));
 	
 	// Create look detector
@@ -211,8 +209,8 @@ void HControlPanel::createExperiment(HEventLog& log)
 		{
 			idStimPairList.append(idspList1.at(htg.next()));
 		}
-		m_pcritPreTest = new HPhaseFixedNCriteria(tiPreTest.getNumberOfTrials());
-		m_psPreTest = new HPhase(*sExperiment, m_pcritPreTest, log, idStimPairList, HPhaseType::PreTest, tiPreTest.getLength(), noLookTimeMS, tiPreTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		pcritPreTest = new HPhaseFixedNCriteria(tiPreTest.getNumberOfTrials());
+		psPreTest = new HPhase(*sExperiment, pcritPreTest, log, idStimPairList, HPhaseType::PreTest, tiPreTest.getLength(), noLookTimeMS, tiPreTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	if (tiHabituation.getNumberOfTrials() > 0)
@@ -225,8 +223,8 @@ void HControlPanel::createExperiment(HEventLog& log)
 		}
 		
 		// Create habituation criteria object. 
-		m_pcritHabituation = createPhaseCriteria(m_experimentSettings.getHabituationSettings(), tiHabituation.getNumberOfTrials());
-		m_psHabituation = new HPhase(*sExperiment, m_pcritHabituation, log, idStimPairList, HPhaseType::Habituation, tiHabituation.getLength(), noLookTimeMS, tiHabituation.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		pcritHabituation = createPhaseCriteria(m_experimentSettings.getHabituationSettings(), tiHabituation.getNumberOfTrials());
+		psHabituation = new HPhase(*sExperiment, pcritHabituation, log, idStimPairList, HPhaseType::Habituation, tiHabituation.getLength(), noLookTimeMS, tiHabituation.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 	
 	if (tiTest.getNumberOfTrials() > 0)
@@ -238,50 +236,50 @@ void HControlPanel::createExperiment(HEventLog& log)
 			idStimPairList.append(idspList3.at(htg.next()));
 		}
 		
-		m_pcritTest = new HPhaseFixedNCriteria(tiTest.getNumberOfTrials());
-		m_psTest = new HPhase(*sExperiment, m_pcritTest, log, idStimPairList, HPhaseType::Test, tiTest.getLength(), noLookTimeMS, tiTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		pcritTest = new HPhaseFixedNCriteria(tiTest.getNumberOfTrials());
+		psTest = new HPhase(*sExperiment, pcritTest, log, idStimPairList, HPhaseType::Test, tiTest.getLength(), noLookTimeMS, tiTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
 	}
 
 	
 	// Now assemble the experiment.
 	QState* plast = NULL;
-	if (m_psPreTest)
+	if (psPreTest)
 	{
 		if (plast)
 		{
-			plast->addTransition(plast, SIGNAL(finished()), m_psPreTest);
-			plast = m_psPreTest;
+			plast->addTransition(plast, SIGNAL(finished()), psPreTest);
+			plast = psPreTest;
 		}
 		else 
 		{
-			sExperiment->setInitialState(m_psPreTest);
-			plast = m_psPreTest;
+			sExperiment->setInitialState(psPreTest);
+			plast = psPreTest;
 		}
 	}
-	if (m_psHabituation)
+	if (psHabituation)
 	{
 		if (plast)
 		{
-			plast->addTransition(plast, SIGNAL(finished()), m_psHabituation);
-			plast = m_psHabituation;
+			plast->addTransition(plast, SIGNAL(finished()), psHabituation);
+			plast = psHabituation;
 		}
 		else 
 		{
-			sExperiment->setInitialState(m_psHabituation);
-			plast = m_psHabituation;
+			sExperiment->setInitialState(psHabituation);
+			plast = psHabituation;
 		}
 	}
-	if (m_psTest)
+	if (psTest)
 	{
 		if (plast)
 		{
-			plast->addTransition(plast, SIGNAL(finished()), m_psTest);
-			plast = m_psTest;
+			plast->addTransition(plast, SIGNAL(finished()), psTest);
+			plast = psTest;
 		}
 		else 
 		{
-			sExperiment->setInitialState(m_psTest);
-			plast = m_psTest;
+			sExperiment->setInitialState(psTest);
+			plast = psTest;
 		}
 	}
 
@@ -299,17 +297,18 @@ void HControlPanel::createExperiment(HEventLog& log)
 	
 	// Finally, text properties of labels can be assigned on entry to various states.
 	sExperiment->assignProperty(m_labelExperimentStatusValue, "text", "Running");
-	if (m_psPreTest)
-		m_psPreTest->assignProperty(m_labelCurrentPhaseValue, "text", "PreTest");
-	if (m_psHabituation)
-		m_psHabituation->assignProperty(m_labelCurrentPhaseValue, "text", "Habituation");
-	if (m_psTest)
-		m_psTest->assignProperty(m_labelCurrentPhaseValue, "text", "Test");
+	if (psPreTest)
+		psPreTest->assignProperty(m_labelCurrentPhaseValue, "text", "PreTest");
+	if (psHabituation)
+		psHabituation->assignProperty(m_labelCurrentPhaseValue, "text", "Habituation");
+	if (psTest)
+		psTest->assignProperty(m_labelCurrentPhaseValue, "text", "Test");
 	
 }
 
 void HControlPanel::populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::IdStimulusSettingsPairList& idsp1, const Habit::IdStimulusSettingsPairList& idsp2, const Habit::IdStimulusSettingsPairList& idsp3)
 {
+	m_mapSS.clear();
 	if (ags.isAttentionGetterUsed())
 	{
 		m_mapSS[0] = ags.getAttentionGetterStimulus();
@@ -377,13 +376,13 @@ void HControlPanel::onAGStarted()
 	updateFileStatusLabels(ss);
 }
 
-void HControlPanel::onStimStarted(int i)
+void HControlPanel::onStimStarted(int i, const QString& filename)
 {
-	Habit::StimulusSettings ss = m_mapSS[i];
-	QString s("Running (" + ss.getName() + ")");
+	//Habit::StimulusSettings ss = m_mapSS[i];
+	//QString s("Running (" + ss.getName() + ")");
 	m_labelAttentionGetterStatusValue->setText("Idle");
-	m_labelCurrentStimulusValue->setText(s);
-	updateFileStatusLabels(ss);
+	m_labelCurrentStimulusValue->setText("Running");
+	//updateFileStatusLabels(ss);
 }
 
 void HControlPanel::onCleared()
