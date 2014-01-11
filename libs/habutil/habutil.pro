@@ -12,6 +12,7 @@ HEADERS +=	HLook.h \
 			HLooker.h \
 			HLookDetector.h \
 			HKeypadLookDetector.h \
+			HTestingLookDetector.h \
 			HEvents.h \
 			HQEvents.h \
 			HState.h \
@@ -108,6 +109,7 @@ SOURCES +=	HLook.cpp \
 			HLooker.cpp \
 			HLookDetector.cpp \
 			HKeypadLookDetector.cpp \
+			HTestingLookDetector.cpp \
 			HEvents.cpp \
 			HState.cpp \
 			HStateMachine.cpp \
