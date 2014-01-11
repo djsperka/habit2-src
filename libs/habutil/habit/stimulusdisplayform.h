@@ -2,7 +2,6 @@
 #define STIMULUSDISPLAYFORM_H
 
 #include "stimulusdisplayinfo.h"
-#include "stimulusdisplayinfo.h"
 
 #include <QtGui/QWidget>
 
