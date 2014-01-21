@@ -30,7 +30,7 @@
 // of subclasses to implement the method of input to the Looker, e.g. keypad or 
 // eye tracker etc. For example, the KeypadLookDetector installs an event 
 // filter and looks at input from the keypad. The constructor is supplied with 
-// a QObject that will receive the keypad events (presumaby a dialog that must
+// a QObject that will receive the keypad events (presumably a dialog that must
 // be in focus). It interprets key events and when a transition is found 
 // it is added to the Looker. 
 // 
@@ -66,7 +66,10 @@ protected:
 signals:
 	void attention();
 public:
-	HLookDetector(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log) : HLooker(minlooktime_ms, minlookawaytime_ms, log), m_bAGLookEnabled(false), m_bLookEnabled(false) {};
+	HLookDetector(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log)
+		: HLooker(minlooktime_ms, minlookawaytime_ms, log)
+		, m_bAGLookEnabled(false)
+		, m_bLookEnabled(false) {};
 	virtual ~HLookDetector() {};
 	virtual void enableAGLook();
 	virtual void enableLook();
