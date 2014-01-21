@@ -18,91 +18,8 @@
 #include <QTimerEvent>
 #include <QtDebug>
 
-void HStimRequestState::onEntry(QEvent* e) 
-{
-	Q_UNUSED(e);
-	HState::onEntry(e);
-	trial().phase().requestCurrentStim();		// phase directly calls mm play() function. mm emits *Started() signals, caught in transition from this state. 
-};
 
-void HAGRequestState::onEntry(QEvent* e) 
-{
-	Q_UNUSED(e);
-	HState::onEntry(e);
-	trial().phase().requestAG();
-};
-
-void HAGRunningState::onEntry(QEvent* e) 
-{
-	Q_UNUSED(e);
-	HState::onEntry(e);
-};
-
-void HStimRunningState::onEntry(QEvent* e) 
-{
-	Q_UNUSED(e);
-	HState::onEntry(e);
-	if (m_ptimerMax->isActive()) m_ptimerMax->stop();
-	if (m_ptimerNoLook->isActive()) m_ptimerNoLook->stop();
-	m_ptimerMax->start(m_msMax);
-	m_ptimerNoLook->start(m_msNoLook);
-};
-
-void HStimRunningState::onExit(QEvent* e)
-{
-	Q_UNUSED(e);
-	HState::onExit(e);
-};
-
-void HGotLookState::onEntry(QEvent* e)
-{
-	Q_UNUSED(e);
-	HState::onEntry(e);
-	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, HElapsedTimer::elapsed()));
-};
-
-void HNoLookTimeoutState::onEntry(QEvent* e)
-{
-	Q_UNUSED(e);
-	HState::onEntry(e);
-	trial().incrementRepeatNumber();
-	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndNoLookTimeout, HElapsedTimer::elapsed()));
-};
-
-void HFixedTimeoutState::onEntry(QEvent* e)
-{
-	Q_UNUSED(e);
-	HState::onEntry(e);
-	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndFixedTimeout, HElapsedTimer::elapsed()));
-};
-	
 					  
-					  
-bool HNoLookTransition::eventTest(QEvent* e)
-{
-	bool bVal = false;
-
-	// Make sure this is the correct signal. If not get out and block transition.
-    if (!QSignalTransition::eventTest(e))
-        return false;
-
-	// OK so our timer event has fired.
-	// If there is a look pending, we don't want the transition to fire (return false).
-    // I assume that the look() signal WILL come, and it will trigger a transition.
-	// If there is no look pending, let this transition happen (return true).
-
-	if (m_ld.isLookPending(HElapsedTimer::elapsed()))
-	{
-		bVal = false;
-	}
-	else
-	{
-		bVal = true;
-	}
-
-	return bVal;
-}
-
 
 HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG) 
 	: HPhaseChildState(phase, log, "HTrial")
@@ -182,11 +99,18 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 		// enough, dammit, for a look and we're quitting the trial. But if a look is in
 		// progress, we will BLOCK this transition and force a look() signal.
 
+		// Modified 1-17-2014
+		// NoLookTimeout should ALWAYS force a transition from StimRunning state, regardless of
+		// the current looking status.
+		// TODO: If there is a look in progress, make sure that it is handled correctly by the
+		// HLooker. A flush should happen - must be triggered?
+
+#ifdef CONDITIONAL_NOLOOK_TRANSITION
 		HNoLookTransition* pNoLookTrans = new HNoLookTransition(phase.experiment().getLookDetector(), m_ptimerMaxNoLookTime);
 		pNoLookTrans->setTargetState(sNoLookTimeout);
 		sStimRunning->addTransition(pNoLookTrans);
+#endif
 
-		//sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sNoLookTimeout);
 		sNoLookTimeout->addTransition(sInitial);	// trial is repeated
 		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(look(HLook)), sGotLook);
 		sGotLook->addTransition(sFinal);
