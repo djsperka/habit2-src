@@ -29,6 +29,24 @@ private:
 };
 
 
+class HLookDirection
+{
+public:
+	static const HLookDirection LookAway;
+	static const HLookDirection LookLeft;
+	static const HLookDirection LookRight;
+	static const HLookDirection LookCenter;
+	static const HLookDirection UnknownLookDirection;
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+
+private:
+	explicit HLookDirection(int t, const char *name): m_t(t), m_s(name) {}
+	int m_t;
+	QString m_s;
+};
+
+
 class HLookTrans
 {
 public:
@@ -42,37 +60,23 @@ public:
 	static const HLookTrans UnknownLookTrans;
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
-	
+	bool isTransToLook() const { return m_bToLook; };
 private:
-	explicit HLookTrans(int t, const char *name): m_t(t), m_s(name) {}
+	explicit HLookTrans(int t, const char *name, bool toLook): m_t(t), m_s(name), m_bToLook(toLook) {}
 	int m_t;
 	QString m_s;
+	bool m_bToLook;
 };
 
 
 
-class HLookDirection
-{
-public:
-	static const HLookDirection NoLook;
-	static const HLookDirection LookLeft;
-	static const HLookDirection LookRight;
-	static const HLookDirection LookCenter;
-	static const HLookDirection UnknownLookDirection;
-	int number() const { return m_t; }
-	const QString& name() const { return m_s; }
-	
-private:
-	explicit HLookDirection(int t, const char *name): m_t(t), m_s(name) {}
-	int m_t;
-	QString m_s;
-};
 
-	
+const HLookDirection& directionTo(const HLookTrans& type);
 const HPhaseType& getPhaseType(int i);
 const HLookTrans& getLookTrans(int i);
 const HLookDirection& getLookDirection(int i);
 bool operator==(const HLookDirection& lhs, const HLookDirection& rhs);
+bool operator!=(const HLookDirection& lhs, const HLookDirection& rhs);
 bool operator==(const HLookTrans& lhs, const HLookTrans& rhs);
 
 // Stim context refers to when stim is to be played. 
