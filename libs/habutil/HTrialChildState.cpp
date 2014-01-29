@@ -22,31 +22,6 @@ void HTrialInitialState::onEntry(QEvent* e)
 }
 
 
-bool HNoLookTransition::eventTest(QEvent* e)
-{
-	bool bVal = false;
-
-	// Make sure this is the correct signal. If not get out and block transition.
-    if (!QSignalTransition::eventTest(e))
-        return false;
-
-	// OK so our timer event has fired.
-	// If there is a look pending, we don't want the transition to fire (return false).
-    // I assume that the look() signal WILL come, and it will trigger a transition.
-	// If there is no look pending, let this transition happen (return true).
-
-	if (m_ld.isLookPending(HElapsedTimer::elapsed()))
-	{
-		bVal = false;
-	}
-	else
-	{
-		bVal = true;
-	}
-
-	return bVal;
-}
-
 void HStimRunningState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
@@ -55,7 +30,38 @@ void HStimRunningState::onEntry(QEvent* e)
 	if (m_ptimerNoLook->isActive()) m_ptimerNoLook->stop();
 	m_ptimerMax->start(m_msMax);
 	m_ptimerNoLook->start(m_msNoLook);
+	m_bGotLook = false;
+	m_bGotLookStarted = false;
+	m_bGotLookAwayStarted = false;
 };
+
+void HStimRunningState::gotLookStarted()
+{
+	m_bGotLookStarted = true;
+}
+
+void HStimRunningState::gotLookAwayStarted()
+{
+	if (m_bGotLook) return;
+	else if (!m_ptimerNoLook->isActive())
+	{
+		machine()->postEvent(new HNoLookQEvent());
+	}
+	else
+	{
+		m_bGotLookAwayStarted = true;
+		m_bGotLookStarted = false;
+	}
+}
+
+void HStimRunningState::noLookTimeout()
+{
+	if (m_bGotLook || m_bGotLookStarted) return;
+	else if (!m_bGotLookStarted)
+	{
+		machine()->postEvent(new HNoLookQEvent());
+	}
+}
 
 void HStimRunningState::onExit(QEvent* e)
 {

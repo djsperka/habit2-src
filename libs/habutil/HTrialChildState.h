@@ -14,6 +14,7 @@
 #include <QString>
 #include <QTimer>
 #include <QSignalTransition>
+#include "HQEvents.h"
 #include "HLogState.h"
 
 class HTrial;
@@ -140,25 +141,26 @@ protected:
 	void onEntry(QEvent* e);
 };
 
-	
-	
-class HNoLookTransition: public QSignalTransition
+
+
+
+class HNoLookTransition: public QAbstractTransition
 {
 	Q_OBJECT
 	
 public:
-	HNoLookTransition(HLookDetector& ld, QTimer *ptimer) : QSignalTransition(ptimer, SIGNAL(timeout())), m_ld(ld), m_ptimer(ptimer) {};
+	HNoLookTransition() {};
 	~HNoLookTransition() {};
 protected:
-	bool eventTest(QEvent* e);
-	void onTransition(QEvent* e) { Q_UNUSED(e); };
-private:
-	HLookDetector& m_ld;
-	QTimer* m_ptimer;
+	bool eventTest(QEvent* e)
+	{
+		return (e->type() == QEvent::Type(HNoLookQEvent::NoLookType));
+	};
+	virtual void onTransition(QEvent* event)
+	{
+		Q_UNUSED(event);
+	};
 };
-
-
-
 
 /**
  State entered when stim starts playing. Starts a timer on entry.
@@ -168,6 +170,7 @@ private:
 
 class HStimRunningState: public HTrialChildState
 {
+	Q_OBJECT
 public:
 	HStimRunningState(HTrial& trial, HEventLog& log, int msMax, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook)
 	: HTrialChildState(trial, log, "HStimRunning")
@@ -177,6 +180,11 @@ public:
 	, m_ptimerNoLook(ptimerNoLook)  
 	{};
 	~HStimRunningState() {};
+
+private slots:
+	void noLookTimeout();
+	void gotLookStarted();
+	void gotLookAwayStarted();
 	
 protected:
 	// Start timer on entry to this state. Also generate kStimRunning event. 
@@ -188,6 +196,9 @@ private:
 	QTimer* m_ptimerMax;
 	int m_msNoLook;
 	QTimer* m_ptimerNoLook;
+	bool m_bGotLook;
+	bool m_bGotLookStarted;
+	bool m_bGotLookAwayStarted;
 };
 
 

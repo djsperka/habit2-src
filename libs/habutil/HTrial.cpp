@@ -105,11 +105,9 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 		// TODO: If there is a look in progress, make sure that it is handled correctly by the
 		// HLooker. A flush should happen - must be triggered?
 
-#ifdef CONDITIONAL_NOLOOK_TRANSITION
-		HNoLookTransition* pNoLookTrans = new HNoLookTransition(phase.experiment().getLookDetector(), m_ptimerMaxNoLookTime);
+		HNoLookTransition* pNoLookTrans = new HNoLookTransition();
 		pNoLookTrans->setTargetState(sNoLookTimeout);
 		sStimRunning->addTransition(pNoLookTrans);
-#endif
 
 		sNoLookTimeout->addTransition(sInitial);	// trial is repeated
 		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(look(HLook)), sGotLook);
