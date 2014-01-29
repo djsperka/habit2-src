@@ -22,22 +22,25 @@
 class HLook
 {
 public:
-	HLook(const HLookDirection& direc, int startMS, int endMS): m_pdirection(&direc), m_startMS(startMS), m_endMS(endMS) {};
-	HLook() : m_pdirection(&HLookDirection::UnknownLookDirection), m_startMS(0), m_endMS(0) {};
+	HLook(const HLookDirection& direc, int startMS, int endMS): m_pdirection(&direc), m_startMS(startMS), m_endMS(endMS) { m_lookMS = endMS-startMS; };
+	HLook(const HLookDirection& direc, int startMS, int endMS, int lookMS): m_pdirection(&direc), m_startMS(startMS), m_endMS(endMS), m_lookMS(lookMS) {};
+	HLook() : m_pdirection(&HLookDirection::UnknownLookDirection), m_startMS(0), m_endMS(0), m_lookMS(0) {};
 	HLook(const HLook& h) 
 	{
 		m_pdirection = &h.direction();
 		m_startMS = h.startMS();
 		m_endMS = h.endMS();
+		m_lookMS = h.lookMS();
 	};
 	~HLook() {};
 	void setDirection(const HLookDirection& d) { m_pdirection = &d; };
 	void setStartMS(int ms) { m_startMS = ms; };
 	void setEndMS(int ms) { m_endMS = ms; };
+	void setLookMS(int ms) { m_lookMS = ms; };
 	const HLookDirection& direction() const { return *m_pdirection; };
 	int startMS() const { return m_startMS; };
 	int endMS() const { return m_endMS; };
-	int lookMS() const { return m_endMS - m_startMS; };
+	int lookMS() const { return m_lookMS; };
 
 	// TODO These do not need to be friends. Use member functions!
 	//friend QDataStream& operator<<(QDataStream& out, const HLook& l);
@@ -47,6 +50,7 @@ private:
 	const HLookDirection* m_pdirection;
 	int m_startMS;
 	int m_endMS;
+	int m_lookMS;
 };
 
 Q_DECLARE_METATYPE(HLook);
