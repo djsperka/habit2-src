@@ -11,6 +11,7 @@ CONFIG(debug, debug|release) {
 HEADERS +=	HLook.h \
 			HLooker.h \
 			HLookDetector.h \
+			HLookDetectorUtil.h \
 			HKeypadLookDetector.h \
 			HTestingLookDetector.h \
 			HEvents.h \
@@ -108,6 +109,7 @@ HEADERS +=	HLook.h \
 SOURCES +=	HLook.cpp \
 			HLooker.cpp \
 			HLookDetector.cpp \
+			HLookDetectorUtil.cpp \
 			HKeypadLookDetector.cpp \
 			HTestingLookDetector.cpp \
 			HEvents.cpp \

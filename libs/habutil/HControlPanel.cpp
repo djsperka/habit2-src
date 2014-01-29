@@ -11,7 +11,8 @@
 #include "HMediaManagerUtil.h"
 #include "HPhase.h"
 #include "HPhaseCriteriaUtil.h"
-#include "HKeypadLookDetector.h"
+//#include "HKeypadLookDetector.h"
+#include "HLookDetectorUtil.h"
 #include "HTrialGenerator.h"
 #include "HElapsedTimer.h"
 #include "maindao.h"
@@ -154,7 +155,11 @@ void HControlPanel::createExperiment(HEventLog& log)
 	Habit::TrialsInfo tiHabituation = ds.getHabituationTrialsInfo();
 	Habit::TrialsInfo tiTest = ds.getTestTrialsInfo();
 	Habit::AttentionGetterSettings ags = m_experimentSettings.getAttentionGetterSettings();
-	
+	int noLookTimeMS = tiTest.getLookTimes();
+	//int lookTimeMS = tiPreTest.getLookTimes();
+	//int lookAwayTimeMS = tiHabituation.getLookTimes();
+
+
 	
 	// Create media manager. Note we are not passing a parent! 
 	// The stimuli configured for each phase are pulled using the experiment settings. 
@@ -172,10 +177,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onCleared()));
 	
 	// Create look detector
-	int lookTimeMS = tiPreTest.getLookTimes();
-	int lookAwayTimeMS = tiHabituation.getLookTimes();
-	int noLookTimeMS = tiTest.getLookTimes();
-	m_pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, log, this);
+	m_pld = createLookDetector(m_experimentSettings, log, this);
 
 	// connect attention() and look() signals to a slot so we can forward the info to the event log
 	connect(m_pld, SIGNAL(attention()), this, SLOT(onAttention()));
@@ -378,6 +380,8 @@ void HControlPanel::onAGStarted()
 
 void HControlPanel::onStimStarted(int i, const QString& filename)
 {
+	Q_UNUSED(i);
+	Q_UNUSED(filename);
 	//Habit::StimulusSettings ss = m_mapSS[i];
 	//QString s("Running (" + ss.getName() + ")");
 	m_labelAttentionGetterStatusValue->setText("Idle");
@@ -416,9 +420,9 @@ void HControlPanel::onLook(HLook l)
 	{
 		m_labelLookStatusValue->setText("Look Right");
 	}
-	else if (l.direction() == HLookDirection::NoLook)
+	else if (l.direction() == HLookDirection::LookAway)
 	{
-		m_labelLookStatusValue->setText("No Look");
+		m_labelLookStatusValue->setText("Look Away");
 	}
 	else
 	{
