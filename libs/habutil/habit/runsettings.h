@@ -4,6 +4,7 @@
 
 #include <QtCore/QString>
 #include <QtCore/QDataStream>
+#include <QList>
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -23,6 +24,7 @@ namespace Habit
 		void setExperimentId(int id);
 
 		QString getHabituationOrder() const;
+		bool getHabituationOrderList(QList<int>& list) const;
 		void setHabituationOrder(const QString&);
 		bool isHabituationRandomized() const;
 		void setHabituationRandomized(bool);
@@ -30,6 +32,7 @@ namespace Habit
 		void setHabituationRandomizeMethod(int);
 
 		QString getPretestOrder() const;
+		bool getPretestOrderList(QList<int>& list) const;
 		void setPretestOrder(const QString&);
 		bool isPretestRandomized() const;
 		void setPretestRandomized(bool);
@@ -37,6 +40,7 @@ namespace Habit
 		void setPretestRandomizeMethod(int);
 
 		QString getTestOrder() const;
+		bool getTestOrderList(QList<int>& list) const;
 		void setTestOrder(const QString&);
 		bool isTestRandomized() const;
 		void setTestRandomized(bool);
@@ -45,6 +49,13 @@ namespace Habit
 
 		int getSubjectId() const;
 		void setSubjectId(int id);
+
+		// space separated or comma-separated string with int.
+		// Returns true and list contains the parsed integers in order,
+		// if each element parses as an int, false otherwise (and list
+		// is undefined).
+		bool getOrderFromString(QList<int>& list, QString str) const;
+
 
 	private:
 		int id_;

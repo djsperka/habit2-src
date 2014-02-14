@@ -1,5 +1,6 @@
 #include "runsettings.h"
 #include <QDebug>
+#include <QStringList>
 
 Habit::RunSettings::RunSettings()
 	: id_(-1)
@@ -114,6 +115,41 @@ int Habit::RunSettings::getTestRandomizeMethod() const {
 void Habit::RunSettings::setTestRandomizeMethod(int m) {
 	testRandomizeMethod = m;
 }
+
+bool Habit::RunSettings::getPretestOrderList(QList<int>& list) const
+{
+	return getOrderFromString(list, getPretestOrder());
+}
+
+bool Habit::RunSettings::getHabituationOrderList(QList<int>& list) const
+{
+	return getOrderFromString(list, getHabituationOrder());
+}
+
+bool Habit::RunSettings::getTestOrderList(QList<int>& list) const
+{
+	return getOrderFromString(list, getTestOrder());
+}
+
+bool Habit::RunSettings::getOrderFromString(QList<int>& list, QString str) const
+{
+	bool b = true;
+	QString separator(" ");
+
+	qDebug() << "getOrderFromString: " << str;
+
+	// If any commas are found, assume comma-separated list. Otherwise assume space separated.
+	if (str.indexOf(',') >= 0) separator = ",";
+	QStringList orderList = str.split(separator);
+	for(QStringList::iterator it = orderList.begin(); it != orderList.end() && b; ++it)
+	{
+		int num = it->toInt(&b);
+		if (b) list.append(num);
+		qDebug() << "getOrderFromString: " << num;
+	}
+	return b;
+}
+
 
 QDataStream & Habit::operator << (QDataStream& stream, Habit::RunSettings settings)
 {
