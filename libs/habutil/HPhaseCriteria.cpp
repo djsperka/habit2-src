@@ -44,19 +44,20 @@ bool HPhaseTotalLookingTimeCriteria::isPhaseComplete(const HPhaseLog& log, bool&
 bool HPhaseHabituationCriteria::getBasisSum(const HPhaseLog& log, int& iBasisSum, int& iBasisWindowStart)
 {
 	bool bval = false;
+	int iTempSum = 0;
 	iBasisSum = 0;
 	iBasisWindowStart = -1;
 	if (m_c.getBasis() == HCriterionBasisType::HCriterionBasisFirstN)
 	{
-		if (log.size() >= (int)m_c.getWindowSize())
+		if (getWindowSum(log, iTempSum, 0))
 		{
-			bval = getWindowSum(log, iBasisSum, 0);
-			if (bval)
+			if ((m_c.getRequireMinBasisValue() && iTempSum > (int)m_c.getMinBasisValue()) ||
+				(!m_c.getRequireMinBasisValue()))
+			{
+				bval = true;
+				iBasisSum = iTempSum;
 				iBasisWindowStart = 0;
-		}
-		else 
-		{
-			iBasisWindowStart = -1;
+			}
 		}
 	}
 	else 
@@ -67,17 +68,23 @@ bool HPhaseHabituationCriteria::getBasisSum(const HPhaseLog& log, int& iBasisSum
 		if (m_c.getWindowType() == HCriterionWindowType::HCriterionWindowFixed)
 			iStep = m_c.getWindowSize();
 		iBasisWindowStart = -1;
-		
-		for (int i=0; i<(log.size()-(int)m_c.getWindowSize()+1); i++)
+
+		for (int i=0; getWindowSum(log, itemp, i); i++)
 		{
-			if (getWindowSum(log, itemp, i) && itemp > bmax) 
+			if (itemp > bmax)
 			{
 				bmax = itemp;
 				iBasisWindowStart = i;
 			}
 		}
-		iBasisSum = bmax;
-		if (bmax > 0) bval = true;
+
+		if ((m_c.getRequireMinBasisValue() && bmax > (int)m_c.getMinBasisValue()) ||
+			(!m_c.getRequireMinBasisValue() && bmax > 0))
+		{
+			iBasisSum = bmax;
+			bval = true;
+		}
+
 	}
 	return bval;
 };
@@ -109,6 +116,8 @@ bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHa
 		threshold = (double)basisSum * m_c.getPercent() / 100.0;
 		if (m_c.getWindowType() == HCriterionWindowType::HCriterionWindowFixed)
 			iStep = m_c.getWindowSize();
+		if (m_c.getExcludeBasisWindow())
+			iWindowStart += m_c.getWindowSize();
 		for (int i=iWindowStart; i<log.size(); i+=iStep)
 		{
 			if (getWindowSum(log, windowSum, i) && windowSum < threshold)

@@ -17,7 +17,8 @@ namespace Habit
 class CriterionSettings
 {
 public:
-    CriterionSettings(const HCriterionBasisType& basis = HCriterionBasisType::HCriterionBasisFirstN, unsigned int percent=50, unsigned int windowSize=3, const HCriterionWindowType& windowType = HCriterionWindowType::HCriterionWindowFixed);
+    CriterionSettings(const HCriterionBasisType& basis = HCriterionBasisType::HCriterionBasisFirstN, unsigned int percent=50, unsigned int windowSize=3, const HCriterionWindowType& windowType = HCriterionWindowType::HCriterionWindowFixed, bool bExcludeBasisWindow = false, bool bRequireMinBasisValue = false, unsigned int uiMinBasisValue = 0);
+    CriterionSettings(const CriterionSettings& c);
     ~CriterionSettings();
     //CriterionSettings& operator = (const CriterionSettings&);
 	
@@ -30,12 +31,21 @@ public:
     void setWindowSize(unsigned int windowSize);
     const HCriterionWindowType& getWindowType() const;
     void setWindowType(const HCriterionWindowType& windowType);
+    void setExcludeBasisWindow(bool b);
+    bool getExcludeBasisWindow() const;
+    void setRequireMinBasisValue(bool b);
+    bool getRequireMinBasisValue() const;
+    void setMinBasisValue(unsigned int v);
+    unsigned int getMinBasisValue() const;
 
 private:
 	const HCriterionBasisType* pbasis_;
 	unsigned int percent_;
 	unsigned int windowSize_;
 	const HCriterionWindowType* pwindowType_;
+	bool m_bExcludeBasisWindow;
+	bool m_bRequireMinBasisValue;
+	unsigned int m_uiMinBasisValue;
 };
 
 QDataStream & operator<< (QDataStream& stream, Habit::CriterionSettings d);
