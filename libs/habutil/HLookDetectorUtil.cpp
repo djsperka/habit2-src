@@ -20,7 +20,7 @@ HLookDetector* createLookDetector(const Habit::ExperimentSettings& es, HEventLog
 	// settings, or maybe the RunSettings will have an indication of the look detector type
 	// to be used.
 
-	pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, log, pdialog);
+	pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, 0, 0, log, pdialog);
 	return pld;
 }
 

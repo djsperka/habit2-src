@@ -25,7 +25,7 @@ class HLooker : public QStateMachine
 	Q_OBJECT
 
 public:
-	HLooker(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log, bool bLive = true);
+	HLooker(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, bool bLive = true);
 	~HLooker() {};
 	void addTrans(const HLookTrans& type, int tMS);
 	
@@ -46,17 +46,16 @@ public:
 
 public slots:
 
-	// when min look away timer fires the first method is called as its slot.
-	// The second version is called with a particular time. Assumed that look-away
-	// is active, and the min look-away time has been exceeded. Call flush().
 	void minLookAwayTimeout();
-	//void minLookAwayTimeout(int tMS);
+	void maxAccumulatedLookTimeReached();
+	void minLookTimeReached();
 
 	// slots called when the individual states are entered. Handle things with these
 	// slots rather than the states' onEntry slots, as it makes it simpler to have
 	// access to the vars which track look/away status and times.
 	void onInitialStateEntered();
 	void onLookingStateEntered();
+	void onLookingStateExited();
 	void onLookingAwayStateEntered();
 	void onLookingAwayStateExited();
 
@@ -67,31 +66,44 @@ public slots:
 private:
 	int m_minLookTimeMS;		// look must be at least this long
 	int m_minLookAwayTimeMS;	// when look away has been at least this long, current look is ended.
+	int m_maxLookAwayTimeMS;	// when >0, if looking away for this long emit maxLookAwayTime()
+	int m_maxAccumulatedLookTimeMS; // when >0, when accumulated look time reaches this emit maxAccumulatedLookTime()
 	HEventLog& m_log;
 	bool m_bLive;				// if true, running with live observer. if false, pre-recorded transitions used.
-	bool m_bLookStarted;		// if true a look has been started but not yet ended.
-	const HLookDirection* m_pdirectionPendingLook;	// when m_bLookStarted==true this is the direction
+	bool m_bLookPending;		// if true a look has been started but not yet ended.
+	const HLookDirection* m_pdirectionLookPending;	// when m_bLookStarted==true this is the direction
+	int m_iLookPendingStartIndex;	// only valid if (m_bLookPending); in that case m_transitions[m_iLookPendingStartIndex]
+									// is the initial transition in this looking period.
 	bool m_bLookAwayStarted;	// if true, look-away has been started. m_bLookStarted may also be true, indicating
 								// that the look may end, depending on how long this lasts
-	int m_lookStartTimeMS;		// initial start time for a look
-	int m_lookLastStartTimeMS;	// start time for most recent looking period (if short look-aways)
-	int m_cumulativeLookTimeMS;	// cumulative total look time for current look
-	int m_lookAwayStartTimeMS;	// initial start time for look-away
-	int m_cumulativeLookAwayTimeMS;	// cumulative total look time for a look-away.
 
+	// These are various tallies and counters that I'd like to do away with.
+	//int m_lookStartTimeMS;		// initial start time for a look
+	//int m_lookLastStartTimeMS;	// start time for most recent looking period (if short look-aways)
+	//int m_cumulativeLookTimeMS;	// cumulative total look time for current look
+	//int m_lookAwayStartTimeMS;	// initial start time for look-away
+	//int m_cumulativeLookAwayTimeMS;	// cumulative total look time for a look-away.
+
+	// Timers used
 	QTimer *m_ptimerLookAwayTimeout;
+	QTimer *m_ptimerMaxLookAway;
+	QTimer *m_ptimerMaxAccumulatedLook;
+	QTimer *m_ptimerMinLookTime;
+
+	// List of all transitions. Starts from scratch each time initial state entered.
 	QList< QPair<const HLookTrans*, int> > m_transitions;
 	QList< HLook > m_looks;
 	
-	// This is made unnecessary when we switch to using a state machine:
-	// addTrans queues an event to the state machine.
-	//void update();
-	
+	bool analyzeLooking(int m_iLookPendingStartIndex, int& lookStartTimeMS, int& lastLookStartTimeMS, int& cumulativeLookTimeMS, int& lastLookAwayStartTimeMS);
+	int getSumOfCompleteLooks();
+
 signals:
 	void look(HLook l);
 	void lookStarted();
-	void lookAway(HLook l);
+	//void lookAway(HLook l);
 	void lookAwayStarted();
+	void maxLookAwayTime();
+	void maxAccumulatedLookTime();
 };
 	
 class HLookerState: public QState

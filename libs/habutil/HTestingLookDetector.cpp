@@ -6,20 +6,24 @@
  */
 
 #include "HTestingLookDetector.h"
+#include "HElapsedTimer.h"
 #include <QTextStream>
 #include <QStringList>
 #include <QTimer>
 
 
-HTestingLookDetector::HTestingLookDetector(QFile& inputFile, int minlooktime_ms, int minlookawaytime_ms, HEventLog& log, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight)
-: HLookDetector(minlooktime_ms, minlookawaytime_ms, log)
+HTestingLookDetector::HTestingLookDetector(QFile& inputFile, int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight)
+: HLookDetector(minlooktime_ms, minlookawaytime_ms, maxlookawaytime_ms, maxaccumlooktime_ms, log)
 , m_pdialog(pdialog)
 , m_bUseLeft(bUseLeft)
 , m_bUseCenter(bUseCenter)
 , m_bUseRight(bUseRight)
-, m_attentionDelay(100)
-, m_cumulativeTime(0)
+, m_lastCheckTime(-1)
 {
+	m_ptimer = new QTimer();
+	m_ptimer->setInterval(0);
+	QObject::connect(m_ptimer, SIGNAL(timeout()), this, SLOT(check()));
+
 	qDebug() << "HTestingLookDetector: load signals from input file.";
 
 	int num = 0;
@@ -38,88 +42,87 @@ HTestingLookDetector::HTestingLookDetector(QFile& inputFile, int minlooktime_ms,
     }
 };
 
+void HTestingLookDetector::check()
+{
+	int t = HElapsedTimer::elapsed();
+	if (t == m_lastCheckTime) return;
+
+	while (m_lookTransitions.size() > 0 && m_lookTransitions[0].second <= t)
+	{
+		QPair<const HLookTrans*, int> pair = m_lookTransitions.takeFirst();
+		addTrans(*pair.first, pair.second);
+		qDebug() << "HTestingLookDetector::check() addTrans " << *pair.first << " @ " << pair.second;
+	}
+	m_lastCheckTime = t;
+};
+
 void HTestingLookDetector::agLookEnabled(bool enabled)
 {
-	if (enabled)
-		QTimer::singleShot(m_attentionDelay, this, SLOT(fireAttention()));
 }
 
 void HTestingLookDetector::lookEnabled(bool enabled)
 {
-	if (enabled && !m_lookTransitions.empty())
-	{
-		QPair<HLookTrans, int> pair = m_lookTransitions.takeFirst();
-		addTrans(pair.first, m_cumulativeTime);
-		qDebug() << "Add trans " << pair.first << " at t=" << m_cumulativeTime;
-		m_cumulativeTime += pair.second;
-		if (isLookEnabled())
-			QTimer::singleShot(m_attentionDelay, this, SLOT(fireTransition()));
-	}
+	if (enabled)
+		m_ptimer->start();
+	else
+		m_ptimer->stop();
 }
-
-void HTestingLookDetector::fireAttention()
-{
-	qDebug() << "Emit attention() signal...";
-	emit attention();
-}
-
-void HTestingLookDetector::fireTransition()
-{
-	if (isLookEnabled() && !m_lookTransitions.empty())
-	{
-		QPair<HLookTrans, int> pair = m_lookTransitions.takeFirst();
-		addTrans(pair.first, m_cumulativeTime);
-		qDebug() << "Add trans " << pair.first << " at t=" << m_cumulativeTime;
-		m_cumulativeTime += pair.second;
-		if (isLookEnabled() && pair.second > 0)
-			QTimer::singleShot(m_attentionDelay, this, SLOT(fireTransition()));
-	}
-	return;
-}
-
-
 
 bool HTestingLookDetector::processLine(const QString& line)
 {
 	bool bval = true;
 
-	QStringList tokens = line.split(",");
-	if (tokens.at(0) == "AttentionDelay")
+	// If line begins with # or is blank then skip it
+	if (line.trimmed().isEmpty() || line.startsWith('#'))
 	{
-		m_attentionDelay = tokens.at(1).toInt();
+		// skip line
 	}
-	else if (tokens.at(0) == HLookTrans::NoneLeft.name())
+	else if (line.startsWith('!'))
 	{
-		m_lookTransitions.append( QPair< HLookTrans, int>(HLookTrans::NoneLeft, tokens.at(1).toInt()));
-	}
-	else if (tokens.at(0) == HLookTrans::LeftNone.name())
-	{
-		m_lookTransitions.append( QPair< HLookTrans, int>(HLookTrans::LeftNone, tokens.at(1).toInt()));
-	}
-	else if (tokens.at(0) == HLookTrans::NoneCenter.name())
-	{
-		m_lookTransitions.append( QPair< HLookTrans, int>(HLookTrans::NoneCenter, tokens.at(1).toInt()));
-	}
-	else if (tokens.at(0) == HLookTrans::CenterNone.name())
-	{
-		m_lookTransitions.append( QPair< HLookTrans, int>(HLookTrans::CenterNone, tokens.at(1).toInt()));
-	}
-	else if (tokens.at(0) == HLookTrans::NoneRight.name())
-	{
-		m_lookTransitions.append( QPair< HLookTrans, int>(HLookTrans::NoneRight, tokens.at(1).toInt()));
-	}
-	else if (tokens.at(0) == HLookTrans::RightNone.name())
-	{
-		m_lookTransitions.append( QPair< HLookTrans, int>(HLookTrans::RightNone, tokens.at(1).toInt()));
-	}
-	else if (tokens.at(0) == HLookTrans::NoneNone.name())
-	{
-		m_lookTransitions.append( QPair< HLookTrans, int>(HLookTrans::NoneNone, tokens.at(1).toInt()));
+#if 0
+		QString s = line.remove(0,1);
+		QTextStream in(s);
+		int i0, i1, i2, i3;
+		in >> i0 >> i1 >> i2 >> i3;
+		qDebug() << "Read parameters from input file line: " << i0 << " " i1 << " " << i2 << " " << i3;
+#endif
 	}
 	else
 	{
-		qDebug() << "Error in input file: unknown look trans type: " << line;
-		bval = false;
+		QStringList tokens = line.split(",");
+		if (tokens.at(0) == HLookTrans::NoneLeft.name())
+		{
+			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneLeft, tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HLookTrans::LeftNone.name())
+		{
+			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::LeftNone, tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HLookTrans::NoneCenter.name())
+		{
+			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneCenter, tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HLookTrans::CenterNone.name())
+		{
+			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::CenterNone, tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HLookTrans::NoneRight.name())
+		{
+			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneRight, tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HLookTrans::RightNone.name())
+		{
+			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::RightNone, tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HLookTrans::NoneNone.name())
+		{
+			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneNone, tokens.at(1).toInt()));
+		}
+		else
+		{
+			qDebug() << "Error in input file: unknown look trans type: " << line;
+			bval = false;
+		}
 	}
 	return bval;
 }
@@ -127,7 +130,6 @@ bool HTestingLookDetector::processLine(const QString& line)
 
 HTestingLookDetector::~HTestingLookDetector()
 {
-	qDebug() << "HTestingLookDetector: ";
 };
 
 

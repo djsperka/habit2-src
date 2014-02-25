@@ -75,14 +75,14 @@ QTextStream& operator<<(QTextStream& out, const HLookDirection& direction)
 
 QTextStream& operator<<(QTextStream& out, const HLook& l)
 {
-	out << l.direction() << ":" << l.startMS() << "-" << l.endMS();
+	out << l.direction() << ":" << l.startMS() << "-" << l.endMS() << "(" << l.lookMS() << ")";
 	return out;
 };
 
 
 QDataStream& operator<<(QDataStream& out, const HLook& l)
 {
-	out << l.direction().number() << l.startMS() << l.endMS();
+	out << l.direction().number() << l.startMS() << l.endMS() << l.lookMS();
 	return out;
 };
 

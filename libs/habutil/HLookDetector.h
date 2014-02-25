@@ -66,8 +66,8 @@ protected:
 signals:
 	void attention();
 public:
-	HLookDetector(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log)
-		: HLooker(minlooktime_ms, minlookawaytime_ms, log)
+	HLookDetector(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log)
+		: HLooker(minlooktime_ms, minlookawaytime_ms, maxlookawaytime_ms, maxaccumlooktime_ms, log)
 		, m_bAGLookEnabled(false)
 		, m_bLookEnabled(false) {};
 	virtual ~HLookDetector() {};
