@@ -172,13 +172,14 @@ class HStimRunningState: public HTrialChildState
 {
 	Q_OBJECT
 public:
-	HStimRunningState(HTrial& trial, HEventLog& log, int msMax, QTimer* ptimerMax, int msNoLook, QTimer* ptimerNoLook)
+	HStimRunningState(HTrial& trial, HEventLog& log, int msNoLook)
 	: HTrialChildState(trial, log, "HStimRunning")
-	, m_msMax(msMax)
-	, m_ptimerMax(ptimerMax)
 	, m_msNoLook(msNoLook)
-	, m_ptimerNoLook(ptimerNoLook)  
-	{};
+	{
+		m_ptimerNoLook = new QTimer();
+		m_ptimerNoLook->setSingleShot(true);
+		connect(m_ptimerNoLook, SIGNAL(timeout()), this, SLOT(noLookTimeout()));
+	};
 	~HStimRunningState() {};
 
 private slots:
@@ -192,8 +193,6 @@ protected:
 	void onExit(QEvent* e);
 	
 private:
-	int m_msMax;
-	QTimer* m_ptimerMax;
 	int m_msNoLook;
 	QTimer* m_ptimerNoLook;
 	bool m_bGotLook;

@@ -26,9 +26,7 @@ void HStimRunningState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	if (m_ptimerMax->isActive()) m_ptimerMax->stop();
 	if (m_ptimerNoLook->isActive()) m_ptimerNoLook->stop();
-	m_ptimerMax->start(m_msMax);
 	m_ptimerNoLook->start(m_msNoLook);
 	m_bGotLook = false;
 	m_bGotLookStarted = false;
@@ -56,6 +54,7 @@ void HStimRunningState::gotLookAwayStarted()
 
 void HStimRunningState::noLookTimeout()
 {
+	qDebug() << "HStimRunningState::noLookTimeout() m_bGotLook " << m_bGotLook << " m_bGotLookStarted " << m_bGotLookStarted;
 	if (m_bGotLook || m_bGotLookStarted) return;
 	else if (!m_bGotLookStarted)
 	{
@@ -67,6 +66,10 @@ void HStimRunningState::onExit(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onExit(e);
+	if (m_ptimerNoLook->isActive())
+	{
+		m_ptimerNoLook->stop();
+	}
 };
 
 void HStimRequestState::onEntry(QEvent* e)
