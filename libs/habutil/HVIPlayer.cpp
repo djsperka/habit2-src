@@ -152,8 +152,15 @@ void HVIPlayer::clear()
 
 void HVIPlayer::play(int number)
 {
+	HStimulusSource::HStimulusSourceType oldType = getStimulusType(m_iCurrentStim);
 	HStimulusSource::HStimulusSourceType newType = getStimulusType(number);
 	HStimulusSource *s;	// Beware! play() can be called with number = -1 (for background). Must not fetch source in that case.
+
+	// Stop video if one is now playing.
+	if (oldType == HStimulusSource::VIDEO)
+	{
+		stop();
+	}
 
 	switch (newType)
 	{
