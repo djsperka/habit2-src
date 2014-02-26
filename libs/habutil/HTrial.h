@@ -52,7 +52,6 @@ private:
 	int m_trialNumber;
 	int m_repeatNumber;
 	QTimer* m_ptimerMaxTrialLength;	
-	QTimer* m_ptimerMaxNoLookTime;
 	
 public slots:
 	void onStimRunningEntered();

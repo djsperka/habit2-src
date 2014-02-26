@@ -33,8 +33,6 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 	// create timer for stim
 	m_ptimerMaxTrialLength = new QTimer();
 	m_ptimerMaxTrialLength->setSingleShot(true);
-	m_ptimerMaxNoLookTime = new QTimer();
-	m_ptimerMaxNoLookTime->setSingleShot(true);
 	
 	// Create initial state. Do not define its transition yet. 
 	HTrialInitialState* sInitial = new HTrialInitialState(*this, log);
@@ -46,7 +44,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 
 	// Stim request state and StimRunning states are similar to AGRequest and AGRunning. 
 	HStimRequestState* sStimRequest = new HStimRequestState(*this, log);
-	HStimRunningState* sStimRunning = new HStimRunningState(*this, log, maxTrialLengthMS, m_ptimerMaxTrialLength, maxNoLookTimeMS, m_ptimerMaxNoLookTime);
+	HStimRunningState* sStimRunning = new HStimRunningState(*this, log, maxNoLookTimeMS);
 
 	// Create final state.
 	QFinalState* sFinal = new QFinalState(this);
@@ -77,19 +75,24 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
  	//QObject::connect(sStimRequest, SIGNAL(playStim(int)), &phase().getMediaManager(), SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
 	QObject::connect(sStimRunning, SIGNAL(entered()), this, SLOT(onStimRunningEntered()));
 	QObject::connect(sStimRunning, SIGNAL(exited()), this, SLOT(onStimRunningExited()));
+
+	// connect look detector signals to sStimRunning state's appropriate slots.
+	QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookStarted()), sStimRunning, SLOT(gotLookStarted()));
+	QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookAwayStarted()), sStimRunning, SLOT(gotLookAwayStarted()));
+
 	sStimRequest->addTransition(&phase.experiment().getMediaManager(), SIGNAL(stimStarted(int)), sStimRunning);		// on entry, emits playStim()
 
 	// Transition from sStimRunning depends on what the trial type is.
-	// Fixed length trials end on a timeout signal (and we don't bother with look signals).
+	// Both trial types - subject-controlled and fixed time - can end when they exceed a
+	// maximum length.
 	// Subject-controlled trials (bFixedLength==false) will end on a look signal, or they can be
 	// aborted on a timeout signal. 
-	if (bFixedLength)
-	{			
-		HFixedTimeoutState* sFixedTimeout = new HFixedTimeoutState(*this, log);
-		sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sFixedTimeout);
-		sFixedTimeout->addTransition(sFinal);
-	}
-	else
+
+	HFixedTimeoutState* sFixedTimeout = new HFixedTimeoutState(*this, log);
+	sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sFixedTimeout);
+	sFixedTimeout->addTransition(sFinal);
+
+	if (!bFixedLength)
 	{
 		HGotLookState* sGotLook = new HGotLookState(*this, log);
 		HNoLookTimeoutState* sNoLookTimeout = new HNoLookTimeoutState(*this, log);
@@ -147,11 +150,13 @@ void HTrial::onEntry(QEvent* e)
 void HTrial::onStimRunningEntered()
 {
 	phase().experiment().getLookDetector().enableLook();
+	m_ptimerMaxTrialLength->start(m_maxTrialLengthMS);
 	eventLog().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
 }
 
 void HTrial::onStimRunningExited()
 {
+	if (m_ptimerMaxTrialLength->isActive()) m_ptimerMaxTrialLength->stop();
 	phase().experiment().getLookDetector().disable();
 	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
 }
