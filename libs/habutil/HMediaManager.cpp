@@ -71,8 +71,8 @@ void HMediaManager::ag()
 
 void HMediaManager::playerStarted(int id, const QString& filename)
 {
-	qDebug() << "HMediaManager::playerStarted(int id = " << id << ") pendingStart " << m_pendingStartSignal << " pendingAGStart " << m_pendingAGStartSignal;
-	emit screen(id);
+	qDebug() << "HMediaManager::playerStarted(int id = " << id << ") file " << filename << " pendingStart " << m_pendingStartSignal << " pendingAGStart " << m_pendingAGStartSignal;
+	emit screen(id, filename);
 	if (m_pendingStartSignal)
 	{
 		if (m_pendingAGStartSignal)

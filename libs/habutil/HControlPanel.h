@@ -53,7 +53,7 @@ private slots:
 	void onExperimentFinished();
 	void onExperimentStarted();
 	void onAGStarted();
-	void onStimStarted(int i, const QString&);
+	void onStimStarted(int i);
 	void onCleared();
 	
 protected:
