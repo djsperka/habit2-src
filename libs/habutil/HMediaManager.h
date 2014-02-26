@@ -66,7 +66,7 @@ signals:
 	void agStarted(int);
 	void stimStarted(int);
 	void cleared();
-	void screen(int);
+	void screen(int, const QString&);
 };
 
 #endif

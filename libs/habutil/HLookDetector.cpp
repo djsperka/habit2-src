@@ -8,6 +8,7 @@
  */
 
 #include "HLookDetector.h"
+#include "HElapsedTimer.h"
 
 void HLookDetector::enableAGLook()
 {
@@ -36,6 +37,7 @@ void HLookDetector::enableLook()
 		m_bLookEnabled = true;
 		lookEnabled(true);
 	}
+	start();	// start state machine
 	return;
 };
 
@@ -45,12 +47,12 @@ void HLookDetector::disable()
 	{
 		m_bLookEnabled = false;
 		lookEnabled(false);
+		stopLooker(HElapsedTimer::elapsed());		// stop state machine
 	}
 	if (m_bAGLookEnabled)
 	{
 		m_bAGLookEnabled = false;
 		agLookEnabled(false);
 	}
-	clear();
 	return;
 };

@@ -13,7 +13,7 @@ HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 	QVBoxLayout* vlayout = new QVBoxLayout;
 	QHBoxLayout* hlayout = new QHBoxLayout;
 	hlayout->addWidget(m_pPrintButton = new QPushButton("Print"));
-	hlayout->addWidget(m_pExportButton = new QPushButton("Export CSV"));
+	hlayout->addWidget(m_pExportButton = new QPushButton("Export Event Log"));
 	vlayout->addLayout(hlayout);
 	vlayout->addWidget(m_pResultsWidget = new HResultsWidget(results));
 	setLayout(vlayout);

@@ -81,10 +81,12 @@ public:
 	static const HTrialEndType HTrialEndFixedTimeout;
 	static const HTrialEndType HTrialEndNoLookTimeout;
 	static const HTrialEndType HTrialEndAbort;
+	static const HTrialEndType HTrialEndMaxAccumulatedLookTime;
+	static const HTrialEndType HTrialEndMaxLookAwayTime;
 	static const HTrialEndType HTrialEndUndefined;
 	
 	// Undefined type not in A
-	static const HTrialEndType* A[4];
+	static const HTrialEndType* A[6];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -895,13 +897,15 @@ private:
 class HScreenStartEvent: public HEvent
 {
 public:
-	HScreenStartEvent(int playerid=-1, int timestamp=0)
+	HScreenStartEvent(const QString& filename, int playerid=-1, int timestamp=0)
 	: HEvent(HEventType::HEventScreenStart, timestamp)
+	, m_filename(filename)
 	, m_playerid(playerid)
 	{};
 
 	HScreenStartEvent(const HScreenStartEvent& e)
 	: HEvent(HEventType::HEventScreenStart, e.timestamp())
+	, m_filename(e.filename())
 	, m_playerid(e.playerid())
 	{};
 
@@ -910,6 +914,7 @@ public:
 	QString eventInfo() const;
 	virtual QString eventCSVAdditional() const;
 	int playerid() const { return m_playerid; };
+	const QString& filename() const { return m_filename; };
 
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 	static HScreenStartEvent* getEvent(QDataStream& stream, int timestamp);
@@ -917,10 +922,11 @@ public:
 	HEvent* clone(int ts = 0) const
 	{
 		int t = (ts < 0 ? timestamp() : ts);
-		return new HScreenStartEvent(playerid(), t);
+		return new HScreenStartEvent(filename(), playerid(), t);
 	};
 
 private:
+	QString m_filename;
 	int m_playerid;
 };
 

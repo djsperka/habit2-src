@@ -58,7 +58,7 @@ protected:
 	
 public slots:
 	void onTrialCompleteEntered();
-	void screenStarted(int);
+	void screenStarted(int, const QString&);
 	void agStarted(int);
 	void stimStarted(int);
 };

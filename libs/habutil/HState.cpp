@@ -52,17 +52,6 @@ void HState::onExit( QEvent* e )
         parent = dynamic_cast<HState*>( parent->parentState() );
     }
 	
-	// Determine the state we're heading...
-	QString sTarget;
-	QList<QAbstractTransition *> trans = transitions();
-	QList<QAbstractTransition *>::const_iterator it;
-	for (int i = 0; i<trans.size(); i++)
-	{
-		HState* t = dynamic_cast<HState*> (trans[i]->targetState());
-		if (t) sTarget.append(t->name());
-		else sTarget.append("???");
-	}
-	
-    qDebug() << "Exiting state:" << state << " target: " << sTarget;
+    qDebug() << "Exiting state:" << state;
 }
 

@@ -11,7 +11,8 @@
 #include "HMediaManagerUtil.h"
 #include "HPhase.h"
 #include "HPhaseCriteriaUtil.h"
-#include "HKeypadLookDetector.h"
+//#include "HKeypadLookDetector.h"
+#include "HLookDetectorUtil.h"
 #include "HTrialGenerator.h"
 #include "HElapsedTimer.h"
 #include "maindao.h"
@@ -154,7 +155,11 @@ void HControlPanel::createExperiment(HEventLog& log)
 	Habit::TrialsInfo tiHabituation = ds.getHabituationTrialsInfo();
 	Habit::TrialsInfo tiTest = ds.getTestTrialsInfo();
 	Habit::AttentionGetterSettings ags = m_experimentSettings.getAttentionGetterSettings();
-	
+	int noLookTimeMS = tiTest.getLookTimes();
+	//int lookTimeMS = tiPreTest.getLookTimes();
+	//int lookAwayTimeMS = tiHabituation.getLookTimes();
+
+
 	
 	// Create media manager. Note we are not passing a parent! 
 	// The stimuli configured for each phase are pulled using the experiment settings. 
@@ -168,14 +173,11 @@ void HControlPanel::createExperiment(HEventLog& log)
 	
 	// Connect media manager signals to slots here so we can update display labels.
 	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(onAGStarted()));
-	connect(m_pmm, SIGNAL(stimStarted(int, const QString&)), this, SLOT(onStimStarted(int, const QString&)));
+	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(onStimStarted(int)));
 	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onCleared()));
 	
 	// Create look detector
-	int lookTimeMS = tiPreTest.getLookTimes();
-	int lookAwayTimeMS = tiHabituation.getLookTimes();
-	int noLookTimeMS = tiTest.getLookTimes();
-	m_pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, log, this);
+	m_pld = createLookDetector(m_experimentSettings, log, this);
 
 	// connect attention() and look() signals to a slot so we can forward the info to the event log
 	connect(m_pld, SIGNAL(attention()), this, SLOT(onAttention()));
@@ -200,14 +202,23 @@ void HControlPanel::createExperiment(HEventLog& log)
 	// transition from experiment on the "Stop Trials" button being clicked()
 	sExperiment->addTransition(m_pbStopTrials, SIGNAL(clicked()), sFinal);
 	
-	// Create phases	
+	// Create phases.
+	// Each HPhase gets a list of stimuli, as pairs of <int, StimulusSettings>, and these are used in order as the
+	// stimuli for that phase. The <int> part is passed to the media manager as the key to play that stimulus.
+	//
 	if (tiPreTest.getNumberOfTrials() > 0)
 	{
-		HTrialGenerator htg(idspList1.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
+		QList<int> list;
+		if (!m_runSettings.getPretestOrderList(list))
+		{
+			QDebug(QtFatalMsg) << "Cannot parse Pretest order (" << m_runSettings.getPretestOrderList(list) << ").";
+		}
+
+		HTrialGenerator htg(list.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
 		idStimPairList.clear();
 		for (unsigned int i=0; i<tiPreTest.getNumberOfTrials(); i++)
 		{
-			idStimPairList.append(idspList1.at(htg.next()));
+			idStimPairList.append(idspList1.at(list.at(htg.next()) - 1));
 		}
 		pcritPreTest = new HPhaseFixedNCriteria(tiPreTest.getNumberOfTrials());
 		psPreTest = new HPhase(*sExperiment, pcritPreTest, log, idStimPairList, HPhaseType::PreTest, tiPreTest.getLength(), noLookTimeMS, tiPreTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
@@ -215,11 +226,17 @@ void HControlPanel::createExperiment(HEventLog& log)
 
 	if (tiHabituation.getNumberOfTrials() > 0)
 	{
-		HTrialGenerator htg(idspList2.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
+		QList<int> list;
+		if (!m_runSettings.getHabituationOrderList(list))
+		{
+			QDebug(QtFatalMsg) << "Cannot parse habituation order (" << m_runSettings.getHabituationOrderList(list) << ").";
+		}
+
+		HTrialGenerator htg(list.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
 		idStimPairList.clear();
 		for (unsigned int i=0; i<tiHabituation.getNumberOfTrials(); i++)
 		{
-			idStimPairList.append(idspList2.at(htg.next()));
+			idStimPairList.append(idspList2.at(list.at(htg.next()) - 1));
 		}
 		
 		// Create habituation criteria object. 
@@ -229,11 +246,17 @@ void HControlPanel::createExperiment(HEventLog& log)
 	
 	if (tiTest.getNumberOfTrials() > 0)
 	{
+		QList<int> list;
+		if (!m_runSettings.getTestOrderList(list))
+		{
+			QDebug(QtFatalMsg) << "Cannot parse test order (" << m_runSettings.getTestOrderList(list) << ").";
+		}
+
 		HTrialGenerator htg(idspList3.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
 		idStimPairList.clear();
 		for (unsigned int i=0; i<tiTest.getNumberOfTrials(); i++)
 		{
-			idStimPairList.append(idspList3.at(htg.next()));
+			idStimPairList.append(idspList3.at(list.at(htg.next()) - 1));
 		}
 		
 		pcritTest = new HPhaseFixedNCriteria(tiTest.getNumberOfTrials());
@@ -376,8 +399,9 @@ void HControlPanel::onAGStarted()
 	updateFileStatusLabels(ss);
 }
 
-void HControlPanel::onStimStarted(int i, const QString& filename)
+void HControlPanel::onStimStarted(int i)
 {
+	Q_UNUSED(i);
 	//Habit::StimulusSettings ss = m_mapSS[i];
 	//QString s("Running (" + ss.getName() + ")");
 	m_labelAttentionGetterStatusValue->setText("Idle");
@@ -416,9 +440,9 @@ void HControlPanel::onLook(HLook l)
 	{
 		m_labelLookStatusValue->setText("Look Right");
 	}
-	else if (l.direction() == HLookDirection::NoLook)
+	else if (l.direction() == HLookDirection::LookAway)
 	{
-		m_labelLookStatusValue->setText("No Look");
+		m_labelLookStatusValue->setText("Look Away");
 	}
 	else
 	{

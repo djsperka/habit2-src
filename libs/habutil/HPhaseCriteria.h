@@ -55,6 +55,9 @@ public:
 	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated);
 	
 	// Get the sum used as basis for the habituation criteria. 
+	// Returns true when a basis sum is found (will return false if there are not enough
+	// trials) and sets the value of iBasisSum (the sum found) and iBasisWindowStart (the
+	// trial at which
 	
 	bool getBasisSum(const HPhaseLog& log, int& iBasisSum, int& iBasisWindowStart);
 	

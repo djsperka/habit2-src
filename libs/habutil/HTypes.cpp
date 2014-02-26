@@ -31,14 +31,14 @@ bool operator==(const HPhaseType& lhs, const HPhaseType& rhs)
 	return lhs.number() == rhs.number();
 };
 
-const HLookTrans HLookTrans::UnknownLookTrans(-1, "UnknownLookTrans");
-const HLookTrans HLookTrans::NoneLeft(0, "NoneLeft");
-const HLookTrans HLookTrans::LeftNone(1, "LeftNone");
-const HLookTrans HLookTrans::NoneCenter(2, "NoneCenter");
-const HLookTrans HLookTrans::CenterNone(3, "CenterNone");
-const HLookTrans HLookTrans::NoneRight(4, "NoneRight");
-const HLookTrans HLookTrans::RightNone(5, "RightNone");
-const HLookTrans HLookTrans::NoneNone(6, "NoneNone");
+const HLookTrans HLookTrans::UnknownLookTrans(-1, "UnknownLookTrans", false);
+const HLookTrans HLookTrans::NoneLeft(0, "NoneLeft", true);
+const HLookTrans HLookTrans::LeftNone(1, "LeftNone", false);
+const HLookTrans HLookTrans::NoneCenter(2, "NoneCenter", true);
+const HLookTrans HLookTrans::CenterNone(3, "CenterNone", false);
+const HLookTrans HLookTrans::NoneRight(4, "NoneRight", true);
+const HLookTrans HLookTrans::RightNone(5, "RightNone", false);
+const HLookTrans HLookTrans::NoneNone(6, "NoneNone", false);
 
 const HLookTrans& getLookTrans(int i)
 {
@@ -58,7 +58,7 @@ const HLookTrans& getLookTrans(int i)
 };
 
 const HLookDirection HLookDirection::UnknownLookDirection(-1, "UnknownLookDirection");
-const HLookDirection HLookDirection::NoLook(0, "NoLook");
+const HLookDirection HLookDirection::LookAway(0, "LookAway");
 const HLookDirection HLookDirection::LookLeft(1, "LookLeft");
 const HLookDirection HLookDirection::LookRight(2, "LookRight");
 const HLookDirection HLookDirection::LookCenter(3, "LookCenter");
@@ -68,7 +68,7 @@ const HLookDirection& getLookDirection(int i)
 	switch (i)
 	{
 		case -1: return HLookDirection::UnknownLookDirection; break;
-		case 0: return HLookDirection::NoLook; break;
+		case 0: return HLookDirection::LookAway; break;
 		case 1: return HLookDirection::LookLeft; break;
 		case 2: return HLookDirection::LookRight; break;
 		case 3: return HLookDirection::LookCenter; break;
@@ -82,10 +82,27 @@ bool operator==(const HLookDirection& lhs, const HLookDirection& rhs)
 	return (lhs.number() == rhs.number());
 }
 
+bool operator!=(const HLookDirection& lhs, const HLookDirection& rhs)
+{
+	return !(lhs == rhs);
+}
+
 bool operator==(const HLookTrans& lhs, const HLookTrans& rhs)
 {
 	return (lhs.number() == rhs.number());
 }
+
+const HLookDirection& directionTo(const HLookTrans& type)
+{
+	if (type == HLookTrans::NoneLeft) return HLookDirection::LookLeft;
+	else if (type == HLookTrans::NoneCenter) return HLookDirection::LookCenter;
+	else if (type == HLookTrans::NoneRight) return HLookDirection::LookRight;
+	else if (type == HLookTrans::LeftNone || type == HLookTrans::CenterNone || type == HLookTrans::RightNone) return HLookDirection::LookAway;
+	return HLookDirection::UnknownLookDirection;
+}
+
+
+
 
 const HStimContext HStimContext::UnknownContext(0, "UnknownContext");
 const HStimContext HStimContext::PreTestPhase(1, "PreTestStim");

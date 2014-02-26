@@ -43,6 +43,7 @@ public:
 
 	Habit::SubjectSettings getSubjectSettings() { return subjectSettings_; }
 	Habit::RunSettings getRunSettings() { return runSettings_; }
+	QString getRunLabel();
 private:
 	void createComponents();
 	void makeConnections();

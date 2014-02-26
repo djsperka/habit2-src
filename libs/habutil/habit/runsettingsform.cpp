@@ -193,6 +193,18 @@ RunSettingsForm::~RunSettingsForm()
 {
 }
 
+QString RunSettingsForm::getRunLabel()
+{
+	if (runTypeCombo_->currentText() == NEW_RUN)
+	{
+		return QString("%1_%2_%3").arg(activeExperiment_.getName()).arg(subjectSettings_.getSubjectName()).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd-hhmm"));
+	}
+	else
+	{
+		return QString("%1_TEST_%2").arg(activeExperiment_.getName()).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd-hhmm"));
+	}
+}
+
 void RunSettingsForm::onDone()
 {
 	int experimentId = activeExperiment_.getId();

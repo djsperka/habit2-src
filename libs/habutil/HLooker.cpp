@@ -8,221 +8,424 @@
  */
 
 #include "HLooker.h"
-#include "HElapsedTimer.h"
 #include <QtDebug>
 
-HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms, HEventLog& log) 
-: m_minLookTimeMS(minlooktime_ms)
+HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, bool bLive)
+: QStateMachine()
+, m_minLookTimeMS(minlooktime_ms)
 , m_minLookAwayTimeMS(minlookawaytime_ms)
+, m_maxLookAwayTimeMS(maxlookawaytime_ms)
+, m_maxAccumulatedLookTimeMS(maxaccumlooktime_ms)
 , m_log(log)
-, m_bLive(true)
-, m_indexAt(0)
-, m_bLookStarted(false)
-, m_pdirectionPendingLook(&HLookDirection::NoLook)
+, m_bLive(bLive)
+, m_bLookPending(false)
+, m_pdirectionLookPending(&HLookDirection::LookAway)
 , m_bLookAwayStarted(false)
 {
-	m_ptimer = new QTimer();
-	m_ptimer->setInterval(minlookawaytime_ms);
-	m_ptimer->setSingleShot(true);
-	QObject::connect(m_ptimer, SIGNAL(timeout()), this, SLOT(timeout()));
+	m_ptimerLookAwayTimeout = new QTimer();
+	m_ptimerLookAwayTimeout->setInterval(minlookawaytime_ms);
+	m_ptimerLookAwayTimeout->setSingleShot(true);
+	QObject::connect(m_ptimerLookAwayTimeout, SIGNAL(timeout()), this, SLOT(minLookAwayTimeout()));
+
+	m_ptimerMinLookTime = new QTimer();
+	// will set interval when started
+	m_ptimerMinLookTime->setSingleShot(true);
+	QObject::connect(m_ptimerMinLookTime, SIGNAL(timeout()), this, SLOT(minLookTimeReached()));
+
+	if (m_maxLookAwayTimeMS > 0)
+	{
+		m_ptimerMaxLookAway = new QTimer();
+		m_ptimerMaxLookAway->setInterval(m_maxLookAwayTimeMS);
+		m_ptimerMaxLookAway->setSingleShot(true);
+		QObject::connect(m_ptimerMaxLookAway, SIGNAL(timeout()), this, SIGNAL(maxLookAwayTime()));
+	}
+	if (m_maxAccumulatedLookTimeMS > 0)
+	{
+		m_ptimerMaxAccumulatedLook = new QTimer();
+		// set interval when started
+		m_ptimerMaxAccumulatedLook->setSingleShot(true);
+		QObject::connect(m_ptimerMaxAccumulatedLook, SIGNAL(timeout()), this, SLOT(maxAccumulatedLookTimeReached()));
+	}
+
+	// Create states and transitions for state machine.
+	QState* sInitial = new QState();
+	QState* sLooking = new QState();
+	QState* sLookingAway = new QState();
+
+	HTransToLookTransition* pTransToLook1;
+	HTransToLookTransition* pTransToLook2;
+	HTransToLookAwayTransition* pTransToLookAway;
+
+	pTransToLook1 = new HTransToLookTransition();
+	pTransToLook1->setTargetState(sLooking);
+	sInitial->addTransition(pTransToLook1);
+	addState(sInitial);
+
+	pTransToLook2 = new HTransToLookTransition();
+	pTransToLook2->setTargetState(sLooking);
+	sLookingAway->addTransition(pTransToLook2);
+	addState(sLookingAway);
+
+	pTransToLookAway = new HTransToLookAwayTransition();
+	pTransToLookAway->setTargetState(sLookingAway);
+	sLooking->addTransition(pTransToLookAway);
+	addState(sLooking);
+
+	setInitialState(sInitial);
+
+	connect(sInitial, SIGNAL(entered()), this, SLOT(onInitialStateEntered()));
+	connect(sLookingAway, SIGNAL(entered()), this, SLOT(onLookingAwayStateEntered()));
+	connect(sLooking, SIGNAL(entered()), this, SLOT(onLookingStateEntered()));
+	connect(sLooking, SIGNAL(exited()), this, SLOT(onLookingStateExited()));
+	connect(sLookingAway, SIGNAL(exited()), this, SLOT(onLookingAwayStateExited()));
 };
 
 void HLooker::addTrans(const HLookTrans& type, int tMS)
 {
 	m_log.append(new HLookTransEvent(type, tMS));
 	m_transitions.append(qMakePair(&type, tMS));
-	update();
-	return;
-}
 
-const HLookDirection& HLooker::directionTo(const HLookTrans& type)
-{
-	if (type == HLookTrans::NoneLeft)
-		return HLookDirection::LookLeft;
-	else if (type == HLookTrans::NoneRight)
-		return HLookDirection::LookRight;
-	else if (type == HLookTrans::NoneCenter)
-		return HLookDirection::LookCenter;
+	// Create a new event for the state machine to digest.
+	if (type.isTransToLook())
+	{
+		postEvent(new HTransToLookQEvent(type, tMS));
+	}
 	else
-		return HLookDirection::UnknownLookDirection;
-}
-
-
-bool HLooker::isTransToLook(const HLookTrans& type)
-{
-	return (type == HLookTrans::NoneLeft || type == HLookTrans::NoneCenter || type == HLookTrans::NoneRight);
-}
-
-
-
-void HLooker::update()
-{
-	int tMS;
-	
-	while (m_indexAt < m_transitions.count())
 	{
-		const HLookTrans& trans = *m_transitions[m_indexAt].first;
-		tMS = m_transitions[m_indexAt].second;
-		
-		qDebug() << "update(): index, trans, t = " << m_indexAt << ", " << trans << ", " << tMS;
-		
-		if (!m_bLookStarted)
-		{
-			if (isTransToLook(trans))
-			{
-				m_bLookStarted = true;
-				m_lookStartTimeMS = tMS;
-				m_lookStartIndex = m_indexAt;
-				m_pdirectionPendingLook = &directionTo(trans);
-				
-				qDebug() << "update(): Look started " << *m_pdirectionPendingLook;
-			}
-			m_indexAt++;
-		}
-		else 
-		{
-			if (!m_bLookAwayStarted)
-			{
-				if (!isTransToLook(trans))
-				{
-					m_bLookAwayStarted = true;
-					m_lookAwayStartTimeMS = tMS;
-					m_lookAwayStartIndex = m_indexAt;
-					qDebug() << "update(): Look away started, pending look " << *m_pdirectionPendingLook;
-				}
-				
-				// TODO: may need to assert that this trans is to look-away. Not sure
-				// if we can have anything but that without an error. 
-				
-				m_indexAt++;
-			}
-			else 
-			{
-				if ((tMS - m_lookAwayStartTimeMS) >= m_minLookAwayTimeMS)
-				{
-					qDebug() << "update(): min look away time exceeded";
-					if ((m_lookAwayStartTimeMS - m_lookStartTimeMS) >= m_minLookTimeMS)
-					{
-						// new look
-						HLook l(*m_pdirectionPendingLook, m_lookStartTimeMS, m_lookAwayStartTimeMS);
-						m_looks.append(l);
-						m_bLookStarted = false;
-						m_bLookAwayStarted = false;
-						m_indexAt = m_lookAwayStartIndex + 1;
-						qDebug() << "update(): look complete " << *m_pdirectionPendingLook;
-						//m_log.append(new HLookEvent(l, HElapsedTimer::elapsed()));
-						emit look(l);						
-					}
-					else 
-					{
-						// last look wasn't a full look. Start over. 
-						m_bLookStarted = false;
-						m_bLookAwayStarted = false;
-						m_indexAt = m_lookAwayStartIndex + 1;
-						
-						qDebug() << "update(): not a full look.";
-					}
-				}
-				else 
-				{
-					qDebug() << "update(): min look away time not exceeded " << tMS << "-" << m_lookAwayStartTimeMS << "=" << tMS - m_lookAwayStartTimeMS;
-					// not a full look-away. If its a look-back to same direction as original look, 
-					// then erase the look-away and resume the look. Otherwise, start a new look.
-					if (directionTo(trans) == *m_pdirectionPendingLook)
-					{
-						m_bLookAwayStarted = false;
-						m_indexAt++;
-						
-						qDebug() << "update(): look-back";
-					}
-					else 
-					{
-						m_bLookAwayStarted = false;
-						m_bLookStarted = true;
-						m_lookStartTimeMS = tMS;
-						m_pdirectionPendingLook = &directionTo(trans);
-						m_indexAt++;
-						
-						qDebug() << "update(): new look started " << *m_pdirectionPendingLook;
-					}
-				}
-			}
-		}
-	}
-	
-	/* 
-	 * If a look away has started then start the timer
-	 */
-	
-	if (m_bLookAwayStarted && !m_ptimer->isActive())
-	{
-		int t = m_minLookAwayTimeMS - (HElapsedTimer::elapsed() - m_lookAwayStartTimeMS);
-		m_ptimer->start(t);
-	}
-	else if (!m_bLookAwayStarted && m_ptimer->isActive())
-	{
-		m_ptimer->stop();
+		postEvent(new HTransToLookAwayQEvent(type, tMS));
 	}
 	return;
 }
 
-void HLooker::timeout()
+bool HLooker::analyzeLooking(int m_iLookPendingStartIndex, int& lookStartTimeMS, int& lastLookStartTimeMS, int& cumulativeLookTimeMS, int& lastLookAwayStartTimeMS)
 {
-	if (m_bLookAwayStarted)
-	{
-		addTrans(HLookTrans::NoneNone, HElapsedTimer::elapsed());
-	}
-	return;
-}
+	int tPrevious = -1;	// time of previous transition
+	bool b = true;
+	lookStartTimeMS = lastLookStartTimeMS = lastLookAwayStartTimeMS = -1;
+	cumulativeLookTimeMS = 0;
 
-bool HLooker::isLookPending(int tMS)
-{
-	bool bValue = false;
-
-	// is a look pending, and is it long enough (at tMS) to consider completed?
-	if (m_bLookStarted)
+	if (m_iLookPendingStartIndex > -1)
 	{
-		if ((m_bLookAwayStarted && ((m_lookAwayStartTimeMS - m_lookStartTimeMS) >= m_minLookTimeMS)) ||
-			(!m_bLookAwayStarted && ((tMS - m_lookStartTimeMS) >= m_minLookTimeMS)))
+		const QPair<const HLookTrans*, int>& p0 = m_transitions.at(m_iLookPendingStartIndex);
+		lookStartTimeMS = p0.second;
+		lastLookStartTimeMS = p0.second;
+		tPrevious = p0.second;
+		cumulativeLookTimeMS = 0;
+		lastLookAwayStartTimeMS = -1;
+
+		for (int i = m_iLookPendingStartIndex+1; i < (int)m_transitions.size(); i++)
 		{
-			bValue = true;
+			const QPair<const HLookTrans*, int>& p = m_transitions.at(i);
+			if ((p.first)->isTransToLook())
+			{
+				// the interval from tPrevious to p.second is a look away period.
+				lastLookStartTimeMS = p.second;
+			}
+			else
+			{
+				cumulativeLookTimeMS += (p.second - tPrevious);
+				lastLookAwayStartTimeMS = p.second;
+			}
+			tPrevious = p.second;
 		}
 	}
-	return bValue;
+	return b;
 }
 
-
-bool HLooker::flush(int tMS)
+int HLooker::getSumOfCompleteLooks()
 {
-	bool bValue = isLookPending(tMS);
-
-	// is a look pending, and is it long enough (at tMS) to consider completed?
-	if (bValue)
+	int sum = 0;
+	for (int i=0; i<m_looks.size(); i++)
 	{
-		int endMS = (m_bLookAwayStarted ? m_lookAwayStartTimeMS : tMS);
-
-		// new look
-		HLook l(*m_pdirectionPendingLook, m_lookStartTimeMS, endMS);
-		m_looks.append(l);
-		m_bLookStarted = false;
-		m_bLookAwayStarted = false;
-		m_indexAt = m_lookAwayStartIndex + 1;
-		qDebug() << "flush(): look complete " << *m_pdirectionPendingLook;
-		emit look(l);
-		clear();
+		if (m_looks[i].direction() != HLookDirection::LookAway)
+			sum += m_looks[i].lookMS();
 	}
-	return bValue;
+	return sum;
 }
 
 
-
-void HLooker::clear()
+void HLooker::onInitialStateEntered()
 {
-	// repeat initializations in constructor - ones that matter. Clear list.
+	m_bLookPending = m_bLookAwayStarted = false;
+	m_pdirectionLookPending = &HLookDirection::UnknownLookDirection;
+	m_iLookPendingStartIndex = -1;
 	m_transitions.clear();
-	m_indexAt = 0;
-	m_bLookStarted = false;
-	m_pdirectionPendingLook = &HLookDirection::NoLook;
-	m_bLookAwayStarted = false;
-	return;
+	m_looks.clear();
 }
+
+void HLooker::onLookingStateEntered()
+{
+	const QPair<const HLookTrans*, int>& p = m_transitions.last(); // the transition that brought us here
+	int lastLookAwayStartTimeMS = -1;
+	int cumulativeLookTimeMS = 0;
+	int lookStartTimeMS = -1;
+	int lastLookStartTimeMS = -1;
+
+	if (!analyzeLooking(m_iLookPendingStartIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS))
+	{
+		qCritical() << "Cannot analyze looking at index " << m_iLookPendingStartIndex;
+		return;
+	}
+
+	// Stop timers if active.
+	if (m_ptimerLookAwayTimeout->isActive())
+	{
+		m_ptimerLookAwayTimeout->stop();
+	}
+	if (m_maxLookAwayTimeMS > 0 && m_ptimerMaxLookAway->isActive())
+	{
+		m_ptimerMaxLookAway->stop();
+	}
+
+	if (m_bLookPending)
+	{
+
+		// A look has started. Since we are entering looking state then the only possibility is
+		// that a look-away had also started and now the subject is looking again.
+		if (m_bLookAwayStarted)
+		{
+
+			// check if the time spent looking away is longer than the min look-away time,
+			// OR if the looking away time was short, but the the look back is to a different screen.
+			if ((lastLookStartTimeMS - lastLookAwayStartTimeMS) >= m_minLookAwayTimeMS ||
+				((lastLookStartTimeMS - lastLookAwayStartTimeMS) < m_minLookAwayTimeMS && *m_pdirectionLookPending != directionTo(*m_transitions.last().first)))
+			{
+
+				// Any accumulated looking time should be flushed.
+				// See if there was a complete look and emit look() if necessary. Then emit a look-away().
+				// Finally, start a new look.
+				if (cumulativeLookTimeMS >= m_minLookTimeMS)
+				{
+					HLook l(*m_pdirectionLookPending, lookStartTimeMS, lastLookAwayStartTimeMS, cumulativeLookTimeMS);
+					m_looks.append(l);
+					emit look(l);
+				}
+
+				// Starting a new potential look.
+				m_bLookAwayStarted = false;
+				m_bLookPending = true;
+				m_pdirectionLookPending = &directionTo(*p.first);
+				m_iLookPendingStartIndex = m_transitions.size()-1;
+				m_ptimerMinLookTime->start(m_minLookTimeMS);
+			}
+
+			// The if here is redundant but left for clarity.
+			// If you fall through the "if" above then the only possibility here is that the looking is in the same direction.
+
+			//else if (*m_pdirectionLookPending == directionTo(*p.first))
+			else
+			{
+				// looked back in same direction as before. resume previous look.
+				m_bLookAwayStarted = false;
+
+				// Its possible that the min look time has not been reached yet, so if that's the case then
+				// start the min look timer.
+				// If the min look time has been reached, then we may need to start the max accumulated look timer.
+
+				if (cumulativeLookTimeMS < m_minLookTimeMS)
+				{
+					m_ptimerMinLookTime->start(m_minLookTimeMS - cumulativeLookTimeMS);
+				}
+				else if (m_maxAccumulatedLookTimeMS > 0)
+				{
+					int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS;
+					if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
+					{
+						m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+					}
+				}
+			}
+		}
+		else
+		{
+			qCritical() << "onLookStateEntered(): lookStarted=true, lookAwayStarted=false!?!";
+		}
+	}
+	else		// !m_bLookStarted
+	{
+		if (!m_bLookAwayStarted)
+		{
+			// This only occurs on initial look transition.
+			emit lookStarted();
+		}
+
+		// start fresh new look
+		m_bLookPending = true;
+		m_iLookPendingStartIndex = m_transitions.size()-1;
+		m_bLookAwayStarted = false;
+		m_pdirectionLookPending = &directionTo(*p.first);
+
+		// Start max accumulated look timer if needed
+		if (m_maxAccumulatedLookTimeMS > 0)
+		{
+			int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS;
+			if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
+			{
+				m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+			}
+		}
+
+	}
+}
+
+void HLooker::onLookingStateExited()
+{
+	if (m_maxAccumulatedLookTimeMS > 0 && m_ptimerMaxAccumulatedLook->isActive())
+		m_ptimerMaxAccumulatedLook->stop();
+}
+
+
+void HLooker::onLookingAwayStateEntered()
+{
+	// If a look is already underway, start the look-away timer
+	if (m_bLookPending)
+	{
+		m_ptimerLookAwayTimeout->start();
+	}
+	m_bLookAwayStarted = true;
+
+	if (m_maxLookAwayTimeMS > 0)
+	{
+		m_ptimerMaxLookAway->start(m_maxLookAwayTimeMS);
+	}
+}
+
+void HLooker::onLookingAwayStateExited()
+{
+	if (m_ptimerLookAwayTimeout->isActive())
+		m_ptimerLookAwayTimeout->stop();
+	if (m_maxLookAwayTimeMS > 0 && m_ptimerMaxLookAway->isActive())
+		m_ptimerMaxLookAway->stop();
+}
+
+void HLooker::maxAccumulatedLookTimeReached()
+{
+	emit maxAccumulatedLookTime();
+}
+
+void HLooker::minLookTimeReached()
+{
+	// this timeout indicates that the current looking has reached the minimum necessary to consider it a look().
+	// Now we start the timer for the max accumulated look time if needed.
+
+	if (m_maxAccumulatedLookTimeMS > 0)
+	{
+		int lastLookAwayStartTimeMS;
+		int cumulativeLookTimeMS;
+		int lookStartTimeMS;
+		int lastLookStartTimeMS;
+
+		if (!analyzeLooking(m_iLookPendingStartIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS))
+		{
+			qCritical() << "HLooker::minLookTimeReached() - Cannot analyze looking at index " << m_iLookPendingStartIndex;
+			return;
+		}
+
+		// Its possible that the max accumulated look time was reached during the "min look" time.
+		// Check if that's happened - if so then emit maxAccumulatedLookTime().
+		// Otherwise, start max accumulated look timer.
+		if (getSumOfCompleteLooks() + cumulativeLookTimeMS + m_minLookTimeMS > m_maxAccumulatedLookTimeMS)
+		{
+			emit maxAccumulatedLookTime();
+		}
+		else
+		{
+			m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - cumulativeLookTimeMS - m_minLookTimeMS);
+		}
+	}
+}
+
+void HLooker::minLookAwayTimeout()
+{
+	// Was the look complete?
+	if (m_bLookPending)
+	{
+		int lastLookAwayStartTimeMS;
+		int cumulativeLookTimeMS;
+		int lookStartTimeMS;
+		int lastLookStartTimeMS;
+
+		if (!analyzeLooking(m_iLookPendingStartIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS))
+		{
+			qCritical() << "HLooker::minLookAwayTimeout() - Cannot analyze looking at index " << m_iLookPendingStartIndex;
+			return;
+		}
+
+		if (cumulativeLookTimeMS >= m_minLookTimeMS)
+		{
+			HLook l(*m_pdirectionLookPending, lookStartTimeMS, lastLookAwayStartTimeMS, cumulativeLookTimeMS);
+
+			// When the look() below is emitted a trial may end (if its subject-controlled). In that
+			// case the looker will be stopped and any pending looks (like this one) will be flushed.
+			// Thus, we have to clear out vars here - before the emit - so the look will not be emitted twice.
+
+			m_bLookPending = false;
+			m_iLookPendingStartIndex = -1;
+			m_looks.append(l);
+			emit look(l);
+		}
+		else
+		{
+			m_bLookPending = false;
+		}
+	}
+	emit lookAwayStarted();
+}
+
+
+void HLooker::stopLooker(int tMS)
+{
+	// the looker will be stopped, it will not enter a final state.
+	// Stop any active timers.
+	// Flush out any look or lookaway pending.
+
+	if (m_ptimerMinLookTime->isActive()) m_ptimerMinLookTime->stop();
+	if (m_ptimerLookAwayTimeout->isActive()) m_ptimerLookAwayTimeout->stop();
+	if (m_maxLookAwayTimeMS > 0 && m_ptimerMaxLookAway->isActive()) m_ptimerMaxLookAway->stop();
+	if (m_maxAccumulatedLookTimeMS > 0 && m_ptimerMaxAccumulatedLook->isActive()) m_ptimerMaxAccumulatedLook->stop();
+
+	if (m_bLookPending)
+	{
+		int lastLookAwayStartTimeMS;
+		int cumulativeLookTimeMS;
+		int lookStartTimeMS;
+		int lastLookStartTimeMS;
+
+		if (!analyzeLooking(m_iLookPendingStartIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS))
+		{
+			qCritical() << "Cannot analyze looking at index " << m_iLookPendingStartIndex;
+			return;
+		}
+
+
+		if (m_bLookAwayStarted)
+		{
+			// Since a lookaway has started, the current state is LookAway, so the cumulativeLookTime is the
+			// it, no need to add the additional from last transition to tMS. If the cumulativeLookTime is
+			// sufficient, emit a look, otherwise do nothing.
+			if (cumulativeLookTimeMS >= m_minLookTimeMS)
+			{
+				HLook l(*m_pdirectionLookPending, lookStartTimeMS, lastLookAwayStartTimeMS, cumulativeLookTimeMS);
+				m_looks.append(l);
+				emit look(l);
+				m_bLookPending = false;
+				m_iLookPendingStartIndex = -1;
+			}
+		}
+		else
+		{
+			// we were in a looking state, so add in the time from tMS to the lastLookStartTime as additional look time and test.
+			cumulativeLookTimeMS += tMS - lastLookStartTimeMS;
+			if (cumulativeLookTimeMS >= m_minLookTimeMS)
+			{
+				HLook l(*m_pdirectionLookPending, lookStartTimeMS, tMS, cumulativeLookTimeMS);
+				m_looks.append(l);
+				emit look(l);
+				m_bLookPending = false;
+				m_iLookPendingStartIndex = -1;
+			}
+		}
+	}
+	stop();
+}
+

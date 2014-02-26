@@ -13,6 +13,7 @@
 
 #include <QEvent>
 class HEvent;
+class HLookTrans;
 
 
 struct HAllTrialsDoneEvent : public QEvent
@@ -52,6 +53,40 @@ struct HReliabilityEndQEvent : public QEvent
 	HReliabilityEndQEvent() : QEvent(Type(ReliabilityEndType)) {};
 	~HReliabilityEndQEvent() {};
 	enum { ReliabilityEndType = QEvent::User + 5 };
+};
+
+struct HNoLookQEvent : public QEvent
+{
+	HNoLookQEvent() : QEvent(Type(NoLookType)) {};
+	~HNoLookQEvent() {};
+	enum { NoLookType = QEvent::User + 6 };
+};
+
+
+class HTransToLookQEvent: public QEvent
+{
+public:
+	HTransToLookQEvent(const HLookTrans& lt, int tMS): QEvent(Type(TransToLookType)), m_lt(lt), m_tMS(tMS) {};
+	~HTransToLookQEvent() {};
+	enum { TransToLookType = QEvent::User + 10 };
+	const HLookTrans& trans() { return m_lt; };
+	int tTrans() { return m_tMS; };
+private:
+	const HLookTrans& m_lt;
+	int m_tMS;
+};
+
+class HTransToLookAwayQEvent: public QEvent
+{
+public:
+	HTransToLookAwayQEvent(const HLookTrans& lt, int tMS): QEvent(Type(TransToLookAwayType)), m_lt(lt), m_tMS(tMS) {};
+	~HTransToLookAwayQEvent() {};
+	enum { TransToLookAwayType = QEvent::User + 11 };
+	const HLookTrans& trans() { return m_lt; };
+	int tTrans() { return m_tMS; };
+private:
+	const HLookTrans& m_lt;
+	int m_tMS;
 };
 
 #endif

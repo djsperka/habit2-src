@@ -49,9 +49,9 @@ QTextStream& operator<<(QTextStream& out, const HLookTrans& lt)
 
 QTextStream& operator<<(QTextStream& out, const HLookDirection& direction)
 {
-	if (direction == HLookDirection::NoLook)
+	if (direction == HLookDirection::LookAway)
 	{
-		out << "NoLook";
+		out << "LookAway";
 	}
 	else if (direction == HLookDirection::LookLeft)
 	{
@@ -75,58 +75,27 @@ QTextStream& operator<<(QTextStream& out, const HLookDirection& direction)
 
 QTextStream& operator<<(QTextStream& out, const HLook& l)
 {
-	out << l.direction() << ":" << l.startMS() << "-" << l.endMS();
+	out << l.direction() << ":" << l.startMS() << "-" << l.endMS() << "(" << l.lookMS() << ")";
 	return out;
 };
 
 
 QDataStream& operator<<(QDataStream& out, const HLook& l)
 {
-	out << l.direction().number() << l.startMS() << l.endMS();
+	out << l.direction().number() << l.startMS() << l.endMS() << l.lookMS();
 	return out;
 };
 
-#if THESE_NO_LONGER_USED
-// THESE METHODS NOW HANDLED IN LOOK I/O
-
-QDataStream& operator<<(QDataStream& out, const HLookTransType& lt)
-{
-	out << lt.number();
-	return out;
-}
-
-QDataStream& operator<<(QDataStream& out, const HLookDirection& direction)
-{
-	out << direction.number();
-	return out;	
-}
-
-QDataStream& operator>>(QDataStream& in, HLookTransType& type)
-{
-	in >> (qint32 &)type;
-	return in;
-}
-
-
-QDataStream& operator>>(QDataStream& in, LookDirection& direction)
-{
-	in >> (qint32 &)direction;
-	return in;
-}
-#endif
-
 QDataStream& operator>>(QDataStream& in, HLook& l)
 {
-	int d, t0, t1;
-	in >> d >> t0 >> t1;
+	int d, t0, t1, t2;
+	in >> d >> t0 >> t1 >> t2;
 	l.setDirection(getLookDirection(d));
 	l.setStartMS(t0);
 	l.setEndMS(t1);
+	l.setLookMS(t2);
 	return in;
 }
-
-
-
 
 QDebug operator<<(QDebug dbg, const HLookTrans& lt)
 {
@@ -167,9 +136,9 @@ QDebug operator<<(QDebug dbg, const HLookTrans& lt)
 
 QDebug operator<<(QDebug dbg, const HLookDirection& direction)
 {
-	if (direction == HLookDirection::NoLook)
+	if (direction == HLookDirection::LookAway)
 	{
-		dbg.nospace() << "NoLook";
+		dbg.nospace() << "LookAway";
 	}
 	else if (direction == HLookDirection::LookLeft)
 	{
@@ -192,13 +161,13 @@ QDebug operator<<(QDebug dbg, const HLookDirection& direction)
 
 QDebug operator<<(QDebug dbg, const HLook& l)
 {
-	dbg.nospace() << l.direction() << ":" << l.startMS() << "-" << l.endMS();
+	dbg.nospace() << l.direction() << ":" << l.startMS() << "-" << l.endMS() << "=" << l.lookMS();
 	return dbg.space();
 }
 
 bool operator==(const HLook& lhs, const HLook& rhs)
 {
-	return lhs.direction() == rhs.direction() && lhs.startMS() == rhs.startMS() && lhs.endMS() == rhs.endMS();
+	return lhs.direction() == rhs.direction() && lhs.startMS() == rhs.startMS() && lhs.endMS() == rhs.endMS() && lhs.lookMS()==rhs.lookMS();
 }
 	
 

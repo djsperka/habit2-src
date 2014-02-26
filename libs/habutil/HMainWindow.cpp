@@ -29,6 +29,7 @@
 #include <QtGui/QApplication>
 #include <QMenu>
 #include <QAction>
+#include <QDir>
 
 using namespace Habit;
 
@@ -149,6 +150,8 @@ void HMainWindow::runSavedExperiment()
 	if(runSettingsForm.exec() == QDialog::Accepted) {
 		HEventLog log;
 		HControlPanel habitControlPanel(log, runSettingsForm.getRunSettings(), this);
+		// set dialog title
+		habitControlPanel.setWindowTitle(runSettingsForm.getRunLabel());
 		if (habitControlPanel.exec() != QDialog::Accepted)
 			return;
 		HResults* results = new HResults(habitControlPanel.getExperimentSettings(), runSettingsForm.getRunSettings(),
@@ -158,6 +161,8 @@ void HMainWindow::runSavedExperiment()
 		HResultsDialog dialog(*results, this);
 		dialog.exec();
 
+
+#if OPTIONAL_FILE_SAVE
 		QMessageBox box;
 		box.setText("Save the results of this experiment?");
 		box.setWindowTitle("End of experiment");
@@ -174,6 +179,21 @@ void HMainWindow::runSavedExperiment()
 				}
 			}
 		}
+#else
+		// Always save results. No option here.
+		QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
+		QString filename(dir.absoluteFilePath(QString("%1.hab").arg(runSettingsForm.getRunLabel())));
+		if (!results->save(filename))
+		{
+			qCritical() << "Error - cannot save data to file " << filename;
+		}
+		QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(runSettingsForm.getRunLabel())));
+		if (!results->saveToCSV(filenameCSV))
+		{
+			qCritical() << "Error - cannot save data to csv file " << filenameCSV;
+		}
+
+#endif
     }
     m_openDBAct->setEnabled(true);
 }
