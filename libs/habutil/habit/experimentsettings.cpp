@@ -1,8 +1,8 @@
 #include "experimentsettings.h"
 #include "maindao.h"
-//#include "connection.h"
+#include "connection.h"
 #include "HTypes.h"
-#include <QtSql/QSqlDatabase>
+//#include <QtSql/QSqlDatabase>
 
 Habit::ExperimentSettings::ExperimentSettings()
 : id_(-1)
@@ -206,9 +206,10 @@ Habit::ExperimentSettings::setTestStimuliSettings(const Habit::StimuliSettings& 
 bool Habit::ExperimentSettings::saveToDB() {
 	Habit::MainDao dao;
 	bool result = false;
-	QSqlDatabase db;	// default connection, assumed to be open.
-	Q_ASSERT(db.isOpen());
-	db.transaction();
+//	QSqlDatabase db;	// default connection, assumed to be open.
+
+	Q_ASSERT(connection::get_instance()->isOpen());
+	connection::get_instance()->transaction();
 	if(dao.insertOrUpdateExperimentSettings(this)) {
 		result = monitorSettings_.saveToDB(id_) && attentionGetterSettings_.saveToDB(id_) && controlBarOptions_.saveToDB(id_)
 			&& designSettings_.saveToDB(id_) && habituationSettings_.saveToDB(id_) && stimulusDisplayInfo_.saveToDB(id_)
@@ -216,9 +217,9 @@ bool Habit::ExperimentSettings::saveToDB() {
 			&& testStimuliSettings_.saveToDB(id_) && pretestStimuliSettings_.saveToDB(id_);
 	}
 	if(result) {
-		db.commit();
+		connection::get_instance()->commit();
 	} else {
-		db.rollback();
+		connection::get_instance()->rollback();
 	}
 	return result;
 }
