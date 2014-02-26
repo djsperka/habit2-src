@@ -96,7 +96,10 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 				else if (pevent->type() == HEventType::HEventLook)
 				{
 					HLookEvent* plook = static_cast<HLookEvent*>(pevent);
-					iTotal += plook->look().lookMS();
+					if (plook->look().direction() != HLookDirection::LookAway)
+					{
+						iTotal += plook->look().lookMS();
+					}
 				}
 			}
 		}
