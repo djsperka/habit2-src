@@ -92,14 +92,18 @@ const HTrialEndType HTrialEndType::HTrialEndGotLook(0, "GotLook");
 const HTrialEndType HTrialEndType::HTrialEndFixedTimeout(1, "FixedTimeout");
 const HTrialEndType HTrialEndType::HTrialEndNoLookTimeout(2, "NoLookTimeout");
 const HTrialEndType HTrialEndType::HTrialEndAbort(3, "Abort");
+const HTrialEndType HTrialEndType::HTrialEndMaxAccumulatedLookTime(4, "MaxAccumulatedLookTime");
+const HTrialEndType HTrialEndType::HTrialEndMaxLookAwayTime(5, "MaxLookAwayTime");
 const HTrialEndType HTrialEndType::HTrialEndUndefined(-1, "Unknown");
 	
-const HTrialEndType* HTrialEndType::A[4] = 
+const HTrialEndType* HTrialEndType::A[6] =
 {
 	&HTrialEndType::HTrialEndGotLook, 
 	&HTrialEndType::HTrialEndFixedTimeout,
 	&HTrialEndType::HTrialEndNoLookTimeout, 
-	&HTrialEndType::HTrialEndAbort
+	&HTrialEndType::HTrialEndAbort,
+	&HTrialEndType::HTrialEndMaxAccumulatedLookTime,
+	&HTrialEndType::HTrialEndMaxLookAwayTime
 };
 	
 bool operator==(const HTrialEndType& lhs, const HTrialEndType& rhs)
@@ -294,7 +298,7 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	else
 	{
 		// this is an error.
-		qCritical() << "Unknown event type (" << etype.name() << ", " << etype.number() << ")";
+		qCritical() << "HEvent::getEvent(): §Unknown event type (" << etype.name() << ", " << etype.number() << ")" << " event code " << n;
 	}
 	return pevent;
 }
@@ -728,23 +732,24 @@ HLookDisabledEvent* HLookDisabledEvent::getEvent(QDataStream& stream, int timest
 
 QString HScreenStartEvent::eventInfo() const
 {
-	return QString("Screen started for player %1").arg(playerid());
+	return QString("Screen started for player %1 file %2").arg(playerid()).arg(filename());
 };
 
 QString HScreenStartEvent::eventCSVAdditional() const
 {
-	return QString("%1").arg(playerid());
+	return QString("%1,%2").arg(playerid()).arg(filename());
 };
 
 QDataStream& HScreenStartEvent::putAdditional(QDataStream& stream) const
 {
-	stream << playerid();
+	stream << filename() << playerid();
 	return stream;
 }
 
 HScreenStartEvent* HScreenStartEvent::getEvent(QDataStream& stream, int timestamp)
 {
 	int playerid;
-	stream >> playerid;
-	return new HScreenStartEvent(playerid, timestamp);
+	QString filename;
+	stream >> filename >> playerid;
+	return new HScreenStartEvent(filename, playerid, timestamp);
 }
