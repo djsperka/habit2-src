@@ -15,7 +15,7 @@
 #include "subjectsettings.h"
 #include "reliabilitysettings.h"
 #include "HEventLog.h"
-#include <QDataStream>
+#include <QTextStream>
 
 
 class HResults {
@@ -49,9 +49,13 @@ public:
 	// save to file. File will be CLOBBERED!
 	bool save(const QString& filename) const;
 
+	// save per-trial results to a CSV file
+	bool saveToCSV(const QString& filename) const;
 
 private:
 	HResults();
+
+	void initializeTrialRow(QList<QString>& row);
 
 	QString m_version;
 	QString m_originalFilename;
@@ -63,6 +67,65 @@ private:
 	Habit::ReliabilitySettings m_reliabilitySettings;
 	HEventLog m_log;
 };
+
+class HTrialResultsRow: public QList<QString>
+{
+public:
+	enum
+	{
+		indSubjectId = 0,
+		indPhase = 1,
+		indTrial = 2,
+		indRepeat = 3,
+		indHabituated = 4,
+		indStimId = 5,
+		indStimName = 6,
+		indStimLeft = 7,
+		indStimCenter = 8,
+		indStimRight = 9,
+		indStimISS = 10,
+		indTotalLook = 11,
+		indTotalAway = 12,
+		indLook = 13,
+		indNInit = 14,
+	};
+
+	HTrialResultsRow(): QList<QString>()
+	{
+		init();
+	}
+
+	void init(QString& subjectId)
+	{
+		init();
+		setId(subjectId);
+	};
+
+	void setId(QString id) { (*this)[indSubjectId] = id; };
+	void setPhase(QString phase) { (*this)[indPhase] = phase; };
+	void setTrial(QString trial) { (*this)[indTrial] = trial; };
+	void setRepeat(QString repeat) { (*this)[indRepeat] = repeat; };
+	void setHabituated(QString habituated) { (*this)[indHabituated] = habituated; };
+	void setStimId(QString stimid) { (*this)[indStimId] = stimid; };
+	void setStimName(QString stim) { (*this)[indStimName] = stim; };
+	void setStimLeft(QString stim) { (*this)[indStimLeft] = stim; };
+	void setStimCenter(QString stim) { (*this)[indStimCenter] = stim; };
+	void setStimRight(QString stim) { (*this)[indStimRight] = stim; };
+	void setStimISS(QString stim) { (*this)[indStimISS] = stim; };
+	void setTotalLook(QString look) { (*this)[indTotalLook] = look; };
+	void setTotalLookAway(QString away) { (*this)[indTotalAway] = away; };
+	void appendLook(QString direc, QString timeMS) { append(direc); append(timeMS); };
+
+private:
+	void init()
+	{
+		clear();
+		for (int i=0; i<indNInit; i++) append(QString());
+	};
+
+};
+
+QTextStream& operator<<(QTextStream& out, const HTrialResultsRow& row);
 
 
 #endif /* HRESULTS_H_ */

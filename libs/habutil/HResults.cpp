@@ -138,3 +138,167 @@ HResults* HResults::load(const QString& filename)
 	return results;
 }
 
+
+bool HResults::saveToCSV(const QString& filename) const
+{
+	bool b = false;
+	QFile file(filename);
+	QString subjectId;
+
+	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+	{
+		QTextStream out(&file);
+		//out << version() << type().number();
+		b = true;
+		if (type() == HResultsType::HResultsTypeOriginalRun)
+		{
+			subjectId = QString("%1").arg(subjectSettings().getId());
+			qDebug() << "Original run";
+		}
+		else if (type() == HResultsType::HResultsTypeTestRun)
+		{
+			subjectId = QString("TESTING");
+		}
+		else if (type() == HResultsType::HResultsTypeReliabilityRun)
+		{
+			subjectId = QString("R-%1").arg(subjectSettings().getId());
+		}
+		else
+		{
+			qCritical() << "Unknown results type. Cannot save HResults to CSV.";
+			b = false;
+			return b;
+		}
+
+		// Now iterate through event log. Each successful trial is written to the csv file.
+
+		QString sPhase;
+		HTrialResultsRow row;
+		bool bInsidePhase = false;
+		bool bInsideTrial = false;
+		int totalLookTime = 0;
+		int totalLookAwayTime = 0;
+		bool bHabituated = false;
+		QListIterator<HEvent*> events(this->eventLog());
+
+		while (events.hasNext())
+		{
+			HEvent* e = events.next();
+			if (e->type() == HEventType::HEventPhaseStart)
+			{
+				HPhaseStartEvent* pse = static_cast<HPhaseStartEvent*>(e);
+				sPhase = pse->phase();
+				if (bInsidePhase) qCritical("Found phase start without preceding phase end event!");
+				bInsidePhase = true;
+			}
+			else if (e->type() == HEventType::HEventTrialStart)
+			{
+				HTrialStartEvent* ptse = static_cast<HTrialStartEvent*>(e);
+				if (bInsideTrial) qCritical("Found trial start without preceding trial end event!");
+				qDebug() << "Init Trial start subjectID " << subjectId;
+				row.init(subjectId);
+				row.setPhase(sPhase);
+				if (bHabituated)
+					row.setHabituated(QString("Yes"));
+				else
+					row.setHabituated(QString("No"));
+				row.setTrial(QString("%1").arg(ptse->trialnumber()));
+				row.setRepeat(QString("%1").arg(ptse->repeatnumber()));
+				totalLookTime = 0;
+				totalLookAwayTime = 0;
+			}
+			else if (e->type() == HEventType::HEventStimStart)
+			{
+				HStimStartEvent* psse = static_cast<HStimStartEvent*>(e);
+				row.setStimId(QString("%1").arg(psse->stimid()));
+			}
+			else if (e->type() == HEventType::HEventScreenStart)
+			{
+				HScreenStartEvent* psse = static_cast<HScreenStartEvent*>(e);
+
+				// TODO - must have a way to map monitor id numbers to left/center/right/iss!
+				switch(psse->playerid())
+				{
+				case 0:
+				{
+					row.setStimISS(psse->filename());
+					break;
+				}
+				case 1:
+				{
+					row.setStimLeft(psse->filename());
+					break;
+				}
+				case 2:
+				{
+					row.setStimRight(psse->filename());
+					break;
+				}
+				case 3:
+				{
+					row.setStimCenter(psse->filename());
+					break;
+				}
+				default:
+				{
+					qWarning() << "Warning: cannot match player id to monitor.";
+					break;
+				}
+				}
+			}
+			else if (e->type() == HEventType::HEventLook)
+			{
+				HLookEvent* ple = static_cast<HLookEvent*>(e);
+				row.appendLook(ple->look().direction().name(), QString("%1").arg(ple->look().lookMS()));
+				if (ple->look().direction() == HLookDirection::LookAway)
+				{
+					totalLookAwayTime += ple->look().lookMS();
+				}
+				if (ple->look().direction() == HLookDirection::LookLeft)
+				{
+					totalLookTime += ple->look().lookMS();
+				}
+				if (ple->look().direction() == HLookDirection::LookCenter)
+				{
+					totalLookTime += ple->look().lookMS();
+				}
+				if (ple->look().direction() == HLookDirection::LookRight)
+				{
+					totalLookTime += ple->look().lookMS();
+				}
+			}
+			else if (e->type() == HEventType::HEventTrialEnd)
+			{
+				// check that the trial ended successfully
+				HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(e);
+				if (pte->endtype() == HTrialEndType::HTrialEndFixedTimeout ||
+						pte->endtype() == HTrialEndType::HTrialEndGotLook)
+				{
+					// good trial, flush it to output
+					row.setTotalLook(QString("%1").arg(totalLookTime));
+					row.setTotalLookAway(QString("%1").arg(totalLookAwayTime));
+					out << row;
+				}
+			}
+
+		}
+
+
+		file.close();
+	}
+	return b;
+}
+
+
+QTextStream& operator<<(QTextStream& out, const HTrialResultsRow& row)
+{
+	QListIterator<QString> items(row);
+	out << items.next();
+	while (items.hasNext())
+	{
+		out << "," << items.next();
+	}
+	out << endl;
+	return out;
+}
+
