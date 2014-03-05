@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	// If no luck, then openDB() returns false and selectDB() is called.
 	while (!openDB())
 	{
-		if (!selectDB()) return 0;
+		if (!selectDB(true)) return 0;
 	}
 
 	// Now show dialog and start event loop.
