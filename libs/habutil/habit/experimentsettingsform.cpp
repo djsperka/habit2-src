@@ -33,10 +33,10 @@ ExperimentSettingsForm::ExperimentSettingsForm(const Habit::ExperimentSettings& 
     treeWizard_->addNodeItem(tr("General"), 0);
     monitorSettingsForm_ = new MonitorSettingsForm(experimentSettings_.getMonitorSettings());
     treeWizard_->addPageItem(monitorSettingsForm_, tr("Monitor settings"), tr("General"));
+    controlBarOptionsForm_ = new ControlBarOptionsForm(experimentSettings_.getControlBarOptions());
+    treeWizard_->addPageItem(controlBarOptionsForm_, tr("Control Bar Options"), tr("General"));
     
     treeWizard_->addNodeItem(tr("Experiment"), 0);
-    controlBarOptionsForm_ = new ControlBarOptionsForm(experimentSettings_.getControlBarOptions());
-    treeWizard_->addPageItem(controlBarOptionsForm_, tr("Control Bar Options"), tr("Experiment"));
 	designSetupForm_ = new DesignSetupForm(experimentSettings_.getDesignSettings());
     treeWizard_->addPageItem(designSetupForm_, tr("Design Settings"), tr("Experiment"));
 	habituationSetupForm_ = new HabituationSetupForm(experimentSettings_.getHabituationSettings());
