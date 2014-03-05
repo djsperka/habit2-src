@@ -16,7 +16,7 @@
 
 
 // select existing db(true) or create new one (false)
-bool selectDB()
+bool selectDB(bool bExisting)
 {
 	bool bval = false;
 	QSettings settings;
@@ -37,7 +37,12 @@ bool selectDB()
 	}
 	QFileInfo initial(QDir(dir), filename);
 	QString fullname = initial.absoluteFilePath();
-	selectedFileName = QFileDialog::getSaveFileName(NULL, "Select Habit database", fullname, "Habit Database Files (*.db3)");
+
+	if (bExisting)
+		selectedFileName = QFileDialog::getOpenFileName(NULL, "Select Habit database", fullname, "Habit Database Files (*.db3)");
+	else
+		selectedFileName = QFileDialog::getSaveFileName(NULL, "New Habit database filename", fullname, "Habit Database Files (*.db3)");
+
 	qDebug() << "Selected db " << selectedFileName;
 
 	// getOpenFileName() returns a null string if user cancelled.

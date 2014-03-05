@@ -46,13 +46,13 @@ void HMainWindow::createActions()
  {
 	m_openDBAct = new QAction(tr("&Open Experiment Database File..."), this);
 	m_openDBAct->setShortcuts(QKeySequence::Open);
-	m_openDBAct->setStatusTip(tr("Open or create another experiment database"));
+	m_openDBAct->setStatusTip(tr("Open another experiment database"));
 	connect(m_openDBAct, SIGNAL(triggered()), this, SLOT(openDBFile()));
  }
 
 void HMainWindow::openDBFile()
 {
-	if (selectDB())
+	if (selectDB(true))
 	{
 		openDB();
 	}

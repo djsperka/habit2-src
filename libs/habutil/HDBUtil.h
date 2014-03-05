@@ -8,7 +8,7 @@
 #ifndef HDBUTIL_H_
 #define HDBUTIL_H_
 
-bool selectDB();
+bool selectDB(bool bExisting);
 void closeDB();
 bool openDB();
 
