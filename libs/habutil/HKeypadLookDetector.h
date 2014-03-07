@@ -19,7 +19,7 @@ class HKeypadLookDetector: public HLookDetector
 	Q_OBJECT
 	
 public:
-	HKeypadLookDetector(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, QWidget* pdialog, bool bUseLeft=true, bool bUseCenter=true, bool bUseRight=true);
+	HKeypadLookDetector(HEventLog& log, QWidget* pdialog=NULL, int minlooktime_ms=0, int minlookawaytime_ms=0, int maxlookawaytime_ms=0, int maxaccumlooktime_ms=0, bool bUseLeft=true, bool bUseCenter=true, bool bUseRight=true);
 	virtual ~HKeypadLookDetector();
 	bool eventFilter(QObject *obj, QEvent *event);
 protected:

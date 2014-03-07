@@ -11,8 +11,7 @@
 #include "HElapsedTimer.h"
 #include <QKeyEvent>
 
-
-HKeypadLookDetector::HKeypadLookDetector(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight)
+HKeypadLookDetector::HKeypadLookDetector(HEventLog& log, QWidget* pdialog, int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, bool bUseLeft, bool bUseCenter, bool bUseRight)
 : HLookDetector(minlooktime_ms, minlookawaytime_ms, maxlookawaytime_ms, maxaccumlooktime_ms, log)
 , m_pdialog(pdialog)
 , m_bUseLeft(bUseLeft)
