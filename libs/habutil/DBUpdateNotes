@@ -1,0 +1,46 @@
+DBUpdateNotes
+
+ Created on: Mar 6, 2014
+     Author: Oakeslab
+
+Updating database to adapt to look_settings and phase_settings tables (eliminating designs_settings)
+
+
+1. Look settings are taken from designs_settings. There was confusion in the code as to how the look
+settings were stored, but that's not happening here and the column names are clear. 
+
+insert into look_settings (experiment_id, min_look_time, min_lookaway_time)
+select a.id, b.minimum_look_time, b.minimum_look_away_time 
+from experiments a, designs_settings b 
+where a.id = b.experiment_id
+
+
+2. oppulate phase_settings with three inserts, one for each phase
+
+insert into phase_settings 
+(experiment_id, enabled, phase_type, ntrials, use_looking_criteria, is_single_look, is_max_accumulated_look_time)
+select a.id, pretest_number_of_trials>0, 1, pretest_number_of_trials, 1, 1, 0
+from experiments a, designs_settings b 
+where a.id = b.experiment_id
+
+insert into phase_settings 
+(experiment_id, enabled, phase_type, ntrials, use_looking_criteria, is_single_look, is_max_accumulated_look_time)
+select a.id, b.habituation_number_of_trials>0, 2, habituation_number_of_trials, 1, 1, 0
+from experiments a, designs_settings b 
+where a.id = b.experiment_id;
+
+insert into phase_settings 
+(experiment_id, enabled, phase_type, ntrials, use_looking_criteria, is_single_look, is_max_accumulated_look_time)
+select a.id,b.test_number_of_trials>0, 3, test_number_of_trials, 1, 1, 0
+from experiments a, designs_settings b 
+where a.id = b.experiment_id;
+
+
+
+
+
+select a.id, b.test_number_of_trials>0, 3, test_number_of_trials, true, true, false
+from experiments a, designs_settings b 
+where a.id = b.experiment_id;
+
+

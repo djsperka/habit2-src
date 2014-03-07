@@ -58,6 +58,7 @@ void HTestingLookDetector::check()
 
 void HTestingLookDetector::agLookEnabled(bool enabled)
 {
+	Q_UNUSED(enabled);
 }
 
 void HTestingLookDetector::lookEnabled(bool enabled)

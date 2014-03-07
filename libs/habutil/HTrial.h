@@ -13,6 +13,8 @@
 #include "HPhaseChildState.h"
 #include "HLookDetector.h"
 #include "stimulussettings.h"
+#include "HPhaseSettings.h"
+#include "HLookSettings.h"
 #include <QObject>
 #include <QTimer>
 #include <QEvent>
@@ -33,7 +35,7 @@ class HTrial: public HPhaseChildState
 	Q_OBJECT
 	
 public:
-	HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG);
+	HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG);
 	~HTrial() {};
 	void setTrialNumber(int i);
 	void incrementRepeatNumber();
@@ -45,19 +47,22 @@ protected:
 	
 private:
 //	HLookDetector* m_pLD;
-	int m_maxTrialLengthMS;
-	int m_maxNoLookTimeMS;
-	bool m_bFixedLength;
+	const Habit::HPhaseSettings m_phaseSettings;
+	const Habit::HLookSettings m_lookSettings;
+//	int m_maxTrialLengthMS;
+//	int m_maxNoLookTimeMS;
+//	bool m_bFixedLength;
 	bool m_bAG;
 	int m_trialNumber;
 	int m_repeatNumber;
-	QTimer* m_ptimerMaxTrialLength;	
+	QTimer* m_ptimerMaxStimulusTime;
 	
 public slots:
 	void onStimRunningEntered();
 	void onAGRunningEntered();
 	void onStimRunningExited();
-	void onAGRunningExited();	
+	void onAGRunningExited();
+	void onLookStarted();
 };
 
 

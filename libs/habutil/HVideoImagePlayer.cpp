@@ -269,6 +269,7 @@ void HVideoImagePlayer::play(int number)
 				default:
 					break;
 			}
+			break;
 		default:
 			break;		
 	}

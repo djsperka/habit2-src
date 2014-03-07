@@ -15,6 +15,8 @@
 #include "HQEvents.h"
 #include "HTypes.h"
 #include "HPhaseCriteria.h"
+#include "HPhaseSettings.h"
+#include "HLookSettings.h"
 #include "stimulusSettings.h"
 #include <QList>
 #include <QEvent>
@@ -35,12 +37,13 @@ class HPhase: public HExperimentChildState
 	
 	HPhaseCriteria *m_pcriteria;
 	QList<QPair<int, Habit::StimulusSettings> > m_stimuli;
-	const HPhaseType& m_ptype;
+	const Habit::HPhaseSettings m_phaseSettings;
+	const Habit::HLookSettings m_lookSettings;
 	int m_itrial;		// this is the current trial. First trial is '0'. Stim found at m_stimuli[m_itrial].second
 	HTrial* m_sTrial;
 
 public:
-	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const HPhaseType& ptype, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG);
+	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG);
 	virtual ~HPhase() {};
 	bool advance();
 	HTrial* getHTrial() { return m_sTrial; };
@@ -50,7 +53,7 @@ public:
 	
 	void requestCurrentStim();
 	void requestAG();
-	const HPhaseType& ptype() const { return m_ptype; };
+	const HPhaseType& ptype() const { return m_phaseSettings.getPhaseType(); };
 
 protected:
 	virtual void onEntry(QEvent* e);

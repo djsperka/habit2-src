@@ -22,16 +22,39 @@ void HTrialInitialState::onEntry(QEvent* e)
 }
 
 
+
+HStimRunningState::HStimRunningState(HTrial& trial, HEventLog& log, const Habit::HPhaseSettings& phaseSettings)
+: HTrialChildState(trial, log, "HStimRunning")
+, m_phaseSettings(phaseSettings)
+{
+
+	// When "max no look time" is used, it is implemented here. This class will start a timer
+	// on entry, set to go off at the max no look time. The noLookTimeout() slot will post a
+	// QEvent to the state machine that will trigger a transition to HNoLookTimeout state.
+
+	if (m_phaseSettings.getIsMaxNoLookTime())
+	{
+		m_ptimerNoLook = new QTimer();
+		m_ptimerNoLook->setSingleShot(true);
+		connect(m_ptimerNoLook, SIGNAL(timeout()), this, SLOT(noLookTimeout()));
+	}
+};
+
 void HStimRunningState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	if (m_ptimerNoLook->isActive()) m_ptimerNoLook->stop();
-	m_ptimerNoLook->start(m_msNoLook);
+	if (m_phaseSettings.getIsMaxNoLookTime())
+	{
+		if (m_ptimerNoLook->isActive()) m_ptimerNoLook->stop();
+		m_ptimerNoLook->start(m_phaseSettings.getMaxNoLookTime());
+	}
 	m_bGotLook = false;
 	m_bGotLookStarted = false;
 	m_bGotLookAwayStarted = false;
 };
+
+
 
 void HStimRunningState::gotLookStarted()
 {
@@ -41,7 +64,7 @@ void HStimRunningState::gotLookStarted()
 void HStimRunningState::gotLookAwayStarted()
 {
 	if (m_bGotLook) return;
-	else if (!m_ptimerNoLook->isActive())
+	else if (m_phaseSettings.getIsMaxNoLookTime() && !m_ptimerNoLook->isActive())
 	{
 		machine()->postEvent(new HNoLookQEvent());
 	}
@@ -66,7 +89,7 @@ void HStimRunningState::onExit(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onExit(e);
-	if (m_ptimerNoLook->isActive())
+	if (m_phaseSettings.getIsMaxNoLookTime() && m_ptimerNoLook->isActive())
 	{
 		m_ptimerNoLook->stop();
 	}
@@ -99,6 +122,21 @@ void HGotLookState::onEntry(QEvent* e)
 	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndGotLook, HElapsedTimer::elapsed()));
 };
 
+void HMaxAccumulatedLookTimeState::onEntry(QEvent* e)
+{
+	Q_UNUSED(e);
+	HState::onEntry(e);
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxAccumulatedLookTime, HElapsedTimer::elapsed()));
+};
+
+void HMaxLookAwayTimeState::onEntry(QEvent* e)
+{
+	Q_UNUSED(e);
+	HState::onEntry(e);
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxLookAwayTime, HElapsedTimer::elapsed()));
+};
+
+
 void HNoLookTimeoutState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
@@ -107,11 +145,11 @@ void HNoLookTimeoutState::onEntry(QEvent* e)
 	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndNoLookTimeout, HElapsedTimer::elapsed()));
 };
 
-void HFixedTimeoutState::onEntry(QEvent* e)
+void HMaxStimulusTimeState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndFixedTimeout, HElapsedTimer::elapsed()));
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxStimulusTime, HElapsedTimer::elapsed()));
 };
 
 

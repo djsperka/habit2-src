@@ -6,11 +6,15 @@
 
 Habit::ExperimentSettings::ExperimentSettings()
 : id_(-1)
+, name_()
 , pretestStimuliSettings_(HStimContext::PreTestPhase)
 , habituationStimuliSettings_(HStimContext::HabituationPhase)
 , testStimuliSettings_(HStimContext::TestPhase)
+, pretestPhaseSettings_(HPhaseType::PreTest)
+, habituationPhaseSettings_(HPhaseType::Habituation)
+, testPhaseSettings_(HPhaseType::Test)
 {
-    name_ = QString();
+//    name_ = QString();
 }
 
 Habit::ExperimentSettings::~ExperimentSettings()
@@ -20,7 +24,11 @@ Habit::ExperimentSettings::~ExperimentSettings()
 QDataStream & Habit::operator<< (QDataStream& stream, const Habit::ExperimentSettings& settings)
 {
 	stream << (int)settings.getId() << settings.getName() <<
-			settings.getMonitorSettings() << settings.getControlBarOptions() << settings.getDesignSettings() <<
+			settings.getMonitorSettings() << settings.getControlBarOptions() <<
+			settings.getHLookSettings() <<
+			settings.getPreTestPhaseSettings() <<
+			settings.getHabituationPhaseSettings() <<
+			settings.getTestPhaseSettings() <<
 			settings.getHabituationSettings() << settings.getStimulusDisplayInfo() <<
 			settings.getAttentionGetterSettings() <<
 			settings.getPreTestStimuliSettings() <<
@@ -35,21 +43,31 @@ QDataStream & Habit::operator>> (QDataStream& stream, Habit::ExperimentSettings&
 	QString name;
 	Habit::MonitorSettings monitorSettings;
 	Habit::ControlBarOptions controlBarOptions;
-	Habit::DesignSettings designSettings;
+	Habit::HLookSettings lookSettings;
+	Habit::HPhaseSettings pretestPhaseSettings;
+	Habit::HPhaseSettings habituationPhaseSettings;
+	Habit::HPhaseSettings testPhaseSettings;
 	Habit::HabituationSettings habituationSettings;
 	Habit::StimulusDisplayInfo stimulusDisplayInfo;
 	Habit::AttentionGetterSettings attentionGetterSettings;
 	Habit::StimuliSettings pretestStimuliSettings(HStimContext::PreTestPhase);
 	Habit::StimuliSettings habituationStimuliSettings(HStimContext::HabituationPhase);
 	Habit::StimuliSettings testStimuliSettings(HStimContext::TestPhase);
-	stream >> id >> name >> monitorSettings >> controlBarOptions >> designSettings >> habituationSettings >>
+	stream >> id >> name >> monitorSettings >> controlBarOptions >>
+		pretestPhaseSettings >>
+		habituationPhaseSettings >>
+		testPhaseSettings >>
+		habituationSettings >>
 		stimulusDisplayInfo >> attentionGetterSettings >>
 		pretestStimuliSettings >> habituationStimuliSettings >> testStimuliSettings;
 	settings.setId(id);
 	settings.setName(name);
 	settings.setMonitorSettings(monitorSettings);
 	settings.setControlBarOptions(controlBarOptions);
-	settings.setDesignSettings(designSettings);
+	settings.setHLookSettings(lookSettings);
+	settings.setPreTestPhaseSettings(pretestPhaseSettings);
+	settings.setHabituationPhaseSettings(habituationPhaseSettings);
+	settings.setTestPhaseSettings(testPhaseSettings);
 	settings.setHabituationSettings(habituationSettings);
 	settings.setStimulusDisplayInfo(stimulusDisplayInfo);
 	settings.setAttentionGetterSettings(attentionGetterSettings);
@@ -65,7 +83,10 @@ bool Habit::operator==(const Habit::ExperimentSettings& lhs, const Habit::Experi
 			lhs.getName() == rhs.getName() &&
 			lhs.getMonitorSettings() == rhs.getMonitorSettings() &&
 			lhs.getControlBarOptions() == rhs.getControlBarOptions() &&
-			lhs.getDesignSettings() == rhs.getDesignSettings() &&
+			lhs.getHLookSettings() == rhs.getHLookSettings() &&
+			lhs.getPreTestPhaseSettings() == rhs.getPreTestPhaseSettings() &&
+			lhs.getHabituationPhaseSettings() == rhs.getHabituationPhaseSettings() &&
+			lhs.getTestPhaseSettings() == rhs.getTestPhaseSettings() &&
 			lhs.getHabituationSettings() == rhs.getHabituationSettings() &&
 			lhs.getStimulusDisplayInfo() == rhs.getStimulusDisplayInfo() &&
 			lhs.getAttentionGetterSettings() == rhs.getAttentionGetterSettings() &&
@@ -117,18 +138,6 @@ void
 Habit::ExperimentSettings::setControlBarOptions(const Habit::ControlBarOptions& controlBarOptions)
 {
     controlBarOptions_ = controlBarOptions;
-}
-
-Habit::DesignSettings
-Habit::ExperimentSettings::getDesignSettings() const
-{
-    return designSettings_;
-}
-
-void
-Habit::ExperimentSettings::setDesignSettings(const Habit::DesignSettings& designSettings)
-{
-    designSettings_ = designSettings;
 }
 
 Habit::HabituationSettings
@@ -212,7 +221,11 @@ bool Habit::ExperimentSettings::saveToDB() {
 	connection::get_instance()->transaction();
 	if(dao.insertOrUpdateExperimentSettings(this)) {
 		result = monitorSettings_.saveToDB(id_) && attentionGetterSettings_.saveToDB(id_) && controlBarOptions_.saveToDB(id_)
-			&& designSettings_.saveToDB(id_) && habituationSettings_.saveToDB(id_) && stimulusDisplayInfo_.saveToDB(id_)
+			&& lookSettings_.saveToDB(id_)
+			&& getPreTestPhaseSettings().saveToDB(id_)
+			&& getHabituationPhaseSettings().saveToDB(id_)
+			&& getTestPhaseSettings().saveToDB(id_)
+			&& habituationSettings_.saveToDB(id_) && stimulusDisplayInfo_.saveToDB(id_)
 			&& habituationStimuliSettings_.saveToDB(id_)
 			&& testStimuliSettings_.saveToDB(id_) && pretestStimuliSettings_.saveToDB(id_);
 	}
@@ -234,7 +247,10 @@ void Habit::ExperimentSettings::loadFromDB(bool byId)
 	monitorSettings_.loadFromDB(id_);
 	attentionGetterSettings_.loadFromDB(id_);
 	controlBarOptions_.loadFromDB(id_);
-	designSettings_.loadFromDB(id_);
+	lookSettings_.loadFromDB(id_);
+	pretestPhaseSettings_.loadFromDB(id_, HPhaseType::PreTest.number());
+	habituationPhaseSettings_.loadFromDB(id_, HPhaseType::Habituation.number());
+	testPhaseSettings_.loadFromDB(id_, HPhaseType::Test.number());
 	habituationSettings_.loadFromDB(id_);
 	stimulusDisplayInfo_.loadFromDB(id_);
 	habituationStimuliSettings_.loadFromDB(id_);

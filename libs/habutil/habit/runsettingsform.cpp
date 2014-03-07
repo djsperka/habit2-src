@@ -1,6 +1,6 @@
 #include "runsettingsform.h"
 #include "habituationstimulitable.h"
-#include "habitcontrolpanel.h"
+//#include "habitcontrolpanel.h"
 #include "stimulisettings.h"
 #include "maindao.h"
 #include "subjectinformation.h"

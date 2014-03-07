@@ -12,6 +12,8 @@
 #include "maindao.h"
 #include "connection.h"
 #include "cloneexperimentdialog.h"
+#include "HLookSettingsWidget.h"
+#include "HPhaseSettingsWidget.h"
 
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QLabel>
@@ -37,8 +39,19 @@ ExperimentSettingsForm::ExperimentSettingsForm(const Habit::ExperimentSettings& 
     treeWizard_->addPageItem(controlBarOptionsForm_, tr("Control Bar Options"), tr("General"));
     
     treeWizard_->addNodeItem(tr("Experiment"), 0);
-	designSetupForm_ = new DesignSetupForm(experimentSettings_.getDesignSettings());
-    treeWizard_->addPageItem(designSetupForm_, tr("Design Settings"), tr("Experiment"));
+
+    lookSettingsForm_ = new HLookSettingsWidget(experimentSettings_.getHLookSettings());
+    treeWizard_->addPageItem(lookSettingsForm_, tr("Looking"), tr("Experiment"));
+
+    pretestPhaseSettingsForm_ = new HPhaseSettingsWidget(experimentSettings_.getPreTestPhaseSettings());
+    treeWizard_->addPageItem(pretestPhaseSettingsForm_, tr("PreTest Phase"), tr("Experiment"));
+
+    habituationPhaseSettingsForm_ = new HPhaseSettingsWidget(experimentSettings_.getHabituationPhaseSettings());
+    treeWizard_->addPageItem(habituationPhaseSettingsForm_, tr("Habituation Phase"), tr("Experiment"));
+
+    testPhaseSettingsForm_ = new HPhaseSettingsWidget(experimentSettings_.getTestPhaseSettings());
+    treeWizard_->addPageItem(testPhaseSettingsForm_, tr("Test Phase"), tr("Experiment"));
+
 	habituationSetupForm_ = new HabituationSetupForm(experimentSettings_.getHabituationSettings());
     treeWizard_->addPageItem(habituationSetupForm_, tr("Habituation Settings"), tr("Experiment"));
 	
@@ -122,26 +135,35 @@ void GUILib::ExperimentSettingsForm::onExperimentChoose(const QString& name) {
 			experimentBox_->setCurrentIndex(-1);
 			Habit::MonitorSettings monitorSettings = experimentSettings_.getMonitorSettings();
 			Habit::ControlBarOptions controlBarOptions = experimentSettings_.getControlBarOptions();
-			Habit::DesignSettings designSettings = experimentSettings_.getDesignSettings();
+			Habit::HLookSettings lookSettings = experimentSettings_.getHLookSettings();
+			Habit::HPhaseSettings pretestPhaseSettings = experimentSettings_.getPreTestPhaseSettings();
+			Habit::HPhaseSettings habituationPhaseSettings = experimentSettings_.getHabituationPhaseSettings();
+			Habit::HPhaseSettings testPhaseSettings = experimentSettings_.getTestPhaseSettings();
 			Habit::HabituationSettings habituationSettings = experimentSettings_.getHabituationSettings();
 			Habit::StimulusDisplayInfo stimulusDisplayInfo = experimentSettings_.getStimulusDisplayInfo();
 			Habit::AttentionGetterSettings attentionGetterSettings = experimentSettings_.getAttentionGetterSettings();
 
 			monitorSettings.setId(-1);
 			controlBarOptions.setId(-1);
-			designSettings.setId(-1);
 			habituationSettings.setId(-1);
 			stimulusDisplayInfo.setId(-1);
 			attentionGetterSettings.setId(-1);
+			lookSettings.setId(-1);
+			pretestPhaseSettings.setId(-1);
+			habituationPhaseSettings.setId(-1);
+			testPhaseSettings.setId(-1);
 			Habit::StimulusSettings ass = attentionGetterSettings.getAttentionGetterStimulus();
 			ass.setId(-1);
 			attentionGetterSettings.setAttentionGetterStimulus(ass);
 			experimentSettings_.setMonitorSettings(monitorSettings);
 			experimentSettings_.setControlBarOptions(controlBarOptions);
-			experimentSettings_.setDesignSettings(designSettings);
 			experimentSettings_.setHabituationSettings(habituationSettings);
 			experimentSettings_.setStimulusDisplayInfo(stimulusDisplayInfo);
 			experimentSettings_.setAttentionGetterSettings(attentionGetterSettings);
+			experimentSettings_.setHLookSettings(lookSettings);
+			experimentSettings_.setPreTestPhaseSettings(pretestPhaseSettings);
+			experimentSettings_.setHabituationPhaseSettings(habituationPhaseSettings);
+			experimentSettings_.setTestPhaseSettings(testPhaseSettings);
 
 			Habit::StimuliSettings pretestSS = experimentSettings_.getPreTestStimuliSettings();
 			Habit::StimulusSettingsList preSSList = pretestSS.getStimuli();
@@ -196,7 +218,10 @@ void GUILib::ExperimentSettingsForm::onDone() {
 		experimentSettings_.setName(experimentName);
 		experimentSettings_.setAttentionGetterSettings(attentionSetup_->getConfigurationObject());
 		experimentSettings_.setControlBarOptions(controlBarOptionsForm_->getConfigurationObject());
-		experimentSettings_.setDesignSettings(designSetupForm_->getConfigurationObject());
+		experimentSettings_.setHLookSettings(lookSettingsForm_->getHLookSettings());
+		experimentSettings_.setPreTestPhaseSettings(pretestPhaseSettingsForm_->getHPhaseSettings());
+		experimentSettings_.setHabituationPhaseSettings(habituationPhaseSettingsForm_->getHPhaseSettings());
+		experimentSettings_.setTestPhaseSettings(testPhaseSettingsForm_->getHPhaseSettings());
 		experimentSettings_.setHabituationSettings(habituationSetupForm_->getConfigurationObject());
 		experimentSettings_.setHabituationStimuliSettings(habituationStimuliForm_->getConfigurationObject());
 		experimentSettings_.setMonitorSettings(monitorSettingsForm_->getConfigurationObject());
@@ -249,10 +274,10 @@ bool GUILib::ExperimentSettingsForm::validateMonitorSettings() {
 	ssList.append(experimentSettings_.getTestStimuliSettings().getStimuli());
 	bool result = true;
 	for (Habit::StimulusSettingsListConstIterator it = ssList.begin(); it != ssList.end(); it++)
-		if (it->isLeftEnabled() && experimentSettings_.getMonitorSettings().getLeftMonitorIndex() < 0 ||
-			it->isCenterEnabled() && experimentSettings_.getMonitorSettings().getCenterMonitorIndex() < 0 ||
-			it->isRightEnabled() && experimentSettings_.getMonitorSettings().getRightMonitorIndex() < 0 ||
-			it->isIndependentSoundEnabled() && experimentSettings_.getMonitorSettings().getControlMonitorIndex() < 0)
+		if ((it->isLeftEnabled() && experimentSettings_.getMonitorSettings().getLeftMonitorIndex() < 0) ||
+			(it->isCenterEnabled() && experimentSettings_.getMonitorSettings().getCenterMonitorIndex() < 0) ||
+			(it->isRightEnabled() && experimentSettings_.getMonitorSettings().getRightMonitorIndex() < 0) ||
+			(it->isIndependentSoundEnabled() && experimentSettings_.getMonitorSettings().getControlMonitorIndex() < 0))
 				result = false;
 	return result;
 }
@@ -290,7 +315,11 @@ void GUILib::ExperimentSettingsForm::initialize() {
 	experimentBox_->setCurrentIndex(indx);
 	monitorSettingsForm_->setConfigurationObject(experimentSettings_.getMonitorSettings());
 	controlBarOptionsForm_->setConfigurationObject(experimentSettings_.getControlBarOptions());
-	designSetupForm_->setConfigurationObject(experimentSettings_.getDesignSettings());
+	Habit::HLookSettings ls = experimentSettings_.getHLookSettings();
+	lookSettingsForm_->setHLookSettings(ls);
+	pretestPhaseSettingsForm_->setHPhaseSettings(experimentSettings_.getPreTestPhaseSettings());
+	habituationPhaseSettingsForm_->setHPhaseSettings(experimentSettings_.getHabituationPhaseSettings());
+	testPhaseSettingsForm_->setHPhaseSettings(experimentSettings_.getTestPhaseSettings());
 	habituationSetupForm_->setConfigurationObject(experimentSettings_.getHabituationSettings());
 	stimulusDisplayForm_->setConfigurationObject(experimentSettings_.getStimulusDisplayInfo());
 	attentionSetup_->setConfigurationObject(experimentSettings_.getAttentionGetterSettings());

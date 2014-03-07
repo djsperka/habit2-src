@@ -11,16 +11,9 @@
 
 HLookDetector* createLookDetector(const Habit::ExperimentSettings& es, HEventLog& log, QWidget* pdialog)
 {
+	Q_UNUSED(es);
 	HLookDetector *pld = (HLookDetector *)NULL;
-	int lookTimeMS = es.getDesignSettings().getPretestTrialsInfo().getLookTimes();
-	int lookAwayTimeMS = es.getDesignSettings().getHabituationTrialsInfo().getLookTimes();
-
-	// Assume that we use the keypad look detector.
-	// This will change when habit is modified to allow using eye trackers. Presumably the experiment
-	// settings, or maybe the RunSettings will have an indication of the look detector type
-	// to be used.
-
-	pld = new HKeypadLookDetector(lookTimeMS, lookAwayTimeMS, 0, 0, log, pdialog);
+	pld = new HKeypadLookDetector(log, pdialog);
 	return pld;
 }
 

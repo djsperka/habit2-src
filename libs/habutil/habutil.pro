@@ -60,8 +60,8 @@ HEADERS +=	HLook.h \
 			habit/controlbaroptions.h \
 			habit/controlbaroptionsform.h \
 			habit/criterionsettings.h \
-			habit/designsettings.h \
-			habit/designsetupform.h \
+# 3-6-14 djs			habit/designsettings.h \
+# 3-6-14 djs			habit/designsetupform.h \
 			habit/experimentresultsform.h \
 			habit/experimentsettings.h \
 			habit/experimentsettingsform.h \
@@ -104,7 +104,11 @@ HEADERS +=	HLook.h \
 			habit/subjectsettings.h \
 			habit/treewizard.h \
 			habit/trialsinfo.h \
-			habit/viewexperimentresultform.h
+			habit/viewexperimentresultform.h \
+			habit/HLookSettings.h \
+			habit/HLookSettingsWidget.h \
+			habit/HPhaseSettings.h \
+			habit/HPhaseSettingsWidget.h
 
 SOURCES +=	HLook.cpp \
 			HLooker.cpp \
@@ -154,8 +158,8 @@ SOURCES +=	HLook.cpp \
 			habit/controlbaroptions.cpp \
 			habit/controlbaroptionsform.cpp \
 			habit/criterionsettings.cpp \
-			habit/designsettings.cpp \
-			habit/designsetupform.cpp \
+# 3-6-14			habit/designsettings.cpp \
+# 3-6-14 			habit/designsetupform.cpp \
 			habit/experimentresultsform.cpp \
 			habit/experimentsettings.cpp \
 			habit/experimentsettingsform.cpp \
@@ -196,7 +200,11 @@ SOURCES +=	HLook.cpp \
 			habit/subjectsettings.cpp \
 			habit/treewizard.cpp \
 			habit/trialsinfo.cpp \
-			habit/viewexperimentresultform.cpp
+			habit/viewexperimentresultform.cpp \
+			habit/HLookSettings.cpp \
+			habit/HLookSettingsWidget.cpp \
+			habit/HPhaseSettings.cpp \
+			habit/HPhaseSettingsWidget.cpp
 
 RESOURCES = habit/resources.qrc
 

@@ -22,6 +22,8 @@ namespace GUILib
 	class StimulusDisplayForm;
 	class AttentionSetupForm;
 	class HabituationStimuliForm;
+	class HLookSettingsWidget;
+	class HPhaseSettingsWidget;
 }
 
 class GUILib::ExperimentSettingsForm : public QDialog
@@ -63,7 +65,10 @@ private:
 
 	GUILib::MonitorSettingsForm* monitorSettingsForm_;
 	GUILib::ControlBarOptionsForm* controlBarOptionsForm_;
-	GUILib::DesignSetupForm* designSetupForm_;
+	GUILib::HLookSettingsWidget* lookSettingsForm_;
+	GUILib::HPhaseSettingsWidget* pretestPhaseSettingsForm_;
+	GUILib::HPhaseSettingsWidget* habituationPhaseSettingsForm_;
+	GUILib::HPhaseSettingsWidget* testPhaseSettingsForm_;
 	GUILib::HabituationSetupForm* habituationSetupForm_;
 	GUILib::StimulusDisplayForm* stimulusDisplayForm_;
 	GUILib::AttentionSetupForm* attentionSetup_;

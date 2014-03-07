@@ -13,16 +13,16 @@
 #include "HMediaManager.h"
 #include <QFinalState>
 
-
-HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const HPhaseType& ptype, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG)
+HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
 	: HExperimentChildState(exp, log, "Phase")
 	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
-	, m_ptype(ptype)
+	, m_phaseSettings(phaseSettings)
+	, m_lookSettings(lookSettings)
 	, m_itrial(0)
 {
 	QAbstractTransition* trans;
-	m_sTrial = new HTrial(*this, log, maxTrialLengthMS, maxNoLookTimeMS, bFixedLength, bUseAG);
+	m_sTrial = new HTrial(*this, log, phaseSettings, lookSettings, bUseAG);
 	setInitialState(m_sTrial);
 	HPhaseTrialCompleteState* sTrialComplete = new HPhaseTrialCompleteState(*this, log);
 	m_sTrial->addTransition(m_sTrial, SIGNAL(finished()), sTrialComplete);
@@ -44,6 +44,9 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	
 	// signal when trial complete entered must be caught
 	connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
+
+	// test only
+	connect(m_sTrial,       SIGNAL(entered()), this, SLOT(onTrialEntered()));
 };
 
 
@@ -83,7 +86,12 @@ void HPhase::onEntry(QEvent* e)
 	QObject::connect(&experiment().getMediaManager(), SIGNAL(screen(int, const QString&)), this, SLOT(screenStarted(int, const QString&)));
 	QObject::connect(&experiment().getMediaManager(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
 	QObject::connect(&experiment().getMediaManager(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
-	
+
+	// update look detector settings  to per-phase values
+	experiment().getLookDetector().setMinLookTime(m_lookSettings.getMinLookTime());
+	experiment().getLookDetector().setMinLookAwayTime(m_lookSettings.getMinLookAwayTime());
+	experiment().getLookDetector().setMaxAccumulatedLookTime(m_phaseSettings.getMaxAccumulatedLookTime());
+	experiment().getLookDetector().setMaxLookAwayTime(m_phaseSettings.getIsMaxLookAwayTime());
 };
 
 void HPhase::onExit(QEvent* e)
@@ -133,10 +141,8 @@ void HPhase::requestAG()
 void HPhase::onTrialCompleteEntered()
 {
 	bool isHabituated = false;
-	qDebug() << "HPhase::onTrialCompleteEntered()";
 	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog(), isHabituated))
 	{
-		qDebug() << "HPhase::onTrialCompleteEntered - all trials done, post AllTrialsDoneEvent";
 		machine()->postEvent(new HAllTrialsDoneEvent());
 		if (ptype() == HPhaseType::Habituation)
 		{
@@ -148,7 +154,6 @@ void HPhase::onTrialCompleteEntered()
 	}
 	else 
 	{
-		qDebug() << "HPhase::onTrialCompleteEntered - advance OK, post NewTrialEvent";
 		m_sTrial->setTrialNumber(++m_itrial);
 		machine()->postEvent(new HNewTrialEvent());
 	}
