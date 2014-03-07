@@ -18,8 +18,8 @@ bool HApplication::event(QEvent* event)
 	{
 	case QEvent::FileOpen:
 	{
-		QWidget* pActiveModal = activeModalWidget();
-		QWidget* pActivePopup = activePopupWidget();
+//		QWidget* pActiveModal = activeModalWidget();
+//		QWidget* pActivePopup = activePopupWidget();
 		QWidget* pActiveWindow = activeWindow();
 
 		// check if active window is the main window.
