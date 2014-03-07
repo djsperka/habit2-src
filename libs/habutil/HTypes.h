@@ -20,7 +20,7 @@ public:
 	static const HPhaseType Habituation;
 	static const HPhaseType Test;
 	int number() const { return m_t; }
-	const QString& name() const { return m_s; }
+	QString name() const { return m_s; }
 	friend bool operator==(const HPhaseType& lhs, const HPhaseType& rhs);
 private:
 	explicit HPhaseType(int t, const char *name): m_t(t), m_s(name) {}
