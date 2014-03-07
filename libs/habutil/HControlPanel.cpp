@@ -149,15 +149,8 @@ void HControlPanel::createExperiment(HEventLog& log)
 	// These will hold stim numbers for all stimuli
 	Habit::IdStimulusSettingsPairList idStimPairList;
 
-	// Get info for creating look detector and phase(s). 
-	Habit::DesignSettings ds = m_experimentSettings.getDesignSettings();
-	Habit::TrialsInfo tiPreTest = ds.getPretestTrialsInfo();
-	Habit::TrialsInfo tiHabituation = ds.getHabituationTrialsInfo();
-	Habit::TrialsInfo tiTest = ds.getTestTrialsInfo();
+	// Need to know if AG is used
 	Habit::AttentionGetterSettings ags = m_experimentSettings.getAttentionGetterSettings();
-	int noLookTimeMS = tiTest.getLookTimes();
-	//int lookTimeMS = tiPreTest.getLookTimes();
-	//int lookAwayTimeMS = tiHabituation.getLookTimes();
 
 
 	
@@ -206,8 +199,9 @@ void HControlPanel::createExperiment(HEventLog& log)
 	// Each HPhase gets a list of stimuli, as pairs of <int, StimulusSettings>, and these are used in order as the
 	// stimuli for that phase. The <int> part is passed to the media manager as the key to play that stimulus.
 	//
-	if (tiPreTest.getNumberOfTrials() > 0)
+	if (m_experimentSettings.getPreTestPhaseSettings().getIsEnabled())
 	{
+		const Habit::HPhaseSettings& ps = m_experimentSettings.getPreTestPhaseSettings();
 		QList<int> list;
 		if (!m_runSettings.getPretestOrderList(list))
 		{
@@ -216,16 +210,18 @@ void HControlPanel::createExperiment(HEventLog& log)
 
 		HTrialGenerator htg(list.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
 		idStimPairList.clear();
-		for (unsigned int i=0; i<tiPreTest.getNumberOfTrials(); i++)
+		for (unsigned int i=0; i<ps.getNTrials(); i++)
 		{
 			idStimPairList.append(idspList1.at(list.at(htg.next()) - 1));
 		}
-		pcritPreTest = new HPhaseFixedNCriteria(tiPreTest.getNumberOfTrials());
-		psPreTest = new HPhase(*sExperiment, pcritPreTest, log, idStimPairList, HPhaseType::PreTest, tiPreTest.getLength(), noLookTimeMS, tiPreTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		pcritPreTest = new HPhaseFixedNCriteria(ps.getNTrials());
+		psPreTest = new HPhase(*sExperiment, pcritPreTest, log, idStimPairList, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
+
 	}
 
-	if (tiHabituation.getNumberOfTrials() > 0)
+	if (m_experimentSettings.getHabituationPhaseSettings().getIsEnabled())
 	{
+		const Habit::HPhaseSettings& ps = m_experimentSettings.getHabituationPhaseSettings();
 		QList<int> list;
 		if (!m_runSettings.getHabituationOrderList(list))
 		{
@@ -234,18 +230,19 @@ void HControlPanel::createExperiment(HEventLog& log)
 
 		HTrialGenerator htg(list.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
 		idStimPairList.clear();
-		for (unsigned int i=0; i<tiHabituation.getNumberOfTrials(); i++)
+		for (unsigned int i=0; i<ps.getNTrials(); i++)
 		{
 			idStimPairList.append(idspList2.at(list.at(htg.next()) - 1));
 		}
 		
 		// Create habituation criteria object. 
-		pcritHabituation = createPhaseCriteria(m_experimentSettings.getHabituationSettings(), tiHabituation.getNumberOfTrials());
-		psHabituation = new HPhase(*sExperiment, pcritHabituation, log, idStimPairList, HPhaseType::Habituation, tiHabituation.getLength(), noLookTimeMS, tiHabituation.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		pcritHabituation = createPhaseCriteria(m_experimentSettings.getHabituationSettings(), ps.getNTrials());
+		psHabituation = new HPhase(*sExperiment, pcritHabituation, log, idStimPairList, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
 	}
 	
-	if (tiTest.getNumberOfTrials() > 0)
+	if (m_experimentSettings.getTestPhaseSettings().getIsEnabled())
 	{
+		const Habit::HPhaseSettings& ps = m_experimentSettings.getTestPhaseSettings();
 		QList<int> list;
 		if (!m_runSettings.getTestOrderList(list))
 		{
@@ -254,13 +251,13 @@ void HControlPanel::createExperiment(HEventLog& log)
 
 		HTrialGenerator htg(idspList3.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
 		idStimPairList.clear();
-		for (unsigned int i=0; i<tiTest.getNumberOfTrials(); i++)
+		for (unsigned int i=0; i<ps.getNTrials(); i++)
 		{
 			idStimPairList.append(idspList3.at(list.at(htg.next()) - 1));
 		}
 		
-		pcritTest = new HPhaseFixedNCriteria(tiTest.getNumberOfTrials());
-		psTest = new HPhase(*sExperiment, pcritTest, log, idStimPairList, HPhaseType::Test, tiTest.getLength(), noLookTimeMS, tiTest.getTrialCompletionType() == HTrialCompletionType::HTrialCompletionFixedLength, ags.isAttentionGetterUsed());
+		pcritTest = new HPhaseFixedNCriteria(ps.getNTrials());
+		psTest = new HPhase(*sExperiment, pcritTest, log, idStimPairList, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
 	}
 
 	
