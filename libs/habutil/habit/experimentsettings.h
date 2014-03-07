@@ -6,6 +6,7 @@
 /// \brief Declaraction of class Habit::ExperimentSettings
 #include <QString>
 #include <QDataStream>
+#include <QMap>
 #include "monitorsettings.h"
 #include "controlbaroptions.h"
 #include "designsettings.h"
@@ -13,6 +14,8 @@
 #include "stimulusdisplayinfo.h"
 #include "attentiongettersettings.h"
 #include "stimulisettings.h"
+#include "HLookSettings.h"
+#include "HPhaseSettings.h"
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -34,8 +37,15 @@ public:
     void setMonitorSettings(const MonitorSettings& monitorSettings);
     ControlBarOptions getControlBarOptions() const;
     void setControlBarOptions(const ControlBarOptions& controlBarOptions);
-    DesignSettings getDesignSettings() const;
-    void setDesignSettings(const DesignSettings& designSettings);
+    HLookSettings getHLookSettings() const { return lookSettings_; };
+    void setHLookSettings(const HLookSettings& lookSettings) { lookSettings_ = lookSettings; };
+    HPhaseSettings getPreTestPhaseSettings() const { return pretestPhaseSettings_; };
+    void setPreTestPhaseSettings(const HPhaseSettings& settings) { pretestPhaseSettings_ = settings; };
+    HPhaseSettings getHabituationPhaseSettings() const { return habituationPhaseSettings_; };
+    void setHabituationPhaseSettings(const HPhaseSettings& settings) { habituationPhaseSettings_ = settings; };
+    HPhaseSettings getTestPhaseSettings() const { return testPhaseSettings_; };
+    void setTestPhaseSettings(const HPhaseSettings& settings) { testPhaseSettings_ = settings; };
+
     HabituationSettings getHabituationSettings() const;
     void setHabituationSettings(const HabituationSettings& habituationSettings);
     StimulusDisplayInfo getStimulusDisplayInfo() const;
@@ -56,14 +66,16 @@ private:
 	QString name_;
 	MonitorSettings monitorSettings_;
 	ControlBarOptions controlBarOptions_;
-	DesignSettings designSettings_;
 	HabituationSettings habituationSettings_;
 	StimulusDisplayInfo stimulusDisplayInfo_;
 	AttentionGetterSettings attentionGetterSettings_;
 	StimuliSettings pretestStimuliSettings_;
 	StimuliSettings habituationStimuliSettings_;
 	StimuliSettings testStimuliSettings_;	
-
+	HLookSettings lookSettings_;
+	HPhaseSettings pretestPhaseSettings_;
+	HPhaseSettings habituationPhaseSettings_;
+	HPhaseSettings testPhaseSettings_;
 };
 
 
