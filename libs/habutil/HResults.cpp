@@ -271,7 +271,7 @@ bool HResults::saveToCSV(const QString& filename) const
 			{
 				// check that the trial ended successfully
 				HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(e);
-				if (pte->endtype() == HTrialEndType::HTrialEndFixedTimeout ||
+				if (pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime ||
 						pte->endtype() == HTrialEndType::HTrialEndGotLook)
 				{
 					// good trial, flush it to output
