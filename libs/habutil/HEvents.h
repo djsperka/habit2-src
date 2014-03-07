@@ -78,7 +78,7 @@ class HTrialEndType
 {
 public:
 	static const HTrialEndType HTrialEndGotLook;
-	static const HTrialEndType HTrialEndFixedTimeout;
+	static const HTrialEndType HTrialEndMaxStimulusTime;
 	static const HTrialEndType HTrialEndNoLookTimeout;
 	static const HTrialEndType HTrialEndAbort;
 	static const HTrialEndType HTrialEndMaxAccumulatedLookTime;
@@ -182,7 +182,7 @@ public:
 	{};
 	
 	virtual ~HPhaseStartEvent() {};
-	const QString& phase() const { return m_pphasetype->name(); };
+	QString phase() const { return m_pphasetype->name(); };
 	const HPhaseType& phasetype() const { return *m_pphasetype; };
 	QString eventInfo() const;
 	

@@ -89,7 +89,7 @@ const HEventType& getHEventType(int number_value)
 // These are supplied when creating HTrialEndEvent
 
 const HTrialEndType HTrialEndType::HTrialEndGotLook(0, "GotLook");
-const HTrialEndType HTrialEndType::HTrialEndFixedTimeout(1, "FixedTimeout");
+const HTrialEndType HTrialEndType::HTrialEndMaxStimulusTime(1, "MaxStimulusTime");
 const HTrialEndType HTrialEndType::HTrialEndNoLookTimeout(2, "NoLookTimeout");
 const HTrialEndType HTrialEndType::HTrialEndAbort(3, "Abort");
 const HTrialEndType HTrialEndType::HTrialEndMaxAccumulatedLookTime(4, "MaxAccumulatedLookTime");
@@ -99,7 +99,7 @@ const HTrialEndType HTrialEndType::HTrialEndUndefined(-1, "Unknown");
 const HTrialEndType* HTrialEndType::A[6] =
 {
 	&HTrialEndType::HTrialEndGotLook, 
-	&HTrialEndType::HTrialEndFixedTimeout,
+	&HTrialEndType::HTrialEndMaxStimulusTime,
 	&HTrialEndType::HTrialEndNoLookTimeout, 
 	&HTrialEndType::HTrialEndAbort,
 	&HTrialEndType::HTrialEndMaxAccumulatedLookTime,
