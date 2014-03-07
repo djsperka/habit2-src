@@ -100,7 +100,7 @@ HVIPlayer::~HVIPlayer()
 
 void HVIPlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
 {
-	//Q_UNUSED(oldState);
+	Q_UNUSED(oldState);
 
 	//QSize s = sizeHint();
 	//qDebug() << (int)oldState << "->" << (int)newState << " " << s.width() << "x" << s.height();
