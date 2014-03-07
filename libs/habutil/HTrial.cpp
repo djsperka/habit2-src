@@ -19,21 +19,19 @@
 #include <QtDebug>
 
 
-					  
 
-HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG) 
+
+//HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG)
+
+					  
+HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
 	: HPhaseChildState(phase, log, "HTrial")
-	, m_maxTrialLengthMS(maxTrialLengthMS)
-	, m_maxNoLookTimeMS(maxNoLookTimeMS)
-	, m_bFixedLength(bFixedLength)
+	, m_phaseSettings(phaseSettings)
+	, m_lookSettings(lookSettings)
 	, m_bAG(bUseAG)
 	, m_trialNumber(0)
 	, m_repeatNumber(0)
 {
-	// create timer for stim
-	m_ptimerMaxTrialLength = new QTimer();
-	m_ptimerMaxTrialLength->setSingleShot(true);
-	
 	// Create initial state. Do not define its transition yet. 
 	HTrialInitialState* sInitial = new HTrialInitialState(*this, log);
 	setInitialState(sInitial);
@@ -44,7 +42,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 
 	// Stim request state and StimRunning states are similar to AGRequest and AGRunning. 
 	HStimRequestState* sStimRequest = new HStimRequestState(*this, log);
-	HStimRunningState* sStimRunning = new HStimRunningState(*this, log, maxNoLookTimeMS);
+	HStimRunningState* sStimRunning = new HStimRunningState(*this, log, m_phaseSettings);
 
 	// Create final state.
 	QFinalState* sFinal = new QFinalState(this);
@@ -82,42 +80,71 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLoo
 
 	sStimRequest->addTransition(&phase.experiment().getMediaManager(), SIGNAL(stimStarted(int)), sStimRunning);		// on entry, emits playStim()
 
-	// Transition from sStimRunning depends on what the trial type is.
-	// Both trial types - subject-controlled and fixed time - can end when they exceed a
-	// maximum length.
-	// Subject-controlled trials (bFixedLength==false) will end on a look signal, or they can be
-	// aborted on a timeout signal. 
+	// Set up state(s) that sStimRunning can transition to.
+	// These are turned on/off by the settings in m_phaseSettings.
+	// First, max no look time
+	// The timer is controlled by HStimRunningState, and it will post an HNoLookQEvent()
+	// to the state machine. That triggers the HNoLookTransition to the HNoLookTimeoutState.
+	// That state automatically transitions back to sInitial to repeat the trial.
 
-	HFixedTimeoutState* sFixedTimeout = new HFixedTimeoutState(*this, log);
-	sStimRunning->addTransition(m_ptimerMaxTrialLength, SIGNAL(timeout()), sFixedTimeout);
-	sFixedTimeout->addTransition(sFinal);
-
-	if (!bFixedLength)
+	if (m_phaseSettings.getIsMaxNoLookTime())
 	{
-		HGotLookState* sGotLook = new HGotLookState(*this, log);
 		HNoLookTimeoutState* sNoLookTimeout = new HNoLookTimeoutState(*this, log);
-
-		// the No Look timeout is tricky. If a look is pending, we want that look to count
-		// if the timeout hits. The timeout is supposed to indicate that we've waited long
-		// enough, dammit, for a look and we're quitting the trial. But if a look is in
-		// progress, we will BLOCK this transition and force a look() signal.
-
-		// Modified 1-17-2014
-		// NoLookTimeout should ALWAYS force a transition from StimRunning state, regardless of
-		// the current looking status.
-		// TODO: If there is a look in progress, make sure that it is handled correctly by the
-		// HLooker. A flush should happen - must be triggered?
-
 		HNoLookTransition* pNoLookTrans = new HNoLookTransition();
 		pNoLookTrans->setTargetState(sNoLookTimeout);
 		sStimRunning->addTransition(pNoLookTrans);
-
 		sNoLookTimeout->addTransition(sInitial);	// trial is repeated
-		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(look(HLook)), sGotLook);
-		sGotLook->addTransition(sFinal);
 	}
 
-	
+
+	// Now the looking criteria to end a trial.
+	// The two possibilities should be mutually exclusive but I won't attempt to check that here.
+	if (m_phaseSettings.getUseLookingCriteria())
+	{
+		if (m_phaseSettings.getIsSingleLook())
+		{
+			HGotLookState* sGotLook = new HGotLookState(*this, log);
+			sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(look(HLook)), sGotLook);
+			sGotLook->addTransition(sFinal);
+		}
+		if (m_phaseSettings.getIsMaxAccumulatedLookTime())
+		{
+			HMaxAccumulatedLookTimeState* sMaxAccum = new HMaxAccumulatedLookTimeState(*this, log);
+			sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(maxAccumulatedLookTime()), sMaxAccum);
+			sMaxAccum->addTransition(sFinal);
+		}
+	}
+
+	// Max look away time - just not interested
+	if (m_phaseSettings.getIsMaxLookAwayTime())
+	{
+		HMaxLookAwayTimeState* sMaxLookAway = new HMaxLookAwayTimeState(*this, log);
+		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(maxLookAwayTime()), sMaxLookAway);
+		sMaxLookAway->addTransition(sFinal);
+	}
+
+	// Max stim time. The timer is controlled by this class, not one of the subclasses.
+	// create timer for stim always, even if not used.
+	m_ptimerMaxStimulusTime = new QTimer();
+	m_ptimerMaxStimulusTime->setSingleShot(true);
+
+	if (m_phaseSettings.getIsMaxStimulusTime())
+	{
+		// and state for transition
+		HMaxStimulusTimeState* sMaxStimulus = new HMaxStimulusTimeState(*this, log);
+		sStimRunning->addTransition(m_ptimerMaxStimulusTime, SIGNAL(timeout()), sMaxStimulus);
+		sMaxStimulus->addTransition(sFinal);
+
+		// when starting from onset, the onStimRunningEntered() slot can start the timer.
+		// when starting from looking, the onLookStarted() slot starts the timer.
+		if (m_phaseSettings.getMeasureStimulusTimeFromLooking())
+		{
+			QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookStarted()), this, SLOT(onLookStarted()));
+		}
+	}
+
+
+	// Initial state transition to AG request or directly to stim request...
 	if (bUseAG)
 	{
 		sInitial->addTransition(sAGRequest);
@@ -150,13 +177,29 @@ void HTrial::onEntry(QEvent* e)
 void HTrial::onStimRunningEntered()
 {
 	phase().experiment().getLookDetector().enableLook();
-	m_ptimerMaxTrialLength->start(m_maxTrialLengthMS);
 	eventLog().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
+	qDebug() << "onStimRunning entered max stim time? " << m_phaseSettings.getIsMaxStimulusTime() << " from onset " << m_phaseSettings.getMeasureStimulusTimeFromOnset();
+	qDebug() << "time " << m_phaseSettings.getMaxStimulusTime();
+	if (m_phaseSettings.getIsMaxStimulusTime() && m_phaseSettings.getMeasureStimulusTimeFromOnset())
+	{
+		qDebug() << "starting timer " << m_phaseSettings.getMaxStimulusTime();
+		m_ptimerMaxStimulusTime->start(m_phaseSettings.getMaxStimulusTime());
+	}
+}
+
+void HTrial::onLookStarted()
+{
+	qDebug() << "onStimRunning entered max stim time? " << m_phaseSettings.getIsMaxStimulusTime() << " from onset " << m_phaseSettings.getMeasureStimulusTimeFromLooking();
+	qDebug() << "time " << m_phaseSettings.getMaxStimulusTime();
+	if (m_phaseSettings.getIsMaxStimulusTime() && m_phaseSettings.getMeasureStimulusTimeFromLooking())
+	{
+		m_ptimerMaxStimulusTime->start(m_phaseSettings.getMaxStimulusTime());
+	}
 }
 
 void HTrial::onStimRunningExited()
 {
-	if (m_ptimerMaxTrialLength->isActive()) m_ptimerMaxTrialLength->stop();
+	if (m_ptimerMaxStimulusTime->isActive()) m_ptimerMaxStimulusTime->stop();
 	phase().experiment().getLookDetector().disable();
 	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
 }

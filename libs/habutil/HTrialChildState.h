@@ -16,6 +16,7 @@
 #include <QSignalTransition>
 #include "HQEvents.h"
 #include "HLogState.h"
+#include "HPhaseSettings.h"
 
 class HTrial;
 class HLookDetector;
@@ -113,13 +114,41 @@ protected:
 	void onEntry(QEvent* e);
 };
 
-class HFixedTimeoutState: public HTrialChildState
+class HMaxAccumulatedLookTimeState: public HTrialChildState
+{
+	Q_OBJECT
+
+public:
+	HMaxAccumulatedLookTimeState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HMaxAccumulatedLookTimeState") {};
+	virtual ~HMaxAccumulatedLookTimeState() {};
+
+protected:
+
+	// onEntry - append kTrialEnd event
+	void onEntry(QEvent* e);
+};
+
+class HMaxLookAwayTimeState: public HTrialChildState
+{
+	Q_OBJECT
+
+public:
+	HMaxLookAwayTimeState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HMaxLookAwayTimeState") {};
+	virtual ~HMaxLookAwayTimeState() {};
+
+protected:
+
+	// onEntry - append kTrialEnd event
+	void onEntry(QEvent* e);
+};
+
+class HMaxStimulusTimeState: public HTrialChildState
 {
 	Q_OBJECT
 	
 public:
-	HFixedTimeoutState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HFixedTimeoutState") {};
-	virtual ~HFixedTimeoutState() {};
+	HMaxStimulusTimeState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HMaxStimulusTimeState") {};
+	virtual ~HMaxStimulusTimeState() {};
 	
 protected:
 	
@@ -172,14 +201,7 @@ class HStimRunningState: public HTrialChildState
 {
 	Q_OBJECT
 public:
-	HStimRunningState(HTrial& trial, HEventLog& log, int msNoLook)
-	: HTrialChildState(trial, log, "HStimRunning")
-	, m_msNoLook(msNoLook)
-	{
-		m_ptimerNoLook = new QTimer();
-		m_ptimerNoLook->setSingleShot(true);
-		connect(m_ptimerNoLook, SIGNAL(timeout()), this, SLOT(noLookTimeout()));
-	};
+	HStimRunningState(HTrial& trial, HEventLog& log, const Habit::HPhaseSettings& phaseSettings);
 	~HStimRunningState() {};
 
 private slots:
@@ -193,7 +215,7 @@ protected:
 	void onExit(QEvent* e);
 	
 private:
-	int m_msNoLook;
+	const Habit::HPhaseSettings& m_phaseSettings;
 	QTimer* m_ptimerNoLook;
 	bool m_bGotLook;
 	bool m_bGotLookStarted;
