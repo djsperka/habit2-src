@@ -27,7 +27,16 @@ class HLooker : public QStateMachine
 public:
 	HLooker(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, bool bLive = true);
 	~HLooker() {};
+
+	// Add a transition. A new event is posted to the state machine.
 	void addTrans(const HLookTrans& type, int tMS);
+
+	// Change parameters of the look detector.
+	bool setMinLookTime(int t);
+	bool setMinLookAwayTime(int t);
+	bool setMaxAccumulatedLookTime(int tMaxAccum);
+	bool setMaxLookAwayTime(int tMaxLookAway);
+
 	
 	// Assume that current Look/away status remains until tMS.
 	// If m_bLookStarted==true, check if there is enough looking time to
@@ -39,7 +48,7 @@ public:
 	// or
 	// 2) abort look monitoring. Trial is being ended for some reason, flush out
 	//    any look or look-away if their respective min times have been exceeded.
-	bool flush(int tMS);
+	//bool flush(int tMS);
 
 	// Stop processing at the time tMS.
 	void stopLooker(int tMS);
@@ -85,10 +94,10 @@ private:
 	//int m_cumulativeLookAwayTimeMS;	// cumulative total look time for a look-away.
 
 	// Timers used
-	QTimer *m_ptimerLookAwayTimeout;
-	QTimer *m_ptimerMaxLookAway;
-	QTimer *m_ptimerMaxAccumulatedLook;
-	QTimer *m_ptimerMinLookTime;
+	QTimer *m_ptimerMinLookTime;		// m_minLookTimeMS
+	QTimer *m_ptimerMinLookAwayTime;	// m_minLookAwayTimeMS
+	QTimer *m_ptimerMaxLookAway;		// m_maxLookAwayTimeMS
+	QTimer *m_ptimerMaxAccumulatedLook;	// m_maxAccumulatedLookTimeMS
 
 	// List of all transitions. Starts from scratch each time initial state entered.
 	QList< QPair<const HLookTrans*, int> > m_transitions;
