@@ -15,7 +15,7 @@
 #endif
 #include "HAudioPlayer.h"
 
-void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& ss, Habit::IdStimulusSettingsPairList& idspStim, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl);
+void populatePlayers(int ntrials, const Habit::StimuliSettings& ss, Habit::IdStimulusSettingsPairList& idspStim, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl);
 
 
 HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* parent)
@@ -42,12 +42,6 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 
 	// AttentionGetter
 	Habit::AttentionGetterSettings ags = es.getAttentionGetterSettings();
-	
-	// Trials info tell us how many trials in each phase
-	Habit::DesignSettings ds = es.getDesignSettings();
-	Habit::TrialsInfo tiPreTest = ds.getPretestTrialsInfo();
-	Habit::TrialsInfo tiHabituation = ds.getHabituationTrialsInfo();
-	Habit::TrialsInfo tiTest = ds.getTestTrialsInfo();
 	
 	// Now look at stimuli settings for each of the three phases. 
 	Habit::StimuliSettings ssPreTest = es.getPreTestStimuliSettings();
@@ -151,19 +145,19 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 	// requested, each of the configured players should play that stimulus on each configured screen.
 	//
 	
-	populatePlayers(tiPreTest, ssPreTest, idspStimPreTest, playerLeft, playerCenter, playerRight, playerControl);
-	populatePlayers(tiHabituation, ssHabituation, idspStimHabituation, playerLeft, playerCenter, playerRight, playerControl);
-	populatePlayers(tiTest, ssTest, idspStimTest, playerLeft, playerCenter, playerRight, playerControl);
+	populatePlayers(es.getPreTestPhaseSettings().getNTrials(), ssPreTest, idspStimPreTest, playerLeft, playerCenter, playerRight, playerControl);
+	populatePlayers(es.getHabituationPhaseSettings().getNTrials(), ssHabituation, idspStimHabituation, playerLeft, playerCenter, playerRight, playerControl);
+	populatePlayers(es.getTestPhaseSettings().getNTrials(), ssTest, idspStimTest, playerLeft, playerCenter, playerRight, playerControl);
 	
 	return pmm;
 }
 
 
-void populatePlayers(const Habit::TrialsInfo& ti, const Habit::StimuliSettings& ss, Habit::IdStimulusSettingsPairList& idspStim, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl)
+void populatePlayers(int ntrials, const Habit::StimuliSettings& ss, Habit::IdStimulusSettingsPairList& idspStim, HPlayer* playerLeft, HPlayer* playerCenter, HPlayer* playerRight, HPlayer* playerControl)
 {
 	int iStimNumber=0;
 	int iTemp = 0;
-	if (ti.getNumberOfTrials() > 0)
+	if (ntrials > 0)
 	{
 		for (int i=0; i<ss.getStimuli().size(); i++)
 		{
