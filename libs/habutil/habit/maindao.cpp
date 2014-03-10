@@ -67,7 +67,7 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, const Habit::HPhaseSet
 				"max_accumulated_look_time, is_max_lookaway_time, max_lookaway_time, "
 				"is_max_stimulus_time, max_stimulus_time, "
 				"measure_from_onset, measure_from_looking, "
-				"is_max_no_look_time, max_no_look_time"
+				"is_max_no_look_time, max_no_look_time, "
 				"experiment_id"
 				") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
@@ -814,11 +814,14 @@ bool MainDao::insertOrUpdateExperimentSettings(Habit::ExperimentSettings* experi
 			q.addBindValue(id);
 			q.exec();
 			qDebug() << q.lastError();
+			qDebug() << q.lastQuery();
 		} else {
 			QString sql = "INSERT INTO experiments (name) VALUES (?)";
 			q.prepare(sql);
 			q.addBindValue(name);
 			q.exec();
+			qDebug() << q.lastError();
+			qDebug() << q.lastQuery();
 			experimentSettings->setId(q.lastInsertId().toInt());
 		}
 		result = !q.lastError().isValid();
