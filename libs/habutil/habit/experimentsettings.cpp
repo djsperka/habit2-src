@@ -1,8 +1,8 @@
 #include "experimentsettings.h"
 #include "maindao.h"
-#include "connection.h"
+//#include "connection.h"
 #include "HTypes.h"
-//#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlDatabase>
 
 Habit::ExperimentSettings::ExperimentSettings()
 : id_(-1)
@@ -215,24 +215,28 @@ Habit::ExperimentSettings::setTestStimuliSettings(const Habit::StimuliSettings& 
 bool Habit::ExperimentSettings::saveToDB() {
 	Habit::MainDao dao;
 	bool result = false;
-//	QSqlDatabase db;	// default connection, assumed to be open.
+	QSqlDatabase db = QSqlDatabase::database();	// default connection, assumed to be open.
 
-	Q_ASSERT(connection::get_instance()->isOpen());
-	connection::get_instance()->transaction();
+//	Q_ASSERT(connection::get_instance()->isOpen());
+//	connection::get_instance()->transaction();
+	Q_ASSERT(db.isOpen());
+	db.transaction();
 	if(dao.insertOrUpdateExperimentSettings(this)) {
 		result = monitorSettings_.saveToDB(id_) && attentionGetterSettings_.saveToDB(id_) && controlBarOptions_.saveToDB(id_)
 			&& lookSettings_.saveToDB(id_)
-			&& getPreTestPhaseSettings().saveToDB(id_)
-			&& getHabituationPhaseSettings().saveToDB(id_)
-			&& getTestPhaseSettings().saveToDB(id_)
+			&& pretestPhaseSettings_.saveToDB(id_)
+			&& habituationPhaseSettings_.saveToDB(id_)
+			&& testPhaseSettings_.saveToDB(id_)
 			&& habituationSettings_.saveToDB(id_) && stimulusDisplayInfo_.saveToDB(id_)
 			&& habituationStimuliSettings_.saveToDB(id_)
 			&& testStimuliSettings_.saveToDB(id_) && pretestStimuliSettings_.saveToDB(id_);
 	}
+
 	if(result) {
-		connection::get_instance()->commit();
+//		connection::get_instance()->commit();
+		db.commit();
 	} else {
-		connection::get_instance()->rollback();
+		db.rollback();
 	}
 	return result;
 }
