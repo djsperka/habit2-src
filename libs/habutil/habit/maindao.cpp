@@ -56,7 +56,7 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, const Habit::HPhaseSet
 				"is_max_lookaway_time=?, max_lookaway_time=?, "
 				"is_max_stimulus_time=?, max_stimulus_time=?, "
 				"measure_from_onset=?, measure_from_looking=?, "
-				"is_max_no_look_time=?, max_no_look_time=?"
+				"is_max_no_look_time=?, max_no_look_time=? "
 				"where experiment_id=? and id=?";
 	}
 	else
@@ -74,20 +74,20 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, const Habit::HPhaseSet
 
 	QSqlQuery q;
 	q.prepare(sql);
-	q.addBindValue(settings->getIsEnabled());
+	q.addBindValue(settings->getIsEnabled() ? 1 : 0);
 	q.addBindValue(settings->getPhaseType().number());
 	q.addBindValue(settings->getNTrials());
-	q.addBindValue(settings->getUseLookingCriteria());
-	q.addBindValue(settings->getIsSingleLook());
-	q.addBindValue(settings->getIsMaxAccumulatedLookTime());
+	q.addBindValue(settings->getUseLookingCriteria() ? 1 : 0);
+	q.addBindValue(settings->getIsSingleLook() ? 1 : 0);
+	q.addBindValue(settings->getIsMaxAccumulatedLookTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxAccumulatedLookTime());
-	q.addBindValue(settings->getIsMaxLookAwayTime());
+	q.addBindValue(settings->getIsMaxLookAwayTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxLookAwayTime());
-	q.addBindValue(settings->getIsMaxStimulusTime());
+	q.addBindValue(settings->getIsMaxStimulusTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxStimulusTime());
-	q.addBindValue(settings->getMeasureStimulusTimeFromOnset());
-	q.addBindValue(settings->getMeasureStimulusTimeFromLooking());
-	q.addBindValue(settings->getIsMaxNoLookTime());
+	q.addBindValue(settings->getMeasureStimulusTimeFromOnset() ? 1 : 0);
+	q.addBindValue(settings->getMeasureStimulusTimeFromLooking() ? 1 : 0);
+	q.addBindValue(settings->getIsMaxNoLookTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxNoLookTime());
 	q.addBindValue(experimentId);
 	if (settings->getId() > 0) q.addBindValue(settings->getId());
@@ -375,25 +375,26 @@ void MainDao::getHLookSettingsForExperiment(int experimentId, HLookSettings* loo
 	}
 }
 
-void MainDao::getHPhaseSettingsForExperiment(int id, int type, HPhaseSettings* phaseSettings)
+void MainDao::getHPhaseSettingsForExperiment(int experimentId, int type, HPhaseSettings* phaseSettings)
 {
 	Q_ASSERT(0 != phaseSettings);
 	QString sql = "select * from phase_settings where experiment_id = ? and phase_type = ?";
 	QSqlQuery q;
 	q.prepare(sql);
-	q.addBindValue(id);
+	q.addBindValue(experimentId);
 	q.addBindValue(type);
 	q.exec();
 	if (q.next())
 	{
-		phaseSettings->setId(id);
+		phaseSettings->setId(q.value(q.record().indexOf("id")).toInt());
 		phaseSettings->setPhaseType(getPhaseType(type));
 		phaseSettings->setIsEnabled(q.value(q.record().indexOf("enabled")).toBool());
+		qDebug() << "id " << phaseSettings->getId() << " index " << q.record().indexOf("enabled") << " value " << q.value(q.record().indexOf("enabled")).toBool();
 		phaseSettings->setNTrials(q.value(q.record().indexOf("ntrials")).toInt());
 		phaseSettings->setUseLookingCriteria(q.value(q.record().indexOf("use_looking_criteria")).toBool());
 		phaseSettings->setIsSingleLook(q.value(q.record().indexOf("is_single_look")).toBool());
 		phaseSettings->setIsMaxAccumulatedLookTime(q.value(q.record().indexOf("is_max_accumulated_look_time")).toBool());
-		phaseSettings->setMaxAccumulatedLookTime(q.value(q.record().indexOf("max_accumulated_look_time")).toBool());
+		phaseSettings->setMaxAccumulatedLookTime(q.value(q.record().indexOf("max_accumulated_look_time")).toUInt());
 		phaseSettings->setIsMaxLookAwayTime(q.value(q.record().indexOf("is_max_lookaway_time")).toBool());
 		phaseSettings->setMaxLookAwayTime(q.value(q.record().indexOf("max_lookaway_time")).toUInt());
 		phaseSettings->setIsMaxStimulusTime(q.value(q.record().indexOf("is_max_stimulus_time")).toBool());
