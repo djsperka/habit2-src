@@ -1,6 +1,7 @@
 #include "connection.h"
 #include "configuration.h"
 
+#include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include <QtCore/QDebug>
@@ -10,6 +11,7 @@ namespace Habit {
 connection* connection::m_instance = 0;
 
 connection* connection::get_instance() {
+	Q_ASSERT(false);		// should not call this function!
 	if(0 == m_instance) {
 		m_instance = new connection();
 	}
