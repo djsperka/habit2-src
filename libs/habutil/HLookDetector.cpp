@@ -9,6 +9,7 @@
 
 #include "HLookDetector.h"
 #include "HElapsedTimer.h"
+#include <QCoreApplication>
 
 void HLookDetector::enableAGLook()
 {
@@ -38,6 +39,8 @@ void HLookDetector::enableLook()
 		lookEnabled(true);
 	}
 	start();	// start state machine
+	QCoreApplication::processEvents(0);
+	qDebug() << "HLookDetector::enableLook() { start() } " << this->isRunning();
 	return;
 };
 
