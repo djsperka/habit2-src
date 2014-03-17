@@ -217,7 +217,6 @@ protected:
 private:
 	const Habit::HPhaseSettings& m_phaseSettings;
 	QTimer* m_ptimerNoLook;
-	bool m_bGotLook;
 	bool m_bGotLookStarted;
 	bool m_bGotLookAwayStarted;
 };

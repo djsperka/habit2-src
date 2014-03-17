@@ -58,6 +58,7 @@ public slots:
 	void minLookAwayTimeout();
 	void maxAccumulatedLookTimeReached();
 	void minLookTimeReached();
+	void maxLookAwayTimeout();
 
 	// slots called when the individual states are entered. Handle things with these
 	// slots rather than the states' onEntry slots, as it makes it simpler to have

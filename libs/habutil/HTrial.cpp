@@ -89,11 +89,20 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 
 	if (m_phaseSettings.getIsMaxNoLookTime())
 	{
-		HNoLookTimeoutState* sNoLookTimeout = new HNoLookTimeoutState(*this, log);
-		HNoLookTransition* pNoLookTrans = new HNoLookTransition();
+		HNoLookTimeoutState* sNoLookTimeout = new HNoLookTimeoutState(*this, log); // onEntry: HTrialEndEvent(HTrialEndType::HTrialEndNoLookTimeout, elapsed())
+		HNoLookTransition* pNoLookTrans = new HNoLookTransition(); // fires on HNoLookQEvent::NoLookType - posted by HStimRunningState::onEntry
 		pNoLookTrans->setTargetState(sNoLookTimeout);
 		sStimRunning->addTransition(pNoLookTrans);
 		sNoLookTimeout->addTransition(sInitial);	// trial is repeated
+	}
+
+	// Max look away time - just not interested.
+	// The transition is triggered by SIGNAL(maxLookAwayTime()) from the look detector.
+	if (m_phaseSettings.getIsMaxLookAwayTime())
+	{
+		HMaxLookAwayTimeState* sMaxLookAway = new HMaxLookAwayTimeState(*this, log);
+		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(maxLookAwayTime()), sMaxLookAway);
+		sMaxLookAway->addTransition(sInitial);	// trial is repeated
 	}
 
 
@@ -115,13 +124,6 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 		}
 	}
 
-	// Max look away time - just not interested
-	if (m_phaseSettings.getIsMaxLookAwayTime())
-	{
-		HMaxLookAwayTimeState* sMaxLookAway = new HMaxLookAwayTimeState(*this, log);
-		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(maxLookAwayTime()), sMaxLookAway);
-		sMaxLookAway->addTransition(sFinal);
-	}
 
 	// Max stim time. The timer is controlled by this class, not one of the subclasses.
 	// create timer for stim always, even if not used.
@@ -178,19 +180,14 @@ void HTrial::onStimRunningEntered()
 {
 	phase().experiment().getLookDetector().enableLook();
 	eventLog().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
-	qDebug() << "onStimRunning entered max stim time? " << m_phaseSettings.getIsMaxStimulusTime() << " from onset " << m_phaseSettings.getMeasureStimulusTimeFromOnset();
-	qDebug() << "time " << m_phaseSettings.getMaxStimulusTime();
 	if (m_phaseSettings.getIsMaxStimulusTime() && m_phaseSettings.getMeasureStimulusTimeFromOnset())
 	{
-		qDebug() << "starting timer " << m_phaseSettings.getMaxStimulusTime();
 		m_ptimerMaxStimulusTime->start(m_phaseSettings.getMaxStimulusTime());
 	}
 }
 
 void HTrial::onLookStarted()
 {
-	qDebug() << "onStimRunning entered max stim time? " << m_phaseSettings.getIsMaxStimulusTime() << " from onset " << m_phaseSettings.getMeasureStimulusTimeFromLooking();
-	qDebug() << "time " << m_phaseSettings.getMaxStimulusTime();
 	if (m_phaseSettings.getIsMaxStimulusTime() && m_phaseSettings.getMeasureStimulusTimeFromLooking())
 	{
 		m_ptimerMaxStimulusTime->start(m_phaseSettings.getMaxStimulusTime());

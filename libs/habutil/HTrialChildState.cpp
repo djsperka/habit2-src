@@ -49,7 +49,6 @@ void HStimRunningState::onEntry(QEvent* e)
 		if (m_ptimerNoLook->isActive()) m_ptimerNoLook->stop();
 		m_ptimerNoLook->start(m_phaseSettings.getMaxNoLookTime());
 	}
-	m_bGotLook = false;
 	m_bGotLookStarted = false;
 	m_bGotLookAwayStarted = false;
 };
@@ -63,7 +62,7 @@ void HStimRunningState::gotLookStarted()
 
 void HStimRunningState::gotLookAwayStarted()
 {
-	if (m_bGotLook) return;
+	if (m_bGotLookStarted) return;
 	else if (m_phaseSettings.getIsMaxNoLookTime() && !m_ptimerNoLook->isActive())
 	{
 		machine()->postEvent(new HNoLookQEvent());
@@ -77,9 +76,8 @@ void HStimRunningState::gotLookAwayStarted()
 
 void HStimRunningState::noLookTimeout()
 {
-	qDebug() << "HStimRunningState::noLookTimeout() m_bGotLook " << m_bGotLook << " m_bGotLookStarted " << m_bGotLookStarted;
-	if (m_bGotLook || m_bGotLookStarted) return;
-	else if (!m_bGotLookStarted)
+	if (m_bGotLookStarted) return;
+	else
 	{
 		machine()->postEvent(new HNoLookQEvent());
 	}
@@ -133,6 +131,7 @@ void HMaxLookAwayTimeState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
+	trial().incrementRepeatNumber();
 	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxLookAwayTime, HElapsedTimer::elapsed()));
 };
 

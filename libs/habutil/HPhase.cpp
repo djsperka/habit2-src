@@ -46,7 +46,7 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
 
 	// test only
-	connect(m_sTrial,       SIGNAL(entered()), this, SLOT(onTrialEntered()));
+	//connect(m_sTrial,       SIGNAL(entered()), this, SLOT(onTrialEntered()));
 };
 
 
@@ -90,8 +90,8 @@ void HPhase::onEntry(QEvent* e)
 	// update look detector settings  to per-phase values
 	experiment().getLookDetector().setMinLookTime(m_lookSettings.getMinLookTime());
 	experiment().getLookDetector().setMinLookAwayTime(m_lookSettings.getMinLookAwayTime());
-	experiment().getLookDetector().setMaxAccumulatedLookTime(m_phaseSettings.getMaxAccumulatedLookTime());
-	experiment().getLookDetector().setMaxLookAwayTime(m_phaseSettings.getIsMaxLookAwayTime());
+	experiment().getLookDetector().setMaxAccumulatedLookTime(m_phaseSettings.getIsMaxAccumulatedLookTime() ? m_phaseSettings.getMaxAccumulatedLookTime() : 0);
+	experiment().getLookDetector().setMaxLookAwayTime(m_phaseSettings.getIsMaxLookAwayTime() ? m_phaseSettings.getMaxLookAwayTime() : 0);
 };
 
 void HPhase::onExit(QEvent* e)
