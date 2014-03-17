@@ -55,6 +55,8 @@ private slots:
 	void onAGStarted();
 	void onStimStarted(int i);
 	void onCleared();
+	void onLDStarted();
+	void onLDStopped();
 	
 protected:
 	void closeEvent (QCloseEvent * e); 

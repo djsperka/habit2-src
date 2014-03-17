@@ -176,6 +176,10 @@ void HControlPanel::createExperiment(HEventLog& log)
 	connect(m_pld, SIGNAL(attention()), this, SLOT(onAttention()));
 	connect(m_pld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
 	
+	// testing - catch started and stopped() signals
+	connect(m_pld, SIGNAL(started()), this, SLOT(onLDStarted()));
+	connect(m_pld, SIGNAL(stopped()), this, SLOT(onLDStopped()));
+
 	// Construct state machine.
 	m_psm = new QStateMachine();
 	
@@ -516,4 +520,16 @@ void HControlPanel::onExperimentStarted()
 	// Obviously this is not to be taken as an absolute offset, but for
 	// the purposes of reliability it will be useful.
 	m_log.append(new HExperimentStartEvent(HElapsedTimer::elapsed()));
+}
+
+void HControlPanel::onLDStarted()
+{
+	qDebug() << "LookDetector started: " << m_pld->isRunning();
+	return;
+}
+
+void HControlPanel::onLDStopped()
+{
+	qDebug() << "LookDetector stopped: " << m_pld->isRunning();
+	return;
 }
