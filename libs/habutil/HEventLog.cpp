@@ -86,7 +86,9 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 				if (pevent->type() == HEventType::HEventTrialEnd)
 				{
 					HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(pevent);
-					if (pte->endtype() == HTrialEndType::HTrialEndGotLook || pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime)
+					if (	pte->endtype() == HTrialEndType::HTrialEndGotLook ||
+							pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime ||
+							pte->endtype() == HTrialEndType::HTrialEndMaxAccumulatedLookTime )
 					{
 						phaselog.append(iTotal);
 					}
