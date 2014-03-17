@@ -8,4 +8,4 @@
  *
  */
 
-#define HABIT_VERSION "2.0.6"
+#define HABIT_VERSION "2.0.7"
