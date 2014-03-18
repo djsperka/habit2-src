@@ -272,7 +272,9 @@ bool HResults::saveToCSV(const QString& filename) const
 				// check that the trial ended successfully
 				HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(e);
 				if (pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime ||
-						pte->endtype() == HTrialEndType::HTrialEndGotLook)
+						pte->endtype() == HTrialEndType::HTrialEndGotLook ||
+						pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime ||
+						pte->endtype() == HTrialEndType::HTrialEndMaxLookAwayTime)
 				{
 					// good trial, flush it to output
 					row.setTotalLook(QString("%1").arg(totalLookTime));

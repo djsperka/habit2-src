@@ -83,12 +83,15 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 			{
 				// if we are not between trials, then we are in one.
 				// We are looking for look events and TrialEnd events. 
+				// We select only the "successful" trial end types for tallying
+				// looks.
 				if (pevent->type() == HEventType::HEventTrialEnd)
 				{
 					HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(pevent);
 					if (	pte->endtype() == HTrialEndType::HTrialEndGotLook ||
 							pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime ||
-							pte->endtype() == HTrialEndType::HTrialEndMaxAccumulatedLookTime )
+							pte->endtype() == HTrialEndType::HTrialEndMaxAccumulatedLookTime ||
+							pte->endtype() == HTrialEndType::HTrialEndMaxLookAwayTime)
 					{
 						phaselog.append(iTotal);
 					}

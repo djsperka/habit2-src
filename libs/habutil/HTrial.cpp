@@ -102,7 +102,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	{
 		HMaxLookAwayTimeState* sMaxLookAway = new HMaxLookAwayTimeState(*this, log);
 		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(maxLookAwayTime()), sMaxLookAway);
-		sMaxLookAway->addTransition(sInitial);	// trial is repeated
+		sMaxLookAway->addTransition(sFinal);	// trial is NOT repeated -- this is successful
 	}
 
 
