@@ -8,11 +8,14 @@
 
 #include "HDButil.h"
 #include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
 #include <QSettings>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QtDebug>
+#include <QDateTime>
 
 
 // select existing db(true) or create new one (false)
@@ -143,8 +146,19 @@ bool openDB()
 			{
 				bval = true;
 				qDebug() << "Database opened.";
-				settings.setValue("database/dir", fileinfo.path());
-				settings.setValue("database/filename", fileinfo.fileName());
+
+				// Now update database if necessary. Do NOT change the database name!
+				if (updateDBVersion(db, fileinfo))
+				{
+					// Update settings to save database name and location for next time.
+					settings.setValue("database/dir", fileinfo.path());
+					settings.setValue("database/filename", fileinfo.fileName());
+				}
+				else
+				{
+					bval = false;
+					qDebug() << "Database update failed.";
+				}
 			}
 			else
 			{
@@ -156,3 +170,124 @@ bool openDB()
 }
 
 
+int getDBVersion()
+{
+	int version=2000000;
+
+	// First check if habit_version table exists.
+	if (getDBTableExists("habit_version"))
+	{
+
+		QSqlQuery sqlv(QString("select max(version) from habit_version"));
+		if (sqlv.next())
+		{
+			version = sqlv.value(0).toInt();
+			qDebug() << "Got version from habit_version: " << version;
+		}
+	}
+	else
+	{
+		// Test if the phase_settings and look_settings table exist
+		if (getDBTableExists("phase_settings") && getDBTableExists("look_settings"))
+		{
+			version = 2000006;
+			qDebug() << "Got version based on phase_settings/look_settings: " << version;
+		}
+		else
+		{
+			version = 2000001;
+			qDebug() << "Got (primitive) version: " << version;
+		}
+	}
+	return version;
+}
+
+bool getDBTableExists(QString name)
+{
+	bool result = false;
+	QSqlQuery sql(QString("select count(*) from sqlite_master where name='%1'").arg(name));
+	if (sql.next())
+	{
+		result = (1 == sql.value(0).toInt());
+	}
+	return result;
+}
+
+bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
+{
+	bool result = true;
+	const int iMinVersion = 2000006;
+	const int iLatestVersion = 2000009;
+	const int iAddColumnsToHabituationSettings = 2000009;
+	int iVersion = getDBVersion();
+
+	// Will any updates be required? If so, close db, make a copy, then reopen.
+	if (iVersion < iMinVersion)
+	{
+		qCritical() << "Cannot update database with version < " << iMinVersion;
+		result = false;
+	}
+	else if (iVersion < iLatestVersion)
+	{
+		qDebug() << "Updating database version...";
+		db.close();
+
+		QString copyname(QString("%1/saved-%2-%3").arg(fileinfo.dir().canonicalPath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
+		if (!QFile::copy(fileinfo.canonicalFilePath(), copyname))
+		{
+			qCritical() << "Cannot make copy of database in " << copyname;
+			result = false;
+		}
+		else
+		{
+			qDebug() << "Made backup copy of current database in " << copyname;
+
+			// reopen db
+			if (db.open())
+			{
+				if (iVersion < iAddColumnsToHabituationSettings)
+				{
+					// create habit_version table
+					// we must alter table habituation_settings
+					// insert record into habit_version
+					db.transaction();
+					QSqlQuery q0("CREATE TABLE \"habit_version\"(id INTEGER NOT NULL DEFAULT \"-1\"  PRIMARY KEY AUTOINCREMENT, version INTEGER)");
+					QSqlQuery q1("alter table habituation_settings add column exclude_basis_window INTEGER DEFAULT 0");
+					QSqlQuery q2("alter table habituation_settings add column require_min_basis_value INTEGER DEFAULT 0");
+					QSqlQuery q3("alter table habituation_settings add column min_basis_value INTEGER DEFAULT 0");
+					QSqlQuery q4("insert into habit_version (version) values(?)");
+					q4.bindValue(0, iAddColumnsToHabituationSettings);
+					q4.exec();
+					if (!q0.lastError().isValid() && !q1.lastError().isValid() && !q2.lastError().isValid() && !q3.lastError().isValid() && !q4.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAddColumnsToHabituationSettings;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddColumnsToHabituationSettings;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						qDebug() << q3.lastQuery() << " : " << q3.lastError();
+						qDebug() << q4.lastQuery() << " : " << q4.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
+			}
+			else
+			{
+				qCritical() << "Cannot re-open database " << db.databaseName();
+			}
+		}
+	}
+	else
+	{
+		result = true;
+		qDebug() << "Database is at the latest version.";
+	}
+
+	return result;
+}
