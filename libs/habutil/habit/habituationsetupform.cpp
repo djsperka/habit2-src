@@ -22,6 +22,7 @@ HabituationSetupForm::HabituationSetupForm(const Habit::HabituationSettings& set
 	, settings_(settings)
 {
 	createComponents();
+	setValidators();
 	makeConnections();
 	doLayout();
 	//setFixedWidth(556);
@@ -63,8 +64,22 @@ void HabituationSetupForm::createComponents()
 	totalLookLengthEdit_ = new QLineEdit();
 	totalLookLengthLabel_ = new QLabel(tr("ms"));
 
+	// added by djs 3-18-14
+	excludeBasisWindowCB_ = new QCheckBox("Exclude basis window when computing percentage");
+	requireMinBasisValueCB_ = new QCheckBox("Require minimum basis value");
+	minBasisValueEdit_ = new QLineEdit();
+	minBasisValueMSLabel_ = new QLabel("ms");
+
 	setLabelsFont();	
 }
+
+void HabituationSetupForm::setValidators()
+{
+	minBasisValueEdit_->setValidator(new QIntValidator(0, 999999, this));
+	percentEdit_->setValidator(new QIntValidator(0, 100, this));
+	totalLookLengthEdit_->setValidator(new QIntValidator(0, 999999, this));
+}
+
 
 void HabituationSetupForm::setLabelsFont()
 {
@@ -76,6 +91,7 @@ void HabituationSetupForm::setLabelsFont()
 	font2.setPointSize(9);
 	habituationCombo_->setFont(font2);
 	windowTypeCombo_->setFont(font2);
+	minBasisValueMSLabel_->setFont(font2);
 	QFont font3;
 	font3.setPointSize(12);
 	font3.setBold(true);
@@ -85,25 +101,38 @@ void HabituationSetupForm::setLabelsFont()
 void HabituationSetupForm::makeConnections()
 {
 	connect(habituationCombo_, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
+	connect(requireMinBasisValueCB_, SIGNAL(toggled(bool)), minBasisValueEdit_, SLOT(setEnabled(bool)));
 }
 
 void HabituationSetupForm::doBasisLayout()
 {
+	QHBoxLayout* hLayout = new QHBoxLayout();
+	hLayout->addWidget(requireMinBasisValueCB_);
+	hLayout->addWidget(minBasisValueEdit_);
+	hLayout->addWidget(minBasisValueMSLabel_);
+
 	QVBoxLayout* basisLayout = new QVBoxLayout();
 	basisGroup_->setLayout(basisLayout);
 	basisLayout->addWidget(basisRadio1_);
 	basisLayout->addWidget(basisRadio2_);
 	basisLayout->addStretch(1);
+	basisLayout->addLayout(hLayout);
 	habituationLayout_->addWidget(basisGroup_);
 }
 
 void HabituationSetupForm::doPercentLayout()
 {
-	QHBoxLayout* percentLayout = new QHBoxLayout();
+	QVBoxLayout* percentLayout = new QVBoxLayout();
+	QHBoxLayout* hLayout = new QHBoxLayout();
+
+	hLayout->addWidget(percentEdit_);
+	hLayout->addWidget(percentLabel_);
+	hLayout->addStretch(1);
+
+	percentLayout->addLayout(hLayout);
+	percentLayout->addWidget(excludeBasisWindowCB_);
+
 	percentGroup_->setLayout(percentLayout);
-	percentLayout->addWidget(percentEdit_);
-	percentLayout->addWidget(percentLabel_);
-	percentLayout->addStretch(1);
 	habituationLayout_->addWidget(percentGroup_);
 }
 
@@ -211,6 +240,10 @@ void HabituationSetupForm::initialize()
 	percentEdit_->setText(QString("%1").arg(settings_.getCriterionSettings().getPercent()));
 	windowSizeEdit_->setText(QString("%1").arg(settings_.getCriterionSettings().getWindowSize()));
 	windowTypeCombo_->setCurrentIndex(settings_.getCriterionSettings().getWindowType().number());
+	excludeBasisWindowCB_->setChecked(settings_.getCriterionSettings().getExcludeBasisWindow());
+	requireMinBasisValueCB_->setChecked(settings_.getCriterionSettings().getRequireMinBasisValue());
+	minBasisValueEdit_->setText(QString("%1").arg(settings_.getCriterionSettings().getMinBasisValue()));
+	minBasisValueEdit_->setEnabled(settings_.getCriterionSettings().getRequireMinBasisValue());
 	totalLookLengthEdit_->setText(QString("%1").arg(settings_.getTotalLookLengthToEnd()));
 	index = windowTypeCombo_->findData(settings_.getCriterionSettings().getWindowType().number());
 	if (index == -1)
@@ -232,6 +265,9 @@ Habit::HabituationSettings HabituationSetupForm::getConfigurationObject()
 	criterion.setPercent(percentEdit_->text().toInt());
 	criterion.setWindowSize(windowSizeEdit_->text().toInt());
 	criterion.setWindowType(*HCriterionWindowType::A[windowTypeCombo_->currentIndex()]);
+	criterion.setExcludeBasisWindow(excludeBasisWindowCB_->isChecked());
+	criterion.setRequireMinBasisValue(requireMinBasisValueCB_->isChecked());
+	criterion.setMinBasisValue(minBasisValueEdit_->text().toUInt());
 	settings.setCriterionSettings(criterion);
 	settings.setTotalLookLengthToEnd(totalLookLengthEdit_->text().toInt());
 	return settings;

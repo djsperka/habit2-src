@@ -3,14 +3,7 @@
 
 #include "habituationsettings.h"
 
-#include <QtGui/QWidget>
-
-class QGroupBox;
-class QComboBox;
-class QRadioButton;
-class QLabel;
-class QLineEdit;
-class QVBoxLayout;
+#include <QtGui>
 
 namespace Habit {
 	class HabituationSettings;
@@ -35,6 +28,7 @@ public:
 
 private:
 	void createComponents();
+	void setValidators();
 	void setLabelsFont();
 	void makeConnections();
 	void doLayout();
@@ -72,6 +66,10 @@ private:
 	QGroupBox* totalLookLengthToEndGroup_;
 	QLineEdit* totalLookLengthEdit_;
 	QLabel* totalLookLengthLabel_;
+	QCheckBox* excludeBasisWindowCB_;
+	QCheckBox* requireMinBasisValueCB_;
+	QLineEdit* minBasisValueEdit_;
+	QLabel* minBasisValueMSLabel_;
 };
 } //namespace GUILIB
 
