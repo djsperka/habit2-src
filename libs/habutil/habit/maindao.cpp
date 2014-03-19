@@ -215,11 +215,11 @@ bool MainDao::addOrUpdateHabituationSetting(size_t experimentId, Habit::Habituat
 	int id = settings->getId();
 	QString sql;
 	if(id > 0) {
-		sql = "update habituation_settings set habituation_type=?, criterion_basis=?, criterion_percent=?, window_size=?, window_type=?, total_look=?"
+		sql = "update habituation_settings set habituation_type=?, criterion_basis=?, criterion_percent=?, window_size=?, window_type=?, total_look=?, exclude_basis_window=?, require_min_basis_value=?, min_basis_value=?"
 			" where id=? and experiment_id=?";
 	} else {
-		sql = "insert into habituation_settings (habituation_type, criterion_basis, criterion_percent, window_size, window_type, total_look, experiment_id)"
-			" values(?, ?, ?, ?, ?, ?, ?)";
+		sql = "insert into habituation_settings (habituation_type, criterion_basis, criterion_percent, window_size, window_type, total_look, exclude_basis_window, require_min_basis_value, min_basis_value, experiment_id)"
+			" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 	QSqlQuery q;
 	q.prepare(sql);
@@ -230,6 +230,9 @@ bool MainDao::addOrUpdateHabituationSetting(size_t experimentId, Habit::Habituat
 	q.addBindValue(cs.getWindowSize());
 	q.addBindValue(cs.getWindowType().number());
 	q.addBindValue(settings->getTotalLookLengthToEnd());
+	q.addBindValue(cs.getExcludeBasisWindow() ? 1 : 0);
+	q.addBindValue(cs.getRequireMinBasisValue() ? 1 : 0);
+	q.addBindValue(cs.getMinBasisValue());
 	if(id > 0) {
 		q.addBindValue(id);
 	}
@@ -551,6 +554,13 @@ void MainDao::getHabituationSettingsForExperiment(size_t experimentId, Habituati
 		criterionSettings.setWindowSize(number);
 		number = q.value(q.record().indexOf("window_type")).toInt();
 		criterionSettings.setWindowType(getCriterionWindowType(number));
+		number = q.value(q.record().indexOf("exclude_basis_window")).toInt();
+		criterionSettings.setExcludeBasisWindow(number==1);
+		number = q.value(q.record().indexOf("require_min_basis_value")).toInt();
+		criterionSettings.setRequireMinBasisValue(number==1);
+		number = q.value(q.record().indexOf("min_basis_value")).toInt();
+		criterionSettings.setMinBasisValue(number);
+
 		habituationSettings->setCriterionSettings(criterionSettings);
 		number = q.value(q.record().indexOf("total_look")).toInt();
 		habituationSettings->setTotalLookLengthToEnd(number);
