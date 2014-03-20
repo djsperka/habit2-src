@@ -86,7 +86,6 @@ HPlayer(id, w), m_pendingClear(false), m_parent(w), m_pMediaObject(0), m_pVideoW
 
 HVIPlayer::~HVIPlayer()
 {
-	qDebug("HVIPlayer::~HVIPlayer()");
 //    delete m_pVideoWidget;
 //    m_pVideoWidget = 0;
 

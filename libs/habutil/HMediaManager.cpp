@@ -21,7 +21,6 @@ HMediaManager::~HMediaManager()
 		delete p;	// error?
 		//p->close();
 	}
-	qDebug("HMediaManager::~HMediaManager - done");
 }
 
 void HMediaManager::addPlayer(HPlayer* player, int screenIndex)

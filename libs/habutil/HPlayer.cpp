@@ -17,7 +17,6 @@ HPlayer::HPlayer(int ID, QWidget *w) : QWidget(w), m_id(ID), m_iCurrentStim(0)
 
 HPlayer::~HPlayer()
 {
-	qDebug("HPlayer::~HPlayer");
 	while (!m_sources.isEmpty())
 		delete m_sources.takeFirst();
 }
