@@ -253,7 +253,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 			QDebug(QtFatalMsg) << "Cannot parse test order (" << m_runSettings.getTestOrderList(list) << ").";
 		}
 
-		HTrialGenerator htg(idspList3.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
+		HTrialGenerator htg(list.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
 		idStimPairList.clear();
 		for (unsigned int i=0; i<ps.getNTrials(); i++)
 		{
