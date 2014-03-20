@@ -136,16 +136,14 @@ bool Habit::RunSettings::getOrderFromString(QList<int>& list, QString str) const
 	bool b = true;
 	QString separator(" ");
 
-	qDebug() << "getOrderFromString: " << str;
-
 	// If any commas are found, assume comma-separated list. Otherwise assume space separated.
 	if (str.indexOf(',') >= 0) separator = ",";
 	QStringList orderList = str.split(separator);
 	for(QStringList::iterator it = orderList.begin(); it != orderList.end() && b; ++it)
 	{
-		int num = it->toInt(&b);
+		// make trimmed(): extra spaces caused error
+		int num = it->trimmed().toInt(&b);
 		if (b) list.append(num);
-		qDebug() << "getOrderFromString: " << num;
 	}
 	return b;
 }

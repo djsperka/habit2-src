@@ -18,16 +18,16 @@ HKeypadLookDetector::HKeypadLookDetector(HEventLog& log, QWidget* pdialog, int m
 , m_bUseCenter(bUseCenter)
 , m_bUseRight(bUseRight)
 {
-	qDebug() << "HKeypadLookDetector: grab keyboard and install self.";
 	m_pdialog->grabKeyboard();
 	m_pdialog->installEventFilter(this);
+	qDebug() << "HKeypadLookDetector: Event filter installed.";
 };																																							  
 
 HKeypadLookDetector::~HKeypadLookDetector() 
 { 
-	qDebug() << "HKeypadLookDetector: release keyboard and remove self.";
 	m_pdialog->releaseKeyboard();
 	m_pdialog->removeEventFilter(this); 
+	qDebug() << "HKeypadLookDetector: Event filter removed.";
 };
 
 

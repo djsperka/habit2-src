@@ -392,7 +392,6 @@ void MainDao::getHPhaseSettingsForExperiment(int experimentId, int type, HPhaseS
 		phaseSettings->setId(q.value(q.record().indexOf("id")).toInt());
 		phaseSettings->setPhaseType(getPhaseType(type));
 		phaseSettings->setIsEnabled(q.value(q.record().indexOf("enabled")).toBool());
-		qDebug() << "id " << phaseSettings->getId() << " index " << q.record().indexOf("enabled") << " value " << q.value(q.record().indexOf("enabled")).toBool();
 		phaseSettings->setNTrials(q.value(q.record().indexOf("ntrials")).toInt());
 		phaseSettings->setUseLookingCriteria(q.value(q.record().indexOf("use_looking_criteria")).toBool());
 		phaseSettings->setIsSingleLook(q.value(q.record().indexOf("is_single_look")).toBool());
@@ -451,7 +450,6 @@ void MainDao::getAttentionGetterSettingsForExperiment(size_t experimentId, Atten
 		q2.prepare(sql);
 		q2.addBindValue(id);
 		q2.exec();
-		qDebug() << q2.lastError();
 		if(q2.next()) {
 			Habit::StimulusSettings ss = getStimulusSettings(q2);
 			attentionGetter->setAttentionGetterStimulus(ss);
@@ -824,15 +822,11 @@ bool MainDao::insertOrUpdateExperimentSettings(Habit::ExperimentSettings* experi
 			q.addBindValue(name);
 			q.addBindValue(id);
 			q.exec();
-			qDebug() << q.lastError();
-			qDebug() << q.lastQuery();
 		} else {
 			QString sql = "INSERT INTO experiments (name) VALUES (?)";
 			q.prepare(sql);
 			q.addBindValue(name);
 			q.exec();
-			qDebug() << q.lastError();
-			qDebug() << q.lastQuery();
 			experimentSettings->setId(q.lastInsertId().toInt());
 		}
 		result = !q.lastError().isValid();

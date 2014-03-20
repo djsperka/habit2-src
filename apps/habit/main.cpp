@@ -83,21 +83,10 @@ int main(int argc, char *argv[])
 	file.open(QIODevice::Append | QIODevice::Text);
 	logfile.setDevice(&file);
 	logfile.flush();
-	qDebug() << "Application Start version " << HABIT_VERSION;
+	qDebug() << "Starting Habit, version " << HABIT_VERSION;
 	HMainWindow w;
 	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
 	Q_INIT_RESOURCE(resources);
-
-	// test - check for existence of habit.db3 in resources
-    QString resourcePath = ":/resources/habit.db3";
-    if( true == QFile::exists(resourcePath))
-    {
-       qDebug() << "habit.db3 found in resource path";
-    }
-    else
-    {
-        qDebug() << "habit.db3 NOT found in resource path";
-    }
 
 	// Open database here. openDB() looks in the settings for a database. If that's not found then
 	// it tries the default location. If a database is found and opened, the function returns true.

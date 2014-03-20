@@ -317,7 +317,6 @@ void HLooker::onLookingStateEntered()
 
 				if (cumulativeLookTimeMS < m_minLookTimeMS)
 				{
-					qDebug() << "HLooker::onLookingStateEntered(1): start min look timer(" << m_minLookTimeMS << "-" << cumulativeLookTimeMS << "=" << (m_minLookTimeMS - cumulativeLookTimeMS) << ")";
 					m_ptimerMinLookTime->start(m_minLookTimeMS - cumulativeLookTimeMS);
 				}
 				else if (m_maxAccumulatedLookTimeMS > 0)
@@ -325,7 +324,6 @@ void HLooker::onLookingStateEntered()
 					int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS;
 					if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
 					{
-						qDebug() << "HLooker::onLookingStateEntered(1): start timer(" << m_maxAccumulatedLookTimeMS << "-" << sumOfAllLooking << "=" << m_maxAccumulatedLookTimeMS - sumOfAllLooking << ")";
 						m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
 					}
 				}
@@ -351,21 +349,8 @@ void HLooker::onLookingStateEntered()
 		m_pdirectionLookPending = &directionTo(*p.first);
 
 		// Since we are starting a new look, start the min look timer.
-		qDebug() << "HLooker::onLookingStateEntered(2): start min look timer(" << m_minLookTimeMS << "-" << cumulativeLookTimeMS << "=" << (m_minLookTimeMS - cumulativeLookTimeMS) << ")";
 		m_ptimerMinLookTime->start(m_minLookTimeMS - cumulativeLookTimeMS);
 
-#if 0
-		// Start max accumulated look timer if needed
-		if (m_maxAccumulatedLookTimeMS > 0)
-		{
-			int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS;
-			if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
-			{
-				qDebug() << "HLooker::onLookingStateEntered(2): start timer(" << m_maxAccumulatedLookTimeMS << "-" << getSumOfCompleteLooks() << "-" << cumulativeLookTimeMS << "=" << (m_maxAccumulatedLookTimeMS - sumOfAllLooking) << ")";
-				m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
-			}
-		}
-#endif
 	}
 }
 
@@ -389,7 +374,6 @@ void HLooker::onLookingAwayStateEntered()
 
 	if (m_maxLookAwayTimeMS > 0)
 	{
-		qDebug() << "onLookingAwayStateEntered(): starting maxLookAway timer";
 		m_ptimerMaxLookAway->start(m_maxLookAwayTimeMS);
 	}
 }
@@ -435,7 +419,6 @@ void HLooker::minLookTimeReached()
 		}
 		else
 		{
-			qDebug() << "HLooker::minLookTimeReached(): start timer(" << m_maxAccumulatedLookTimeMS << "-" << getSumOfCompleteLooks() << "-" << cumulativeLookTimeMS << "-" << m_minLookTimeMS << "=" << sumOfAllLooking << ")";
 			m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
 		}
 	}
@@ -481,7 +464,6 @@ void HLooker::minLookAwayTimeout()
 
 void HLooker::maxLookAwayTimeout()
 {
-	qDebug() << "HLooker::maxLookAwayTimeout()";
 	emit maxLookAwayTime();
 }
 
@@ -541,6 +523,5 @@ void HLooker::stopLooker(int tMS)
 	}
 	stop();
 	QCoreApplication::processEvents(0);
-	qDebug() << "HLooker::stopLooker() {stop()} : " << this->isRunning();
 }
 

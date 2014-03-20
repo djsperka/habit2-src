@@ -176,10 +176,6 @@ void HControlPanel::createExperiment(HEventLog& log)
 	connect(m_pld, SIGNAL(attention()), this, SLOT(onAttention()));
 	connect(m_pld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
 	
-	// testing - catch started and stopped() signals
-	connect(m_pld, SIGNAL(started()), this, SLOT(onLDStarted()));
-	connect(m_pld, SIGNAL(stopped()), this, SLOT(onLDStopped()));
-
 	// Construct state machine.
 	m_psm = new QStateMachine();
 	
@@ -456,17 +452,8 @@ void HControlPanel::onLook(HLook l)
 void HControlPanel::loadFromDB()
 {
 	Habit::MainDao dao;
-//	qDebug("HControlPanel::loadFromDB(): get exp settings.");
 	m_experimentSettings = dao.getExperimentSettingsById(m_runSettings.getExperimentId());
 	m_experimentSettings.loadFromDB();
-	
-#ifdef NO_LONGER_USED
-	qDebug() << m_experimentSettings.getPreTestStimuliSettings();
-	qDebug() << m_experimentSettings.getHabituationStimuliSettings();
-	qDebug() << m_experimentSettings.getTestStimuliSettings();
-#endif
-	
-//	qDebug("HControlPanel::loadFromDB(): get exp settings - Done.");
 }
 	
 	
@@ -477,7 +464,6 @@ void HControlPanel::onStartTrials()
 	 * Set control buttons enabled/disabled as necessary
 	 */
 	
-	qDebug("HControlPanel::onStartTrials()");
 	m_pbStopTrials->setEnabled(true);
 	m_pbNextTrial->setEnabled(true);
 	m_pbStartTrials->setEnabled(false);
@@ -491,13 +477,11 @@ void HControlPanel::onStartTrials()
 
 void HControlPanel::onNextTrial()
 {
-	qDebug("HControlPanel::onNextTrial()");
 	m_psm->postEvent(new HAbortTrialEvent());
 }
 
 void HControlPanel::onStopTrials()
 {
-	qDebug("HControlPanel::onStopTrials()");
 	m_psm->stop();
 	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onExperimentFinished()));
 	m_pmm->clear();
@@ -522,14 +506,3 @@ void HControlPanel::onExperimentStarted()
 	m_log.append(new HExperimentStartEvent(HElapsedTimer::elapsed()));
 }
 
-void HControlPanel::onLDStarted()
-{
-	qDebug() << "LookDetector started: " << m_pld->isRunning();
-	return;
-}
-
-void HControlPanel::onLDStopped()
-{
-	qDebug() << "LookDetector stopped: " << m_pld->isRunning();
-	return;
-}

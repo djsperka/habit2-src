@@ -324,7 +324,6 @@ void RunSettingsForm::initializeStimuliTable(const QString& orderName) {
 		stimuliOrderEdit_->setText(runSettings_.getHabituationOrder());
 		randomizeOrderCombo_->setCurrentIndex(runSettings_.getHabituationRandomizeMethod());
 		randomizeGroup_->setChecked(runSettings_.isHabituationRandomized());
-		qDebug() << "RunSettingsForm::initializeStimuliTable(" << orderName << ") rand " <<  runSettings_.isHabituationRandomized();
 	} else
 	if(orderName == PRETEST_ORDER) {
 		settingsList_->setCurrentRow(settingsList_->count()-3);
@@ -332,7 +331,6 @@ void RunSettingsForm::initializeStimuliTable(const QString& orderName) {
 		stimuliOrderEdit_->setText(runSettings_.getPretestOrder());
 		randomizeOrderCombo_->setCurrentIndex(runSettings_.getPretestRandomizeMethod());
 		randomizeGroup_->setChecked(runSettings_.isPretestRandomized());
-		qDebug() << "RunSettingsForm::initializeStimuliTable(" << orderName << ") rand " <<  runSettings_.isPretestRandomized();
 	} else
 	if(orderName == TEST_ORDER) {
 		settingsList_->setCurrentRow(settingsList_->count()-1);
@@ -340,7 +338,6 @@ void RunSettingsForm::initializeStimuliTable(const QString& orderName) {
 		stimuliOrderEdit_->setText(runSettings_.getTestOrder());
 		randomizeOrderCombo_->setCurrentIndex(runSettings_.getTestRandomizeMethod());
 		randomizeGroup_->setChecked(runSettings_.isTestRandomized());
-		qDebug() << "RunSettingsForm::initializeStimuliTable(" << orderName << ") rand " <<  runSettings_.isTestRandomized();
 	}
 }
 

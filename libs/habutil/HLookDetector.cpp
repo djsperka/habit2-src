@@ -40,7 +40,6 @@ void HLookDetector::enableLook()
 	}
 	start();	// start state machine
 	QCoreApplication::processEvents(0);
-	qDebug() << "HLookDetector::enableLook() { start() } " << this->isRunning();
 	return;
 };
 

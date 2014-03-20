@@ -28,15 +28,15 @@ void HState::onEntry( QEvent* e )
 {
     Q_UNUSED( e );
 	
-    // Print out the state we are entering and it's parents
+    // Print out the state we are entering and its parents
     QString state = m_name;
     HState* parent = dynamic_cast<HState*>( parentState() );
     while ( parent != 0 )
     {
-        state = parent->name() + "->" + state;
+        state = parent->name() + ":" + state;
         parent = dynamic_cast<HState*>( parent->parentState() );
     }
-    qDebug() << "Entering state:" << state;
+    qDebug() << "Enter state:" << state;
 }
 
 void HState::onExit( QEvent* e )
@@ -48,10 +48,10 @@ void HState::onExit( QEvent* e )
     HState* parent = dynamic_cast<HState*>( parentState() );
     while ( parent != 0 )
     {
-        state = parent->name() + "->" + state;
+        state = parent->name() + ":" + state;
         parent = dynamic_cast<HState*>( parent->parentState() );
     }
 	
-    qDebug() << "Exiting state:" << state;
+    qDebug() << "Exit  state:" << state;
 }
 

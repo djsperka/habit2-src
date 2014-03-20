@@ -4,6 +4,7 @@
 #include <QtGui/QTreeWidgetItem>
 #include <QtGui/QGroupBox>
 #include <QtGui/QApplication>
+#include <QtDebug>
 
 using namespace GUILib;
 
@@ -69,10 +70,7 @@ TreeWizard::TreeWizard(QWidget *parent)
     mainLayout->setMargin(0);
 	mainLayout->addLayout(leftSideLayout);
 
-    //pageArea_->setFixedSize(560, 460);
-	//pageArea_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-	//pageArea_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    pageArea_->setCurrentWidget(currentPage());
+    //pageArea_->setCurrentWidget(currentPage());
 
     QVBoxLayout* rightSideLayout = new QVBoxLayout;
     rightSideLayout->addWidget(pageArea_, 1);

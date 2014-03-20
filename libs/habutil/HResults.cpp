@@ -153,7 +153,6 @@ bool HResults::saveToCSV(const QString& filename) const
 		if (type() == HResultsType::HResultsTypeOriginalRun)
 		{
 			subjectId = QString("%1").arg(subjectSettings().getId());
-			qDebug() << "Original run";
 		}
 		else if (type() == HResultsType::HResultsTypeTestRun)
 		{
@@ -195,7 +194,6 @@ bool HResults::saveToCSV(const QString& filename) const
 			{
 				HTrialStartEvent* ptse = static_cast<HTrialStartEvent*>(e);
 				if (bInsideTrial) qCritical("Found trial start without preceding trial end event!");
-				qDebug() << "Init Trial start subjectID " << subjectId;
 				row.init(subjectId);
 				row.setPhase(sPhase);
 				if (bHabituated)

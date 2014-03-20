@@ -46,8 +46,6 @@ bool selectDB(bool bExisting)
 	else
 		selectedFileName = QFileDialog::getSaveFileName(NULL, "New Habit database filename", fullname, "Habit Database Files (*.db3)");
 
-	qDebug() << "Selected db " << selectedFileName;
-
 	// getOpenFileName() returns a null string if user cancelled.
 	// If they didn't cancel, then check if the file exists. If it doesn't exist, ask the user
 	// if they'd like to create a new file.
@@ -129,7 +127,6 @@ bool openDB()
 	}
 
 	// Does file exist and can we write to it? If not, then get filename
-	qDebug() << "Opening database file: " << fileinfo.absoluteFilePath();
 	if (fileinfo.exists())
 	{
 		if (!fileinfo.isWritable())
@@ -145,7 +142,6 @@ bool openDB()
 			if(db.open())
 			{
 				bval = true;
-				qDebug() << "Database opened.";
 
 				// Now update database if necessary. Do NOT change the database name!
 				if (updateDBVersion(db, fileinfo))
