@@ -56,7 +56,6 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 					{
 						if (isAGLookEnabled())
 						{
-							qDebug() << "Emit attention() signal...";
 							emit attention();
 							bVal = true;
 						}

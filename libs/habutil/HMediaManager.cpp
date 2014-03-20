@@ -13,7 +13,6 @@
 
 HMediaManager::~HMediaManager()
 {
-	qDebug("HMediaManager::~HMediaManager");
 	QListIterator<HPlayer*> it(m_players);
 	while (it.hasNext())
 	{
