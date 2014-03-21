@@ -225,59 +225,64 @@ void RunSettingsForm::onDone()
 
 bool areStimulusIndicesOk(const QString order, const Habit::StimuliSettings& ss) {
 	bool result = true;
-	QStringList orderList = order.split(" ");
-	for(QStringList::iterator it = orderList.begin(); it != orderList.end() && result; ++it) {
-		QString numStr = *it;
-		if(!numStr.isEmpty()) {
-			bool ok;
-			int num = numStr.toInt(&ok);
-			if(ok) {
-				if(num <= 0 || (num > ss.getStimuli().size())) {
-					result = false;
-				}
-			} else {
-				result = false;
-			}
+	QList<int> list;
+	result = Habit::RunSettings::getOrderFromString(list, order);
+	if (result)
+	{
+		QListIterator<int> it(list);
+		while (it.hasNext() && result)
+		{
+			int num = it.next();
+			result = (num >= 0 && num < ss.getStimuli().size());
 		}
 	}
 	return result;
 }
 
-bool RunSettingsForm::isInformationCorrect() {
-	bool result = false;
+bool RunSettingsForm::isInformationCorrect()
+{
 	QString hOrder = runSettings_.getHabituationOrder();
 	QString pOrder = runSettings_.getPretestOrder();
 	QString tOrder = runSettings_.getTestOrder();
 	subjectSettings_ = subjectInfoWgt_->getConfigurationObject();
-	Habit::MainDao dao;
-	if(hOrder.isEmpty() && pOrder.isEmpty() && tOrder.isEmpty()) {
-		QMessageBox::warning(this, "Can't run experiment", "Can't run the experiment: orders are not specified");
-	} else
-	if(!areStimulusIndicesOk(hOrder, activeExperiment_.getHabituationStimuliSettings())) {
-		QMessageBox::warning(this, "Invalid habituation order", "Habituation order is invalid, indices must be separated by spaces and correspond with the table indices.\nFor example, if table contains indices from 1 to 4, the right order might be '1 2 3 4' or '2 4 1 3' and so on.");
-	} else
-	if(!areStimulusIndicesOk(pOrder, activeExperiment_.getPreTestStimuliSettings())) {
-		QMessageBox::warning(this, "Invalid pretest order", "Pretest order is invalid, indices must be separated by spaces and must correspond with the table indices.\nFor example, if table contains indices from 1 to 4, the right order might be '1 2 3 4' or '2 4 1 3' and so on.");
-	} else
-	if(!areStimulusIndicesOk(tOrder, activeExperiment_.getTestStimuliSettings())) {
-		QMessageBox::warning(this, "Invalid test order", "Test order is invalid, indices must be separated by spaces and must correspond with the table indices.\nFor example, if table contains indices from 1 to 4, the right order might be '1 2 3 4' or '2 4 1 3' and so on.");
-	} else
-	if((runTypeCombo_->currentText() == NEW_RUN ) && !subjectSettings_.isOk()) {
-		QMessageBox::warning(this, "Invalid subject information", "Subject information is invalid.  Subject name and observer name are required.");
-	} //else
-	//if(runTypeCombo_->currentText() == NEW_RUN && !dao.isSubjectUnique(subjectSettings_) ||
-	//	runTypeCombo_->currentText() == EXISTING_RUN && subjectSettings_.isNameChanged() && !dao.isSubjectUnique(subjectSettings_)) {
-	//	QMessageBox::warning(this, "Invalid subject information", "Subject " + subjectSettings_.getSubjectName() + " already exists");
-	//} 
-	else
-		if ((runTypeCombo_->currentText() == NEW_RUN) && !subjectInfoWgt_->validate())
-		{
-		}
-	else {
-		
-		result = true;
+
+	// Check PreTest order
+	if (activeExperiment_.getPreTestPhaseSettings().getIsEnabled() &&
+			(pOrder.isEmpty() || !areStimulusIndicesOk(pOrder, activeExperiment_.getPreTestStimuliSettings())))
+	{
+		QMessageBox::warning(this, "Invalid pretest order", "Pretest order is invalid, indices must be separated by spaces or commas and must correspond with the table indices.");
+		return false;
 	}
-	return result;
+
+	// Check Habituation order
+	if (activeExperiment_.getHabituationPhaseSettings().getIsEnabled() &&
+			(hOrder.isEmpty() || !areStimulusIndicesOk(hOrder, activeExperiment_.getHabituationStimuliSettings())))
+	{
+		QMessageBox::warning(this, "Invalid habituation order", "Habituation order is invalid, indices must be separated by spaces or commas and must correspond with the table indices.");
+		return false;
+	}
+
+	// Check Habituation order
+	if (activeExperiment_.getTestPhaseSettings().getIsEnabled() &&
+			(tOrder.isEmpty() || !areStimulusIndicesOk(tOrder, activeExperiment_.getTestStimuliSettings())))
+	{
+		QMessageBox::warning(this, "Invalid test order", "Test order is invalid, indices must be separated by spaces or commas and must correspond with the table indices.");
+		return false;
+	}
+
+	// Check subject info if this is not a test run
+	if((runTypeCombo_->currentText() == NEW_RUN ) && !subjectSettings_.isOk())
+	{
+		QMessageBox::warning(this, "Invalid subject information", "Subject information is invalid.  Subject name and observer name are required.");
+		return false;
+	}
+
+	if ((runTypeCombo_->currentText() == NEW_RUN) && !subjectInfoWgt_->validate())
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void RunSettingsForm::onOrderActivation(QListWidgetItem* item) {

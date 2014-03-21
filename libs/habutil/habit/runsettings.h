@@ -54,7 +54,7 @@ namespace Habit
 		// Returns true and list contains the parsed integers in order,
 		// if each element parses as an int, false otherwise (and list
 		// is undefined).
-		bool getOrderFromString(QList<int>& list, QString str) const;
+		static bool getOrderFromString(QList<int>& list, QString str);
 
 
 	private:
