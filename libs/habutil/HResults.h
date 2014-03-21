@@ -71,23 +71,25 @@ private:
 class HTrialResultsRow: public QList<QString>
 {
 public:
+	static QStringList headers;
 	enum
 	{
 		indSubjectId = 0,
 		indPhase = 1,
 		indTrial = 2,
 		indRepeat = 3,
-		indHabituated = 4,
-		indStimId = 5,
-		indStimName = 6,
-		indStimLeft = 7,
-		indStimCenter = 8,
-		indStimRight = 9,
-		indStimISS = 10,
-		indTotalLook = 11,
-		indTotalAway = 12,
-		indLook = 13,
-		indNInit = 14,
+		indEndType = 4,
+		indHabituated = 5,
+		indStimId = 6,
+		indStimName = 7,
+		indStimLeft = 8,
+		indStimCenter = 9,
+		indStimRight = 10,
+		indStimISS = 11,
+		indTotalLook = 12,
+		indTotalAway = 13,
+		indLook = 14,
+		indNInit = 15,
 	};
 
 	HTrialResultsRow(): QList<QString>()
@@ -105,6 +107,7 @@ public:
 	void setPhase(QString phase) { (*this)[indPhase] = phase; };
 	void setTrial(QString trial) { (*this)[indTrial] = trial; };
 	void setRepeat(QString repeat) { (*this)[indRepeat] = repeat; };
+	void setEndType(QString type) { (*this)[indEndType] = type; };
 	void setHabituated(QString habituated) { (*this)[indHabituated] = habituated; };
 	void setStimId(QString stimid) { (*this)[indStimId] = stimid; };
 	void setStimName(QString stim) { (*this)[indStimName] = stim; };

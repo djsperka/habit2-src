@@ -155,7 +155,9 @@ void HMainWindow::runSavedExperiment()
 		if (habitControlPanel.exec() != QDialog::Accepted)
 			return;
 		HResults* results = new HResults(habitControlPanel.getExperimentSettings(), runSettingsForm.getRunSettings(),
-				runSettingsForm.getSubjectSettings(), log, QCoreApplication::instance()->applicationVersion());
+				runSettingsForm.getSubjectSettings(), log,
+				runSettingsForm.getRunLabel(),
+				QCoreApplication::instance()->applicationVersion());
 
 		// display results
 		HResultsDialog dialog(*results, this);

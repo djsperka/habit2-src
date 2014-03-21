@@ -233,7 +233,7 @@ bool areStimulusIndicesOk(const QString order, const Habit::StimuliSettings& ss)
 		while (it.hasNext() && result)
 		{
 			int num = it.next();
-			result = (num >= 0 && num < ss.getStimuli().size());
+			result = (num > 0 && num <= ss.getStimuli().size());
 		}
 	}
 	return result;

@@ -11,6 +11,15 @@
 #include <QCoreApplication>
 #include <QtDebug>
 
+
+// This should be kept in sync with the enum defined in HTrialResultsRow. Pain but I can't think of a better way now.
+QStringList HTrialResultsRow::headers =
+		QStringList() 	<< "SubjectID" << "Phase" << "Trial" << "Repeat" << "EndType"
+						<< "Habituated" << "StimID" << "StimName"
+						<< "Left" << "Center" << "Right" << "ISS"
+						<< "TotalLook" << "TotalLookAway" << "Looks";
+
+
 HResults::HResults()
 : m_originalFilename("")
 , m_filename("NOT_SAVED")
@@ -33,7 +42,7 @@ HResults::HResults(HResults& r)
 // This constructor used for ORIGINAL RUN. The filename is the results filename the settings and log are taken from.
 HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::SubjectSettings& ss, const HEventLog& log, const QString filename, const QString version)
 : m_version(version)
-, m_originalFilename("NOT_SAVED")
+, m_originalFilename(filename)
 , m_filename(filename)
 , m_pResultsType(&HResultsType::HResultsTypeOriginalRun)
 , m_experimentSettings(es)
@@ -169,8 +178,10 @@ bool HResults::saveToCSV(const QString& filename) const
 			return b;
 		}
 
-		// Now iterate through event log. Each successful trial is written to the csv file.
+		// put headers in output file
+		out << HTrialResultsRow::headers.join(",") << endl;
 
+		// Now iterate through event log. Each trial is written to the csv file.
 		QString sPhase;
 		HTrialResultsRow row;
 		bool bInsidePhase = false;
@@ -267,20 +278,13 @@ bool HResults::saveToCSV(const QString& filename) const
 			}
 			else if (e->type() == HEventType::HEventTrialEnd)
 			{
-				// check that the trial ended successfully
+				// set trial end type and flush
 				HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(e);
-				if (pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime ||
-						pte->endtype() == HTrialEndType::HTrialEndGotLook ||
-						pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime ||
-						pte->endtype() == HTrialEndType::HTrialEndMaxLookAwayTime)
-				{
-					// good trial, flush it to output
-					row.setTotalLook(QString("%1").arg(totalLookTime));
-					row.setTotalLookAway(QString("%1").arg(totalLookAwayTime));
-					out << row;
-				}
+				row.setEndType(pte->endtype().name());
+				row.setTotalLook(QString("%1").arg(totalLookTime));
+				row.setTotalLookAway(QString("%1").arg(totalLookAwayTime));
+				out << row;
 			}
-
 		}
 
 
