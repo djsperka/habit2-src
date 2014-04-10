@@ -13,6 +13,7 @@
 #include "HEvents.h"
 #include "HPhaseLog.h"
 #include <QList>
+#include <QMutableListIterator>
 #include <QDataStream>
 
 class HEventLog: public QList<HEvent*>
@@ -31,6 +32,13 @@ public:
 	HPhaseLog getPhaseLog(QString s = QString(""));
 	
 	bool saveToCSV(QString& filename) const;
+};
+
+class HMutableEventLogIterator: public QMutableListIterator<HEvent*>
+{
+public:
+	HMutableEventLogIterator(HEventLog& log): QMutableListIterator<HEvent*>(log) {};
+	bool skipToEventType(const HEventType& type);
 };
 
 bool operator==(const HEventLog& log0, const HEventLog& log1);

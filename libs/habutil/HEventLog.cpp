@@ -133,6 +133,24 @@ bool HEventLog::saveToCSV(QString& filename) const
 	return b;
 }
 
+bool HMutableEventLogIterator::skipToEventType(const HEventType& type)
+{
+	bool b = false;
+	while (!b && this->hasNext())
+	{
+		HEvent* e = this->peekNext();
+		if (e->type() == type)
+		{
+			b = true;	// found what we were looking for
+		}
+		else
+		{
+			this->next();
+		}
+	}
+	return b;
+}
+
 QDataStream& operator<<(QDataStream& stream, HEventLog log)
 {
 	stream << log.size();
