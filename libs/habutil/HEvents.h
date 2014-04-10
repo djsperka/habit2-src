@@ -62,6 +62,7 @@ public:
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
 	friend bool operator==(const HEventType& lhs, const HEventType& rhs);
+	friend bool operator!=(const HEventType& lhs, const HEventType& rhs);
 	
 private:
 	explicit HEventType(int t, const char* s): m_t(t), m_s(s) {};

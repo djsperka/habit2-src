@@ -77,6 +77,11 @@ bool operator==(const HEventType& lhs, const HEventType& rhs)
 	return lhs.number() == rhs.number();
 };
 
+bool operator!=(const HEventType& lhs, const HEventType& rhs)
+{
+	return lhs.number() != rhs.number();
+};
+
 const HEventType& getHEventType(int number_value)
 {
 	const HEventType* t = &HEventType::HEventUndefined;
