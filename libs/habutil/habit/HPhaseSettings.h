@@ -9,6 +9,7 @@
 #define HTRIALSETTINGS_H_
 
 #include <QDataStream>
+#include <QtDebug>
 #include "HTypes.h"
 
 namespace Habit
@@ -78,6 +79,7 @@ namespace Habit
 
 	QDataStream & operator<< (QDataStream& stream, HPhaseSettings settings);
 	QDataStream & operator>> (QDataStream& stream, HPhaseSettings& settings);
+	QDebug operator<<(QDebug dbg, const HPhaseSettings& settings);
 	bool operator==(const HPhaseSettings& lhs, const HPhaseSettings& rhs);
 }; // namespace
 

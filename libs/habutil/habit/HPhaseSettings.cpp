@@ -85,6 +85,19 @@ QDataStream & Habit::operator<< (QDataStream& stream, HPhaseSettings settings)
 	return stream;
 }
 
+QDebug Habit::operator<<(QDebug dbg, const HPhaseSettings& settings)
+{
+	dbg.nospace() << "Id " << settings.getId() << "Enabled " << settings.getIsEnabled() << " ptype " << settings.getPhaseType().number() << " N " << settings.getNTrials()
+			<< " use look " << settings.getUseLookingCriteria() << " single " << settings.getIsSingleLook() << " maxaccum " << settings.getIsMaxAccumulatedLookTime()
+			<< settings.getMaxAccumulatedLookTime() << " max lookaway " << settings.getIsMaxLookAwayTime()
+			<< settings.getMaxLookAwayTime() << " max stim " << settings.getIsMaxStimulusTime()
+			<< settings.getMaxStimulusTime() << " onset " << settings.getMeasureStimulusTimeFromOnset()
+			<< " looking " << settings.getMeasureStimulusTimeFromLooking()
+			<< " max nolook " << settings.getIsMaxNoLookTime() << settings.getMaxNoLookTime();
+	return dbg.nospace();
+}
+
+
 QDataStream & Habit::operator>> (QDataStream& stream, HPhaseSettings& settings)
 {
 	int id, nphase;
@@ -99,8 +112,8 @@ QDataStream & Habit::operator>> (QDataStream& stream, HPhaseSettings& settings)
 	settings.setNTrials(n);
 	settings.setUseLookingCriteria(bUseLooking);
 	settings.setIsSingleLook(bSingle);
-	settings.setIsMaxAccumulatedLookTime(bMaxLA);
-	settings.setMaxAccumulatedLookTime(maxLA);
+	settings.setIsMaxAccumulatedLookTime(bMaxAccum);
+	settings.setMaxAccumulatedLookTime(maxAccum);
 	settings.setIsMaxLookAwayTime(bMaxLA);
 	settings.setMaxLookAwayTime(maxLA);
 	settings.setIsMaxStimulusTime(bMaxStim);
