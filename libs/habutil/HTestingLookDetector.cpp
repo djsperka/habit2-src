@@ -10,7 +10,7 @@
 #include <QTextStream>
 #include <QStringList>
 #include <QTimer>
-
+#include <QtDebug>
 
 HTestingLookDetector::HTestingLookDetector(QFile& inputFile, int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight)
 : HLookDetector(minlooktime_ms, minlookawaytime_ms, maxlookawaytime_ms, maxaccumlooktime_ms, log)
@@ -19,11 +19,23 @@ HTestingLookDetector::HTestingLookDetector(QFile& inputFile, int minlooktime_ms,
 , m_bUseCenter(bUseCenter)
 , m_bUseRight(bUseRight)
 , m_lastCheckTime(-1)
+, m_offsetTime(0)
+, m_eventOffsetTime(0)
+, m_bAG(false)
+, m_bLook(false)
+, m_input()
+, m_inputIterator(m_input)
 {
 	m_ptimer = new QTimer();
 	m_ptimer->setInterval(0);
 	QObject::connect(m_ptimer, SIGNAL(timeout()), this, SLOT(check()));
+	load(inputFile);
+    m_inputIterator.toFront();
+}
 
+bool HTestingLookDetector::load(QFile& inputFile)
+{
+	bool b = false;
 	qDebug() << "HTestingLookDetector: load signals from input file.";
 
 	int num = 0;
@@ -40,33 +52,97 @@ HTestingLookDetector::HTestingLookDetector(QFile& inputFile, int minlooktime_ms,
     		}
     	}
     }
+    return b;
 };
 
 void HTestingLookDetector::check()
 {
 	int t = HElapsedTimer::elapsed();
+	int tRelative = t - m_offsetTime;	// compare to tEvent-tEventOffsetTime
 	if (t == m_lastCheckTime) return;
-
-	while (m_lookTransitions.size() > 0 && m_lookTransitions[0].second <= t)
+	while (	m_inputIterator.hasNext() &&
+			m_inputIterator.peekNext()->type() != HEventType::HEventLookDisabled &&
+			m_inputIterator.peekNext()->timestamp()-m_eventOffsetTime <= tRelative)
 	{
-		QPair<const HLookTrans*, int> pair = m_lookTransitions.takeFirst();
-		addTrans(*pair.first, pair.second);
-		qDebug() << "HTestingLookDetector::check() addTrans " << *pair.first << " @ " << pair.second;
+		// Events of interest depend on whether we are in AGLook or Look mode.
+		if (m_bAG)
+		{
+			if (m_inputIterator.peekNext()->type() == HEventType::HEventAttention)
+			{
+				emit attention();
+			}
+			else
+			{
+				qDebug() << "HTestingLookDetector::check(AG): skip event " << m_inputIterator.peekNext()->eventCSV();
+			}
+		}
+		if (m_bLook)
+		{
+			if (m_inputIterator.peekNext()->type() == HEventType::HEventLookTrans)
+			{
+				HLookTransEvent* elt = static_cast<HLookTransEvent*>(m_inputIterator.peekNext());
+				addTrans(elt->transtype(), t);
+			}
+			else
+			{
+				qDebug() << "HTestingLookDetector::check(Look): skip event " << m_inputIterator.peekNext()->eventCSV();
+			}
+		}
+		m_inputIterator.next();
 	}
 	m_lastCheckTime = t;
 };
 
 void HTestingLookDetector::agLookEnabled(bool enabled)
 {
-	Q_UNUSED(enabled);
+	if (enabled)
+	{
+		m_bAG = true;
+		m_bLook = false;
+		m_ptimer->start();
+		if (m_inputIterator.skipToEventType(HEventType::HEventAGLookEnabled))
+		{
+			// The time on the AGLookEnabled event is the event offset
+			m_eventOffsetTime = m_inputIterator.peekNext()->timestamp();
+			qDebug() << "HTestingLookDetector::agLookEnabled(true): AGLookEnabledEvent @ " << m_eventOffsetTime;
+		}
+		else
+		{
+			qCritical() << "HTestingLookDetector::agLookEnabled(true): Cannot skip to AGLookEnabled event.";
+		}
+	}
+	else
+	{
+		m_ptimer->stop();
+		m_bAG = false;
+		m_bLook = false;
+	}
 }
 
 void HTestingLookDetector::lookEnabled(bool enabled)
 {
 	if (enabled)
+	{
+		m_bAG = false;
+		m_bLook = true;
 		m_ptimer->start();
+		if (m_inputIterator.skipToEventType(HEventType::HEventLookEnabled))
+		{
+			// The time on the LookEnabled event is the event offset
+			m_eventOffsetTime = m_inputIterator.peekNext()->timestamp();
+			qDebug() << "HTestingLookDetector::lookEnabled(true): LookEnabledEvent @ " << m_eventOffsetTime;
+		}
+		else
+		{
+			qCritical() << "HTestingLookDetector::lookEnabled(true): Cannot skip to LookEnabled event.";
+		}
+	}
 	else
+	{
+		m_bAG = false;
+		m_bLook = false;
 		m_ptimer->stop();
+	}
 }
 
 bool HTestingLookDetector::processLine(const QString& line)
@@ -93,36 +169,58 @@ bool HTestingLookDetector::processLine(const QString& line)
 		QStringList tokens = line.split(",");
 		if (tokens.at(0) == HLookTrans::NoneLeft.name())
 		{
-			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneLeft, tokens.at(1).toInt()));
+			m_input.append(new HLookTransEvent(HLookTrans::NoneLeft, tokens.at(1).toInt()));
+//			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneLeft, tokens.at(1).toInt()));
 		}
 		else if (tokens.at(0) == HLookTrans::LeftNone.name())
 		{
-			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::LeftNone, tokens.at(1).toInt()));
+			m_input.append(new HLookTransEvent(HLookTrans::LeftNone, tokens.at(1).toInt()));
+//			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::LeftNone, tokens.at(1).toInt()));
 		}
 		else if (tokens.at(0) == HLookTrans::NoneCenter.name())
 		{
-			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneCenter, tokens.at(1).toInt()));
+			m_input.append(new HLookTransEvent(HLookTrans::NoneCenter, tokens.at(1).toInt()));
+//			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneCenter, tokens.at(1).toInt()));
 		}
 		else if (tokens.at(0) == HLookTrans::CenterNone.name())
 		{
-			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::CenterNone, tokens.at(1).toInt()));
+			m_input.append(new HLookTransEvent(HLookTrans::CenterNone, tokens.at(1).toInt()));
+//			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::CenterNone, tokens.at(1).toInt()));
 		}
 		else if (tokens.at(0) == HLookTrans::NoneRight.name())
 		{
-			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneRight, tokens.at(1).toInt()));
+			m_input.append(new HLookTransEvent(HLookTrans::NoneRight, tokens.at(1).toInt()));
+//			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneRight, tokens.at(1).toInt()));
 		}
 		else if (tokens.at(0) == HLookTrans::RightNone.name())
 		{
-			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::RightNone, tokens.at(1).toInt()));
+			m_input.append(new HLookTransEvent(HLookTrans::RightNone, tokens.at(1).toInt()));
+//			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::RightNone, tokens.at(1).toInt()));
 		}
 		else if (tokens.at(0) == HLookTrans::NoneNone.name())
 		{
-			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneNone, tokens.at(1).toInt()));
+			m_input.append(new HLookTransEvent(HLookTrans::NoneNone, tokens.at(1).toInt()));
+//			m_lookTransitions.append( QPair< const HLookTrans*, int>(&HLookTrans::NoneNone, tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HEventType::HEventLookEnabled.name())
+		{
+			m_input.append(new HLookEnabledEvent(tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HEventType::HEventAGLookEnabled.name())
+		{
+			m_input.append(new HAGLookEnabledEvent(tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HEventType::HEventLookDisabled.name())
+		{
+			m_input.append(new HLookDisabledEvent(tokens.at(1).toInt()));
+		}
+		else if (tokens.at(0) == HEventType::HEventAttention.name())
+		{
+			m_input.append(new HAttentionEvent(tokens.at(1).toInt()));
 		}
 		else
 		{
-			qDebug() << "Error in input file: unknown look trans type: " << line;
-			bval = false;
+			qDebug() << "Skipping line: " << line;
 		}
 	}
 	return bval;

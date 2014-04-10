@@ -24,6 +24,7 @@ public:
 protected:
 	virtual void agLookEnabled(bool enabled);
 	virtual void lookEnabled(bool enabled);
+	virtual bool load(QFile& inputFile);	// will be overloaded
 private:
 	// Process a line read from the input file.
 	bool processLine(const QString& line);
@@ -35,12 +36,21 @@ private:
 	bool m_bUseCenter;
 	bool m_bUseRight;
 	int m_lastCheckTime;
+	int m_offsetTime;
+	int m_eventOffsetTime;
+	bool m_bAG;
+	bool m_bLook;
 
 	/// timer for checking trans list.
 	QTimer* m_ptimer;
 
 	/// Transitions list
-	QList< QPair< const HLookTrans*, int> > m_lookTransitions;
+//	QList< QPair< const HLookTrans*, int> > m_lookTransitions;
+
+	// input is taken from an event log. This is NOT the same event log
+	// that is used by HLooker for output.
+	HEventLog m_input;
+	HMutableEventLogIterator m_inputIterator;
 };
 
 #endif /* HTESTINGLOOKDETECTOR_H_ */
