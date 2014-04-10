@@ -54,6 +54,7 @@ QDataStream & Habit::operator>> (QDataStream& stream, Habit::ExperimentSettings&
 	Habit::StimuliSettings habituationStimuliSettings(HStimContext::HabituationPhase);
 	Habit::StimuliSettings testStimuliSettings(HStimContext::TestPhase);
 	stream >> id >> name >> monitorSettings >> controlBarOptions >>
+		lookSettings >>
 		pretestPhaseSettings >>
 		habituationPhaseSettings >>
 		testPhaseSettings >>
