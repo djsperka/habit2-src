@@ -345,3 +345,23 @@ const HLookDetectorType& getLookDetectorType(int number_value)
 	return *result;
 };
 
+
+// HRandomizationType
+
+const HRandomizationType HRandomizationType::UnknownRandomizationType(-1, "UnknownRandomizationType", "Unknown Type");
+const HRandomizationType HRandomizationType::Simple(0, "Simple", "Simple Randomization");
+const HRandomizationType HRandomizationType::Block(1, "Block", "Randomization by Blocks");
+const HRandomizationType* HRandomizationType::A[2] =
+{
+		&HRandomizationType::Simple,
+		&HRandomizationType::Block
+};
+
+const HRandomizationType& getRandomizationType(int number_value)
+{
+	const HRandomizationType* result = &HRandomizationType::UnknownRandomizationType;
+	for (unsigned int i=0; i<sizeof(HRandomizationType::A)/sizeof(HRandomizationType *) && result==&HRandomizationType::UnknownRandomizationType; i++)
+		if (number_value == HRandomizationType::A[i]->number()) result = HRandomizationType::A[i];
+	return *result;
+};
+
