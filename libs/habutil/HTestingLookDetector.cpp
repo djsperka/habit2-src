@@ -36,11 +36,12 @@ HTestingLookDetector::HTestingLookDetector(QFile& inputFile, int minlooktime_ms,
 bool HTestingLookDetector::load(QFile& inputFile)
 {
 	bool b = false;
-	qDebug() << "HTestingLookDetector: load signals from input file.";
+	qDebug() << "HTestingLookDetector: loading input file " << inputFile.fileName();
 
 	int num = 0;
     if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
+    	b = true;
     	QTextStream in(&inputFile);
     	while (!in.atEnd())
     	{
@@ -51,6 +52,11 @@ bool HTestingLookDetector::load(QFile& inputFile)
     			qDebug() << "Error in input file at line " << num << ": " << line;
     		}
     	}
+    }
+    if (b)
+    {
+    	qDebug() << "Loaded " << m_input.size() << " events. Starting...";
+    	m_ptimer->start();
     }
     return b;
 };
@@ -76,7 +82,7 @@ void HTestingLookDetector::check()
 				qDebug() << "HTestingLookDetector::check(AG): skip event " << m_inputIterator.peekNext()->eventCSV();
 			}
 		}
-		if (m_bLook)
+		else if (m_bLook)
 		{
 			if (m_inputIterator.peekNext()->type() == HEventType::HEventLookTrans)
 			{
@@ -87,6 +93,14 @@ void HTestingLookDetector::check()
 			{
 				qDebug() << "HTestingLookDetector::check(Look): skip event " << m_inputIterator.peekNext()->eventCSV();
 			}
+		}
+		else if (m_inputIterator.peekNext()->type() == HEventType::HEventLookEnabled)
+		{
+			enableLook();
+		}
+		else if (m_inputIterator.peekNext()->type() == HEventType::HEventAGLookEnabled)
+		{
+			enableAGLook();
 		}
 		m_inputIterator.next();
 	}
@@ -99,7 +113,7 @@ void HTestingLookDetector::agLookEnabled(bool enabled)
 	{
 		m_bAG = true;
 		m_bLook = false;
-		m_ptimer->start();
+//		m_ptimer->start();
 		if (m_inputIterator.skipToEventType(HEventType::HEventAGLookEnabled))
 		{
 			// The time on the AGLookEnabled event is the event offset
@@ -113,7 +127,7 @@ void HTestingLookDetector::agLookEnabled(bool enabled)
 	}
 	else
 	{
-		m_ptimer->stop();
+//		m_ptimer->stop();
 		m_bAG = false;
 		m_bLook = false;
 	}
@@ -125,7 +139,7 @@ void HTestingLookDetector::lookEnabled(bool enabled)
 	{
 		m_bAG = false;
 		m_bLook = true;
-		m_ptimer->start();
+//		m_ptimer->start();
 		if (m_inputIterator.skipToEventType(HEventType::HEventLookEnabled))
 		{
 			// The time on the LookEnabled event is the event offset
@@ -141,7 +155,7 @@ void HTestingLookDetector::lookEnabled(bool enabled)
 	{
 		m_bAG = false;
 		m_bLook = false;
-		m_ptimer->stop();
+//		m_ptimer->stop();
 	}
 }
 

@@ -68,7 +68,7 @@ private slots:
 	void onSubjectInformationEdit();
 	void onRunTypeActivation(const QString& runType);
 	void onSubjectChosen(const QString&);
-
+	void onCurrentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
 private:
 	QGroupBox* runTypeGroup_;
 	QComboBox* runTypeCombo_;

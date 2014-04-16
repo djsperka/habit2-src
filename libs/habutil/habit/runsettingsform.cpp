@@ -98,6 +98,7 @@ void RunSettingsForm::makeConnections() {
 	connect(cancelButton_, SIGNAL(clicked()), this, SLOT(close()));	
 	connect(doneButton_, SIGNAL(clicked()), this, SLOT(onDone()));	
 	connect(settingsList_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onOrderActivation(QListWidgetItem*)));
+	connect(settingsList_, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)), this, SLOT(onCurrentItemChanged(QListWidgetItem*, QListWidgetItem*)));
 	connect(experimentBox_, SIGNAL(activated(QString)), this, SLOT(onExperimentActivation(QString)));
 	//connect(editSubjectInformation_, SIGNAL(clicked()), this, SLOT(onSubjectInformationEdit()));
 	connect(runTypeCombo_, SIGNAL(activated(QString)), this, SLOT(onRunTypeActivation(QString)));
@@ -304,6 +305,12 @@ void RunSettingsForm::onOrderActivation(QListWidgetItem* item) {
 	}
 }
 
+void RunSettingsForm::onCurrentItemChanged(QListWidgetItem* current, QListWidgetItem* previous)
+{
+	qDebug() << "onCurrentItemChanged(" << (current ? current->text() : "NULL") << ", " << (previous ? previous->text() : "NULL");
+}
+
+
 void RunSettingsForm::initializeRunSettings(const QString& orderName)  {
 	if(orderName == HABITUATION_ORDER) {
 		runSettings_.setHabituationOrder(stimuliOrderEdit_->toPlainText());
@@ -385,11 +392,9 @@ void RunSettingsForm::onRunTypeActivation(const QString& runType)  {
 		onExperimentActivation(experimentBox_->currentText());
 		experimentsChooserLabel_->setEnabled(true);
 		subjectChooser_->setCurrentIndex(-1);
-	}// else if(runType == EXISTING_RUN) {
-	//	setControlsEnabled(false, true);
-	//	experimentBox_->setEnabled(subjectChooser_->currentIndex() != -1);
-	//	experimentsChooserLabel_->setEnabled(subjectChooser_->currentIndex() != -1);
-	//}
+	}
+
+#if TEMP_HACK
 	settingsList_->clear();
 	if (runType == NEW_RUN)
 	{
@@ -405,40 +410,28 @@ void RunSettingsForm::onRunTypeActivation(const QString& runType)  {
 		settingsList_->addItem(new QListWidgetItem(TEST_ORDER));
 	}
 	settingsList_->setCurrentRow(0);
-	/*if (settingsList_->currentItem())
-	{
-		QString curItem = settingsList_->currentItem()->data(Qt::DisplayRole).toString();
-		if (runType == NEW_RUN)
-		{
-			
-			if (curItem == SUBJECT_INFORMATION)
-				settingsList_->setCurrentRow(0);
-			else if (curItem == PRETEST_ORDER)
-				settingsList_->setCurrentRow(1);
-			else if (curItem == HABITUATION_ORDER)
-				settingsList_->setCurrentRow(2);
-			else if (curItem == TEST_ORDER)
-				settingsList_->setCurrentRow(3);
-			stackedWgt_->setCurrentIndex(settingsList_->currentIndex().row());
-		}
-		else
-		{
-			
-			if (curItem == PRETEST_ORDER)
-				settingsList_->setCurrentRow(0);
-			else if (curItem == HABITUATION_ORDER)
-				settingsList_->setCurrentRow(1);
-			else if (curItem == TEST_ORDER)
-				settingsList_->setCurrentRow(2);
-			else
-				settingsList_->setCurrentRow(0);
-			stackedWgt_->setCurrentIndex(settingsList_->currentIndex().row()+1);
-		}
-	}*/
 	if (runType == NEW_RUN)
 		stackedWgt_->setCurrentIndex(1);
 	else
 		stackedWgt_->setCurrentIndex(0);
+#else
+	if (runType == NEW_RUN)
+	{
+		QListWidgetItem* pitem = settingsList_->item(0);
+		pitem->setFlags(Qt::ItemIsSelectable);
+		stackedWgt_->setCurrentIndex(1);
+		qDebug() << "onRunTypeActivation(" << runType << "): set item " << pitem->text() << " selectable";
+	}
+	else
+	{
+		QListWidgetItem* pitem = settingsList_->item(0);
+		pitem->setFlags(Qt::NoItemFlags);
+		stackedWgt_->setCurrentIndex(0);
+		qDebug() << "onRunTypeActivation(" << runType << "): set item " << pitem->text() << " noItemFlags";
+	}
+
+
+#endif
 }
 
 void RunSettingsForm::onSubjectChosen(const QString& subj) {
@@ -463,6 +456,10 @@ void RunSettingsForm::setControlsEnabled(bool isEnabled, bool isSubjInfoEnabled)
 		stimuliTable_->clearContents();
 		stimuliTable_->setRowCount(0);
 	}
+	else
+	{
+		// If a phase is not enabled, make it unselectable
+	}
 	randomizeGroup_->setEnabled(isEnabled);
  	doneButton_->setEnabled(isEnabled);
 	//editSubjectInformation_->setEnabled(isEnabled);
@@ -472,7 +469,8 @@ void RunSettingsForm::setControlsEnabled(bool isEnabled, bool isSubjInfoEnabled)
 	subjectChooserLabel_->setEnabled(isSubjInfoEnabled);
 }
 
-void RunSettingsForm::initializeSettingsList() {
+void RunSettingsForm::initializeSettingsList()
+{
 	Q_ASSERT(0 != settingsList_);
 	settingsList_->addItem(new QListWidgetItem(SUBJECT_INFORMATION));
 	settingsList_->addItem(new QListWidgetItem(PRETEST_ORDER));
