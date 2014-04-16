@@ -8,6 +8,7 @@
  */
 
 #include "HPhaseCriteria.h"
+#include <algorithm>
 
 
 using namespace Habit;
@@ -45,19 +46,39 @@ bool HPhaseHabituationCriteria::getBasisSum(const HPhaseLog& log, int& iBasisSum
 {
 	bool bval = false;
 	int iTempSum = 0;
+	int iStep = 1;
+	if (m_c.getWindowType() == HCriterionWindowType::HCriterionWindowFixed)
+		iStep = m_c.getWindowSize();
 	iBasisSum = 0;
 	iBasisWindowStart = -1;
 	if (m_c.getBasis() == HCriterionBasisType::HCriterionBasisFirstN)
 	{
-		if (getWindowSum(log, iTempSum, 0))
+		// When a min basis value is NOT required, just check the first n trials.
+		// If a valid sum is gotten (i.e. if there are at least n trials) then a
+		// basis will be found.
+		if (!m_c.getRequireMinBasisValue())
 		{
-			if ((m_c.getRequireMinBasisValue() && iTempSum > (int)m_c.getMinBasisValue()) ||
-				(!m_c.getRequireMinBasisValue()))
+			if (getWindowSum(log, iTempSum, 0))
 			{
 				bval = true;
 				iBasisSum = iTempSum;
 				iBasisWindowStart = 0;
 			}
+		}
+		else
+		{
+			// In the case where a min basis value IS REQUIRED, then we take the
+			// first n trials that satisfy the min basis requirement.
+			for (int i=0; !bval && getWindowSum(log, iTempSum, i); i+=iStep)
+			{
+				if (iTempSum > (int)m_c.getMinBasisValue())
+				{
+					bval = true;
+					iBasisSum = iTempSum;
+					iBasisWindowStart = i;
+				}
+			}
+
 		}
 	}
 	else 
@@ -69,7 +90,7 @@ bool HPhaseHabituationCriteria::getBasisSum(const HPhaseLog& log, int& iBasisSum
 			iStep = m_c.getWindowSize();
 		iBasisWindowStart = -1;
 
-		for (int i=0; getWindowSum(log, itemp, i); i++)
+		for (int i=0; getWindowSum(log, itemp, i); i+=iStep)
 		{
 			if (itemp > bmax)
 			{
@@ -118,7 +139,7 @@ bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHa
 			iStep = m_c.getWindowSize();
 		if (m_c.getExcludeBasisWindow())
 			iWindowStart += m_c.getWindowSize();
-		for (int i=iWindowStart; i<log.size(); i+=iStep)
+		for (int i=iWindowStart; i<std::min<int>(log.size(), getN()-m_c.getWindowSize()+1); i+=iStep)
 		{
 			if (getWindowSum(log, windowSum, i) && windowSum < threshold)
 			{

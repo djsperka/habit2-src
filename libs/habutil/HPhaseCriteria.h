@@ -33,6 +33,7 @@ public:
 	HPhaseFixedNCriteria(int N): HPhaseCriteria(), m_N(N) {};
 	virtual ~HPhaseFixedNCriteria() {};
 	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated);
+	int getN() { return m_N; };
 protected:
 	int m_N;
 };
