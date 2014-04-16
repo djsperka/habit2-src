@@ -108,7 +108,9 @@ HEADERS +=	HLook.h \
 			habit/HLookSettings.h \
 			habit/HLookSettingsWidget.h \
 			habit/HPhaseSettings.h \
-			habit/HPhaseSettingsWidget.h
+			habit/HPhaseSettingsWidget.h \
+			habit/HOrderSettings.h \
+			habit/HOrderSettingsWidget.h
 
 SOURCES +=	HLook.cpp \
 			HLooker.cpp \
@@ -204,7 +206,9 @@ SOURCES +=	HLook.cpp \
 			habit/HLookSettings.cpp \
 			habit/HLookSettingsWidget.cpp \
 			habit/HPhaseSettings.cpp \
-			habit/HPhaseSettingsWidget.cpp
+			habit/HPhaseSettingsWidget.cpp \
+			habit/HOrderSettings.cpp \
+			habit/HOrderSettingsWidget.cpp
 
 RESOURCES = habit/resources.qrc
 
