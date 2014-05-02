@@ -36,7 +36,10 @@ private:
 	bool m_bUseCenter;
 	bool m_bUseRight;
 	int m_lastCheckTime;
-	int m_offsetTime;
+	int m_offsetTime;		// The elapsed timer used during testing may have elapsed more time than the
+							// actual experiment due to pauses, e.g. This time is subtracted from the
+							// value of the elapsed timer to get the time in the same time frame as the
+							// input data events
 	int m_eventOffsetTime;
 	bool m_bAG;
 	bool m_bLook;

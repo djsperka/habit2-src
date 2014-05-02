@@ -56,6 +56,7 @@ bool HTestingLookDetector::load(QFile& inputFile)
     if (b)
     {
     	qDebug() << "Loaded " << m_input.size() << " events. Starting...";
+    	m_offsetTime = HElapsedTimer::elapsed();
     	m_ptimer->start();
     }
     return b;
@@ -70,29 +71,14 @@ void HTestingLookDetector::check()
 			m_inputIterator.peekNext()->type() != HEventType::HEventLookDisabled &&
 			m_inputIterator.peekNext()->timestamp()-m_eventOffsetTime <= tRelative)
 	{
-		// Events of interest depend on whether we are in AGLook or Look mode.
-		if (m_bAG)
+		if (m_inputIterator.peekNext()->type() == HEventType::HEventAttention)
 		{
-			if (m_inputIterator.peekNext()->type() == HEventType::HEventAttention)
-			{
-				emit attention();
-			}
-			else
-			{
-				qDebug() << "HTestingLookDetector::check(AG): skip event " << m_inputIterator.peekNext()->eventCSV();
-			}
+			emit attention();
 		}
-		else if (m_bLook)
+		else if (m_inputIterator.peekNext()->type() == HEventType::HEventLookTrans)
 		{
-			if (m_inputIterator.peekNext()->type() == HEventType::HEventLookTrans)
-			{
-				HLookTransEvent* elt = static_cast<HLookTransEvent*>(m_inputIterator.peekNext());
-				addTrans(elt->transtype(), t);
-			}
-			else
-			{
-				qDebug() << "HTestingLookDetector::check(Look): skip event " << m_inputIterator.peekNext()->eventCSV();
-			}
+			HLookTransEvent* elt = static_cast<HLookTransEvent*>(m_inputIterator.peekNext());
+			addTrans(elt->transtype(), t);
 		}
 		else if (m_inputIterator.peekNext()->type() == HEventType::HEventLookEnabled)
 		{
@@ -101,6 +87,10 @@ void HTestingLookDetector::check()
 		else if (m_inputIterator.peekNext()->type() == HEventType::HEventAGLookEnabled)
 		{
 			enableAGLook();
+		}
+		else
+		{
+			qDebug() << "HTestingLookDetector::check() @ " << t << ": skip event " << m_inputIterator.peekNext()->eventCSV();
 		}
 		m_inputIterator.next();
 	}
@@ -113,21 +103,9 @@ void HTestingLookDetector::agLookEnabled(bool enabled)
 	{
 		m_bAG = true;
 		m_bLook = false;
-//		m_ptimer->start();
-		if (m_inputIterator.skipToEventType(HEventType::HEventAGLookEnabled))
-		{
-			// The time on the AGLookEnabled event is the event offset
-			m_eventOffsetTime = m_inputIterator.peekNext()->timestamp();
-			qDebug() << "HTestingLookDetector::agLookEnabled(true): AGLookEnabledEvent @ " << m_eventOffsetTime;
-		}
-		else
-		{
-			qCritical() << "HTestingLookDetector::agLookEnabled(true): Cannot skip to AGLookEnabled event.";
-		}
 	}
 	else
 	{
-//		m_ptimer->stop();
 		m_bAG = false;
 		m_bLook = false;
 	}
@@ -139,23 +117,11 @@ void HTestingLookDetector::lookEnabled(bool enabled)
 	{
 		m_bAG = false;
 		m_bLook = true;
-//		m_ptimer->start();
-		if (m_inputIterator.skipToEventType(HEventType::HEventLookEnabled))
-		{
-			// The time on the LookEnabled event is the event offset
-			m_eventOffsetTime = m_inputIterator.peekNext()->timestamp();
-			qDebug() << "HTestingLookDetector::lookEnabled(true): LookEnabledEvent @ " << m_eventOffsetTime;
-		}
-		else
-		{
-			qCritical() << "HTestingLookDetector::lookEnabled(true): Cannot skip to LookEnabled event.";
-		}
 	}
 	else
 	{
 		m_bAG = false;
 		m_bLook = false;
-//		m_ptimer->stop();
 	}
 }
 
