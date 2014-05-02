@@ -38,7 +38,7 @@ void HAudioPlayer::play(int number)
 	if (number >= 0 && number < m_sources.count())
 	{
 		m_pMediaObject->setCurrentSource((m_sources[number]->filename()));
-		m_pAudioOutput->setVolume(m_sources[number]->getAudioBalance());
+		m_pAudioOutput->setVolume((double)m_sources[number]->getAudioBalance()/100.0);
 		m_pMediaObject->play();
 		m_iCurrentStim = number;
 		m_nowPlayingFilename = m_sources[number]->filename();

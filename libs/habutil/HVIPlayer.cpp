@@ -178,7 +178,7 @@ void HVIPlayer::play(int number)
 
 			//qDebug() << "VIDEO player geom " << geometry().left() << "," << geometry().bottom() << "," << geometry().width() << "," << geometry().height();
 			//qDebug() << "VIDEO widget geom " << m_pVideoWidget->geometry().left() << "," << m_pVideoWidget->geometry().bottom() << "," << m_pVideoWidget->geometry().width() << "," << m_pVideoWidget->geometry().height();
-			m_pAudioOutput->setVolume(s->getAudioBalance());
+			m_pAudioOutput->setVolume((double)s->getAudioBalance()/100.0);
 			m_pMediaObject->play();
 			m_pStackedLayout->setCurrentIndex(1);
 			//m_pVideoWidget->setFullScreen(m_isFullScreen);
