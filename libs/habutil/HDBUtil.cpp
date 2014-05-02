@@ -212,9 +212,10 @@ bool getDBTableExists(QString name)
 bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 {
 	bool result = true;
-	const int iMinVersion = 2000006;
-	const int iLatestVersion = 2000009;
-	const int iAddColumnsToHabituationSettings = 2000009;
+	const int iMinVersion                                      = 2000006;
+	const int iAddColumnsToHabituationSettings                 = 2000009;
+	const int iAddInclusiveLookTimeColumnToLookSettings        = 2000010;
+	const int iLatestVersion                                   = 2000010;
 	int iVersion = getDBVersion();
 
 	// Will any updates be required? If so, close db, make a copy, then reopen.
@@ -268,6 +269,29 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 						qDebug() << q2.lastQuery() << " : " << q2.lastError();
 						qDebug() << q3.lastQuery() << " : " << q3.lastError();
 						qDebug() << q4.lastQuery() << " : " << q4.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
+				if (iVersion < iAddInclusiveLookTimeColumnToLookSettings)
+				{
+					// Add column inclusive_look to habituation_settings
+					db.transaction();
+					QSqlQuery q0("alter table look_settings add column inclusive_look_time INTEGER DEFAULT 1");
+					QSqlQuery q1("insert into habit_version (version) values(?)");
+					q1.bindValue(0, iAddInclusiveLookTimeColumnToLookSettings);
+					q1.exec();
+					if (!q0.lastError().isValid() && !q1.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAddInclusiveLookTimeColumnToLookSettings;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddInclusiveLookTimeColumnToLookSettings;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
 						result = false;
 						db.rollback();
 					}
