@@ -331,6 +331,31 @@ bool operator==(const HRandomizationType& lhs, const HRandomizationType& rhs);
 bool operator!=(const HRandomizationType& lhs, const HRandomizationType& rhs);
 const HRandomizationType& getRandomizationType(int number_value);
 
+class HPlayerPositionType
+{
+public:
+	static const HPlayerPositionType UnknownPlayerPositionType;
+	static const HPlayerPositionType Control;
+	static const HPlayerPositionType Left;
+	static const HPlayerPositionType Center;
+	static const HPlayerPositionType Right;
+	static const HPlayerPositionType Sound;
+
+	static const HPlayerPositionType* A[5];
+
+	HPlayerPositionType() : m_t(-1), m_s("") {};
+	HPlayerPositionType(const HPlayerPositionType& ppt): m_t(ppt.number()), m_s(ppt.name()) {};
+	HPlayerPositionType& operator=(const HPlayerPositionType& rhs);
+
+	int number() const { return m_t; };
+	QString name() const { return m_s; };
+private:
+	explicit HPlayerPositionType(int t, const char *name): m_t(t), m_s(name) {};
+	int m_t;
+	QString m_s;
+};
+
+bool operator<(const HPlayerPositionType& lhs, const HPlayerPositionType& rhs);
 
 
 

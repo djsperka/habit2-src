@@ -57,7 +57,7 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 #else
 		playerLeft = new HVIPlayer(ms.getLeftMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
 #endif
-		pmm->addPlayer(playerLeft, ms.getLeftMonitorIndex());
+		pmm->addPlayer(HPlayerPositionType::Left, playerLeft, ms.getLeftMonitorIndex());
 	}
 	if (ms.getCenterMonitorIndex() > -1)
 	{
@@ -66,7 +66,7 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 #else
 		playerCenter = new HVIPlayer(ms.getCenterMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
 #endif
-		pmm->addPlayer(playerCenter, ms.getCenterMonitorIndex());
+		pmm->addPlayer(HPlayerPositionType::Center, playerCenter, ms.getCenterMonitorIndex());
 	}
 	if ((ms.getRightMonitorIndex() > -1)) 
 	{
@@ -75,12 +75,12 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 #else
 		playerRight = new HVIPlayer(ms.getRightMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
 #endif
-		pmm->addPlayer(playerRight, ms.getRightMonitorIndex());
+		pmm->addPlayer(HPlayerPositionType::Right, playerRight, ms.getRightMonitorIndex());
 	}
 	if ((ms.getControlMonitorIndex() > -1)) 
 	{
 		playerControl = new HAudioPlayer(ms.getControlMonitorIndex());
-		pmm->addPlayer(playerControl, ms.getControlMonitorIndex());
+		pmm->addPlayer(HPlayerPositionType::Sound, playerControl, ms.getControlMonitorIndex());
 	}
 	
 	// Attention getter? 

@@ -365,3 +365,36 @@ const HRandomizationType& getRandomizationType(int number_value)
 	return *result;
 };
 
+
+// HPlayerPositionType
+
+const HPlayerPositionType HPlayerPositionType::UnknownPlayerPositionType(-1, "UnknownPosition");
+const HPlayerPositionType HPlayerPositionType::Control(0, "Control");
+const HPlayerPositionType HPlayerPositionType::Left(1, "Left");
+const HPlayerPositionType HPlayerPositionType::Center(2, "Center");
+const HPlayerPositionType HPlayerPositionType::Right(3, "Right");
+const HPlayerPositionType HPlayerPositionType::Sound(4, "Sound");
+const HPlayerPositionType* HPlayerPositionType::A[5] =
+{
+		&HPlayerPositionType::Control,
+		&HPlayerPositionType::Left,
+		&HPlayerPositionType::Center,
+		&HPlayerPositionType::Right,
+		&HPlayerPositionType::Sound
+};
+
+bool operator<(const HPlayerPositionType& lhs, const HPlayerPositionType& rhs)
+{
+	return lhs.number() < rhs.number();
+}
+
+HPlayerPositionType& HPlayerPositionType::operator=(const HPlayerPositionType& rhs)
+{
+	if (this->number() != rhs.number())
+	{
+		m_t = rhs.number();
+		m_s = rhs.name();
+	}
+	return *this;
+};
+
