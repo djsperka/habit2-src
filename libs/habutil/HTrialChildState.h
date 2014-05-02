@@ -207,8 +207,9 @@ public:
 private slots:
 	void noLookTimeout();
 	void gotLookStarted();
-	void gotLookAwayStarted();
-	
+	void gotLookPending();
+	void gotLookAborted();
+
 protected:
 	// Start timer on entry to this state. Also generate kStimRunning event. 
 	void onEntry(QEvent* e);
@@ -218,7 +219,8 @@ private:
 	const Habit::HPhaseSettings& m_phaseSettings;
 	QTimer* m_ptimerNoLook;
 	bool m_bGotLookStarted;
-	bool m_bGotLookAwayStarted;
+	bool m_bGotLookPending;
+	bool m_bNeedPendingBeforeAbort;
 };
 
 

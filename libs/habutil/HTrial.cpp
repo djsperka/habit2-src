@@ -76,7 +76,8 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 
 	// connect look detector signals to sStimRunning state's appropriate slots.
 	QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookStarted()), sStimRunning, SLOT(gotLookStarted()));
-	QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookAwayStarted()), sStimRunning, SLOT(gotLookAwayStarted()));
+	QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookPending()), sStimRunning, SLOT(gotLookPending()));
+	QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookAborted()), sStimRunning, SLOT(gotLookAborted()));
 
 	sStimRequest->addTransition(&phase.experiment().getMediaManager(), SIGNAL(stimStarted(int)), sStimRunning);		// on entry, emits playStim()
 

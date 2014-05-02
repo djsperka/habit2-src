@@ -50,7 +50,8 @@ void HStimRunningState::onEntry(QEvent* e)
 		m_ptimerNoLook->start(m_phaseSettings.getMaxNoLookTime());
 	}
 	m_bGotLookStarted = false;
-	m_bGotLookAwayStarted = false;
+	m_bGotLookPending = false;
+	m_bNeedPendingBeforeAbort = false;
 };
 
 
@@ -60,6 +61,22 @@ void HStimRunningState::gotLookStarted()
 	m_bGotLookStarted = true;
 }
 
+void HStimRunningState::gotLookPending()
+{
+	m_bGotLookPending = true;
+}
+
+void HStimRunningState::gotLookAborted()
+{
+	// Under certain conditions, this signal generates an HNoLookQEvent.
+	m_bGotLookStarted = false;
+	if (m_bNeedPendingBeforeAbort && !m_bGotLookPending)
+	{
+		machine()->postEvent(new HNoLookQEvent());
+	}
+}
+
+#if 0
 void HStimRunningState::gotLookAwayStarted()
 {
 	if (m_bGotLookStarted) return;
@@ -73,13 +90,29 @@ void HStimRunningState::gotLookAwayStarted()
 		m_bGotLookStarted = false;
 	}
 }
+#endif
 
 void HStimRunningState::noLookTimeout()
 {
-	if (m_bGotLookStarted) return;
-	else
+	// The timer associated with the "Max No Look Time" has expired.
+	// This timer will not have started if the "Max No Look Time" has not been set.
+	// If this timeout has occurred, then either
+	// 1) must have m_bGotLookPending == true, meaning a look has met the min look time criteria,
+	//    though the look may not yet be complete. It WILL become a complete look eventually.
+	// 2) if !m_bGotLookPending, then must have m_bLookStarted==true. If not, post a HNoLookQEvent()
+	//    (which should trigger a transition from this state to a trial-ending state)
+	//    If we DO HAVE m_bLookStarted==true, then we must receive SIGNAL(lookPending()) before we
+	//    receive SIGNAL(lookAborted()). If SIGNAL(lookAborted()) is received first, then post a
+	//    HNoLookQEvent(). If SIGNAL(lookPending()) is received first, do nothing -- the "Max No
+	//    Look Time" requirement has been met.
+	if (m_bGotLookPending) return;
+	else if (!m_bGotLookStarted)
 	{
 		machine()->postEvent(new HNoLookQEvent());
+	}
+	else
+	{
+		m_bNeedPendingBeforeAbort = true;
 	}
 }
 
