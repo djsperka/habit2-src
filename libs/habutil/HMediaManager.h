@@ -36,15 +36,18 @@
 #define _HMEDIAMANAGER_H_
 
 #include <QObject>
-#include <QList>
+#include <QMap>
 #include "HPlayer.h"
+#include "HTypes.h"
+#include "attentiongettersettings.h"
+
 
 class HMediaManager : public QObject
 {
 	Q_OBJECT
 
 private:
-	QList<HPlayer *> m_players;
+	QMap<HPlayerPositionType, HPlayer *> m_players;
 	bool m_pendingStartSignal;
 	bool m_pendingAGStartSignal;
 	bool m_pendingClearSignal;
@@ -53,8 +56,10 @@ public:
 
 	HMediaManager(): QObject(), m_pendingStartSignal(false), m_pendingAGStartSignal(false), m_pendingClearSignal(false), m_pendingStimNumber(-1) {};
 	~HMediaManager();
-	void addPlayer(HPlayer* player, int screenIndex=-1);
+	void addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex=-1);
 	void clear();
+	void addAttentionGetter(const Habit::AttentionGetterSettings& ags);
+	//void addStimulus();
 public slots:
 
 	void stim(int);

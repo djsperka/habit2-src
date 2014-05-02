@@ -10,20 +10,21 @@
 #include "HMediaManager.h"
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QMapIterator>
 
 HMediaManager::~HMediaManager()
 {
-	QListIterator<HPlayer*> it(m_players);
+	QMapIterator<HPlayerPositionType, HPlayer*> it(m_players);
 	while (it.hasNext())
 	{
-		HPlayer* p = it.next();
+		HPlayer* p = it.next().value();
 		p->stop();
 		delete p;	// error?
 		//p->close();
 	}
 }
 
-void HMediaManager::addPlayer(HPlayer* player, int screenIndex)
+void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex)
 {
 	if (screenIndex >= 0)
 	{
@@ -36,27 +37,27 @@ void HMediaManager::addPlayer(HPlayer* player, int screenIndex)
 		player->setGeometry(QRect(0, 0, 0, 0));
 	}
 	connect(player, SIGNAL(started(int, const QString&)), this, SLOT(playerStarted(int, const QString&)));
-	m_players.append(player);
+	m_players[ppt] = player;
 }
 
 void HMediaManager::stim(int i)
 {
 	m_pendingStartSignal = true;
 	m_pendingStimNumber = i;
-	QListIterator<HPlayer *> it(m_players);
+	QMapIterator<HPlayerPositionType, HPlayer *> it(m_players);
 	while (it.hasNext())
 	{
-		it.next()->play(i);
+		it.next().value()->play(i);
 	}
 }
 
 void HMediaManager::clear()
 {
 	m_pendingClearSignal = true;
-	QListIterator<HPlayer *> it(m_players);
+	QMapIterator<HPlayerPositionType, HPlayer *> it(m_players);
 	while (it.hasNext())
 	{
-		it.next()->clear();
+		it.next().value()->clear();
 	}
 }
 
