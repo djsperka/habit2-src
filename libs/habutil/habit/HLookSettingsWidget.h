@@ -47,7 +47,7 @@ namespace GUILib
 		QGroupBox* m_pgbLookAway;
 		QLineEdit* m_peditLook;
 		QLineEdit* m_peditLookAway;
-
+		QCheckBox* m_pcbInclusiveLookTime;
 	};
 }; // namespace
 

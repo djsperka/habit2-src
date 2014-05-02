@@ -39,6 +39,7 @@ const Habit::HLookSettings& HLookSettingsWidget::getHLookSettings()
 {
 	m_settings.setMinLookTime(m_peditLook->text().toUInt());
 	m_settings.setMinLookAwayTime(m_peditLookAway->text().toUInt());
+	m_settings.setInclusiveLookTime(m_pcbInclusiveLookTime->isChecked());
 	return m_settings;
 }
 
@@ -47,6 +48,7 @@ void HLookSettingsWidget::initialize()
 {
 	m_peditLook->setText(QString("%1").arg(m_settings.getMinLookTime()));
 	m_peditLookAway->setText(QString("%1").arg(m_settings.getMinLookAwayTime()));
+	m_pcbInclusiveLookTime->setChecked(m_settings.getInclusiveLookTime());
 }
 
 void HLookSettingsWidget::createComponents()
@@ -56,6 +58,7 @@ void HLookSettingsWidget::createComponents()
 	m_pgbLookAway = new QGroupBox(tr("Minimum Look-Away Time"));
 	m_peditLook = new QLineEdit();
 	m_peditLookAway = new QLineEdit();
+	m_pcbInclusiveLookTime = new QCheckBox("Inclusive look time?");
 }
 
 void HLookSettingsWidget::setValidators()
@@ -114,10 +117,12 @@ void HLookSettingsWidget::doLayout()
 	hboxMLAT->addWidget(m_peditLookAway);
 	hboxMLAT->addWidget(pMS2);
 
-//	QVBoxLayout* boxGB = new QVBoxLayout();
-	QHBoxLayout* boxGB = new QHBoxLayout();
+	QVBoxLayout* boxGB = new QVBoxLayout();
+//	QHBoxLayout* boxGB = new QHBoxLayout();
 	boxGB->addLayout(hboxMLT);
 	boxGB->addLayout(hboxMLAT);
+	boxGB->addWidget(m_pcbInclusiveLookTime);
+	boxGB->addStretch(1);
 	m_pgb->setLayout(boxGB);
 
 	// this widget object will have a single layout with the main group box in it
@@ -125,5 +130,5 @@ void HLookSettingsWidget::doLayout()
 	main->addWidget(m_pgb);
 	setLayout(main);
 
-	#endif
+#endif
 }

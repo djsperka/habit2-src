@@ -29,16 +29,17 @@ bool MainDao::addOrUpdateHLookSettings(int experimentId, Habit::HLookSettings* s
 	QString sql;
 	if (settings->getId() > 0)
 	{
-		sql = "update look_settings set min_look_time=?, min_lookaway_time=? where experiment_id=? and id=?";
+		sql = "update look_settings set min_look_time=?, min_lookaway_time=?, inclusive_look_time=? where experiment_id=? and id=?";
 	}
 	else
 	{
-		sql = "insert into look_settings (min_look_time, min_lookaway_time, experiment_id) values (?, ?, ?)";
+		sql = "insert into look_settings (min_look_time, min_lookaway_time, inclusive_look_time, experiment_id) values (?, ?, ?, ?)";
 	}
 	QSqlQuery q;
 	q.prepare(sql);
 	q.addBindValue(settings->getMinLookTime());
 	q.addBindValue(settings->getMinLookAwayTime());
+	q.addBindValue(settings->getInclusiveLookTime() ? 1 : 0);
 	q.addBindValue(experimentId);
 	if (settings->getId() > 0) q.addBindValue(settings->getId());
 	q.exec();
@@ -375,6 +376,8 @@ void MainDao::getHLookSettingsForExperiment(int experimentId, HLookSettings* loo
 		lookSettings->setMinLookTime(minLookTime);
 		uint minLookAwayTime = q.value(q.record().indexOf("min_lookaway_time")).toUInt();
 		lookSettings->setMinLookAwayTime(minLookAwayTime);
+		int iInclusiveLookTime = q.value(q.record().indexOf("inclusive_look_time")).toInt();
+		lookSettings->setInclusiveLookTime(iInclusiveLookTime!=0);
 	}
 }
 
