@@ -86,10 +86,11 @@ public:
 		indStimCenter = 9,
 		indStimRight = 10,
 		indStimISS = 11,
-		indTotalLook = 12,
-		indTotalAway = 13,
-		indLook = 14,
-		indNInit = 15,
+		indTrialStartTime = 12,
+		indTrialEndTime = 13,
+		indTotalLook = 14,
+		indTotalAway = 15,
+		indNInit = 16,
 	};
 
 	HTrialResultsRow(): QList<QString>()
@@ -105,11 +106,11 @@ public:
 
 	void setId(QString id) { (*this)[indSubjectId] = id; };
 	void setPhase(QString phase) { (*this)[indPhase] = phase; };
-	void setTrial(QString trial) { (*this)[indTrial] = trial; };
-	void setRepeat(QString repeat) { (*this)[indRepeat] = repeat; };
+	void setTrial(int itrial) { (*this)[indTrial] = QString("%1").arg(itrial); };
+	void setRepeat(int irepeat) { (*this)[indRepeat] = QString("%1").arg(irepeat); };
 	void setEndType(QString type) { (*this)[indEndType] = type; };
 	void setHabituated(QString habituated) { (*this)[indHabituated] = habituated; };
-	void setStimId(QString stimid) { (*this)[indStimId] = stimid; };
+	void setStimId(int stimid) { (*this)[indStimId] = QString("%1").arg(stimid); };
 	void setStimName(QString stim) { (*this)[indStimName] = stim; };
 	void setStimLeft(QString stim) { (*this)[indStimLeft] = stim; };
 	void setStimCenter(QString stim) { (*this)[indStimCenter] = stim; };
@@ -117,12 +118,29 @@ public:
 	void setStimISS(QString stim) { (*this)[indStimISS] = stim; };
 	void setTotalLook(QString look) { (*this)[indTotalLook] = look; };
 	void setTotalLookAway(QString away) { (*this)[indTotalAway] = away; };
-	void appendLook(QString direc, QString timeMS) { append(direc); append(timeMS); };
+	void setTrialStartTime(int t) { (*this)[indTrialStartTime] = QString("%1").arg(t); m_lastLookEndTime = t; };
+	void setTrialEndTime(int t)
+	{
+		(*this)[indTrialEndTime] = QString("%1").arg(t);
+		(*this)[indTotalLook] = QString("%1").arg(m_totalLookTime);
+		(*this)[indTotalAway] = QString("%1").arg(m_totalLookAwayTime);
+	};
+	void appendLook(HLook look);
+	//void appendLook(QString direc, QString startMS, QString endMS, QString timeMS) { append(direc); append(startMS); append(endMS); append(timeMS); };
+	const QList<HLook>& looks() const { return m_looks; };
 
 private:
+	int m_lastLookEndTime;
+	int m_totalLookTime;
+	int m_totalLookAwayTime;
+	QList<HLook> m_looks;
 	void init()
 	{
+		m_lastLookEndTime = 0;
+		m_totalLookTime = 0;
+		m_totalLookAwayTime = 0;
 		clear();
+		m_looks.clear();
 		for (int i=0; i<indNInit; i++) append(QString());
 	};
 

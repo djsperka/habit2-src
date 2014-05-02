@@ -6,6 +6,7 @@
  */
 
 #include "HResults.h"
+#include "HLook.h"
 #include <QFile>
 #include <QDataStream>
 #include <QCoreApplication>
@@ -17,6 +18,7 @@ QStringList HTrialResultsRow::headers =
 		QStringList() 	<< "SubjectID" << "Phase" << "Trial" << "Repeat" << "EndType"
 						<< "Habituated" << "StimID" << "StimName"
 						<< "Left" << "Center" << "Right" << "ISS"
+						<< "Trial Start" << "Trial End"
 						<< "TotalLook" << "TotalLookAway" << "Looks";
 
 
@@ -211,15 +213,16 @@ bool HResults::saveToCSV(const QString& filename) const
 					row.setHabituated(QString("Yes"));
 				else
 					row.setHabituated(QString("No"));
-				row.setTrial(QString("%1").arg(ptse->trialnumber()));
-				row.setRepeat(QString("%1").arg(ptse->repeatnumber()));
+				row.setTrialStartTime(ptse->timestamp());
+				row.setTrial(ptse->trialnumber());
+				row.setRepeat(ptse->repeatnumber());
 				totalLookTime = 0;
 				totalLookAwayTime = 0;
 			}
 			else if (e->type() == HEventType::HEventStimStart)
 			{
 				HStimStartEvent* psse = static_cast<HStimStartEvent*>(e);
-				row.setStimId(QString("%1").arg(psse->stimid()));
+				row.setStimId(psse->stimid());
 			}
 			else if (e->type() == HEventType::HEventScreenStart)
 			{
@@ -258,23 +261,7 @@ bool HResults::saveToCSV(const QString& filename) const
 			else if (e->type() == HEventType::HEventLook)
 			{
 				HLookEvent* ple = static_cast<HLookEvent*>(e);
-				row.appendLook(ple->look().direction().name(), QString("%1").arg(ple->look().lookMS()));
-				if (ple->look().direction() == HLookDirection::LookAway)
-				{
-					totalLookAwayTime += ple->look().lookMS();
-				}
-				if (ple->look().direction() == HLookDirection::LookLeft)
-				{
-					totalLookTime += ple->look().lookMS();
-				}
-				if (ple->look().direction() == HLookDirection::LookCenter)
-				{
-					totalLookTime += ple->look().lookMS();
-				}
-				if (ple->look().direction() == HLookDirection::LookRight)
-				{
-					totalLookTime += ple->look().lookMS();
-				}
+				row.appendLook(ple->look());
 			}
 			else if (e->type() == HEventType::HEventTrialEnd)
 			{
@@ -283,11 +270,10 @@ bool HResults::saveToCSV(const QString& filename) const
 				row.setEndType(pte->endtype().name());
 				row.setTotalLook(QString("%1").arg(totalLookTime));
 				row.setTotalLookAway(QString("%1").arg(totalLookAwayTime));
+				row.setTrialEndTime(pte->timestamp());	// automatically sets total look(away) times
 				out << row;
 			}
 		}
-
-
 		file.close();
 	}
 	return b;
@@ -302,7 +288,29 @@ QTextStream& operator<<(QTextStream& out, const HTrialResultsRow& row)
 	{
 		out << "," << items.next();
 	}
+
+	// now dump looks
+	QListIterator<HLook> looks(row.looks());
+	while (looks.hasNext())
+	{
+		HLook l = looks.next();
+		out << "," << l.direction().name() << "," << l.startMS() << "," << l.endMS() << "," << l.lookMS();
+	}
 	out << endl;
 	return out;
 }
 
+void HTrialResultsRow::appendLook(HLook look)
+{
+	// assume that this is a look; check for look-away gap
+	if (look.startMS() > m_lastLookEndTime)
+	{
+		HLook lookaway(HLookDirection::LookAway, m_lastLookEndTime, look.startMS());
+		m_looks.append(lookaway);
+		m_totalLookAwayTime += lookaway.lookMS();
+	}
+	m_looks.append(look);
+	m_totalLookTime += look.lookMS();
+	m_lastLookEndTime = look.endMS();
+
+}
