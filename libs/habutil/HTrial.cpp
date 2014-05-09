@@ -47,12 +47,6 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	// Create final state.
 	QFinalState* sFinal = new QFinalState(this);
 		
-	// Set connection for AGRequest state, which emits playAG() in its 'onEntry' method. 
-	// That goes to the media manager, which starts the playhing of the AG.
-
-	// 2/14/2013 stim request and ag request will no longer emit playStim() - instead will call phase().requestCurentStim()
-	//QObject::connect(sAGRequest, SIGNAL(playAG()), &phase().getMediaManager(), SLOT(ag()));
-
 	// Once that happens the media manager starts playing the ag, it emits
 	// agStarted(). We use that signal as a transition to the AGRunning state. 
 	sAGRequest->addTransition(&phase.experiment().getMediaManager(), SIGNAL(agStarted(int)), sAGRunning);
