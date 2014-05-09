@@ -24,7 +24,7 @@ HEADERS +=	HLook.h \
 			HElapsedTimer.h \
 			HPlayer.h \
 			HAudioPlayer.h \
-			HVideoImagePlayer.h \
+#			HVideoImagePlayer.h \
 			HNonPlayer.h \
 			HVIPlayer.h \
 			HStimulusSource.h \
@@ -126,7 +126,7 @@ SOURCES +=	HLook.cpp \
 			HElapsedTimer.cpp \
 			HPlayer.cpp \
 			HAudioPlayer.cpp \
-			HVideoImagePlayer.cpp \
+#			HVideoImagePlayer.cpp \
 			HNonPlayer.cpp \
 			HVIPlayer.cpp \
 			HStimulusSource.cpp \
