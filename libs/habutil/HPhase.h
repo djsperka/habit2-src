@@ -36,20 +36,20 @@ class HPhase: public HExperimentChildState
 	Q_OBJECT
 	
 	HPhaseCriteria *m_pcriteria;
-	QList<QPair<int, Habit::StimulusSettings> > m_stimuli;
+	QList<unsigned int> m_stimuli;
 	const Habit::HPhaseSettings m_phaseSettings;
 	const Habit::HLookSettings m_lookSettings;
 	int m_itrial;		// this is the current trial. First trial is '0'. Stim found at m_stimuli[m_itrial].second
 	HTrial* m_sTrial;
 
 public:
-	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG);
+	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<unsigned int>& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG);
 	virtual ~HPhase() {};
 	bool advance();
 	HTrial* getHTrial() { return m_sTrial; };
 	inline int currentTrialNumber() { return m_itrial; };	
-	inline int currentStimNumber() { return m_stimuli.at(m_itrial).first; };
-	inline Habit::StimulusSettings currentStimulusSettings() { return m_stimuli.at(m_itrial).second; };
+	unsigned int currentStimNumber() { return m_stimuli[m_itrial]; };
+//	inline Habit::StimulusSettings currentStimulusSettings() { return m_stimuli.at(m_itrial).second; };
 	
 	void requestCurrentStim();
 	void requestAG();

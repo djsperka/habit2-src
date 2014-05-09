@@ -13,7 +13,7 @@
 #include "HMediaManager.h"
 #include <QFinalState>
 
-HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<QPair<int, Habit::StimulusSettings> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
+HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<unsigned int>& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
 	: HExperimentChildState(exp, log, "Phase")
 	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
@@ -117,8 +117,8 @@ void HPhase::requestCurrentStim()
 {
 	if (m_itrial < m_stimuli.size())
 	{
-		eventLog().append(new HStimRequestEvent(m_stimuli.at(m_itrial).first, HElapsedTimer::elapsed()));
-		experiment().getMediaManager().stim(m_stimuli.at(m_itrial).first);
+		eventLog().append(new HStimRequestEvent(m_stimuli[m_itrial], HElapsedTimer::elapsed()));
+		experiment().getMediaManager().stim(m_stimuli[m_itrial]);
 	}
 	else 
 	{
