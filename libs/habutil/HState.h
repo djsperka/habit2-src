@@ -22,7 +22,7 @@ public:
     QString name() const { return m_name; }
     QString prefix() const { return m_prefix; }
 	
-	public slots:
+public slots:
     void setName( const QString& name ) { m_name = name; }
     void setPrefix( const QString& prefix ) { m_prefix = prefix; }
 	
