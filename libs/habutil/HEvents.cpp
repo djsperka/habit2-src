@@ -10,7 +10,7 @@
 
 #include "HEvents.h"
 #include <QtDebug>
-
+#include <QListIterator>
 /* 
  * Constants for event types and trial end types 
  */
@@ -40,6 +40,7 @@ const HEventType HEventType::HEventLookEnabled(21, "LookEnabled");
 const HEventType HEventType::HEventAGLookEnabled(22, "AGLookEnabled");
 const HEventType HEventType::HEventLookDisabled(23, "LookDisabled");
 const HEventType HEventType::HEventScreenStart(24, "ScreenStart");
+const HEventType HEventType::HEventStimulusOrder(25, "StimulusOrder");
 const HEventType HEventType::HEventUndefined(-1, "Undefined");
 
 // Note undefined event not in search array.
@@ -300,6 +301,10 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	{
 		pevent = HScreenStartEvent::getEvent(stream, ts);
 	}
+	else if (etype == HEventType::HEventStimulusOrder)
+	{
+		pevent = HStimulusOrderEvent::getEvent(stream, ts);
+	}
 	else
 	{
 		// this is an error.
@@ -559,6 +564,45 @@ HStimulusSettingsEvent* HStimulusSettingsEvent::getEvent(QDataStream& stream, in
 	int stimid;
 	stream >> stimid >> settings;
 	return new HStimulusSettingsEvent(settings, stimid, timestamp);
+}
+
+
+QString HStimulusOrderEvent::eventInfo() const
+{
+	return QString("Stim order (%1): %2").arg(this->phase()).arg(this->listToString());
+};
+
+QString HStimulusOrderEvent::listToString() const
+{
+	QString s;
+	QListIterator<unsigned int> it(list());
+	if (it.hasNext())
+	{
+		s = QString("%1").arg(it.next());
+		while (it.hasNext())
+			s += QString(",%1").arg(it.next());
+	}
+	return s;
+}
+
+QString HStimulusOrderEvent::eventCSVAdditional() const
+{
+	return QString("%1,%2").arg(this->phase()).arg(this->listToString());
+};
+
+QDataStream& HStimulusOrderEvent::putAdditional(QDataStream& stream) const
+{
+	stream << phasetype().number() << m_list;
+	return stream;
+}
+
+HStimulusOrderEvent* HStimulusOrderEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int n;
+	QList<unsigned int> list;
+	stream >> n >> list;
+	const HPhaseType& phasetype = getPhaseType(n);
+	return new HStimulusOrderEvent(phasetype, list, timestamp);
 }
 
 QString HStimulusInfoEvent::eventInfo() const
