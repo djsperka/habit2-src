@@ -11,7 +11,7 @@
 #define HABITAUDIOPLAYER_H
 
 
-#include <QtGui/QLabel>
+#include <QLabel>
 #include <QList>
 #include <QTextStream>
 #include <Phonon/MediaObject>
@@ -26,7 +26,7 @@ class HAudioPlayer : public HPlayer
 public:
 	HAudioPlayer(int id = 0, QWidget* w = 0);
 	~HAudioPlayer() {};
-	virtual void play(int number);
+	virtual void play(unsigned int number);
 	virtual void stop(); 
 	virtual void clear();
 	friend QTextStream& operator<<(QTextStream& out, const HAudioPlayer& player);

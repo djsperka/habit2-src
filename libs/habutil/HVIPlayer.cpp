@@ -149,7 +149,7 @@ void HVIPlayer::clear()
 
 
 
-void HVIPlayer::play(int number)
+void HVIPlayer::play(unsigned int number)
 {
 	HStimulusSource::HStimulusSourceType oldType = getStimulusType(m_iCurrentStim);
 	HStimulusSource::HStimulusSourceType newType = getStimulusType(number);
@@ -164,7 +164,7 @@ void HVIPlayer::play(int number)
 	switch (newType)
 	{
 		case HStimulusSource::VIDEO:
-			s = m_sources.at(number);
+			s = m_sources.value(number);
 			m_nowPlayingFilename = s->filename();
 			if (s->hasBuffer())
 			{
@@ -184,7 +184,7 @@ void HVIPlayer::play(int number)
 			//m_pVideoWidget->setFullScreen(m_isFullScreen);
 			break;
 		case HStimulusSource::IMAGE:
-			s = m_sources.at(number);
+			s = m_sources.value(number);
 			m_nowPlayingFilename = s->filename();
 			m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
 			m_pImageWidget->setCurrentSource(s->filename());
@@ -208,7 +208,7 @@ void HVIPlayer::play(int number)
 void HVIPlayer::onPrefinishMarkReached(qint32 msec)
 {
 	Q_UNUSED(msec);
-	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.at(m_iCurrentStim))->type() == HStimulusSource::VIDEO && (m_sources.at(m_iCurrentStim))->isLooped())
+	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.value(m_iCurrentStim))->type() == HStimulusSource::VIDEO && (m_sources.value(m_iCurrentStim))->isLooped())
 	{
 		m_pMediaObject->pause();
 		m_pMediaObject->seek(0);
