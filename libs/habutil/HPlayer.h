@@ -10,8 +10,8 @@
 #ifndef HABITPLAYER_H
 #define HABITPLAYER_H
 
-#include <QtGui>
-#include <QList>
+#include <QWidget>
+#include <QMap>
 #include <QTextStream>
 #include "HStimulusSource.h"
 
@@ -26,6 +26,7 @@
 
 class HPlayer : public QWidget
 {
+
 	Q_OBJECT
 	
 public:
@@ -34,7 +35,7 @@ public:
 
 	
 	/// Play the stim at index 'number'. Out of range index defaults to background.
-	virtual void play(int number) = 0;
+	virtual void play(unsigned int number) = 0;
 	
 	/// Play the currently configured attention getter. 
 	virtual void playAG() { play(0); };
@@ -52,40 +53,55 @@ public:
 	// stim, so even if no AG has been added, the first stim added will still be 
 	// at position 1. The return value is the stim position number, and should 
 	// be used in a call to play(). 
-	virtual int addStimulus(QString filename, int volume=0, bool isLooped = false);
+	//virtual unsigned int addStimulus(QString filename, int volume=0, bool isLooped = false);
 	
+	// Same as above, but assigns the given id to the stimulus.
+	virtual unsigned int addStimulus(unsigned int id, QString filename, int volume=0, bool isLooped = false);
+
 	// add dummy (background) stimulus
-	virtual int addStimulus();
+	//virtual unsigned int addStimulus();
+	virtual unsigned int addStimulus(unsigned int id);
 	
 	// Add an attention getter stimulus to the player. The AG will always have
 	// index 0. It can be played by calling play(0) or playAG().
-	virtual int addAG(QString filename, int volume=0, bool isLooped = false);
+	virtual unsigned int addAG(QString filename, int volume=0, bool isLooped = false);
 
 	int count() const { return m_sources.count(); };
-	const HStimulusSource& source(int i) const
+
+	// Guard against returning a bad reference.
+	HStimulusSource* source(unsigned int i)
 	{
-		return *m_sources.at(i);
+		HStimulusSource *s = NULL;
+		if (m_sources.contains(i)) s = m_sources[i];
+		return s;
 	};
+
+	QTextStream& operator<<(QTextStream& out);
+
+
 
 protected:	
 	/// An id number for this player. Can be used to indicate screen number, but not required. 
 	int m_id;
 	
-	/// List of stimulus sources to be used. The [0] index is used as the attention getter, 
+	/// Map of stimulus sources to be used. The [0] index is used as the attention getter,
 	/// so calling addAG() always replaces the current attention getter.
-	QList<HStimulusSource *> m_sources;
+	QMap<unsigned int, HStimulusSource *> m_sources;
 	
 	/// index of currently playing stim. An out of range index defaults to playing background.
 	int m_iCurrentStim;
 	
 	/// Gets the type of stim corresponding to index
-	HStimulusSource::HStimulusSourceType getStimulusType(int index);
+	HStimulusSource::HStimulusSourceType getStimulusType(unsigned int index);
 	
 	/// Gets the type of the stim corresponding to m_iCurrentStim.
 	HStimulusSource::HStimulusSourceType getCurrentStimulusType()
 	{
 		return getStimulusType(m_iCurrentStim);
 	};
+
+	// returns the next key to be used. Equal to the largest current key + 1.
+	unsigned int nextKey();
 
 
 signals:
@@ -95,6 +111,6 @@ signals:
 };
 
 
-QTextStream& operator<<(QTextStream& out, const HPlayer& player);
+//QTextStream& operator<<(QTextStream& out, const HPlayer& player);
 
 #endif
