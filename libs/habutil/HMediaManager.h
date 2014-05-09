@@ -40,6 +40,7 @@
 #include "HPlayer.h"
 #include "HTypes.h"
 #include "attentiongettersettings.h"
+#include "stimulisettings.h"
 
 
 class HMediaManager : public QObject
@@ -47,19 +48,28 @@ class HMediaManager : public QObject
 	Q_OBJECT
 
 private:
-	QMap<HPlayerPositionType, HPlayer *> m_players;
 	bool m_pendingStartSignal;
 	bool m_pendingAGStartSignal;
 	bool m_pendingClearSignal;
 	int m_pendingStimNumber;
+	QMap<HPlayerPositionType, HPlayer *> m_players;
+	QMap<unsigned int, Habit::StimulusSettings> m_mapStim;
+	unsigned int nextKey();
+	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss);
 public:
 
-	HMediaManager(): QObject(), m_pendingStartSignal(false), m_pendingAGStartSignal(false), m_pendingClearSignal(false), m_pendingStimNumber(-1) {};
+	HMediaManager();
 	~HMediaManager();
 	void addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex=-1);
 	void clear();
-	void addAttentionGetter(const Habit::AttentionGetterSettings& ags);
-	//void addStimulus();
+	unsigned int addAG(const Habit::StimulusSettings& ags);
+	void addStimuli(const Habit::StimuliSettings& ss, QList<unsigned int>& idList);
+	unsigned int addStimulus(const Habit::StimulusSettings& ss);
+	Habit::StimulusSettings getStimulusSettings(unsigned int key);
+
+	const QMap<unsigned int, Habit::StimulusSettings>& map() { return m_mapStim; };
+	static const unsigned int backgroundKey;
+
 public slots:
 
 	void stim(int);

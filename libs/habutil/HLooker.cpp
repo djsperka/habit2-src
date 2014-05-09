@@ -22,6 +22,7 @@ HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime
 , m_bLive(bLive)
 , m_bLookStarted(false)
 , m_pdirectionLookStarted(&HLookDirection::LookAway)
+, m_iLookStartedIndex(-1)
 , m_bLookAwayStarted(false)
 {
 	// There are 4 timers created here. Each is single shot, and each will have its interval set when it is started.

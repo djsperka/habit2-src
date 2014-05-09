@@ -136,45 +136,42 @@ void HControlPanel::createExperiment(HEventLog& log)
 	HPhaseCriteria* pcritPreTest = (HPhaseCriteria *)NULL;
 	HPhaseCriteria* pcritHabituation = (HPhaseCriteria *)NULL;
 	HPhaseCriteria* pcritTest = (HPhaseCriteria *)NULL;
-
+	HLookDetector* pld = (HLookDetector *)NULL;
 
 	// First make sure all info is loaded from db. I'd rather this were done before HControlPanel were instantiated, 
 	// but this is how it was originally written so there. 
 	loadFromDB();
-	
-	// For each phase, save the StimulusSettings and the index at which they are added to the players.
-	// The index will be used by the phases to request stim be played.
-	Habit::IdStimulusSettingsPairList idspList1, idspList2, idspList3;
-
-	// These will hold stim numbers for all stimuli
-	Habit::IdStimulusSettingsPairList idStimPairList;
-
-	// Need to know if AG is used
-	Habit::AttentionGetterSettings ags = m_experimentSettings.getAttentionGetterSettings();
 
 
 	
-	// Create media manager. Note we are not passing a parent! 
+	// Create look detector. Type of look detector is buried in the experiment settings; what we receive is a generic
+	// HLookDetector* .
+	pld = createLookDetector(m_experimentSettings, log, this);
+
+	// connect attention() and look() signals to a slot so we can forward the info to the event log
+	connect(pld, SIGNAL(attention()), this, SLOT(onAttention()));
+	connect(pld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
+
+
+
+
+	// Create media manager.
 	// The stimuli configured for each phase are pulled using the experiment settings. 
 	// One by one the stimuli are added to the media manager's player. As each stim is added, 
 	// its ordinal position in the player's set of stim is paired with the StimulusSettings 
 	// object, and the pair is stored in the StimulusSettingsList objects l1, l2, l3.
-	m_pmm = createMediaManager(m_experimentSettings, NULL, idspList1, idspList2, idspList3);
-	
-	// Save the lists of stimuli for use in updating labels.
-	populateSSMap(ags, idspList1, idspList2, idspList3);
-	
+	m_pmm = createMediaManager(m_experimentSettings, NULL);
+
+	// Need to know if AG is used. If it is, add attention getter settings to media manager
+
+	Habit::AttentionGetterSettings ags(m_experimentSettings.getAttentionGetterSettings());
+	if (ags.isAttentionGetterUsed()) m_pmm->addAG(ags.getAttentionGetterStimulus());
+
 	// Connect media manager signals to slots here so we can update display labels.
 	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(onAGStarted()));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(onStimStarted(int)));
 	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onCleared()));
 	
-	// Create look detector
-	m_pld = createLookDetector(m_experimentSettings, log, this);
-
-	// connect attention() and look() signals to a slot so we can forward the info to the event log
-	connect(m_pld, SIGNAL(attention()), this, SLOT(onAttention()));
-	connect(m_pld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
 	
 	// Construct state machine.
 	m_psm = new QStateMachine();
@@ -184,7 +181,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 	connect(m_psm, SIGNAL(started()), this, SLOT(onExperimentStarted()));
 
 	// This is a single super-state that holds all the phases.
-	HExperiment* sExperiment = new HExperiment(log, *m_pmm, *m_pld);
+	HExperiment* sExperiment = new HExperiment(log, *m_pmm, *pld);
 	m_psm->addState(sExperiment);
 	m_psm->setInitialState(sExperiment);
 	QFinalState* sFinal = new QFinalState;
@@ -203,19 +200,23 @@ void HControlPanel::createExperiment(HEventLog& log)
 	{
 		const Habit::HPhaseSettings& ps = m_experimentSettings.getPreTestPhaseSettings();
 		QList<int> list;
+		QList<unsigned int> stimidListInitial;
+		QList<unsigned int> stimidListOrdered;
+
+		m_pmm->addStimuli(m_experimentSettings.getPreTestStimuliSettings(), stimidListInitial);
+
 		if (!m_runSettings.getPretestOrderList(list))
 		{
 			QDebug(QtFatalMsg) << "Cannot parse Pretest order (" << m_runSettings.getPretestOrderList(list) << ").";
 		}
 
 		HTrialGenerator htg(list.size(), m_runSettings.isPretestRandomized(), m_runSettings.getPretestRandomizeMethod()==1);
-		idStimPairList.clear();
 		for (unsigned int i=0; i<ps.getNTrials(); i++)
 		{
-			idStimPairList.append(idspList1.at(list.at(htg.next()) - 1));
+			stimidListOrdered.append(stimidListInitial.at(list.at(htg.next()) - 1));
 		}
 		pcritPreTest = new HPhaseFixedNCriteria(ps.getNTrials());
-		psPreTest = new HPhase(*sExperiment, pcritPreTest, log, idStimPairList, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
+		psPreTest = new HPhase(*sExperiment, pcritPreTest, log, stimidListOrdered, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
 
 	}
 
@@ -223,41 +224,49 @@ void HControlPanel::createExperiment(HEventLog& log)
 	{
 		const Habit::HPhaseSettings& ps = m_experimentSettings.getHabituationPhaseSettings();
 		QList<int> list;
+		QList<unsigned int> stimidListInitial;
+		QList<unsigned int> stimidListOrdered;
+
+		m_pmm->addStimuli(m_experimentSettings.getHabituationStimuliSettings(), stimidListInitial);
+
 		if (!m_runSettings.getHabituationOrderList(list))
 		{
 			QDebug(QtFatalMsg) << "Cannot parse habituation order (" << m_runSettings.getHabituationOrderList(list) << ").";
 		}
 
 		HTrialGenerator htg(list.size(), m_runSettings.isHabituationRandomized(), m_runSettings.getHabituationRandomizeMethod()==1);
-		idStimPairList.clear();
 		for (unsigned int i=0; i<ps.getNTrials(); i++)
 		{
-			idStimPairList.append(idspList2.at(list.at(htg.next()) - 1));
+			stimidListOrdered.append(stimidListInitial.at(list.at(htg.next()) - 1));
 		}
 		
 		// Create habituation criteria object. 
 		pcritHabituation = createPhaseCriteria(m_experimentSettings.getHabituationSettings(), ps.getNTrials());
-		psHabituation = new HPhase(*sExperiment, pcritHabituation, log, idStimPairList, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
+		psHabituation = new HPhase(*sExperiment, pcritHabituation, log, stimidListOrdered, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
 	}
 	
 	if (m_experimentSettings.getTestPhaseSettings().getIsEnabled())
 	{
 		const Habit::HPhaseSettings& ps = m_experimentSettings.getTestPhaseSettings();
 		QList<int> list;
+		QList<unsigned int> stimidListInitial;
+		QList<unsigned int> stimidListOrdered;
+
+		m_pmm->addStimuli(m_experimentSettings.getTestStimuliSettings(), stimidListInitial);
+
 		if (!m_runSettings.getTestOrderList(list))
 		{
 			QDebug(QtFatalMsg) << "Cannot parse test order (" << m_runSettings.getTestOrderList(list) << ").";
 		}
 
 		HTrialGenerator htg(list.size(), m_runSettings.isTestRandomized(), m_runSettings.getTestRandomizeMethod()==1);
-		idStimPairList.clear();
 		for (unsigned int i=0; i<ps.getNTrials(); i++)
 		{
-			idStimPairList.append(idspList3.at(list.at(htg.next()) - 1));
+			stimidListOrdered.append(stimidListInitial.at(list.at(htg.next()) - 1));
 		}
 		
 		pcritTest = new HPhaseFixedNCriteria(ps.getNTrials());
-		psTest = new HPhase(*sExperiment, pcritTest, log, idStimPairList, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
+		psTest = new HPhase(*sExperiment, pcritTest, log, stimidListOrdered, ps, m_experimentSettings.getHLookSettings(), ags.isAttentionGetterUsed());
 	}
 
 	
@@ -313,7 +322,15 @@ void HControlPanel::createExperiment(HEventLog& log)
 		// This is a trivial case
 		sExperiment->setInitialState(sExperimentFinal);
 	}
-	
+
+
+	// Store the stimulus settings events in the log
+	QMapIterator<unsigned int, Habit::StimulusSettings> it(m_pmm->map());
+	while (it.hasNext())
+	{
+		it.next();
+		log.append(new HStimulusSettingsEvent(it.value(), it.key()));
+	}
 	
 	// Finally, text properties of labels can be assigned on entry to various states.
 	sExperiment->assignProperty(m_labelExperimentStatusValue, "text", "Running");
@@ -325,27 +342,6 @@ void HControlPanel::createExperiment(HEventLog& log)
 		psTest->assignProperty(m_labelCurrentPhaseValue, "text", "Test");
 	
 }
-
-void HControlPanel::populateSSMap(const Habit::AttentionGetterSettings& ags, const Habit::IdStimulusSettingsPairList& idsp1, const Habit::IdStimulusSettingsPairList& idsp2, const Habit::IdStimulusSettingsPairList& idsp3)
-{
-	m_mapSS.clear();
-	if (ags.isAttentionGetterUsed())
-	{
-		m_mapSS[0] = ags.getAttentionGetterStimulus();
-	}
-	for (Habit::IdStimulusSettingsPairList::const_iterator it = idsp1.begin(); it != idsp1.end(); it++)
-	{
-		m_mapSS.insert(it->first, it->second);
-	}
-	for (Habit::IdStimulusSettingsPairList::const_iterator it = idsp2.begin(); it != idsp2.end(); it++)
-	{
-		m_mapSS.insert(it->first, it->second);
-	}
-	for (Habit::IdStimulusSettingsPairList::const_iterator it = idsp3.begin(); it != idsp3.end(); it++)
-	{
-		m_mapSS.insert(it->first, it->second);
-	}
-};
 
 void HControlPanel::updateFileStatusLabels(Habit::StimulusSettings& ss)
 {
@@ -390,7 +386,7 @@ void HControlPanel::updateFileStatusLabels(Habit::StimulusSettings& ss)
 
 void HControlPanel::onAGStarted()
 {
-	Habit::StimulusSettings ss = m_mapSS[0];
+	Habit::StimulusSettings ss = m_pmm->getStimulusSettings(0);
 	m_labelAttentionGetterStatusValue->setText("Running ");
 	m_labelCurrentStimulusValue->setText("Idle");
 	updateFileStatusLabels(ss);
@@ -399,11 +395,11 @@ void HControlPanel::onAGStarted()
 void HControlPanel::onStimStarted(int i)
 {
 	Q_UNUSED(i);
-	//Habit::StimulusSettings ss = m_mapSS[i];
-	//QString s("Running (" + ss.getName() + ")");
+	Habit::StimulusSettings ss = m_pmm->getStimulusSettings(i);
+	QString s("Running (" + ss.getName() + ")");
 	m_labelAttentionGetterStatusValue->setText("Idle");
-	m_labelCurrentStimulusValue->setText("Running");
-	//updateFileStatusLabels(ss);
+	m_labelCurrentStimulusValue->setText(s);
+	updateFileStatusLabels(ss);
 }
 
 void HControlPanel::onCleared()

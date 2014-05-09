@@ -16,6 +16,7 @@ class AttentionGetterSettings
 {
 public:
     AttentionGetterSettings();
+    AttentionGetterSettings(const AttentionGetterSettings& settings);
      ~AttentionGetterSettings();
 
 public:

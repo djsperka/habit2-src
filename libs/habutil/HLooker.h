@@ -88,12 +88,6 @@ private:
 	bool m_bLookAwayStarted;	// if true, look-away has been started. m_bLookStarted may also be true, indicating
 								// that the look may end, depending on how long this lasts
 
-	// These are various tallies and counters that I'd like to do away with.
-	//int m_lookStartTimeMS;		// initial start time for a look
-	//int m_lookLastStartTimeMS;	// start time for most recent looking period (if short look-aways)
-	//int m_cumulativeLookTimeMS;	// cumulative total look time for current look
-	//int m_lookAwayStartTimeMS;	// initial start time for look-away
-	//int m_cumulativeLookAwayTimeMS;	// cumulative total look time for a look-away.
 
 	// Timers used
 	QTimer *m_ptimerMinLookTime;		// m_minLookTimeMS
@@ -129,7 +123,7 @@ signals:
 	
 class HLookerState: public QState
 {
-	Q_OBJECT
+//	Q_OBJECT
 
 public:
 	HLookerState(HLooker& looker, QState* parent = NULL): QState(parent), m_looker(looker) {};

@@ -9,6 +9,16 @@ Habit::AttentionGetterSettings::AttentionGetterSettings()
 {
 }
 
+
+Habit::AttentionGetterSettings::AttentionGetterSettings(const AttentionGetterSettings& ags)
+: id_(ags.getId())
+, isAttentionGetterUsed_(ags.isAttentionGetterUsed())
+, attentionGetterStimulus_(ags.getAttentionGetterStimulus())
+, backGroundColor_(ags.getBackGroundColor())
+{
+}
+
+
 QDataStream & Habit::operator<< (QDataStream& stream, const AttentionGetterSettings& settings)
 {
 	stream << settings.getId() << settings.isAttentionGetterUsed() << settings.getAttentionGetterStimulus() << settings.getBackGroundColor();

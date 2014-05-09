@@ -40,6 +40,7 @@ public:
 	static const HEventType HEventStimStart;
 	static const HEventType HEventStimEnd;
 	static const HEventType HEventStimulusSettings;
+	static const HEventType HEventStimulusOrder;
 	static const HEventType HEventStimulusInfo;
 	static const HEventType HEventAttention;
 	static const HEventType HEventLook;
@@ -516,6 +517,51 @@ public:
 private:
 	Habit::StimulusSettings m_settings;
 	int m_stimindex;
+};
+
+class HStimulusOrderEvent: public HEvent
+{
+public:
+	HStimulusOrderEvent(const HPhaseType& type, const QList<unsigned int>& list, int timestamp = 0)
+	: HEvent(HEventType::HEventStimulusOrder, timestamp)
+	, m_pphasetype(&type)
+	, m_list(list)
+	{};
+
+	HStimulusOrderEvent()
+	: HEvent(HEventType::HEventStimulusOrder)
+	, m_pphasetype(&HPhaseType::UnknownPhase)
+	, m_list()
+	{};
+
+	HStimulusOrderEvent(const HStimulusOrderEvent& e)
+	: HEvent(e.type(), e.timestamp())
+	, m_pphasetype(&e.phasetype())
+	, m_list(e.list())
+	{};
+
+	virtual ~HStimulusOrderEvent() {};
+	QString phase() const { return m_pphasetype->name(); };
+	const HPhaseType& phasetype() const { return *m_pphasetype; };
+	const QList<unsigned int>& list() const { return m_list; };
+	QString listToString() const;
+	QString eventInfo() const;
+
+	virtual QString eventCSVAdditional() const;		// override this to add more fields
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+
+	static HStimulusOrderEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HStimulusOrderEvent(phasetype(), list(), t);
+	};
+
+private:
+	const HPhaseType* m_pphasetype;
+	QList<unsigned int> m_list;
 };
 
 class HStimulusInfoEvent: public HEvent

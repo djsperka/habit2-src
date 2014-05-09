@@ -26,6 +26,9 @@ void HTrialInitialState::onEntry(QEvent* e)
 HStimRunningState::HStimRunningState(HTrial& trial, HEventLog& log, const Habit::HPhaseSettings& phaseSettings)
 : HTrialChildState(trial, log, "HStimRunning")
 , m_phaseSettings(phaseSettings)
+, m_bGotLookStarted(false)
+, m_bGotLookPending(false)
+, m_bNeedPendingBeforeAbort(false)
 {
 
 	// When "max no look time" is used, it is implemented here. This class will start a timer
