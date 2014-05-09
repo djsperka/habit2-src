@@ -23,7 +23,6 @@ class HLookDetector;
 
 class HTrialChildState: public HLogState
 {
-	Q_OBJECT
 	
 public:
 	HTrialChildState(HTrial& trial, HEventLog& log, const QString& name)
@@ -41,7 +40,6 @@ private:
 
 class HTrialInitialState: public HTrialChildState
 {
-	Q_OBJECT
 	
 public:
 	HTrialInitialState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HInitialState") {};
@@ -54,16 +52,11 @@ protected:
 
 class HAGRequestState: public HTrialChildState
 {
-	Q_OBJECT
 	
 public:
 	
 	HAGRequestState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HAGRequestState") {};
 	~HAGRequestState() {};
-	
-signals:
-	
-	void playAG();
 	
 protected:
 	// on entry emit playAG() - media manager should act on that. 
@@ -72,7 +65,6 @@ protected:
 
 class HAGRunningState: public HTrialChildState
 {
-	Q_OBJECT
 	
 public:
 	
@@ -86,7 +78,6 @@ public:
 
 class HStimRequestState: public HTrialChildState
 {
-	Q_OBJECT
 	
 public:
 	
@@ -102,7 +93,6 @@ protected:
 
 class HGotLookState: public HTrialChildState
 {
-	Q_OBJECT
 
 public:
 	HGotLookState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HGotLookState") {};
@@ -116,7 +106,6 @@ protected:
 
 class HMaxAccumulatedLookTimeState: public HTrialChildState
 {
-	Q_OBJECT
 
 public:
 	HMaxAccumulatedLookTimeState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HMaxAccumulatedLookTimeState") {};
@@ -130,7 +119,6 @@ protected:
 
 class HMaxLookAwayTimeState: public HTrialChildState
 {
-	Q_OBJECT
 
 public:
 	HMaxLookAwayTimeState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HMaxLookAwayTimeState") {};
@@ -144,7 +132,6 @@ protected:
 
 class HMaxStimulusTimeState: public HTrialChildState
 {
-	Q_OBJECT
 	
 public:
 	HMaxStimulusTimeState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HMaxStimulusTimeState") {};
@@ -158,7 +145,6 @@ protected:
 
 class HNoLookTimeoutState: public HTrialChildState
 {
-	Q_OBJECT
 	
 public:
 	HNoLookTimeoutState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HNoLookTimeoutState") {};
@@ -175,7 +161,6 @@ protected:
 
 class HNoLookTransition: public QAbstractTransition
 {
-	Q_OBJECT
 	
 public:
 	HNoLookTransition() {};

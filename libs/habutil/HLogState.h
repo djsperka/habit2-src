@@ -20,7 +20,7 @@
 
 class HLogState: public HState
 {
-	Q_OBJECT
+//	Q_OBJECT
 	
 public:
 	HLogState(HEventLog& log, const QString& name, QState* parent = 0)
