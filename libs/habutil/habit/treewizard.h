@@ -29,6 +29,7 @@ public:
     void setCurrentPage(int index);
 	QComboBox* getExperimentComboBox();
 	void setControlsEnabled(bool isEnabled);
+	void setControlsForViewOnly();
 
 protected:
     QWidget* currentPage();

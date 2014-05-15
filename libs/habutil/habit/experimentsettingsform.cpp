@@ -26,9 +26,25 @@ using namespace GUILib;
 const QString ExperimentSettingsForm::NEW_EXPERIMENT = "-- New Experiment --";
 const QString ExperimentSettingsForm::CLONE_EXPERIMENT = "-- Clone Experiment --";
 
-ExperimentSettingsForm::ExperimentSettingsForm(const Habit::ExperimentSettings& experimentSettings, QWidget* w)
+ExperimentSettingsForm::ExperimentSettingsForm(const Habit::ExperimentSettings& experimentSettings, QWidget* w, bool bViewOnly)
     : QDialog(w)
+	, bViewOnly_(bViewOnly)
     , experimentSettings_(experimentSettings)
+{
+	createComponents();
+	makeConnections();
+	doLayout();
+	if (!bViewOnly_)
+		initializeAvailableExperimentSettings();
+	else
+		initializeForViewOnly();
+}
+
+ExperimentSettingsForm::~ExperimentSettingsForm()
+{}
+
+
+void ExperimentSettingsForm::createComponents()
 {
     treeWizard_ = new GUILib::TreeWizard(0); 
   
@@ -72,12 +88,21 @@ ExperimentSettingsForm::ExperimentSettingsForm(const Habit::ExperimentSettings& 
 	
     treeWizard_->setCurrentPage(0);
 	treeWizard_->setControlsEnabled(false);
-    
+
+	return;
+}
+
+
+void ExperimentSettingsForm::doLayout()
+{
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(treeWizard_);
 	layout->setSizeConstraint(QLayout::SetFixedSize);
-    //layout->addWidget(experimentNameGrBx, 0, 0, Qt::AlignTop | Qt::AlignLeft);
+}
 
+
+void ExperimentSettingsForm::makeConnections()
+{
     QObject::connect(treeWizard_, SIGNAL(canceled()), this,  SLOT(onCancel()));
     QObject::connect(treeWizard_, SIGNAL(done()), this,  SLOT(onDone()));
 	QObject::connect(treeWizard_, SIGNAL(experimentActivated(QString)), this, SLOT(onExperimentChoose(QString)));
@@ -90,11 +115,8 @@ ExperimentSettingsForm::ExperimentSettingsForm(const Habit::ExperimentSettings& 
 	connect(testStimuliForm_, SIGNAL(copyStimulusToPretest(Habit::StimulusSettings*)), preTestStimuliForm_, SLOT(onCopyStimulus(Habit::StimulusSettings*)));
 	connect(testStimuliForm_, SIGNAL(copyStimulusToHabit(Habit::StimulusSettings*)), habituationStimuliForm_, SLOT(onCopyStimulus(Habit::StimulusSettings*)));
 	connect(testStimuliForm_, SIGNAL(copyStimulusToTest(Habit::StimulusSettings*)), testStimuliForm_, SLOT(onCopyStimulus(Habit::StimulusSettings*)));
-	initializeAvailableExperimentSettings();
+	return;
 }
-
-ExperimentSettingsForm::~ExperimentSettingsForm()
-{}
 
 Habit::ExperimentSettings GUILib::ExperimentSettingsForm::getConfigurationObject()
 {
@@ -340,3 +362,12 @@ void GUILib::ExperimentSettingsForm::initializeAvailableExperimentSettings() {
 	QStringList sl = dao.getAllExperimentNames();
 	experimentBox_->addItems(sl);
 }
+
+
+void GUILib::ExperimentSettingsForm::initializeForViewOnly()
+{
+	treeWizard_->getExperimentComboBox()->setEnabled(false);
+	treeWizard_->setControlsForViewOnly();
+	initialize();
+}
+

@@ -171,6 +171,17 @@ void TreeWizard::setControlsEnabled(bool isEnabled)
     doneBtn_->setEnabled(isEnabled);
 }
 
+void TreeWizard::setControlsForViewOnly()
+{
+	tree_->setEnabled(true);
+	pageArea_->setEnabled(true);
+	nextBtn_->setEnabled(true);
+    previousBtn_->setEnabled(true);
+    cancelBtn_->setEnabled(true);
+    doneBtn_->setEnabled(false);
+}
+
+
 void TreeWizard::onPrevious()
 {
     if(currentPageIndex_ > 0) {

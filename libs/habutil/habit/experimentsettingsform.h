@@ -35,7 +35,7 @@ public:
 	static const QString CLONE_EXPERIMENT;
 
 public:
-    ExperimentSettingsForm(const Habit::ExperimentSettings& experimentSettings, QWidget* w = 0);
+    ExperimentSettingsForm(const Habit::ExperimentSettings& experimentSettings, QWidget* w = 0, bool bViewOnly=false);
     ~ExperimentSettingsForm();
 
 public:
@@ -45,10 +45,14 @@ public:
 
 private:
 	void initializeAvailableExperimentSettings();
+	void initializeForViewOnly();
 	void setControlsActive(bool isActive);
 	bool validateMonitorSettings();
 	bool validateHabituationSettings();
 	bool isMediaExists(Habit::StimulusSettings& stimulus);
+	void createComponents();
+	void makeConnections();
+	void doLayout();
 
 private slots:
 	void onExperimentChoose(const QString&);
@@ -59,7 +63,7 @@ signals:
 	void initializationRequest(const Habit::ExperimentSettings& es);
 	
 private:
-    //QComboBox* experimentBox_;
+	bool bViewOnly_;	// if true, the ExperimentSettings in constructor are to be viewed, not saved, experiment combo not populated or active.
     GUILib::TreeWizard *treeWizard_;
     Habit::ExperimentSettings experimentSettings_;
 
