@@ -6,6 +6,7 @@
  */
 
 #include "HResultsDialog.h"
+#include "experimentsettingsform.h"
 
 HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 : QDialog(parent)
@@ -14,12 +15,14 @@ HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 	QHBoxLayout* hlayout = new QHBoxLayout;
 	hlayout->addWidget(m_pPrintButton = new QPushButton("Print"));
 	hlayout->addWidget(m_pExportButton = new QPushButton("Export Event Log"));
+	hlayout->addWidget(m_pViewButton = new QPushButton("View Experiment Settings"));
 	vlayout->addLayout(hlayout);
 	vlayout->addWidget(m_pResultsWidget = new HResultsWidget(results));
 	setLayout(vlayout);
 
 	connect(m_pPrintButton, SIGNAL(clicked()), this, SLOT(onPrint()));
 	connect(m_pExportButton, SIGNAL(clicked()), this, SLOT(onExport()));
+	connect(m_pViewButton, SIGNAL(clicked()), this, SLOT(onView()));
 }
 
 void HResultsDialog::onPrint()
@@ -54,3 +57,7 @@ void HResultsDialog::onExport()
 	}
 }
 
+void HResultsDialog::onView()
+{
+    GUILib::ExperimentSettingsForm experimentSettingsForm(m_pResultsWidget->results().experimentSettings(), this, true);
+    experimentSettingsForm.exec();}
