@@ -89,6 +89,11 @@ public:
 	static const HStimContext HabituationPhase;
 	static const HStimContext TestPhase;
 	static const HStimContext AttentionGetter;	// Not really a phase, but makes this class useful for stim types as well as phase. 
+
+	HStimContext() : m_t(-1), m_s("") {};
+	HStimContext(const HStimContext& c): m_t(c.number()), m_s(c.name()) {};
+	HStimContext& operator=(const HStimContext& rhs);
+
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
 
@@ -99,6 +104,8 @@ private:
 	int m_t;
 	QString m_s;
 };
+
+bool operator<(const HStimContext& lhs, const HStimContext& rhs);
 
 const HStimContext& getStimContext(int i);
 

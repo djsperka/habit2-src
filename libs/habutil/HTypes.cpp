@@ -110,6 +110,23 @@ const HStimContext HStimContext::HabituationPhase(2, "HabituationStim");
 const HStimContext HStimContext::TestPhase(3, "TestStim");
 const HStimContext HStimContext::AttentionGetter(4, "AttentionGetter");
 
+
+HStimContext& HStimContext::operator=(const HStimContext& rhs)
+{
+	if (this->number() != rhs.number())
+	{
+		m_t = rhs.number();
+		m_s = rhs.name();
+	}
+	return *this;
+};
+
+bool operator<(const HStimContext& lhs, const HStimContext& rhs)
+{
+	return lhs.number() < rhs.number();
+}
+
+
 const HStimContext& getStimContext(int i)
 {
 	switch (i)
