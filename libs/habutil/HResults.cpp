@@ -203,6 +203,10 @@ bool HResults::saveToCSV(const QString& filename) const
 				if (bInsidePhase) qCritical("Found phase start without preceding phase end event!");
 				bInsidePhase = true;
 			}
+			else if (e->type() == HEventType::HEventPhaseEnd)
+			{
+				bInsidePhase = false;
+			}
 			else if (e->type() == HEventType::HEventTrialStart)
 			{
 				HTrialStartEvent* ptse = static_cast<HTrialStartEvent*>(e);
