@@ -163,9 +163,16 @@ void HControlPanel::createExperiment(HEventLog& log)
 	m_pmm = createMediaManager(m_experimentSettings, NULL);
 
 	// Need to know if AG is used. If it is, add attention getter settings to media manager
-
 	Habit::AttentionGetterSettings ags(m_experimentSettings.getAttentionGetterSettings());
 	if (ags.isAttentionGetterUsed()) m_pmm->addAG(ags.getAttentionGetterStimulus());
+
+	// add stimuli for each phase.
+	if (m_experimentSettings.getPreTestPhaseSettings().getIsEnabled())
+		m_pmm->addStimuli(m_experimentSettings.getPreTestStimuliSettings());
+	if (m_experimentSettings.getHabituationPhaseSettings().getIsEnabled())
+		m_pmm->addStimuli(m_experimentSettings.getHabituationStimuliSettings());
+	if (m_experimentSettings.getTestPhaseSettings().getIsEnabled())
+		m_pmm->addStimuli(m_experimentSettings.getTestStimuliSettings());
 
 	// Connect media manager signals to slots here so we can update display labels.
 	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(onAGStarted()));
@@ -203,7 +210,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 		QList<unsigned int> stimidListInitial;
 		QList<unsigned int> stimidListOrdered;
 
-		m_pmm->addStimuli(m_experimentSettings.getPreTestStimuliSettings(), stimidListInitial);
+		m_pmm->getContextStimList(HStimContext::PreTestPhase, stimidListInitial);
 
 		if (!m_runSettings.getPretestOrderList(list))
 		{
@@ -227,7 +234,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 		QList<unsigned int> stimidListInitial;
 		QList<unsigned int> stimidListOrdered;
 
-		m_pmm->addStimuli(m_experimentSettings.getHabituationStimuliSettings(), stimidListInitial);
+		m_pmm->getContextStimList(HStimContext::HabituationPhase, stimidListInitial);
 
 		if (!m_runSettings.getHabituationOrderList(list))
 		{
@@ -252,7 +259,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 		QList<unsigned int> stimidListInitial;
 		QList<unsigned int> stimidListOrdered;
 
-		m_pmm->addStimuli(m_experimentSettings.getTestStimuliSettings(), stimidListInitial);
+		m_pmm->getContextStimList(HStimContext::TestPhase, stimidListInitial);
 
 		if (!m_runSettings.getTestOrderList(list))
 		{
@@ -473,11 +480,13 @@ void HControlPanel::onStartTrials()
 
 void HControlPanel::onNextTrial()
 {
-	m_psm->postEvent(new HAbortTrialEvent());
+	m_log.append(new HAbortTrialEvent(HElapsedTimer::elapsed()));
+	m_psm->postEvent(new HAbortTrialQEvent());
 }
 
 void HControlPanel::onStopTrials()
 {
+	m_log.append(new HExperimentQuitEvent(HElapsedTimer::elapsed()));
 	m_psm->stop();
 	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onExperimentFinished()));
 	m_pmm->clear();
