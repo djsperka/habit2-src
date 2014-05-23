@@ -54,8 +54,11 @@ private:
 	int m_pendingStimNumber;
 	QMap<HPlayerPositionType, HPlayer *> m_players;
 	QMap<unsigned int, Habit::StimulusSettings> m_mapStim;
+	QMap<HStimContext, QList<unsigned int> > m_mapContext;
 	unsigned int nextKey();
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss);
+	void addOrAppendList(const HStimContext& c, const QList<unsigned int>& list);
+
 public:
 
 	HMediaManager();
@@ -63,9 +66,10 @@ public:
 	void addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex=-1);
 	void clear();
 	unsigned int addAG(const Habit::StimulusSettings& ags);
-	void addStimuli(const Habit::StimuliSettings& ss, QList<unsigned int>& idList);
+	void addStimuli(const Habit::StimuliSettings& ss);
 	unsigned int addStimulus(const Habit::StimulusSettings& ss);
 	Habit::StimulusSettings getStimulusSettings(unsigned int key);
+	unsigned int getContextStimList(const HStimContext& c, QList<unsigned int>& list);
 
 	const QMap<unsigned int, Habit::StimulusSettings>& map() { return m_mapStim; };
 	static const unsigned int backgroundKey;

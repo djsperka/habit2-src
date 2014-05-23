@@ -70,7 +70,8 @@ void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, i
 
 unsigned int HMediaManager::addAG(const Habit::StimulusSettings& ssAG)
 {
-	m_mapStim[0] = ssAG;
+	unsigned int key = 0;
+	m_mapStim[key] = ssAG;
 	if (m_players.contains(HPlayerPositionType::Left))
 	{
 		if (ssAG.isLeftEnabled())
@@ -119,22 +120,56 @@ unsigned int HMediaManager::addAG(const Habit::StimulusSettings& ssAG)
 			qWarning("Control monitor is configured, and attention getter is used, but no independent sound attention getter stimulus is configured.");
 		}
 	}
+
+
+	// Append to context list.
+	// This code allows more than one ag....nothing here prevents multiple ags to be added to the list.
+	QList<unsigned int> list;
+	list.append(key);
+	addOrAppendList(HStimContext::AttentionGetter, list);
+
 	return 0;
 }
 
 
-void HMediaManager::addStimuli(const Habit::StimuliSettings& ss, QList<unsigned int>& idList)
+void HMediaManager::addOrAppendList(const HStimContext& c, const QList<unsigned int>& list)
+{
+	if (m_mapContext.contains(c))
+	{
+		m_mapContext[c].append(list);
+	}
+	else
+	{
+		m_mapContext.insert(c, list);
+	}
+}
+
+unsigned int HMediaManager::getContextStimList(const HStimContext& c, QList<unsigned int>& list)
+{
+	unsigned int n=0;
+	if (m_mapContext.contains(c))
+	{
+		n = m_mapContext.value(c).size();
+		list.append(m_mapContext.value(c));
+	}
+	return list.size();
+}
+
+
+//void HMediaManager::addStimuli(const Habit::StimuliSettings& ss, QList<unsigned int>& idList)
+void HMediaManager::addStimuli(const Habit::StimuliSettings& ss)
 {
 	// it is assumed that we only add stimuli, not the AG, via this method.
 	// That means the first stim added will never have key=0, instead it will start
 	// at
+	QList<unsigned int> idList;
 	unsigned int key = 1;
-	unsigned int test = 0;
 	for (int i=0; i<ss.getStimuli().size(); i++)
 	{
 		key = nextKey();
 		idList.append(addStimulus(key, ss.getStimuli().at(i)));
 	}
+	addOrAppendList(ss.getStimContext(), idList);
 	return;
 }
 
