@@ -72,6 +72,8 @@ public slots:
 	// slot called when state machine is stopped (i.e. when stop() is called).
 	// Should always call the overloaded stop(int tMS) so a proper stop time is
 	// used to flush
+protected:
+	HEventLog& log() { return m_log; };
 
 private:
 	int m_minLookTimeMS;		// look must be at least this long
