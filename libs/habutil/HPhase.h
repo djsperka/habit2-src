@@ -107,7 +107,7 @@ public:
 protected:
 	virtual bool eventTest(QEvent *event)
 	{
-		return (event->type() == QEvent::Type(HAbortTrialEvent::AbortTrialType));
+		return (event->type() == QEvent::Type(HAbortTrialQEvent::AbortTrialType));
 	};
 	virtual void onTransition(QEvent* event)
 	{

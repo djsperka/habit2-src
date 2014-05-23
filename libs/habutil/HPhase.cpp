@@ -14,7 +14,7 @@
 #include <QFinalState>
 
 HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<unsigned int>& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
-	: HExperimentChildState(exp, log, "Phase")
+	: HExperimentChildState(exp, log, phaseSettings.getPhaseType().name())
 	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
 	, m_phaseSettings(phaseSettings)
@@ -27,12 +27,6 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	HPhaseTrialCompleteState* sTrialComplete = new HPhaseTrialCompleteState(*this, log);
 	m_sTrial->addTransition(m_sTrial, SIGNAL(finished()), sTrialComplete);
 	QFinalState* sFinal = new QFinalState(this);
-	
-	// There is a transition from the trial state to trial complete state when user wants
-	// to skip/abort a trial
-	trans = new HAbortTrialTransition();
-	trans->setTargetState(sTrialComplete);
-	m_sTrial->addTransition(trans);
 	
 	// There are two event transitions from the TrialComplete state. 
 	trans = new HAllTrialsDoneTransition();

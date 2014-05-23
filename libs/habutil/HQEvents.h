@@ -30,10 +30,10 @@ struct HNewTrialEvent : public QEvent
 	enum { NewTrialType = QEvent::User + 2 };
 };
 
-struct HAbortTrialEvent : public QEvent
+struct HAbortTrialQEvent : public QEvent
 {
-	HAbortTrialEvent() : QEvent(Type(AbortTrialType)) {};
-	~HAbortTrialEvent() {};
+	HAbortTrialQEvent() : QEvent(Type(AbortTrialType)) {};
+	~HAbortTrialQEvent() {};
 	enum { AbortTrialType = QEvent::User + 3 };
 };
 
