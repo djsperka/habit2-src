@@ -23,6 +23,7 @@ void HLookDetector::enableAGLook()
 		m_bAGLookEnabled = true;
 		agLookEnabled(true);
 	}
+	log().append(new HAGLookEnabledEvent(HElapsedTimer::elapsed()));
 	return;
 };
 
@@ -40,6 +41,7 @@ void HLookDetector::enableLook()
 	}
 	start();	// start state machine
 	QCoreApplication::processEvents(0);
+	log().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
 	return;
 };
 
@@ -56,5 +58,6 @@ void HLookDetector::disable()
 		m_bAGLookEnabled = false;
 		agLookEnabled(false);
 	}
+	log().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
 	return;
 };
