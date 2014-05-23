@@ -53,6 +53,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 				switch (keyEvent->key()) 
 				{
 					case Qt::Key_Enter:
+					case Qt::Key_Space:
 					{
 						if (isAGLookEnabled())
 						{
@@ -100,6 +101,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 			switch (keyEvent->key()) 
 			{
 				case Qt::Key_Enter:
+				case Qt::Key_Space:
 				{
 					if (isAGLookEnabled())
 					{
