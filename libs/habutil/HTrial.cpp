@@ -140,6 +140,21 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 		}
 	}
 
+	// If the user aborts the trial during the AG this transition will pick it up.
+	QAbstractTransition* trans;
+	HAGAbortedState* sAGAborted = new HAGAbortedState(*this, log);
+	trans = new HAbortTrialTransition();
+	trans->setTargetState(sAGAborted);
+	sAGRunning->addTransition(trans);
+	sAGAborted->addTransition(sInitial);	// trial is repeated
+
+	// If user aborts the trial during the stimulus this transition will pick it up.
+	HStimAbortedState* sStimAborted = new HStimAbortedState(*this, log);
+	trans = new HAbortTrialTransition();
+	trans->setTargetState(sStimAborted);
+	sStimRunning->addTransition(trans);
+	sStimAborted->addTransition(sFinal);
+
 
 	// Initial state transition to AG request or directly to stim request...
 	if (bUseAG)
@@ -174,7 +189,7 @@ void HTrial::onEntry(QEvent* e)
 void HTrial::onStimRunningEntered()
 {
 	phase().experiment().getLookDetector().enableLook();
-	eventLog().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
+//	eventLog().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
 	if (m_phaseSettings.getIsMaxStimulusTime() && m_phaseSettings.getMeasureStimulusTimeFromOnset())
 	{
 		m_ptimerMaxStimulusTime->start(m_phaseSettings.getMaxStimulusTime());
@@ -193,17 +208,17 @@ void HTrial::onStimRunningExited()
 {
 	if (m_ptimerMaxStimulusTime->isActive()) m_ptimerMaxStimulusTime->stop();
 	phase().experiment().getLookDetector().disable();
-	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
+//	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
 }
 
 void HTrial::onAGRunningEntered()
 {
 	phase().experiment().getLookDetector().enableAGLook();
-	eventLog().append(new HAGLookEnabledEvent(HElapsedTimer::elapsed()));
+//	eventLog().append(new HAGLookEnabledEvent(HElapsedTimer::elapsed()));
 }
 
 void HTrial::onAGRunningExited()
 {
 	phase().experiment().getLookDetector().disable();
-	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
+//	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
 }
