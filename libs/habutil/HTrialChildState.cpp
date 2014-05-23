@@ -187,4 +187,17 @@ void HMaxStimulusTimeState::onEntry(QEvent* e)
 	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxStimulusTime, HElapsedTimer::elapsed()));
 };
 
+void HAGAbortedState::onEntry(QEvent* e)
+{
+	Q_UNUSED(e);
+	HState::onEntry(e);
+	trial().incrementRepeatNumber();
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndAGAbort, HElapsedTimer::elapsed()));
+};
 
+void HStimAbortedState::onEntry(QEvent* e)
+{
+	Q_UNUSED(e);
+	HState::onEntry(e);
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndStimAbort, HElapsedTimer::elapsed()));
+};

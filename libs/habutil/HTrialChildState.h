@@ -209,4 +209,33 @@ private:
 };
 
 
+
+class HAGAbortedState: public HTrialChildState
+{
+
+public:
+	HAGAbortedState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HAGAbortedState") {};
+	virtual ~HAGAbortedState() {};
+
+protected:
+
+	// onEntry - do not end trial, simply repeat.
+	void onEntry(QEvent* e);
+};
+
+
+class HStimAbortedState: public HTrialChildState
+{
+
+public:
+	HStimAbortedState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HStimAbortedState") {};
+	virtual ~HStimAbortedState() {};
+
+protected:
+
+	// onEntry - append kTrialEnd event
+	void onEntry(QEvent* e);
+};
+
+
 #endif
