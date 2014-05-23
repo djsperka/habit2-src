@@ -44,10 +44,8 @@ public:
 	{
 		Q_UNUSED(e);
 		// on exiting experiment, tell Media Manager to put up blank screen.
-		emit playStim(-1);
+		getMediaManager().stim(-1);
 	};
-signals:
-	void playStim(int);
 	
 private:
 	HMediaManager& m_mm;
