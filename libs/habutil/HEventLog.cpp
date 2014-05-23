@@ -91,7 +91,8 @@ HPhaseLog HEventLog::getPhaseLog(QString phase)
 					if (	pte->endtype() == HTrialEndType::HTrialEndGotLook ||
 							pte->endtype() == HTrialEndType::HTrialEndMaxStimulusTime ||
 							pte->endtype() == HTrialEndType::HTrialEndMaxAccumulatedLookTime ||
-							pte->endtype() == HTrialEndType::HTrialEndMaxLookAwayTime)
+							pte->endtype() == HTrialEndType::HTrialEndMaxLookAwayTime ||
+							pte->endtype() == HTrialEndType::HTrialEndStimAbort)
 					{
 						phaselog.append(iTotal);
 					}

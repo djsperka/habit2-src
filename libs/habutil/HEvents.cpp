@@ -41,10 +41,12 @@ const HEventType HEventType::HEventAGLookEnabled(22, "AGLookEnabled");
 const HEventType HEventType::HEventLookDisabled(23, "LookDisabled");
 const HEventType HEventType::HEventScreenStart(24, "ScreenStart");
 const HEventType HEventType::HEventStimulusOrder(25, "StimulusOrder");
+const HEventType HEventType::HEventTrialAbort(26, "TrialAborted");
+const HEventType HEventType::HEventExperimentQuit(27, "ExperimentQuit");
 const HEventType HEventType::HEventUndefined(-1, "Undefined");
 
 // Note undefined event not in search array.
-const HEventType* HEventType::A[25] =
+const HEventType* HEventType::A[28] =
 {
 	&HEventType::HEventPhaseStart,
 	&HEventType::HEventPhaseEnd,
@@ -70,7 +72,10 @@ const HEventType* HEventType::A[25] =
 	&HEventType::HEventLookEnabled,
 	&HEventType::HEventAGLookEnabled,
 	&HEventType::HEventLookDisabled,
-	&HEventType::HEventScreenStart
+	&HEventType::HEventScreenStart,
+	&HEventType::HEventStimulusOrder,
+	&HEventType::HEventTrialAbort,
+	&HEventType::HEventExperimentQuit
 };
 	
 bool operator==(const HEventType& lhs, const HEventType& rhs)
@@ -97,19 +102,21 @@ const HEventType& getHEventType(int number_value)
 const HTrialEndType HTrialEndType::HTrialEndGotLook(0, "GotLook");
 const HTrialEndType HTrialEndType::HTrialEndMaxStimulusTime(1, "MaxStimulusTime");
 const HTrialEndType HTrialEndType::HTrialEndNoLookTimeout(2, "NoLookTimeout");
-const HTrialEndType HTrialEndType::HTrialEndAbort(3, "Abort");
+const HTrialEndType HTrialEndType::HTrialEndStimAbort(3, "Abort");
 const HTrialEndType HTrialEndType::HTrialEndMaxAccumulatedLookTime(4, "MaxAccumulatedLookTime");
 const HTrialEndType HTrialEndType::HTrialEndMaxLookAwayTime(5, "MaxLookAwayTime");
+const HTrialEndType HTrialEndType::HTrialEndAGAbort(6, "AGAbort");
 const HTrialEndType HTrialEndType::HTrialEndUndefined(-1, "Unknown");
 	
-const HTrialEndType* HTrialEndType::A[6] =
+const HTrialEndType* HTrialEndType::A[7] =
 {
 	&HTrialEndType::HTrialEndGotLook, 
 	&HTrialEndType::HTrialEndMaxStimulusTime,
 	&HTrialEndType::HTrialEndNoLookTimeout, 
-	&HTrialEndType::HTrialEndAbort,
+	&HTrialEndType::HTrialEndStimAbort,
 	&HTrialEndType::HTrialEndMaxAccumulatedLookTime,
-	&HTrialEndType::HTrialEndMaxLookAwayTime
+	&HTrialEndType::HTrialEndMaxLookAwayTime,
+	&HTrialEndType::HTrialEndAGAbort
 };
 	
 bool operator==(const HTrialEndType& lhs, const HTrialEndType& rhs)
@@ -304,6 +311,14 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	else if (etype == HEventType::HEventStimulusOrder)
 	{
 		pevent = HStimulusOrderEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventTrialAbort)
+	{
+		pevent = HAbortTrialEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventExperimentQuit)
+	{
+		pevent = HExperimentQuitEvent::getEvent(stream, ts);
 	}
 	else
 	{
@@ -802,3 +817,25 @@ HScreenStartEvent* HScreenStartEvent::getEvent(QDataStream& stream, int timestam
 	stream >> filename >> playerid;
 	return new HScreenStartEvent(filename, playerid, timestamp);
 }
+
+HAbortTrialEvent* HAbortTrialEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HAbortTrialEvent(timestamp);
+}
+
+QString HAbortTrialEvent::eventInfo() const
+{
+	return QString("Trial aborted by user.");
+};
+
+HExperimentQuitEvent* HExperimentQuitEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	Q_UNUSED(stream);
+	return new HExperimentQuitEvent(timestamp);
+}
+
+QString HExperimentQuitEvent::eventInfo() const
+{
+	return QString("Experiment quit by user.");
+};

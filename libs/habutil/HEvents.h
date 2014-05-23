@@ -56,9 +56,11 @@ public:
 	static const HEventType HEventAGLookEnabled;
 	static const HEventType HEventLookDisabled;
 	static const HEventType HEventScreenStart;
+	static const HEventType HEventTrialAbort;
+	static const HEventType HEventExperimentQuit;
 
 	// undefined event not in A[]
-	static const HEventType* A[25];
+	static const HEventType* A[28];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -82,13 +84,14 @@ public:
 	static const HTrialEndType HTrialEndGotLook;
 	static const HTrialEndType HTrialEndMaxStimulusTime;
 	static const HTrialEndType HTrialEndNoLookTimeout;
-	static const HTrialEndType HTrialEndAbort;
+	static const HTrialEndType HTrialEndStimAbort;
 	static const HTrialEndType HTrialEndMaxAccumulatedLookTime;
 	static const HTrialEndType HTrialEndMaxLookAwayTime;
+	static const HTrialEndType HTrialEndAGAbort;
 	static const HTrialEndType HTrialEndUndefined;
 	
 	// Undefined type not in A
-	static const HTrialEndType* A[6];
+	static const HTrialEndType* A[7];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -975,6 +978,58 @@ public:
 private:
 	QString m_filename;
 	int m_playerid;
+};
+
+class HAbortTrialEvent: public HEvent
+{
+public:
+	HAbortTrialEvent(int timestamp=0)
+	: HEvent(HEventType::HEventTrialAbort, timestamp)
+	{};
+
+	HAbortTrialEvent(const HAbortTrialEvent& e)
+	: HEvent(HEventType::HEventTrialAbort, e.timestamp())
+	{};
+
+	virtual ~HAbortTrialEvent() {};
+
+	QString eventInfo() const;
+
+	// not needed for this class virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HAbortTrialEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HAbortTrialEvent(t);
+	};
+
+};
+
+class HExperimentQuitEvent: public HEvent
+{
+public:
+	HExperimentQuitEvent(int timestamp=0)
+	: HEvent(HEventType::HEventExperimentQuit, timestamp)
+	{};
+
+	HExperimentQuitEvent(const HExperimentQuitEvent& e)
+	: HEvent(HEventType::HEventExperimentQuit, e.timestamp())
+	{};
+
+	virtual ~HExperimentQuitEvent() {};
+
+	QString eventInfo() const;
+
+	// not needed for this class virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HExperimentQuitEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HExperimentQuitEvent(t);
+	};
+
 };
 
 
