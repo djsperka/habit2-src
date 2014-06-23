@@ -10,13 +10,15 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
-#include <QSettings>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QtDebug>
 #include <QDateTime>
 
+#if 0
+
+This function superceded by functions in HWorkspaceUtil
 
 // select existing db(true) or create new one (false)
 bool selectDB(bool bExisting)
@@ -81,85 +83,68 @@ bool selectDB(bool bExisting)
 	return bval;
 }
 
+#endif
+
+
+// Close database on default connection.
+
 void closeDB()
 {
 	// See if there is a database connection currently open....
-	QSqlDatabase db = QSqlDatabase::database();
-	if (db.isOpen())
+//	QSqlDatabase db = QSqlDatabase::database();
+//	if (db.isOpen())
+//	{
+//		db.close();
+//	}
+	if (QSqlDatabase::database().isOpen())
 	{
-		db.close();
+		QSqlDatabase::database().close();
+		QSqlDatabase::removeDatabase(QSqlDatabase::defaultConnection);
 	}
 }
 
-bool openDB()
+// Open the database file "habit.sqlite" in the given directory.
+
+bool openDB(QDir& dir)
 {
 	bool bval = false;
-	QSettings settings;
-	QString dir, filename;
-	QString default_dir;
-	QString default_filename("habit.db3");
+	QString filename;
 	QFileInfo fileinfo;
 
 
 	// close database if one is open
 	closeDB();
 
-	// First, determine a dir and filename to check.
-	// This will be taken from settings file (if found),
-	// or else we assign the default values.
-	//
-	// Next, check if that directory/file exists.
-	// If it exists then we'll open that file.
-	//
+	// check file attributes
+	fileinfo.setFile(dir, "habit.sqlite");
 
-	if (settings.contains("database/dir") && settings.contains("database/filename"))
+	// Does file exist and can we write to it? If not, then get filename
+	if (!fileinfo.exists() || !fileinfo.isWritable())
 	{
-		dir = settings.value("database/dir").toString();
-		filename = settings.value("database/filename").toString();
-		fileinfo.setFile(QDir(dir), filename);
+		QMessageBox msgBox;
+		QString msg("The database file \"habit.sqlite\" exists, but you do not have write permission. Please fix permissions or select another workspace.");
+		msgBox.setText(msg);
+		msgBox.exec();
 	}
 	else
 	{
-		// Settings do not have current database filename and dir.
-		// Check default location for database file.
-		default_dir = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-		fileinfo.setFile(QDir(default_dir), default_filename);
-	}
-
-	// Does file exist and can we write to it? If not, then get filename
-	if (fileinfo.exists())
-	{
-		if (!fileinfo.isWritable())
+		QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+		db.setDatabaseName(fileinfo.absoluteFilePath());
+		qDebug() << "Opening database: " << fileinfo.absoluteFilePath();
+		if(db.open())
 		{
-			QMessageBox msgBox;
-			msgBox.setText("The database file %1 exists, but you do not have write permission. Please fix permissions or select another file.");
+			bval = true;
+
+			// Now update database if necessary. Do NOT change the database name!
+			if (!updateDBVersion(db, fileinfo))
+			{
+				bval = false;
+				qDebug() << "Database update failed.";
+			}
 		}
 		else
 		{
-			QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-			db.setDatabaseName(fileinfo.absoluteFilePath());
-			qDebug() << "Opening database: " << fileinfo.absoluteFilePath();
-			if(db.open())
-			{
-				bval = true;
-
-				// Now update database if necessary. Do NOT change the database name!
-				if (updateDBVersion(db, fileinfo))
-				{
-					// Update settings to save database name and location for next time.
-					settings.setValue("database/dir", fileinfo.path());
-					settings.setValue("database/filename", fileinfo.fileName());
-				}
-				else
-				{
-					bval = false;
-					qDebug() << "Database update failed.";
-				}
-			}
-			else
-			{
-				qDebug() << "Database file open failed.";
-			}
+			qDebug() << "Database file open failed.";
 		}
 	}
 	return bval;

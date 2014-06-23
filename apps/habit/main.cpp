@@ -1,6 +1,6 @@
 #include "HApplication.h"
 #include "HMainWindow.h"
-#include "HDBUtil.h"
+#include "HWorkspaceUtil.h"
 #include "version.h"
 #include <QApplication>
 #include <QTime>
@@ -49,10 +49,22 @@ int main(int argc, char *argv[])
 	bool bs = false;
 	for (i=0; i<argc; i++)
 	{
-		cout << argv[i] << endl;
 		if (!strcmp(argv[i], "-s"))
 		{
 			bs = true;
+		}
+		else if (!strcmp(argv[i], "-x"))
+		{
+			habutilClearWorkspace();
+		}
+		else if (!strcmp(argv[i], "-w"))
+		{
+			// TODO - maybe tell user they need to supply a directory?
+			if (i < (argc-1))
+			{
+				habutilSetWorkspace(argv[i+1]);
+				i++;
+			}
 		}
 	}
 	if (bs)
@@ -66,7 +78,7 @@ int main(int argc, char *argv[])
 
     HApplication h(argc, argv);
 	h.setApplicationVersion(HABIT_VERSION);
-	h.setApplicationName("Habit");
+	h.setApplicationName("habit2");
 	h.setOrganizationName("Infant Cognition Lab");
 	h.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
 
@@ -88,13 +100,10 @@ int main(int argc, char *argv[])
 	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
 	Q_INIT_RESOURCE(resources);
 
-	// Open database here. openDB() looks in the settings for a database. If that's not found then
-	// it tries the default location. If a database is found and opened, the function returns true.
-	// If no luck, then openDB() returns false and selectDB() is called.
-	while (!openDB())
-	{
-		if (!selectDB(true)) return 0;
-	}
+	// Open a workspace. The workspace is a folder containing "habit.sqlite" and three folders:
+	// "results", "log" and "stim".
+	if (!habutilInitWorkspace())
+		return 0;
 
 	// Now show dialog and start event loop.
     w.show();

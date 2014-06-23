@@ -5,6 +5,6 @@
     <file>resources/rims.png</file>
     <file>resources/gear_wheel.png</file>
     <file>resources/analysis.png</file>
-    <file>resources/habit.db3</file>
+    <file>resources/habit.sqlite</file>
   </qresource>
 </RCC>

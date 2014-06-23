@@ -18,8 +18,6 @@ bool HApplication::event(QEvent* event)
 	{
 	case QEvent::FileOpen:
 	{
-//		QWidget* pActiveModal = activeModalWidget();
-//		QWidget* pActivePopup = activePopupWidget();
 		QWidget* pActiveWindow = activeWindow();
 
 		// check if active window is the main window.
@@ -27,14 +25,8 @@ bool HApplication::event(QEvent* event)
 		HMainWindow* pMainWindow = dynamic_cast<HMainWindow*>(pActiveWindow);
 		if (pMainWindow)
 		{
-			qDebug() << "Got FileOpen event! Active window = main window";
 			emit showResultsFile(static_cast<QFileOpenEvent *>(event)->file());
 		}
-		else
-		{
-			qDebug() << "Got FileOpen event! Active window unknown";
-		}
-
 		bstatus = true;
 		break;
 	}
