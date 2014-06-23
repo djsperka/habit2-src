@@ -40,14 +40,14 @@ public:
 	void showResultsFile(QString filename);
 	
 private slots:
-	void openDBFile();
+	void openWorkspace();
 
 private:
 	void createMenus();
 	void createActions();
     Ui::HabitAppClass ui;
     QMenu *m_fileMenu;
-    QAction *m_openDBAct;
+    QAction *m_openWorkspaceAct;
 };
 
 #endif // HABITAPP_H

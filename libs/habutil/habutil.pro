@@ -38,6 +38,7 @@ HEADERS +=	HLook.h \
 			HPhaseCriteria.h \
 			HPhaseCriteriaUtil.h \
 			HDBUtil.h \
+			HWorkspaceUtil.h \
 			HTrialLog.h \
 			HPhaseLog.h \
 			HEventLog.h \
@@ -140,6 +141,7 @@ SOURCES +=	HLook.cpp \
 			HPhaseCriteria.cpp \
 			HPhaseCriteriaUtil.cpp \
 			HDBUtil.cpp \
+			HWorkspaceUtil.cpp \
 			HTrialLog.cpp \
 			HPhaseLog.cpp \
 			HEventLog.cpp \
