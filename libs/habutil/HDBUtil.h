@@ -11,10 +11,11 @@
 #include <QString>
 #include <QFileInfo>
 #include <QtSql/QSqlDatabase>
+#include <QDir>
 
-bool selectDB(bool bExisting);
+//bool selectDB(bool bExisting);
 void closeDB();
-bool openDB();
+bool openDB(QDir& dir);
 int getDBVersion();
 bool getDBTableExists(QString name);
 bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo);
