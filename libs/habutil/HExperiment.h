@@ -11,9 +11,8 @@
 #define _HEXPERIMENT_H_
 
 #include "HLogState.h"
+#include "HMediaManager.h"
 
-
-class HMediaManager;
 class HLookDetector;
 class HPhase;
 
