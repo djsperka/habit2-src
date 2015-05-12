@@ -17,7 +17,10 @@ class StimulusDisplayInfo
 {
 public:
     StimulusDisplayInfo();
+    StimulusDisplayInfo(const StimulusDisplayInfo& info);
     ~StimulusDisplayInfo();
+    StimulusDisplayInfo& operator=(const StimulusDisplayInfo& rhs);
+    StimulusDisplayInfo clone();
 
 public:
 	int getId() const;
@@ -30,6 +33,10 @@ public:
     void setMaintainOriginalAspectRatio(bool maintainOriginalaspectRatio);
     QColor getBackGroundColor() const;
     void setBackGroundColor(const QColor& backGroundColor);
+    const HStimulusLayoutType& getStimulusLayoutType() const;
+    void setStimulusLayoutType(const HStimulusLayoutType& type);
+    bool getUseISS() const;
+    void setUseISS(bool use);
 	void loadFromDB(size_t id);
 	bool saveToDB(size_t id_);
 
@@ -39,6 +46,8 @@ private:
 	const HDisplayType* pdtype_;
 	bool isOriginalAspectRatioMaintained_;
 	QColor backGroundColor_;
+	const HStimulusLayoutType* playouttype_;
+	bool useISS_;
 };
 
 QDataStream & operator<< (QDataStream& stream, Habit::StimulusDisplayInfo d);

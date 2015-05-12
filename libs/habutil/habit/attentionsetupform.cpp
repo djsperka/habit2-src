@@ -1,6 +1,7 @@
 #include "attentionsetupform.h"
-#include "stimulussettingseditordialog.h"
-
+//#include "stimulussettingseditordialog.h"
+#include "HStimulusSettingsEditor.h"
+#include <QStringList>
 #include <QtGui/QWidget>
 #include <QtGui/QColorDialog>
 #include <QtGui/QFont>
@@ -13,10 +14,10 @@
 
 namespace GUILib {
 
-AttentionSetupForm::AttentionSetupForm(const Habit::AttentionGetterSettings& settings, QWidget* w)
-	: QWidget(w)
-	, settings_(settings)
-	, dlg_(0)
+AttentionSetupForm::AttentionSetupForm(const Habit::AttentionGetterSettings& settings, const HStimulusLayoutType& layoutType, QWidget* w)
+: QWidget(w)
+, settings_(settings)
+, m_pLayoutType(&layoutType)
 {
 	//setFixedWidth(556);
 	createComponents();
@@ -29,8 +30,18 @@ AttentionSetupForm::~AttentionSetupForm()
 {
 }
 
+void AttentionSetupForm::setStimulusLayoutType(const HStimulusLayoutType& layoutType)
+{
+	m_pLayoutType = &layoutType;
+}
+
+void AttentionSetupForm::stimulusLayoutTypeChanged(int i)
+{
+	setStimulusLayoutType(getStimulusLayoutType(i));
+}
+
+
 void AttentionSetupForm::createComponents() {
-	mainTitle_ = new QLabel(tr("Attention Setup"));
 	attentionGroup_ = new QGroupBox(tr("Use Attention Stimulus"));
 	attentionGroup_ ->setCheckable(true);
 	colorGroup_ = new QGroupBox(tr("Background Color"));
@@ -69,10 +80,6 @@ void AttentionSetupForm::setLabelsFont()
 	font1.setPointSize(11);
 	attentionGroup_->setFont(font1);
 	colorGroup_->setFont(font1);
-	QFont font2;
-	font2.setPointSize(12);
-	font2.setBold(true);
-	mainTitle_->setFont(font2);
 }
 
 void AttentionSetupForm::onColorChooserClick() {
@@ -84,25 +91,23 @@ void AttentionSetupForm::onColorChooserClick() {
 	colorButton_->setStyleSheet(st); 
 }
 
-void AttentionSetupForm::onModifyClick() {
-	if(0 == dlg_) {
-		dlg_ = new StimulusSettingsEditorDialog(settings_.getAttentionGetterStimulus());	
-	}
-	else
+void AttentionSetupForm::onModifyClick()
+{
+	QStringList empty;	// dummy empty name list for HStimulusSettingsEditor
+	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(settings_.getAttentionGetterStimulus(), *m_pLayoutType, empty, QString("Modify Attention Getter Stimulus"), this);
+	if (pEditor->exec() == QDialog::Accepted)
 	{
-		dlg_->initialize();
+		// update the AG stimulus settings and label
+		settings_.setAttentionGetterStimulus(pEditor->getStimulusSettings());
+		stimulusName_->setText(QString("Stimulus Name :  " + settings_.getAttentionGetterStimulus().getName()));
 	}
-	connect(dlg_, SIGNAL(configurationChanged(Habit::StimulusSettings)), this, SLOT(onConfigurationChange(Habit::StimulusSettings)));
-	dlg_->setModal(true);
-	dlg_->setVisible(true);
 }
 
-void AttentionSetupForm::onConfigurationChange(const Habit::StimulusSettings& stimulus) {
-	Q_ASSERT(0 != dlg_);
-	settings_.setAttentionGetterStimulus(stimulus);
-	stimulusName_->setText("Stimulus Name: " + stimulus.getName());
-	dlg_->close();
+/*
+void AttentionSetupForm::onConfigurationChange(const Habit::StimulusSettings& stimulus)
+{
 }
+*/
 
 void AttentionSetupForm::makeConnections()
 {
@@ -110,7 +115,9 @@ void AttentionSetupForm::makeConnections()
 	connect(modifyButton_, SIGNAL(clicked()), this, SLOT(onModifyClick()));
 }
 
-void AttentionSetupForm::doAttentionLayout(){
+void AttentionSetupForm::doLayout()
+{
+	mainLayout_=  new QVBoxLayout(this);
 	QVBoxLayout* attentionLayout = new QVBoxLayout();
 	attentionGroup_->setLayout(attentionLayout);
 	QHBoxLayout* nameLayout = new QHBoxLayout();
@@ -125,14 +132,6 @@ void AttentionSetupForm::doAttentionLayout(){
 	attentionLayout->addWidget(colorGroup_);
 	mainLayout_->addWidget(attentionGroup_);
 	mainLayout_->addStretch(1);
-}
-
-void AttentionSetupForm::doLayout()
-{
-	mainLayout_=  new QVBoxLayout(this);
-	mainLayout_->addWidget(mainTitle_);
-	mainTitle_->setAlignment(Qt::AlignCenter);
-	doAttentionLayout();
 }
 
 void AttentionSetupForm::setConfigurationObject(const Habit::AttentionGetterSettings& settings)

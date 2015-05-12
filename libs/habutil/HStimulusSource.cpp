@@ -9,6 +9,7 @@
 
 #include "HStimulusSource.h"
 #include <QFile>
+#include <QDir>
 #include <QFileInfo>
 #include <QTextStream>
 #include <QBuffer>
@@ -40,6 +41,20 @@ QTextStream& operator<<(QTextStream& out, const HStimulusSource& ss)
 	return out;
 }
 
+HStimulusSource::HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& stimRootDir)
+: m_type(BACKGROUND)
+, m_pBuffer(0)
+, m_pImage(0)
+, m_audioBalance(pinfo->getVolume())
+, m_isLooped(pinfo->isLoopPlayBack())
+{
+	if (!pinfo->getFileName().isEmpty())
+		init(pinfo->getAbsoluteFileName(stimRootDir));
+	else
+		init();
+}
+
+
 HStimulusSource::HStimulusSource()
 : m_type(BACKGROUND)
 , m_pByteArray(0)
@@ -48,12 +63,22 @@ HStimulusSource::HStimulusSource()
 , m_audioBalance(0)
 , m_isLooped(false)
 {
+	init();
 }
 
-
-HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool isLooped) : m_type(BACKGROUND), m_pBuffer(0), m_pImage(0), m_audioBalance(audioBalance), m_isLooped(isLooped)
+HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool isLooped)
+: m_type(BACKGROUND)
+, m_pBuffer(0)
+, m_pImage(0)
+, m_audioBalance(audioBalance)
+, m_isLooped(isLooped)
 {
-	// Zero length filename implies BACKGROUND. 
+	init(filename);
+}
+
+void HStimulusSource::init(const QString& filename)
+{
+	// Zero length filename implies BACKGROUND.
 	if (filename.length() > 0)
 	{
 		QFile file(filename);
@@ -88,8 +113,13 @@ HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool
 		}
 		else 
 		{
+			qCritical() << "HStimulusSource file not found: \"" << filename << "\"";
 			m_type = ERROR;
 		}
+	}
+	else
+	{
+		m_type = BACKGROUND;
 	}
 }
 

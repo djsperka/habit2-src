@@ -9,8 +9,14 @@
 
 #include "HAudioPlayer.h"
 
-HAudioPlayer::HAudioPlayer(int id, QWidget *w) : 
-HPlayer(id, w), m_pendingStop(false), m_pMediaObject(0), m_pAudioOutput(0), m_nowPlayingFilename("NONE")
+using namespace Habit;
+
+HAudioPlayer::HAudioPlayer(int id, QWidget *w, const QDir& stimRootDir)
+: HPlayer(id, w, stimRootDir)
+, m_pendingStop(false)
+, m_pMediaObject(0)
+, m_pAudioOutput(0)
+, m_nowPlayingFilename("NONE")
 {
 	// Generate image widget, media object, video widget, audio output
 	// Special case is when this player is for audio only stimuli (as for control player and ISS stim)
@@ -18,14 +24,31 @@ HPlayer(id, w), m_pendingStop(false), m_pMediaObject(0), m_pAudioOutput(0), m_no
 	m_pMediaObject = new Phonon::MediaObject(this);
 	m_pMediaObject->setObjectName("MediaObject");
 	m_pAudioOutput = new Phonon::AudioOutput(Phonon::VideoCategory, this);
+	setFocusPolicy(Qt::NoFocus);
 	
 	// connect media object slot to handle looped video when needed
 	
 	connect(m_pMediaObject, SIGNAL(prefinishMarkReached(qint32)), this, SLOT(onPrefinishMarkReached(qint32)));
-	
+
+	// connect media object's stateChanged signal so we can emit started() and stopped() signals.
+
+	connect(m_pMediaObject, SIGNAL(stateChanged (Phonon::State, Phonon::State)),
+			this, SLOT(onStateChanged(Phonon::State, Phonon::State)));
+
 	// Create paths
 	Phonon::createPath(m_pMediaObject, m_pAudioOutput);
-	
+
+}
+
+unsigned int HAudioPlayer::addStimulusPrivate(unsigned int id)
+{
+	// TODO: Store buffer of audio file?
+	qDebug() << "HAudioPlayer::addStimulusPrivate(" << id << ")";
+	return id;
+}
+
+HAudioPlayer::~HAudioPlayer()
+{
 }
 
 void HAudioPlayer::stop()
@@ -35,14 +58,12 @@ void HAudioPlayer::stop()
 
 void HAudioPlayer::play(unsigned int number)
 {
-	if (number < (unsigned int)m_sources.count())
-	{
-		m_pMediaObject->setCurrentSource((m_sources[number]->filename()));
-		m_pAudioOutput->setVolume((double)m_sources[number]->getAudioBalance()/100.0);
-		m_pMediaObject->play();
-		m_iCurrentStim = number;
-		m_nowPlayingFilename = m_sources[number]->filename();
-	}
+	const StimulusInfo& info = getStimulusInfo(number);
+	m_pMediaObject->setCurrentSource(info.getAbsoluteFileName(getStimulusRoot()));
+	m_pAudioOutput->setVolume((double)info.getVolume()/100.0);
+	m_pMediaObject->play();
+	m_iCurrentStim = number;
+	m_nowPlayingFilename = info.getFileName();
 }
 
 
@@ -62,7 +83,8 @@ void HAudioPlayer::clear()
 void HAudioPlayer::onPrefinishMarkReached(qint32 msec)
 {
 	Q_UNUSED(msec);
-	if (m_iCurrentStim > -1 && m_iCurrentStim < m_sources.count() && (m_sources.value(m_iCurrentStim)->type() == HStimulusSource::AUDIO && (m_sources.value(m_iCurrentStim)->isLooped())))
+
+	if (getCurrentStimulusInfo().isLoopPlayBack())
 	{
 		m_pMediaObject->pause();
 		m_pMediaObject->seek(0);

@@ -185,6 +185,7 @@ private:
 
 const HCriterionBasisType& getCriterionBasisType(int number_value);
 
+
 class HTrialCompletionType
 {
 public:
@@ -265,6 +266,32 @@ private:
 
 bool operator==(const HDisplayType& lhs, const HDisplayType& rhs);
 const HDisplayType& getDisplayType(int number_value);
+
+
+class HStimulusLayoutType
+{
+public:
+	static const HStimulusLayoutType HStimulusLayoutUnknown;
+	static const HStimulusLayoutType HStimulusLayoutSingle;
+	static const HStimulusLayoutType HStimulusLayoutLeftRight;
+
+	// The contents of this array are used to populate the radio buttons.
+	static const HStimulusLayoutType* A[2];
+
+	int number() const { return m_t; }
+	const QString& name() const { return m_s; }
+	const QString& label() const { return m_l; }
+
+private:
+	explicit HStimulusLayoutType(int t, const char* name, const char* label): m_t(t), m_s(name), m_l(label) {};
+	int m_t;
+	const QString m_s;
+	const QString m_l;
+};
+
+bool operator==(const HStimulusLayoutType& lhs, const HStimulusLayoutType& rhs);
+const HStimulusLayoutType& getStimulusLayoutType(int number_value);
+
 
 
 
@@ -363,7 +390,9 @@ private:
 };
 
 bool operator<(const HPlayerPositionType& lhs, const HPlayerPositionType& rhs);
-
+bool operator==(const HPlayerPositionType& lhs, const HPlayerPositionType& rhs);
+bool operator!=(const HPlayerPositionType& lhs, const HPlayerPositionType& rhs);
+const HPlayerPositionType& getPlayerPositionType(int number_value);
 
 
 

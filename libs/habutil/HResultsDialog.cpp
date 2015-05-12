@@ -6,10 +6,13 @@
  */
 
 #include "HResultsDialog.h"
-#include "experimentsettingsform.h"
+#include "HWorkspaceUtil.h"
+#include "HExperimentMain.h"
+//#include "experimentsettingsform.h"
 
 HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 : QDialog(parent)
+, m_sExptName(results.experimentSettings().getName())
 {
 	QVBoxLayout* vlayout = new QVBoxLayout;
 	QHBoxLayout* hlayout = new QHBoxLayout;
@@ -44,7 +47,22 @@ void HResultsDialog::onPrint()
 void HResultsDialog::onExport()
 {
 	QFileInfo fileinfo(m_pResultsWidget->results().filename());
-	QString tmpfile = fileinfo.dir().path().append("/").append(fileinfo.baseName()).append(".csv");
+	QString tmpfile;
+
+	// The filename in the results widget's HResults may not have a directory yet. That's the case when the expt has
+	// just been run and we have not saved the results to disk. If a results file has been loaded from disk, though,
+	// the filename will have a dir. Attempt to make the save starting point as close as possible to the location
+	// of the results (even if the results haven't been written - in that case assume they'll get written to the
+	// results dir).
+
+	if (fileinfo.dir().path() == ".")
+	{
+		tmpfile = habutilGetResultsDir(m_sExptName).path().append("/").append(fileinfo.baseName()).append("_eventlog.csv");
+	}
+	else
+	{
+		tmpfile = fileinfo.dir().path().append("/").append(fileinfo.baseName()).append("_eventlog.csv");
+	}
 
 	// Get filename. Use the original input filename as starting point...
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Filename for export"), tmpfile, "CSV File (*.csv)");
@@ -59,5 +77,6 @@ void HResultsDialog::onExport()
 
 void HResultsDialog::onView()
 {
-    GUILib::ExperimentSettingsForm experimentSettingsForm(m_pResultsWidget->results().experimentSettings(), this, true);
-    experimentSettingsForm.exec();}
+    GUILib::HExperimentMain experimentMain(m_pResultsWidget->results().experimentSettings(), this, true);
+    experimentMain.exec();
+}

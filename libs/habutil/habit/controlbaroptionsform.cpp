@@ -9,9 +9,6 @@ ControlBarOptionsForm::ControlBarOptionsForm(const Habit::ControlBarOptions& con
 {
     ui = new Ui::ControlBarOptionsFormClass();
     ui->setupUi(this);
-    //QObject::connect(ui->useControlBarGroupBox, SIGNAL(toggled(bool)), this,  SLOT(useControlBar(bool)));
-    //QObject::connect(ui->displayPhaseCheckBox, SIGNAL(stateChanged(int)), this,  SLOT(displayExperimentPhase(int)));
-    //QObject::connect(ui->displayStimulusCheckBox, SIGNAL(stateChanged(int)), this,  SLOT(displayStimulus(int)));
 	setFixedWidth(556);
 }
 
@@ -20,8 +17,8 @@ ControlBarOptionsForm::~ControlBarOptionsForm()
     delete ui;
 }
 
-void ControlBarOptionsForm::initialize() {
-	ui->useControlBarGroupBox->setChecked(controlBarOptions_.isControlBarUsed());
+void ControlBarOptionsForm::initialize()
+{
 	ui->displayPhaseCheckBox->setChecked(controlBarOptions_.isCurrentExperimentDisplayed());
 	ui->displayStimulusCheckBox->setChecked(controlBarOptions_.isCurrentStimulusDisplayed());
 }
@@ -31,7 +28,7 @@ Habit::ControlBarOptions ControlBarOptionsForm::getConfigurationObject() {
 	cbo.setId(controlBarOptions_.getId());
 	cbo.setDisplayCurrentExperiment(ui->displayPhaseCheckBox->isChecked());
 	cbo.setDisplayCurrentStimulus(ui->displayStimulusCheckBox->isChecked());
-	cbo.setUseControlBar(ui->useControlBarGroupBox->isChecked());
+	cbo.setUseControlBar(true);
 	return cbo;
 }
 

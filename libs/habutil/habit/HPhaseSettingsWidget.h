@@ -11,6 +11,11 @@
 #include <QtGui>
 #include "HPhaseSettings.h"
 
+namespace Ui
+{
+	class HPhaseSettingsForm;
+}
+
 namespace GUILib
 {
 	class HPhaseSettingsWidget: public QWidget
@@ -18,11 +23,12 @@ namespace GUILib
 		Q_OBJECT
 
 	public:
-		HPhaseSettingsWidget();
-		HPhaseSettingsWidget(const Habit::HPhaseSettings& settings);
+		HPhaseSettingsWidget(QWidget *parent = 0);
+		HPhaseSettingsWidget(const Habit::HPhaseSettings& settings, QWidget *parent=0);
 		const Habit::HPhaseSettings& getHPhaseSettings();
 		void setHPhaseSettings(const Habit::HPhaseSettings& settings) { m_settings = settings; initialize(); };
 
+#if 0
 	protected slots:
 
 		void cbEnabledToggled(bool checked);
@@ -30,26 +36,30 @@ namespace GUILib
 		void cbMaxStimulusTimeToggled(bool checked);
 		void cbMaxNoLookTimeToggled(bool checked);
 		void cbMaxLookAwayTimeToggled(bool checked);
-
+#endif
 
 	private:
 		// Set values in widget to match those in m_settings
 		void initialize();
 
-		// Create gui components
-		void createComponents();
-
 		// Set up validators for gui components
 		void setValidators();
+
+#if 0
+		// Create gui components
+		void createComponents();
 
 		// Establish connections for gui components
 		void makeConnections();
 
 		// Create layouts
 		void doLayout();
+#endif
 
+		Ui::HPhaseSettingsForm *ui;
 		Habit::HPhaseSettings m_settings;
 
+#if 0
 		QGroupBox* m_pgb;	// main group box
 		QCheckBox* m_pcbEnabled;
 		QSpinBox* m_pNTrials;
@@ -73,6 +83,8 @@ namespace GUILib
 
 		QCheckBox *m_pcbMaxNoLookTime;
 		QLineEdit* m_peditMaxNoLookTime;
+#endif
+
 	};
 }; // namespace
 

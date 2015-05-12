@@ -50,7 +50,13 @@ QString Habit::RunSettings::getHabituationOrder() const {
 }
 
 void Habit::RunSettings::setHabituationOrder(const QString& order) {
+	// for historical reasons (to help loading older experiment results files)
+	// convert this input string to a list. We run the risk that the input
+	// is no good and cannot be converted. I'm going to rely on the unlikelihood
+	// of that to protect us.
 	habituationTestOrder_ = order;
+	getOrderFromString(habituationOrderList_, order);
+	return;
 }
 
 bool Habit::RunSettings::isHabituationRandomized() const {
@@ -74,7 +80,13 @@ QString Habit::RunSettings::getPretestOrder() const {
 }
 
 void Habit::RunSettings::setPretestOrder(const QString& order) {
+	// for historical reasons (to help loading older experiment results files)
+	// convert this input string to a list. We run the risk that the input
+	// is no good and cannot be converted. I'm going to rely on the unlikelihood
+	// of that to protect us.
 	pretestTestOrder_ = order;
+	getOrderFromString(pretestOrderList_, order);
+	return;
 }
 
 bool Habit::RunSettings::isPretestRandomized() const {
@@ -117,33 +129,52 @@ void Habit::RunSettings::setTestRandomizeMethod(int m) {
 	testRandomizeMethod = m;
 }
 
-bool Habit::RunSettings::getPretestOrderList(QList<int>& list) const
+bool Habit::RunSettings::getPretestOrderList(StimLabelList& list) const
 {
-	return getOrderFromString(list, getPretestOrder());
+	list = pretestOrderList_;
+	return true;
 }
 
-bool Habit::RunSettings::getHabituationOrderList(QList<int>& list) const
+bool Habit::RunSettings::getHabituationOrderList(StimLabelList& list) const
 {
-	return getOrderFromString(list, getHabituationOrder());
+	list = habituationOrderList_;
+	return true;
 }
 
-bool Habit::RunSettings::getTestOrderList(QList<int>& list) const
+bool Habit::RunSettings::getTestOrderList(StimLabelList& list) const
 {
-	return getOrderFromString(list, getTestOrder());
+	list = testOrderList_;
+	return true;
 }
 
-bool Habit::RunSettings::getOrderFromString(QList<int>& list, QString str)
+
+void Habit::RunSettings::setPretestOrderList(const StimLabelList& list)
+{
+	pretestOrderList_ = list;
+}
+
+void Habit::RunSettings::setHabituationOrderList(const StimLabelList& list)
+{
+	habituationOrderList_ = list;
+}
+
+void Habit::RunSettings::setTestOrderList(const StimLabelList& list)
+{
+	testOrderList_ = list;
+}
+
+
+bool Habit::RunSettings::getOrderFromString(StimLabelList& list, QString str)
 {
 	bool b = true;
 	QRegExp resep("[ ,]+");
-
 	// the regexp allows spaces and commas as separators. Extra spaces, and extra commas for
 	// that matter, are allowed.
 	QStringList orderList = str.split(resep);
-	for(QStringList::iterator it = orderList.begin(); it != orderList.end() && b; ++it)
+	for (QStringList::iterator it = orderList.begin(); it != orderList.end() && b; ++it)
 	{
 		int num = it->toInt(&b);
-		if (b) list.append(num);
+		if (b) list.append(QPair<int, QString>(num, QString()));
 	}
 	return b;
 }

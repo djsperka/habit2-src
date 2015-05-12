@@ -15,7 +15,7 @@ namespace Habit
 	class HLookSettings
 	{
 	public:
-		HLookSettings(): m_id(-1), m_minLookTime(0), m_minLookAwayTime(0), m_bInclusiveLookTime(true) {};
+		HLookSettings(): m_id(-1), m_minLookTime(500), m_minLookAwayTime(100), m_bInclusiveLookTime(true) {};
 		HLookSettings(unsigned int minlook, unsigned int minlookaway, bool bInclusiveLookTime = true): m_id(-1), m_minLookTime(minlook), m_minLookAwayTime(minlookaway), m_bInclusiveLookTime(bInclusiveLookTime) {};
 		HLookSettings(const HLookSettings& ls): m_id(ls.getId()), m_minLookTime(ls.getMinLookTime()), m_minLookAwayTime(ls.getMinLookAwayTime()), m_bInclusiveLookTime(ls.getInclusiveLookTime()) {};
 		HLookSettings& operator=(const HLookSettings& rhs)
@@ -29,6 +29,8 @@ namespace Habit
 			}
 			return *this;
 		};
+		// A clone is a copy with db ID set to -1
+		HLookSettings clone();
 		int getId() const { return m_id; };
 		void setId(int id) { m_id = id; };
 		unsigned int getMinLookTime() const { return m_minLookTime; };

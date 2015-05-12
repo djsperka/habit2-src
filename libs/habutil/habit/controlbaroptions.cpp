@@ -10,9 +10,36 @@ Habit::ControlBarOptions::ControlBarOptions()
     displayCurrentStimulus_ = false;
 }
 
+Habit::ControlBarOptions::ControlBarOptions(const Habit::ControlBarOptions& cbo)
+{
+	setId(cbo.getId());
+	setUseControlBar(cbo.isControlBarUsed());
+	setDisplayCurrentExperiment(cbo.isCurrentExperimentDisplayed());
+	setDisplayCurrentStimulus(cbo.isCurrentStimulusDisplayed());
+}
+
+Habit::ControlBarOptions& Habit::ControlBarOptions::operator=(const ControlBarOptions& rhs)
+{
+	if (this != &rhs)
+	{
+		setId(rhs.getId());
+		setUseControlBar(rhs.isControlBarUsed());
+		setDisplayCurrentExperiment(rhs.isCurrentExperimentDisplayed());
+		setDisplayCurrentStimulus(rhs.isCurrentStimulusDisplayed());
+	}
+	return *this;
+};
+
 Habit::ControlBarOptions::~ControlBarOptions()
 {
 
+}
+
+Habit::ControlBarOptions Habit::ControlBarOptions::clone()
+{
+	Habit::ControlBarOptions cbo(*this);
+	cbo.setId(-1);
+	return cbo;
 }
 
 QDataStream & Habit::operator<< (QDataStream& stream, Habit::ControlBarOptions cbo)

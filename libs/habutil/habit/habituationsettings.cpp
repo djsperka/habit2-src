@@ -1,15 +1,45 @@
 #include "habituationsettings.h"
 #include "maindao.h"
+#include <QtDebug>
 
 Habit::HabituationSettings::HabituationSettings(const HHabituationType& htype) 
 : id_(-1)
 , lookTime_(50)
 , phtype_(&htype)
+, criterionsettings_()
 {
 }
 
 Habit::HabituationSettings::~HabituationSettings()
 {
+}
+
+Habit::HabituationSettings::HabituationSettings(const Habit::HabituationSettings& settings)
+: id_(settings.getId())
+, lookTime_(settings.getTotalLookLengthToEnd())
+, phtype_(&settings.getHabituationType())
+, criterionsettings_(settings.getCriterionSettings())
+{
+}
+
+Habit::HabituationSettings& Habit::HabituationSettings::operator=(const Habit::HabituationSettings& rhs)
+{
+	if (this != &rhs)
+	{
+		setId(rhs.getId());
+		setHabituationType(rhs.getHabituationType());
+		setTotalLookLengthToEnd(rhs.getTotalLookLengthToEnd());
+		setCriterionSettings(rhs.getCriterionSettings());
+	}
+	return *this;
+}
+
+
+Habit::HabituationSettings Habit::HabituationSettings::clone()
+{
+	Habit::HabituationSettings settings(*this);
+	settings.setId(-1);
+	return settings;
 }
 
 QDataStream & Habit::operator<< (QDataStream& stream, Habit::HabituationSettings d)
@@ -32,10 +62,21 @@ QDataStream & Habit::operator>> (QDataStream& stream, Habit::HabituationSettings
 
 bool Habit::operator==(const Habit::HabituationSettings& lhs, const Habit::HabituationSettings& rhs)
 {
+	bool b;
+	Habit::CriterionSettings csl(lhs.getCriterionSettings());
+	Habit::CriterionSettings csr(rhs.getCriterionSettings());
+	b = (lhs.getId() == rhs.getId() &&
+		lhs.getTotalLookLengthToEnd() == rhs.getTotalLookLengthToEnd() &&
+		lhs.getHabituationType() == rhs.getHabituationType() &&
+		lhs.getCriterionSettings() == rhs.getCriterionSettings());
+	return b;
+#if 0
 	return (lhs.getId() == rhs.getId() &&
 			lhs.getTotalLookLengthToEnd() == rhs.getTotalLookLengthToEnd() &&
 			lhs.getHabituationType() == rhs.getHabituationType() &&
 			lhs.getCriterionSettings() == rhs.getCriterionSettings());
+#endif
+
 }
 
 
@@ -60,7 +101,7 @@ void Habit::HabituationSettings::setHabituationType(const HHabituationType& htyp
     phtype_ = &htype;
 }
 
-const Habit::CriterionSettings& Habit::HabituationSettings::getCriterionSettings() const
+const Habit::CriterionSettings Habit::HabituationSettings::getCriterionSettings() const
 {
     return criterionsettings_;
 }

@@ -18,7 +18,10 @@ void HTrialInitialState::onEntry(QEvent* e)
 	Q_UNUSED(e);
 	
 	// post TrialStart event to event log
-	eventLog().append(new HTrialStartEvent(trial().getTrialNumber(), trial().getRepeatNumber(), HElapsedTimer::elapsed()));										   
+	eventLog().append(new HTrialStartEvent(trial().getTrialNumber(), trial().getRepeatNumber(), HElapsedTimer::elapsed()));
+
+	// emit signal...
+	emit trialStarted(trial().getTrialNumber(), trial().getRepeatNumber());
 }
 
 

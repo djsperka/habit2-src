@@ -9,6 +9,7 @@
 #define HWORKSPACEUTIL_H_
 
 #include <QDir>
+#include "HTypes.h"
 
 // A dir is a valid workspace if all of the following are true
 // 1. dir exists
@@ -41,8 +42,11 @@ bool habutilInitWorkspace();
 
 bool habutilGetWorkspaceDir(QDir& dir);
 
+// get workspace dir currently set in preferences. Returns absolute dir as string.
+QString habutilGetWorkspaceDir();
+
 // These assume you've already opened a workspace (called habutilInitWorkspace).
-QDir habutilGetResultsDir();
+QDir habutilGetResultsDir(const QString expt = QString());
 QDir habutilGetLogDir();
 QDir habutilGetStimDir();
 
@@ -61,5 +65,40 @@ void habutilClearWorkspace();
 
 // Set workspace to given dir
 void habutilSetWorkspace(const QString& d);
+
+
+// get stimulus root dir.
+// If settings "stimroot" exists, use it
+// If that setting is not set, use default location getStimDir() (and create setting).
+// Returns true (false) if the stim root dir exists (does not exist).
+bool habutilGetStimulusRootDir(QDir& dir);
+
+// just gimme the dir, nevermind whether it exists.
+QString habutilGetStimulusRootDir();
+
+// Prompt user to select a stimulus root folder.
+
+bool habutilSelectStimulusRootDir();
+
+
+// Testing utility. Call to delete the "stimroot" setting from settings.
+void habutilClearStimulusRootDir();
+
+
+// Set stimroot to given dir
+void habutilSetStimulusRootDir(const QString& d);
+
+// get last dir that a stim was selected from
+bool habutilGetLastDir(QDir& dir);
+
+// set last dir that a stim was selected from
+void habutilSetLastDir(const QString& d);
+
+// get/set monitor id for Control, left, right, etc
+int habutilGetMonitorID(const HPlayerPositionType& type);
+void habutilSetMonitorID(const HPlayerPositionType& type, int id);
+
+
+
 
 #endif /* HWORKSPACEUTIL_H_ */

@@ -107,6 +107,27 @@ bool habutilCreateWorkspace(QDir& dir)
 		else
 		{
 			qDebug() << "Created stim directory " << dir.absoluteFilePath("stim");
+
+			// move sample stim files into stim folder
+			QDir resourceStimDir(":/resources/stim");
+			QDir stimDir(dir);
+			stimDir.cd(QString("stim"));
+
+			QFileInfoList list = resourceStimDir.entryInfoList();
+			for (int i = 0; i < list.size(); ++i)
+			{
+				QFileInfo fileInfo = list.at(i);
+				if (!QFile::copy(fileInfo.absoluteFilePath(), stimDir.absoluteFilePath(fileInfo.fileName())))
+				{
+					qCritical() << "Cannot copy image file " << fileInfo.absoluteFilePath();
+					return false;
+				}
+				else
+				{
+					qDebug() << "Copied " << fileInfo.absoluteFilePath() << " to " << stimDir.absoluteFilePath(fileInfo.fileName());
+				}
+			}
+
 		}
 	}
 
@@ -187,13 +208,41 @@ bool habutilGetWorkspaceDir(QDir& dir)
 	return habutilIsValidWorkspace(dir);
 }
 
+
+QString habutilGetWorkspaceDir()
+{
+	QDir dir;
+	habutilGetWorkspaceDir(dir);
+	return dir.absolutePath();
+}
+
+
 // get results dir. Assumes that the directory exists. As long as this is called on an open workspace that is a safe assumption.
 
-QDir habutilGetResultsDir()
+QDir habutilGetResultsDir(const QString expt)
 {
 	QDir dir;
 	habutilGetWorkspaceDir(dir);
 	dir.setPath(dir.filePath("results"));
+	if (!expt.isEmpty())
+	{
+		if (!dir.exists(expt))
+		{
+			if (!dir.mkdir(expt))
+			{
+				qCritical() << "Cannot create results directory for experiment \"" << expt << "\". Results will be put in \"" << dir.absolutePath() << "\"";
+			}
+			else
+			{
+				qDebug() << "Created results directory for experiment \"" << expt << "\"";
+				dir.setPath(dir.filePath(expt));
+			}
+		}
+		else
+		{
+			dir.setPath(dir.filePath(expt));
+		}
+	}
 	return dir;
 }
 
@@ -227,5 +276,130 @@ void habutilSetWorkspace(const QString& d)
 {
 	QSettings settings;
 	settings.setValue("workspace", d);
+	return;
+}
+
+
+
+bool habutilGetStimulusRootDir(QDir& stimRootDir)
+{
+	QSettings settings;
+	stimRootDir = habutilGetStimDir();
+	if (!settings.contains("stimroot"))
+	{
+		settings.setValue("stimroot", stimRootDir.absolutePath());
+	}
+	else
+	{
+		stimRootDir.setPath(settings.value("stimroot").toString());
+	}
+
+	return stimRootDir.exists();
+}
+
+
+QString habutilGetStimulusRootDir()
+{
+	QDir dir;
+	habutilGetStimulusRootDir(dir);
+	return dir.absolutePath();
+}
+
+// Prompt user to select a stimulus root folder.
+bool habutilSelectStimulusRootDir()
+{
+	bool b = false;
+	QDir dir;
+	QString selectedDir;
+
+	habutilGetStimulusRootDir(dir);
+
+	selectedDir = QFileDialog::getExistingDirectory(0, "Select Habit Stimulus Root Folder", dir.absolutePath());
+	if (selectedDir.isEmpty() || selectedDir.isNull())
+	{
+		b = false;
+	}
+	else
+	{
+		habutilSetStimulusRootDir(selectedDir);
+		b = true;
+	}
+	return b;
+}
+
+
+// Testing utility. Call to delete the "stimroot" setting from settings.
+void habutilClearStimulusRootDir()
+{
+	QSettings settings;
+	settings.remove("stimroot");
+	return;
+}
+
+
+// Set stimroot to given dir
+void habutilSetStimulusRootDir(const QString& d)
+{
+	QSettings settings;
+	settings.setValue("stimroot", QDir(d).absolutePath());
+	return;
+}
+
+
+// get last dir that a stim was selected from
+bool habutilGetLastDir(QDir& dir)
+{
+	QSettings settings;
+	dir = QDir::root();
+	if (!settings.contains("lastdir"))
+	{
+		settings.setValue("lastdir", dir.absolutePath());
+	}
+	else
+	{
+		dir.setPath(settings.value("lastdir").toString());
+	}
+
+	return dir.exists();
+}
+
+// set last dir that a stim was selected from
+void habutilSetLastDir(const QString& d)
+{
+	QSettings settings;
+	settings.setValue("lastdir", QDir(d).absolutePath());
+	return;
+}
+
+
+// Get the local machine's monitor ID for given position.
+int habutilGetMonitorID(const HPlayerPositionType& type)
+{
+	int num = -1;	// default is NO MONITOR
+	QSettings settings;
+	if (type == HPlayerPositionType::Control)
+		num = settings.value("position/control", QVariant(num)).toInt();
+	else if (type == HPlayerPositionType::Left)
+		num = settings.value("position/left", QVariant(num)).toInt();
+	else if (type == HPlayerPositionType::Center)
+		num = settings.value("position/center", QVariant(num)).toInt();
+	else if (type == HPlayerPositionType::Right)
+		num = settings.value("position/right", QVariant(num)).toInt();
+	return num;
+}
+
+
+// Set the local machine's monitor ID for given position.
+void habutilSetMonitorID(const HPlayerPositionType& type, int id)
+{
+	QSettings settings;
+	if (type == HPlayerPositionType::Control)
+		settings.setValue("position/control", QVariant(id));
+	else if (type == HPlayerPositionType::Left)
+		settings.setValue("position/left", QVariant(id));
+	else if (type == HPlayerPositionType::Center)
+		settings.setValue("position/center", QVariant(id));
+	else if (type == HPlayerPositionType::Right)
+		settings.setValue("position/right", QVariant(id));
 	return;
 }

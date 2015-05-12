@@ -17,10 +17,11 @@ namespace Habit
 class CriterionSettings
 {
 public:
+	//CriterionSettings();
     CriterionSettings(const HCriterionBasisType& basis = HCriterionBasisType::HCriterionBasisFirstN, unsigned int percent=50, unsigned int windowSize=3, const HCriterionWindowType& windowType = HCriterionWindowType::HCriterionWindowFixed, bool bExcludeBasisWindow = false, bool bRequireMinBasisValue = false, unsigned int uiMinBasisValue = 0);
     CriterionSettings(const CriterionSettings& c);
     ~CriterionSettings();
-    //CriterionSettings& operator = (const CriterionSettings&);
+    CriterionSettings& operator=(const CriterionSettings&);
 	
 	
     const HCriterionBasisType& getBasis() const;

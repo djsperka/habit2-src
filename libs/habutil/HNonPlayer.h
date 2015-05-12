@@ -11,9 +11,9 @@
 
 
 #include <QtGui/QLabel>
-#include <QList>
+#include <QMap>
 #include <QTextStream>
-#include "HStimulusSource.h"
+//#include "HStimulusSource.h"
 #include "HPlayer.h"
 
 class HNonPlayer : public HPlayer
@@ -29,8 +29,8 @@ public:
 	friend QTextStream& operator<<(QTextStream& out, const HNonPlayer& player);
 	
 private:
+	unsigned int addStimulusPrivate(unsigned int id);
 
-	
 };
 
 #endif

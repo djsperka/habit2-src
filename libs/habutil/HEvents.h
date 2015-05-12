@@ -37,6 +37,7 @@ public:
 	static const HEventType HEventAGStart;
 	static const HEventType HEventAGEnd;
 	static const HEventType HEventStimRequest;
+	static const HEventType HEventStimLabelRequest;
 	static const HEventType HEventStimStart;
 	static const HEventType HEventStimEnd;
 	static const HEventType HEventStimulusSettings;
@@ -60,7 +61,7 @@ public:
 	static const HEventType HEventExperimentQuit;
 
 	// undefined event not in A[]
-	static const HEventType* A[28];
+	static const HEventType* A[29];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -104,6 +105,7 @@ private:
 };
 	
 const HTrialEndType& getHTrialEndType(int number_value);
+bool isTrialEndTypeSuccessful(const HTrialEndType& etype);
 
 QTextStream& operator<<(QTextStream& out, const HTrialEndType& etype);
 QTextStream& operator<<(QTextStream& out, const HEventType& type);
@@ -331,6 +333,45 @@ public:
 private:
 	int m_stimindex;
 };
+
+class HStimLabelRequestEvent: public HEvent
+{
+public:
+	HStimLabelRequestEvent(int stimindex=-2, const QString& label = QString(), int timestamp=0)
+	: HEvent(HEventType::HEventStimLabelRequest, timestamp)
+	, m_stimindex(stimindex)
+	, m_label(label)
+	{};
+
+	HStimLabelRequestEvent(const HStimLabelRequestEvent& e)
+	: HEvent(HEventType::HEventStimLabelRequest, e.timestamp())
+	, m_stimindex(e.stimindex())
+	, m_label(e.label())
+	{};
+
+	virtual ~HStimLabelRequestEvent() {};
+
+	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
+	int stimindex() const { return m_stimindex; };
+	QString label() const { return m_label; };
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HStimLabelRequestEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HStimLabelRequestEvent(stimindex(), label(), t);
+	};
+
+private:
+	int m_stimindex;
+	QString m_label;
+};
+
+
+
 
 
 class HAGRequestEvent: public HEvent

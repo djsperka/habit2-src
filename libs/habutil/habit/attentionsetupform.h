@@ -20,7 +20,7 @@ class AttentionSetupForm : public QWidget
 	Q_OBJECT
 
 public:
-	AttentionSetupForm(const Habit::AttentionGetterSettings& settings, QWidget* w = 0);
+	AttentionSetupForm(const Habit::AttentionGetterSettings& settings, const HStimulusLayoutType& layoutType = HStimulusLayoutType::HStimulusLayoutSingle, QWidget* w = 0);
 	~AttentionSetupForm();
 
 private:
@@ -28,20 +28,20 @@ private:
 	void setLabelsFont();
 	void makeConnections();
 	void doLayout();
-	void doAttentionLayout();
 
 public:
 	Habit::AttentionGetterSettings getConfigurationObject();
 	void setConfigurationObject(const Habit::AttentionGetterSettings&);
 	void initialize();
+	void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 
 private slots:
 	void onColorChooserClick();
-	void onConfigurationChange(const Habit::StimulusSettings& stimulus);
 	void onModifyClick();
+	void stimulusLayoutTypeChanged(int);
 
 private:
-	QLabel* mainTitle_;
+	//QLabel* mainTitle_;
 	QGroupBox* attentionGroup_;
 	QGroupBox* colorGroup_;
 	QLabel* stimulusName_;
@@ -49,7 +49,8 @@ private:
 	QPushButton* colorButton_; 
 	QVBoxLayout* mainLayout_;
 	Habit::AttentionGetterSettings settings_;
-	StimulusSettingsEditorDialog* dlg_;
+	const HStimulusLayoutType* m_pLayoutType;
+//	StimulusSettingsEditorDialog* dlg_;
 };
 }
 #endif // ATTENTIONSETUPFORM_H

@@ -25,25 +25,7 @@
   <property name="windowTitle">
    <string>ControlBarOptionsForm</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1">
-   <item>
-    <widget class="QLabel" name="headerLabel">
-     <property name="font">
-      <font>
-       <pointsize>16</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Control Bar</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::PlainText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
    <item>
     <widget class="QGroupBox" name="useControlBarGroupBox">
      <property name="sizePolicy">
@@ -58,10 +40,10 @@
       </font>
      </property>
      <property name="title">
-      <string> Use Control Bar</string>
+      <string>Information display when running this experiment:</string>
      </property>
      <property name="checkable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
@@ -83,7 +65,7 @@
            </font>
           </property>
           <property name="text">
-           <string> Display current experiment phase in Control Bar</string>
+           <string> Display current experiment phase in Control Panel</string>
           </property>
          </widget>
         </item>
@@ -101,7 +83,7 @@
            </font>
           </property>
           <property name="text">
-           <string> Display current stimulus information in Control Bar</string>
+           <string> Display current stimulus information in Control Panel</string>
           </property>
          </widget>
         </item>

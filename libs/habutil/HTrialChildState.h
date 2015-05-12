@@ -40,10 +40,14 @@ private:
 
 class HTrialInitialState: public HTrialChildState
 {
+	Q_OBJECT
 	
 public:
 	HTrialInitialState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HInitialState") {};
 	~HTrialInitialState() {};
+
+signals:
+	void trialStarted(int trialnumber, int repeatnumber);
 	
 protected:
 	virtual void onEntry(QEvent* e);

@@ -10,52 +10,44 @@
 #include "HMediaManagerUtil.h"
 #include "HVIPlayer.h"
 #include "HAudioPlayer.h"
+#include "HWorkspaceUtil.h"
 
 
 HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* parent)
 {
 	Q_UNUSED(parent);
 	HMediaManager* pmm = new HMediaManager();
-	HPlayer *playerLeft = NULL;
-	HPlayer *playerCenter = NULL;
-	HPlayer *playerRight = NULL;
-	HPlayer *playerControl = NULL;
-	
-	// Monitor settings
-	Habit::MonitorSettings ms = es.getMonitorSettings();
-	
+
 	// Stimulus Display info
 	Habit::StimulusDisplayInfo sdi = es.getStimulusDisplayInfo();
 
-	// AttentionGetter
-	Habit::AttentionGetterSettings ags = es.getAttentionGetterSettings();
-	
-	// Now look at stimuli settings for each of the three phases. 
-	Habit::StimuliSettings ssPreTest = es.getPreTestStimuliSettings();
-	Habit::StimuliSettings ssHabituation = es.getHabituationStimuliSettings();
-	Habit::StimuliSettings ssTest = es.getTestStimuliSettings();
-	
 	// Create players for each monitor that will be used. 
-	// Non-NULL player pointers will indicate that a particular player was assigned to a monitor. 
-	if ((ms.getLeftMonitorIndex() > -1)) 
+	int iControl = habutilGetMonitorID(HPlayerPositionType::Control);
+	int iLeft = habutilGetMonitorID(HPlayerPositionType::Left);
+	int iCenter = habutilGetMonitorID(HPlayerPositionType::Center);
+	int iRight = habutilGetMonitorID(HPlayerPositionType::Right);
+	const HStimulusLayoutType& layoutType = sdi.getStimulusLayoutType();
+
+	QDir baseDir;
+	habutilGetStimulusRootDir(baseDir);
+
+
+	if (iControl > -1 && sdi.getUseISS())
 	{
-		playerLeft = new HVIPlayer(ms.getLeftMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
-		pmm->addPlayer(HPlayerPositionType::Left, playerLeft, ms.getLeftMonitorIndex());
+		//pmm->addPlayer(HPlayerPositionType::Sound, new HAudioPlayer(iControl, parent), iControl);
+		pmm->addPlayer(HPlayerPositionType::Sound, new HAudioPlayer(iControl, NULL, baseDir), iControl);
 	}
-	if (ms.getCenterMonitorIndex() > -1)
+	if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		playerCenter = new HVIPlayer(ms.getCenterMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
-		pmm->addPlayer(HPlayerPositionType::Center, playerCenter, ms.getCenterMonitorIndex());
+		//pmm->addPlayer(HPlayerPositionType::Center, new HVIPlayer(iCenter, parent, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iCenter);
+		pmm->addPlayer(HPlayerPositionType::Center, new HVIPlayer(iCenter, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iCenter);
 	}
-	if ((ms.getRightMonitorIndex() > -1)) 
+	else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		playerRight = new HVIPlayer(ms.getRightMonitorIndex(), NULL, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen);
-		pmm->addPlayer(HPlayerPositionType::Right, playerRight, ms.getRightMonitorIndex());
-	}
-	if ((ms.getControlMonitorIndex() > -1)) 
-	{
-		playerControl = new HAudioPlayer(ms.getControlMonitorIndex());
-		pmm->addPlayer(HPlayerPositionType::Sound, playerControl, ms.getControlMonitorIndex());
+		//pmm->addPlayer(HPlayerPositionType::Left, new HVIPlayer(iLeft, parent, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iLeft);
+		//pmm->addPlayer(HPlayerPositionType::Right, new HVIPlayer(iRight, parent, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iRight);
+		pmm->addPlayer(HPlayerPositionType::Left, new HVIPlayer(iLeft, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iLeft);
+		pmm->addPlayer(HPlayerPositionType::Right, new HVIPlayer(iRight, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iRight);
 	}
 	
 	return pmm;

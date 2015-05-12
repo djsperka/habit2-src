@@ -13,7 +13,7 @@
 #include "experimentsettings.h"
 #include "runsettings.h"
 #include "subjectsettings.h"
-#include "reliabilitysettings.h"
+//#include "reliabilitysettings.h"
 #include "HEventLog.h"
 #include <QTextStream>
 
@@ -29,7 +29,7 @@ public:
 	HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const HEventLog& log, const QString filename = QString(""), const QString version = QString(""));
 
 	// This constructor used for RELIABILTY RUN. The filename is that for the ORIGINAL run, and the event log is from the reliability run, not the original run.
-	HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::ReliabilitySettings& rs, const HEventLog& log, const QString origFilename = QString(""), const QString filename = QString(""), const QString version = QString(""));
+	// DJS 2-24-15 HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::ReliabilitySettings& rs, const HEventLog& log, const QString origFilename = QString(""), const QString filename = QString(""), const QString version = QString(""));
 
 	virtual ~HResults();
 
@@ -40,7 +40,7 @@ public:
 	const Habit::ExperimentSettings& experimentSettings() const { return m_experimentSettings; };
 	const Habit::RunSettings& runSettings() const { return m_runSettings; };
 	const Habit::SubjectSettings& subjectSettings() const { return m_subjectSettings; };
-	const Habit::ReliabilitySettings& reliabilitySettings() const { return m_reliabilitySettings; };
+	// 2-24-15 djs const Habit::ReliabilitySettings& reliabilitySettings() const { return m_reliabilitySettings; };
 	const HEventLog& eventLog() const { return m_log; };
 
 	// Load an HResults object from a file.
@@ -64,7 +64,7 @@ private:
 	Habit::ExperimentSettings m_experimentSettings;
 	Habit::RunSettings m_runSettings;
 	Habit::SubjectSettings m_subjectSettings;
-	Habit::ReliabilitySettings m_reliabilitySettings;
+	// 2-24-15 djs Habit::ReliabilitySettings m_reliabilitySettings;
 	HEventLog m_log;
 };
 
@@ -82,15 +82,16 @@ public:
 		indHabituated = 5,
 		indStimId = 6,
 		indStimName = 7,
-		indStimLeft = 8,
-		indStimCenter = 9,
-		indStimRight = 10,
-		indStimISS = 11,
-		indTrialStartTime = 12,
-		indTrialEndTime = 13,
-		indTotalLook = 14,
-		indTotalAway = 15,
-		indNInit = 16,
+		indStimLabel = 8,
+		indStimLeft = 9,
+		indStimCenter = 10,
+		indStimRight = 11,
+		indStimISS = 12,
+		indTrialStartTime = 13,
+		indTrialEndTime = 14,
+		indTotalLook = 15,
+		indTotalAway = 16,
+		indNInit = 17,
 	};
 
 	HTrialResultsRow(): QList<QString>()
@@ -112,6 +113,7 @@ public:
 	void setHabituated(QString habituated) { (*this)[indHabituated] = habituated; };
 	void setStimId(int stimid) { (*this)[indStimId] = QString("%1").arg(stimid); };
 	void setStimName(QString stim) { (*this)[indStimName] = stim; };
+	void setStimLabel(QString label) { (*this)[indStimLabel] = label; };
 	void setStimLeft(QString stim) { (*this)[indStimLeft] = stim; };
 	void setStimCenter(QString stim) { (*this)[indStimCenter] = stim; };
 	void setStimRight(QString stim) { (*this)[indStimRight] = stim; };

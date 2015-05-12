@@ -33,8 +33,14 @@ public:
 	void setId(size_t id);
     QString getName() const;
     void setName(const QString& name);
-    MonitorSettings getMonitorSettings() const;
-    void setMonitorSettings(const MonitorSettings& monitorSettings);
+    bool isHidden() const;
+    void setHidden(bool bHidden);
+
+    // make a copy of this experiment, with the given name and all database ids set to -1.
+    ExperimentSettings clone(const QString& name);
+
+    static bool load(const QString& filename, ExperimentSettings& settings);
+
     ControlBarOptions getControlBarOptions() const;
     void setControlBarOptions(const ControlBarOptions& controlBarOptions);
     HLookSettings getHLookSettings() const { return lookSettings_; };
@@ -50,21 +56,35 @@ public:
     void setHabituationSettings(const HabituationSettings& habituationSettings);
     StimulusDisplayInfo getStimulusDisplayInfo() const;
     void setStimulusDisplayInfo(const StimulusDisplayInfo& stimulusDisplayInfo);
-    AttentionGetterSettings getAttentionGetterSettings() const;
+
+    const AttentionGetterSettings& getAttentionGetterSettings() const;
+    AttentionGetterSettings& getAttentionGetterSettings();
     void setAttentionGetterSettings(const AttentionGetterSettings& attentionGetterSettings);
-    StimuliSettings getPreTestStimuliSettings() const;
+
+    const StimuliSettings& getPreTestStimuliSettings() const;
+    StimuliSettings& getPreTestStimuliSettings();
     void setPreTestStimuliSettings(const StimuliSettings& preTestStimuliSettings);
-    StimuliSettings getHabituationStimuliSettings() const;
+
+    const StimuliSettings& getHabituationStimuliSettings() const;
+    StimuliSettings& getHabituationStimuliSettings();
     void setHabituationStimuliSettings(const StimuliSettings& habituationStimuliSettings);
-    StimuliSettings getTestStimuliSettings() const;
+
+    const StimuliSettings& getTestStimuliSettings() const;
+    StimuliSettings& getTestStimuliSettings();
     void setTestStimuliSettings(const StimuliSettings& testStimuliSettings);
-	void loadFromDB(bool byId = false);
+
+    void loadFromDB(bool byId = false);
 	bool saveToDB();
+	bool deleteFromDB();
+
+	static bool load(ExperimentSettings& settings, int id);
+	static bool load(ExperimentSettings& settings, const QString& name);
 
 private:
 	size_t id_;
 	QString name_;
-	MonitorSettings monitorSettings_;
+	int hidden_;	// 0 = visible; 1=hidden; this value not saved on I/O (saved in db)
+// 11/10/2014 djs removed from experiment settings.	MonitorSettings monitorSettings_;
 	ControlBarOptions controlBarOptions_;
 	HabituationSettings habituationSettings_;
 	StimulusDisplayInfo stimulusDisplayInfo_;

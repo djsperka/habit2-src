@@ -6,9 +6,13 @@
 /// \brief Declaraction of class Habit::StimuliSettings
 
 #include "stimulussettings.h"
+#include "HStimulusSettingsList.h"
+#include "HStimulusOrder.h"
+#include "HStimulusOrderList.h"
 #include "HTypes.h"
 #include <QtCore/QVector>
 #include <QDebug>
+#include <QStringList>
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -18,24 +22,33 @@ namespace Habit
 	class StimuliSettings
 	{
 	public:
-		// djs The preferred way of storing a list of StimulusSettings is StimulusSettingsList (see stimulussettings.h)
-		//typedef QVector<Habit::StimulusSettings> stimulus_container;
-
-	public:
 		StimuliSettings(const HStimContext& context);
+		StimuliSettings(const StimuliSettings& s);
 		~StimuliSettings();
+		StimuliSettings& operator=(const StimuliSettings& rhs);
+		StimuliSettings clone();
 
 	public:
 		const HStimContext& getStimContext() const;
 		void setStimContext(const HStimContext& context);
-		StimulusSettingsList getStimuli() const;
-		void setStimuli(const StimulusSettingsList& basis);
-		void addStimuli(const StimulusSettings& settings);
+		HStimulusSettingsList& stimuli();
+		const HStimulusSettingsList& stimuli() const;
+		void setStimuli(const HStimulusSettingsList& basis);
+		void addStimulus(const HStimulusSettings& settings);
+		void setOrderList(const HStimulusOrderList& list);
+		void addOrder(const HStimulusOrder& order);
+		HStimulusOrderList& orders();
+		const HStimulusOrderList& orders() const;
 		void loadFromDB(int experimentId);
 		bool saveToDB(size_t id_);
 
+		QStringList getStimulusNames() const;
+		QStringList getOrderNames() const;
+		bool getIndexedOrderList(const QString& orderName, QList< QPair<int, QString> >& list) const;
+
 	private:
-		StimulusSettingsList ssList_;
+		HStimulusSettingsList ssList_;
+		HStimulusOrderList soList_;
 		const HStimContext* pcontext_;
 	};
 

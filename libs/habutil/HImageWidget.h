@@ -18,7 +18,7 @@ class HImageWidget : public QWidget
 	Q_OBJECT
 	
 public:
-	HImageWidget(QWidget *parent = 0, bool fullScreen = false, bool aspectRatio = false);
+	HImageWidget(QWidget *parent = 0, bool fullScreen = false, bool aspectRatio = false, QColor background = QColor("black"));
 	~HImageWidget();
 	void setCurrentSource(const QString& filename);
 protected:

@@ -105,9 +105,9 @@ const HLookDirection& directionTo(const HLookTrans& type)
 
 
 const HStimContext HStimContext::UnknownContext(0, "UnknownContext");
-const HStimContext HStimContext::PreTestPhase(1, "PreTestStim");
-const HStimContext HStimContext::HabituationPhase(2, "HabituationStim");
-const HStimContext HStimContext::TestPhase(3, "TestStim");
+const HStimContext HStimContext::PreTestPhase(1, "PreTest");
+const HStimContext HStimContext::HabituationPhase(2, "Habituation");
+const HStimContext HStimContext::TestPhase(3, "Test");
 const HStimContext HStimContext::AttentionGetter(4, "AttentionGetter");
 
 
@@ -237,6 +237,8 @@ const HCriterionBasisType& getCriterionBasisType(int number_value)
 }
 
 
+
+
 const HTrialCompletionType HTrialCompletionType::HTrialCompletionUnknown(-1, "TrialCompletionUnknown", "Unknown");
 const HTrialCompletionType HTrialCompletionType::HTrialCompletionFixedLength(0, "TrialCompletionFixedLength", "Fixed Length");
 const HTrialCompletionType HTrialCompletionType::HTrialCompletionSubjectControlled(1, "TrialCompletionSubjectControlled", "Subject Controlled");
@@ -312,6 +314,30 @@ const HDisplayType& getDisplayType(int number_value)
 	return *result;
 };
 
+
+const HStimulusLayoutType HStimulusLayoutType::HStimulusLayoutUnknown(-1, "StimulusLayoutTypeUnknown", "Unknown");
+const HStimulusLayoutType HStimulusLayoutType::HStimulusLayoutSingle(0, "StimulusLayoutSingle", "Single");
+const HStimulusLayoutType HStimulusLayoutType::HStimulusLayoutLeftRight(1, "StimulusLayoutLeftRight", "Left/Right");
+
+// The contents of this array are used to populate the radio buttons.
+const HStimulusLayoutType* HStimulusLayoutType::A[2] =
+{
+	&HStimulusLayoutType::HStimulusLayoutSingle,
+	&HStimulusLayoutType::HStimulusLayoutLeftRight
+};
+
+bool operator==(const HStimulusLayoutType& lhs, const HStimulusLayoutType& rhs)
+{
+	return (lhs.number() == rhs.number());
+};
+
+const HStimulusLayoutType& getStimulusLayoutType(int number_value)
+{
+	const HStimulusLayoutType* result = &HStimulusLayoutType::HStimulusLayoutUnknown;
+	for (unsigned int i=0; i<sizeof(HStimulusLayoutType::A)/sizeof(HStimulusLayoutType*) && result==&HStimulusLayoutType::HStimulusLayoutUnknown; i++)
+		if (number_value == HStimulusLayoutType::A[i]->number()) result = HStimulusLayoutType::A[i];
+	return *result;
+};
 
 
 const HResultsType HResultsType::HResultsTypeUnknown(-1, "Unknown Results Type");
@@ -415,3 +441,20 @@ HPlayerPositionType& HPlayerPositionType::operator=(const HPlayerPositionType& r
 	return *this;
 };
 
+bool operator==(const HPlayerPositionType& lhs, const HPlayerPositionType& rhs)
+{
+	return lhs.number() == rhs.number();
+};
+
+bool operator!=(const HPlayerPositionType& lhs, const HPlayerPositionType& rhs)
+{
+	return lhs.number() != rhs.number();
+};
+
+const HPlayerPositionType& getPlayerPositionType(int number_value)
+{
+	const HPlayerPositionType* result = &HPlayerPositionType::UnknownPlayerPositionType;
+	for (unsigned int i=0; i<sizeof(HPlayerPositionType::A)/sizeof(HPlayerPositionType *) && result==&HPlayerPositionType::UnknownPlayerPositionType; i++)
+		if (number_value == HPlayerPositionType::A[i]->number()) result = HPlayerPositionType::A[i];
+	return *result;
+};

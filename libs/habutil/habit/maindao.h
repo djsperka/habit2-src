@@ -16,6 +16,7 @@
 #include "runsettings.h"
 #include "resultviewersettings.h"
 #include "HLookSettings.h"
+#include "HStimulusOrder.h"
 
 #include <QtCore/QVector>
 #include <QtCore/QStringList>
@@ -33,13 +34,20 @@ public:
 	~MainDao();
 	void getExperimentSettingsByName(ExperimentSettings*);
 	void getExperimentNameById(ExperimentSettings*);
-	int isExperimentExists(const QString& name);
+
+	// does experiment with name exist? If it does, set id to experiment id from db.
+	bool experimentExists(const QString& name, int& id);
+
+	// does an experiment with id exist?
+	bool experimentExists(int id);
+
 	void insertExperiment(const QString& name);
-	void updateExperiment(const QString& name);
+	int getExperimentId(const QString& name);
+	bool updateExperimentName(const QString& oldName, const QString& newName);
 	QString getExperimentNameById(int id);
 	ExperimentSettings getExperimentSettingsById(int id);
 	QVector<ExperimentSettings> getAllExperiments();
-	QStringList getAllExperimentNames();
+	QStringList getAllExperimentNames(bool includeHidden = false);
 
 	void getMonitorSettingsForExperiment(size_t id, MonitorSettings* monitorSettings);
 	void getControlBarOptionsForExperiment(size_t id, ControlBarOptions* controlBarOptions);
@@ -50,26 +58,60 @@ public:
 	void getHLookSettingsForExperiment(int id, HLookSettings* lookSettings);
 	void getHPhaseSettingsForExperiment(int id, int type, HPhaseSettings* phaseSettings);
 
+
+	/*
+	 * These are OLD methods for handling StimuliSettings, StimulusSettings
+	 */
+
 	StimuliSettings getPretestStimuliSettingsForExperiment(const QString& experiment);
 	StimuliSettings getHabituationStimuliSettingsForExperiment(const QString& experiment);
 	StimuliSettings getTestStimuliSettingsForExperiment(const QString& experiment);
 	StimuliSettings getPretestStimuliSettingsForExperiment(int experiment);
 	StimuliSettings getHabituationStimuliSettingsForExperiment(int experiment);
 	StimuliSettings getTestStimuliSettingsForExperiment(int experiment);
+	StimuliSettings getStimuliSettings(const QString& table_name, int experiment_id, const HStimContext& context);
 	StimuliSettings getStimuliSettings(const QString& table_name, const QString& experiment, const HStimContext& context);
-	StimulusSettings getStimulusSettings(const QSqlQuery& q);
 
-	void deleteStimulus(const QString& table_name, int id);
-	void deleteAllStimulus(const QString& table_name, int experiment_id);
+	StimulusSettings getStimulusSettings(const QSqlQuery& q);
+	bool deleteStimulus(const QString& table_name, int id);
+
+
+	/*
+	 * These are NEW methods for handling StimuliSettings, StimulusSettings
+	 */
+
+	StimuliSettings getStimuliSettings(int experiment_id, const HStimContext& context);
+	bool getStimulusSettings(StimulusSettings& settings, int stimulus_id);
+	bool deleteStimulus(int stimulus_id);
+	bool addOrUpdateStimuliSettings(int experimentId, Habit::StimuliSettings& settings);
+	bool addOrUpdateStimulusSettings(int experiment_id, Habit::StimulusSettings& ss);
+	bool addOrUpdateStimulusInfo(int stimulus_id, const HPlayerPositionType& position, StimulusInfo& info);
+
+	void getAttentionGetterSettings(int experimentId, AttentionGetterSettings* attentionGetter);
+	bool addOrUpdateAttentionGetterSetting(int experimentId, Habit::AttentionGetterSettings* settings);
+
+
+#if 0
+	bool addOrUpdateStimuliSetting(size_t experimentId, Habit::StimuliSettings* settings);
+	bool addOrUpdateStimulusSetting(int parentId, Habit::StimulusSettings& ss, const QString& tableName, const QString& parentKeyName);
+#endif
+
+	/* Get HStimulusOrder from the results of a query */
+	HStimulusOrder getStimulusOrder(const QSqlQuery& q);
+
+	/* Delete the StimulusOrder with given id */
+	bool deleteOrder(int id);
+
 	bool insertOrUpdateExperimentSettings(Habit::ExperimentSettings* experimentSettings);
+	bool deleteExperimentSettings(Habit::ExperimentSettings* experimentSettings);
 	bool addOrUpdateHLookSettings(int experimentId, Habit::HLookSettings* settings);
-	bool addOrUpdateHPhaseSettings(int experimentId, const Habit::HPhaseSettings* settings);
+	bool addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings* settings);
 	bool addOrUpdateMonitorSetting(int experimentId, Habit::MonitorSettings* settings);
-	bool addOrUpdateAttentionGetterSetting(size_t experimentId, Habit::AttentionGetterSettings* settings);
 	bool addOrUpdateControlBarOption(size_t experimentId, Habit::ControlBarOptions* settings);
 	bool addOrUpdateHabituationSetting(size_t experimentId, Habit::HabituationSettings* settings);
-	bool addOrUpdateStimuliSetting(size_t experimentId, Habit::StimuliSettings* settings);
-	bool addOrUpdateStimulusSetting(int id, int parentId, Habit::StimulusSettings& ss, const QString& tableName, const QString& parentKeyName);
+
+
+	bool addOrUpdateStimulusOrder(int parentId, Habit::HStimulusOrder& order);
 	bool addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::StimulusDisplayInfo* settings);
 
 	QStringList getAllSubjectsNames();
@@ -83,6 +125,9 @@ public:
 	Habit::RunSettings getRunSettingsBySubject(const Habit::SubjectSettings& subjectSettings);
 	void addOrUpdateConfigObject(const Habit::ResultViewerSettings& config);
 	Habit::ResultViewerSettings getResultViewerOptions();
+
+private:
+	bool deleteFromTable(const QString table, const QString key, int id);
 };
 
 } // namespace Habit 

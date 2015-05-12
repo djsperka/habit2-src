@@ -25,6 +25,7 @@ HabituationSetupForm::HabituationSetupForm(const Habit::HabituationSettings& set
 	setValidators();
 	makeConnections();
 	doLayout();
+	initialize();
 	//setFixedWidth(556);
 }
 
@@ -44,8 +45,10 @@ void HabituationSetupForm::createComponents()
 	}
 	
 	basisGroup_ = new QGroupBox(tr("Criterion Basis")); 
-	basisRadio1_ = new QRadioButton(tr("Base Criterion on first n trials"));
-	basisRadio2_ = new QRadioButton(tr("Base Criterion on longest n trials"));
+	basisRadio1_ = new QRadioButton(tr("Base Criterion on first window"));
+	basisRadio1_->setToolTip(QString("Use total looking time in the first window (see \"Window Size\" below)"));
+	basisRadio2_ = new QRadioButton(tr("Base Criterion on longest window"));
+	basisRadio2_->setToolTip(QString("Use the window (see \"Window Size\" and \"Window Type\" below) with the highest total looking time"));
 	percentGroup_ = new QGroupBox(tr("Percent For Criterion")); 
 	percentEdit_ = new QLineEdit();
 	percentLabel_ = new QLabel(tr("percent"));
@@ -66,7 +69,9 @@ void HabituationSetupForm::createComponents()
 
 	// added by djs 3-18-14
 	excludeBasisWindowCB_ = new QCheckBox("Exclude basis window when computing percentage");
+	excludeBasisWindowCB_->setToolTip(QString("If checked, Habit will not use trials from the criterion basis to test for habituation."));
 	requireMinBasisValueCB_ = new QCheckBox("Require minimum basis value");
+	requireMinBasisValueCB_->setToolTip(QString("If checked, the basis sum must be at least this value. If using \"first window\" and minimum is not reached, Habit will test subsequent windows."));
 	minBasisValueEdit_ = new QLineEdit();
 	minBasisValueMSLabel_ = new QLabel("ms");
 

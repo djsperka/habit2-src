@@ -9,10 +9,13 @@
 #include "HTypes.h"
 #include <QString>
 #include <QDataStream>
+#include <QTextStream>
 #include <QList>
 
 namespace Habit {
 	   
+	class HStimulusSettingsList;
+
 	/// Stores stimuli settings for a trial.
 	class StimulusSettings
 	{
@@ -20,20 +23,14 @@ namespace Habit {
 		StimulusSettings(const QString& name = "", const HStimContext& context = HStimContext::UnknownContext);
 		StimulusSettings(const StimulusSettings& s);
 		~StimulusSettings();
+		StimulusSettings clone() const;
+		StimulusSettings& operator=(const StimulusSettings& rhs);
 		
 	public:
 		int getId() const;
 		void setId(int id);
 		const QString& getName() const;
 		void setName(const QString& name);
-		bool isLeftEnabled() const;
-		void setLeftEnabled(bool isLeftEnabled);
-		bool isCenterEnabled() const;
-		void setCenterEnabled(bool isCenterEnabled);
-		bool isRightEnabled() const;
-		void setRightEnabled(bool isRightEnabled);
-		bool isIndependentSoundEnabled() const;
-		void setIndependentSoundEnabled(bool isRightEnabled);
 		StimulusInfo& getLeftStimulusInfo();
 		const StimulusInfo& getLeftStimulusInfo() const;
 		void setLeftStimulusInfo(const StimulusInfo& leftStimulusInfo);
@@ -48,16 +45,14 @@ namespace Habit {
 		void setIndependentSoundInfo(const StimulusInfo& independentSoundInfo);
 		const HStimContext* getContext() const;
 		void setContext(const HStimContext& context);
+		void setStimulusInfo(const StimulusInfo& info, const HPlayerPositionType& position);
+
 
 		friend bool operator==(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
 
 	private:
 		int id_;
 		QString name_;
-		bool isLeftEnabled_;
-		bool isCenterEnabled_;
-		bool isRightEnabled_;
-		bool isIndependentSoundEnabled_;
 		StimulusInfo leftStimulusInfo_;
 		StimulusInfo centerStimulusInfo_;
 		StimulusInfo rightStimulusInfo_;
@@ -66,9 +61,14 @@ namespace Habit {
 	};
 	QDataStream & operator<< (QDataStream& stream, StimulusSettings settings);
 	QDataStream & operator>> (QDataStream& stream, StimulusSettings& settings);
+	QTextStream & operator<< (QTextStream& stream, StimulusSettings settings);
+	QTextStream & operator>> (QTextStream& stream, StimulusSettings& settings);
 	bool operator==(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
 
-	typedef QList<StimulusSettings> StimulusSettingsList;
+
+//	typedef QList<StimulusSettings> StimulusSettingsList;
+	typedef StimulusSettings HStimulusSettings;	// Sorry, StimulusSettings doesn't have an H- analog.
+	typedef HStimulusSettingsList StimulusSettingsList;
 	typedef QList<StimulusSettings>::iterator StimulusSettingsListIterator;
 	typedef QList<StimulusSettings>::const_iterator StimulusSettingsListConstIterator;
 	typedef QList<QPair<int, StimulusSettings> > IdStimulusSettingsPairList;

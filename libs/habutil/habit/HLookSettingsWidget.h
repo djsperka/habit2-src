@@ -11,6 +11,44 @@
 #include <QtGui>
 #include "HLookSettings.h"
 
+namespace Ui
+{
+	class HLookSettingsForm;
+}
+
+namespace GUILib
+{
+	class HLookSettingsWidget: public QWidget
+	{
+		Q_OBJECT
+
+	public:
+		HLookSettingsWidget();
+		HLookSettingsWidget(const Habit::HLookSettings& settings, QWidget* parent=0);
+		~HLookSettingsWidget();
+		const Habit::HLookSettings& getHLookSettings();
+		void setHLookSettings(const Habit::HLookSettings& settings);
+
+	private:
+
+		Ui::HLookSettingsForm *ui;
+		Habit::HLookSettings m_settings;
+
+		// Set values in widget to match those in m_settings
+		void initialize();
+
+		// Set up validators for gui components
+		void setValidators();
+
+	};
+}
+
+
+
+
+
+#if 0
+
 namespace GUILib
 {
 	class HLookSettingsWidget: public QWidget
@@ -50,5 +88,8 @@ namespace GUILib
 		QCheckBox* m_pcbInclusiveLookTime;
 	};
 }; // namespace
+#endif
+
+
 
 #endif /* HLOOKSETTINGSWIDGET_H_ */

@@ -14,7 +14,7 @@ HOrderSettingsWidget::HOrderSettingsWidget(const Habit::StimuliSettings& stimuli
 {
 	// create stuff
 	m_pStimuliTable = new HabituationStimuliTable(stimuli);
-	m_plineeditOrder = new HStimOrderLineEdit(stimuli.getStimuli().size());
+	m_plineeditOrder = new HStimOrderLineEdit(stimuli.stimuli().size());
 //	m_plineeditOrder->setValidator(new HStimOrderValidator(stimuli.getStimuli().size()));
 	m_plabelOrder = new QLabel("Stimuli Order - stimuli number(s) separated by spaces, commas, or ""|""");
 	m_pcheckboxRandomize = new QCheckBox("Randomize Order");
@@ -56,7 +56,7 @@ void HOrderSettingsWidget::initialize(const Habit::StimuliSettings& stimuli)
 {
 	m_pStimuliTable->initializeTable(stimuli);
 	m_plineeditOrder->setText("");
-	m_plineeditOrder->setMax(stimuli.getStimuli().size());
+	m_plineeditOrder->setMax(stimuli.stimuli().size());
 	m_pcomboRandomizationType->setCurrentIndex(0);
 	m_pcheckboxRandomize->setChecked(false);
 }

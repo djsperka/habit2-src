@@ -35,6 +35,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	// Create initial state. Do not define its transition yet. 
 	HTrialInitialState* sInitial = new HTrialInitialState(*this, log);
 	setInitialState(sInitial);
+	QObject::connect(sInitial, SIGNAL(trialStarted(int, int)), this, SIGNAL(trialStarted(int, int)));
 	
 	// AG states
 	HAGRequestState* sAGRequest = new HAGRequestState(*this, log);

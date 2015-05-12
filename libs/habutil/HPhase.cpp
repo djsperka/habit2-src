@@ -12,8 +12,9 @@
 #include "HElapsedTimer.h"
 #include "HMediaManager.h"
 #include <QFinalState>
+#include <QtDebug>
 
-HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList<unsigned int>& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
+HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
 	: HExperimentChildState(exp, log, phaseSettings.getPhaseType().name())
 	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
@@ -39,8 +40,11 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	// signal when trial complete entered must be caught
 	connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
 
-	// test only
-	//connect(m_sTrial,       SIGNAL(entered()), this, SLOT(onTrialEntered()));
+	// Set object name - trick to allow updating status labels when this phase is entered.
+	setObjectName(QString(phaseSettings.getPhaseType().name()));
+
+	connect(this, SIGNAL(phaseStarted(QString)), &exp, SIGNAL(phaseStarted(QString)));
+	connect(m_sTrial, SIGNAL(trialStarted(int, int)), &exp, SIGNAL(trialStarted(int, int)));
 };
 
 
@@ -73,6 +77,9 @@ void HPhase::onEntry(QEvent* e)
 	// post 'phase start' event to event log.
 	eventLog().append(new HPhaseStartEvent(ptype(), HElapsedTimer::elapsed()));
 	
+	// emit signal to let the world know this phase has started
+	emit phaseStarted(m_phaseSettings.getPhaseType().name());
+
 	// connect media manager signal screen(int) to slot screenStarted(int)
 	// connect media manager signal agStarted(int) to slot agStarted(int)
 	// connect media manager signal stimStarted(int) to slot stimStarted(int)
@@ -111,12 +118,13 @@ void HPhase::requestCurrentStim()
 {
 	if (m_itrial < m_stimuli.size())
 	{
-		eventLog().append(new HStimRequestEvent(m_stimuli[m_itrial], HElapsedTimer::elapsed()));
-		experiment().getMediaManager().stim(m_stimuli[m_itrial]);
+		qDebug() << "HPhase::requestCurrentStim(): stim " << m_stimuli.at(m_itrial).first << " label " << m_stimuli.at(m_itrial).second;
+		eventLog().append(new HStimLabelRequestEvent(m_stimuli.at(m_itrial).first, m_stimuli.at(m_itrial).second, HElapsedTimer::elapsed()));
+		experiment().getMediaManager().stim(m_stimuli.at(m_itrial).first);
 	}
 	else 
 	{
-		eventLog().append(new HStimRequestEvent(-1, HElapsedTimer::elapsed()));
+		eventLog().append(new HStimLabelRequestEvent(-1, QString("ERROR"), HElapsedTimer::elapsed()));
 		experiment().getMediaManager().stim(-1);
 		qDebug() << "Bad trial number (" << m_itrial << ")for phase " << m_name << " max " << m_stimuli.size();
 	}

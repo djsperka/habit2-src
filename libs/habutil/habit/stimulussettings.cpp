@@ -2,23 +2,18 @@
 
 using namespace Habit;
 
+// version string for input/output. See operator<<, operator>>
+static const QString f_sVersion2("SIV2");
+
 StimulusSettings::StimulusSettings(const QString& name, const HStimContext& context) 
 : id_(-1)
 , name_(name)
-, isLeftEnabled_(false)
-, isCenterEnabled_(false)
-, isRightEnabled_(false)
-, isIndependentSoundEnabled_(false)
 , pcontext_(&context)
 {};
 
 StimulusSettings::StimulusSettings(const StimulusSettings& s)
 : id_(s.getId())
 , name_(s.getName())
-, isLeftEnabled_(s.isLeftEnabled())
-, isCenterEnabled_(s.isCenterEnabled())
-, isRightEnabled_(s.isRightEnabled())
-, isIndependentSoundEnabled_(s.isIndependentSoundEnabled())
 , leftStimulusInfo_(s.getLeftStimulusInfo())
 , centerStimulusInfo_(s.getCenterStimulusInfo())
 , rightStimulusInfo_(s.getRightStimulusInfo())
@@ -26,6 +21,31 @@ StimulusSettings::StimulusSettings(const StimulusSettings& s)
 , pcontext_(s.getContext())
 {};
 
+StimulusSettings& StimulusSettings::operator=(const StimulusSettings& rhs)
+{
+	if (this != &rhs)
+	{
+		setId(rhs.getId());
+		setName(rhs.getName());
+		setLeftStimulusInfo(rhs.getLeftStimulusInfo());
+		setCenterStimulusInfo(rhs.getCenterStimulusInfo());
+		setRightStimulusInfo(rhs.getRightStimulusInfo());
+		setIndependentSoundInfo(rhs.getIndependentSoundInfo());
+		setContext(*rhs.getContext());
+	}
+	return *this;
+}
+
+StimulusSettings StimulusSettings::clone() const
+{
+	StimulusSettings settings(*this);
+	settings.setId(-1);
+	settings.getLeftStimulusInfo().setId(-1);
+	settings.getCenterStimulusInfo().setId(-1);
+	settings.getRightStimulusInfo().setId(-1);
+	settings.getIndependentSoundInfo().setId(-1);
+	return settings;
+}
 
 Habit::StimulusSettings::~StimulusSettings()
 {}
@@ -48,45 +68,6 @@ void Habit::StimulusSettings::setName(const QString& name)
     name_ = name;
 }
 
-bool Habit::StimulusSettings::isLeftEnabled() const
-{
-    return isLeftEnabled_;
-}
-
-void Habit::StimulusSettings::setLeftEnabled(bool isLeftEnabled)
-{
-    isLeftEnabled_ = isLeftEnabled;
-}
-
-bool Habit::StimulusSettings::isRightEnabled() const
-{
-    return isRightEnabled_;
-}
-
-void Habit::StimulusSettings::setRightEnabled(bool isRightEnabled)
-{
-    isRightEnabled_ = isRightEnabled;
-}
-
-bool Habit::StimulusSettings::isCenterEnabled() const
-{
-    return isCenterEnabled_;
-}
-
-void Habit::StimulusSettings::setCenterEnabled(bool isCenterEnabled)
-{
-    isCenterEnabled_ = isCenterEnabled;
-}
-
-bool Habit::StimulusSettings::isIndependentSoundEnabled() const
-{
-    return isIndependentSoundEnabled_;
-}
-
-void Habit::StimulusSettings::setIndependentSoundEnabled(bool isIndependentSoundEnabled)
-{
-    isIndependentSoundEnabled_ = isIndependentSoundEnabled;
-}
 
 Habit::StimulusInfo& Habit::StimulusSettings::getLeftStimulusInfo()
 {
@@ -148,16 +129,6 @@ void Habit::StimulusSettings::setIndependentSoundInfo(const StimulusInfo& indepe
     independentSoundInfo_ = independentSoundInfo;
 }
 
-#if 0
-int Habit::StimulusSettings::getStimulusType() const {
-	return stimulusType_;
-}
-
-void Habit::StimulusSettings::setStimulusType(int type) {
-	stimulusType_ = type;
-}
-#endif
-
 const HStimContext* StimulusSettings::getContext() const
 {
 	return pcontext_;
@@ -168,10 +139,29 @@ void StimulusSettings::setContext(const HStimContext& context)
 	pcontext_ = &context;
 }
 
+void StimulusSettings::setStimulusInfo(const StimulusInfo& info, const HPlayerPositionType& position)
+{
+	if (position == HPlayerPositionType::Left)
+		setLeftStimulusInfo(info);
+	else if (position == HPlayerPositionType::Center)
+		setCenterStimulusInfo(info);
+	else if (position == HPlayerPositionType::Right)
+		setRightStimulusInfo(info);
+	else if (position == HPlayerPositionType::Sound)
+		setIndependentSoundInfo(info);
+	else
+		qWarning() << "Attempting to set stimulus info for an unknown position: " << position.name();
+	return;
+}
+
+
+
 QDataStream & Habit::operator<< (QDataStream& stream, StimulusSettings settings)
 {
-	stream << settings.getId() << settings.getName() <<
-			settings.isLeftEnabled() << settings.isCenterEnabled() << settings.isRightEnabled() << settings.isIndependentSoundEnabled() <<
+	// 3-11-2015, write version number to stream. Layout of StimulusInfo has changed - this will
+	// keep the loading of old results from breaking.
+
+	stream << f_sVersion2 << settings.getId() << settings.getName() <<
 			settings.getLeftStimulusInfo() <<
 			settings.getCenterStimulusInfo() <<
 			settings.getRightStimulusInfo() <<
@@ -184,23 +174,34 @@ QDataStream & Habit::operator>> (QDataStream& stream, StimulusSettings& settings
 {
 	int id;
 	QString name;
-	bool isLeftEnabled;
-	bool isCenterEnabled;
-	bool isRightEnabled;
-	bool isIndependentSoundEnabled;
+	bool b0, b1, b2, b3;
 	StimulusInfo leftStimulusInfo;
 	StimulusInfo centerStimulusInfo;
 	StimulusInfo rightStimulusInfo;
-	StimulusInfo independentSoundInfo;
+	StimulusInfo independentSoundInfo;	// there is a dummy var dumped for this; legacy reasons, ignore the value.
 	int icontext;
-	stream >> id >> name >> isLeftEnabled >> isCenterEnabled >> isRightEnabled >> isIndependentSoundEnabled >>
-			leftStimulusInfo >> centerStimulusInfo >> rightStimulusInfo >> independentSoundInfo >> icontext;
+	QString sVersion;
+	qint64 pos = stream.device()->pos();
+
+	stream >> sVersion;
+	if (sVersion == f_sVersion2)
+	{
+		// at version 2 the stimulus info a new fields added.
+		stream >> id >> name >>
+				leftStimulusInfo >> centerStimulusInfo >> rightStimulusInfo >> independentSoundInfo >> icontext;
+	}
+	else
+	{
+		StimulusInfoOld oldLeft, oldRight, oldCenter, oldSound;
+		stream.device()->seek(pos);
+		stream >> id >> name >> b0 >> b1 >> b2 >> b3 >> oldLeft >> oldCenter >> oldRight >> oldSound >> icontext;
+		leftStimulusInfo = StimulusInfo(oldLeft.getName(), oldLeft.getFileName(), oldLeft.isLoopPlayBack(), oldLeft.getVolume());
+		centerStimulusInfo = StimulusInfo(oldCenter.getName(), oldCenter.getFileName(), oldCenter.isLoopPlayBack(), oldCenter.getVolume());
+		rightStimulusInfo = StimulusInfo(oldRight.getName(), oldRight.getFileName(), oldRight.isLoopPlayBack(), oldRight.getVolume());
+		independentSoundInfo = StimulusInfo(oldSound.getName(), oldSound.getFileName(), oldSound.isLoopPlayBack(), oldSound.getVolume());
+	}
 	settings.setId(id);
 	settings.setName(name);
-	settings.setLeftEnabled(isLeftEnabled);
-	settings.setCenterEnabled(isCenterEnabled);
-	settings.setRightEnabled(isRightEnabled);
-	settings.setIndependentSoundEnabled(isIndependentSoundEnabled);
 	settings.setLeftStimulusInfo(leftStimulusInfo);
 	settings.setCenterStimulusInfo(centerStimulusInfo);
 	settings.setRightStimulusInfo(rightStimulusInfo);
@@ -210,22 +211,23 @@ QDataStream & Habit::operator>> (QDataStream& stream, StimulusSettings& settings
 
 }
 
+QTextStream & Habit::operator<< (QTextStream& stream, StimulusSettings settings)
+{
+	return stream;
+}
+
+QTextStream & operator>> (QTextStream& stream, StimulusSettings& settings)
+{
+	return stream;
+}
 
 QDebug Habit::operator<<(QDebug dbg, const StimulusSettings& ss)
 {
 	dbg.nospace() << "StimulusSettings: Name " << ss.getName() << " id " << ss.getId() << " type " << ss.getContext()->name();
-	dbg.nospace() << "                  Left enabled? " << ss.isLeftEnabled();
-	if (ss.isLeftEnabled())
-		dbg.nospace() << ss.getLeftStimulusInfo();
-	dbg.nospace() << "                  Center enabled? " << ss.isCenterEnabled();
-	if (ss.isCenterEnabled())
-		dbg.nospace() << ss.getCenterStimulusInfo();
-	dbg.nospace() << "                  Right enabled? " << ss.isRightEnabled();
-	if (ss.isRightEnabled())
-		dbg.nospace() << ss.getRightStimulusInfo();
-	dbg.nospace() << "                  Independent Sound enabled? " << ss.isIndependentSoundEnabled();
-	if (ss.isIndependentSoundEnabled())
-		dbg.nospace() << ss.getIndependentSoundInfo();
+	dbg.nospace() << "Left " << ss.getLeftStimulusInfo();
+	dbg.nospace() << "Center " << ss.getCenterStimulusInfo();
+	dbg.nospace() << "Right " << ss.getRightStimulusInfo();
+	dbg.nospace() << "Sound " << ss.getIndependentSoundInfo();
 	return dbg.space();
 }
 
@@ -235,25 +237,10 @@ bool Habit::operator==(const Habit::StimulusSettings& lhs, const Habit::Stimulus
 	bool bleft, bcenter, bright, bsound;
 	bool bother;
 	
-	if (lhs.isLeftEnabled_)
-		bleft = (lhs.isLeftEnabled_ == rhs.isLeftEnabled_ && lhs.leftStimulusInfo_ == rhs.leftStimulusInfo_);
-	else 
-		bleft = (lhs.isLeftEnabled_ == rhs.isLeftEnabled_);
-
-	if (lhs.isCenterEnabled_)
-		bcenter = (lhs.isCenterEnabled_ == rhs.isCenterEnabled_ && lhs.centerStimulusInfo_ == rhs.centerStimulusInfo_);
-	else 
-		bcenter = (lhs.isCenterEnabled_ == rhs.isCenterEnabled_);
-
-	if (lhs.isRightEnabled_)
-		bright = (lhs.isRightEnabled_ == rhs.isRightEnabled_ && lhs.rightStimulusInfo_ == rhs.rightStimulusInfo_);
-	else 
-		bright = (lhs.isRightEnabled_ == rhs.isRightEnabled_);
-	
-	if (lhs.isIndependentSoundEnabled_)
-		bsound = (lhs.isIndependentSoundEnabled_ == rhs.isIndependentSoundEnabled_ && lhs.independentSoundInfo_ == rhs.independentSoundInfo_);
-	else 
-		bsound = (lhs.isIndependentSoundEnabled_ == rhs.isIndependentSoundEnabled_);
+	bleft = (lhs.leftStimulusInfo_ == rhs.leftStimulusInfo_);
+	bcenter = (lhs.centerStimulusInfo_ == rhs.centerStimulusInfo_);
+	bright = (lhs.rightStimulusInfo_ == rhs.rightStimulusInfo_);
+	bsound = (lhs.independentSoundInfo_ == rhs.independentSoundInfo_);
 	
 	bother = (lhs.id_ == rhs.id_ &&	lhs.name_ == rhs.name_ && *lhs.getContext() == *rhs.getContext());
 

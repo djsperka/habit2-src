@@ -43,10 +43,11 @@ const HEventType HEventType::HEventScreenStart(24, "ScreenStart");
 const HEventType HEventType::HEventStimulusOrder(25, "StimulusOrder");
 const HEventType HEventType::HEventTrialAbort(26, "TrialAborted");
 const HEventType HEventType::HEventExperimentQuit(27, "ExperimentQuit");
+const HEventType HEventType::HEventStimLabelRequest(28, "StimLabelRequest");
 const HEventType HEventType::HEventUndefined(-1, "Undefined");
 
 // Note undefined event not in search array.
-const HEventType* HEventType::A[28] =
+const HEventType* HEventType::A[29] =
 {
 	&HEventType::HEventPhaseStart,
 	&HEventType::HEventPhaseEnd,
@@ -75,7 +76,8 @@ const HEventType* HEventType::A[28] =
 	&HEventType::HEventScreenStart,
 	&HEventType::HEventStimulusOrder,
 	&HEventType::HEventTrialAbort,
-	&HEventType::HEventExperimentQuit
+	&HEventType::HEventExperimentQuit,
+	&HEventType::HEventStimLabelRequest
 };
 	
 bool operator==(const HEventType& lhs, const HEventType& rhs)
@@ -133,6 +135,13 @@ const HTrialEndType& getHTrialEndType(int number_value)
 	return *t;
 };
 
+bool isTrialEndTypeSuccessful(const HTrialEndType& etype)
+{
+	return (etype == HTrialEndType::HTrialEndGotLook ||
+			etype == HTrialEndType::HTrialEndMaxStimulusTime ||
+			etype == HTrialEndType::HTrialEndMaxAccumulatedLookTime ||
+			etype == HTrialEndType::HTrialEndMaxLookAwayTime);
+}
 
 
 
@@ -243,6 +252,10 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	else if (etype == HEventType::HEventStimRequest)
 	{
 		pevent = HStimRequestEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventStimLabelRequest)
+	{
+		pevent = HStimLabelRequestEvent::getEvent(stream, ts);
 	}
 	else if (etype == HEventType::HEventStimStart)
 	{
@@ -438,6 +451,34 @@ HStimRequestEvent* HStimRequestEvent::getEvent(QDataStream& stream, int timestam
 	return new HStimRequestEvent(stimid, timestamp);
 }
 
+QString HStimLabelRequestEvent::eventInfo() const
+{
+	return QString("Request stim index %1 label %2").arg(m_stimindex).arg(m_label);
+};
+
+QString HStimLabelRequestEvent::eventCSVAdditional() const
+{
+	return QString("%1,%2").arg(m_stimindex).arg(m_label);
+};
+
+QDataStream& HStimLabelRequestEvent::putAdditional(QDataStream& stream) const
+{
+	stream << stimindex() << label();
+	return stream;
+}
+
+HStimLabelRequestEvent* HStimLabelRequestEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	int stimid;
+	QString label;
+	stream >> stimid >> label;
+	return new HStimLabelRequestEvent(stimid, label, timestamp);
+}
+
+
+
+
+
 
 QString HStimStartEvent::eventInfo() const
 {
@@ -559,8 +600,8 @@ QString HStimulusSettingsEvent::eventCSVAdditional() const
 	const Habit::StimulusInfo& iss = settings().getIndependentSoundInfo();
 
 	return QString("%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,%21,%22,%23").
-			arg(stimindex()).arg(settings().getId()).arg(settings().getName()).arg(settings().isLeftEnabled()).
-			arg(settings().isCenterEnabled()).arg(settings().isRightEnabled()).arg(settings().isIndependentSoundEnabled()).
+			arg(stimindex()).arg(settings().getId()).arg(settings().getName()).arg(left.isBackground()).
+			arg(center.isBackground()).arg(right.isBackground()).arg(QString("N/A")).
 			arg(left.getName()).arg(left.getFileName()).arg(left.isLoopPlayBack()).arg(left.getAudioBalance()).
 			arg(center.getName()).arg(center.getFileName()).arg(center.isLoopPlayBack()).arg(center.getAudioBalance()).
 			arg(right.getName()).arg(right.getFileName()).arg(right.isLoopPlayBack()).arg(right.getAudioBalance()).

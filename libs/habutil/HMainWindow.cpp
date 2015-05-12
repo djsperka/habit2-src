@@ -183,7 +183,8 @@ void HMainWindow::runSavedExperiment()
 		}
 #else
 		// Always save results. No option here.
-		QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
+		//QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
+		QDir dir (habutilGetResultsDir(habitControlPanel.getExperimentSettings().getName()));
 		QString filename(dir.absoluteFilePath(QString("%1.hab").arg(runSettingsForm.getRunLabel())));
 		if (!results->save(filename))
 		{

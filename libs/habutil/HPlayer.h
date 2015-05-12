@@ -12,9 +12,9 @@
 
 #include <QWidget>
 #include <QMap>
-#include <QTextStream>
+#include <QDir>
 #include "HStimulusSource.h"
-
+#include "stimulusinfo.h"
 
 
 // The HPlayer plays stimuli for Habit. 
@@ -30,7 +30,7 @@ class HPlayer : public QWidget
 	Q_OBJECT
 	
 public:
-	HPlayer(int ID = 0, QWidget* w = 0);
+	HPlayer(int ID = 0, QWidget* w = 0, const QDir& dir = QDir("/"));
 	virtual ~HPlayer();
 
 	
@@ -38,7 +38,7 @@ public:
 	virtual void play(unsigned int number) = 0;
 	
 	/// Play the currently configured attention getter. 
-	virtual void playAG() { play(0); };
+	//virtual void playAG() { play(0); };
 	
 	/// Stop playing the current stim. Has no effect on a video that has stopped, or
 	/// on an image or background. 
@@ -54,31 +54,28 @@ public:
 	// at position 1. The return value is the stim position number, and should 
 	// be used in a call to play(). 
 	//virtual unsigned int addStimulus(QString filename, int volume=0, bool isLooped = false);
+
+	// TODO: this will replace addStimulus(id, filename, etc) and addStimulus(id);
+	// Will call addStimulusPrivate(id) = 0;
+	// Subclasses may assume that getStimulusInfo(id) will return the correct thing.
 	
+	unsigned int addStimulus(const unsigned int id, const Habit::StimulusInfo& info);
+
 	// Same as above, but assigns the given id to the stimulus.
-	virtual unsigned int addStimulus(unsigned int id, QString filename, int volume=0, bool isLooped = false);
+	//virtual unsigned int addStimulus(unsigned int id, QString filename, int volume=0, bool isLooped = false);
 
 	// add dummy (background) stimulus
 	//virtual unsigned int addStimulus();
-	virtual unsigned int addStimulus(unsigned int id);
+	//virtual unsigned int addStimulus(unsigned int id);
 	
 	// Add an attention getter stimulus to the player. The AG will always have
 	// index 0. It can be played by calling play(0) or playAG().
-	virtual unsigned int addAG(QString filename, int volume=0, bool isLooped = false);
+	//virtual unsigned int addAG(QString filename, int volume=0, bool isLooped = false);
 
-	int count() const { return m_sources.count(); };
+//	QTextStream& operator<<(QTextStream& out);
 
-	// Guard against returning a bad reference.
-	HStimulusSource* source(unsigned int i)
-	{
-		HStimulusSource *s = NULL;
-		if (m_sources.contains(i)) s = m_sources[i];
-		return s;
-	};
-
-	QTextStream& operator<<(QTextStream& out);
-
-
+	// dummy value to be returned when getStimulusInfo gets a bad key.
+	static const Habit::StimulusInfo dummyStimulusInfo;
 
 protected:	
 	/// An id number for this player. Can be used to indicate screen number, but not required. 
@@ -86,22 +83,33 @@ protected:
 	
 	/// Map of stimulus sources to be used. The [0] index is used as the attention getter,
 	/// so calling addAG() always replaces the current attention getter.
-	QMap<unsigned int, HStimulusSource *> m_sources;
+	//QMap<unsigned int, HStimulusSource *> m_sources;
 	
 	/// index of currently playing stim. An out of range index defaults to playing background.
 	int m_iCurrentStim;
-	
-	/// Gets the type of stim corresponding to index
-	HStimulusSource::HStimulusSourceType getStimulusType(unsigned int index);
-	
-	/// Gets the type of the stim corresponding to m_iCurrentStim.
-	HStimulusSource::HStimulusSourceType getCurrentStimulusType()
-	{
-		return getStimulusType(m_iCurrentStim);
-	};
+
+	// Get the StimulusInfo object for given key.
+	const Habit::StimulusInfo& getStimulusInfo(unsigned int key);
+
+	// Get current stim info
+	const Habit::StimulusInfo& getCurrentStimulusInfo() { return getStimulusInfo(m_iCurrentStim); };
 
 	// returns the next key to be used. Equal to the largest current key + 1.
-	unsigned int nextKey();
+	unsigned int nextKey() { return m_mapPStimulusInfo.count() - 1;};
+
+	unsigned int count() { return m_mapPStimulusInfo.count(); };
+
+	const QDir& getStimulusRoot() { return m_dirStimulusRoot; };
+
+private:
+
+	// map of StimulusInfo objects, by key.
+	QMap<unsigned int, const Habit::StimulusInfo* > m_mapPStimulusInfo;
+
+	/// stimulus root directory. Any stimuli with relative paths will be found here, hopefully.
+	QDir m_dirStimulusRoot;
+
+	virtual unsigned int addStimulusPrivate(unsigned int id) = 0;
 
 
 signals:

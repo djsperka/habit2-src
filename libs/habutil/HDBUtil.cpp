@@ -7,8 +7,10 @@
 
 
 #include "HDButil.h"
+#include "HTypes.h"
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
+#include <QtSql/QSqlRecord>
 #include <QtSql/QSqlError>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -16,86 +18,14 @@
 #include <QtDebug>
 #include <QDateTime>
 
-#if 0
-
-This function superceded by functions in HWorkspaceUtil
-
-// select existing db(true) or create new one (false)
-bool selectDB(bool bExisting)
-{
-	bool bval = false;
-	QSettings settings;
-	QString dir, filename;
-	QString default_filename("habit.db3");
-	QString selectedFileName;
-	if (settings.contains("database/dir") && settings.contains("database/filename"))
-	{
-		dir = settings.value("database/dir").toString();
-		filename = settings.value("database/filename").toString();
-	}
-	else
-	{
-		// Settings do not have current database filename and dir.
-		// Check default location for database file.
-		dir = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-		filename = default_filename;
-	}
-	QFileInfo initial(QDir(dir), filename);
-	QString fullname = initial.absoluteFilePath();
-
-	if (bExisting)
-		selectedFileName = QFileDialog::getOpenFileName(NULL, "Select Habit database", fullname, "Habit Database Files (*.db3)");
-	else
-		selectedFileName = QFileDialog::getSaveFileName(NULL, "New Habit database filename", fullname, "Habit Database Files (*.db3)");
-
-	// getOpenFileName() returns a null string if user cancelled.
-	// If they didn't cancel, then check if the file exists. If it doesn't exist, ask the user
-	// if they'd like to create a new file.
-
-	if (!selectedFileName.isNull())
-	{
-		QFileInfo selected(selectedFileName);
-		if (selected.exists())
-		{
-			bval = true;
-			settings.setValue("database/dir", selected.dir().canonicalPath());
-			settings.setValue("database/filename", selected.fileName());
-		}
-		else
-		{
-			QMessageBox msgBox;
-			msgBox.setText(QString("The database file \"%1\" does not exist. Would you like to create this file?").arg(selectedFileName));
-			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-			int iret = msgBox.exec();
-			if (iret == QMessageBox::Yes)
-			{
-				QFile::copy(":/resources/habit.db3", selectedFileName);
-				// set perms
-				QFile newfile(selectedFileName);
-				newfile.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadGroup | QFile::WriteGroup);
-				bval = true;
-				settings.setValue("database/dir", selected.dir().canonicalPath());
-				settings.setValue("database/filename", selected.fileName());
-			}
-		}
-	}
-
-	return bval;
-}
-
-#endif
+bool populateStimulusTable(QSqlQuery& q, const HStimContext& context);
+bool populateStimulusTableSingle(QSqlQuery& q, const HStimContext& context, int& stimulus_id);
 
 
 // Close database on default connection.
 
 void closeDB()
 {
-	// See if there is a database connection currently open....
-//	QSqlDatabase db = QSqlDatabase::database();
-//	if (db.isOpen())
-//	{
-//		db.close();
-//	}
 	if (QSqlDatabase::database().isOpen())
 	{
 		QSqlDatabase::database().close();
@@ -105,7 +35,7 @@ void closeDB()
 
 // Open the database file "habit.sqlite" in the given directory.
 
-bool openDB(QDir& dir)
+bool openDB(const QDir& dir)
 {
 	bool bval = false;
 	QString filename;
@@ -197,10 +127,17 @@ bool getDBTableExists(QString name)
 bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 {
 	bool result = true;
-	const int iMinVersion                                      = 2000006;
-	const int iAddColumnsToHabituationSettings                 = 2000009;
-	const int iAddInclusiveLookTimeColumnToLookSettings        = 2000010;
-	const int iLatestVersion                                   = 2000010;
+	const int iMinVersion										= 2000006;
+	const int iAddColumnsToHabituationSettings					= 2000009;
+	const int iAddInclusiveLookTimeColumnToLookSettings			= 2000010;
+	const int iAddStimulusDisplayColumns						= 2000011;
+	const int iAddExperimentHiddenColumn						= 2000012;
+	const int iAddOrderTable									= 2000013;
+	const int iChangeStimEnabled								= 2000014;
+	const int iChangeStimEnabledForgotAttentionGetter			= 2000015;
+	const int iBigStimulusTableChange							= 2000016;
+	const int iBigStimulusTableChangeAG							= 2000017;
+	const int iLatestVersion									= 2000017;
 	int iVersion = getDBVersion();
 
 	// Will any updates be required? If so, close db, make a copy, then reopen.
@@ -281,6 +218,313 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 						db.rollback();
 					}
 				}
+				if (iVersion < iAddStimulusDisplayColumns)
+				{
+					// Add column inclusive_look to habituation_settings
+					db.transaction();
+					QSqlQuery q0("alter table stimulus_display add column stimulus_layout INTEGER DEFAULT 0");
+					QSqlQuery q1("alter table stimulus_display add column use_iss INTEGER DEFAULT 0");
+					QSqlQuery q2("insert into habit_version (version) values(?)");
+					q2.bindValue(0, iAddStimulusDisplayColumns);
+					q2.exec();
+					if (!q0.lastError().isValid() && !q1.lastError().isValid() && !q2.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAddStimulusDisplayColumns;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddStimulusDisplayColumns;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
+				if (iVersion < iAddExperimentHiddenColumn)
+				{
+					// Add column inclusive_look to habituation_settings
+					db.transaction();
+					QSqlQuery q0("alter table experiments add column hidden INTEGER DEFAULT 0");
+					QSqlQuery q2("insert into habit_version (version) values(?)");
+					q2.bindValue(0, iAddExperimentHiddenColumn);
+					q2.exec();
+					if (!q0.lastError().isValid() && !q2.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAddExperimentHiddenColumn;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddExperimentHiddenColumn;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
+				if (iVersion < iAddOrderTable)
+				{
+					// create stimulus_order table
+					db.transaction();
+					QSqlQuery q0("CREATE TABLE \"stimulus_order\"(id INTEGER NOT NULL DEFAULT \"-1\"  PRIMARY KEY AUTOINCREMENT, experiment_id INTEGER, name VARCHAR, context INTEGER, orderlist VARCHAR)");
+					QSqlQuery q2("insert into habit_version (version) values(?)");
+					q2.bindValue(0, iAddOrderTable);
+					q2.exec();
+					if (!q0.lastError().isValid() && !q2.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAddOrderTable;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddOrderTable;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						result = false;
+						db.rollback();
+					}
+
+				}
+				if (iVersion < iChangeStimEnabled)
+				{
+					// Change column name in the three stimuli tables
+					db.transaction();
+					QSqlQuery q0("ALTER TABLE \"pretest_stimuli\" RENAME TO \"pstimtmp\"");
+					QSqlQuery q1("ALTER TABLE \"habituation_stimuli\" RENAME TO \"hstimtmp\"");
+					QSqlQuery q2("ALTER TABLE \"test_stimuli\" RENAME TO \"tstimtmp\"");
+					QSqlQuery q3("CREATE TABLE \"pretest_stimuli\" (\"id\" INTEGER PRIMARY KEY  DEFAULT \"-1\" ,\"experiment_id\" INTEGER,\"name\" VARCHAR(50),\"is_left_background\" BOOL,\"left_filename\" TEXT,\"is_left_loop_playback\" BOOL,\"is_center_background\" BOOL,\"center_filename\" VARCHAR(50),\"is_center_loop_playback\" BOOL,\"is_right_background\" BOOL,\"right_filename\" VARCHAR(50),\"is_right_loop_playback\" BOOL,\"independent_sound_filename\" VARCHAR(50),\"is_independent_loop_playback\" BOOL,\"left_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"right_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"center_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"independent_audio_balance\" INTEGER NOT NULL  DEFAULT 100 )");
+					QSqlQuery q4("CREATE TABLE \"habituation_stimuli\" (\"id\" INTEGER PRIMARY KEY  DEFAULT \"-1\" ,\"experiment_id\" INTEGER,\"name\" VARCHAR(50),\"is_left_background\" BOOL,\"left_filename\" TEXT,\"is_left_loop_playback\" BOOL,\"is_center_background\" BOOL,\"center_filename\" VARCHAR(50),\"is_center_loop_playback\" BOOL,\"is_right_background\" BOOL,\"right_filename\" VARCHAR(50),\"is_right_loop_playback\" BOOL,\"independent_sound_filename\" VARCHAR(50),\"is_independent_loop_playback\" BOOL,\"left_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"right_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"center_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"independent_audio_balance\" INTEGER NOT NULL  DEFAULT 100 )");
+					QSqlQuery q5("CREATE TABLE \"test_stimuli\" (\"id\" INTEGER PRIMARY KEY  DEFAULT \"-1\" ,\"experiment_id\" INTEGER,\"name\" VARCHAR(50),\"is_left_background\" BOOL,\"left_filename\" TEXT,\"is_left_loop_playback\" BOOL,\"is_center_background\" BOOL,\"center_filename\" VARCHAR(50),\"is_center_loop_playback\" BOOL,\"is_right_background\" BOOL,\"right_filename\" VARCHAR(50),\"is_right_loop_playback\" BOOL,\"independent_sound_filename\" VARCHAR(50),\"is_independent_loop_playback\" BOOL,\"left_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"right_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"center_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"independent_audio_balance\" INTEGER NOT NULL  DEFAULT 100 )");
+					QSqlQuery q6("INSERT INTO pretest_stimuli (id, experiment_id, name, is_left_background, left_filename, is_left_loop_playback, is_center_background, center_filename, is_center_loop_playback, is_right_background, right_filename, is_right_loop_playback, independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, independent_audio_balance)	SELECT id, experiment_id, name, \"false\", left_filename, is_left_loop_playback, \"false\", center_filename, is_center_loop_playback, \"false\", right_filename, is_right_loop_playback, independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, independent_audio_balance from pstimtmp");
+					QSqlQuery q7("INSERT INTO habituation_stimuli (id, experiment_id, name, is_left_background, left_filename, is_left_loop_playback, is_center_background, center_filename, is_center_loop_playback, is_right_background, right_filename, is_right_loop_playback, independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, independent_audio_balance)	SELECT id, experiment_id, name, \"false\", left_filename, is_left_loop_playback, \"false\", center_filename, is_center_loop_playback, \"false\", right_filename, is_right_loop_playback, independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, independent_audio_balance from hstimtmp");
+					QSqlQuery q8("INSERT INTO test_stimuli (id, experiment_id, name, is_left_background, left_filename, is_left_loop_playback, is_center_background, center_filename, is_center_loop_playback, is_right_background, right_filename, is_right_loop_playback, independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, independent_audio_balance)	SELECT id, experiment_id, name, \"false\", left_filename, is_left_loop_playback, \"false\", center_filename, is_center_loop_playback, \"false\", right_filename, is_right_loop_playback, independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, independent_audio_balance from tstimtmp");
+					QSqlQuery q9("DROP TABLE pstimtmp");
+					QSqlQuery q10("DROP TABLE hstimtmp");
+					QSqlQuery q11("DROP TABLE tstimtmp");
+					QSqlQuery q12("insert into habit_version (version) values(?)");
+					q12.bindValue(0, iChangeStimEnabled);
+					q12.exec();
+
+					if (
+							!q0.lastError().isValid() &&
+							!q1.lastError().isValid() &&
+							!q2.lastError().isValid() &&
+							!q3.lastError().isValid() &&
+							!q4.lastError().isValid() &&
+							!q5.lastError().isValid() &&
+							!q6.lastError().isValid() &&
+							!q7.lastError().isValid() &&
+							!q8.lastError().isValid() &&
+							!q9.lastError().isValid() &&
+							!q10.lastError().isValid() &&
+							!q11.lastError().isValid() &&
+							!q12.lastError().isValid()
+						)
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iChangeStimEnabled;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iChangeStimEnabled;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						qDebug() << q3.lastQuery() << " : " << q3.lastError();
+						qDebug() << q4.lastQuery() << " : " << q4.lastError();
+						qDebug() << q5.lastQuery() << " : " << q5.lastError();
+						qDebug() << q6.lastQuery() << " : " << q6.lastError();
+						qDebug() << q7.lastQuery() << " : " << q7.lastError();
+						qDebug() << q8.lastQuery() << " : " << q8.lastError();
+						qDebug() << q9.lastQuery() << " : " << q9.lastError();
+						qDebug() << q10.lastQuery() << " : " << q10.lastError();
+						qDebug() << q11.lastQuery() << " : " << q11.lastError();
+						qDebug() << q12.lastQuery() << " : " << q12.lastError();
+						result = false;
+						db.rollback();
+					}
+
+				}
+
+				if (iVersion < iChangeStimEnabledForgotAttentionGetter)
+				{
+					// Change column name in the attention_getting_stimulus table
+					db.transaction();
+					QSqlQuery q0("ALTER TABLE \"attention_getting_stimuli\" RENAME TO \"astimtmp\"");
+					QSqlQuery q1("CREATE TABLE \"attention_getting_stimuli\" (\"id\" INTEGER PRIMARY KEY  DEFAULT \"-1\" ,\"attention_getter_id\" INTEGER,\"name\" VARCHAR(50),\"is_left_background\" BOOL,\"left_filename\" TEXT,\"is_left_loop_playback\" BOOL,\"is_center_background\" BOOL,\"center_filename\" VARCHAR(50),\"is_center_loop_playback\" BOOL,\"is_right_background\" BOOL,\"right_filename\" VARCHAR(50),\"is_right_loop_playback\" BOOL,\"independent_sound_filename\" VARCHAR(50),\"is_independent_loop_playback\" BOOL,\"left_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"right_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"center_audio_balance\" INTEGER NOT NULL  DEFAULT 100 ,\"independent_audio_balance\" INTEGER NOT NULL  DEFAULT 100 )");
+					QSqlQuery q6("INSERT INTO attention_getting_stimuli (id, attention_getter_id, name, is_left_background, left_filename, is_left_loop_playback, is_center_background, center_filename, is_center_loop_playback, is_right_background, right_filename, is_right_loop_playback, independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, independent_audio_balance)	SELECT id, attention_getter_id, name, \"false\", left_filename, is_left_loop_playback, \"false\", center_filename, is_center_loop_playback, \"false\", right_filename, is_right_loop_playback, independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, independent_audio_balance from astimtmp");
+					QSqlQuery q9("DROP TABLE astimtmp");
+					QSqlQuery q12("insert into habit_version (version) values(?)");
+					q12.bindValue(0, iChangeStimEnabledForgotAttentionGetter);
+					q12.exec();
+
+					if (
+							!q0.lastError().isValid() &&
+							!q1.lastError().isValid() &&
+							!q6.lastError().isValid() &&
+							!q9.lastError().isValid() &&
+							!q12.lastError().isValid()
+						)
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iChangeStimEnabledForgotAttentionGetter;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iChangeStimEnabledForgotAttentionGetter;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
+						qDebug() << q6.lastQuery() << " : " << q6.lastError();
+						qDebug() << q9.lastQuery() << " : " << q9.lastError();
+						qDebug() << q12.lastQuery() << " : " << q12.lastError();
+						result = false;
+						db.rollback();
+					}
+
+				}
+
+				if (iVersion < iBigStimulusTableChange)
+				{
+					// Create new stimulus tables and migrate from existing tables.
+					db.transaction();
+					QSqlQuery q0("CREATE TABLE \"stimulus\" (\"id\" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL  UNIQUE  DEFAULT -1, \"experiment_id\" INTEGER NOT NULL , \"name\" VARCHAR NOT NULL , \"context\" INTEGER NOT NULL )");
+					QSqlQuery q1("CREATE  TABLE \"stimfiles\" (\"id\" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL  UNIQUE , \"stimulus_id\" INTEGER NOT NULL , \"position\" INTEGER NOT NULL , \"filename\" VARCHAR, \"isLoop\" BOOL NOT NULL  DEFAULT 0, \"volume\" INTEGER NOT NULL  DEFAULT 0, \"isBackground\" BOOL NOT NULL  DEFAULT 0, \"isColor\" BOOL NOT NULL  DEFAULT 0, \"color\" VARCHAR)");
+
+					/*
+					 * Populate the tables...
+					 */
+
+					if (
+							!q0.lastError().isValid() &&
+							!q1.lastError().isValid()
+						)
+					{
+						QSqlQuery q2("SELECT * FROM \"pretest_stimuli\"");
+						QSqlQuery q3("SELECT * FROM \"habituation_stimuli\"");
+						QSqlQuery q4("SELECT * FROM \"test_stimuli\"");
+						bool bOK = false;
+
+						bOK = 	populateStimulusTable(q2, HStimContext::PreTestPhase) &&
+								populateStimulusTable(q3, HStimContext::HabituationPhase) &&
+								populateStimulusTable(q4, HStimContext::TestPhase);
+
+						if (!bOK)
+						{
+							qCritical() << "Error in updateDBVersion at version " << iBigStimulusTableChange;
+							result = false;
+							db.rollback();
+						}
+						else
+						{
+							QSqlQuery qversion("insert into habit_version (version) values(?)");
+							qversion.bindValue(0, iBigStimulusTableChange);
+							qversion.exec();
+							if (!qversion.lastError().isValid())
+							{
+								result = true;
+								db.commit();
+								qDebug() << "Database updated to version " << iBigStimulusTableChange;
+							}
+							else
+							{
+								qCritical() << "Error in updateDBVersion at version " << iBigStimulusTableChange;
+								qDebug() << qversion.lastQuery() << " : " << qversion.lastError();
+								result = false;
+								db.rollback();
+							}
+						}
+
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iBigStimulusTableChange;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
+
+
+				if (result && iVersion < iBigStimulusTableChangeAG)
+				{
+					// Move attention getting stimuli from table attention_getting_stimuli
+					// to stimulus/stimfiles. The attention getting stim will be tied to the
+					// experiment by the experiment ID and the context. The old 'id' from
+					// the attention_setup table was used in the attention_getting_stimuli table
+					// to point back to the stim. That was redundant, because each experiment
+					// has just one attention getting record (by default), and that link is
+					// established by the experiment id.
+
+					db.transaction();
+
+					/*
+					 * Each record in attention_getting_stimuli must be moved to stimuli/stimfiles.
+					 */
+
+					QSqlQuery q2("SELECT * from attention_getting_stimuli a, attention_setup e where a.attention_getter_id = e.id ");
+					bool bOK = true;
+
+					while (bOK && q2.next())
+					{
+						int stimulus_id = -1;	// not really used
+						bOK = populateStimulusTableSingle(q2, HStimContext::AttentionGetter, stimulus_id);
+					}
+
+					if (!bOK)
+					{
+						qCritical() << "Error in updateDBVersion at version " << iBigStimulusTableChangeAG;
+						result = false;
+						db.rollback();
+					}
+					else
+					{
+						QSqlQuery qversion("insert into habit_version (version) values(?)");
+						qversion.bindValue(0, iBigStimulusTableChangeAG);
+						qversion.exec();
+						if (!qversion.lastError().isValid())
+						{
+							result = true;
+							db.commit();
+							qDebug() << "Database updated to version " << iBigStimulusTableChangeAG;
+						}
+						else
+						{
+							qCritical() << "Error in updateDBVersion at version " << iBigStimulusTableChangeAG;
+							qDebug() << qversion.lastQuery() << " : " << qversion.lastError();
+							result = false;
+							db.rollback();
+						}
+					}
+				}
+
+				// If failed, revert to to original database
+				if (!result)
+				{
+					closeDB();
+
+					// rename the current database - it has a partial update only!
+					QString partialname(QString("%1/error-%2-%3").arg(fileinfo.dir().canonicalPath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
+					if (!QFile::rename(fileinfo.canonicalFilePath(), partialname))
+					{
+						qCritical() << "Cannot rename existing habit.sqlite. This database may be partially updated and may not work. Must revert to database " << copyname << " manually.";
+					}
+					else
+					{
+						if (!QFile::copy(copyname, fileinfo.canonicalFilePath()))
+						{
+							qCritical() << "Cannot revert to to original database in " << copyname;
+						}
+						openDB(fileinfo.absoluteDir());
+					}
+				}
 			}
 			else
 			{
@@ -294,5 +538,113 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 		qDebug() << "Database is at the latest version.";
 	}
 
+	return result;
+}
+
+bool populateStimulusTable(QSqlQuery& q, const HStimContext& context)
+{
+	bool result = true;
+	int stimulus_id = -1;
+	while (result && q.next())
+	{
+		result = populateStimulusTableSingle(q, context, stimulus_id);
+	}
+	return result;
+}
+
+
+// Populate a record in the 'stimulus' table using the results in the query given.
+// I assume the query comes from one of the old stimuli tables (select * from one of
+// pretest_stimuli, habituation_stimuli, test_stimuli, attention_getting_stimuli).
+
+bool populateStimulusTableSingle(QSqlQuery& q, const HStimContext& context, int& stimulus_id)
+{
+	bool result = false;
+	QSqlQuery qStimulus("insert into stimulus (experiment_id, name, context) values (?, ?, ?)");
+	qStimulus.addBindValue(q.value(q.record().indexOf("experiment_id")).toInt());
+	qStimulus.addBindValue(q.value(q.record().indexOf("name")).toString());
+	qStimulus.addBindValue(QVariant(context.number()));
+	qDebug() << "populateStimulusTableSingle: stim name " << q.value(q.record().indexOf("name")).toString();
+	result = qStimulus.exec();
+	if (result)
+	{
+		stimulus_id = q.lastInsertId().toInt();
+		if (result)
+		{
+			QSqlQuery qLeft("insert into stimfiles (stimulus_id, position, filename, isLoop, volume, isBackground, isColor, color) values (?, ?, ?, ?, ?, ?, ?, ?)");
+			qLeft.addBindValue(QVariant(stimulus_id));
+			qLeft.addBindValue(QVariant(HPlayerPositionType::Left.number()));
+			qLeft.addBindValue(q.value(q.record().indexOf("left_filename")).toString());
+			qLeft.addBindValue(q.value(q.record().indexOf("is_left_loop_playback")).toBool());
+			qLeft.addBindValue(q.value(q.record().indexOf("left_audio_balance")).toInt());
+			qLeft.addBindValue(QVariant(false));
+			qLeft.addBindValue(QVariant(false));
+			qLeft.addBindValue(QVariant(QString("#000000")));
+			result = qLeft.exec();
+			//qDebug() << "Left " << qLeft.lastQuery() << " : " << qLeft.lastError();
+			if (!result)
+			{
+				qCritical() << "Error in populateStimulusTableSingle";
+				qDebug() << qLeft.lastQuery() << " : " << qLeft.lastError();
+			}
+		}
+
+		if (result)
+		{
+			QSqlQuery qCenter("insert into stimfiles (stimulus_id, position, filename, isLoop, volume, isBackground, isColor) values (?, ?, ?, ?, ?, ?, ?)");
+			qCenter.addBindValue(QVariant(stimulus_id));
+			qCenter.addBindValue(QVariant(HPlayerPositionType::Center.number()));
+			qCenter.addBindValue(q.value(q.record().indexOf("center_filename")).toString());
+			qCenter.addBindValue(q.value(q.record().indexOf("is_center_loop_playback")).toBool());
+			qCenter.addBindValue(q.value(q.record().indexOf("center_audio_balance")).toInt());
+			qCenter.addBindValue(QVariant(false));
+			qCenter.addBindValue(QVariant(false));
+			result = qCenter.exec();
+			//qDebug() << "Center " << qCenter.lastQuery() << " : " << qCenter.lastError();
+			if (!result)
+			{
+				qCritical() << "Error in populateStimulusTableSingle";
+				qDebug() << qCenter.lastQuery() << " : " << qCenter.lastError();
+			}
+		}
+
+		if (result)
+		{
+			QSqlQuery qRight("insert into stimfiles (stimulus_id, position, filename, isLoop, volume, isBackground, isColor) values (?, ?, ?, ?, ?, ?, ?)");
+			qRight.addBindValue(QVariant(stimulus_id));
+			qRight.addBindValue(QVariant(HPlayerPositionType::Right.number()));
+			qRight.addBindValue(q.value(q.record().indexOf("right_filename")).toString());
+			qRight.addBindValue(q.value(q.record().indexOf("is_right_loop_playback")).toBool());
+			qRight.addBindValue(q.value(q.record().indexOf("right_audio_balance")).toInt());
+			qRight.addBindValue(QVariant(false));
+			qRight.addBindValue(QVariant(false));
+			result = qRight.exec();
+			//qDebug() << "Right " << qRight.lastQuery() << " : " << qRight.lastError();
+			if (!result)
+			{
+				qCritical() << "Error in populateStimulusTableSingle";
+				qDebug() << qRight.lastQuery() << " : " << qRight.lastError();
+			}
+		}
+
+		if (result)
+		{
+			QSqlQuery qSound("insert into stimfiles (stimulus_id, position, filename, isLoop, volume, isBackground, isColor) values (?, ?, ?, ?, ?, ?, ?)");
+			qSound.addBindValue(QVariant(stimulus_id));
+			qSound.addBindValue(QVariant(HPlayerPositionType::Sound.number()));
+			qSound.addBindValue(q.value(q.record().indexOf("independent_sound_filename")).toString());
+			qSound.addBindValue(q.value(q.record().indexOf("is_independent_loop_playback")).toBool());
+			qSound.addBindValue(q.value(q.record().indexOf("independent_audio_balance")).toInt());
+			qSound.addBindValue(QVariant(false));
+			qSound.addBindValue(QVariant(false));
+			result = qSound.exec();
+			//qDebug() << "Sound " << qSound.lastQuery() << " : " << qSound.lastError();
+			if (!result)
+			{
+				qCritical() << "Error in populateStimulusTableSingle";
+				qDebug() << qSound.lastQuery() << " : " << qSound.lastError();
+			}
+		}
+	}
 	return result;
 }

@@ -10,6 +10,7 @@
 
 #include <QtGui>
 #include <QList>
+#include <QMap>
 #include <QTextStream>
 #include <QKeyEvent>
 #include <Phonon/MediaObject>
@@ -19,7 +20,6 @@
 #include "HImageWidget.h"
 #include "HStimulusSource.h"
 #include "HPlayer.h"
-
 
 // This class implements the HPlayer interface to play images and video stimuli.
 // It has an ugly hack which I found necessary - that is the usage of the parent widget
@@ -34,20 +34,19 @@
 // affects the display of the stimuli - they play at full screen and visually there is no
 // difference when the focus is on them or something else.
 
-
+class Habit::StimulusInfo;
 
 class HVIPlayer : public HPlayer
 {
 	Q_OBJECT
 
 public:
-	HVIPlayer(int id = 0, QWidget* w = 0, bool fullscreen = true, bool maintainAspectRatio = true);
+	HVIPlayer(int id = 0, QWidget* w = 0, const QDir& stimRootDir = QDir("/"), bool fullscreen = true, QColor background = QColor("#000000"), bool maintainAspectRatio = true);
 	~HVIPlayer();
 	virtual void play(unsigned int number);
 	virtual void stop();
 	virtual void clear();
 	friend QTextStream& operator<<(QTextStream& out, const HVIPlayer& player);
-	//bool eventFilter(QObject *object, QEvent *event);
 
 protected:
 
@@ -62,15 +61,31 @@ private:
 	bool m_isFullScreen;
 	bool m_maintainAspectRatio;
 	QString m_nowPlayingFilename;
+	int m_backgroundIndex;
+	int m_videoIndex;
+	int m_imageIndex;
+	QMap<unsigned int, HStimulusSource*> m_mapSources;
 
-//signals:
-//	void started(int);
+	unsigned int addStimulusPrivate(unsigned int id);
+
+	/// Gets the type of stim corresponding to index
+	HStimulusSource::HStimulusSourceType getStimulusType(unsigned int index);
+
+	/// Gets the type of the stim corresponding to m_iCurrentStim.
+	HStimulusSource::HStimulusSourceType getCurrentStimulusType()
+	{
+		return getStimulusType(m_iCurrentStim);
+	};
+
 
 public slots:
 	void onPrefinishMarkReached(qint32);
 	void onStateChanged(Phonon::State newState, Phonon::State oldState);
 	void onImagePainted();
+	void onCurrentChanged(int);
 };
+
+
 
 
 

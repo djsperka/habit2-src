@@ -11,13 +11,16 @@
 #include "attentiongettersettings.h"
 #include "stimulisettings.h"
 #include "HTypes.h"
+#include "HWorkspaceUtil.h"
 #include <climits>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMapIterator>
 
 
-const unsigned int HMediaManager::backgroundKey=UINT_MAX;
+const unsigned int HMediaManager::backgroundKey = UINT_MAX;
+const unsigned int HMediaManager::agKey = 0;
+const Habit::StimulusSettings HMediaManager::dummyStimulusSettings(QString("dummySS"));
 
 HMediaManager::HMediaManager()
 : QObject()
@@ -27,108 +30,93 @@ HMediaManager::HMediaManager()
 , m_pendingStimNumber(-1)
 {
 	// There will always be at least 2 stim keys.
-	Habit::StimulusSettings s("Background");
-	m_mapStim.insert(backgroundKey, s);
-	Habit::StimulusSettings ag("AG Placeholder");
-	m_mapStim.insert(0, ag);
+	m_mapPStimulusSettings.insert(backgroundKey, &dummyStimulusSettings);
+	m_mapPStimulusSettings.insert(agKey, &dummyStimulusSettings);
 };
 
 
 HMediaManager::~HMediaManager()
 {
+	qDebug() << "HMediaManager::~HMediaManager()";
 	QMapIterator<HPlayerPositionType, HPlayer*> it(m_players);
 	while (it.hasNext())
 	{
 		HPlayer* p = it.next().value();
-		p->stop();
-		delete p;	// error?
-		//p->close();
+		//p->stop();
+		delete p;
 	}
 }
 
 unsigned int HMediaManager::nextKey()
 {
-	return (unsigned int)(m_mapStim.size() - 1);
+	// Assumes that there are two pre-loaded keys -- see constructor.
+	// All stimuli added via addStimulus (and by extension, addStimuli) are numbered 1, 2, 3, ...
+	return (unsigned int)(m_mapPStimulusSettings.size() - 1);
 }
 
 void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex)
 {
-	if (screenIndex >= 0)
+	// TODO: This should be governed by fullscreen setting!
+	if (ppt != HPlayerPositionType::Sound)
 	{
 		QRect rect = QApplication::desktop()->screenGeometry(screenIndex);
 		player->setGeometry(rect);
 		player->move(rect.x(), rect.y());
+		player->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+		player->show();
+		qDebug() << "Player index " << screenIndex << " moved to rect " << rect;
 	}
 	else 
 	{
 		player->setGeometry(QRect(0, 0, 0, 0));
+		//player->hide();
+		qDebug() << "Player index " << screenIndex << " moved to rect (0,0,0,0)";
 	}
 	connect(player, SIGNAL(started(int, const QString&)), this, SLOT(playerStarted(int, const QString&)));
 	m_players[ppt] = player;
+	qDebug() << "HMediaManager::addPlayer: player parent is " << (player->parent() ? player->parent()->objectName() : "NONE") << " hidden? " << player->isHidden() << " rect " << player->rect();
+	if (player->windowModality() == Qt::WindowModal) qDebug() << "WindowModal";
+	else if (player->windowModality() == Qt::ApplicationModal) qDebug() << "ApplicationModal";
+	else if (player->windowModality() == Qt::NonModal) qDebug() << "NonModal";
+	else qDebug() << "Modality???";
 }
 
 
 unsigned int HMediaManager::addAG(const Habit::StimulusSettings& ssAG)
 {
-	unsigned int key = 0;
-	m_mapStim[key] = ssAG;
+	m_mapPStimulusSettings.insert(agKey, &ssAG);
+
+	// Assume that if the player is here, then there is a stimulus configured for it.
+
 	if (m_players.contains(HPlayerPositionType::Left))
 	{
-		if (ssAG.isLeftEnabled())
-		{
-			Habit::StimulusInfo si = ssAG.getLeftStimulusInfo();
-			m_players.value(HPlayerPositionType::Left)->addAG(si.getFileName(), si.getAudioBalance(), si.isLoopPlayBack());
-		}
-		else
-		{
-			qWarning("Left monitor is configured, and attention getter is used, but no left monitor attention getter stimulus is configured.");
-		}
+		//Habit::StimulusInfo si = ssAG.getLeftStimulusInfo();
+		//m_players.value(HPlayerPositionType::Left)->addAG(si.getAbsoluteFileName(baseDir), si.getAudioBalance(), si.isLoopPlayBack());
+		m_players.value(HPlayerPositionType::Left)->addStimulus(agKey, ssAG.getLeftStimulusInfo());
 	}
 	if (m_players.contains(HPlayerPositionType::Center))
 	{
-		if (ssAG.isCenterEnabled())
-		{
-			Habit::StimulusInfo si = ssAG.getCenterStimulusInfo();
-			m_players.value(HPlayerPositionType::Center)->addAG(si.getFileName(), si.getAudioBalance(), si.isLoopPlayBack());
-		}
-		else
-		{
-			qWarning("Center monitor is configured, and attention getter is used, but no center monitor attention getter stimulus is configured.");
-		}
+		//Habit::StimulusInfo si = ssAG.getCenterStimulusInfo();
+		m_players.value(HPlayerPositionType::Center)->addStimulus(agKey, ssAG.getCenterStimulusInfo());
 	}
 	if (m_players.contains(HPlayerPositionType::Right))
 	{
-		if (ssAG.isRightEnabled())
-		{
-			Habit::StimulusInfo si = ssAG.getRightStimulusInfo();
-			m_players.value(HPlayerPositionType::Right)->addAG(si.getFileName(), si.getAudioBalance(), si.isLoopPlayBack());
-		}
-		else
-		{
-			qWarning("Right monitor is configured, and attention getter is used, but no right monitor attention getter stimulus is configured.");
-		}
+		//Habit::StimulusInfo si = ssAG.getRightStimulusInfo();
+		m_players.value(HPlayerPositionType::Right)->addStimulus(agKey, ssAG.getRightStimulusInfo());
 	}
 	if (m_players.contains(HPlayerPositionType::Sound))
 	{
-		if (ssAG.isIndependentSoundEnabled())
-		{
-			Habit::StimulusInfo si = ssAG.getIndependentSoundInfo();
-			m_players.value(HPlayerPositionType::Sound)->addAG(si.getFileName(), si.getAudioBalance(), si.isLoopPlayBack());
-		}
-		else
-		{
-			qWarning("Control monitor is configured, and attention getter is used, but no independent sound attention getter stimulus is configured.");
-		}
+		//Habit::StimulusInfo si = ssAG.getIndependentSoundInfo();
+		m_players.value(HPlayerPositionType::Sound)->addStimulus(agKey, ssAG.getIndependentSoundInfo());
 	}
-
 
 	// Append to context list.
 	// This code allows more than one ag....nothing here prevents multiple ags to be added to the list.
 	QList<unsigned int> list;
-	list.append(key);
+	list.append(agKey);
 	addOrAppendList(HStimContext::AttentionGetter, list);
 
-	return 0;
+	return agKey;
 }
 
 
@@ -159,15 +147,11 @@ unsigned int HMediaManager::getContextStimList(const HStimContext& c, QList<unsi
 //void HMediaManager::addStimuli(const Habit::StimuliSettings& ss, QList<unsigned int>& idList)
 void HMediaManager::addStimuli(const Habit::StimuliSettings& ss)
 {
-	// it is assumed that we only add stimuli, not the AG, via this method.
-	// That means the first stim added will never have key=0, instead it will start
-	// at
 	QList<unsigned int> idList;
-	unsigned int key = 1;
-	for (int i=0; i<ss.getStimuli().size(); i++)
+	QListIterator<Habit::StimulusSettings> it(ss.stimuli());	// note: getting const HStimulusSettingsList&, it.next() will be const StimulusSettings&
+	while (it.hasNext())
 	{
-		key = nextKey();
-		idList.append(addStimulus(key, ss.getStimuli().at(i)));
+		idList.append(addStimulus(it.next()));
 	}
 	addOrAppendList(ss.getStimContext(), idList);
 	return;
@@ -175,62 +159,31 @@ void HMediaManager::addStimuli(const Habit::StimuliSettings& ss)
 
 unsigned int HMediaManager::addStimulus(unsigned int key, const Habit::StimulusSettings& settings)
 {
-	m_mapStim[key] = settings;
+	QDir baseDir;
+	habutilGetStimulusRootDir(baseDir);
+
+	m_mapPStimulusSettings.insert(key, &settings);
+
 	if (m_players.contains(HPlayerPositionType::Left))
 	{
-		if (settings.isLeftEnabled())
-		{
-			Habit::StimulusInfo si = settings.getLeftStimulusInfo();
-			m_players.value(HPlayerPositionType::Left)->addStimulus(key, si.getFileName(), si.getAudioBalance(), si.isLoopPlayBack());
-		}
-		else
-		{
-			qWarning() << "Left monitor configured, but no left stimulus for stim named \"" << settings.getName() << "\"";
-			m_players.value(HPlayerPositionType::Left)->addStimulus(key);
-		}
+		m_players.value(HPlayerPositionType::Left)->addStimulus(key, settings.getLeftStimulusInfo());
 	}
 
 	if (m_players.contains(HPlayerPositionType::Center))
 	{
-		if (settings.isCenterEnabled())
-		{
-			Habit::StimulusInfo si = settings.getCenterStimulusInfo();
-			m_players.value(HPlayerPositionType::Center)->addStimulus(key, si.getFileName(), si.getAudioBalance(), si.isLoopPlayBack());
-		}
-		else
-		{
-			qWarning() << "Center monitor configured, but no center stimulus for stim named \"" << settings.getName() << "\"";
-			m_players.value(HPlayerPositionType::Center)->addStimulus(key);
-		}
+		m_players.value(HPlayerPositionType::Center)->addStimulus(key, settings.getCenterStimulusInfo());
 	}
 
 	if (m_players.contains(HPlayerPositionType::Right))
 	{
-		if (settings.isRightEnabled())
-		{
-			Habit::StimulusInfo si = settings.getRightStimulusInfo();
-			m_players.value(HPlayerPositionType::Right)->addStimulus(key, si.getFileName(), si.getAudioBalance(), si.isLoopPlayBack());
-		}
-		else
-		{
-			qWarning() << "Right monitor configured, but no right stimulus for stim named \"" << settings.getName() << "\"";
-			m_players.value(HPlayerPositionType::Right)->addStimulus(key);
-		}
+		m_players.value(HPlayerPositionType::Right)->addStimulus(key, settings.getRightStimulusInfo());
 	}
 
 	if (m_players.contains(HPlayerPositionType::Sound))
 	{
-		if (settings.isIndependentSoundEnabled())
-		{
-			Habit::StimulusInfo si = settings.getIndependentSoundInfo();
-			m_players.value(HPlayerPositionType::Sound)->addStimulus(key, si.getFileName(), si.getAudioBalance(), si.isLoopPlayBack());
-		}
-		else
-		{
-			qWarning() << "Independent sound configured, but no sound stimulus for stim named \"" << settings.getName() << "\"";
-			m_players.value(HPlayerPositionType::Sound)->addStimulus(key);
-		}
+		m_players.value(HPlayerPositionType::Sound)->addStimulus(key, settings.getIndependentSoundInfo());
 	}
+
 	return key;
 }
 
@@ -243,10 +196,10 @@ unsigned int HMediaManager::addStimulus(const Habit::StimulusSettings& ss)
 
 
 
-Habit::StimulusSettings HMediaManager::getStimulusSettings(unsigned int key)
+const Habit::StimulusSettings& HMediaManager::getStimulusSettings(unsigned int key) const
 {
-	if (m_mapStim.contains(key)) return m_mapStim.value(key);
-	else return m_mapStim.value(backgroundKey);
+	if (m_mapPStimulusSettings.contains(key)) return *m_mapPStimulusSettings.value(key);
+	else return dummyStimulusSettings;
 }
 
 
@@ -275,7 +228,7 @@ void HMediaManager::ag()
 {
 	m_pendingStartSignal = true;
 	m_pendingAGStartSignal = true;
-	stim(0);
+	stim(agKey);
 }
 
 void HMediaManager::playerStarted(int id, const QString& filename)
@@ -285,7 +238,7 @@ void HMediaManager::playerStarted(int id, const QString& filename)
 	{
 		if (m_pendingAGStartSignal)
 		{
-			emit agStarted(id);
+			emit agStarted(agKey);
 		}
 		else
 		{

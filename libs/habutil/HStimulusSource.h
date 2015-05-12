@@ -14,6 +14,7 @@
 #include <QTextStream>
 #include <QBuffer>
 #include <Phonon/MediaSource>
+#include "stimulusinfo.h"
 
 class HStimulusSource
 {
@@ -22,7 +23,8 @@ public:
 	enum HStimulusSourceType {
 		BACKGROUND = 0, VIDEO, IMAGE, AUDIO, EMPTY, ERROR
 	};
-	
+
+	HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& stimRootDir = QDir("/"));
 	HStimulusSource();
 	HStimulusSource(const QString& filename, int audioBalance = 0, bool islooped=false);
 
@@ -43,6 +45,7 @@ public:
 private:
 	bool isImageFile(const QString& filename);
 	bool isAudioFile(const QString& filename);
+	void init(const QString& filename = QString());
 	HStimulusSourceType m_type;
 	QByteArray *m_pByteArray;
 	QBuffer *m_pBuffer;

@@ -5,10 +5,13 @@
 #include <QtCore/QString>
 #include <QtCore/QDataStream>
 #include <QList>
+#include <QPair>
 
 /// Common namespace for all entities of the Habit
 namespace Habit
 {
+
+	typedef QList< QPair< int, QString> > StimLabelList;
 
 	class RunSettings
 	{
@@ -24,7 +27,8 @@ namespace Habit
 		void setExperimentId(int id);
 
 		QString getHabituationOrder() const;
-		bool getHabituationOrderList(QList<int>& list) const;
+		bool getHabituationOrderList(StimLabelList& list) const;
+		void setHabituationOrderList(const StimLabelList& list);
 		void setHabituationOrder(const QString&);
 		bool isHabituationRandomized() const;
 		void setHabituationRandomized(bool);
@@ -32,7 +36,8 @@ namespace Habit
 		void setHabituationRandomizeMethod(int);
 
 		QString getPretestOrder() const;
-		bool getPretestOrderList(QList<int>& list) const;
+		bool getPretestOrderList(StimLabelList& list) const;
+		void setPretestOrderList(const StimLabelList& list);
 		void setPretestOrder(const QString&);
 		bool isPretestRandomized() const;
 		void setPretestRandomized(bool);
@@ -40,7 +45,8 @@ namespace Habit
 		void setPretestRandomizeMethod(int);
 
 		QString getTestOrder() const;
-		bool getTestOrderList(QList<int>& list) const;
+		bool getTestOrderList(StimLabelList& list) const;
+		void setTestOrderList(const StimLabelList& list);
 		void setTestOrder(const QString&);
 		bool isTestRandomized() const;
 		void setTestRandomized(bool);
@@ -54,7 +60,7 @@ namespace Habit
 		// Returns true and list contains the parsed integers in order,
 		// if each element parses as an int, false otherwise (and list
 		// is undefined).
-		static bool getOrderFromString(QList<int>& list, QString str);
+		static bool getOrderFromString(StimLabelList& list, QString str);
 
 
 	private:
@@ -63,14 +69,17 @@ namespace Habit
 		int subjectId_;
 
 		QString habituationTestOrder_;
+		StimLabelList habituationOrderList_;	// version 2
 		bool isHabituationOrderRandomized_;
 		int habituationRandomizeMethod;
 
 		QString pretestTestOrder_;
+		StimLabelList pretestOrderList_;	// version 2
 		bool isPretestOrderRandomized_;
 		int pretestRandomizeMethod;
 
 		QString testTestOrder_;
+		StimLabelList testOrderList_;	// version 2
 		bool isTestOrderRandomized_;
 		int testRandomizeMethod;
 	};

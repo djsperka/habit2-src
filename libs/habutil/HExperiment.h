@@ -46,6 +46,10 @@ public:
 		getMediaManager().stim(-1);
 	};
 	
+signals:
+	void phaseStarted(QString phaseName);
+	void trialStarted(int trialnumber, int repeatnumber);
+
 private:
 	HMediaManager& m_mm;
 	HLookDetector& m_ld;

@@ -24,6 +24,7 @@ private slots:
 	void onExport();
 	void onView();
 private:
+	QString m_sExptName;
 	QPushButton* m_pPrintButton;
 	QPushButton* m_pExportButton;
 	QPushButton* m_pViewButton;

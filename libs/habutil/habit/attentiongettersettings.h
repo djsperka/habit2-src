@@ -17,14 +17,17 @@ class AttentionGetterSettings
 public:
     AttentionGetterSettings();
     AttentionGetterSettings(const AttentionGetterSettings& settings);
-     ~AttentionGetterSettings();
+    ~AttentionGetterSettings();
+    AttentionGetterSettings& operator=(const AttentionGetterSettings& rhs);
+    AttentionGetterSettings clone();
 
 public:
 	int getId() const;
 	void setId(int);
     bool isAttentionGetterUsed() const;
     void setUseAttentionGetter(bool isAttentionGetterUsed);
-    StimulusSettings getAttentionGetterStimulus() const;
+    const StimulusSettings& getAttentionGetterStimulus() const;
+    StimulusSettings& getAttentionGetterStimulus();
     void setAttentionGetterStimulus(const StimulusSettings& attentionGetterStimulus);
     QColor getBackGroundColor() const;
     void setBackGroundColor(const QColor& backGroundColor);

@@ -18,6 +18,26 @@ Habit::AttentionGetterSettings::AttentionGetterSettings(const AttentionGetterSet
 {
 }
 
+Habit::AttentionGetterSettings& Habit::AttentionGetterSettings::operator=(const Habit::AttentionGetterSettings& rhs)
+{
+	if (this != &rhs)
+	{
+		setId(rhs.getId());
+		setUseAttentionGetter(rhs.isAttentionGetterUsed());
+		setAttentionGetterStimulus(rhs.getAttentionGetterStimulus());
+		setBackGroundColor(rhs.getBackGroundColor());
+	}
+	return *this;
+}
+
+Habit::AttentionGetterSettings Habit::AttentionGetterSettings::clone()
+{
+	Habit::AttentionGetterSettings settings(*this);
+	settings.setId(-1);
+	settings.setAttentionGetterStimulus(settings.getAttentionGetterStimulus().clone());
+	return settings;
+}
+
 
 QDataStream & Habit::operator<< (QDataStream& stream, const AttentionGetterSettings& settings)
 {
@@ -70,7 +90,12 @@ void Habit::AttentionGetterSettings::setUseAttentionGetter(bool isAttentionGette
     isAttentionGetterUsed_ = isAttentionGetterUsed;
 }
 
-Habit::StimulusSettings Habit::AttentionGetterSettings::getAttentionGetterStimulus() const
+const Habit::StimulusSettings& Habit::AttentionGetterSettings::getAttentionGetterStimulus() const
+{
+    return attentionGetterStimulus_;
+}
+
+Habit::StimulusSettings& Habit::AttentionGetterSettings::getAttentionGetterStimulus()
 {
     return attentionGetterStimulus_;
 }
@@ -93,7 +118,7 @@ void Habit::AttentionGetterSettings::setBackGroundColor(const QColor& backGround
 void Habit::AttentionGetterSettings::loadFromDB( size_t id )
 {
 	Habit::MainDao dao;
-	dao.getAttentionGetterSettingsForExperiment(id, this);
+	dao.getAttentionGetterSettings(id, this);
 }
 
 bool Habit::AttentionGetterSettings::saveToDB( size_t id_ )

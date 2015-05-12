@@ -9,10 +9,14 @@
 
 #include "HNonPlayer.h"
 
+using namespace Habit;
+
 void HNonPlayer::play(int number)
 {
+	const StimulusInfo& info = getStimulusInfo(number);
 	qDebug() << "HNonPlayer::play(" << number << ")";
-	emit started(number, QString("DUMMY"));
+	qDebug() << info;
+	emit started(number, info.label());
 }
 
 void HNonPlayer::stop()
@@ -24,4 +28,8 @@ void HNonPlayer::clear()
 	emit cleared(m_id);
 }
 
+unsigned int HNonPlayer::addStimulusPrivate(const unsigned int id)
+{
+	return id;
+}
 

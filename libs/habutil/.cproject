@@ -40,7 +40,6 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.1411730174.1897104990" name="libhabutil.a" rcbsApplicability="disable" resourcePath="debug/libhabutil.a" toolsToInvoke=""/>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

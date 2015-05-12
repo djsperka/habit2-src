@@ -16,7 +16,7 @@
 // This should be kept in sync with the enum defined in HTrialResultsRow. Pain but I can't think of a better way now.
 QStringList HTrialResultsRow::headers =
 		QStringList() 	<< "SubjectID" << "Phase" << "Trial" << "Repeat" << "EndType"
-						<< "Habituated" << "StimID" << "StimName"
+						<< "Habituated" << "StimID" << "StimName" << "StimLabel"
 						<< "Left" << "Center" << "Right" << "ISS"
 						<< "Trial Start" << "Trial End"
 						<< "TotalLook" << "TotalLookAway" << "Looks";
@@ -36,7 +36,7 @@ HResults::HResults(HResults& r)
 , m_experimentSettings(r.experimentSettings())
 , m_runSettings(r.runSettings())
 , m_subjectSettings(r.subjectSettings())
-, m_reliabilitySettings(r.reliabilitySettings())
+// 2-24-15 djs , m_reliabilitySettings(r.reliabilitySettings())
 , m_log(r.eventLog())
 {};
 
@@ -66,6 +66,9 @@ HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings
 
 
 // This constructor used for RELIABILTY RUN
+
+/*
+ * 2-24-15 djs Remove reliability settings for now, clearing out unused code. Will probably need to add this back soon. Cleaner, I hope.
 HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::ReliabilitySettings& bs, const HEventLog& log, const QString origFilename, const QString filename, const QString version)
 : m_version(version)
 , m_originalFilename(origFilename)
@@ -76,6 +79,7 @@ HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings
 , m_reliabilitySettings(bs)
 , m_log(log)
 {};
+*/
 
 HResults::~HResults() {};
 
@@ -99,8 +103,9 @@ bool HResults::save(const QString& filename) const
 		}
 		else if (type() == HResultsType::HResultsTypeReliabilityRun)
 		{
-			out << originalFilename();
-			out << experimentSettings() << runSettings() << reliabilitySettings() << eventLog();
+			qCritical() << "Saving reliability results not implemented!";
+			//out << originalFilename();
+			//out << experimentSettings() << runSettings() << reliabilitySettings() << eventLog();
 		}
 		else
 		{
@@ -121,12 +126,13 @@ HResults* HResults::load(const QString& filename)
 	Habit::ExperimentSettings es;
 	Habit::RunSettings rs;
 	Habit::SubjectSettings ss;
-	Habit::ReliabilitySettings bs;
+	// 2-24-15 djs Habit::ReliabilitySettings bs;
 	HEventLog log;
 	HResults* results = NULL;
 	log.clear();
 	if (file.open(QIODevice::ReadOnly))
 	{
+		qDebug() << "Loading results from file " << filename;
 		QDataStream in(&file);
 		in >> version >> itype;
 		if (itype == HResultsType::HResultsTypeOriginalRun.number())
@@ -141,10 +147,15 @@ HResults* HResults::load(const QString& filename)
 		}
 		else if (itype == HResultsType::HResultsTypeReliabilityRun.number())
 		{
-			in >> originalFilename >> es >> rs >> bs >> log;
-			results = new HResults(es, rs, bs, log, originalFilename, filename);
+			qCritical() << "Loading reliability results not implemented!";
+			//in >> originalFilename >> es >> rs >> bs >> log;
+			//results = new HResults(es, rs, bs, log, originalFilename, filename);
 		}
 		file.close();
+	}
+	else
+	{
+		qCritical() << "Cannot open results file " << filename;
 	}
 	return results;
 }
@@ -155,6 +166,7 @@ bool HResults::saveToCSV(const QString& filename) const
 	bool b = false;
 	QFile file(filename);
 	QString subjectId;
+	QMap<int, QString> mapStimIdNames;
 
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
 	{
@@ -163,7 +175,7 @@ bool HResults::saveToCSV(const QString& filename) const
 		b = true;
 		if (type() == HResultsType::HResultsTypeOriginalRun)
 		{
-			subjectId = QString("%1").arg(subjectSettings().getId());
+			subjectId = subjectSettings().getSubjectName();
 		}
 		else if (type() == HResultsType::HResultsTypeTestRun)
 		{
@@ -171,7 +183,7 @@ bool HResults::saveToCSV(const QString& filename) const
 		}
 		else if (type() == HResultsType::HResultsTypeReliabilityRun)
 		{
-			subjectId = QString("R-%1").arg(subjectSettings().getId());
+			subjectId = QString("R-%1").arg(subjectSettings().getSubjectName());
 		}
 		else
 		{
@@ -191,6 +203,8 @@ bool HResults::saveToCSV(const QString& filename) const
 		int totalLookTime = 0;
 		int totalLookAwayTime = 0;
 		bool bHabituated = false;
+		bool bHaveStimRequest = false;
+		QString sPendingStimLabel;
 		QListIterator<HEvent*> events(this->eventLog());
 
 		while (events.hasNext())
@@ -210,6 +224,7 @@ bool HResults::saveToCSV(const QString& filename) const
 			else if (e->type() == HEventType::HEventTrialStart)
 			{
 				HTrialStartEvent* ptse = static_cast<HTrialStartEvent*>(e);
+				bHaveStimRequest = false;
 				if (bInsideTrial) qCritical("Found trial start without preceding trial end event!");
 				row.init(subjectId);
 				row.setPhase(sPhase);
@@ -223,43 +238,62 @@ bool HResults::saveToCSV(const QString& filename) const
 				totalLookTime = 0;
 				totalLookAwayTime = 0;
 			}
+			else if (e->type() == HEventType::HEventStimRequest)
+			{
+				bHaveStimRequest = true;
+				sPendingStimLabel = "";
+			}
+			else if (e->type() == HEventType::HEventStimLabelRequest)
+			{
+				HStimLabelRequestEvent* pslre = static_cast<HStimLabelRequestEvent*>(e);
+				bHaveStimRequest = true;
+				sPendingStimLabel = pslre->label();
+			}
 			else if (e->type() == HEventType::HEventStimStart)
 			{
 				HStimStartEvent* psse = static_cast<HStimStartEvent*>(e);
 				row.setStimId(psse->stimid());
+				row.setStimName(mapStimIdNames.value(psse->stimid()));
+				row.setStimLabel(sPendingStimLabel);
 			}
 			else if (e->type() == HEventType::HEventScreenStart)
 			{
 				HScreenStartEvent* psse = static_cast<HScreenStartEvent*>(e);
 
 				// TODO - must have a way to map monitor id numbers to left/center/right/iss!
-				switch(psse->playerid())
+
+				// Do not keep filename unless stim request has been seen. Otherwise we will
+				// record attention getter file(s).
+				if (bHaveStimRequest)
 				{
-				case 0:
-				{
-					row.setStimISS(psse->filename());
-					break;
-				}
-				case 1:
-				{
-					row.setStimLeft(psse->filename());
-					break;
-				}
-				case 2:
-				{
-					row.setStimRight(psse->filename());
-					break;
-				}
-				case 3:
-				{
-					row.setStimCenter(psse->filename());
-					break;
-				}
-				default:
-				{
-					qWarning() << "Warning: cannot match player id to monitor.";
-					break;
-				}
+					switch(psse->playerid())
+					{
+					case 0:
+					{
+						row.setStimISS(psse->filename());
+						break;
+					}
+					case 1:
+					{
+						row.setStimLeft(psse->filename());
+						break;
+					}
+					case 2:
+					{
+						row.setStimRight(psse->filename());
+						break;
+					}
+					case 3:
+					{
+						row.setStimCenter(psse->filename());
+						break;
+					}
+					default:
+					{
+						qWarning() << "Warning: cannot match player id to monitor.";
+						break;
+					}
+					}
 				}
 			}
 			else if (e->type() == HEventType::HEventLook)
@@ -276,6 +310,18 @@ bool HResults::saveToCSV(const QString& filename) const
 				row.setTotalLookAway(QString("%1").arg(totalLookAwayTime));
 				row.setTrialEndTime(pte->timestamp());	// automatically sets total look(away) times
 				out << row;
+				sPendingStimLabel = "";
+			}
+			else if (e->type() == HEventType::HEventStimulusSettings)
+			{
+				// Save stim name
+				HStimulusSettingsEvent* pss = static_cast<HStimulusSettingsEvent*>(e);
+				mapStimIdNames.insert(pss->stimindex(), pss->settings().getName());
+				//qDebug() << "HStimulusSettingsEvent " << pss->stimindex() << " : " << pss->settings().getName();
+			}
+			else if (e->type() == HEventType::HHabituationSuccess)
+			{
+				bHabituated = true;
 			}
 		}
 		file.close();

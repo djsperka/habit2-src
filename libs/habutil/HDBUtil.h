@@ -15,7 +15,7 @@
 
 //bool selectDB(bool bExisting);
 void closeDB();
-bool openDB(QDir& dir);
+bool openDB(const QDir& dir);
 int getDBVersion();
 bool getDBTableExists(QString name);
 bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo);

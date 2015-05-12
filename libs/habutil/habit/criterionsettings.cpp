@@ -1,4 +1,23 @@
 #include "criterionsettings.h"
+#include <QtDebug>
+
+
+//     const HCriterionWindowType& windowType = HCriterionWindowType::HCriterionWindowFixed, bool bExcludeBasisWindow = false, bool bRequireMinBasisValue = false, unsigned int uiMinBasisValue = 0);
+
+#if 0
+Habit::CriterionSettings::CriterionSettings()
+: pbasis_(&HCriterionBasisType::HCriterionBasisFirstN)
+, percent_(50)
+, windowSize_(3)
+, pwindowType_(&HCriterionWindowType::HCriterionWindowFixed)
+, m_bExcludeBasisWindow(false)
+, m_bRequireMinBasisValue(false)
+, m_uiMinBasisValue(0)
+{
+	qDebug() << "default constructor";
+}
+#endif
+
 
 Habit::CriterionSettings::CriterionSettings(const HCriterionBasisType& basis, unsigned int percent, unsigned int windowSize, const HCriterionWindowType& windowType,  bool bExcludeBasisWindow, bool bRequireMinBasisValue, unsigned int uiMinBasisValue)
 : pbasis_(&basis)
@@ -22,10 +41,23 @@ Habit::CriterionSettings::CriterionSettings(const CriterionSettings& c)
 {
 }
 
-
-
 Habit::CriterionSettings::~CriterionSettings()
 {
+}
+
+Habit::CriterionSettings& Habit::CriterionSettings::operator=(const Habit::CriterionSettings& rhs)
+{
+	if (this != &rhs)
+	{
+		setBasis(rhs.getBasis());
+		setPercent(rhs.getPercent());
+		setWindowSize(rhs.getWindowSize());
+		setWindowType(rhs.getWindowType());
+		setExcludeBasisWindow(rhs.getExcludeBasisWindow());
+		setRequireMinBasisValue(rhs.getRequireMinBasisValue());
+		setMinBasisValue(rhs.getMinBasisValue());
+	}
+	return *this;
 }
 
 

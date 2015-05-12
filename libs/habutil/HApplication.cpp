@@ -6,7 +6,7 @@
  */
 
 #include "HApplication.h"
-#include "HMainWindow.h"
+#include "H2MainWindow.h"
 #include <QEvent>
 #include <QtDebug>
 #include <QFileOpenEvent>
@@ -22,7 +22,7 @@ bool HApplication::event(QEvent* event)
 
 		// check if active window is the main window.
 		// If so, then a file may be opened.
-		HMainWindow* pMainWindow = dynamic_cast<HMainWindow*>(pActiveWindow);
+		GUILib::H2MainWindow* pMainWindow = dynamic_cast<GUILib::H2MainWindow*>(pActiveWindow);
 		if (pMainWindow)
 		{
 			emit showResultsFile(static_cast<QFileOpenEvent *>(event)->file());

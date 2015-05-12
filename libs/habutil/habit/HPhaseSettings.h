@@ -20,6 +20,7 @@ namespace Habit
 		HPhaseSettings(const HPhaseType& type = HPhaseType::UnknownPhase);
 		HPhaseSettings(const HPhaseSettings& ts);
 		HPhaseSettings& operator=(const HPhaseSettings& rhs);
+		HPhaseSettings clone();
 
 		int getId() const { return m_id; };
 		void setId(int id) { m_id = id; };
@@ -55,7 +56,7 @@ namespace Habit
 		void setMaxNoLookTime(unsigned int ui) { m_uiMaxNoLookTime = ui; };
 
 		void loadFromDB(int id, int type);
-		bool saveToDB(int id) const;
+		bool saveToDB(int id);
 
 	private:
 		int m_id;

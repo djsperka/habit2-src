@@ -32,6 +32,13 @@ bool Habit::operator==(const HLookSettings& lhs, const HLookSettings& rhs)
 	return lhs.getId() == rhs.getId() && lhs.getMinLookTime() == rhs.getMinLookTime() && lhs.getMinLookAwayTime() == rhs.getMinLookAwayTime();
 }
 
+HLookSettings HLookSettings::clone()
+{
+	HLookSettings settings(*this);
+	settings.setId(-1);
+	return settings;
+}
+
 void HLookSettings::loadFromDB(int id)
 {
 	Habit::MainDao maindao;

@@ -17,9 +17,9 @@ class ControlBarOptions
 {
 public:
     ControlBarOptions();
-    //ControlBarOptions(const ControlBarOptions& );
+    ControlBarOptions(const ControlBarOptions&);
     ~ControlBarOptions();
-    //ControlBarOptions& operator = (const ControlBarOptions&);
+    ControlBarOptions& operator=(const ControlBarOptions& rhs);
 
 public:
 	int getId() const;
@@ -32,6 +32,7 @@ public:
     void setDisplayCurrentStimulus(bool display);
 	void loadFromDB(size_t id);
 	bool saveToDB(size_t id_);
+	ControlBarOptions clone();
 
 private:
 	int id_;

@@ -41,6 +41,7 @@ public:
 	void incrementRepeatNumber();
 	int getTrialNumber() { return m_trialNumber; };
 	int getRepeatNumber() { return m_repeatNumber; };
+
 protected:
 	virtual void onEntry(QEvent* e);
 //	virtual void onExit(QEvent* e);
@@ -57,6 +58,9 @@ private:
 	int m_repeatNumber;
 	QTimer* m_ptimerMaxStimulusTime;
 	
+signals:
+	void trialStarted(int trialnumber, int repeatnumber);
+
 public slots:
 	void onStimRunningEntered();
 	void onAGRunningEntered();

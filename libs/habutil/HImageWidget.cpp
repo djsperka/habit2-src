@@ -12,9 +12,12 @@
 #include <QtGui/QPainter>
 #include <QtCore/QDebug>
 
-HImageWidget::HImageWidget(QWidget *parent, bool fullScreen, bool aspectRatio)
+HImageWidget::HImageWidget(QWidget *parent, bool fullScreen, bool aspectRatio, QColor background)
 : QWidget(parent), m_fullscreen(fullScreen), m_maintainAspectRatio(aspectRatio)
 {	
+	QPalette p = palette();
+	p.setColor(backgroundRole(), background);
+	setPalette(p);
 	setAutoFillBackground(true);
 }
 

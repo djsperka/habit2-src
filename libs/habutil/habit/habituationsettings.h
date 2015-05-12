@@ -18,7 +18,10 @@ class HabituationSettings
 {
 public:
     HabituationSettings(const HHabituationType& htype = HHabituationType::HHabituationTypeCriterion);
+    HabituationSettings(const HabituationSettings& settings);
+    HabituationSettings& operator=(const HabituationSettings& rhs);
     ~HabituationSettings();
+    HabituationSettings clone();
 
 public:
 	int getId() const;
@@ -27,7 +30,8 @@ public:
     const HHabituationType& getHabituationType() const;
     void setHabituationType(const HHabituationType& htype);
 
-    const Habit::CriterionSettings& getCriterionSettings() const;
+//    const Habit::CriterionSettings& getCriterionSettings() const;
+    const Habit::CriterionSettings getCriterionSettings() const;
     void setCriterionSettings(Habit::CriterionSettings criterionsettings);
 	int getTotalLookLengthToEnd() const;
 	void setTotalLookLengthToEnd(int length);

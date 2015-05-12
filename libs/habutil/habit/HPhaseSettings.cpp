@@ -72,6 +72,12 @@ HPhaseSettings& HPhaseSettings::operator=(const HPhaseSettings& rhs)
 	return *this;
 }
 
+HPhaseSettings HPhaseSettings::clone()
+{
+	HPhaseSettings settings(*this);
+	settings.setId(-1);
+	return settings;
+}
 
 QDataStream & Habit::operator<< (QDataStream& stream, HPhaseSettings settings)
 {
@@ -156,7 +162,7 @@ void HPhaseSettings::loadFromDB(int id, int type)
 }
 
 
-bool HPhaseSettings::saveToDB(int id) const
+bool HPhaseSettings::saveToDB(int id)
 {
 	Habit::MainDao dao;
 	return dao.addOrUpdateHPhaseSettings(id, this);
