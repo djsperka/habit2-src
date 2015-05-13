@@ -1,5 +1,7 @@
 TEMPLATE = subdirs
 CONFIG += qt debug_and_release
-SUBDIRS = ./libs/habutil ./apps/testlook
-looktest.depends = habutil
+SUBDIRS = habutil habit
+habutil.subdir = libs/habutil
+habit.subdir = apps/habit
+habit.depends = habutil
 
