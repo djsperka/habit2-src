@@ -44,7 +44,7 @@ QVariant HStimulusOrderListModel::data(const QModelIndex & index, int role) cons
 		{
 			QString stimLabel = it.next();
 			b = allStimNames.contains(HStimulusOrder::getStim(stimLabel));
-			//qDebug() << "Look for " << stimLabel << " stim= " << HStimulusOrder::getStim(stimLabel) << " in stim list?  " << b;
+			qDebug() << "Look for " << stimLabel << " stim= " << HStimulusOrder::getStim(stimLabel) << " in stim list?  " << b;
 		}
 		if (!b) return QBrush(Qt::yellow);
 	}

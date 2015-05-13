@@ -9,32 +9,54 @@
 #include <QDebug>
 #include <QRegExp>
 
-static const QRegExp re("(\\w+)(/(\\w+))?");
+//static const QRegExp re("(\\w+)(/(\\w+))?");
+static const QString sreWordWithSpaces("((\\w)|(\\w[ \\w]*\\w))");
+static const QRegExp reStimAndLabel(sreWordWithSpaces + "(/" + sreWordWithSpaces + ")?");
+
 
 QString Habit::HStimulusOrder::getStim(const QString& stimAndLabel)
 {
 	QString result;
-	if (re.indexIn(stimAndLabel) > -1)
+
+#if 0
+	// test
+	qDebug() << "HStimulusOrder::getStim(" << stimAndLabel << "):";
+	if (reStimAndLabel.indexIn(stimAndLabel) > -1)
 	{
-		result = re.cap(1);
+		qDebug() << "cap count is " << reStimAndLabel.captureCount();
+		qDebug() << "stim cap 1 2 3 " << reStimAndLabel.cap(1) << " " << reStimAndLabel.cap(2) << " " << reStimAndLabel.cap(3);
+		qDebug() << "label cap 5 6 7 " << reStimAndLabel.cap(5) << " " << reStimAndLabel.cap(6) << " " << reStimAndLabel.cap(7);
 	}
+	else
+	{
+		qDebug() << "No Match.";
+	}
+#endif
+
+	if (reStimAndLabel.indexIn(stimAndLabel) > -1)
+	{
+		result = reStimAndLabel.cap(1);
+	}
+
+
+
 	return result;
 }
 
 QString Habit::HStimulusOrder::getLabel(const QString& stimAndLabel)
 {
 	QString result;
-	if (re.indexIn(stimAndLabel) > -1 && re.captureCount() == 3 && re.cap(3).length()>0)
+	if (reStimAndLabel.indexIn(stimAndLabel) > -1)
 	{
-		result = re.cap(3);
+		result = reStimAndLabel.cap(5);
 	}
 	return result;
 }
 
 QString Habit::HStimulusOrder::formatStimLabel(const QString& stim, const QString& label)
 {
-	if (label.isEmpty()) return stim;
-	else return QString("%1/%2").arg(stim).arg(label);
+	if (label.trimmed().isEmpty()) return stim.trimmed();
+	else return QString("%1/%2").arg(stim.trimmed()).arg(label.trimmed());
 }
 
 
