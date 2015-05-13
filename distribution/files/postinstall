@@ -1,0 +1,15 @@
+#!/bin/sh
+
+APPSUPPORT="$HOME/Library/Application Support/Infant Cognition Lab/Habit"
+APPLICATIONS="$HOME/Applications"
+
+env
+
+# copy initial db
+
+if ! [ -d "$APPSUPPORT" ]; then
+	mkdir -p "$APPSUPPORT"
+fi
+cp -n "habit.db3" "$APPSUPPORT"
+
+exit 0
