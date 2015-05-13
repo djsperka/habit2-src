@@ -41,7 +41,7 @@ private:
 	void doLayout();
 	void createExperiment(HEventLog& log);
 	void loadFromDB();
-	void updateFileStatusLabels(Habit::StimulusSettings& ss);
+	//void updateFileStatusLabels(Habit::StimulusSettings& ss);
 	
 private slots:
 	void onStartTrials();
