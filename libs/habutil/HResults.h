@@ -76,22 +76,23 @@ public:
 	{
 		indSubjectId = 0,
 		indPhase = 1,
-		indTrial = 2,
-		indRepeat = 3,
-		indEndType = 4,
-		indHabituated = 5,
-		indStimId = 6,
-		indStimName = 7,
-		indStimLabel = 8,
-		indStimLeft = 9,
-		indStimCenter = 10,
-		indStimRight = 11,
-		indStimISS = 12,
-		indTrialStartTime = 13,
-		indTrialEndTime = 14,
-		indTotalLook = 15,
-		indTotalAway = 16,
-		indNInit = 17,
+		indOrderName = 2,
+		indTrial = 3,
+		indRepeat = 4,
+		indEndType = 5,
+		indHabituated = 6,
+		indStimId = 7,
+		indStimName = 8,
+		indStimLabel = 9,
+		indStimLeft = 10,
+		indStimCenter = 11,
+		indStimRight = 12,
+		indStimISS = 13,
+		indTrialStartTime = 14,
+		indTrialEndTime = 15,
+		indTotalLook = 16,
+		indTotalAway = 17,
+		indNInit = 18,
 	};
 
 	HTrialResultsRow(): QList<QString>()
@@ -108,6 +109,7 @@ public:
 	void setId(QString id) { (*this)[indSubjectId] = id; };
 	void setPhase(QString phase) { (*this)[indPhase] = phase; };
 	void setTrial(int itrial) { (*this)[indTrial] = QString("%1").arg(itrial); };
+	void setOrderName(QString name) { (*this)[indOrderName] = name; };
 	void setRepeat(int irepeat) { (*this)[indRepeat] = QString("%1").arg(irepeat); };
 	void setEndType(QString type) { (*this)[indEndType] = type; };
 	void setHabituated(QString habituated) { (*this)[indHabituated] = habituated; };

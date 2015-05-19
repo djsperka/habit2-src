@@ -15,7 +15,7 @@
 
 // This should be kept in sync with the enum defined in HTrialResultsRow. Pain but I can't think of a better way now.
 QStringList HTrialResultsRow::headers =
-		QStringList() 	<< "SubjectID" << "Phase" << "Trial" << "Repeat" << "EndType"
+		QStringList() 	<< "SubjectID" << "Phase" << "Order" << "Trial" << "Repeat" << "EndType"
 						<< "Habituated" << "StimID" << "StimName" << "StimLabel"
 						<< "Left" << "Center" << "Right" << "ISS"
 						<< "Trial Start" << "Trial End"
@@ -205,6 +205,7 @@ bool HResults::saveToCSV(const QString& filename) const
 		bool bHabituated = false;
 		bool bHaveStimRequest = false;
 		QString sPendingStimLabel;
+		QString sOrderName;
 		QListIterator<HEvent*> events(this->eventLog());
 
 		while (events.hasNext())
@@ -214,6 +215,12 @@ bool HResults::saveToCSV(const QString& filename) const
 			{
 				HPhaseStartEvent* pse = static_cast<HPhaseStartEvent*>(e);
 				sPhase = pse->phase();
+
+				if (pse->phasetype() == HPhaseType::PreTest) sOrderName = runSettings().getPretestOrderName();
+				else if (pse->phasetype() == HPhaseType::Habituation) sOrderName = runSettings().getHabituationOrderName();
+				else if (pse->phasetype() == HPhaseType::Test) sOrderName = runSettings().getTestOrderName();
+				else sOrderName="";
+
 				if (bInsidePhase) qCritical("Found phase start without preceding phase end event!");
 				bInsidePhase = true;
 			}

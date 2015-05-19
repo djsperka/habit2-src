@@ -62,6 +62,7 @@ Habit::RunSettings GUILib::HRunSettingsDialog::getRunSettings() const
 		}
 		else if (m_map[HStimContext::PreTestPhase.number()]->isDefinedOrder())
 		{
+			settings.setPretestOrderName(m_map[HStimContext::PreTestPhase.number()]->getDefinedOrderName());
 			if (!m_exptSettings.getPreTestStimuliSettings().getIndexedOrderList(m_map[HStimContext::PreTestPhase.number()]->getDefinedOrderName(), list))
 				qCritical() << 	"HRunSettingsDialog::getRunSettings(): Cannot find defined order \"" <<
 								m_map[HStimContext::PreTestPhase.number()]->getDefinedOrderName() <<
@@ -85,6 +86,7 @@ Habit::RunSettings GUILib::HRunSettingsDialog::getRunSettings() const
 		}
 		else if (m_map[HStimContext::HabituationPhase.number()]->isDefinedOrder())
 		{
+			settings.setHabituationOrderName(m_map[HStimContext::HabituationPhase.number()]->getDefinedOrderName());
 			if (!m_exptSettings.getHabituationStimuliSettings().getIndexedOrderList(m_map[HStimContext::HabituationPhase.number()]->getDefinedOrderName(), list))
 				qCritical() << 	"HRunSettingsDialog::getRunSettings(): Cannot find defined order \"" <<
 								m_map[HStimContext::HabituationPhase.number()]->getDefinedOrderName() <<
@@ -109,6 +111,7 @@ Habit::RunSettings GUILib::HRunSettingsDialog::getRunSettings() const
 		}
 		else if (m_map[HStimContext::TestPhase.number()]->isDefinedOrder())
 		{
+			settings.setTestOrderName(m_map[HStimContext::TestPhase.number()]->getDefinedOrderName());
 			if (!m_exptSettings.getTestStimuliSettings().getIndexedOrderList(m_map[HStimContext::TestPhase.number()]->getDefinedOrderName(), list))
 				qCritical() << 	"HRunSettingsDialog::getRunSettings(): Cannot find defined order \"" <<
 								m_map[HStimContext::TestPhase.number()]->getDefinedOrderName() <<

@@ -93,7 +93,7 @@ HEADERS +=	HLook.h \
 # 2-24-15 djs			habit/resultviewersettings.h \
 			habit/runsettings.h \
 # 2-24-15 djs			habit/runsettingsform.h \
-			habit/HRunSettingsWidget.h \
+# 5-19-15 djs			habit/HRunSettingsWidget.h \
 			habit/sleeper.h \
 			habit/stimulisettings.h \
 # 2-24-15 djs			habit/stimulusdisplayform.h \
@@ -231,7 +231,7 @@ SOURCES +=	HLook.cpp \
 # 2-24-15 djs			habit/resultviewersettings.cpp \
 			habit/runsettings.cpp \
 # 2-24-15 djs			habit/runsettingsform.cpp \
-			habit/HRunSettingsWidget.cpp \
+# 5-19-15 djs			habit/HRunSettingsWidget.cpp \
 			habit/stimulisettings.cpp \
 # 2-24-15 djs			habit/stimulusdisplayform.cpp \
 			habit/stimulusdisplayinfo.cpp \

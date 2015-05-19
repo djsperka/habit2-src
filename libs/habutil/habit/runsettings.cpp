@@ -3,7 +3,9 @@
 #include <QStringList>
 #include <QRegExp>
 
-Habit::RunSettings::RunSettings()
+using namespace Habit;
+
+RunSettings::RunSettings()
 	: id_(-1)
 	, experimentId_(-1)
 	, subjectId_(-1)
@@ -18,153 +20,168 @@ Habit::RunSettings::RunSettings()
 	, testRandomizeMethod(-1)
 {}
 
-Habit::RunSettings::~RunSettings() {
+RunSettings::~RunSettings()
+{
 }
 
-int Habit::RunSettings::getId() const {
+int RunSettings::getId() const
+{
 	return id_;
 }
 
-void Habit::RunSettings::setId(int id) {
+void RunSettings::setId(int id)
+{
 	id_ = id;
 }
 
-int Habit::RunSettings::getExperimentId() const {
+int RunSettings::getExperimentId() const
+{
 	return experimentId_;
 }
 
-void Habit::RunSettings::setExperimentId(int id) {
+void RunSettings::setExperimentId(int id)
+{
 	experimentId_ = id;
 }
 
-int Habit::RunSettings::getSubjectId() const {
+int RunSettings::getSubjectId() const
+{
 	return subjectId_;
 }
 
-void Habit::RunSettings::setSubjectId(int id) {
+void RunSettings::setSubjectId(int id)
+{
 	subjectId_ = id;
 }
 
-QString Habit::RunSettings::getHabituationOrder() const {
+QString RunSettings::getHabituationOrderName() const
+{
 	return habituationTestOrder_;
 }
 
-void Habit::RunSettings::setHabituationOrder(const QString& order) {
-	// for historical reasons (to help loading older experiment results files)
-	// convert this input string to a list. We run the risk that the input
-	// is no good and cannot be converted. I'm going to rely on the unlikelihood
-	// of that to protect us.
+void RunSettings::setHabituationOrderName(const QString& order)
+{
 	habituationTestOrder_ = order;
-	getOrderFromString(habituationOrderList_, order);
 	return;
 }
 
-bool Habit::RunSettings::isHabituationRandomized() const {
+bool RunSettings::isHabituationRandomized() const
+{
 	return isHabituationOrderRandomized_;
 }
 
-void Habit::RunSettings::setHabituationRandomized(bool t) {
+void RunSettings::setHabituationRandomized(bool t)
+{
 	isHabituationOrderRandomized_ = t;
 }
 
-int Habit::RunSettings::getHabituationRandomizeMethod() const {
+int RunSettings::getHabituationRandomizeMethod() const
+{
 	return habituationRandomizeMethod;
 }
 
-void Habit::RunSettings::setHabituationRandomizeMethod(int m) {
+void RunSettings::setHabituationRandomizeMethod(int m)
+{
 	habituationRandomizeMethod = m;
 }
 
-QString Habit::RunSettings::getPretestOrder() const {
+QString RunSettings::getPretestOrderName() const
+{
 	return pretestTestOrder_;
 }
 
-void Habit::RunSettings::setPretestOrder(const QString& order) {
-	// for historical reasons (to help loading older experiment results files)
-	// convert this input string to a list. We run the risk that the input
-	// is no good and cannot be converted. I'm going to rely on the unlikelihood
-	// of that to protect us.
-	pretestTestOrder_ = order;
-	getOrderFromString(pretestOrderList_, order);
+void RunSettings::setPretestOrderName(const QString& ordername)
+{
+	pretestTestOrder_ = ordername;
 	return;
 }
 
-bool Habit::RunSettings::isPretestRandomized() const {
+bool RunSettings::isPretestRandomized() const
+{
 	return isPretestOrderRandomized_;
 }
 
-void Habit::RunSettings::setPretestRandomized(bool t) {
+void RunSettings::setPretestRandomized(bool t)
+{
 	isPretestOrderRandomized_ = t;
 }
 
-int Habit::RunSettings::getPretestRandomizeMethod() const {
+int RunSettings::getPretestRandomizeMethod() const
+{
 	return pretestRandomizeMethod;
 }
 
-void Habit::RunSettings::setPretestRandomizeMethod(int m) {
+void RunSettings::setPretestRandomizeMethod(int m)
+{
 	pretestRandomizeMethod = m;
 }
 
-QString Habit::RunSettings::getTestOrder() const {
+QString RunSettings::getTestOrderName() const
+{
 	return testTestOrder_;
 }
 
-void Habit::RunSettings::setTestOrder(const QString& order) {
+void RunSettings::setTestOrderName(const QString& order)
+{
 	testTestOrder_ = order;
 }
 
-bool Habit::RunSettings::isTestRandomized() const {
+bool RunSettings::isTestRandomized() const
+{
 	return isTestOrderRandomized_;
 }
 
-void Habit::RunSettings::setTestRandomized(bool t) {
+void RunSettings::setTestRandomized(bool t)
+{
 	isTestOrderRandomized_ = t;
 }
 
-int Habit::RunSettings::getTestRandomizeMethod() const {
+int RunSettings::getTestRandomizeMethod() const
+{
 	return testRandomizeMethod;
 }
 
-void Habit::RunSettings::setTestRandomizeMethod(int m) {
+void RunSettings::setTestRandomizeMethod(int m)
+{
 	testRandomizeMethod = m;
 }
 
-bool Habit::RunSettings::getPretestOrderList(StimLabelList& list) const
+bool RunSettings::getPretestOrderList(StimLabelList& list) const
 {
 	list = pretestOrderList_;
 	return true;
 }
 
-bool Habit::RunSettings::getHabituationOrderList(StimLabelList& list) const
+bool RunSettings::getHabituationOrderList(StimLabelList& list) const
 {
 	list = habituationOrderList_;
 	return true;
 }
 
-bool Habit::RunSettings::getTestOrderList(StimLabelList& list) const
+bool RunSettings::getTestOrderList(StimLabelList& list) const
 {
 	list = testOrderList_;
 	return true;
 }
 
 
-void Habit::RunSettings::setPretestOrderList(const StimLabelList& list)
+void RunSettings::setPretestOrderList(const StimLabelList& list)
 {
 	pretestOrderList_ = list;
 }
 
-void Habit::RunSettings::setHabituationOrderList(const StimLabelList& list)
+void RunSettings::setHabituationOrderList(const StimLabelList& list)
 {
 	habituationOrderList_ = list;
 }
 
-void Habit::RunSettings::setTestOrderList(const StimLabelList& list)
+void RunSettings::setTestOrderList(const StimLabelList& list)
 {
 	testOrderList_ = list;
 }
 
 
-bool Habit::RunSettings::getOrderFromString(StimLabelList& list, QString str)
+bool RunSettings::getOrderFromString(StimLabelList& list, QString str)
 {
 	bool b = true;
 	QRegExp resep("[ ,]+");
@@ -185,13 +202,13 @@ QDataStream & Habit::operator << (QDataStream& stream, Habit::RunSettings settin
 	stream << settings.getId();
 	stream << settings.getExperimentId();
 	stream << settings.getSubjectId();
-	stream << settings.getPretestOrder();
+	stream << settings.getPretestOrderName();
 	stream << settings.isPretestRandomized();
 	stream << settings.getPretestRandomizeMethod();
-	stream << settings.getHabituationOrder();
+	stream << settings.getHabituationOrderName();
 	stream << settings.isHabituationRandomized();
 	stream << settings.getHabituationRandomizeMethod();
-	stream << settings.getTestOrder();
+	stream << settings.getTestOrderName();
 	stream << settings.isTestRandomized();
 	stream << settings.getTestRandomizeMethod();
 	return stream;
@@ -203,28 +220,28 @@ QDataStream & Habit::operator >> (QDataStream& stream, Habit::RunSettings& setti
 	int subjectId_;
 	int id_;
 
-	QString habituationTestOrder_;
+	QString habituationOrderName;
 	bool isHabituationOrderRandomized_;
 	int habituationRandomizeMethod;
 
-	QString pretestTestOrder_;
+	QString pretestOrderName;
 	bool isPretestOrderRandomized_;
 	int pretestRandomizeMethod;
 
-	QString testTestOrder_;
+	QString testOrderName;
 	bool isTestOrderRandomized_;
 	int testRandomizeMethod;
 
 	stream >> id_; settings.setId(id_);
 	stream >> experimentId_; settings.setExperimentId(experimentId_);
 	stream >> subjectId_; settings.setSubjectId(subjectId_);
-	stream >> pretestTestOrder_; settings.setPretestOrder(pretestTestOrder_);
+	stream >> pretestOrderName; settings.setPretestOrderName(pretestOrderName);
 	stream >> isPretestOrderRandomized_; settings.setPretestRandomized(isPretestOrderRandomized_);
 	stream >> pretestRandomizeMethod; settings.setPretestRandomizeMethod(pretestRandomizeMethod);
-	stream >> habituationTestOrder_; settings.setHabituationOrder(habituationTestOrder_);
+	stream >> habituationOrderName; settings.setHabituationOrderName(habituationOrderName);
 	stream >> isHabituationOrderRandomized_; settings.setHabituationRandomized(isHabituationOrderRandomized_);
 	stream >> habituationRandomizeMethod; settings.setHabituationRandomizeMethod(habituationRandomizeMethod);
-	stream >> testTestOrder_; settings.setTestOrder(testTestOrder_);
+	stream >> testOrderName; settings.setTestOrderName(testOrderName);
 	stream >> isTestOrderRandomized_; settings.setTestRandomized(isTestOrderRandomized_);
 	stream >> testRandomizeMethod; settings.setTestRandomizeMethod(testRandomizeMethod);
 	return stream;
@@ -236,13 +253,13 @@ bool Habit::operator==(const Habit::RunSettings& lhs, const Habit::RunSettings& 
 	return (lhs.getId() == rhs.getId() &&
 			lhs.getExperimentId() == rhs.getExperimentId() &&
 			lhs.getSubjectId() == rhs.getSubjectId() &&
-			lhs.getHabituationOrder() == rhs.getHabituationOrder() &&
+			lhs.getHabituationOrderName() == rhs.getHabituationOrderName() &&
 			lhs.isHabituationRandomized() == rhs.isHabituationRandomized() &&
 			lhs.getHabituationRandomizeMethod() == rhs.getHabituationRandomizeMethod() &&
-			lhs.getPretestOrder() == rhs.getPretestOrder() &&
+			lhs.getPretestOrderName() == rhs.getPretestOrderName() &&
 			lhs.isPretestRandomized() == rhs.isPretestRandomized() &&
 			lhs.getPretestRandomizeMethod() == rhs.getPretestRandomizeMethod() &&
-			lhs.getTestOrder() == rhs.getTestOrder() &&
+			lhs.getTestOrderName() == rhs.getTestOrderName() &&
 			lhs.isTestRandomized() == rhs.isTestRandomized() &&
 			lhs.getTestRandomizeMethod() == rhs.getTestRandomizeMethod());
 }
