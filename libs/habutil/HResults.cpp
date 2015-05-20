@@ -316,6 +316,7 @@ bool HResults::saveToCSV(const QString& filename) const
 				row.setTotalLook(QString("%1").arg(totalLookTime));
 				row.setTotalLookAway(QString("%1").arg(totalLookAwayTime));
 				row.setTrialEndTime(pte->timestamp());	// automatically sets total look(away) times
+				row.setOrderName(sOrderName);
 				out << row;
 				sPendingStimLabel = "";
 			}
