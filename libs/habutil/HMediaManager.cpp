@@ -22,12 +22,13 @@ const unsigned int HMediaManager::backgroundKey = UINT_MAX;
 const unsigned int HMediaManager::agKey = 0;
 const Habit::StimulusSettings HMediaManager::dummyStimulusSettings(QString("dummySS"));
 
-HMediaManager::HMediaManager()
+HMediaManager::HMediaManager(bool bPlayersAreFullScreen)
 : QObject()
 , m_pendingStartSignal(false)
 , m_pendingAGStartSignal(false)
 , m_pendingClearSignal(false)
 , m_pendingStimNumber(-1)
+, m_bPlayersAreFullScreen(bPlayersAreFullScreen)
 {
 	// There will always be at least 2 stim keys.
 	m_mapPStimulusSettings.insert(backgroundKey, &dummyStimulusSettings);
@@ -38,12 +39,15 @@ HMediaManager::HMediaManager()
 HMediaManager::~HMediaManager()
 {
 	qDebug() << "HMediaManager::~HMediaManager()";
-	QMapIterator<HPlayerPositionType, HPlayer*> it(m_players);
-	while (it.hasNext())
+	if (m_bPlayersAreFullScreen)
 	{
-		HPlayer* p = it.next().value();
-		//p->stop();
-		delete p;
+		QMapIterator<HPlayerPositionType, HPlayer*> it(m_players);
+		while (it.hasNext())
+		{
+			HPlayer* p = it.next().value();
+			//p->stop();
+			delete p;
+		}
 	}
 }
 
@@ -57,20 +61,23 @@ unsigned int HMediaManager::nextKey()
 void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex)
 {
 	// TODO: This should be governed by fullscreen setting!
-	if (ppt != HPlayerPositionType::Sound)
+	if (m_bPlayersAreFullScreen)
 	{
-		QRect rect = QApplication::desktop()->screenGeometry(screenIndex);
-		player->setGeometry(rect);
-		player->move(rect.x(), rect.y());
-		player->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-		player->show();
-		qDebug() << "Player index " << screenIndex << " moved to rect " << rect;
-	}
-	else 
-	{
-		player->setGeometry(QRect(0, 0, 0, 0));
-		//player->hide();
-		qDebug() << "Player index " << screenIndex << " moved to rect (0,0,0,0)";
+		if (ppt != HPlayerPositionType::Sound)
+		{
+			QRect rect = QApplication::desktop()->screenGeometry(screenIndex);
+			player->setGeometry(rect);
+			player->move(rect.x(), rect.y());
+			player->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+			player->show();
+			qDebug() << "Player index " << screenIndex << " moved to rect " << rect;
+		}
+		else
+		{
+			player->setGeometry(QRect(0, 0, 0, 0));
+			//player->hide();
+			qDebug() << "Player index " << screenIndex << " moved to rect (0,0,0,0)";
+		}
 	}
 	connect(player, SIGNAL(started(int, const QString&)), this, SLOT(playerStarted(int, const QString&)));
 	m_players[ppt] = player;
@@ -90,23 +97,18 @@ unsigned int HMediaManager::addAG(const Habit::StimulusSettings& ssAG)
 
 	if (m_players.contains(HPlayerPositionType::Left))
 	{
-		//Habit::StimulusInfo si = ssAG.getLeftStimulusInfo();
-		//m_players.value(HPlayerPositionType::Left)->addAG(si.getAbsoluteFileName(baseDir), si.getAudioBalance(), si.isLoopPlayBack());
 		m_players.value(HPlayerPositionType::Left)->addStimulus(agKey, ssAG.getLeftStimulusInfo());
 	}
 	if (m_players.contains(HPlayerPositionType::Center))
 	{
-		//Habit::StimulusInfo si = ssAG.getCenterStimulusInfo();
 		m_players.value(HPlayerPositionType::Center)->addStimulus(agKey, ssAG.getCenterStimulusInfo());
 	}
 	if (m_players.contains(HPlayerPositionType::Right))
 	{
-		//Habit::StimulusInfo si = ssAG.getRightStimulusInfo();
 		m_players.value(HPlayerPositionType::Right)->addStimulus(agKey, ssAG.getRightStimulusInfo());
 	}
 	if (m_players.contains(HPlayerPositionType::Sound))
 	{
-		//Habit::StimulusInfo si = ssAG.getIndependentSoundInfo();
 		m_players.value(HPlayerPositionType::Sound)->addStimulus(agKey, ssAG.getIndependentSoundInfo());
 	}
 
@@ -159,9 +161,6 @@ void HMediaManager::addStimuli(const Habit::StimuliSettings& ss)
 
 unsigned int HMediaManager::addStimulus(unsigned int key, const Habit::StimulusSettings& settings)
 {
-	QDir baseDir;
-	habutilGetStimulusRootDir(baseDir);
-
 	m_mapPStimulusSettings.insert(key, &settings);
 
 	if (m_players.contains(HPlayerPositionType::Left))

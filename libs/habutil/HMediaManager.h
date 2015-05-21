@@ -52,6 +52,8 @@ private:
 	bool m_pendingAGStartSignal;
 	bool m_pendingClearSignal;
 	int m_pendingStimNumber;
+	bool m_bPlayersAreFullScreen;	// if set, players will be moved and resized to be full screen.
+									// if not set, then do not adjust position of players here when added.
 
 	// A map containing HPlayers. The key is the HPlayerPositionType (Left, Right, etc)
 	QMap<HPlayerPositionType, HPlayer *> m_players;
@@ -75,7 +77,7 @@ private:
 
 public:
 
-	HMediaManager();
+	HMediaManager(bool bPlayersAreFullScreen = true);
 	~HMediaManager();
 	void addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex=-1);
 	void clear();
