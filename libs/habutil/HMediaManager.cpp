@@ -75,6 +75,7 @@ void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, i
 		else
 		{
 			player->setGeometry(QRect(0, 0, 0, 0));
+			player->show();
 			//player->hide();
 			qDebug() << "Player index " << screenIndex << " moved to rect (0,0,0,0)";
 		}
