@@ -86,6 +86,7 @@ void SDIDialog::showClicked()
 		m_pmm->addPlayer(HPlayerPositionType::Right, pr, -1);
 		hbox->addWidget(pr);
 	}
+	pwidget->setLayout(hbox);
 
 	QPushButton* playButton = new QPushButton(tr("Play"));
 	QPushButton* clearButton = new QPushButton(tr("Clear"));

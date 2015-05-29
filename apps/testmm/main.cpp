@@ -8,7 +8,8 @@
  */
 
 #include "stimulusdisplayinfo.h"
-#include "SDIDialog.h"
+#include "HExperimentSelectionDialog.h"
+#include "HWorkspaceUtil.h"
 #include <QApplication>
 
 using namespace Habit;
@@ -16,10 +17,19 @@ using namespace Habit;
 int main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
-	StimulusDisplayInfo sdi;
 
-	SDIDialog dialog;
+	//app.setApplicationVersion();
+	app.setApplicationName("testmm");
+	app.setOrganizationName("Infant Cognition Lab");
+	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
+
+	if (!habutilInitWorkspace())
+		return 0;
+
+	// Select an experiment to test with
+	HExperimentSelectionDialog dialog;
 	dialog.show();
+
 
 	return app.exec();
 }
