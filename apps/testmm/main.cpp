@@ -18,17 +18,46 @@ int main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
 
-	//app.setApplicationVersion();
-	app.setApplicationName("testmm");
+	app.setApplicationName("habit2");
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
+
+
+	// Default is to always have log file.
+	for (int i=1; i<argc; i++)
+	{
+		if (!strcmp(argv[i], "-x"))
+		{
+			habutilClearWorkspace();
+		}
+		else if (!strcmp(argv[i], "-w"))
+		{
+			// TODO - maybe tell user they need to supply a directory?
+			if (i < (argc-1))
+			{
+				habutilSetWorkspace(argv[i+1]);
+				i++;
+			}
+		}
+		else if (!strcmp(argv[i], "-r"))
+		{
+			habutilSetStimulusRootDir(QString(argv[i+1]));
+			i++;
+		}
+		else
+		{
+			qDebug() << "Unrecognized command line arg " << QString(argv[i]);
+		}
+	}
+
 
 	if (!habutilInitWorkspace())
 		return 0;
 
 	// Select an experiment to test with
-	HExperimentSelectionDialog dialog;
-	dialog.show();
+	HExperimentSelectionDialog *dialog = new HExperimentSelectionDialog();
+
+	dialog->show();
 
 
 	return app.exec();

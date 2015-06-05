@@ -8,7 +8,10 @@
 #ifndef HEXPERIMENTSELECTIONDIALOG_H_
 #define HEXPERIMENTSELECTIONDIALOG_H_
 
-#include <QtGui/QDialog>
+
+#include <QDialog>
+#include <QPushButton>
+#include <QLineEdit>
 #include "HExperimentListWidget.h"
 #include "experimentsettings.h"
 #include "HMediaManager.h"
@@ -23,11 +26,13 @@ public:
 
 private:
 	GUILib::HExperimentListWidget* m_pelw;
+	QLineEdit *m_plineeditRoot;
+	QPushButton *m_pbSelect;
 
 private slots:
 	void experimentActivated(QString);
+	void selectClicked();
 
-signals:
 };
 
 
