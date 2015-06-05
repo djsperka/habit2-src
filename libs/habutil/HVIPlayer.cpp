@@ -120,13 +120,13 @@ void HVIPlayer::onCurrentChanged(int index)
 	// if the index is the background index, emit started()
 	if (index == m_backgroundIndex)
 	{
-		qDebug() << "HVIPlayer::onCurrentChanged(" << index << ") emit started(" << m_id << ", " << m_nowPlayingFilename << ")";
+//		qDebug() << "HVIPlayer::onCurrentChanged(" << index << ") emit started(" << m_id << ", " << m_nowPlayingFilename << ")";
 		emit started(m_id, m_nowPlayingFilename);
 	}
-	else
-	{
-		qDebug() << "HVIPlayer::onCurrentChanged(" << index << ") not background index " << m_backgroundIndex;
-	}
+//	else
+//	{
+//		qDebug() << "HVIPlayer::onCurrentChanged(" << index << ") not background index " << m_backgroundIndex;
+//	}
 }
 
 void HVIPlayer::stop()
@@ -224,5 +224,6 @@ unsigned int HVIPlayer::addStimulusPrivate(const unsigned int id)
 	const Habit::StimulusInfo& info = getStimulusInfo(id);
 	HStimulusSource* s = new HStimulusSource(&info, getStimulusRoot());
 	m_mapSources.insert(id, s);
+	qDebug() << "HVIPlayer::addStimulusPrivate(" << id << ")";
 	return id;
 }
