@@ -15,9 +15,8 @@
 using namespace Habit;
 using namespace GUILib;
 
-MMPreviewDialog::MMPreviewDialog(const ExperimentSettings& settings, const QDir& dirStimRoot, QWidget *parent)
+MMPreviewDialog::MMPreviewDialog(const StimulusDisplayInfo& info, const QDir& dirStimRoot, QWidget *parent)
 : QDialog(parent)
-, m_settings(settings)
 {
 	m_pmm = new HMediaManager(false);
 	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(onAGStarted()));
@@ -27,12 +26,10 @@ MMPreviewDialog::MMPreviewDialog(const ExperimentSettings& settings, const QDir&
 	// HBoxLayout to hold the players, even if there's just 1
 	QHBoxLayout *hbox = new QHBoxLayout;
 
-	StimulusDisplayInfo info(m_settings.getStimulusDisplayInfo());
 	if (info.getUseISS())
 	{
 		HPlayer *p = new HAudioPlayer(-1, NULL, dirStimRoot);
 		m_pmm->addPlayer(HPlayerPositionType::Sound, p, -1);
-		//hbox->addWidget(p);
 	}
 	if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
@@ -51,7 +48,7 @@ MMPreviewDialog::MMPreviewDialog(const ExperimentSettings& settings, const QDir&
 	}
 
 	// Populate the media manager AFTER players have been added to the MM!
-	populateMM();
+	populateMM(settings);
 	m_pmodel = new HPStimulusSettingsListModel(m_pmm->pmap());
 
 	m_pListView = new QListView(this);
@@ -78,27 +75,27 @@ MMPreviewDialog::MMPreviewDialog(const ExperimentSettings& settings, const QDir&
     setLayout(vbox);
 }
 
-void MMPreviewDialog::populateMM()
+void MMPreviewDialog::populateMM(const ExperimentSettings& settings)
 {
 	// Need to know if AG is used. If it is, add attention getter settings to media manager
-	// YOW!
-	//	Habit::AttentionGetterSettings ags(m_settings.getAttentionGetterSettings());
-	//	if (ags.isAttentionGetterUsed()) m_pmm->addAG(ags.getAttentionGetterStimulus());
-
-	if (m_settings.getAttentionGetterSettings().isAttentionGetterUsed())
+	if (settings.getAttentionGetterSettings().isAttentionGetterUsed())
 	{
-		m_pmm->addAG(m_settings.getAttentionGetterSettings().getAttentionGetterStimulus());
+		m_pmm->addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus());
 	}
 
 	// add stimuli for each phase.
-	if (m_settings.getPreTestPhaseSettings().getIsEnabled())
-		m_pmm->addStimuli(m_settings.getPreTestStimuliSettings());
-	if (m_settings.getHabituationPhaseSettings().getIsEnabled())
-		m_pmm->addStimuli(m_settings.getHabituationStimuliSettings());
-	if (m_settings.getTestPhaseSettings().getIsEnabled())
-		m_pmm->addStimuli(m_settings.getTestStimuliSettings());
+	if (settings.getPreTestPhaseSettings().getIsEnabled())
+		m_pmm->addStimuli(settings.getPreTestStimuliSettings());
+	if (settings.getHabituationPhaseSettings().getIsEnabled())
+		m_pmm->addStimuli(settings.getHabituationStimuliSettings());
+	if (settings.getTestPhaseSettings().getIsEnabled())
+		m_pmm->addStimuli(settings.getTestStimuliSettings());
 }
 
+void MMPreviewDialog::populateMM(const Habit::StimuliSettings& stimuli)
+{
+	m_pmm->addStimuli(stimuli);
+}
 
 
 void MMPreviewDialog::playClicked()

@@ -18,15 +18,19 @@
 class MMPreviewDialog: public QDialog
 {
 	Q_OBJECT
-	const Habit::ExperimentSettings& m_settings;
 	HMediaManager *m_pmm;
 	GUILib::HPStimulusSettingsListModel *m_pmodel;
 	QListView *m_pListView;
-	void populateMM();
+	void populateMM(const Habit::ExperimentSettings& settings);
+	void populateMM(const Habit::StimuliSettings& stimuli);
 
 public:
-	MMPreviewDialog(const Habit::ExperimentSettings& settings, const QDir& dirStimRoot = QDir(), QWidget *parent = NULL);
+	MMPreviewDialog(const Habit::StimulusDisplayInfo& info, const QDir& dirStimRoot = QDir(), QWidget *parent = NULL);
 	~MMPreviewDialog() {};
+	void preview(const Habit::ExperimentSettings& settings);
+	void preview(const Habit::StimuliSettings& stimuli);
+	void preview(const Habit::StimulusSettings& stimulus);
+	void preview(const Habit::StimuliSettings& stimuli, const Habit::HStimulusOrder& order);
 
 protected slots:
 

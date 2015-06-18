@@ -38,6 +38,11 @@ namespace GUILib
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
 		unsigned int getStimulusKey(int row);
+
+
+		void append(const Habit::StimulusSettings& newStim);
+		void append(const Habit::StimulusSettingsList& list);
+
 /*
 		void changed(const QModelIndex & topLeft, const QModelIndex & bottomRight);
 		void append(const Habit::StimulusSettings& newStim);

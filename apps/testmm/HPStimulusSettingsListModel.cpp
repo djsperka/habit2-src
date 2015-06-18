@@ -71,7 +71,6 @@ unsigned int HPStimulusSettingsListModel::getStimulusKey(int row)
 		return 0;
 }
 
-
 #if 0
 void HStimulusSettingsListModel::changed(const QModelIndex & topLeft, const QModelIndex & bottomRight)
 {
