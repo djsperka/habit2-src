@@ -1,3 +1,4 @@
+MAKEFILE = Makefile.qmake
 TEMPLATE = subdirs
 CONFIG += qt debug_and_release
 SUBDIRS = habutil habit testmm
