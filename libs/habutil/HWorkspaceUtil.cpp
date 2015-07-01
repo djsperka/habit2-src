@@ -205,6 +205,8 @@ bool habutilGetWorkspaceDir(QDir& dir)
 		dir.setPath(settings.value("workspace").toString());
 	}
 
+	qDebug() << "getWorkspaceDir: " << dir << ":" << habutilIsValidWorkspace(dir);
+
 	return habutilIsValidWorkspace(dir);
 }
 
