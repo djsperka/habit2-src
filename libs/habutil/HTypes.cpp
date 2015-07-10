@@ -109,6 +109,7 @@ const HStimContext HStimContext::PreTestPhase(1, "PreTest");
 const HStimContext HStimContext::HabituationPhase(2, "Habituation");
 const HStimContext HStimContext::TestPhase(3, "Test");
 const HStimContext HStimContext::AttentionGetter(4, "AttentionGetter");
+const HStimContext HStimContext::Preview(5, "Preview");
 
 
 HStimContext& HStimContext::operator=(const HStimContext& rhs)
@@ -136,6 +137,7 @@ const HStimContext& getStimContext(int i)
 		case 2: return HStimContext::HabituationPhase; break;
 		case 3: return HStimContext::TestPhase; break;
 		case 4: return HStimContext::AttentionGetter; break;
+		case 5: return HStimContext::Preview; break;
 		default: return HStimContext::UnknownContext; break;
 	}
 	return HStimContext::UnknownContext;

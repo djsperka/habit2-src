@@ -89,6 +89,7 @@ public:
 	static const HStimContext HabituationPhase;
 	static const HStimContext TestPhase;
 	static const HStimContext AttentionGetter;	// Not really a phase, but makes this class useful for stim types as well as phase. 
+	static const HStimContext Preview;			// Used with previewer
 
 	HStimContext() : m_t(-1), m_s("") {};
 	HStimContext(const HStimContext& c): m_t(c.number()), m_s(c.name()) {};
