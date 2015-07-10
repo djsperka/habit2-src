@@ -32,9 +32,11 @@ void HStimulusSettingsListWidget::create()
 	m_pbNew = new QPushButton("New");
 	m_pbEdit = new QPushButton("Edit");
 	m_pbRemove = new QPushButton("Remove");
+	m_pbPreview = new QPushButton("Preview");
 	QVBoxLayout *vPB = new QVBoxLayout;
 	vPB->addWidget(m_pbNew);
 	vPB->addWidget(m_pbEdit);
+	vPB->addWidget(m_pbPreview);
 	vPB->addWidget(m_pbRemove);
 	vPB->addStretch(1);
 
@@ -60,6 +62,7 @@ void HStimulusSettingsListWidget::connections()
 	connect(m_pbEdit, SIGNAL(clicked()), this, SLOT(editClicked()));
 	connect(m_pListView, SIGNAL(activated(const QModelIndex&)), this, SLOT(itemActivated(const QModelIndex&)));
 	connect(m_pbNew, SIGNAL(clicked()), this, SLOT(newClicked()));
+	connect(m_pbPreview, SIGNAL(clicked()), this, SLOT(previewClicked()));
 	connect(m_pbRemove, SIGNAL(clicked()), this, SLOT(removeClicked()));
 	connect(m_pListView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
 }
@@ -72,12 +75,27 @@ void HStimulusSettingsListWidget::removeClicked()
 		m_pmodel->remove(it.next());
 }
 
+void HStimulusSettingsListWidget::previewClicked()
+{
+	QModelIndexList selected = m_pListView->selectionModel()->selectedIndexes();
+	QListIterator<QModelIndex> it(selected);
+	if (selected.size() == 1)
+	{
+		emit previewStimulus(selected.at(0).row());
+	}
+}
+
+
 void HStimulusSettingsListWidget::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
 	Q_UNUSED(deselected);
+
 	// If something is selected, enable the Edit and Remove push buttons
 	m_pbEdit->setDisabled(selected.isEmpty());
 	m_pbRemove->setDisabled(selected.isEmpty());
+	m_pbPreview->setDisabled(selected.isEmpty());
+
+	emit clearStimulus();
 }
 
 void HStimulusSettingsListWidget::itemActivated(const QModelIndex& index)
@@ -95,9 +113,6 @@ void HStimulusSettingsListWidget::editClicked()
 		editItem(selectedIndexes.at(0));
 	}
 }
-
-
-
 
 void HStimulusSettingsListWidget::editItem(const QModelIndex& index)
 {

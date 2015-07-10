@@ -83,3 +83,9 @@ void HStimulusSettingsListModel::remove(const QModelIndex& index)
 	m_list.removeAt(index.row());
 	endRemoveRows();
 }
+
+void HStimulusSettingsListModel::removeAll()
+{
+	while (!m_list.isEmpty())
+		remove(index(0));
+}

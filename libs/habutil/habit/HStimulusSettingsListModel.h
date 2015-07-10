@@ -31,6 +31,7 @@ namespace GUILib
 		void clobber(const Habit::StimulusSettings& stim);
 		void append(const QList<Habit::StimulusSettings>& list);
 		void remove(const QModelIndex& index);
+		void removeAll();
 	};
 }
 

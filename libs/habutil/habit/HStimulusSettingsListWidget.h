@@ -28,6 +28,7 @@ namespace GUILib
 		QPushButton *m_pbNew;
 		QPushButton *m_pbEdit;
 		QPushButton *m_pbRemove;
+		QPushButton *m_pbPreview;
 
 		void create();
 		void connections();
@@ -40,10 +41,15 @@ namespace GUILib
 		void append(const Habit::HStimulusSettings& ss);
 		void clobber(const Habit::HStimulusSettings& ss);
 
+	signals:
+		void previewStimulus(int);
+		void clearStimulus();
+
 	protected slots:
 		void editClicked();
 		void itemActivated(const QModelIndex& index);
 		void newClicked();
+		void previewClicked();
 		void removeClicked();
 		void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 	};
