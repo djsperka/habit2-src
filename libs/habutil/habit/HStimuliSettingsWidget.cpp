@@ -8,6 +8,7 @@
 #include "HStimuliSettingsWidget.h"
 #include "HStimulusSettingsWidget.h"
 #include "HStimulusSettingsOrderImportUtil.h"
+#include "HWorkspaceUtil.h"
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -15,12 +16,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+using namespace Habit;
 using namespace GUILib;
 
-HStimuliSettingsWidget::HStimuliSettingsWidget(const Habit::StimuliSettings& stimuli, const HStimulusLayoutType& stimLayoutType, QWidget* parent)
+HStimuliSettingsWidget::HStimuliSettingsWidget(const StimuliSettings& stimuli, const StimulusDisplayInfo& info, QWidget* parent)
 : QWidget(parent)
 , m_stimuli(stimuli)
-, m_pStimulusLayout(&stimLayoutType)
+, m_stimulusDisplayInfo(info)
 {
 	create();
 	connections();
@@ -28,8 +30,12 @@ HStimuliSettingsWidget::HStimuliSettingsWidget(const Habit::StimuliSettings& sti
 
 void HStimuliSettingsWidget::create()
 {
-	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), *m_pStimulusLayout);
-	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimuli.getStimContext(), *m_pStimulusLayout);
+	QDir root;
+	habutilGetStimulusRootDir(root);
+
+	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
+	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimuli.getStimContext(), m_stimulusDisplayInfo.getStimulusLayoutType());
+	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, root, this);
 
 	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(m_stimuli.getStimContext().name()));
 	QVBoxLayout *v1 = new QVBoxLayout;
@@ -39,6 +45,12 @@ void HStimuliSettingsWidget::create()
 	QVBoxLayout *v2 = new QVBoxLayout;
 	v2->addWidget(m_pStimulusOrderListWidget);
 	g2->setLayout(v2);
+
+	QHBoxLayout *h12 = new QHBoxLayout;
+	h12->addWidget(g1);
+	h12->addWidget(g2);
+
+
 	QGroupBox *g3 = new QGroupBox("Import");
 	QHBoxLayout *h3 = new QHBoxLayout;
 	QLabel *l3 = new QLabel("Stimuli and/or orders for this phase can be imported from a text file.");
@@ -49,8 +61,10 @@ void HStimuliSettingsWidget::create()
 	g3->setLayout(h3);
 
 	QVBoxLayout *v = new QVBoxLayout;
-	v->addWidget(g1);
-	v->addWidget(g2);
+//	v->addWidget(g1);
+//	v->addWidget(g2);
+	v->addLayout(h12);
+	v->addWidget(m_pStimulusPreviewWidget);
 	v->addStretch(1);
 	v->addWidget(g3);
 	setLayout(v);
@@ -59,6 +73,19 @@ void HStimuliSettingsWidget::create()
 void HStimuliSettingsWidget::connections()
 {
 	connect(m_pbImport, SIGNAL(clicked()), this, SLOT(importClicked()));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(previewStimulus(int)), this, SLOT(previewStimulus(int)));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(clearStimulus()), this, SLOT(clearStimulus()));
+}
+
+void HStimuliSettingsWidget::clearStimulus()
+{
+	m_pStimulusPreviewWidget->clear();
+}
+
+void HStimuliSettingsWidget::previewStimulus(int row)
+{
+	qDebug() << "HStimulusSettingsWidget::previewStimulus " << m_stimuli.stimuli().at(row).getName();
+	m_pStimulusPreviewWidget->preview(m_stimuli.stimuli().at(row));
 }
 
 void HStimuliSettingsWidget::importClicked()
@@ -159,16 +186,11 @@ void HStimuliSettingsWidget::importClicked()
 	}
 }
 
-void HStimuliSettingsWidget::setStimulusLayoutType(const HStimulusLayoutType& type)
-{
-	m_pStimulusLayout = &type;
-	m_pStimulusSettingsListWidget->setStimulusLayoutType(type);
-	m_pStimulusOrderListWidget->setStimulusLayoutType(type);
-}
 
 void HStimuliSettingsWidget::stimulusLayoutTypeChanged(int i)
 {
-	setStimulusLayoutType(getStimulusLayoutType(i));
+	m_pStimulusSettingsListWidget->setStimulusLayoutType(m_stimulusDisplayInfo.getStimulusLayoutType());
+	m_pStimulusOrderListWidget->setStimulusLayoutType(m_stimulusDisplayInfo.getStimulusLayoutType());
 }
 
 Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()

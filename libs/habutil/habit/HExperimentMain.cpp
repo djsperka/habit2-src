@@ -265,7 +265,7 @@ void GUILib::HExperimentMain::createComponents()
 	iPreTestPhaseWidget = m_pPagesWidget->addWidget(m_pPreTestPhaseWidget);
 
 	// pretest stimuli
-	m_pPreTestStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getPreTestStimuliSettings(), m_settings.getStimulusDisplayInfo().getStimulusLayoutType());
+	m_pPreTestStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getPreTestStimuliSettings(), m_settings.getStimulusDisplayInfo());
 	m_stackidPreTestStimuli = m_pPagesWidget->addWidget(m_pPreTestStimuliWidget);
 
 	// habituation trial settings
@@ -279,7 +279,7 @@ void GUILib::HExperimentMain::createComponents()
 	iHabituationSetupWidget = m_pPagesWidget->addWidget(m_pHabituationSetupWidget);
 
 	// habituation stimuli
-	m_pHabituationStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getHabituationStimuliSettings(), m_settings.getStimulusDisplayInfo().getStimulusLayoutType());
+	m_pHabituationStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getHabituationStimuliSettings(), m_settings.getStimulusDisplayInfo());
 	m_stackidHabituationStimuli = m_pPagesWidget->addWidget(m_pHabituationStimuliWidget);
 
 	// test trial settings
@@ -287,7 +287,7 @@ void GUILib::HExperimentMain::createComponents()
 	iTestPhaseWidget = m_pPagesWidget->addWidget(m_pTestPhaseWidget);
 
 	// test stimuli
-	m_pTestStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getTestStimuliSettings(), m_settings.getStimulusDisplayInfo().getStimulusLayoutType());
+	m_pTestStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getTestStimuliSettings(), m_settings.getStimulusDisplayInfo());
 	m_stackidTestStimuli = m_pPagesWidget->addWidget(m_pTestStimuliWidget);
 
 
