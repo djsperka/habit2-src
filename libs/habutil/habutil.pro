@@ -123,6 +123,7 @@ HEADERS +=	HLook.h \
 			habit/HStimulusSettingsListModel.h \
 			habit/HStimulusSettingsListWidget.h \
 			habit/HStimulusSettingsEditor.h \
+			habit/HStimulusPreviewWidget.h \
 			habit/H2MainWindow.h \
 			habit/HExperimentListWidget.h \
 			habit/HExperimentMain.h \
@@ -260,6 +261,7 @@ SOURCES +=	HLook.cpp \
 			habit/HStimulusSettingsListModel.cpp \
 			habit/HStimulusSettingsListWidget.cpp \
 			habit/HStimulusSettingsEditor.cpp \
+			habit/HStimulusPreviewWidget.cpp \
 			habit/H2MainWindow.cpp \
 			habit/HExperimentListWidget.cpp \
 			habit/HExperimentMain.cpp \
