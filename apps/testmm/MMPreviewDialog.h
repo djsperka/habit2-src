@@ -11,18 +11,24 @@
 #include <QDialog>
 #include <QDir>
 #include <QListView>
+#include <QMap>
 #include "experimentsettings.h"
 #include "HMediaManager.h"
-#include "HPStimulusSettingsListModel.h"
+#include "HStimulusSettingsListModel.h"
 
 class MMPreviewDialog: public QDialog
 {
 	Q_OBJECT
+	Habit::HStimulusSettingsList m_list;
+	QList<int> m_listStimID;
 	HMediaManager *m_pmm;
-	GUILib::HPStimulusSettingsListModel *m_pmodel;
+	GUILib::HStimulusSettingsListModel *m_pmodel;
 	QListView *m_pListView;
 	void populateMM(const Habit::ExperimentSettings& settings);
 	void populateMM(const Habit::StimuliSettings& stimuli);
+
+	// Clear model and all data, empty MM as well
+	void clearAll();
 
 public:
 	MMPreviewDialog(const Habit::StimulusDisplayInfo& info, const QDir& dirStimRoot = QDir(), QWidget *parent = NULL);

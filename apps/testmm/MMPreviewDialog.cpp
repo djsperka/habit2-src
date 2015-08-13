@@ -48,8 +48,7 @@ MMPreviewDialog::MMPreviewDialog(const StimulusDisplayInfo& info, const QDir& di
 	}
 
 	// Populate the media manager AFTER players have been added to the MM!
-	populateMM(settings);
-	m_pmodel = new HPStimulusSettingsListModel(m_pmm->pmap());
+	m_pmodel = new HStimulusSettingsListModel(m_list, info.getStimulusLayoutType());
 
 	m_pListView = new QListView(this);
 	m_pListView->setModel(m_pmodel);
@@ -81,6 +80,7 @@ void MMPreviewDialog::populateMM(const ExperimentSettings& settings)
 	if (settings.getAttentionGetterSettings().isAttentionGetterUsed())
 	{
 		m_pmm->addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus());
+
 	}
 
 	// add stimuli for each phase.
@@ -101,16 +101,20 @@ void MMPreviewDialog::populateMM(const Habit::StimuliSettings& stimuli)
 void MMPreviewDialog::playClicked()
 {
 	// what row is selected?
+/*
 	QModelIndexList selectedIndexes = m_pListView->selectionModel()->selectedIndexes();
 	if (selectedIndexes.size() == 1)
 	{
 		m_pmm->stim(m_pmodel->getStimulusKey(selectedIndexes.at(0).row()));
 	}
+	*/
 }
 
 void MMPreviewDialog::itemActivated(const QModelIndex& index)
 {
+	/*
 	m_pmm->stim(m_pmodel->getStimulusKey(index.row()));
+	*/
 }
 
 
@@ -132,4 +136,23 @@ void MMPreviewDialog::onStimStarted(int i)
 void MMPreviewDialog::onCleared()
 {
 	qDebug() << "Stim cleared";
+}
+
+void MMPreviewDialog::preview(const Habit::ExperimentSettings& settings)
+{
+	// clear all
+	m_pmm->clear();
+
+	// empty existing model
+	clearAll();
+
+	// Now populate MM
+	populateMM(settings);
+
+}
+
+void MMPreviewDialog::clearAll()
+{
+	m_pmodel->removeAll();
+	m_listStimID.clear();
 }

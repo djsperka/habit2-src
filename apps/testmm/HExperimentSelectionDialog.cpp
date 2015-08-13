@@ -56,7 +56,7 @@ void HExperimentSelectionDialog::experimentActivated(QString expt)
 		habutilGetStimulusRootDir(dirStimRoot);
 
 		// Start up mm test dialog
-		MMPreviewDialog* preview = new MMPreviewDialog(settings, dirStimRoot, this);
+		MMPreviewDialog* preview = new MMPreviewDialog(settings.getStimulusDisplayInfo(), dirStimRoot, this);
 		preview->exec();
 
 #if 0
