@@ -39,20 +39,11 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 		hbox->addWidget(pr);
 	}
 
-//	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(onAGStarted()));
-//	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(onStimStarted(int)));
-//	connect(m_pmm, SIGNAL(cleared()), this, SLOT(onCleared()));
-
-
-
     QVBoxLayout* vbox = new QVBoxLayout;
     vbox->addLayout(hbox);
     setLayout(vbox);
 
 }
-
-
-
 
 void GUILib::HStimulusPreviewWidget::preview(const Habit::StimulusSettings& stimulus)
 {

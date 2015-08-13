@@ -50,6 +50,10 @@ void HStimuliSettingsWidget::create()
 	h12->addWidget(g1);
 	h12->addWidget(g2);
 
+	QGroupBox *g4 = new QGroupBox("Preview");
+	QVBoxLayout *v4 = new QVBoxLayout;
+	v4->addWidget(m_pStimulusPreviewWidget);
+	g4->setLayout(v4);
 
 	QGroupBox *g3 = new QGroupBox("Import");
 	QHBoxLayout *h3 = new QHBoxLayout;
@@ -61,10 +65,8 @@ void HStimuliSettingsWidget::create()
 	g3->setLayout(h3);
 
 	QVBoxLayout *v = new QVBoxLayout;
-//	v->addWidget(g1);
-//	v->addWidget(g2);
 	v->addLayout(h12);
-	v->addWidget(m_pStimulusPreviewWidget);
+	v->addWidget(g4);
 	v->addStretch(1);
 	v->addWidget(g3);
 	setLayout(v);
@@ -74,7 +76,13 @@ void HStimuliSettingsWidget::connections()
 {
 	connect(m_pbImport, SIGNAL(clicked()), this, SLOT(importClicked()));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(previewStimulus(int)), this, SLOT(previewStimulus(int)));
+	connect(m_pStimulusOrderListWidget, SIGNAL(previewOrder(int)), this, SLOT(previewOrder(int)));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(clearStimulus()), this, SLOT(clearStimulus()));
+	connect(m_pStimulusOrderListWidget, SIGNAL(clearStimulus()), this, SLOT(clearStimulus()));
+	//connect(m_pStimulusSettingsListWidget, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentStimulusSelectionChanged(const QModelIndex&, const QModelIndex&)));
+	//connect(m_pStimulusOrderListWidget, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentOrderSelectionChanged(const QModelIndex&, const QModelIndex&)));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusSelectionChanged()), this, SLOT(stimulusSelectionChanged()));
+	connect(m_pStimulusOrderListWidget, SIGNAL(orderSelectionChanged()), this, SLOT(orderSelectionChanged()));
 }
 
 void HStimuliSettingsWidget::clearStimulus()
@@ -84,8 +92,30 @@ void HStimuliSettingsWidget::clearStimulus()
 
 void HStimuliSettingsWidget::previewStimulus(int row)
 {
-	qDebug() << "HStimulusSettingsWidget::previewStimulus " << m_stimuli.stimuli().at(row).getName();
+	//qDebug() << "HStimuliSettingsWidget::previewStimulus " << m_stimuli.stimuli().at(row).getName();
 	m_pStimulusPreviewWidget->preview(m_stimuli.stimuli().at(row));
+}
+
+void HStimuliSettingsWidget::previewOrder(int row)
+{
+	QList< QPair<int, QString> > list;
+	QString orderName;
+	orderName = m_stimuli.orders().at(row).getName();
+
+	if (!m_stimuli.getIndexedOrderList(orderName, list))
+	{
+		qDebug() << "Cannot get order list for order \"" << orderName << "\"";
+	}
+	else
+	{
+		QPair<int, QString> p;
+		foreach(p, list)
+		{
+			qDebug() << "index " << p.first << " label " << p.second;
+		}
+
+		m_pStimulusPreviewWidget->preview(m_stimuli.stimuli(), list);
+	}
 }
 
 void HStimuliSettingsWidget::importClicked()
@@ -199,4 +229,36 @@ Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()
 	settings.setStimuli(m_stimuli.stimuli());
 	settings.setOrderList(m_stimuli.orders());
 	return settings;
+}
+
+void HStimuliSettingsWidget::currentStimulusSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+	qDebug() << "HStimuliSettingsWidget::currentStimulusSelectionChanged( " << current.row() << ", " << previous.row() << ")";
+
+	// look at current selection in order widget
+	if (current.row() > -1)
+	{
+		m_pStimulusOrderListWidget->clearSelection();
+	}
+}
+
+void HStimuliSettingsWidget::currentOrderSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+	qDebug() << "HStimuliSettingsWidget::currentOrderSelectionChanged( " << current.row() << ", " << previous.row() << ")";
+	if (current.row() > -1)
+	{
+		m_pStimulusSettingsListWidget->clearSelection();
+	}
+}
+
+void HStimuliSettingsWidget::stimulusSelectionChanged()
+{
+	qDebug() << "HStimuliSettingsWidget::stimulusSelectionChanged()";
+	m_pStimulusOrderListWidget->clearSelection();
+}
+
+void HStimuliSettingsWidget::orderSelectionChanged()
+{
+	qDebug() << "HStimuliSettingsWidget::orderSelectionChanged()";
+	m_pStimulusSettingsListWidget->clearSelection();
 }

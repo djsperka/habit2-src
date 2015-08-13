@@ -32,11 +32,9 @@ void HStimulusSettingsListWidget::create()
 	m_pbNew = new QPushButton("New");
 	m_pbEdit = new QPushButton("Edit");
 	m_pbRemove = new QPushButton("Remove");
-	m_pbPreview = new QPushButton("Preview");
 	QVBoxLayout *vPB = new QVBoxLayout;
 	vPB->addWidget(m_pbNew);
 	vPB->addWidget(m_pbEdit);
-	vPB->addWidget(m_pbPreview);
 	vPB->addWidget(m_pbRemove);
 	vPB->addStretch(1);
 
@@ -62,8 +60,10 @@ void HStimulusSettingsListWidget::connections()
 	connect(m_pbEdit, SIGNAL(clicked()), this, SLOT(editClicked()));
 	connect(m_pListView, SIGNAL(activated(const QModelIndex&)), this, SLOT(itemActivated(const QModelIndex&)));
 	connect(m_pbNew, SIGNAL(clicked()), this, SLOT(newClicked()));
-	connect(m_pbPreview, SIGNAL(clicked()), this, SLOT(previewClicked()));
 	connect(m_pbRemove, SIGNAL(clicked()), this, SLOT(removeClicked()));
+	//connect(m_pListView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(m_pListView->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)));
+	//connect(m_pListView->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentSelectionChanged(const QModelIndex&, const QModelIndex&)));
 	connect(m_pListView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
 }
 
@@ -86,16 +86,42 @@ void HStimulusSettingsListWidget::previewClicked()
 }
 
 
-void HStimulusSettingsListWidget::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
-	Q_UNUSED(deselected);
+	qDebug() << "HStimulusSettingsListWidget::selectionChanged - selected: " << selected.count() << " deselected " << deselected.count();
+	if (selected.count() > 0)
+	{
+		// when a stimulus is selected, we should deselect anything currently selected in the stimulus order widget.
+		m_pbEdit->setEnabled(true);
+		m_pbRemove->setEnabled(true);
 
+		emit stimulusSelectionChanged();
+		emit clearStimulus();
+		emit previewStimulus(selected.at(0).indexes().at(0).row());
+	}
+	else
+	{
+		m_pbEdit->setEnabled(false);
+		m_pbRemove->setEnabled(false);
+	}
+}
+
+void HStimulusSettingsListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+{
 	// If something is selected, enable the Edit and Remove push buttons
-	m_pbEdit->setDisabled(selected.isEmpty());
-	m_pbRemove->setDisabled(selected.isEmpty());
-	m_pbPreview->setDisabled(selected.isEmpty());
+	if (current.row() > -1)
+	{
+		m_pbEdit->setEnabled(true);
+		m_pbRemove->setEnabled(true);
 
-	emit clearStimulus();
+		emit clearStimulus();
+		emit previewStimulus(current.row());
+	}
+	else
+	{
+		m_pbEdit->setEnabled(false);
+		m_pbRemove->setEnabled(false);
+	}
 }
 
 void HStimulusSettingsListWidget::itemActivated(const QModelIndex& index)
@@ -165,4 +191,19 @@ void HStimulusSettingsListWidget::append(const Habit::HStimulusSettings& ss)
 void HStimulusSettingsListWidget::clobber(const Habit::HStimulusSettings& ss)
 {
 	m_pmodel->clobber(ss);
+}
+
+void HStimulusSettingsListWidget::clearSelection()
+{
+	m_pListView->clearSelection();
+	// get current selection
+//	QModelIndexList indexes = m_pListView->selectionModel()->selectedIndexes();
+//	QModelIndex index;
+//	QItemSelection selection(indexes.at(0), indexes.at(0));
+//   m_pListView->selectionModel()->select(selection, QItemSelectionModel::Toggle);
+//	foreach(index, indexes)
+//	{
+//		m_pListView->selectionModel()->select(index, QItemSelectionModel::Toggle);
+//		qDebug() << "(de)Selected row " << index.row();
+//	}
 }

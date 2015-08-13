@@ -42,7 +42,12 @@ namespace GUILib
 		void stimulusLayoutTypeChanged(int);
 		void importClicked();
 		void previewStimulus(int);
+		void previewOrder(int);
 		void clearStimulus();
+		void currentStimulusSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
+		void currentOrderSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
+		void stimulusSelectionChanged();
+		void orderSelectionChanged();
 	};
 }
 

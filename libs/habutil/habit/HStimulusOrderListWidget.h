@@ -40,12 +40,20 @@ namespace GUILib
 		void append(const Habit::HStimulusOrder& order);
 		void clobber(const Habit::HStimulusOrder& order);
 		void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
+		void clearSelection();
+
+	signals:
+		void previewOrder(int);
+		void currentChanged(const QModelIndex& current, const QModelIndex& previous);
+		void clearStimulus();
+		void orderSelectionChanged();
 
 	protected slots:
 		void editClicked();
 		void itemActivated(const QModelIndex& index);
 		void newClicked();
 		void removeClicked();
+		void currentSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 		void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 	};
 };

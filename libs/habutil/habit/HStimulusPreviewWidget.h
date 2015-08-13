@@ -28,6 +28,7 @@ namespace GUILib
 		HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, const QDir& dirStimRoot = QDir(), QWidget *parent = NULL);
 		~HStimulusPreviewWidget() {};
 		void preview(const Habit::StimulusSettings& stimulus);
+		void preview(const HStimulusSettingsList& stimuli, QList< QPair<int, QString> > list);
 		void clear();
 
 	protected slots:
