@@ -43,7 +43,7 @@ HAudioPlayer::HAudioPlayer(int id, QWidget *w, const QDir& stimRootDir)
 unsigned int HAudioPlayer::addStimulusPrivate(unsigned int id)
 {
 	// TODO: Store buffer of audio file?
-	qDebug() << "HAudioPlayer::addStimulusPrivate(" << id << ")";
+	//qDebug() << "HAudioPlayer::addStimulusPrivate(" << id << ")";
 	return id;
 }
 

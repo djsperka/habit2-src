@@ -22,7 +22,7 @@ HPlayer::HPlayer(int ID, QWidget *w, const QDir& stimRootDir)
 
 HPlayer::~HPlayer()
 {
-	qDebug() << "HPlayer::~HPlayer()";
+	//qDebug() << "HPlayer::~HPlayer()";
 }
 
 unsigned int HPlayer::addStimulus(const unsigned int id, const Habit::StimulusInfo& info)

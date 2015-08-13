@@ -82,11 +82,11 @@ void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, i
 	}
 	connect(player, SIGNAL(started(int, const QString&)), this, SLOT(playerStarted(int, const QString&)));
 	m_players[ppt] = player;
-	qDebug() << "HMediaManager::addPlayer: player parent is " << (player->parent() ? player->parent()->objectName() : "NONE") << " hidden? " << player->isHidden() << " rect " << player->rect();
-	if (player->windowModality() == Qt::WindowModal) qDebug() << "WindowModal";
-	else if (player->windowModality() == Qt::ApplicationModal) qDebug() << "ApplicationModal";
-	else if (player->windowModality() == Qt::NonModal) qDebug() << "NonModal";
-	else qDebug() << "Modality???";
+	//qDebug() << "HMediaManager::addPlayer: player parent is " << (player->parent() ? player->parent()->objectName() : "NONE") << " hidden? " << player->isHidden() << " rect " << player->rect();
+	//if (player->windowModality() == Qt::WindowModal) qDebug() << "WindowModal";
+	//else if (player->windowModality() == Qt::ApplicationModal) qDebug() << "ApplicationModal";
+	//else if (player->windowModality() == Qt::NonModal) qDebug() << "NonModal";
+	//else qDebug() << "Modality???";
 }
 
 

@@ -224,6 +224,6 @@ unsigned int HVIPlayer::addStimulusPrivate(const unsigned int id)
 	const Habit::StimulusInfo& info = getStimulusInfo(id);
 	HStimulusSource* s = new HStimulusSource(&info, getStimulusRoot());
 	m_mapSources.insert(id, s);
-	qDebug() << "HVIPlayer::addStimulusPrivate(" << id << ")";
+	//qDebug() << "HVIPlayer::addStimulusPrivate(" << id << ")";
 	return id;
 }
