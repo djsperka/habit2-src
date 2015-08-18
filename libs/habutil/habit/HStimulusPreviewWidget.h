@@ -11,6 +11,8 @@
 #include <QWidget>
 #include <QDir>
 #include <QList>
+#include <QPushButton>
+#include <QLabel>
 #include "stimulisettings.h"
 #include "stimulusdisplayinfo.h"
 #include "HMediaManager.h"
@@ -23,16 +25,27 @@ namespace GUILib
 		Q_OBJECT
 		const Habit::HStimulusSettingsList m_stimlist;
 		HMediaManager *m_pmm;
+		QList<unsigned int> m_idList;
+		unsigned int m_idListCurrent;
+		QPushButton *m_pbDown;
+		QPushButton *m_pbUp;
+		QLabel *m_labelStimName;
+		QPushButton *m_pbNext;
+		QPushButton *m_pbPrev;
+
+		void updateNavigation();
+		void updateNavigation(QString stimName);
 
 	public:
 		HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, const QDir& dirStimRoot = QDir(), QWidget *parent = NULL);
-		~HStimulusPreviewWidget() {};
+		~HStimulusPreviewWidget();
 		void preview(const Habit::StimulusSettings& stimulus);
-		void preview(const HStimulusSettingsList& stimuli, QList< QPair<int, QString> > list);
+		void preview(const Habit::HStimulusSettingsList& stimuli, QList< QPair<int, QString> > list);
 		void clear();
 
 	protected slots:
-
+		void nextClicked();
+		void prevClicked();
 	};
 
 };

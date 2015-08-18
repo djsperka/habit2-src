@@ -50,9 +50,10 @@ void HStimuliSettingsWidget::create()
 	h12->addWidget(g1);
 	h12->addWidget(g2);
 
-	QGroupBox *g4 = new QGroupBox("Preview");
+	QGroupBox *g4 = new QGroupBox("Stimulus Preview");
 	QVBoxLayout *v4 = new QVBoxLayout;
 	v4->addWidget(m_pStimulusPreviewWidget);
+
 	g4->setLayout(v4);
 
 	QGroupBox *g3 = new QGroupBox("Import");
@@ -108,12 +109,13 @@ void HStimuliSettingsWidget::previewOrder(int row)
 	}
 	else
 	{
+#if 0
 		QPair<int, QString> p;
 		foreach(p, list)
 		{
 			qDebug() << "index " << p.first << " label " << p.second;
 		}
-
+#endif
 		m_pStimulusPreviewWidget->preview(m_stimuli.stimuli(), list);
 	}
 }
@@ -233,7 +235,7 @@ Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()
 
 void HStimuliSettingsWidget::currentStimulusSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-	qDebug() << "HStimuliSettingsWidget::currentStimulusSelectionChanged( " << current.row() << ", " << previous.row() << ")";
+	//qDebug() << "HStimuliSettingsWidget::currentStimulusSelectionChanged( " << current.row() << ", " << previous.row() << ")";
 
 	// look at current selection in order widget
 	if (current.row() > -1)
@@ -244,7 +246,7 @@ void HStimuliSettingsWidget::currentStimulusSelectionChanged(const QModelIndex& 
 
 void HStimuliSettingsWidget::currentOrderSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-	qDebug() << "HStimuliSettingsWidget::currentOrderSelectionChanged( " << current.row() << ", " << previous.row() << ")";
+	//qDebug() << "HStimuliSettingsWidget::currentOrderSelectionChanged( " << current.row() << ", " << previous.row() << ")";
 	if (current.row() > -1)
 	{
 		m_pStimulusSettingsListWidget->clearSelection();
@@ -253,12 +255,12 @@ void HStimuliSettingsWidget::currentOrderSelectionChanged(const QModelIndex& cur
 
 void HStimuliSettingsWidget::stimulusSelectionChanged()
 {
-	qDebug() << "HStimuliSettingsWidget::stimulusSelectionChanged()";
+	//qDebug() << "HStimuliSettingsWidget::stimulusSelectionChanged()";
 	m_pStimulusOrderListWidget->clearSelection();
 }
 
 void HStimuliSettingsWidget::orderSelectionChanged()
 {
-	qDebug() << "HStimuliSettingsWidget::orderSelectionChanged()";
+	//qDebug() << "HStimuliSettingsWidget::orderSelectionChanged()";
 	m_pStimulusSettingsListWidget->clearSelection();
 }

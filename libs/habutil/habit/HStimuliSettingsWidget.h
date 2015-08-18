@@ -29,7 +29,6 @@ namespace GUILib
 		HStimulusOrderListWidget *m_pStimulusOrderListWidget;
 		HStimulusPreviewWidget *m_pStimulusPreviewWidget;
 		QPushButton *m_pbImport;
-
 		void create();
 		void connections();
 	public:

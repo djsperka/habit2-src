@@ -80,7 +80,7 @@ void HStimulusOrderListWidget::removeClicked()
 
 void HStimulusOrderListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
-	qDebug() << "HStimulusOrderListWidget::selectionChanged - selected: " << selected.count() << " deselected " << deselected.count();
+	//qDebug() << "HStimulusOrderListWidget::selectionChanged - selected: " << selected.count() << " deselected " << deselected.count();
 	if (selected.count() > 0)
 	{
 		// when a stimulus is selected, we should deselect anything currently selected in the stimulus order widget.
