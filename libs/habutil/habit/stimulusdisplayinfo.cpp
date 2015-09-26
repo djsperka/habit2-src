@@ -75,22 +75,6 @@ QDataStream & Habit::operator>> (QDataStream& stream, Habit::StimulusDisplayInfo
 	stream >> sVersion;
 	if (sVersion == f_sVersion2)
 	{
-
-#if 0
-	char vers[5];
-	stream.device()->peek(vers, 4);
-	vers[4]=0;
-
-	char vers[17];
-	stream.device()->peek(vers, 16);
-	vers[17]=0;
-	qDebug() << "Read string from sdi: " << QChar(vers[0]) << QChar(vers[1]) << QChar(vers[2]) << QChar(vers[3]) << QChar(vers[4]) << QChar(vers[5]) << QChar(vers[6]) << QChar(vers[7]) << QChar(vers[8]) << QChar(vers[9]) << QChar(vers[10]) << QChar(vers[11]) << QChar(vers[12]) << QChar(vers[13]) << QChar(vers[14]);
-	vers[4] = 0;
-	if (QString(vers) == QString(f_psVersion2))
-	{
-		// Have to skip over the version string
-		stream.readRawData(vers, 4);
-#endif
 		// now read
 		stream >> id >> istyle >> itype >> b >> color >> ilayout >> use;
 		d.setId(id);

@@ -137,7 +137,8 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 	const int iChangeStimEnabledForgotAttentionGetter			= 2000015;
 	const int iBigStimulusTableChange							= 2000016;
 	const int iBigStimulusTableChangeAG							= 2000017;
-	const int iLatestVersion									= 2000017;
+	const int iRepeatTrialOnMaxLookAway							= 2000018;
+	const int iLatestVersion									= 2000018;
 	int iVersion = getDBVersion();
 
 	// Will any updates be required? If so, close db, make a copy, then reopen.
@@ -502,6 +503,31 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 							result = false;
 							db.rollback();
 						}
+					}
+				}
+
+
+				if (iVersion < iRepeatTrialOnMaxLookAway)
+				{
+					// Add column repeat_on_max_lookaway to phase_settings
+					db.transaction();
+					QSqlQuery q0("alter table phase_settings add column repeat_trial_on_max_lookaway INTEGER DEFAULT 0");
+					QSqlQuery q2("insert into habit_version (version) values(?)");
+					q2.bindValue(0, iRepeatTrialOnMaxLookAway);
+					q2.exec();
+					if (!q0.lastError().isValid() && !q2.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iRepeatTrialOnMaxLookAway;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddExperimentHiddenColumn;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						result = false;
+						db.rollback();
 					}
 				}
 

@@ -62,6 +62,7 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings*
 				"set enabled=?, phase_type=?, ntrials=?, "
 				"use_looking_criteria=?, is_single_look=?, is_max_accumulated_look_time=?, max_accumulated_look_time=?, "
 				"is_max_lookaway_time=?, max_lookaway_time=?, "
+				"repeat_trial_on_max_lookaway=?, "
 				"is_max_stimulus_time=?, max_stimulus_time=?, "
 				"measure_from_onset=?, measure_from_looking=?, "
 				"is_max_no_look_time=?, max_no_look_time=? "
@@ -72,12 +73,12 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings*
 		sql = "insert into phase_settings "
 				"("
 				"enabled, phase_type, ntrials, use_looking_criteria, is_single_look, is_max_accumulated_look_time, "
-				"max_accumulated_look_time, is_max_lookaway_time, max_lookaway_time, "
+				"max_accumulated_look_time, is_max_lookaway_time, max_lookaway_time, repeat_trial_on_max_lookaway, "
 				"is_max_stimulus_time, max_stimulus_time, "
 				"measure_from_onset, measure_from_looking, "
 				"is_max_no_look_time, max_no_look_time, "
 				"experiment_id"
-				") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	QSqlQuery q;
@@ -91,6 +92,7 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings*
 	q.addBindValue(settings->getMaxAccumulatedLookTime());
 	q.addBindValue(settings->getIsMaxLookAwayTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxLookAwayTime());
+	q.addBindValue(settings->getRepeatTrialOnMaxLookAwayTime() ? 1 : 0);
 	q.addBindValue(settings->getIsMaxStimulusTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxStimulusTime());
 	q.addBindValue(settings->getMeasureStimulusTimeFromOnset() ? 1 : 0);
@@ -823,6 +825,7 @@ void MainDao::getHPhaseSettingsForExperiment(int experimentId, int type, HPhaseS
 		phaseSettings->setMaxAccumulatedLookTime(q.value(q.record().indexOf("max_accumulated_look_time")).toUInt());
 		phaseSettings->setIsMaxLookAwayTime(q.value(q.record().indexOf("is_max_lookaway_time")).toBool());
 		phaseSettings->setMaxLookAwayTime(q.value(q.record().indexOf("max_lookaway_time")).toUInt());
+		phaseSettings->setRepeatTrialOnMaxLookAwayTime(q.value(q.record().indexOf("repeat_trial_on_max_lookaway")).toBool());
 		phaseSettings->setIsMaxStimulusTime(q.value(q.record().indexOf("is_max_stimulus_time")).toBool());
 		phaseSettings->setMaxStimulusTime(q.value(q.record().indexOf("max_stimulus_time")).toUInt());
 		phaseSettings->setMeasureStimulusTimeFromOnset(q.value(q.record().indexOf("measure_from_onset")).toBool());

@@ -108,9 +108,10 @@ const HTrialEndType HTrialEndType::HTrialEndStimAbort(3, "Abort");
 const HTrialEndType HTrialEndType::HTrialEndMaxAccumulatedLookTime(4, "MaxAccumulatedLookTime");
 const HTrialEndType HTrialEndType::HTrialEndMaxLookAwayTime(5, "MaxLookAwayTime");
 const HTrialEndType HTrialEndType::HTrialEndAGAbort(6, "AGAbort");
+const HTrialEndType HTrialEndType::HTrialEndMaxLookAwayTimeRepeat(7, "MaxLookAwayTimeRepeat");
 const HTrialEndType HTrialEndType::HTrialEndUndefined(-1, "Unknown");
 	
-const HTrialEndType* HTrialEndType::A[7] =
+const HTrialEndType* HTrialEndType::A[8] =
 {
 	&HTrialEndType::HTrialEndGotLook, 
 	&HTrialEndType::HTrialEndMaxStimulusTime,
@@ -118,7 +119,8 @@ const HTrialEndType* HTrialEndType::A[7] =
 	&HTrialEndType::HTrialEndStimAbort,
 	&HTrialEndType::HTrialEndMaxAccumulatedLookTime,
 	&HTrialEndType::HTrialEndMaxLookAwayTime,
-	&HTrialEndType::HTrialEndAGAbort
+	&HTrialEndType::HTrialEndAGAbort,
+	&HTrialEndType::HTrialEndMaxLookAwayTimeRepeat,
 };
 	
 bool operator==(const HTrialEndType& lhs, const HTrialEndType& rhs)

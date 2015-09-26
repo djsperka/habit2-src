@@ -170,8 +170,15 @@ void HMaxLookAwayTimeState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	//trial().incrementRepeatNumber();
-	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxLookAwayTime, HElapsedTimer::elapsed()));
+	if (m_bRepeatTrialOnMaxLookAwayTime)
+	{
+		trial().incrementRepeatNumber();
+		eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxLookAwayTimeRepeat, HElapsedTimer::elapsed()));
+	}
+	else
+	{
+		eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxLookAwayTime, HElapsedTimer::elapsed()));
+	}
 };
 
 

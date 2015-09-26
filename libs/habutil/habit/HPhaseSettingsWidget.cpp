@@ -49,6 +49,7 @@ void HPhaseSettingsWidget::initialize()
 	ui->lineeditAccumulatedLookTime->setText(QString("%1").arg(m_settings.getMaxAccumulatedLookTime()));
 	ui->cbxContinuousLookAwayTime->setChecked(m_settings.getIsMaxLookAwayTime());
 	ui->lineeditContinuousLookAwayTime->setText(QString("%1").arg(m_settings.getMaxLookAwayTime()));
+	ui->cbxRepeatTrialInattentive->setChecked(m_settings.getRepeatTrialOnMaxLookAwayTime());
 	ui->cbxMaxStimulusTime->setChecked(m_settings.getIsMaxStimulusTime());
 	ui->lineeditMaxStimulusTime->setText(QString("%1").arg(m_settings.getMaxStimulusTime()));
 	ui->rbMeasuredFromStimulusOnset->setChecked(m_settings.getMeasureStimulusTimeFromOnset());
@@ -87,6 +88,7 @@ const HPhaseSettings& HPhaseSettingsWidget::getHPhaseSettings()
 	m_settings.setMaxAccumulatedLookTime(ui->lineeditAccumulatedLookTime->text().toUInt(&b));
 	m_settings.setIsMaxLookAwayTime(ui->cbxContinuousLookAwayTime->isChecked());
 	m_settings.setMaxLookAwayTime(ui->lineeditContinuousLookAwayTime->text().toUInt(&b));
+	m_settings.setRepeatTrialOnMaxLookAwayTime((ui->cbxRepeatTrialInattentive->isChecked()));
 	m_settings.setIsMaxStimulusTime(ui->cbxMaxStimulusTime->isChecked());
 	m_settings.setMaxStimulusTime(ui->lineeditMaxStimulusTime->text().toUInt(&b));
 	m_settings.setMeasureStimulusTimeFromOnset(ui->rbMeasuredFromStimulusOnset->isChecked());

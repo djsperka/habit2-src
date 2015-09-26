@@ -42,6 +42,8 @@ namespace Habit
 		void setIsMaxLookAwayTime(bool b) { m_bIsMaxLookAwayTime = b; };
 		unsigned int getMaxLookAwayTime() const { return m_uiMaxLookAwayTime; };
 		void setMaxLookAwayTime(unsigned int ui) { m_uiMaxLookAwayTime = ui; };
+		bool getRepeatTrialOnMaxLookAwayTime() const { return m_bRepeatTrialOnMaxLookAwayTime; };
+		void setRepeatTrialOnMaxLookAwayTime(bool b) { m_bRepeatTrialOnMaxLookAwayTime = b; };
 		bool getIsMaxStimulusTime() const { return m_bIsMaxStimulusTime; };
 		void setIsMaxStimulusTime(bool b) { m_bIsMaxStimulusTime = b; };
 		unsigned int getMaxStimulusTime() const { return m_uiMaxStimulusTime; };
@@ -69,6 +71,7 @@ namespace Habit
 		unsigned int m_uiMaxAccumulatedLookTime;
 		bool m_bIsMaxLookAwayTime;		// trials end if a look away lasts for max look away time
 		unsigned int m_uiMaxLookAwayTime;
+		bool m_bRepeatTrialOnMaxLookAwayTime;
 		bool m_bIsMaxStimulusTime;		// trials can end if stimulus is on for max stim time
 		unsigned int m_uiMaxStimulusTime;
 		bool m_bMeasureStimulusTimeFromOnset;	// max stim time measured from initial onset

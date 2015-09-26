@@ -123,9 +123,12 @@ protected:
 
 class HMaxLookAwayTimeState: public HTrialChildState
 {
-
+	bool m_bRepeatTrialOnMaxLookAwayTime;
 public:
-	HMaxLookAwayTimeState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HMaxLookAwayTimeState") {};
+	HMaxLookAwayTimeState(HTrial& trial, HEventLog& log, bool bRepeat = false)
+	: HTrialChildState(trial, log, "HMaxLookAwayTimeState")
+	, m_bRepeatTrialOnMaxLookAwayTime(bRepeat)
+	{};
 	virtual ~HMaxLookAwayTimeState() {};
 
 protected:

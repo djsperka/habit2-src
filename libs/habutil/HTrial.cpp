@@ -96,9 +96,12 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	// The transition is triggered by SIGNAL(maxLookAwayTime()) from the look detector.
 	if (m_phaseSettings.getIsMaxLookAwayTime())
 	{
-		HMaxLookAwayTimeState* sMaxLookAway = new HMaxLookAwayTimeState(*this, log);
+		HMaxLookAwayTimeState* sMaxLookAway = new HMaxLookAwayTimeState(*this, log, m_phaseSettings.getRepeatTrialOnMaxLookAwayTime());
 		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(maxLookAwayTime()), sMaxLookAway);
-		sMaxLookAway->addTransition(sFinal);	// trial is NOT repeated -- this is successful
+		if (m_phaseSettings.getRepeatTrialOnMaxLookAwayTime())
+			sMaxLookAway->addTransition(sInitial);	// trial is repeated -- this is a failed trial!
+		else
+			sMaxLookAway->addTransition(sFinal);	// trial is NOT repeated -- this is successful
 	}
 
 

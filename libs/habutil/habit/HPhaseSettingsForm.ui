@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>728</width>
-    <height>498</height>
+    <width>785</width>
+    <height>608</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,8 +21,8 @@
     <rect>
      <x>60</x>
      <y>20</y>
-     <width>685</width>
-     <height>437</height>
+     <width>684</width>
+     <height>486</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -37,7 +37,7 @@
    <property name="checked">
     <bool>false</bool>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QVBoxLayout" name="verticalLayout_8">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
@@ -81,79 +81,183 @@
     <item>
      <widget class="QGroupBox" name="groupBox_2">
       <property name="title">
-       <string>Criteria for successful trials</string>
+       <string>Criteria for ending a trial</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
-        <widget class="QFrame" name="frame">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QCheckBox" name="cbxUseLookSettings">
-            <property name="toolTip">
-             <string>If checked, Habit will end trials when one or more &quot;complete looks&quot; satisfies the selected criteria.</string>
-            </property>
-            <property name="text">
-             <string>Use Look Settings</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout">
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <widget class="QFrame" name="frame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
-             <widget class="QRadioButton" name="rbSingleCompleteLook">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
+             <widget class="QCheckBox" name="cbxUseLookSettings">
               <property name="toolTip">
-               <string>A single complete look, as specified in the Look Settings, will end a trial successfully.</string>
+               <string>If checked, Habit will end trials when one or more &quot;complete looks&quot; satisfies the selected criteria.</string>
               </property>
               <property name="text">
-               <string>Single complete look</string>
+               <string>Use Look Settings</string>
               </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup</string>
-              </attribute>
              </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout">
+             <layout class="QVBoxLayout" name="verticalLayout">
               <item>
-               <widget class="QRadioButton" name="rbAccumulatedLookTime">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <item>
+                 <widget class="QRadioButton" name="rbSingleCompleteLook">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>A single complete look, as specified in the Look Settings, will end a trial successfully.</string>
+                  </property>
+                  <property name="text">
+                   <string>Single complete look</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">buttonGroup</string>
+                  </attribute>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>91</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <widget class="QRadioButton" name="rbAccumulatedLookTime">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>A trial will end successfully when the sum of &quot;complete looks&quot; is at least the time you specify.</string>
+                  </property>
+                  <property name="text">
+                   <string>Accumulated look time</string>
+                  </property>
+                  <attribute name="buttonGroup">
+                   <string notr="true">buttonGroup</string>
+                  </attribute>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineeditAccumulatedLookTime">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>50</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>4000</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_3">
+                  <property name="text">
+                   <string>ms</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_6">
+                  <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                    <italic>true</italic>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>You must also select max stim time or cont. time inattentive.</string>
+                  </property>
+                  <property name="wordWrap">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="frame_2">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QCheckBox" name="cbxMaxStimulusTime">
                 <property name="toolTip">
-                 <string>A trial will end successfully when the sum of &quot;complete looks&quot; is at least the time you specify.</string>
+                 <string>When checked, Habit will end a trial when the stimulus time (measured according to the radio button you select) reaches the time you specify.</string>
                 </property>
                 <property name="text">
-                 <string>Accumulated look time</string>
+                 <string>Max stimulus time</string>
                 </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">buttonGroup</string>
-                </attribute>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineeditAccumulatedLookTime">
+               <widget class="QLineEdit" name="lineeditMaxStimulusTime">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>60</width>
+                  <height>0</height>
+                 </size>
+                </property>
                 <property name="text">
-                 <string>4000</string>
+                 <string>10000</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_3">
+               <widget class="QLabel" name="label_2">
                 <property name="text">
                  <string>ms</string>
                 </property>
@@ -161,231 +265,251 @@
               </item>
              </layout>
             </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>91</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="frame_2">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QCheckBox" name="cbxMaxStimulusTime">
-              <property name="toolTip">
-               <string>When checked, Habit will end a trial when the stimulus time (measured according to the radio button you select) reaches the time you specify.</string>
-              </property>
-              <property name="text">
-               <string>Max stimulus time</string>
-              </property>
-             </widget>
+             <layout class="QVBoxLayout" name="verticalLayout_2">
+              <item>
+               <widget class="QRadioButton" name="rbMeasuredFromStimulusOnset">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Stimulus time is measured starting when the stimulus first appears on the screen.</string>
+                </property>
+                <property name="text">
+                 <string>Measured from stimulus onset</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="rbMeasuredFromInitialLooking">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Stimulus time is measured starting when the subject first looks at any stimulus.</string>
+                </property>
+                <property name="text">
+                 <string>Measured from initial looking</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineeditMaxStimulusTime">
-              <property name="enabled">
-               <bool>false</bool>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
+              <property name="sizeHint" stdset="0">
                <size>
-                <width>60</width>
-                <height>0</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
-              <property name="text">
-               <string>10000</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>ms</string>
-              </property>
-             </widget>
+             </spacer>
             </item>
            </layout>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item>
-             <widget class="QRadioButton" name="rbMeasuredFromStimulusOnset">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>Stimulus time is measured starting when the stimulus first appears on the screen.</string>
-              </property>
-              <property name="text">
-               <string>Measured from stimulus onset</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="rbMeasuredFromInitialLooking">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>Stimulus time is measured starting when the subject first looks at any stimulus.</string>
-              </property>
-              <property name="text">
-               <string>Measured from initial looking</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="frame_3">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QCheckBox" name="cbxContinuousLookAwayTime">
-              <property name="toolTip">
-               <string>When checked, Habit will end a trial if, after at least one &quot;complete look&quot; has been registered, the subject looks away from all stimuli for the specified time.</string>
-              </property>
-              <property name="text">
-               <string>Continuous time looking away</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineeditContinuousLookAwayTime">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>2000</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>ms</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>194</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="groupBox_3">
-      <property name="title">
-       <string>Criteria for unsuccessful trials (trial will be repeated)</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_9">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
-         <item>
-          <widget class="QCheckBox" name="cbxMaxInitialTimeNotLooking">
-           <property name="toolTip">
-            <string>Wheh checked, Habit will require that the subject begins a &quot;look&quot;, which eventually becomes a &quot;complete look&quot;, before the specified time has passed in the trial.</string>
-           </property>
-           <property name="text">
-            <string>Max initial time not looking</string>
-           </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineeditMaxInitialTimeNotLooking">
-           <property name="enabled">
-            <bool>false</bool>
+          <widget class="QFrame" name="frame_3">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
            </property>
-           <property name="text">
-            <string>200</string>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_4">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_2">
+                  <item>
+                   <widget class="QCheckBox" name="cbxContinuousLookAwayTime">
+                    <property name="toolTip">
+                     <string>When checked, Habit will end a trial if, after at least one &quot;complete look&quot; has been registered, the subject looks away from all stimuli for the specified time.</string>
+                    </property>
+                    <property name="text">
+                     <string>Continuous time inattentive</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineeditContinuousLookAwayTime">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>50</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>2000</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_4">
+                    <property name="text">
+                     <string>ms</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_8">
+                  <item>
+                   <spacer name="horizontalSpacer_6">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="cbxRepeatTrialInattentive">
+                    <property name="text">
+                     <string>Check to repeat trial if this occurs</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_7">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                  <italic>true</italic>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Once looking has been recorded, max time infant can be continuously off-task before trial ends.</string>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>ms</string>
+          <widget class="QFrame" name="frame_4">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
            </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QCheckBox" name="cbxMaxInitialTimeNotLooking">
+                <property name="toolTip">
+                 <string>Wheh checked, Habit will require that the subject begins a &quot;look&quot;, which eventually becomes a &quot;complete look&quot;, before the specified time has passed in the trial.</string>
+                </property>
+                <property name="text">
+                 <string>Max initial time inattentive</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineeditMaxInitialTimeNotLooking">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>80</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>200</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>ms</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_8">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                  <italic>true</italic>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Trial will be repeated.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </item>
@@ -501,22 +625,6 @@
     <hint type="destinationlabel">
      <x>392</x>
      <y>319</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbxMaxInitialTimeNotLooking</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>lineeditMaxInitialTimeNotLooking</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>189</x>
-     <y>410</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>386</x>
-     <y>410</y>
     </hint>
    </hints>
   </connection>
