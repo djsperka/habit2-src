@@ -53,6 +53,7 @@ HEADERS +=	HLook.h \
 			HApplication.h \
 			HReliability.h \
 			HStimulusUtil.h \
+			HExperimentUtil.h \
 			habit/HControlPanel.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
@@ -193,6 +194,7 @@ SOURCES +=	HLook.cpp \
 			HApplication.cpp \
 			HReliability.cpp \
 			HStimulusUtil.cpp \
+			HExperimentUtil.cpp \
 			habit/HControlPanel.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \

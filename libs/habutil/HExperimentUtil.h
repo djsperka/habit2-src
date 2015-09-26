@@ -16,7 +16,7 @@
 #include "runsettings.h"
 #include "experimentsettings.h"
 
-HExperiment* createExperiment(const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HMediaManager* pmm, HEventLog& log);
+HExperiment* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HMediaManager* pmm, HEventLog& log);
 
 
 
