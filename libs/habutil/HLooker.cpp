@@ -404,6 +404,8 @@ void HLooker::onLookingAwayStateEntered()
 	}
 	m_bLookAwayStarted = true;
 
+	// If there is a max look away time, start the timer ONLY IF
+	// there has been at least one complete look.
 	if (m_maxLookAwayTimeMS > 0)
 	{
 		m_ptimerMaxLookAway->start(m_maxLookAwayTimeMS);
@@ -512,7 +514,12 @@ void HLooker::minLookAwayTimeout()
 
 void HLooker::maxLookAwayTimeout()
 {
-	emit maxLookAwayTime();
+	// We only trigger the transition if there is at least
+	// one complete look.
+	// CAUTION: If the maxLookAwayTime is LESS THAN the minLookAwayTime
+	// then when you get here there is NOT a complete look.
+	if (m_looks.count() > 0)
+		emit maxLookAwayTime();
 }
 
 
