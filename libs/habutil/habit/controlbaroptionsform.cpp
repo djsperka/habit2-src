@@ -9,6 +9,7 @@ ControlBarOptionsForm::ControlBarOptionsForm(const Habit::ControlBarOptions& con
 {
     ui = new Ui::ControlBarOptionsFormClass();
     ui->setupUi(this);
+    initialize();
 	setFixedWidth(556);
 }
 

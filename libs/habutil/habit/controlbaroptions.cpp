@@ -112,11 +112,16 @@ void Habit::ControlBarOptions::loadFromDB(size_t id)
 {
 	Habit::MainDao mainDao;
 	mainDao.getControlBarOptionsForExperiment(id, this);
-
 }
 
 bool Habit::ControlBarOptions::saveToDB( size_t id_ )
 {
 	Habit::MainDao dao;
 	return dao.addOrUpdateControlBarOption(id_, this);
+}
+
+QDebug Habit::operator<<(QDebug dbg, ControlBarOptions& cbo)
+{
+	dbg.nospace() << "ControlBarOptions: id " << cbo.getId() << " cbar used?  " << cbo.isControlBarUsed() << " expt displayed " << cbo.isCurrentExperimentDisplayed() << " stim displayed " << cbo.isCurrentStimulusDisplayed() << endl;
+	return dbg.nospace();
 }

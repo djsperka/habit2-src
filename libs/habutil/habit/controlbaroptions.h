@@ -43,6 +43,7 @@ private:
 
 QDataStream & operator<< (QDataStream& stream, ControlBarOptions settings);
 QDataStream & operator>> (QDataStream& stream, ControlBarOptions& settings);
+QDebug operator<<(QDebug dbg, ControlBarOptions& cbo);
 bool operator==(const Habit::ControlBarOptions& lhs, const Habit::ControlBarOptions& rhs);
 
 } // namespace Habit
