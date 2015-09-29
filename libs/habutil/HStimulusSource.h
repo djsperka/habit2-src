@@ -24,7 +24,7 @@ public:
 		BACKGROUND = 0, VIDEO, IMAGE, AUDIO, EMPTY, ERROR
 	};
 
-	HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& stimRootDir = QDir("/"));
+	HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& stimRootDir = QDir("/"), bool buffer = true);
 	HStimulusSource();
 	HStimulusSource(const QString& filename, int audioBalance = 0, bool islooped=false);
 
@@ -45,7 +45,7 @@ public:
 private:
 	bool isImageFile(const QString& filename);
 	bool isAudioFile(const QString& filename);
-	void init(const QString& filename = QString());
+	void init(const QString& filename = QString(), bool buffer = true);
 	HStimulusSourceType m_type;
 	QByteArray *m_pByteArray;
 	QBuffer *m_pBuffer;

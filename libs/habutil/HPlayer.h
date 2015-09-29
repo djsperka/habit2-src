@@ -61,18 +61,10 @@ public:
 	
 	unsigned int addStimulus(const unsigned int id, const Habit::StimulusInfo& info);
 
-	// Same as above, but assigns the given id to the stimulus.
-	//virtual unsigned int addStimulus(unsigned int id, QString filename, int volume=0, bool isLooped = false);
-
-	// add dummy (background) stimulus
-	//virtual unsigned int addStimulus();
-	//virtual unsigned int addStimulus(unsigned int id);
-	
-	// Add an attention getter stimulus to the player. The AG will always have
-	// index 0. It can be played by calling play(0) or playAG().
-	//virtual unsigned int addAG(QString filename, int volume=0, bool isLooped = false);
-
-//	QTextStream& operator<<(QTextStream& out);
+	/// should stimuli be buffered? This is advisory, subclasses may ignore. Put here especially for
+	/// video types, see HVIPlayer
+	bool preferBufferedStimulus() const { return 	m_preferBufferedStimulus; };
+	void setPreferBufferedStimulus(bool buffer) { m_preferBufferedStimulus = buffer; };
 
 	// dummy value to be returned when getStimulusInfo gets a bad key.
 	static const Habit::StimulusInfo dummyStimulusInfo;
@@ -108,6 +100,9 @@ private:
 
 	/// stimulus root directory. Any stimuli with relative paths will be found here, hopefully.
 	QDir m_dirStimulusRoot;
+
+	/// Should stimulus files be buffered by subclasses?
+	bool m_preferBufferedStimulus;
 
 	virtual unsigned int addStimulusPrivate(unsigned int id) = 0;
 

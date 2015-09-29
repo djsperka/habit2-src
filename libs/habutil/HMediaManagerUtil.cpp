@@ -34,20 +34,21 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* 
 
 	if (iControl > -1 && sdi.getUseISS())
 	{
-		//pmm->addPlayer(HPlayerPositionType::Sound, new HAudioPlayer(iControl, parent), iControl);
-		pmm->addPlayer(HPlayerPositionType::Sound, new HAudioPlayer(iControl, NULL, baseDir), iControl);
+		HPlayer *audio = new HAudioPlayer(iControl, NULL, baseDir);
+		pmm->addPlayer(HPlayerPositionType::Sound, audio, iControl);
 	}
 	if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		//pmm->addPlayer(HPlayerPositionType::Center, new HVIPlayer(iCenter, parent, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iCenter);
-		pmm->addPlayer(HPlayerPositionType::Center, new HVIPlayer(iCenter, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iCenter);
+		HPlayer *single = new HVIPlayer(iCenter, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
+		single->setPreferBufferedStimulus(false);
+		pmm->addPlayer(HPlayerPositionType::Center, single, iCenter);
 	}
 	else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		//pmm->addPlayer(HPlayerPositionType::Left, new HVIPlayer(iLeft, parent, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iLeft);
-		//pmm->addPlayer(HPlayerPositionType::Right, new HVIPlayer(iRight, parent, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iRight);
-		pmm->addPlayer(HPlayerPositionType::Left, new HVIPlayer(iLeft, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iLeft);
-		pmm->addPlayer(HPlayerPositionType::Right, new HVIPlayer(iRight, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor()), iRight);
+		HPlayer *left = new HVIPlayer(iLeft, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
+		HPlayer *right = new HVIPlayer(iRight, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
+		pmm->addPlayer(HPlayerPositionType::Left, left, iLeft);
+		pmm->addPlayer(HPlayerPositionType::Right, right, iRight);
 	}
 	
 	return pmm;

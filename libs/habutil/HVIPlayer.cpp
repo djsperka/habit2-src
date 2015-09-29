@@ -222,8 +222,7 @@ void HVIPlayer::onPrefinishMarkReached(qint32 msec)
 unsigned int HVIPlayer::addStimulusPrivate(const unsigned int id)
 {
 	const Habit::StimulusInfo& info = getStimulusInfo(id);
-	HStimulusSource* s = new HStimulusSource(&info, getStimulusRoot());
+	HStimulusSource* s = new HStimulusSource(&info, getStimulusRoot(), preferBufferedStimulus());
 	m_mapSources.insert(id, s);
-	//qDebug() << "HVIPlayer::addStimulusPrivate(" << id << ")";
 	return id;
 }

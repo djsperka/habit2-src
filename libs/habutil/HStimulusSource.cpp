@@ -41,7 +41,7 @@ QTextStream& operator<<(QTextStream& out, const HStimulusSource& ss)
 	return out;
 }
 
-HStimulusSource::HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& stimRootDir)
+HStimulusSource::HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& stimRootDir, bool buffer)
 : m_type(BACKGROUND)
 , m_pBuffer(0)
 , m_pImage(0)
@@ -49,7 +49,7 @@ HStimulusSource::HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& s
 , m_isLooped(pinfo->isLoopPlayBack())
 {
 	if (!pinfo->getFileName().isEmpty())
-		init(pinfo->getAbsoluteFileName(stimRootDir));
+		init(pinfo->getAbsoluteFileName(stimRootDir), buffer);
 	else
 		init();
 }
@@ -66,36 +66,21 @@ HStimulusSource::HStimulusSource()
 	init();
 }
 
-HStimulusSource::HStimulusSource(const QString& filename, int audioBalance, bool isLooped)
-: m_type(BACKGROUND)
-, m_pBuffer(0)
-, m_pImage(0)
-, m_audioBalance(audioBalance)
-, m_isLooped(isLooped)
-{
-	init(filename);
-}
 
-void HStimulusSource::init(const QString& filename)
+void HStimulusSource::init(const QString& filename, bool buffer)
 {
 	// Zero length filename implies BACKGROUND.
 	if (filename.length() > 0)
 	{
+		// Figure out which stimulus type this is.
+		// If there's a filename, then its either IMAGE, AUDIO or VIDEO.
+		// Each type has a different method for loading. In addition,
+		// VIDEO types may be buffered or not.
+
 		QFile file(filename);
 		m_filename = filename;
 		if (file.exists()) 
 		{
-			// Load file into a QByteArray, and create a QBuffer that manages it.
-			if (!file.open(QIODevice::ReadOnly))
-			{
-				qCritical() << "Cannot read stimulus file " << filename;
-	    	}
-			else
-			{
-				m_pByteArray = new QByteArray(file.readAll());
-				m_pBuffer = new QBuffer(m_pByteArray);
-				file.close();
-			}
 			if (isImageFile(filename))
 			{
 				m_pImage = new QImage(filename);
@@ -108,8 +93,30 @@ void HStimulusSource::init(const QString& filename)
 			else 
 			{
 				m_type = VIDEO;
-			}
 
+				// if the file is to be buffered, then read it now.
+				// The player will know the file is buffered if the buffer itself
+				// is non-null. Unbuffered videos are played from disk.
+				if (buffer)
+				{
+					// Load file into a QByteArray, and create a QBuffer that manages it.
+					qDebug() << "Buffering stimulus " << filename;
+					if (!file.open(QIODevice::ReadOnly))
+					{
+						qCritical() << "Cannot read video stimulus file " << filename;
+					}
+					else
+					{
+						m_pByteArray = new QByteArray(file.readAll());
+						m_pBuffer = new QBuffer(m_pByteArray);
+						file.close();
+					}
+				}
+				else
+				{
+					qDebug() << "Unbuffered stimulus " << filename;
+				}
+			}
 		}
 		else 
 		{

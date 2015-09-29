@@ -17,6 +17,7 @@ HPlayer::HPlayer(int ID, QWidget *w, const QDir& stimRootDir)
 , m_id(ID)
 , m_iCurrentStim(0)
 , m_dirStimulusRoot(stimRootDir)
+, m_preferBufferedStimulus(true)
 {
 }
 
