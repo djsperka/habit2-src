@@ -26,6 +26,7 @@
 
 using namespace GUILib;
 
+
 HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEventLog& log, const Habit::RunSettings& runSettings, QWidget* w)
 : QDialog(w)
 , m_experimentSettings(exptSettings)
@@ -40,8 +41,24 @@ HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEve
 	m_pbStopTrials->setEnabled(false);
 	m_pbNextTrial->setEnabled(false);
 
+#ifndef NEWFANGLED_CREATE_EXPERIMENT
 	// Generate the state machine and associated machinery that make the experiment run
 	createExperiment(log);
+#else
+	HLookDetector* pld = createLookDetector(m_experimentSettings, m_log, this);
+	m_pmm = createMediaManager(m_experimentSettings, this);
+	m_psm = createExperiment(this, m_runSettings, m_experimentSettings, pld, m_pmm, m_log);
+
+	// connect the state machine's finished() signal to this dialog's close() slot
+	connect(m_psm, SIGNAL(finished()), this, SLOT(onExperimentFinished()));
+	connect(m_psm, SIGNAL(started()), this, SLOT(onExperimentStarted()));
+
+	// Set some slots to update text labels in the control panel
+	connect(&m_psm->experiment(), SIGNAL(phaseStarted(QString)), this, SLOT(onPhaseStarted(QString)));
+	connect(&m_psm->experiment(), SIGNAL(trialStarted(int, int)), this, SLOT(onTrialStarted(int, int)));
+
+#endif
+
 
 	// connections after expt created
 	connections();
@@ -92,7 +109,7 @@ void HControlPanel::doLayout()
 }
 
 
-
+#ifndef NEWFANGLED_CREATE_EXPERIMENT  /* NEWFANGLED_CREATE_EXPERIMENT is defined */
 void HControlPanel::createExperiment(HEventLog& log)
 {
 	HPhase* psPreTest = (HPhase *)NULL;
@@ -322,6 +339,7 @@ void HControlPanel::createExperiment(HEventLog& log)
 	connect(sExperiment, SIGNAL(trialStarted(int, int)), this, SLOT(onTrialStarted(int, int)));
 
 }
+#endif
 
 void HControlPanel::onPhaseStarted(QString phaseName)
 {

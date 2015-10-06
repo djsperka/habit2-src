@@ -7,14 +7,22 @@
  *
  */
 
+#ifndef _HSTATE_MACHINE_H
+#define _HSTATE_MACHINE_H
+
 #include <QStateMachine>
+#include "HExperiment.h"
 
 class HStateMachine: public QStateMachine
 {
 	Q_OBJECT
 
+	const HExperiment& m_expt;
 	public:
 
-	HStateMachine() {};
+	HStateMachine(const HExperiment& expt): QStateMachine(), m_expt(expt) {};
 	~HStateMachine() {}
+	const HExperiment& experiment() const { return m_expt; };
 };
+
+#endif

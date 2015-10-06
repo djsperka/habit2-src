@@ -9,14 +9,14 @@
 #define HEXPERIMENTUTIL_H_
 
 
-#include "HExperiment.h"
+#include "HStateMachine.h"
 #include "HMediaManager.h"
 #include "HLookDetector.h"
 #include "HEventLog.h"
 #include "runsettings.h"
 #include "experimentsettings.h"
 
-HExperiment* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HMediaManager* pmm, HEventLog& log);
+HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HMediaManager* pmm, HEventLog& log);
 
 
 

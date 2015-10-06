@@ -26,15 +26,18 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 	if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		HPlayer *p = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
+		p->setPreferBufferedStimulus(false);
 		m_pmm->addPlayer(HPlayerPositionType::Center, p, -1);
 		hbox->addWidget(p);
 	}
 	else if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
 		HPlayer *pl = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
+		pl->setPreferBufferedStimulus(false);
 		m_pmm->addPlayer(HPlayerPositionType::Left, pl, -1);
 		hbox->addWidget(pl);
 		HPlayer *pr = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
+		pr->setPreferBufferedStimulus(false);
 		m_pmm->addPlayer(HPlayerPositionType::Right, pr, -1);
 		hbox->addWidget(pr);
 	}
@@ -42,21 +45,27 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 	// set up label for stim name and buttons for advancing stim through orders.
 	m_pbNext = new QPushButton(">");
 	m_pbPrev = new QPushButton("<");
+	m_pbStop = new QPushButton("Stop");
 	m_labelStimName = new QLabel("Stimulus: ");
 	QHBoxLayout *hlb = new QHBoxLayout;
 	hlb->addWidget(m_labelStimName, 1, Qt::AlignCenter);
 	hlb->addStretch(1);
 	hlb->addWidget(m_pbPrev);
+	hlb->addWidget(m_pbStop);
 	hlb->addWidget(m_pbNext);
 
 	connect(m_pbPrev, SIGNAL(clicked()), this, SLOT(prevClicked()));
 	connect(m_pbNext, SIGNAL(clicked()), this, SLOT(nextClicked()));
+	connect(m_pbStop, SIGNAL(clicked()), this, SLOT(stopClicked()));
 
 	// Now do the layout for the entire thing
     QVBoxLayout* vbox = new QVBoxLayout;
     vbox->addLayout(hbox);
     vbox->addLayout(hlb);
     setLayout(vbox);
+
+    // This turns off the arow buttons
+    updateNavigation(QString(""));
 
 }
 
@@ -78,6 +87,11 @@ void GUILib::HStimulusPreviewWidget::nextClicked()
 	m_idListCurrent++;
 	updateNavigation();
 	m_pmm->stim(m_idList[m_idListCurrent]);
+}
+
+void GUILib::HStimulusPreviewWidget::stopClicked()
+{
+	m_pmm->clear();
 }
 
 void GUILib::HStimulusPreviewWidget::preview(const Habit::StimulusSettings& stimulus)

@@ -30,7 +30,7 @@ namespace Habit
 		 Q_OBJECT
 
 	 public:
-		 H2MainWindow(bool bTestRunDefault=true);
+		 H2MainWindow(bool bDefaultTestRun=true);
 		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems);
 
 	 protected:

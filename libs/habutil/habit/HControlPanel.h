@@ -10,8 +10,13 @@
 #ifndef HCONTROLPANEL_H
 #define HCONTROLPANEL_H
 
+
+
 #include <QtGui>
 #include <QMap>
+
+#define NEWFANGLED_CREATE_EXPERIMENT
+
 
 #include "runsettings.h"
 #include "stimulussettings.h"
@@ -25,6 +30,12 @@
 #include "HEventLog.h"
 #include "HMediaStatusWidget.h"
 #include "HExperimentStatusWidget.h"
+
+#ifdef NEWFANGLED_CREATE_EXPERIMENT
+#include "HExperimentUtil.h"
+#endif
+
+
 
 namespace GUILib
 {
@@ -43,7 +54,9 @@ namespace GUILib
 		void components();
 		void connections();
 		void doLayout();
+#ifndef NEWFANGLED_CREATE_EXPERIMENT
 		void createExperiment(HEventLog& log);
+#endif
 
 	private slots:
 		void onStartTrials();
@@ -66,7 +79,7 @@ namespace GUILib
 		Habit::RunSettings m_runSettings;
 		HMediaManager* m_pmm;
 		//HLookDetector* m_pld;
-		QStateMachine* m_psm;
+		HStateMachine* m_psm;
 	
 		QPushButton* m_pbStartTrials;
 		QPushButton* m_pbNextTrial;

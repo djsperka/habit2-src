@@ -4,6 +4,7 @@
  *  Created on: May 15, 2014
  *      Author: Oakeslab
  */
+#include <QFinalState>
 
 #include "HExperimentUtil.h"
 #include "HLookDetectorUtil.h"
@@ -11,13 +12,11 @@
 #include "HPhase.h"
 #include "HTrialGenerator.h"
 #include "HPhaseCriteriaUtil.h"
-#include <QStateMachine>
-#include <QFinalState>
-
+#include "HStateMachine.h"
 
 using namespace Habit;
 
-QStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HEventLog& log, HLookDetector* pld, HMediaManager* pmm)
+HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HMediaManager* pmm, HEventLog& log)
 {
 	HPhase* psPreTest = (HPhase *)NULL;
 	HPhase* psHabituation = (HPhase *)NULL;
@@ -25,26 +24,7 @@ QStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	HPhaseCriteria* pcritPreTest = (HPhaseCriteria *)NULL;
 	HPhaseCriteria* pcritHabituation = (HPhaseCriteria *)NULL;
 	HPhaseCriteria* pcritTest = (HPhaseCriteria *)NULL;
-	QStateMachine *psm;
-
-	// TODO: THE LOOK DETECTOR IS PASSED AS AN ARG.
-	// Create look detector. Type of look detector is buried in the experiment settings; what we receive is a generic
-	// HLookDetector* .
-	//pld = createLookDetector(experimentSettings, log, w);
-
-	// TODO: this connection must be made externally
-	//
-	// connect attention() and look() signals to a slot so we can forward the info to the event log
-	//connect(pld, SIGNAL(attention()), this, SLOT(onAttention()));
-	//connect(pld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
-
-	// TODO: THE MEDIA MANAGER IS CREATED EXTERNALLY
-	// Create media manager.
-	// The stimuli configured for each phase are pulled using the experiment settings.
-	// One by one the stimuli are added to the media manager's player. As each stim is added,
-	// its ordinal position in the player's set of stim is paired with the StimulusSettings
-	// object, and the pair is stored in the StimulusSettingsList objects l1, l2, l3.
-	//m_pmm = createMediaManager(m_experimentSettings, this);
+	HStateMachine *psm;
 
 	// Need to know if AG is used. If it is, add attention getter settings to media manager
 	if (experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed())
@@ -60,24 +40,16 @@ QStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	if (experimentSettings.getTestPhaseSettings().getIsEnabled())
 		pmm->addStimuli(experimentSettings.getTestStimuliSettings());
 
-	// Construct state machine.
-	psm = new QStateMachine();
-
-	// TODO THESE CONNECTIONS MADE EXTERALLY
-	// connect the state machine's finished() signal to this dialog's close() slot
-	//connect(m_psm, SIGNAL(finished()), this, SLOT(onExperimentFinished()));
-	//connect(m_psm, SIGNAL(started()), this, SLOT(onExperimentStarted()));
 
 	// This is a single super-state that holds all the phases.
 	HExperiment* sExperiment = new HExperiment(log, *pmm, *pld);
+	// Construct state machine.
+	psm = new HStateMachine(*sExperiment);
 	psm->addState(sExperiment);
 	psm->setInitialState(sExperiment);
 	QFinalState* sFinal = new QFinalState;
 	psm->addState(sFinal);
 	sExperiment->addTransition(sExperiment, SIGNAL(finished()), sFinal);
-	//QObject::connect(sExperiment, SIGNAL(playStim(int)), m_pmm, SLOT(stim(int)));// media player will receive this signal and emit stimStarted()
-
-	//TEMPsExperiment->addTransition(m_pbStopTrials, SIGNAL(clicked()), sFinal);
 
 	// Create phases.
 	// Each HPhase gets a list of stimuli, as pairs of <int, StimulusSettings>, and these are used in order as the
@@ -246,9 +218,5 @@ QStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 		log.append(new HStimulusSettingsEvent(*it.value(), it.key()));
 	}
 
-	//TODO These connections made externally
-	// Set some slots to update text labels in the control panel
-	//connect(sExperiment, SIGNAL(phaseStarted(QString)), this, SLOT(onPhaseStarted(QString)));
-	//connect(sExperiment, SIGNAL(trialStarted(int, int)), this, SLOT(onTrialStarted(int, int)));
-
+	return psm;
 }

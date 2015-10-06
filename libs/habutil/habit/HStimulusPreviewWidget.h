@@ -32,6 +32,7 @@ namespace GUILib
 		QLabel *m_labelStimName;
 		QPushButton *m_pbNext;
 		QPushButton *m_pbPrev;
+		QPushButton *m_pbStop;
 
 		void updateNavigation();
 		void updateNavigation(QString stimName);
@@ -46,6 +47,7 @@ namespace GUILib
 	protected slots:
 		void nextClicked();
 		void prevClicked();
+		void stopClicked();
 	};
 
 };

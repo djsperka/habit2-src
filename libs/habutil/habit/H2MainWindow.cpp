@@ -31,7 +31,7 @@ using namespace GUILib;
 using namespace Habit;
 
 
-GUILib::H2MainWindow::H2MainWindow(bool bTestRun)
+GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun)
 : QMainWindow()
 , m_bTestRunDefault(bTestRun)
 {

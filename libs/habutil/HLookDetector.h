@@ -60,6 +60,8 @@ class HLookDetector: public HLooker
 private:
 	bool m_bAGLookEnabled;
 	bool m_bLookEnabled;
+	bool m_bLookTransPending;
+	int m_iLookTransPendingType;
 protected:
 	virtual void agLookEnabled(bool enabled) = 0;
 	virtual void lookEnabled(bool enabled) = 0;
@@ -69,13 +71,16 @@ public:
 	HLookDetector(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log)
 		: HLooker(minlooktime_ms, minlookawaytime_ms, maxlookawaytime_ms, maxaccumlooktime_ms, log)
 		, m_bAGLookEnabled(false)
-		, m_bLookEnabled(false) {};
+		, m_bLookEnabled(false)
+		, m_bLookTransPending(false)
+		, m_iLookTransPendingType(-1) {};
 	virtual ~HLookDetector() {};
 	virtual void enableAGLook();
 	virtual void enableLook();
 	virtual void disable();
 	bool isAGLookEnabled() { return m_bAGLookEnabled; };
 	bool isLookEnabled() { return 	m_bLookEnabled; };
+	void pendingTrans(bool bPending, const HLookTrans& type = HLookTrans::UnknownLookTrans);
 };
 	
 #endif

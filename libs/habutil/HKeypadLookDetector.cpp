@@ -18,9 +18,16 @@ HKeypadLookDetector::HKeypadLookDetector(HEventLog& log, QWidget* pdialog, int m
 , m_bUseCenter(bUseCenter)
 , m_bUseRight(bUseRight)
 {
-	m_pdialog->grabKeyboard();
-	m_pdialog->installEventFilter(this);
-	qDebug() << "HKeypadLookDetector: Event filter installed.";
+	if (m_pdialog)
+	{
+		m_pdialog->grabKeyboard();
+		m_pdialog->installEventFilter(this);
+		qDebug() << "HKeypadLookDetector: Event filter installed.";
+	}
+	else
+	{
+		qDebug() << "HKeypadLookDetector: No event filter installed - expecting testing input.";
+	}
 };																																							  
 
 HKeypadLookDetector::~HKeypadLookDetector() 
@@ -64,27 +71,50 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 					}
 					case Qt::Key_4:
 					{
-						if (isLookEnabled() && m_bUseLeft)
+						if (m_bUseLeft)
 						{
-							addTrans(HLookTrans::NoneLeft, t);
+							if (isLookEnabled())
+							{
+								addTrans(HLookTrans::NoneLeft, t);
+							}
+							else
+							{
+								pendingTrans(true, HLookTrans::NoneLeft);
+							}
 							bVal = true;
 						}
 						break;
 					}
 					case Qt::Key_5:
 					{
-						if (isLookEnabled() && m_bUseCenter)
+						if (m_bUseCenter)
 						{
-							addTrans(HLookTrans::NoneCenter, t);
+							if (isLookEnabled())
+							{
+								qDebug() << "Key_5 down: addTrans";
+								addTrans(HLookTrans::NoneCenter, t);
+							}
+							else
+							{
+								qDebug() << "Key_5 down: pendingTrans";
+								pendingTrans(true, HLookTrans::NoneCenter);
+							}
 							bVal = true;
 						}
 						break;
 					}
 					case Qt::Key_6:
 					{
-						if (isLookEnabled() && m_bUseRight)
+						if (m_bUseRight)
 						{
-							addTrans(HLookTrans::NoneRight, t);
+							if (isLookEnabled())
+							{
+								addTrans(HLookTrans::NoneRight, t);
+							}
+							else
+							{
+								pendingTrans(true, HLookTrans::NoneRight);
+							}
 							bVal = true;
 						}
 						break;
@@ -112,27 +142,48 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 				}
 				case Qt::Key_4:
 				{
-					if (isLookEnabled() && m_bUseLeft)
+					if (m_bUseLeft)
 					{
-						addTrans(HLookTrans::LeftNone, t);
+						if (isLookEnabled())
+						{
+							addTrans(HLookTrans::LeftNone, t);
+						}
+						else
+						{
+							pendingTrans(false);
+						}
 						bVal = true;
 					}
 					break;
 				}
 				case Qt::Key_5:
 				{
-					if (isLookEnabled() && m_bUseCenter)
+					if (m_bUseCenter)
 					{
-						addTrans(HLookTrans::CenterNone, t);
+						if (isLookEnabled())
+						{
+							addTrans(HLookTrans::CenterNone, t);
+						}
+						else
+						{
+							pendingTrans(false);
+						}
 						bVal = true;
 					}
 					break;
 				}
 				case Qt::Key_6:
 				{
-					if (isLookEnabled() && m_bUseRight)
+					if (m_bUseRight)
 					{
-						addTrans(HLookTrans::RightNone, t);
+						if (isLookEnabled())
+						{
+							addTrans(HLookTrans::RightNone, t);
+						}
+						else
+						{
+							pendingTrans(false);
+						}
 						bVal = true;
 					}
 					break;

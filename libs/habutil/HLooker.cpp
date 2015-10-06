@@ -76,7 +76,13 @@ HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime
 	connect(sLooking, SIGNAL(entered()), this, SLOT(onLookingStateEntered()));
 	connect(sLooking, SIGNAL(exited()), this, SLOT(onLookingStateExited()));
 	connect(sLookingAway, SIGNAL(exited()), this, SLOT(onLookingAwayStateExited()));
+	connect(this, SIGNAL(started()), this, SLOT(onStarted()));
 };
+
+void HLooker::onStarted()
+{
+	qDebug() << "onStarted() " << (isRunning() ? " RUNNING " : "NOT RUNNING");
+}
 
 void HLooker::addTrans(const HLookTrans& type, int tMS)
 {
@@ -84,6 +90,8 @@ void HLooker::addTrans(const HLookTrans& type, int tMS)
 	m_transitions.append(qMakePair(&type, tMS));
 
 	// Create a new event for the state machine to digest.
+	if (!isRunning())
+		qDebug() << "State Machine is not running!";
 	if (type.isTransToLook())
 	{
 		postEvent(new HTransToLookQEvent(type, tMS));
