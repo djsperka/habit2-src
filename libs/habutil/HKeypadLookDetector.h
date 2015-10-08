@@ -22,6 +22,7 @@ public:
 	HKeypadLookDetector(HEventLog& log, QWidget* pdialog=NULL, int minlooktime_ms=0, int minlookawaytime_ms=0, int maxlookawaytime_ms=0, int maxaccumlooktime_ms=0, bool bUseLeft=true, bool bUseCenter=true, bool bUseRight=true);
 	virtual ~HKeypadLookDetector();
 	bool eventFilter(QObject *obj, QEvent *event);
+	void setDialog(QWidget *pdialog);
 protected:
 	virtual void agLookEnabled(bool enabled) { Q_UNUSED(enabled); };
 	virtual void lookEnabled(bool enabled) { Q_UNUSED(enabled); };

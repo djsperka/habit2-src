@@ -21,4 +21,4 @@
 // Position 0 in the players is reserved for the attention getter (even if there is no attention getter
 // used this position is filled with a background stimulus). 
 
-HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* parent);
+HMediaManager* createMediaManager(const Habit::ExperimentSettings& es);

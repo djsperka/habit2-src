@@ -93,6 +93,7 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings*
 	q.addBindValue(settings->getIsMaxLookAwayTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxLookAwayTime());
 	q.addBindValue(settings->getRepeatTrialOnMaxLookAwayTime() ? 1 : 0);
+	qDebug() << "MainDao::addOrUpdateHPhaseSettings(" << experimentId << ", " << settings->getPhaseType().number() << ") repeat on max lookaway " << (settings->getRepeatTrialOnMaxLookAwayTime() ? 1 : 0);
 	q.addBindValue(settings->getIsMaxStimulusTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxStimulusTime());
 	q.addBindValue(settings->getMeasureStimulusTimeFromOnset() ? 1 : 0);
@@ -189,19 +190,20 @@ bool MainDao::addOrUpdateControlBarOption(size_t experimentId, Habit::ControlBar
 	QString sql;
 	if(settings->getId() > 0)
 	{
-		sql = "update controlbar_options set is_used=?, display_current_experiment=?, display_current_stimulus=?"
+		sql = "update controlbar_options set is_used=?, display_current_experiment=?, display_current_stimulus=?, display_looking_direction=?"
 			" where id=? and experiment_id=?";
 	}
 	else
 	{
-		sql = "insert into controlbar_options (is_used, display_current_experiment, display_current_stimulus, experiment_id)"
-			" values(?, ?, ?, ?)";
+		sql = "insert into controlbar_options (is_used, display_current_experiment, display_current_stimulus, display_looking_direction, experiment_id)"
+			" values(?, ?, ?, ?, ?)";
 	}
 	QSqlQuery q;
 	q.prepare(sql);
 	q.addBindValue(settings->isControlBarUsed());
 	q.addBindValue(settings->isCurrentExperimentDisplayed());
 	q.addBindValue(settings->isCurrentStimulusDisplayed());
+	q.addBindValue(settings->isLookingDirectionDisplayed());
 	if(settings->getId() > 0) {
 		q.addBindValue(settings->getId());
 	}
@@ -965,6 +967,8 @@ void MainDao::getControlBarOptionsForExperiment(size_t experimentId, ControlBarO
 		controlBarOptions->setDisplayCurrentExperiment(displayCurrentExperiment);
 		size_t displayCurrentStimulus = q.value(q.record().indexOf("display_current_stimulus")).toBool();
 		controlBarOptions->setDisplayCurrentStimulus(displayCurrentStimulus);
+		int number = q.value(q.record().indexOf("display_looking_direction")).toBool();
+		controlBarOptions->setDisplayLookingDirection(number);
 	}
 	else
 	{

@@ -100,6 +100,9 @@ void HLooker::addTrans(const HLookTrans& type, int tMS)
 	{
 		postEvent(new HTransToLookAwayQEvent(type, tMS));
 	}
+
+	emit lookingDirection(directionTo(type).name());
+
 	return;
 }
 

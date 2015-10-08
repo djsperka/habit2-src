@@ -120,6 +120,7 @@ signals:
 	void lookStarted();	// indicates that looking at a target has begun
 	void lookPending();	// looking at a target for at least the min look time
 	void lookAborted();	// a look that started has ended before becoming a complete look
+	void lookingDirection(QString);
 	//void lookAwayStarted();
 	void maxLookAwayTime();
 	void maxAccumulatedLookTime();
@@ -142,7 +143,7 @@ class HLookerInitialState: public HLookerState
 public:
 	HLookerInitialState(HLooker& looker, QState* parent = NULL): HLookerState(looker, parent) {};
 	virtual ~HLookerInitialState() {};
-	virtual void onEntry(QEvent* event);
+	//virtual void onEntry(QEvent* event);
 };
 
 class HLookingState: public HLookerState
@@ -150,7 +151,7 @@ class HLookingState: public HLookerState
 public:
 	HLookingState(HLooker& looker, QState* parent = NULL): HLookerState(looker, parent) {};
 	virtual ~HLookingState() {};
-	virtual void onEntry(QEvent* event);
+	//virtual void onEntry(QEvent* event);
 };
 	
 class HLookingAwayState: public HLookerState
@@ -158,7 +159,7 @@ class HLookingAwayState: public HLookerState
 public:
 	HLookingAwayState(HLooker& looker, QState* parent = NULL): HLookerState(looker, parent) {};
 	virtual ~HLookingAwayState() {};
-	virtual void onEntry(QEvent* event);
+	//virtual void onEntry(QEvent* event);
 };
 
 class HTransToLookTransition: public QAbstractTransition

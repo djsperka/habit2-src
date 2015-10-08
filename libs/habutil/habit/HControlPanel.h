@@ -45,8 +45,11 @@ namespace GUILib
 		Q_OBJECT
 
 	public:
-		HControlPanel(const Habit::ExperimentSettings& settings, HEventLog& log, const Habit::RunSettings& runSettings, QWidget* w = 0);
+		HControlPanel(const Habit::ExperimentSettings& exptSettings, HEventLog& log, const Habit::RunSettings& runSettings, HMediaManager *pmm, QWidget* w);
 		~HControlPanel();
+
+		// must call this before onStartTrials() is called.
+		void setStateMachine(HStateMachine *psm);
 
 		const Habit::ExperimentSettings& getExperimentSettings() { return m_experimentSettings; };
 	
@@ -68,6 +71,7 @@ namespace GUILib
 		void onExperimentStarted();
 		void onPhaseStarted(QString phaseName);
 		void onTrialStarted(int trialindex, int repeatindex);
+		void onLookingDirection(QString sLookingDirection);
 
 	protected:
 		void closeEvent (QCloseEvent * e);
@@ -78,7 +82,6 @@ namespace GUILib
 		HEventLog& m_log;
 		Habit::RunSettings m_runSettings;
 		HMediaManager* m_pmm;
-		//HLookDetector* m_pld;
 		HStateMachine* m_psm;
 	
 		QPushButton* m_pbStartTrials;

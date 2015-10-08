@@ -24,7 +24,7 @@
 //HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG)
 
 					  
-HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
+HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG, bool bTestingInput)
 	: HPhaseChildState(phase, log, "HTrial")
 	, m_phaseSettings(phaseSettings)
 	, m_lookSettings(lookSettings)
@@ -47,7 +47,10 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 
 	// Create final state.
 	QFinalState* sFinal = new QFinalState(this);
-		
+
+
+
+
 	// Once that happens the media manager starts playing the ag, it emits
 	// agStarted(). We use that signal as a transition to the AGRunning state. 
 	sAGRequest->addTransition(&phase.experiment().getMediaManager(), SIGNAL(agStarted(int)), sAGRunning);
@@ -161,13 +164,20 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 
 
 	// Initial state transition to AG request or directly to stim request...
-	if (bUseAG)
+	if (!bTestingInput)
 	{
-		sInitial->addTransition(sAGRequest);
+		if (bUseAG)
+		{
+			sInitial->addTransition(sAGRequest);
+		}
+		else
+		{
+			sInitial->addTransition(sStimRequest);
+		}
 	}
-	else 
+	else
 	{
-		sInitial->addTransition(sStimRequest);
+		sInitial->addTransition(sStimRunning);
 	}
 }
 

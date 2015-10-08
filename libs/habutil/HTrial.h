@@ -35,7 +35,7 @@ class HTrial: public HPhaseChildState
 	Q_OBJECT
 	
 public:
-	HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG);
+	HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG, bool bTestingInput = false);
 	~HTrial() {};
 	void setTrialNumber(int i);
 	void incrementRepeatNumber();

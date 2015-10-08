@@ -30,6 +30,8 @@ public:
     void setDisplayCurrentExperiment(bool display);
     bool isCurrentStimulusDisplayed() const;
     void setDisplayCurrentStimulus(bool display);
+    bool isLookingDirectionDisplayed() const;
+    void setDisplayLookingDirection(bool display);
 	void loadFromDB(size_t id);
 	bool saveToDB(size_t id_);
 	ControlBarOptions clone();
@@ -39,6 +41,7 @@ private:
 	bool useControlBar_;
 	bool displayCurrentExperiment_;
 	bool displayCurrentStimulus_;
+	bool displayLookingDirection_;
 };
 
 QDataStream & operator<< (QDataStream& stream, ControlBarOptions settings);

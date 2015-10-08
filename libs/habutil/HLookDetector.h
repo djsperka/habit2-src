@@ -67,6 +67,8 @@ protected:
 	virtual void lookEnabled(bool enabled) = 0;
 signals:
 	void attention();
+	void lookDetectorEnabled();
+	void lookDetectorDisabled();
 public:
 	HLookDetector(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log)
 		: HLooker(minlooktime_ms, minlookawaytime_ms, maxlookawaytime_ms, maxaccumlooktime_ms, log)

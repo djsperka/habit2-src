@@ -26,10 +26,27 @@ const HPhaseType& getPhaseType(int i)
 	return HPhaseType::UnknownPhase; 
 };
 
+const HPhaseType& getPhaseType(const QString& sPhase)
+{
+	if (sPhase == HPhaseType::PreTest.name())
+		return HPhaseType::PreTest;
+	if (sPhase == HPhaseType::Habituation.name())
+		return HPhaseType::Habituation;
+	if (sPhase == HPhaseType::Test.name())
+		return HPhaseType::Test;
+	return HPhaseType::UnknownPhase;
+};
+
+
 bool operator==(const HPhaseType& lhs, const HPhaseType& rhs)
 {
 	return lhs.number() == rhs.number();
 };
+
+bool operator<(const HPhaseType& lhs, const HPhaseType& rhs)
+{
+	return lhs.number() < rhs.number();
+}
 
 const HLookTrans HLookTrans::UnknownLookTrans(-1, "UnknownLookTrans", false);
 const HLookTrans HLookTrans::NoneLeft(0, "NoneLeft", true);

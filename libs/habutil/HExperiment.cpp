@@ -6,6 +6,21 @@
  */
 
 #include "HExperiment.h"
+#include "HElapsedTimer.h"
+#include "HLookDetector.h"
+#include <QObject>
+
+HExperiment::HExperiment(HEventLog& log, HMediaManager& mm, HLookDetector& ld, QState* parent)
+: HLogState(log, "HExperiment", parent)
+, m_mm(mm)
+, m_ld(ld)
+, m_pPreTestPhase(NULL)
+, m_pHabituationPhase(NULL)
+, m_pTestPhase(NULL)
+{
+	connect(&m_ld, SIGNAL(attention()), this, SLOT(onAttention()));
+	connect(&m_ld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
+};
 
 void HExperiment::onAttention()
 {

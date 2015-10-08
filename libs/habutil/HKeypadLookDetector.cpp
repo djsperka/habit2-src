@@ -13,11 +13,23 @@
 
 HKeypadLookDetector::HKeypadLookDetector(HEventLog& log, QWidget* pdialog, int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, bool bUseLeft, bool bUseCenter, bool bUseRight)
 : HLookDetector(minlooktime_ms, minlookawaytime_ms, maxlookawaytime_ms, maxaccumlooktime_ms, log)
-, m_pdialog(pdialog)
 , m_bUseLeft(bUseLeft)
 , m_bUseCenter(bUseCenter)
 , m_bUseRight(bUseRight)
 {
+	setDialog(pdialog);
+};
+
+HKeypadLookDetector::~HKeypadLookDetector()
+{
+	m_pdialog->releaseKeyboard();
+	m_pdialog->removeEventFilter(this);
+	qDebug() << "HKeypadLookDetector: Event filter removed.";
+};
+
+void HKeypadLookDetector::setDialog(QWidget *pdialog)
+{
+	m_pdialog = pdialog;
 	if (m_pdialog)
 	{
 		m_pdialog->grabKeyboard();
@@ -28,16 +40,7 @@ HKeypadLookDetector::HKeypadLookDetector(HEventLog& log, QWidget* pdialog, int m
 	{
 		qDebug() << "HKeypadLookDetector: No event filter installed - expecting testing input.";
 	}
-};																																							  
-
-HKeypadLookDetector::~HKeypadLookDetector() 
-{ 
-	m_pdialog->releaseKeyboard();
-	m_pdialog->removeEventFilter(this); 
-	qDebug() << "HKeypadLookDetector: Event filter removed.";
-};
-
-
+}
 
 bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 {
@@ -91,12 +94,10 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 						{
 							if (isLookEnabled())
 							{
-								qDebug() << "Key_5 down: addTrans";
 								addTrans(HLookTrans::NoneCenter, t);
 							}
 							else
 							{
-								qDebug() << "Key_5 down: pendingTrans";
 								pendingTrans(true, HLookTrans::NoneCenter);
 							}
 							bVal = true;

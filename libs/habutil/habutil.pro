@@ -54,6 +54,7 @@ HEADERS +=	HLook.h \
 			HReliability.h \
 			HStimulusUtil.h \
 			HExperimentUtil.h \
+			HTestingInputWrangler.h \
 			habit/HControlPanel.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
@@ -184,6 +185,7 @@ SOURCES +=	HLook.cpp \
 			HTrialLog.cpp \
 			HPhaseLog.cpp \
 			HEventLog.cpp \
+			HExperiment.cpp \
 			HPhaseChildState.cpp \
 			HTrialChildState.cpp \
 			HTypes.cpp \
@@ -195,6 +197,7 @@ SOURCES +=	HLook.cpp \
 			HReliability.cpp \
 			HStimulusUtil.cpp \
 			HExperimentUtil.cpp \
+			HTestingInputWrangler.cpp \
 			habit/HControlPanel.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \

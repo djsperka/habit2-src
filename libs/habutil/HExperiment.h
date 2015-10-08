@@ -21,14 +21,7 @@ class HExperiment: public HLogState
 	Q_OBJECT
 
 public:
-	HExperiment(HEventLog& log, HMediaManager& mm, HLookDetector& ld, QState* parent = 0) 
-	: HLogState(log, "HExperiment", parent) 
-	, m_mm(mm)
-	, m_ld(ld)
-	, m_pPreTestPhase(NULL)
-	, m_pHabituationPhase(NULL)
-	, m_pTestPhase(NULL)
-	{};
+	HExperiment(HEventLog& log, HMediaManager& mm, HLookDetector& ld, QState* parent = 0);
 	~HExperiment() {};
 	
 	bool hasPreTestPhase() { return m_pPreTestPhase==(HPhase*)NULL; };
@@ -38,7 +31,9 @@ public:
 	HPhase* habituation() { return m_pHabituationPhase; };
 	HPhase* test() { return m_pTestPhase; };
 	HMediaManager& getMediaManager() { return m_mm; };
+	const HMediaManager& getMediaManager() const { return m_mm; };
 	HLookDetector& getLookDetector() { return m_ld; };
+	const HLookDetector& getLookDetector() const { return m_ld; };
 	void onExit(QEvent* e) 
 	{
 		Q_UNUSED(e);
@@ -49,6 +44,10 @@ public:
 signals:
 	void phaseStarted(QString phaseName);
 	void trialStarted(int trialnumber, int repeatnumber);
+
+private slots:
+	void onAttention();
+	void onLook(HLook l);
 
 private:
 	HMediaManager& m_mm;

@@ -67,6 +67,9 @@ void HLookDetector::enableLook()
 		addTrans(getLookTrans(m_iLookTransPendingType), HElapsedTimer::elapsed());
 		pendingTrans(false);
 	}
+
+	emit lookDetectorEnabled();
+
 	return;
 };
 
@@ -77,6 +80,8 @@ void HLookDetector::disable()
 		m_bLookEnabled = false;
 		lookEnabled(false);
 		stopLooker(HElapsedTimer::elapsed());		// stop state machine
+
+		emit lookDetectorDisabled();
 	}
 	if (m_bAGLookEnabled)
 	{

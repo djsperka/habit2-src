@@ -14,7 +14,7 @@
 #include <QFinalState>
 #include <QtDebug>
 
-HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG)
+HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG, bool bTestingInput)
 	: HExperimentChildState(exp, log, phaseSettings.getPhaseType().name())
 	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
@@ -23,7 +23,7 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	, m_itrial(0)
 {
 	QAbstractTransition* trans;
-	m_sTrial = new HTrial(*this, log, phaseSettings, lookSettings, bUseAG);
+	m_sTrial = new HTrial(*this, log, phaseSettings, lookSettings, bUseAG, bTestingInput);
 	setInitialState(m_sTrial);
 	HPhaseTrialCompleteState* sTrialComplete = new HPhaseTrialCompleteState(*this, log);
 	m_sTrial->addTransition(m_sTrial, SIGNAL(finished()), sTrialComplete);
@@ -77,8 +77,6 @@ void HPhase::onEntry(QEvent* e)
 	// post 'phase start' event to event log.
 	eventLog().append(new HPhaseStartEvent(ptype(), HElapsedTimer::elapsed()));
 	
-	// emit signal to let the world know this phase has started
-	emit phaseStarted(m_phaseSettings.getPhaseType().name());
 
 	// connect media manager signal screen(int) to slot screenStarted(int)
 	// connect media manager signal agStarted(int) to slot agStarted(int)
@@ -93,6 +91,13 @@ void HPhase::onEntry(QEvent* e)
 	experiment().getLookDetector().setMinLookAwayTime(m_lookSettings.getMinLookAwayTime());
 	experiment().getLookDetector().setMaxAccumulatedLookTime(m_phaseSettings.getIsMaxAccumulatedLookTime() ? m_phaseSettings.getMaxAccumulatedLookTime() : 0);
 	experiment().getLookDetector().setMaxLookAwayTime(m_phaseSettings.getIsMaxLookAwayTime() ? m_phaseSettings.getMaxLookAwayTime() : 0);
+
+	// emit signal to let the world know this phase has started
+	// djs 10-7-2015 Moved this to be the last statement in the function.
+	// NOTE: onEntry() is called first, then QAbstractState emits SIGNAL(entered()),
+	// so this signal comes before the state is "entered"?
+	emit phaseStarted(m_phaseSettings.getPhaseType().name());
+
 };
 
 void HPhase::onExit(QEvent* e)

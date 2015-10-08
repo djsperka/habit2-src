@@ -22,6 +22,7 @@ void ControlBarOptionsForm::initialize()
 {
 	ui->displayPhaseCheckBox->setChecked(controlBarOptions_.isCurrentExperimentDisplayed());
 	ui->displayStimulusCheckBox->setChecked(controlBarOptions_.isCurrentStimulusDisplayed());
+	ui->displayLookingDirectionCheckBox->setChecked(controlBarOptions_.isLookingDirectionDisplayed());
 }
 
 Habit::ControlBarOptions ControlBarOptionsForm::getConfigurationObject() {
@@ -29,6 +30,7 @@ Habit::ControlBarOptions ControlBarOptionsForm::getConfigurationObject() {
 	cbo.setId(controlBarOptions_.getId());
 	cbo.setDisplayCurrentExperiment(ui->displayPhaseCheckBox->isChecked());
 	cbo.setDisplayCurrentStimulus(ui->displayStimulusCheckBox->isChecked());
+	cbo.setDisplayLookingDirection(ui->displayLookingDirectionCheckBox->isChecked());
 	cbo.setUseControlBar(true);
 	return cbo;
 }

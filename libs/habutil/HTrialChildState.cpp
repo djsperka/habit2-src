@@ -46,6 +46,13 @@ HStimRunningState::HStimRunningState(HTrial& trial, HEventLog& log, const Habit:
 	}
 };
 
+
+/*
+ * This is called before the state's entered() signal is emitted.
+ * See HTrial::onStimRunningEntered(), which is connected to
+ * HStimRunningState SIGNAL(entered()).
+ */
+
 void HStimRunningState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);

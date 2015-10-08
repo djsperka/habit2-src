@@ -138,7 +138,8 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 	const int iBigStimulusTableChange							= 2000016;
 	const int iBigStimulusTableChangeAG							= 2000017;
 	const int iRepeatTrialOnMaxLookAway							= 2000018;
-	const int iLatestVersion									= 2000018;
+	const int iAddColumnToControlBarOptions						= 2000019;
+	const int iLatestVersion									= 2000019;
 	int iVersion = getDBVersion();
 
 	// Will any updates be required? If so, close db, make a copy, then reopen.
@@ -507,7 +508,7 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 				}
 
 
-				if (iVersion < iRepeatTrialOnMaxLookAway)
+				if (result && iVersion < iRepeatTrialOnMaxLookAway)
 				{
 					// Add column repeat_on_max_lookaway to phase_settings
 					db.transaction();
@@ -523,13 +524,38 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 					}
 					else
 					{
-						qCritical() << "Error in updateDBVersion at version " << iAddExperimentHiddenColumn;
+						qCritical() << "Error in updateDBVersion at version " << iRepeatTrialOnMaxLookAway;
 						qDebug() << q0.lastQuery() << " : " << q0.lastError();
 						qDebug() << q2.lastQuery() << " : " << q2.lastError();
 						result = false;
 						db.rollback();
 					}
 				}
+
+				if (result && iVersion < iAddColumnToControlBarOptions)
+				{
+					// Add column repeat_on_max_lookaway to phase_settings
+					db.transaction();
+					QSqlQuery q0("alter table controlbar_options add column display_looking_direction INTEGER DEFAULT 0");
+					QSqlQuery q2("insert into habit_version (version) values(?)");
+					q2.bindValue(0, iAddColumnToControlBarOptions);
+					q2.exec();
+					if (!q0.lastError().isValid() && !q2.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAddColumnToControlBarOptions;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddColumnToControlBarOptions;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
+
 
 				// If failed, revert to to original database
 				if (!result)

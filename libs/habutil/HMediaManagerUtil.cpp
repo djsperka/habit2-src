@@ -13,9 +13,8 @@
 #include "HWorkspaceUtil.h"
 
 
-HMediaManager* createMediaManager(const Habit::ExperimentSettings& es, QWidget* parent)
+HMediaManager* createMediaManager(const Habit::ExperimentSettings& es)
 {
-	Q_UNUSED(parent);
 	HMediaManager* pmm = new HMediaManager();
 
 	// Stimulus Display info

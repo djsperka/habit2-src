@@ -89,6 +89,7 @@ const HPhaseSettings& HPhaseSettingsWidget::getHPhaseSettings()
 	m_settings.setIsMaxLookAwayTime(ui->cbxContinuousLookAwayTime->isChecked());
 	m_settings.setMaxLookAwayTime(ui->lineeditContinuousLookAwayTime->text().toUInt(&b));
 	m_settings.setRepeatTrialOnMaxLookAwayTime((ui->cbxRepeatTrialInattentive->isChecked()));
+	qDebug() << "HPhaseSettingsWidget::getHPhaseSettings() setRepeatTrialOnMaxLookAwayTime " << ui->cbxRepeatTrialInattentive->isChecked();
 	m_settings.setIsMaxStimulusTime(ui->cbxMaxStimulusTime->isChecked());
 	m_settings.setMaxStimulusTime(ui->lineeditMaxStimulusTime->text().toUInt(&b));
 	m_settings.setMeasureStimulusTimeFromOnset(ui->rbMeasuredFromStimulusOnset->isChecked());

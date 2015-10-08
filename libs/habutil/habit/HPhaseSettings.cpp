@@ -45,6 +45,7 @@ HPhaseSettings::HPhaseSettings(const HPhaseSettings& ts)
 , m_uiMaxAccumulatedLookTime(ts.getMaxAccumulatedLookTime())
 , m_bIsMaxLookAwayTime(ts.getIsMaxLookAwayTime())
 , m_uiMaxLookAwayTime(ts.getMaxLookAwayTime())
+, m_bRepeatTrialOnMaxLookAwayTime(ts.getRepeatTrialOnMaxLookAwayTime())
 , m_bIsMaxStimulusTime(ts.getIsMaxStimulusTime())
 , m_uiMaxStimulusTime(ts.getMaxStimulusTime())
 , m_bMeasureStimulusTimeFromOnset(ts.getMeasureStimulusTimeFromOnset())
@@ -67,6 +68,7 @@ HPhaseSettings& HPhaseSettings::operator=(const HPhaseSettings& rhs)
 		m_uiMaxAccumulatedLookTime = rhs.getMaxAccumulatedLookTime();
 		m_bIsMaxLookAwayTime = rhs.getIsMaxLookAwayTime();
 		m_uiMaxLookAwayTime = rhs.getMaxLookAwayTime();
+		m_bRepeatTrialOnMaxLookAwayTime = rhs.getRepeatTrialOnMaxLookAwayTime();
 		m_bIsMaxStimulusTime = rhs.getIsMaxStimulusTime();
 		m_uiMaxStimulusTime = rhs.getMaxStimulusTime();
 		m_bMeasureStimulusTimeFromOnset = rhs.getMeasureStimulusTimeFromOnset();

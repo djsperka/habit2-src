@@ -12,10 +12,11 @@
 
 using namespace GUILib;
 
-HExperimentStatusWidget::HExperimentStatusWidget(const QString& name, bool bDisplayCurrentPhaseTrial, QWidget* parent)
+HExperimentStatusWidget::HExperimentStatusWidget(const QString& name, bool bDisplayCurrentPhaseTrial, bool bDisplayLookingDirection, QWidget* parent)
 : QWidget(parent)
 , ui(new Ui::HExperimentStatusForm)
 , m_bDisplayCurrentPhaseTrial(bDisplayCurrentPhaseTrial)
+, m_bDisplayLookingDirection(bDisplayLookingDirection)
 {
 	ui->setupUi(this);
 	initialize(name);
@@ -73,3 +74,14 @@ void HExperimentStatusWidget::setTrial(int trial, int repeat)
 	}
 }
 
+void HExperimentStatusWidget::setLooking(QString sLookingAt)
+{
+	if (m_bDisplayLookingDirection)
+	{
+		ui->labelLooking->setText(sLookingAt);
+	}
+	else
+	{
+		ui->labelLooking->setText(QString("Not displayed"));
+	}
+}
