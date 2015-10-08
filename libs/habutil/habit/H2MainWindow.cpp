@@ -26,14 +26,18 @@
 #include "HResultsDialog.h"
 #include "HStimulusUtil.h"
 #include "HResultsExplorerDialog.h"
+#include "HMediaManagerUtil.h"
+#include "HLookDetectorUtil.h"
+#include "HTestingInputWrangler.h"
 
 using namespace GUILib;
 using namespace Habit;
 
 
-GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun)
+GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon)
 : QMainWindow()
-, m_bTestRunDefault(bTestRun)
+, m_bTestRunIsDefault(bDefaultTestRun)
+, m_bShowTestingIcon(bShowTestingIcon)
 {
 	m_pExperimentListWidget = new GUILib::HExperimentListWidget();
 	setCentralWidget(m_pExperimentListWidget);
@@ -109,6 +113,12 @@ void GUILib::H2MainWindow::createActions()
     m_actionPreferences->setStatusTip(tr("Edit Habit preferences for this computer"));
     connect(m_actionPreferences, SIGNAL(triggered()), this, SLOT(editPreferences()));
 
+    if (m_bShowTestingIcon)
+    {
+		m_actionTesting = new QAction(QIcon(":/resources/testing.png"), tr("&Testing"), this);
+		m_actionTesting->setStatusTip(tr("Load a testing file and test phase settings."));
+		connect(m_actionTesting, SIGNAL(triggered()), this, SLOT(testExperiment()));
+    }
 }
 
 
@@ -123,6 +133,10 @@ void GUILib::H2MainWindow::createToolBars()
     m_pToolBar->addAction(m_actionRun);
     m_pToolBar->addAction(m_actionResults);
     m_pToolBar->addAction(m_actionPreferences);
+    if (m_bShowTestingIcon)
+    {
+    	m_pToolBar->addAction(m_actionTesting);
+    }
 }
 
 
@@ -426,9 +440,17 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 	return b;
 }
 
-
+void GUILib::H2MainWindow::testExperiment()
+{
+	run(true);
+}
 
 void GUILib::H2MainWindow::runExperiment()
+{
+	run(false);
+}
+
+void GUILib::H2MainWindow::run(bool bTestInput)
 {
 	QString expt = m_pExperimentListWidget->selectedExperiment();	// the experiment to run
 	if (expt.isEmpty())
@@ -459,12 +481,34 @@ void GUILib::H2MainWindow::runExperiment()
 			return;
 		}
 
-		GUILib::HRunSettingsDialog dlg(settings, m_bTestRunDefault, this);
+		GUILib::HRunSettingsDialog dlg(settings, m_bTestRunIsDefault, this);
 		int i = dlg.exec();
 		if (i == QDialog::Accepted)
 		{
 			HEventLog log;
-			HControlPanel habitControlPanel(settings, log, dlg.getRunSettings(), this);
+			HMediaManager *pmm = createMediaManager(settings);
+
+			HControlPanel habitControlPanel(settings, log, dlg.getRunSettings(), pmm, this);
+			HLookDetector* pld = createLookDetector(settings, log, &habitControlPanel);
+			HStateMachine *psm = createExperiment(this, dlg.getRunSettings(), settings, pld, pmm, log, bTestInput);
+			HTestingInputWrangler *pWrangler;
+			if (bTestInput)
+			{
+				pWrangler = new HTestingInputWrangler();
+				pWrangler->enable(pld, &psm->experiment());
+				// Get input file
+
+				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation), "(*.txt)");
+				qDebug() << "Selected input file " << selectedFileName;
+				QFile file(selectedFileName);
+				if (!pWrangler->load(file))
+				{
+					QMessageBox::critical(this, "Cannot load input file", "Cannot load testing input file.");
+					return;
+				}
+			}
+			habitControlPanel.setStateMachine(psm);
+
 			// set dialog title
 			habitControlPanel.setWindowTitle(dlg.getRunLabel());
 			if (habitControlPanel.exec() != QDialog::Accepted)

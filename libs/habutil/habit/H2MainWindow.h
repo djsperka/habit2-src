@@ -30,7 +30,7 @@ namespace Habit
 		 Q_OBJECT
 
 	 public:
-		 H2MainWindow(bool bDefaultTestRun=true);
+		 H2MainWindow(bool bDefaultTestRun=true, bool bShowTestingIcon=false);
 		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems);
 
 	 protected:
@@ -59,6 +59,7 @@ namespace Habit
 		 void experimentActivated(QString);
 		 void editExperiment();
 		 void editPreferences();
+		 void testExperiment();
 		 void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 	 private:
@@ -66,9 +67,11 @@ namespace Habit
 	//     void createMenus();
 		 void createToolBars();
 	//     void createStatusBar();
+		 void run(bool bInputTesting);
 
 	//    QMap<QString, HExperimentMain> m_mapExperiments;
-		 bool m_bTestRunDefault;
+		 bool m_bTestRunIsDefault;
+		 bool m_bShowTestingIcon;
 		 GUILib::HExperimentListWidget *m_pExperimentListWidget;
 		 QToolBar *m_pToolBar;
 		 QAction *m_actionEdit;
@@ -79,6 +82,7 @@ namespace Habit
 		 QAction *m_actionResults;
 		 QAction *m_actionPreferences;
 		 QAction *m_actionImport;
+		 QAction *m_actionTesting;
 	 };
  };
 

@@ -65,6 +65,8 @@ int main(int argc, char *argv[])
 	bool bPendingWorkspace = false;
 	QString sPendingWorkspace;
 	bool bDBUpdateOnly = false;
+	bool bTestRunIsDefault = false;
+	bool bShowTestingIcon = false;
 
 	// by default add debugging output goes to the screen unless we install
 	// a handler for logging msgs. Until Habit is at a good release state
@@ -105,6 +107,14 @@ int main(int argc, char *argv[])
 		{
 			bDBUpdateOnly = true;
 		}
+		else if (!strcmp(argv[i], "-T"))
+		{
+			bTestRunIsDefault = true;
+		}
+		else if (!strcmp(argv[i], "-t"))
+		{
+			bShowTestingIcon = true;
+		}
 	}
 
     HApplication h(argc, argv);
@@ -123,7 +133,7 @@ int main(int argc, char *argv[])
 	if (!habutilInitWorkspace() || bDBUpdateOnly)
 		return 0;
 
-	GUILib::H2MainWindow w;
+	GUILib::H2MainWindow w(bTestRunIsDefault, bShowTestingIcon);
 	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
 	Q_INIT_RESOURCE(resources);
 
