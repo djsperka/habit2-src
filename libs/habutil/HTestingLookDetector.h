@@ -19,7 +19,7 @@ class HTestingLookDetector: public HLookDetector
 	Q_OBJECT
 
 public:
-	HTestingLookDetector(QFile& inputFile, int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight);
+	HTestingLookDetector(QFile& inputFile, HEventLog& log, bool bInclusiveLookTime, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight);
 	virtual ~HTestingLookDetector();
 protected:
 	virtual void agLookEnabled(bool enabled);

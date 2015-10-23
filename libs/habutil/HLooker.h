@@ -25,7 +25,7 @@ class HLooker : public QStateMachine
 	Q_OBJECT
 
 public:
-	HLooker(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, bool bInclusiveLookTime = true, bool bLive = true);
+	HLooker(HEventLog& log, bool bInclusiveLookTime);
 	~HLooker() {};
 
 	// Add a transition. A new event is posted to the state machine.
@@ -84,7 +84,6 @@ private:
 	int m_maxAccumulatedLookTimeMS; // when >0, when accumulated look time reaches this emit maxAccumulatedLookTime()
 	HEventLog& m_log;
 	bool m_bInclusiveLookTime;	// if true (default), short look-aways are included in total look time.
-	bool m_bLive;				// if true, running with live observer. if false, pre-recorded transitions used.
 	bool m_bLookStarted;		// if true a look has been started but not yet ended.
 	const HLookDirection* m_pdirectionLookStarted;	// when m_bLookStarted==true this is the direction
 	int m_iLookStartedIndex;	// only valid if (m_bLookStarted); in that case m_transitions[m_iLookStartedIndex]

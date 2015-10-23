@@ -55,11 +55,8 @@ void HLookDetector::enableLook()
 		m_bLookEnabled = true;
 		lookEnabled(true);
 	}
-	qDebug() << "call start()";
 	start();	// start state machine
-	qDebug() << "state machine started, calling process Events(0)";
 	QCoreApplication::processEvents(0);
-	qDebug() << "append log";
 	log().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
 	if (m_bLookTransPending)
 	{

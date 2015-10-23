@@ -11,15 +11,14 @@
 #include <QtDebug>
 #include <QCoreApplication>
 
-HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, bool bInclusiveLookTime, bool bLive)
+HLooker::HLooker(HEventLog& log, bool bInclusiveLookTime)
 : QStateMachine()
-, m_minLookTimeMS(minlooktime_ms)
-, m_minLookAwayTimeMS(minlookawaytime_ms)
-, m_maxLookAwayTimeMS(maxlookawaytime_ms)
-, m_maxAccumulatedLookTimeMS(maxaccumlooktime_ms)
+, m_minLookTimeMS(0)
+, m_minLookAwayTimeMS(0)
+, m_maxLookAwayTimeMS(0)
+, m_maxAccumulatedLookTimeMS(0)
 , m_log(log)
 , m_bInclusiveLookTime(bInclusiveLookTime)
-, m_bLive(bLive)
 , m_bLookStarted(false)
 , m_pdirectionLookStarted(&HLookDirection::LookAway)
 , m_iLookStartedIndex(-1)
@@ -81,7 +80,6 @@ HLooker::HLooker(int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime
 
 void HLooker::onStarted()
 {
-	qDebug() << "onStarted() " << (isRunning() ? " RUNNING " : "NOT RUNNING");
 }
 
 void HLooker::addTrans(const HLookTrans& type, int tMS)
@@ -202,6 +200,19 @@ bool HLooker::setMaxLookAwayTime(int t)
 	}
 	return b;
 }
+
+
+// Look at the look transitions recorded, starting at m_transitions.at(iLookStartIndex), up to and including the last transition recorded.
+// This function should only be called when iLookStartIndex is < 0, or when the transition at iLookStartIndex is a transition to looking.
+// Sums up all looking based on those transitions. Looks away from target(s) are ignored. No attempt is made to analyze where the looking
+// is directed, so looks at different targets would be summed up together here (best take care of the different looking directions elsewhere).
+// Returns true always;)
+// lookStartTimeMS - the time of the first transition to looking
+// lastLookStartTimeMS - if there are multiple transitions, the time of the last transition to looking
+// cumulativeLookTimeMS - sum of all looking periods for the transitions analyzed
+// lastLookAwayStartTimeMS - if there are multiple transitions, the time of the last transition to looking AWAY (-1 if no such transition)
+//
+
 
 bool HLooker::analyzeLooking(int iLookStartIndex, int& lookStartTimeMS, int& lastLookStartTimeMS, int& cumulativeLookTimeMS, int& lastLookAwayStartTimeMS)
 {
@@ -458,7 +469,12 @@ void HLooker::minLookTimeReached()
 		// Its possible that the max accumulated look time was reached during the "min look" time.
 		// Check if that's happened - if so then emit maxAccumulatedLookTime().
 		// Otherwise, start max accumulated look timer.
-		int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS + m_minLookTimeMS;
+		// djs 10-14-2015. Be careful when summing up total looking at this point. Why? Because we should be in a looking
+		// state right now, but we don't know for how long. We cannot assume that its been for m_minLookTimeMS, because
+		// there may have been a short look-away followed by a return to looking. In that case, the looking prior to the
+		// look-away is included in cumulativeLookTimeMS, and it was taken into account when starting the minLookTime timer.
+		// A better way is to add the time this timer was initialized with.
+		int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS + m_ptimerMinLookTime->interval();
 		if (sumOfAllLooking > m_maxAccumulatedLookTimeMS)
 		{
 			emit maxAccumulatedLookTime();

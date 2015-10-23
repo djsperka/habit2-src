@@ -12,8 +12,8 @@
 #include <QTimer>
 #include <QtDebug>
 
-HTestingLookDetector::HTestingLookDetector(QFile& inputFile, int minlooktime_ms, int minlookawaytime_ms, int maxlookawaytime_ms, int maxaccumlooktime_ms, HEventLog& log, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight)
-: HLookDetector(minlooktime_ms, minlookawaytime_ms, maxlookawaytime_ms, maxaccumlooktime_ms, log)
+HTestingLookDetector::HTestingLookDetector(QFile& inputFile, HEventLog& log, bool bInclusiveLookTime, QWidget* pdialog, bool bUseLeft, bool bUseCenter, bool bUseRight)
+: HLookDetector(log, bInclusiveLookTime)
 , m_pdialog(pdialog)
 , m_bUseLeft(bUseLeft)
 , m_bUseCenter(bUseCenter)
