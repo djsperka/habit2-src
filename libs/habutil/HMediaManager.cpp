@@ -38,7 +38,6 @@ HMediaManager::HMediaManager(bool bPlayersAreFullScreen)
 
 HMediaManager::~HMediaManager()
 {
-	qDebug() << "HMediaManager::~HMediaManager()";
 	if (m_bPlayersAreFullScreen)
 	{
 		QMapIterator<HPlayerPositionType, HPlayer*> it(m_players);
