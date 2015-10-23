@@ -88,6 +88,10 @@ void habutilClearStimulusRootDir();
 // Set stimroot to given dir
 void habutilSetStimulusRootDir(const QString& d);
 
+// get/set state of "use default stim root" checkbox
+bool habutilGetUseDefaultStimRoot();
+void habutilSetUseDefaultStimRoot(bool b);
+
 // get last dir that a stim was selected from
 bool habutilGetLastDir(QDir& dir);
 

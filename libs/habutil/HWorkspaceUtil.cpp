@@ -286,16 +286,23 @@ void habutilSetWorkspace(const QString& d)
 bool habutilGetStimulusRootDir(QDir& stimRootDir)
 {
 	QSettings settings;
-	stimRootDir = habutilGetStimDir();
-	if (!settings.contains("stimroot"))
+
+	if (!habutilGetUseDefaultStimRoot())
 	{
-		settings.setValue("stimroot", stimRootDir.absolutePath());
+		stimRootDir = habutilGetStimDir();
+		if (!settings.contains("stimroot"))
+		{
+			settings.setValue("stimroot", stimRootDir.absolutePath());
+		}
+		else
+		{
+			stimRootDir.setPath(settings.value("stimroot").toString());
+		}
 	}
 	else
 	{
-		stimRootDir.setPath(settings.value("stimroot").toString());
+		stimRootDir = habutilGetStimDir();
 	}
-
 	return stimRootDir.exists();
 }
 
@@ -328,6 +335,24 @@ bool habutilSelectStimulusRootDir()
 	}
 	return b;
 }
+
+bool habutilGetUseDefaultStimRoot()
+{
+	QSettings settings;
+	if (!settings.contains("stimroot_use_default"))
+	{
+		settings.setValue("stimroot_use_default", false);
+	}
+	return settings.value("stimroot_use_default").toBool();
+}
+
+void habutilSetUseDefaultStimRoot(bool b)
+{
+	QSettings settings;
+	settings.setValue("stimroot_use_default", b);
+	return;
+}
+
 
 
 // Testing utility. Call to delete the "stimroot" setting from settings.

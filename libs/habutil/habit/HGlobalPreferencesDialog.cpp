@@ -37,6 +37,7 @@ void GUILib::HGlobalPreferencesDialog::create()
 	m_pcbLeft = new QComboBox();
 	m_pcbCenter = new QComboBox();
 	m_pcbRight = new QComboBox();
+	m_pcheckDefaultStimRoot = new QCheckBox("Use default stimulus root dir");
 
 	m_pcbControl->addItem(QString("None"), QVariant(-1));
 	m_pcbLeft->addItem(QString("None"), QVariant(-1));
@@ -88,8 +89,11 @@ void GUILib::HGlobalPreferencesDialog::create()
 	hroot->addWidget(new QLabel("Stimulus root folder:"));
 	hroot->addWidget(m_plineeditRoot, 1);
 	hroot->addWidget(m_pbSelect);
+	QVBoxLayout *vroot = new QVBoxLayout;
+	vroot->addLayout(hroot);
+	vroot->addWidget(m_pcheckDefaultStimRoot);
 
-	pgbRoot->setLayout(hroot);
+	pgbRoot->setLayout(vroot);
 
 
 	m_plineeditWorkspace = new QLineEdit();
@@ -129,16 +133,40 @@ void GUILib::HGlobalPreferencesDialog::connections()
 	connect(m_pbSelect, SIGNAL(clicked()), this, SLOT(selectClicked()));
 	connect(m_pbSelectWorkspace, SIGNAL(clicked()), this, SLOT(selectWorkspaceClicked()));
 	connect(m_pbIdentify, SIGNAL(clicked()), this, SLOT(identifyClicked()));
+	connect(m_pcheckDefaultStimRoot, SIGNAL(clicked()), this, SLOT(defaultStimRootClicked()));
+}
+
+void GUILib::HGlobalPreferencesDialog::defaultStimRootClicked()
+{
+	if (m_pcheckDefaultStimRoot->isChecked())
+	{
+		m_plineeditRoot->setText("<workspace_dir>/stim");
+		m_plineeditRoot->setEnabled(false);
+	}
+	else
+	{
+		m_plineeditRoot->setText(habutilGetStimulusRootDir());
+		m_plineeditRoot->setEnabled(true);
+	}
 }
 
 void GUILib::HGlobalPreferencesDialog::initialize()
 {
-	m_plineeditRoot->setText(habutilGetStimulusRootDir());
 	m_plineeditWorkspace->setText(habutilGetWorkspaceDir());
 	m_pcbControl->setCurrentIndex(m_pcbControl->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Control))));
 	m_pcbLeft->setCurrentIndex(m_pcbLeft->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Left))));
 	m_pcbCenter->setCurrentIndex(m_pcbCenter->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Center))));
 	m_pcbRight->setCurrentIndex(m_pcbRight->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Right))));
+
+	if (habutilGetUseDefaultStimRoot())
+	{
+		m_pcheckDefaultStimRoot->setChecked(true);
+	}
+	else
+	{
+		m_pcheckDefaultStimRoot->setChecked(false);
+	}
+	defaultStimRootClicked();
 }
 
 void GUILib::HGlobalPreferencesDialog::doneClicked()
@@ -149,6 +177,7 @@ void GUILib::HGlobalPreferencesDialog::doneClicked()
 	habutilSetMonitorID(HPlayerPositionType::Left, m_pcbLeft->itemData(m_pcbLeft->currentIndex()).toInt());
 	habutilSetMonitorID(HPlayerPositionType::Center, m_pcbCenter->itemData(m_pcbCenter->currentIndex()).toInt());
 	habutilSetMonitorID(HPlayerPositionType::Right, m_pcbRight->itemData(m_pcbRight->currentIndex()).toInt());
+	habutilSetUseDefaultStimRoot(m_pcheckDefaultStimRoot->isChecked());
 	accept();
 }
 

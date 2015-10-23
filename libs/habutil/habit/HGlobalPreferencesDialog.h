@@ -29,6 +29,7 @@ namespace GUILib
 		QComboBox *m_pcbLeft;
 		QComboBox *m_pcbCenter;
 		QComboBox *m_pcbRight;
+		QCheckBox *m_pcheckDefaultStimRoot;
 
 		void create();
 		void connections();
@@ -44,6 +45,7 @@ namespace GUILib
 		void selectClicked();
 		void selectWorkspaceClicked();
 		void identifyClicked();
+		void defaultStimRootClicked();
 
 	public:
 		HGlobalPreferencesDialog(QWidget *parent=NULL);
