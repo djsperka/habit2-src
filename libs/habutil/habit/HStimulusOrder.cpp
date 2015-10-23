@@ -10,7 +10,7 @@
 #include <QRegExp>
 
 //static const QRegExp re("(\\w+)(/(\\w+))?");
-static const QString sreWordWithSpaces("((\\w)|(\\w[ \\w]*\\w))");
+static const QString sreWordWithSpaces("((\\w)|(\\w[ -\\w]*\\w))");
 static const QRegExp reStimAndLabel(sreWordWithSpaces + "(/" + sreWordWithSpaces + ")?");
 
 

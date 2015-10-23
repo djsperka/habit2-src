@@ -106,6 +106,7 @@ void HStimuliSettingsWidget::previewOrder(int row)
 	if (!m_stimuli.getIndexedOrderList(orderName, list))
 	{
 		qDebug() << "Cannot get order list for order \"" << orderName << "\"";
+		qDebug() << m_stimuli;
 	}
 	else
 	{

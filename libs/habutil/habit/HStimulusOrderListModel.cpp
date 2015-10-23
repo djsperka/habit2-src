@@ -35,9 +35,11 @@ QVariant HStimulusOrderListModel::data(const QModelIndex & index, int role) cons
 	{
 		// Determine if the order at this index is valid (i.e. all stimuli in the
 		// order are in fact found in the stimulus settings list.
-		//qDebug() << "HStimulusOrderListModel::data(BackgroundRole)";
+		//qDebug() << "HStimulusOrderListModel::data(BackgroundRole) for order " << m_list[index.row()].getName();
 		QStringList allStimNames = m_ssList.names();
 		QStringList stimNamesThisOrder(m_list[index.row()].getList());
+		//qDebug() << "allStimNames=" << allStimNames.join(" | ");
+		//qDebug() << "stimNamesThisOrder=" << stimNamesThisOrder.join(" | ");
 		QStringListIterator it(stimNamesThisOrder);
 		bool b = true;
 		while (b && it.hasNext())
