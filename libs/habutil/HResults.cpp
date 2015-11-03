@@ -240,7 +240,7 @@ bool HResults::saveToCSV(const QString& filename) const
 				else
 					row.setHabituated(QString("No"));
 				row.setTrialStartTime(ptse->timestamp());
-				row.setTrial(ptse->trialnumber());
+				row.setTrial(ptse->trialnumber() + 1);		// djs 11-2-2015 Use trial number, not index, in output CSV.
 				row.setRepeat(ptse->repeatnumber());
 				totalLookTime = 0;
 				totalLookAwayTime = 0;

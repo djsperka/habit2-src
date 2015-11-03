@@ -131,7 +131,7 @@ void HPhase::requestCurrentStim()
 	{
 		eventLog().append(new HStimLabelRequestEvent(-1, QString("ERROR"), HElapsedTimer::elapsed()));
 		experiment().getMediaManager().stim(-1);
-		qDebug() << "Bad trial number (" << m_itrial << ")for phase " << m_name << " max " << m_stimuli.size();
+		qDebug() << "Bad trial index (" << m_itrial << ")for phase " << m_name << " max " << m_stimuli.size();
 	}
 
 }

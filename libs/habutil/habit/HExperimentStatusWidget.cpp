@@ -66,7 +66,8 @@ void HExperimentStatusWidget::setTrial(int trial, int repeat)
 {
 	if (m_bDisplayCurrentPhaseTrial)
 	{
-		ui->labelTrial->setText(QString("%1 (repeat %2)").arg(trial).arg(repeat));
+		// DJS 11-2-2015. Display trial number (1, 2, ...), not trial index (0, 1, 2, ...)
+		ui->labelTrial->setText(QString("%1 (repeat %2)").arg(trial+1).arg(repeat));
 	}
 	else
 	{

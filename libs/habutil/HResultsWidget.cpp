@@ -109,7 +109,7 @@ void HResultsWidget::addLooksTable(QTextCursor& cursor)
 		else if (e->type() == HEventType::HEventTrialStart)
 		{
 			HTrialStartEvent* ps = static_cast<HTrialStartEvent*>(e);
-			iTrialNumber = ps->trialnumber();
+			iTrialNumber = ps->trialnumber() + 1;	// DJS 11-2-2015 Use trial number (not index) in output
 			iRepeatNumber = ps->repeatnumber();
 			cellFormat.setBackground(trialColors[trialCounter % 2]);
 
