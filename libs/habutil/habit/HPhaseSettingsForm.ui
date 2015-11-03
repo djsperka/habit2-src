@@ -644,6 +644,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cbxMaxInitialTimeNotLooking</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lineeditMaxInitialTimeNotLooking</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>445</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>338</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <buttongroups>
   <buttongroup name="buttonGroup"/>
