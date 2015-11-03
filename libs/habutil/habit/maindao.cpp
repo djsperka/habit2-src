@@ -93,7 +93,7 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings*
 	q.addBindValue(settings->getIsMaxLookAwayTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxLookAwayTime());
 	q.addBindValue(settings->getRepeatTrialOnMaxLookAwayTime() ? 1 : 0);
-	qDebug() << "MainDao::addOrUpdateHPhaseSettings(" << experimentId << ", " << settings->getPhaseType().number() << ") repeat on max lookaway " << (settings->getRepeatTrialOnMaxLookAwayTime() ? 1 : 0);
+	//qDebug() << "MainDao::addOrUpdateHPhaseSettings(" << experimentId << ", " << settings->getPhaseType().number() << ") repeat on max lookaway " << (settings->getRepeatTrialOnMaxLookAwayTime() ? 1 : 0);
 	q.addBindValue(settings->getIsMaxStimulusTime() ? 1 : 0);
 	q.addBindValue(settings->getMaxStimulusTime());
 	q.addBindValue(settings->getMeasureStimulusTimeFromOnset() ? 1 : 0);
