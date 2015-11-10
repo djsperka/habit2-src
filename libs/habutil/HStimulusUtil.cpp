@@ -56,10 +56,28 @@ bool habutilStimulusFilesFound(const Habit::HStimulusSettings& settings, const H
 	QDir stimRootDir;
 	habutilGetStimulusRootDir(stimRootDir);
 	if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
-		b = !settings.getCenterStimulusInfo().getFileName().isEmpty() && (stimRootDir.exists(settings.getCenterStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getCenterStimulusInfo().getFileName()));
+		b = (
+				(
+					!settings.getCenterStimulusInfo().getFileName().isEmpty() &&
+					(stimRootDir.exists(settings.getCenterStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getCenterStimulusInfo().getFileName()))
+				) ||
+				settings.getCenterStimulusInfo().isBackground()
+			);
 	else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-		b = !settings.getLeftStimulusInfo().getFileName().isEmpty() && (stimRootDir.exists(settings.getLeftStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getLeftStimulusInfo().getFileName())) &&
-			!settings.getLeftStimulusInfo().getFileName().isEmpty() && (stimRootDir.exists(settings.getRightStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getRightStimulusInfo().getFileName()));
+		b = (
+				(
+					!settings.getLeftStimulusInfo().getFileName().isEmpty() &&
+					(stimRootDir.exists(settings.getLeftStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getLeftStimulusInfo().getFileName()))
+				) ||
+				settings.getLeftStimulusInfo().isBackground()
+			) &&
+			(
+				(
+					!settings.getRightStimulusInfo().getFileName().isEmpty() &&
+					(stimRootDir.exists(settings.getRightStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getRightStimulusInfo().getFileName()))
+				) ||
+				settings.getRightStimulusInfo().isBackground()
+			);
 	else
 	{
 		b = false;
