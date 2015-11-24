@@ -20,6 +20,7 @@ HStimulusDisplayInfoWidget::HStimulusDisplayInfoWidget(const Habit::StimulusDisp
 	ui->setupUi(this);
 	connect(ui->pbBackgroundColor, SIGNAL(clicked()), this, SLOT(onColorChooserClick()));
 	connect(ui->listStimulusLayout, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelectionChanged()));
+	connect(ui->rbFullScreen, SIGNAL(toggled(bool)), ui->cbMaintainAspectRatio, SLOT(setEnabled(bool)));
 	initialize();
 }
 
@@ -66,6 +67,17 @@ void HStimulusDisplayInfoWidget::initialize()
 
 	ui->cbxUseISS->setChecked(m_info.getUseISS());
 	ui->listStimulusLayout->setCurrentRow(m_info.getStimulusLayoutType().number());
+	ui->cbMaintainAspectRatio->setChecked(m_info.isOriginalAspectRatioMaintained());
+	if (m_info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen)
+	{
+		ui->rbFullScreen->setChecked(true);
+		ui->cbMaintainAspectRatio->setEnabled(true);
+	}
+	else
+	{
+		ui->rbOriginalSize->setChecked(true);
+		ui->cbMaintainAspectRatio->setEnabled(false);
+	}
 }
 
 Habit::StimulusDisplayInfo HStimulusDisplayInfoWidget::getStimulusDisplayInfo()
@@ -74,6 +86,19 @@ Habit::StimulusDisplayInfo HStimulusDisplayInfoWidget::getStimulusDisplayInfo()
 	info.setBackGroundColor(ui->pbBackgroundColor->palette().color(QPalette::Button));
 	info.setStimulusLayoutType(getStimulusLayoutType(ui->listStimulusLayout->currentRow()));
 	info.setUseISS(ui->cbxUseISS->isChecked());
+	info.setMaintainOriginalAspectRatio(ui->cbMaintainAspectRatio->isChecked());
+	if (ui->rbFullScreen->isChecked())
+	{
+		info.setDisplayType(HDisplayType::HDisplayTypeFullScreen);
+	}
+	else if (ui->rbOriginalSize->isChecked())
+	{
+		info.setDisplayType(HDisplayType::HDisplayTypeOriginalSize);
+	}
+	else
+	{
+		info.setDisplayType(HDisplayType::HDisplayTypeUnknown);
+	}
 	info.setId(m_info.getId());
 	return info;
 }

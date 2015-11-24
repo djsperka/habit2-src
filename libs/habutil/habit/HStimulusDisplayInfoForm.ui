@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>702</width>
-    <height>442</height>
+    <width>700</width>
+    <height>595</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,71 +19,109 @@
      <property name="title">
       <string>Stimulus Layout</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <widget class="QGroupBox" name="groupBox_3">
         <property name="title">
          <string>Stimuli Layout</string>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QListWidget" name="listStimulusLayout">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <item>
+              <property name="text">
+               <string>Single Monitor</string>
+              </property>
+              <property name="toolTip">
+               <string>Display stimuli on a single monitor</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/resources/single.png</normaloff>:/resources/single.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Dual Monitors (left/right)</string>
+              </property>
+              <property name="toolTip">
+               <string>Display stimuli on dual monitors, arranged side by side.</string>
+              </property>
+              <property name="icon">
+               <iconset resource="resources.qrc">
+                <normaloff>:/resources/leftright.png</normaloff>:/resources/leftright.png</iconset>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select monitor arrangement for your stimuli. The assignment of monitors depends on the particular computer that the experiment is run on, and is made via Habit's workspace &lt;span style=&quot; font-style:italic;&quot;&gt;Preferences&lt;/span&gt; on each computer&lt;span style=&quot; font-style:italic;&quot;&gt;. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QCheckBox" name="cbxUseISS">
+             <property name="text">
+              <string>Use Independent Sound Stimuli</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Sound files can be played with your stimuli.</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="title">
+         <string>Stimulus Size</string>
+        </property>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
-          <widget class="QListWidget" name="listStimulusLayout">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+          <widget class="QRadioButton" name="rbFullScreen">
+           <property name="text">
+            <string>Display Full Screen</string>
            </property>
-           <item>
-            <property name="text">
-             <string>Single Monitor</string>
-            </property>
-            <property name="toolTip">
-             <string>Display stimuli on a single monitor</string>
-            </property>
-            <property name="icon">
-             <iconset resource="resources.qrc">
-              <normaloff>:/resources/single.png</normaloff>:/resources/single.png</iconset>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Dual Monitors (left/right)</string>
-            </property>
-            <property name="toolTip">
-             <string>Display stimuli on dual monitors, arranged side by side.</string>
-            </property>
-            <property name="icon">
-             <iconset resource="resources.qrc">
-              <normaloff>:/resources/leftright.png</normaloff>:/resources/leftright.png</iconset>
-            </property>
-           </item>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLabel" name="label">
+          <widget class="QCheckBox" name="cbMaintainAspectRatio">
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select monitor arrangement for your stimuli. The assignment of monitors depends on the particular computer that the experiment is run on, and is made via Habit's workspace &lt;span style=&quot; font-style:italic;&quot;&gt;Preferences&lt;/span&gt; on each computer&lt;span style=&quot; font-style:italic;&quot;&gt;. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
+            <string>Maintain Original Aspect Ratio</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QCheckBox" name="cbxUseISS">
+          <widget class="QRadioButton" name="rbOriginalSize">
            <property name="text">
-            <string>Use Independent Sound Stimuli</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Sound files can be played with your stimuli.</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
+            <string>Use Original Stimulus Size</string>
            </property>
           </widget>
          </item>
