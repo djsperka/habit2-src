@@ -38,14 +38,14 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es)
 	}
 	if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		HPlayer *single = new HVIPlayer(iCenter, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
+		HPlayer *single = new HVIPlayer(iCenter, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor(), sdi.isOriginalAspectRatioMaintained());
 		single->setPreferBufferedStimulus(false);
 		pmm->addPlayer(HPlayerPositionType::Center, single, iCenter);
 	}
 	else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		HPlayer *left = new HVIPlayer(iLeft, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
-		HPlayer *right = new HVIPlayer(iRight, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
+		HPlayer *left = new HVIPlayer(iLeft, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor(), sdi.isOriginalAspectRatioMaintained());
+		HPlayer *right = new HVIPlayer(iRight, NULL, baseDir, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor(), sdi.isOriginalAspectRatioMaintained());
 		pmm->addPlayer(HPlayerPositionType::Left, left, iLeft);
 		pmm->addPlayer(HPlayerPositionType::Right, right, iRight);
 	}

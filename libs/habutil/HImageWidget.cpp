@@ -23,7 +23,6 @@ HImageWidget::HImageWidget(QWidget *parent, bool fullScreen, bool aspectRatio, Q
 
 HImageWidget::~HImageWidget()
 {
-	
 }
 
 void HImageWidget::setCurrentSource(const QString& filename)
@@ -31,6 +30,12 @@ void HImageWidget::setCurrentSource(const QString& filename)
 	m_image.load(filename);
 	QSize size = m_image.size();
 	QSize parentSize = this->size();
+
+	qDebug() << "HImageWidget::setCurrentSource(" << filename << ")";
+	qDebug() << "              parent size " << parentSize.width() << "x" << parentSize.height();
+	qDebug() << "              image  size " << size.width() << "x" << size.height();
+
+#if 0
 	if (size.width() > parentSize.width())
 	{
 		m_image =m_image.scaledToWidth(parentSize.width(), Qt::SmoothTransformation);
@@ -41,6 +46,8 @@ void HImageWidget::setCurrentSource(const QString& filename)
 		m_image = m_image.scaledToWidth(parentSize.height(), Qt::SmoothTransformation);
 		size = m_image.size();
 	}
+	qDebug() << "              image scal " << size.width() << "x" << size.height();
+#endif
 	if (m_fullscreen)
 	{
 		double scaleX = size.width()*1.0 / parentSize.width();
@@ -54,6 +61,7 @@ void HImageWidget::setCurrentSource(const QString& filename)
 		{
 			m_image = m_image.scaled(parentSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 		}
+		qDebug() << "            FSimage  size " << m_image.size().width() << "x" << m_image.size().height();
 	}
 	repaint();
 	return;

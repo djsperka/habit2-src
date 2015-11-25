@@ -37,12 +37,24 @@ HPlayer(id, w, stimRootDir), m_pendingClear(false), m_parent(w), m_pMediaObject(
 	label->setPalette(palette);
 	m_backgroundIndex = m_pStackedLayout->addWidget(label);
 
-	m_pImageWidget = new HImageWidget(NULL, true, true, background);
+	m_pImageWidget = new HImageWidget(NULL, fullscreen, maintainAspectRatio, background);
 	m_imageIndex = m_pStackedLayout->addWidget(m_pImageWidget);
 
 	m_pMediaObject = new Phonon::MediaObject(this);
 	m_pVideoWidget = new Phonon::VideoWidget;
-	m_videoIndex = m_pStackedLayout->addWidget(m_pVideoWidget);
+
+	// test - create a QLabel, background color, then stick the video widget into a layout and add it.
+
+	QLabel *labelVideoWidget = new QLabel;
+	labelVideoWidget->setAutoFillBackground(true);
+	labelVideoWidget->setPalette(palette);
+	QHBoxLayout *h = new QHBoxLayout;
+	h->addWidget(m_pVideoWidget);
+	h->setContentsMargins(0, 0, 0, 0);
+	labelVideoWidget->setLayout(h);
+
+	m_videoIndex = m_pStackedLayout->addWidget(labelVideoWidget);
+	//m_videoIndex = m_pStackedLayout->addWidget(m_pVideoWidget);
 
 	m_pAudioOutput = new Phonon::AudioOutput(Phonon::VideoCategory, this);
 
@@ -65,6 +77,8 @@ HPlayer(id, w, stimRootDir), m_pendingClear(false), m_parent(w), m_pMediaObject(
 	connect(m_pStackedLayout, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
 
 
+
+	// Tell VideoWidget how to scale movies
 	m_pVideoWidget->setScaleMode(Phonon::VideoWidget::FitInView);
 	if (maintainAspectRatio)
 	{
@@ -74,6 +88,25 @@ HPlayer(id, w, stimRootDir), m_pendingClear(false), m_parent(w), m_pMediaObject(
 	{
 		m_pVideoWidget->setAspectRatio(Phonon::VideoWidget::AspectRatioWidget);
 	}
+
+#if 0
+	if (fullscreen)
+	{
+		m_pVideoWidget->setScaleMode(Phonon::VideoWidget::FitInView);
+		if (maintainAspectRatio)
+		{
+			m_pVideoWidget->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
+		}
+		else
+		{
+			m_pVideoWidget->setAspectRatio(Phonon::VideoWidget::AspectRatioWidget);
+		}
+	}
+	else
+	{
+
+	}
+#endif
 
 	// Create paths
 	Phonon::createPath(m_pMediaObject, m_pVideoWidget);
@@ -88,11 +121,17 @@ HVIPlayer::~HVIPlayer()
 
 void HVIPlayer::onStateChanged(Phonon::State newState, Phonon::State oldState)
 {
-	Q_UNUSED(oldState);
+	//Q_UNUSED(oldState);
 
-	//QSize s = sizeHint();
 	//qDebug() << (int)oldState << "->" << (int)newState << " " << s.width() << "x" << s.height();
 
+	if (oldState == Phonon::LoadingState)
+	{
+		QSize s = m_pVideoWidget->sizeHint();
+		qDebug() << (int)oldState << "(LoadingState) ->" << (int)newState << " " << s.width() << "x" << s.height();
+		if (!m_isFullScreen)
+			m_pVideoWidget->setFixedSize(s);
+	}
 	if (newState == Phonon::PlayingState)
 	{
 		emit started(m_id, m_nowPlayingFilename);
