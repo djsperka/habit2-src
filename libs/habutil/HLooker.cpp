@@ -80,6 +80,7 @@ HLooker::HLooker(HEventLog& log, bool bInclusiveLookTime)
 
 void HLooker::onStarted()
 {
+	qDebug() << "HLooker state machine started.";
 }
 
 void HLooker::addTrans(const HLookTrans& type, int tMS)

@@ -81,7 +81,7 @@ public:
 	virtual void enableLook();
 	virtual void disable();
 	bool isAGLookEnabled() { return m_bAGLookEnabled; };
-	bool isLookEnabled() { return 	m_bLookEnabled; };
+	bool isLookEnabled() { return 	m_bLookEnabled && isRunning(); };
 	void pendingTrans(bool bPending, const HLookTrans& type = HLookTrans::UnknownLookTrans);
 };
 	
