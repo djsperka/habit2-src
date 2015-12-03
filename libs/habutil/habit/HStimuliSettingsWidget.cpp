@@ -67,8 +67,8 @@ void HStimuliSettingsWidget::create()
 
 	QVBoxLayout *v = new QVBoxLayout;
 	v->addLayout(h12);
-	v->addWidget(g4);
-	v->addStretch(1);
+	v->addWidget(g4, 1);
+//	v->addStretch(1);
 	v->addWidget(g3);
 	setLayout(v);
 }

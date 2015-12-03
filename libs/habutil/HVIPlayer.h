@@ -48,6 +48,7 @@ public:
 	virtual void clear();
 	friend QTextStream& operator<<(QTextStream& out, const HVIPlayer& player);
 
+	virtual QSize sizeHint() const { return QSize(200, 150); };
 protected:
 
 private:
