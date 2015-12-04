@@ -130,14 +130,22 @@ public:
 		(*this)[indTotalAway] = QString("%1").arg(m_totalLookAwayTime);
 	};
 	void appendLook(HLook look);
+	void appendLookTrans(HLookTrans trans, int t);
 	//void appendLook(QString direc, QString startMS, QString endMS, QString timeMS) { append(direc); append(startMS); append(endMS); append(timeMS); };
 	const QList<HLook>& looks() const { return m_looks; };
+
+	// write line of all Looking info to a text stream.
+	void writeAllLooking(QTextStream& out);
 
 private:
 	int m_lastLookEndTime;
 	int m_totalLookTime;
 	int m_totalLookAwayTime;
 	QList<HLook> m_looks;
+	QList<HLook> m_allLooking;
+	HLook m_lookAllLookingPending;	// this is for recording all looking, not necessarily a Look!
+	const HLookDirection* m_pdirectionAllLookingPending;
+	int m_startMSAllLookingPending;
 	void init()
 	{
 		m_lastLookEndTime = 0;
@@ -145,6 +153,11 @@ private:
 		m_totalLookAwayTime = 0;
 		clear();
 		m_looks.clear();
+		m_allLooking.clear();
+		m_lookAllLookingPending.setStartMS(0);
+		m_lookAllLookingPending.setEndMS(0);
+		m_lookAllLookingPending.setLookMS(0);
+		m_lookAllLookingPending.setDirection(HLookDirection::UnknownLookDirection);
 		for (int i=0; i<indNInit; i++) append(QString());
 	};
 

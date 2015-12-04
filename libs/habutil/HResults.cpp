@@ -171,7 +171,17 @@ bool HResults::saveToCSV(const QString& filename) const
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
 	{
 		QTextStream out(&file);
-		//out << version() << type().number();
+		QString sAllLooking;
+		QTextStream outAllLooking(&sAllLooking);
+
+		// put some headers in for all looking
+		outAllLooking << HTrialResultsRow::headers.at(0);
+		for (int i=1; i<6; i++)
+		{
+			outAllLooking << "," << HTrialResultsRow::headers.at(i);
+		}
+		outAllLooking << "," << "Direction,Start,End,Diff" << endl;
+
 		b = true;
 		if (type() == HResultsType::HResultsTypeOriginalRun)
 		{
@@ -308,6 +318,11 @@ bool HResults::saveToCSV(const QString& filename) const
 				HLookEvent* ple = static_cast<HLookEvent*>(e);
 				row.appendLook(ple->look());
 			}
+			else if (e->type() == HEventType::HEventLookTrans)
+			{
+				HLookTransEvent* plt = static_cast<HLookTransEvent*>(e);
+				row.appendLookTrans(plt->transtype(), plt->timestamp());
+			}
 			else if (e->type() == HEventType::HEventTrialEnd)
 			{
 				// set trial end type and flush
@@ -318,6 +333,11 @@ bool HResults::saveToCSV(const QString& filename) const
 				row.setTrialEndTime(pte->timestamp());	// automatically sets total look(away) times
 				row.setOrderName(sOrderName);
 				out << row;
+
+				// Dump all looking into outAllLooking
+				row.writeAllLooking(outAllLooking);
+
+				// clear pending stim label
 				sPendingStimLabel = "";
 			}
 			else if (e->type() == HEventType::HEventStimulusSettings)
@@ -332,6 +352,10 @@ bool HResults::saveToCSV(const QString& filename) const
 				bHabituated = true;
 			}
 		}
+
+		// Now dump all looking into the file
+		out << endl << endl << sAllLooking;
+
 		file.close();
 	}
 	return b;
@@ -358,6 +382,26 @@ QTextStream& operator<<(QTextStream& out, const HTrialResultsRow& row)
 	return out;
 }
 
+
+void HTrialResultsRow::writeAllLooking(QTextStream& out)
+{
+
+	out << this->at(0);
+	for (int i=1; i<6; i++)
+	{
+		out << "," << this->at(i);
+	}
+	// now dump all looking
+	QListIterator<HLook> looks(m_allLooking);
+	while (looks.hasNext())
+	{
+		HLook l = looks.next();
+		out << "," << l.direction().name() << "," << l.startMS() << "," << l.endMS() << "," << l.lookMS();
+	}
+
+	out << endl;
+}
+
 void HTrialResultsRow::appendLook(HLook look)
 {
 	// assume that this is a look; check for look-away gap
@@ -371,4 +415,23 @@ void HTrialResultsRow::appendLook(HLook look)
 	m_totalLookTime += look.lookMS();
 	m_lastLookEndTime = look.endMS();
 
+}
+
+void HTrialResultsRow::appendLookTrans(HLookTrans trans, int t)
+{
+	// If the transition is to a look-away, then record a "look" in m_allLooking
+	// using the saved start and direction.
+	// If the transition is to a look, then save the direction to and the time.
+
+	if (trans.isTransToLook())
+	{
+		m_pdirectionAllLookingPending = &directionTo(trans);
+		m_startMSAllLookingPending = t;
+	}
+	else
+	{
+		m_allLooking.append(HLook(*m_pdirectionAllLookingPending, m_startMSAllLookingPending, t));
+		m_pdirectionAllLookingPending = &HLookDirection::UnknownLookDirection;
+		m_startMSAllLookingPending = 0;
+	}
 }
