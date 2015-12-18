@@ -107,10 +107,9 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 		habutilSetLastDir(newFileCanonicalPath);
 		if (newFileCanonicalPath.startsWith(stimroot.canonicalPath()))
 		{
-			QDir relative(newFileCanonicalPath.right(newFileCanonicalPath.size() - stimroot.canonicalPath().size()));
-			filename = relative.filePath(newFileInfo.fileName());
-			//qDebug() << "selected file is in stimroot path " << stimroot.canonicalPath();
-			//qDebug() << "relative selected file: " << filename;
+			filename = stimroot.relativeFilePath(newFileInfo.canonicalFilePath());
+			qDebug() << "selected file is in stimroot path " << stimroot.canonicalPath();
+			qDebug() << "relative selected file: " << filename;
 		}
 		stimulusInfo.setFileName(filename);
 		setStimulusInfo(stimulusInfo);
