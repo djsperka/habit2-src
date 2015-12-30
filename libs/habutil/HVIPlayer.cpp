@@ -237,6 +237,12 @@ void HVIPlayer::play(unsigned int number)
 		case HStimulusSource::BACKGROUND:
 			m_nowPlayingFilename = QString("Background");
 			m_pStackedLayout->setCurrentIndex(m_backgroundIndex);
+
+			// For displaying the background color, we have to fake a SIGNAL to trigger state changes
+			// that are generated when the stim onset occurs. It makes sense to tell the media manager
+			// that the monitor id corresponding to this player has started.
+			emit started(m_id, m_nowPlayingFilename);
+
 			break;
 		default:
 			m_nowPlayingFilename = "UNKNOWN";
