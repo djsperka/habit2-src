@@ -44,7 +44,9 @@ GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon)
     createActions();
     createToolBars();
 
-    setWindowTitle(QString("%1 - %2").arg("Habit").arg(QCoreApplication::instance()->applicationVersion()));
+    m_pLabelStatusBar = new QLabel(QString("Current workspace: %1").arg(habutilGetWorkspaceDir()));
+    statusBar()->addWidget(m_pLabelStatusBar);
+    setWindowTitle(QString("%1 (v%2)").arg("Habit2").arg(QCoreApplication::instance()->applicationVersion()));
 
     connect(m_pExperimentListWidget, SIGNAL(experimentActivated(QString)), this, SLOT(experimentActivated(QString)));
     connect(m_pExperimentListWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
@@ -105,7 +107,7 @@ void GUILib::H2MainWindow::createActions()
     connect(m_actionRun, SIGNAL(triggered()), this, SLOT(runExperiment()));
 
     m_actionResults = new QAction(QIcon(":/resources/results.png"), tr("Results"), this);
-    m_actionResults->setStatusTip(tr("Open results file"));
+    m_actionResults->setStatusTip(tr("Open results file viewer"));
     connect(m_actionResults, SIGNAL(triggered()), this, SLOT(openResultsFile()));
 
     m_actionPreferences = new QAction(QIcon(":/resources/gear_wheel.png"), tr("&Preferences"), this);
@@ -607,16 +609,21 @@ void GUILib::H2MainWindow::deleteExperiment()
 	}
 }
 
+void GUILib::H2MainWindow::workspaceChanged()
+{
+	m_pLabelStatusBar->setText(QString("Current workspace: %1").arg(habutilGetWorkspaceDir()));
+	m_pExperimentListWidget->reload();
+}
 
 void GUILib::H2MainWindow::editPreferences()
 {
 	// Open preferences dialog
 	HGlobalPreferencesDialog *pPrefDialog = new HGlobalPreferencesDialog(this);
-	connect(pPrefDialog, SIGNAL(workspaceChanged()), m_pExperimentListWidget, SLOT(reload()));
+	connect(pPrefDialog, SIGNAL(workspaceChanged()), this, SLOT(workspaceChanged()));
 	if (pPrefDialog->exec() == QDialog::Accepted)
 	{
 		qDebug() << "Preferences updated";
 	}
-	disconnect(pPrefDialog, SIGNAL(workspaceChanged()), m_pExperimentListWidget, SLOT(reload()));
+	disconnect(pPrefDialog, SIGNAL(workspaceChanged()), this, SLOT(workspaceChanged()));
 }
 

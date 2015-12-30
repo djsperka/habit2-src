@@ -15,6 +15,7 @@ class QAction;
 class QMenu;
 class QPlainTextEdit;
 class QItemSelection;
+class QLabel;
 
 namespace Habit
 {
@@ -61,6 +62,7 @@ namespace Habit
 		 void editPreferences();
 		 void testExperiment();
 		 void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+		 void workspaceChanged();
 
 	 private:
 		 void createActions();
@@ -83,6 +85,7 @@ namespace Habit
 		 QAction *m_actionPreferences;
 		 QAction *m_actionImport;
 		 QAction *m_actionTesting;
+		 QLabel *m_pLabelStatusBar;
 	 };
  };
 
