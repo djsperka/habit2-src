@@ -36,17 +36,17 @@ public:
 	void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 
 private slots:
-	void onColorChooserClick();
+	//void onColorChooserClick();
 	void onModifyClick();
 	void stimulusLayoutTypeChanged(int);
 
 private:
 	//QLabel* mainTitle_;
 	QGroupBox* attentionGroup_;
-	QGroupBox* colorGroup_;
+	//QGroupBox* colorGroup_;
 	QLabel* stimulusName_;
 	QPushButton* modifyButton_;
-	QPushButton* colorButton_; 
+	//QPushButton* colorButton_;
 	QVBoxLayout* mainLayout_;
 	Habit::AttentionGetterSettings settings_;
 	const HStimulusLayoutType* m_pLayoutType;

@@ -44,31 +44,22 @@ void AttentionSetupForm::stimulusLayoutTypeChanged(int i)
 void AttentionSetupForm::createComponents() {
 	attentionGroup_ = new QGroupBox(tr("Use Attention Stimulus"));
 	attentionGroup_ ->setCheckable(true);
-	colorGroup_ = new QGroupBox(tr("Background Color"));
 	stimulusName_ = new QLabel("Stimulus Name :  " + settings_.getAttentionGetterStimulus().getName());
 	modifyButton_ = new QPushButton(tr("Modify"));
-	colorButton_ = new QPushButton();
-	colorButton_->setFixedWidth(80);
-	colorButton_->setFixedHeight(30);
 	setLabelsFont();
 	initialize();
 }
 
-void AttentionSetupForm::initialize() {
-	QPalette p = colorButton_->palette();
-	p.setColor(QPalette::Button, settings_.getBackGroundColor());
-	colorButton_->setPalette(p);
-	QColor c = colorButton_->palette().color(QPalette::Button);
-	QString st = QString("background-color: rgb(%1, %2, %3)").arg(c.red()).arg(c.green()).arg(c.blue());
-	colorButton_->setStyleSheet(st); 
+void AttentionSetupForm::initialize()
+{
 	attentionGroup_->setChecked(settings_.isAttentionGetterUsed());
 	stimulusName_->setText("Stimulus Name :  " + settings_.getAttentionGetterStimulus().getName());
 }
 
-Habit::AttentionGetterSettings AttentionSetupForm::getConfigurationObject() {
+Habit::AttentionGetterSettings AttentionSetupForm::getConfigurationObject()
+{
 	Habit::AttentionGetterSettings ags;
 	ags.setId(settings_.getId());
-	ags.setBackGroundColor(colorButton_->palette().color(QPalette::Button));
 	ags.setUseAttentionGetter(attentionGroup_->isChecked());
 	ags.setAttentionGetterStimulus(settings_.getAttentionGetterStimulus());
 	return ags;
@@ -79,16 +70,7 @@ void AttentionSetupForm::setLabelsFont()
 	QFont font1;
 	font1.setPointSize(11);
 	attentionGroup_->setFont(font1);
-	colorGroup_->setFont(font1);
-}
-
-void AttentionSetupForm::onColorChooserClick() {
-	QColorDialog dlg;
-	dlg.setCurrentColor(colorButton_->palette().color(QPalette::Button));
-	dlg.exec();
-	QColor c = dlg.currentColor();
-	QString st = QString("background-color: rgb(%1, %2, %3)").arg(c.red()).arg(c.green()).arg(c.blue());
-	colorButton_->setStyleSheet(st); 
+	//colorGroup_->setFont(font1);
 }
 
 void AttentionSetupForm::onModifyClick()
@@ -103,15 +85,8 @@ void AttentionSetupForm::onModifyClick()
 	}
 }
 
-/*
-void AttentionSetupForm::onConfigurationChange(const Habit::StimulusSettings& stimulus)
-{
-}
-*/
-
 void AttentionSetupForm::makeConnections()
 {
-	connect(colorButton_, SIGNAL(clicked()), this, SLOT(onColorChooserClick()));
 	connect(modifyButton_, SIGNAL(clicked()), this, SLOT(onModifyClick()));
 }
 
@@ -121,15 +96,10 @@ void AttentionSetupForm::doLayout()
 	QVBoxLayout* attentionLayout = new QVBoxLayout();
 	attentionGroup_->setLayout(attentionLayout);
 	QHBoxLayout* nameLayout = new QHBoxLayout();
-	QHBoxLayout* colorLayout = new QHBoxLayout();
 	nameLayout->addWidget(stimulusName_);
 	nameLayout->addSpacing(70);
 	nameLayout->addWidget(modifyButton_);
 	attentionLayout->addLayout(nameLayout);
-	colorGroup_->setLayout(colorLayout);
-	colorLayout->addWidget(colorButton_);
-	colorLayout->addStretch();
-	attentionLayout->addWidget(colorGroup_);
 	mainLayout_->addWidget(attentionGroup_);
 	mainLayout_->addStretch(1);
 }
