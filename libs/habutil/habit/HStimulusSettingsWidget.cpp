@@ -74,9 +74,21 @@ GUILib::HStimulusSettingsWidget::HStimulusSettingsWidget(const Habit::StimulusSe
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
 	setStimulusLayoutType(*m_pStimulusLayout);
+
+	connections();
 }
 
 GUILib::HStimulusSettingsWidget::~HStimulusSettingsWidget() {};
+
+
+void GUILib::HStimulusSettingsWidget::connections()
+{
+	connect(m_pLeft, SIGNAL(stimulusInfoChanged()), this, SIGNAL(stimulusSettingsChanged()));
+	connect(m_pCenter, SIGNAL(stimulusInfoChanged()), this, SIGNAL(stimulusSettingsChanged()));
+	connect(m_pRight, SIGNAL(stimulusInfoChanged()), this, SIGNAL(stimulusSettingsChanged()));
+	connect(m_pSound, SIGNAL(stimulusInfoChanged()), this, SIGNAL(stimulusSettingsChanged()));
+};
+
 
 void GUILib::HStimulusSettingsWidget::setStimulusLayoutType(const HStimulusLayoutType& type)
 {

@@ -48,7 +48,7 @@ HStimulusSource::HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& s
 , m_audioBalance(pinfo->getVolume())
 , m_isLooped(pinfo->isLoopPlayBack())
 {
-	if (!pinfo->getFileName().isEmpty())
+	if (!pinfo->getFileName().isEmpty() && !pinfo->isBackground())
 		init(pinfo->getAbsoluteFileName(stimRootDir), buffer);
 	else
 		init();

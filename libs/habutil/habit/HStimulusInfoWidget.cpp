@@ -42,6 +42,7 @@ void GUILib::HStimulusInfoWidget::setStimulusInfo(const Habit::StimulusInfo& inf
 {
 	m_info = info;
 	initialize();
+	emit stimulusInfoChanged();
 }
 
 void GUILib::HStimulusInfoWidget::initialize()
@@ -71,6 +72,7 @@ void GUILib::HStimulusInfoWidget::backgroundColorChecked(bool checked)
 	ui->sliderVolume->setDisabled(checked);
 	ui->checkboxLoop->setDisabled(checked);
 	ui->lineeditFileBase->setDisabled(checked);
+	emit stimulusInfoChanged();
 }
 
 void GUILib::HStimulusInfoWidget::selectButtonClicked()

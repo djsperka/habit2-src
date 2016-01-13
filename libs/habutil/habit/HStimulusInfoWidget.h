@@ -46,6 +46,9 @@ namespace GUILib
 		QString m_label;
 		QDir m_rootDir;
 
+	signals:
+		void stimulusInfoChanged();
+
 	protected slots:
 		void selectButtonClicked();
 		void backgroundColorClicked();

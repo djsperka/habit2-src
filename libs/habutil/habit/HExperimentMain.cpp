@@ -253,7 +253,7 @@ void GUILib::HExperimentMain::createComponents()
 	iControlBarOptions = m_pPagesWidget->addWidget(m_pControlBarOptionsForm);
 
 	// Attention Getter
-	m_pAttentionSetupForm = new AttentionSetupForm(m_settings.getAttentionGetterSettings(), m_settings.getStimulusDisplayInfo().getStimulusLayoutType());
+	m_pAttentionSetupForm = new AttentionSetupForm(m_settings.getAttentionGetterSettings(), m_settings.getStimulusDisplayInfo());
 	iAttentionSetupForm = m_pPagesWidget->addWidget(m_pAttentionSetupForm);
 
 	// Look settings

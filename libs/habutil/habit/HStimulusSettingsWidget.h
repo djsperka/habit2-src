@@ -33,6 +33,7 @@ namespace GUILib
 		int m_stackidSingle;
 		int m_stackidLR;
 		void initialize();
+		void connections();
 
 	public:
 		HStimulusSettingsWidget(const Habit::StimulusSettings& settings, const HStimulusLayoutType& stimLayout = HStimulusLayoutType::HStimulusLayoutSingle, QWidget *parent=0);
@@ -46,6 +47,9 @@ namespace GUILib
 
 		// just get the name - for validation by the editor
 		QString getName();
+
+	signals:
+		void stimulusSettingsChanged();
 	};
 };
 
