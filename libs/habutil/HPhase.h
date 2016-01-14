@@ -18,6 +18,7 @@
 #include "HPhaseSettings.h"
 #include "HLookSettings.h"
 #include "stimulusSettings.h"
+#include "attentiongettersettings.h"
 #include <QList>
 #include <QPair>
 #include <QEvent>
@@ -44,7 +45,7 @@ class HPhase: public HExperimentChildState
 	HTrial* m_sTrial;
 
 public:
-	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG, bool bTestingInput=false);
+	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput=false);
 	virtual ~HPhase() {};
 	bool advance();
 	HTrial* getHTrial() { return m_sTrial; };

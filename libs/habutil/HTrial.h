@@ -35,7 +35,7 @@ class HTrial: public HPhaseChildState
 	Q_OBJECT
 	
 public:
-	HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG, bool bTestingInput = false);
+	HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput = false);
 	~HTrial() {};
 	void setTrialNumber(int i);
 	void incrementRepeatNumber();
@@ -47,16 +47,13 @@ protected:
 //	virtual void onExit(QEvent* e);
 	
 private:
-//	HLookDetector* m_pLD;
 	const Habit::HPhaseSettings m_phaseSettings;
 	const Habit::HLookSettings m_lookSettings;
-//	int m_maxTrialLengthMS;
-//	int m_maxNoLookTimeMS;
-//	bool m_bFixedLength;
-	bool m_bAG;
+	const Habit::AttentionGetterSettings m_agSettings;
 	int m_trialNumber;
 	int m_repeatNumber;
 	QTimer* m_ptimerMaxStimulusTime;
+	QTimer* m_ptimerFixedISI;
 	
 signals:
 	void trialStarted(int trialnumber, int repeatnumber);

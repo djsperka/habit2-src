@@ -152,19 +152,21 @@ bool MainDao::addOrUpdateAttentionGetterSetting(int experimentId, Habit::Attenti
 	QString sql;
 	if(settings->getId() > 0)
 	{
-		sql = "update attention_setup set use_attention_stimulus=?, stimulus_name=?, background_color=?"
+		sql = "update attention_setup set use_attention_stimulus=?, stimulus_name=?, background_color=?, use_fixed_isi=?, isi_ms=?"
 			" where id=? and experiment_id=?";
 	}
 	else
 	{
-		sql = "insert into attention_setup (use_attention_stimulus, stimulus_name, background_color, experiment_id)"
-			" values(?, ?, ?, ?)";
+		sql = "insert into attention_setup (use_attention_stimulus, stimulus_name, background_color, use_fixed_isi, isi_ms, experiment_id)"
+			" values(?, ?, ?, ?, ?, ?)";
 	}
 	QSqlQuery q;
 	q.prepare(sql);
 	q.addBindValue(settings->isAttentionGetterUsed());
 	q.addBindValue(settings->getAttentionGetterStimulus().getName());
 	q.addBindValue(settings->getBackGroundColor().name());
+	q.addBindValue(settings->isFixedISI());
+	q.addBindValue(settings->getFixedISIMS());
 	if(settings->getId() > 0)
 	{
 		q.addBindValue(settings->getId());
@@ -881,10 +883,14 @@ void MainDao::getAttentionGetterSettings(int experimentId, AttentionGetterSettin
 		int id = q.value(q.record().indexOf("id")).toInt();
 		bool useAttentionStimulus = q.value(q.record().indexOf("use_attention_stimulus")).toBool();
 		QString backgroundColor = q.value(q.record().indexOf("background_color")).toString();
+		bool bFixedISI = q.value(q.record().indexOf("use_fixed_isi")).toBool();
+		int isiMS = q.value(q.record().indexOf("isi_ms")).toInt();
 		attentionGetter->setId(id);
 		attentionGetter->setUseAttentionGetter(useAttentionStimulus);
 		attentionGetter->setBackGroundColor(QColor(backgroundColor));
 		attentionGetter->setAttentionGetterStimulus(dummyStimuliSettings.stimuli().at(0));
+		attentionGetter->setIsFixedISI(bFixedISI);
+		attentionGetter->setFixedISIMS(isiMS);
 	}
 	else
 	{

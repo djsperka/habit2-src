@@ -139,7 +139,8 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 	const int iBigStimulusTableChangeAG							= 2000017;
 	const int iRepeatTrialOnMaxLookAway							= 2000018;
 	const int iAddColumnToControlBarOptions						= 2000019;
-	const int iLatestVersion									= 2000019;
+	const int iAddFixedISIAttentionGetter						= 2000020;
+	const int iLatestVersion									= 2000020;
 	int iVersion = getDBVersion();
 
 	// Will any updates be required? If so, close db, make a copy, then reopen.
@@ -556,6 +557,31 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 					}
 				}
 
+				if (result && iVersion < iAddFixedISIAttentionGetter)
+				{
+					// add columns use_fixed_isi and isi_ms to attention_setup
+					db.transaction();
+					QSqlQuery q0("alter table attention_setup add column use_fixed_isi BOOL DEFAULT false");
+					QSqlQuery q1("alter table attention_setup add column isi_ms INTEGER DEFAULT 0");
+					QSqlQuery q2("insert into habit_version (version) values(?)");
+					q2.bindValue(0, iAddFixedISIAttentionGetter);
+					q2.exec();
+					if (!q0.lastError().isValid() && !q1.lastError().isValid() && !q2.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAddFixedISIAttentionGetter;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddFixedISIAttentionGetter;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
 
 				// If failed, revert to to original database
 				if (!result)

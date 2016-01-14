@@ -6,12 +6,13 @@
 #include "stimulusdisplayinfo.h"
 #include "HStimulusSettingsWidget.h"
 #include "HStimulusPreviewWidget.h"
-#include <QtGui/QWidget>
+#include <QtGui>
 
 class QGroupBox;
 class QLabel;
 class QPushButton;
 class QVBoxLayout;
+
 
 namespace GUILib {
 
@@ -26,10 +27,8 @@ public:
 	~AttentionSetupForm();
 
 private:
-	void createComponents();
-	void setLabelsFont();
-	void makeConnections();
-	void doLayout();
+	void components();
+	void connections();
 
 public:
 	Habit::AttentionGetterSettings getConfigurationObject();
@@ -38,20 +37,18 @@ public:
 	void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 
 private slots:
-	//void onModifyClick();
 	void stimulusLayoutTypeChanged(int);
 	void stimulusSettingsChanged();
 
 private:
-	QGroupBox* attentionGroup_;
-	QLabel* stimulusName_;
-	QPushButton* modifyButton_;
-	QVBoxLayout* mainLayout_;
-	Habit::AttentionGetterSettings settings_;
-	//const HStimulusLayoutType* m_pLayoutType;
+	Habit::AttentionGetterSettings m_agSettings;
 	Habit::StimulusDisplayInfo m_stimulusDisplayInfo;
-	HStimulusSettingsWidget* stimulusSettingsWidget_;
-	HStimulusPreviewWidget* stimulusPreviewWidget_;
+	HStimulusSettingsWidget* m_pStimulusSettingsWidget;
+	HStimulusPreviewWidget* m_pStimulusPreviewWidget;
+	QRadioButton *m_prbNoISI;
+	QRadioButton *m_prbUseAG;
+	QRadioButton *m_prbUseISI;
+	QLineEdit *m_plineeditISI;
 };
 }
 #endif // ATTENTIONSETUPFORM_H

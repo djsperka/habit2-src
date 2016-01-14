@@ -14,7 +14,7 @@
 #include <QFinalState>
 #include <QtDebug>
 
-HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG, bool bTestingInput)
+HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput)
 	: HExperimentChildState(exp, log, phaseSettings.getPhaseType().name())
 	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
@@ -23,7 +23,7 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	, m_itrial(0)
 {
 	QAbstractTransition* trans;
-	m_sTrial = new HTrial(*this, log, phaseSettings, lookSettings, bUseAG, bTestingInput);
+	m_sTrial = new HTrial(*this, log, phaseSettings, lookSettings, agSettings, bTestingInput);
 	setInitialState(m_sTrial);
 	HPhaseTrialCompleteState* sTrialComplete = new HPhaseTrialCompleteState(*this, log);
 	m_sTrial->addTransition(m_sTrial, SIGNAL(finished()), sTrialComplete);

@@ -27,7 +27,7 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	HStateMachine *psm;
 
 	// Need to know if AG is used. If it is, add attention getter settings to media manager
-	if (experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed())
+	if (experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed() || experimentSettings.getAttentionGetterSettings().isFixedISI())
 	{
 		pmm->addAG(experimentSettings.getAttentionGetterSettings().getAttentionGetterStimulus());
 	}
@@ -89,7 +89,7 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 			stimidListOrdered.append(QPair<int, QString>(stimidListInitial.at(list.at(itmp).first), list.at(itmp).second));
 		}
 		pcritPreTest = new HPhaseFixedNCriteria(ps.getNTrials());
-		psPreTest = new HPhase(*sExperiment, pcritPreTest, log, stimidListOrdered, ps, experimentSettings.getHLookSettings(), experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed(), bTestingInput);
+		psPreTest = new HPhase(*sExperiment, pcritPreTest, log, stimidListOrdered, ps, experimentSettings.getHLookSettings(), experimentSettings.getAttentionGetterSettings(), bTestingInput);
 
 	}
 
@@ -122,7 +122,7 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 
 		// Create habituation criteria object.
 		pcritHabituation = createPhaseCriteria(experimentSettings.getHabituationSettings(), ps.getNTrials());
-		psHabituation = new HPhase(*sExperiment, pcritHabituation, log, stimidListOrdered, ps, experimentSettings.getHLookSettings(), experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed(), bTestingInput);
+		psHabituation = new HPhase(*sExperiment, pcritHabituation, log, stimidListOrdered, ps, experimentSettings.getHLookSettings(), experimentSettings.getAttentionGetterSettings(), bTestingInput);
 	}
 
 	if (experimentSettings.getTestPhaseSettings().getIsEnabled())
@@ -152,7 +152,7 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 		}
 
 		pcritTest = new HPhaseFixedNCriteria(ps.getNTrials());
-		psTest = new HPhase(*sExperiment, pcritTest, log, stimidListOrdered, ps, experimentSettings.getHLookSettings(), experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed(), bTestingInput);
+		psTest = new HPhase(*sExperiment, pcritTest, log, stimidListOrdered, ps, experimentSettings.getHLookSettings(), experimentSettings.getAttentionGetterSettings(), bTestingInput);
 	}
 
 

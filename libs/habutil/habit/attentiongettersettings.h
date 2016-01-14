@@ -31,6 +31,10 @@ public:
     void setAttentionGetterStimulus(const StimulusSettings& attentionGetterStimulus);
     QColor getBackGroundColor() const;
     void setBackGroundColor(const QColor& backGroundColor);
+    bool isFixedISI() const;
+    void setIsFixedISI(bool b);
+    int getFixedISIMS() const;
+    void setFixedISIMS(int ms);
 	void loadFromDB(size_t id);
 	bool saveToDB(size_t id_);
 
@@ -39,6 +43,8 @@ private:
 	bool isAttentionGetterUsed_;
 	StimulusSettings attentionGetterStimulus_;
 	QColor backGroundColor_;
+	bool isFixedISI_;
+	int isiMS_;
 };
 
 QDataStream & operator<< (QDataStream& stream, const AttentionGetterSettings& settings);

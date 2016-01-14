@@ -298,7 +298,7 @@ void GUILib::HExperimentMain::createComponents()
 	//HExperimentTreeWidgetItem* ptwiControlBar =
 	new HExperimentTreeWidgetItem(ptwiGeneral, iControlBarOptions, "Control Panel Display Options");
 	//HExperimentTreeWidgetItem* ptwiAttentionGetter =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iAttentionSetupForm, "Attention Getter");
+	new HExperimentTreeWidgetItem(ptwiGeneral, iAttentionSetupForm, "Intertrial Interval");
 	//HExperimentTreeWidgetItem* ptwiLookSettings =
 	new HExperimentTreeWidgetItem(ptwiGeneral, iLookSettingsWidget, "Look Settings");
 

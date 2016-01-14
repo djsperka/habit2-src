@@ -24,11 +24,11 @@
 //HTrial::HTrial(HPhase& phase, HEventLog& log, int maxTrialLengthMS, int maxNoLookTimeMS, bool bFixedLength, bool bUseAG)
 
 					  
-HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, bool bUseAG, bool bTestingInput)
+HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput)
 	: HPhaseChildState(phase, log, "HTrial")
 	, m_phaseSettings(phaseSettings)
 	, m_lookSettings(lookSettings)
-	, m_bAG(bUseAG)
+	, m_agSettings(agSettings)
 	, m_trialNumber(0)
 	, m_repeatNumber(0)
 {
@@ -60,9 +60,20 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	QObject::connect(sAGRunning, SIGNAL(entered()), this, SLOT(onAGRunningEntered()));
 	QObject::connect(sAGRunning, SIGNAL(exited()), this, SLOT(onAGRunningExited()));
 
-	// When the look detector emits the attention() signal enter StimRequest state. 
-	sAGRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(attention()), sStimRequest);
-		
+	// This timer is only used when fixed isi is specified. Create the timer always to guard against null ptr errs.
+	m_ptimerFixedISI = new QTimer();
+	m_ptimerFixedISI->setSingleShot(true);
+
+	if (m_agSettings.isAttentionGetterUsed())
+	{
+		// When the look detector emits the attention() signal enter StimRequest state.
+		sAGRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(attention()), sStimRequest);
+	}
+	else if (m_agSettings.isFixedISI())
+	{
+		sAGRunning->addTransition(m_ptimerFixedISI, SIGNAL(timeout()), sStimRequest);
+	}
+
 	// StimRequest emits a playStim() signal, which is connected to the media manager. 
 	// When media manager starts playing the stim it emits stimStarted(). That signal 
 	// is used to exit to StimRunning.
@@ -166,7 +177,11 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	// Initial state transition to AG request or directly to stim request...
 	if (!bTestingInput)
 	{
-		if (bUseAG)
+		if (m_agSettings.isAttentionGetterUsed())
+		{
+			sInitial->addTransition(sAGRequest);
+		}
+		else if (m_agSettings.isFixedISI())
 		{
 			sInitial->addTransition(sAGRequest);
 		}
@@ -227,12 +242,25 @@ void HTrial::onStimRunningExited()
 
 void HTrial::onAGRunningEntered()
 {
-	phase().experiment().getLookDetector().enableAGLook();
-//	eventLog().append(new HAGLookEnabledEvent(HElapsedTimer::elapsed()));
+	if (m_agSettings.isAttentionGetterUsed())
+	{
+		phase().experiment().getLookDetector().enableAGLook();
+	}
+	else if (m_agSettings.isFixedISI())
+	{
+		qDebug() << "onAGRunningEntered: start timer " << m_agSettings.getFixedISIMS();
+		m_ptimerFixedISI->start(m_agSettings.getFixedISIMS() > 0 ? m_agSettings.getFixedISIMS() : 1);
+	}
 }
 
 void HTrial::onAGRunningExited()
 {
-	phase().experiment().getLookDetector().disable();
-//	eventLog().append(new HLookDisabledEvent(HElapsedTimer::elapsed()));
+	if (m_agSettings.isAttentionGetterUsed())
+	{
+		phase().experiment().getLookDetector().disable();
+	}
+	else if (m_agSettings.isFixedISI())
+	{
+		if (m_ptimerFixedISI->isActive()) m_ptimerFixedISI->stop();
+	}
 }
