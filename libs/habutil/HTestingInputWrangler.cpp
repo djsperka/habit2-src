@@ -200,6 +200,7 @@ void HTestingInputWrangler::phaseStarted(QString sPhase)
 {
 	Q_ASSERT(m_bIsEnabled);
 	// when phase starts, get
+	qDebug() << "HTestingInputWrangler::phaseStarted(\"" << sPhase << "\")";
 	if (m_map.contains(getPhaseType(sPhase)))
 	{
 		m_pCurrentEventLogMap = &m_map[getPhaseType(sPhase)];
