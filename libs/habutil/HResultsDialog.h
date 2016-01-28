@@ -21,11 +21,13 @@ public:
 
 private slots:
 	void onPrint();
+	void onOpen();
 	void onExport();
 	void onView();
 private:
 	QString m_sExptName;
 	QPushButton* m_pPrintButton;
+	QPushButton* m_pOpenButton;
 	QPushButton* m_pExportButton;
 	QPushButton* m_pViewButton;
 	HResultsWidget* m_pResultsWidget;

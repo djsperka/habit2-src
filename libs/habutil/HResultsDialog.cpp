@@ -17,15 +17,19 @@ HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 	QVBoxLayout* vlayout = new QVBoxLayout;
 	QHBoxLayout* hlayout = new QHBoxLayout;
 	hlayout->addWidget(m_pPrintButton = new QPushButton("Print"));
+	hlayout->addWidget(m_pOpenButton = new QPushButton("Open Results in Excel"));
 	hlayout->addWidget(m_pExportButton = new QPushButton("Export Event Log"));
 	hlayout->addWidget(m_pViewButton = new QPushButton("View Experiment Settings"));
 	vlayout->addLayout(hlayout);
+	qDebug() << "HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent) - new HResultsWidget";
 	vlayout->addWidget(m_pResultsWidget = new HResultsWidget(results));
+	qDebug() << "HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent) - new HResultsWidget done";
 	setLayout(vlayout);
 
 	connect(m_pPrintButton, SIGNAL(clicked()), this, SLOT(onPrint()));
 	connect(m_pExportButton, SIGNAL(clicked()), this, SLOT(onExport()));
 	connect(m_pViewButton, SIGNAL(clicked()), this, SLOT(onView()));
+	connect(m_pOpenButton, SIGNAL(clicked()), this, SLOT(onOpen()));
 }
 
 void HResultsDialog::onPrint()
@@ -79,4 +83,42 @@ void HResultsDialog::onView()
 {
     GUILib::HExperimentMain experimentMain(m_pResultsWidget->results().experimentSettings(), this, true);
     experimentMain.exec();
+}
+
+void HResultsDialog::onOpen()
+{
+	// Determine CSV filename
+	QFileInfo fileinfo(m_pResultsWidget->results().filename());
+	QFileInfo csvfile(fileinfo.dir(), fileinfo.completeBaseName() + ".csv");
+
+	// Check if the file exists
+	if (!csvfile.exists())
+	{
+		QMessageBox mbox;
+		mbox.setText("Cannot find results file " + csvfile.canonicalFilePath());
+		mbox.exec();
+	}
+	else
+	{
+		// Open (assuming that Excel is installed!)
+#ifdef Q_WS_MAC
+	    QStringList args;
+	    args << "-e";
+	    args << "tell application \"Microsoft Excel\"";
+	    args << "-e";
+	    args << "activate";
+	    args << "-e";
+	    args << "open \"" + csvfile.canonicalFilePath() +"\"";
+	    args << "-e";
+	    args << "end tell";
+	    QProcess::startDetached("osascript", args);
+#endif
+
+#ifdef Q_WS_WIN
+	    QStringList args;
+	    args << "/select," << QDir::toNativeSeparators(filePath);
+	    QProcess::startDetached("explorer", args);
+#endif
+	}
+
 }
