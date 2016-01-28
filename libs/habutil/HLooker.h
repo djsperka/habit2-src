@@ -26,6 +26,7 @@ class HLooker : public QStateMachine
 
 public:
 	HLooker(HEventLog& log, bool bInclusiveLookTime);
+	HLooker(const HLooker& looker);
 	~HLooker() {};
 
 	// Add a transition. A new event is posted to the state machine.

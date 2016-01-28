@@ -11,6 +11,22 @@
 #include <QtDebug>
 #include <QCoreApplication>
 
+HLooker::HLooker(const HLooker& looker)
+: QStateMachine()
+, m_minLookTimeMS(looker.m_minLookTimeMS)
+, m_minLookAwayTimeMS(looker.m_minLookAwayTimeMS)
+, m_maxLookAwayTimeMS(looker.m_maxLookAwayTimeMS)
+, m_maxAccumulatedLookTimeMS(looker.m_maxAccumulatedLookTimeMS)
+, m_log(looker.m_log)
+, m_bInclusiveLookTime(looker.m_bInclusiveLookTime)
+, m_bLookStarted(looker.m_bLookStarted)
+, m_pdirectionLookStarted(looker.m_pdirectionLookStarted)
+, m_iLookStartedIndex(m_iLookStartedIndex)
+, m_bLookAwayStarted(m_bLookAwayStarted)
+{
+	qDebug() << "HLooker(const HLooker&) -- ?????";
+}
+
 HLooker::HLooker(HEventLog& log, bool bInclusiveLookTime)
 : QStateMachine()
 , m_minLookTimeMS(0)
@@ -76,6 +92,10 @@ HLooker::HLooker(HEventLog& log, bool bInclusiveLookTime)
 	connect(sLooking, SIGNAL(exited()), this, SLOT(onLookingStateExited()));
 	connect(sLookingAway, SIGNAL(exited()), this, SLOT(onLookingAwayStateExited()));
 	connect(this, SIGNAL(started()), this, SLOT(onStarted()));
+
+
+
+	qDebug() << "HLooker(): inclusive=" << m_bInclusiveLookTime;
 };
 
 void HLooker::onStarted()
@@ -328,6 +348,7 @@ void HLooker::onLookingStateEntered()
 						l.setLookMS(cumulativeLookTimeMS);
 					}
 					m_looks.append(l);
+					qDebug() << "emit look(1): " << l;
 					emit look(l);
 				}
 				else
@@ -528,6 +549,7 @@ void HLooker::minLookAwayTimeout()
 			}
 
 			m_looks.append(l);
+			qDebug() << "emit look(2, inclusive=" << m_bInclusiveLookTime << "): " << l;
 			emit look(l);
 		}
 		else
@@ -597,6 +619,7 @@ void HLooker::stopLooker(int tMS)
 					l.setLookMS(cumulativeLookTimeMS);
 				}
 				m_looks.append(l);
+				qDebug() << "emit look(3): " << l;
 				emit look(l);
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
@@ -622,6 +645,7 @@ void HLooker::stopLooker(int tMS)
 					l.setLookMS(cumulativeLookTimeMS);
 				}
 				m_looks.append(l);
+				qDebug() << "emit look(4): " << l;
 				emit look(l);
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
