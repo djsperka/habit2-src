@@ -16,7 +16,7 @@ namespace Habit
 	{
 	public:
 		HLookSettings(): m_id(-1), m_minLookTime(500), m_minLookAwayTime(100), m_bInclusiveLookTime(true) {};
-		HLookSettings(unsigned int minlook, unsigned int minlookaway, bool bInclusiveLookTime = true): m_id(-1), m_minLookTime(minlook), m_minLookAwayTime(minlookaway), m_bInclusiveLookTime(bInclusiveLookTime) {};
+		HLookSettings(unsigned int minlook, unsigned int minlookaway, bool bInclusiveLookTime): m_id(-1), m_minLookTime(minlook), m_minLookAwayTime(minlookaway), m_bInclusiveLookTime(bInclusiveLookTime) {};
 		HLookSettings(const HLookSettings& ls): m_id(ls.getId()), m_minLookTime(ls.getMinLookTime()), m_minLookAwayTime(ls.getMinLookAwayTime()), m_bInclusiveLookTime(ls.getInclusiveLookTime()) {};
 		HLookSettings& operator=(const HLookSettings& rhs)
 		{
