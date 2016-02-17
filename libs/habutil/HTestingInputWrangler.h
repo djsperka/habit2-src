@@ -38,6 +38,7 @@ class HTestingInputWrangler: public QObject
 	bool m_bIsEnabled;
 
 	bool processLine(const QString& line);
+	void dump();
 
 public:
 	static HEventLog m_staticDummyEventLog;
@@ -46,6 +47,7 @@ public:
 	virtual ~HTestingInputWrangler() {};
 	void enable(HLookDetector *pLD, const HExperiment* pExpt);
 	bool load(QFile& inputFile);
+	void stop();
 protected slots:
 	void phaseStarted(QString);
 	void trialStarted(int, int);
@@ -54,6 +56,7 @@ protected slots:
 	void check();
 };
 
+QDebug operator<<(QDebug dbg, const HTestingInputWrangler& w);
 
 
 #endif /* HTESTINGINPUTWRANGLER_H_ */

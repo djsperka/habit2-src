@@ -5,6 +5,7 @@
  *      Author: Oakeslab
  */
 
+#include <QListIterator>
 #include "HTestingInputWrangler.h"
 #include "HElapsedTimer.h"
 HEventLog HTestingInputWrangler::m_staticDummyEventLog;
@@ -35,9 +36,15 @@ void HTestingInputWrangler::enable(HLookDetector *pLD, const HExperiment* pExpt)
 	connect(m_pLD, SIGNAL(lookDetectorDisabled()), this, SLOT(lookDetectorDisabled()));
 	connect(pExpt, SIGNAL(phaseStarted(QString)), this, SLOT(phaseStarted(QString)));
 	connect(pExpt, SIGNAL(trialStarted(int, int)), this, SLOT(trialStarted(int, int)));
+	connect(pExpt, SIGNAL(exited()), this, SLOT(experimentFinished()));
 	m_bIsEnabled = true;
 }
 
+
+void HTestingInputWrangler::stop()
+{
+	if (m_ptimer && m_ptimer->isActive()) m_ptimer->stop();
+}
 
 bool HTestingInputWrangler::load(QFile& inputFile)
 {
@@ -65,19 +72,23 @@ bool HTestingInputWrangler::load(QFile& inputFile)
     	while (!in.atEnd())
     	{
     		QString line = in.readLine();
-    		num++;
     		if (!processLine(line))
     		{
     			qDebug() << "Error in input file at line " << num << ": " << line;
+    		}
+    		else
+    		{
+        		num++;
     		}
     	}
     }
     if (b)
     {
-    	qDebug() << "Loaded ???TODO??? events. ";
-//    	m_offsetTime = HElapsedTimer::elapsed();
-//    	m_ptimer->start();
+    	qDebug() << "Loaded " << num << " events from " << inputFile.fileName();
     }
+
+    dump();
+
     return b;
 };
 
@@ -192,6 +203,9 @@ bool HTestingInputWrangler::processLine(const QString& line)
 			qDebug() << "Unknown LookTransType: " << tokens.at(3);
 			return false;
 		}
+
+		qDebug() << "There are " << pEventLog->count() << " events so far...";
+
 	}
 	return true;
 }
@@ -204,6 +218,7 @@ void HTestingInputWrangler::phaseStarted(QString sPhase)
 	if (m_map.contains(getPhaseType(sPhase)))
 	{
 		m_pCurrentEventLogMap = &m_map[getPhaseType(sPhase)];
+		qDebug() << "There are events for this phase.";
 	}
 	else
 	{
@@ -216,6 +231,7 @@ void HTestingInputWrangler::trialStarted(int itrial, int irepeat)
 {
 	Q_ASSERT(m_bIsEnabled);
 	// initialize pointer to the event log found in m_pCurrentEventLogMap for this trial/repeat
+	qDebug() << "HTestingInputWrangler::trialStarted(" << itrial << "/" << irepeat << ")";
 	if (!m_pCurrentEventLogMap)
 	{
 		qWarning() << "HTestingInputWrangler::trialStarted(): No look transitions found for current phase";
@@ -228,6 +244,7 @@ void HTestingInputWrangler::trialStarted(int itrial, int irepeat)
 	}
 	else
 	{
+		qDebug() << "There are " << (m_pCurrentEventLogMap->value(QPair<int, int>(itrial, irepeat)))->count() << " events for this trial/repeat.";
 		m_inputIterator = HMutableEventLogIterator(*m_pCurrentEventLogMap->value(QPair<int,int>(itrial, irepeat)));
 	}
 
@@ -254,6 +271,19 @@ void HTestingInputWrangler::check()
 	int t = HElapsedTimer::elapsed();
 	int tRelative = t - m_offsetTime;	// compare to tEvent-tEventOffsetTime
 	if (t == m_lastCheckTime) return;
+
+	if (tRelative % 100 == 0)
+	{
+		if (m_inputIterator.hasNext())
+		{
+			qDebug() << "check() " << tRelative << ": next " << m_inputIterator.peekNext()->timestamp();
+		}
+		else
+		{
+			qDebug() << "check() " << tRelative << ": NO NEXT";
+		}
+	}
+
 	while (	m_inputIterator.hasNext() &&
 			m_inputIterator.peekNext()->timestamp() <= tRelative)
 	{
@@ -270,4 +300,30 @@ void HTestingInputWrangler::check()
 		m_inputIterator.next();
 	}
 	m_lastCheckTime = t;
+};
+
+
+void HTestingInputWrangler::dump()
+{
+	QList< HPhaseType > keys = m_map.keys();
+	qDebug() << "HTestingInputWrangler events loaded: ";
+	QListIterator< HPhaseType > itPhases(keys);
+	while (itPhases.hasNext())
+	{
+		HPhaseType type = itPhases.next();
+		qDebug() << type.name() << endl;
+
+		// Get the map for this phase.
+		TrialEventLogMap *pEventLogMap = &m_map[type];
+		QList< QPair<int, int> > trkeys = pEventLogMap->keys();
+		QListIterator<QPair<int, int> >itTrialRepeat(trkeys);
+		while (itTrialRepeat.hasNext())
+		{
+			QPair<int, int> tr = itTrialRepeat.next();
+			qDebug() << "Trial/repeat " << tr.first << "/" << tr.second;
+
+		}
+
+	}
+	return;
 };
