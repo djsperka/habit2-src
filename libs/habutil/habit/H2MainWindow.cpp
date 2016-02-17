@@ -515,19 +515,17 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			habitControlPanel.setWindowTitle(dlg.getRunLabel());
 			if (habitControlPanel.exec() != QDialog::Accepted)
 				return;
+
 			HResults* results = new HResults(settings, dlg.getRunSettings(),
 					dlg.getSubjectSettings(), log,
 					dlg.getRunLabel(),
 					QCoreApplication::instance()->applicationVersion());
 
-			// display results
-			HResultsDialog dialog(*results, this);
-			dialog.exec();
-
 			// Always save results. No option here.
 			//QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
 			QDir dir (habutilGetResultsDir(expt));
 			QString filename(dir.absoluteFilePath(QString("%1.hab").arg(dlg.getRunLabel())));
+			qDebug() << "Saving results to " << filename;
 			if (!results->save(filename))
 			{
 				qCritical() << "Error - cannot save data to file " << filename;
@@ -537,6 +535,11 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			{
 				qCritical() << "Error - cannot save data to csv file " << filenameCSV;
 			}
+
+			// display results
+			HResultsDialog dialog(*results, this);
+			dialog.exec();
+
 		}
 	}
 }
