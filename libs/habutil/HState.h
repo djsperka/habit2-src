@@ -18,6 +18,7 @@ class HState : public QState
 public:
     HState(const QString& name, QState* parent = 0 );
     HState(const QString& name, const QString& prefix, QState* parent = 0 );
+    virtual ~HState() {};
 	
     QString name() const { return m_name; }
     QString prefix() const { return m_prefix; }

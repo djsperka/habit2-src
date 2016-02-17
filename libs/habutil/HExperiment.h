@@ -22,7 +22,7 @@ class HExperiment: public HLogState
 
 public:
 	HExperiment(HEventLog& log, HMediaManager& mm, HLookDetector& ld, QState* parent = 0);
-	~HExperiment() {};
+	virtual ~HExperiment() {};
 	
 	bool hasPreTestPhase() { return m_pPreTestPhase==(HPhase*)NULL; };
 	bool hasHabituationPhase() { return m_pHabituationPhase==(HPhase*)NULL; };
