@@ -1,0 +1,12 @@
+Test,0,0,NoneCenter,100
+Test,0,0,CenterNone,1000
+Test,1,0,NoneCenter,100
+Test,1,0,CenterNone,500
+Test,1,0,NoneCenter,600
+Test,1,0,CenterNone,900
+Test,2,0,NoneCenter,100
+Test,2,0,CenterNone,500
+Test,2,1,NoneCenter,900
+Test,2,1,CenterNone,1000
+Test,2,1,NoneCenter,1600
+Test,2,1,CenterNone,2200

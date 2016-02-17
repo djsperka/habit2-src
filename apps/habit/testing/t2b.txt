@@ -1,0 +1,6 @@
+Test,0,0,NoneCenter,100
+Test,0,0,CenterNone,500
+Test,0,0,NoneCenter,600
+Test,0,0,CenterNone,1150
+Test,0,0,NoneCenter,1500
+Test,0,0,CenterNone,2100
