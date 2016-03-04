@@ -7,10 +7,12 @@
 
 
 #include "HStimulusSettingsWidget.h"
+#include "HStimulusOrder.h"
 #include "HTypes.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QRegExpValidator>
 
 GUILib::HStimulusSettingsWidget::HStimulusSettingsWidget(const Habit::StimulusSettings& settings, const HStimulusLayoutType& stimLayout, QWidget *parent)
 : QWidget(parent)
@@ -26,6 +28,7 @@ GUILib::HStimulusSettingsWidget::HStimulusSettingsWidget(const Habit::StimulusSe
 	// label
 	QLabel *pNameLabel = new QLabel("Stimulus name:");
 	m_pName = new QLineEdit(m_settings.getName(), this);
+	m_pName->setValidator(new QRegExpValidator(Habit::HStimulusOrder::getStimlusNameLabelRE()));
 
 	// stack
 	m_pStack = new QStackedWidget(this);

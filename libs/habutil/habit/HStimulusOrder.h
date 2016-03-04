@@ -9,6 +9,7 @@
 #define HSTIMULUSORDER_H_
 
 #include <QStringList>
+#include <QRegExp>
 #include <QDebug>
 #include "HTypes.h"
 
@@ -34,6 +35,9 @@ namespace Habit
 		void setContext(const HStimContext& context);
 		void setName(const QString& name) { m_name = name; };
 		QString getName() const { return m_name; };
+
+		// Convenience - this is the clearing house for correct spelling of stimulus names and labels!
+		static const QRegExp& getStimlusNameLabelRE();
 
 		// the List is the list of strings as they should be stored in the database.
 		// That means the strings may carry labels with them, i.e. "stimname/label" instead of

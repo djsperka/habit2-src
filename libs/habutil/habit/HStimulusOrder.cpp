@@ -10,8 +10,13 @@
 #include <QRegExp>
 
 //static const QRegExp re("(\\w+)(/(\\w+))?");
-static const QString sreWordWithSpaces("((\\w)|(\\w[ -\\w]*\\w))");
+static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");
 static const QRegExp reStimAndLabel(sreWordWithSpaces + "(/" + sreWordWithSpaces + ")?");
+
+const QRegExp& Habit::HStimulusOrder::getStimlusNameLabelRE()
+{
+	return reStimAndLabel;
+}
 
 
 QString Habit::HStimulusOrder::getStim(const QString& stimAndLabel)

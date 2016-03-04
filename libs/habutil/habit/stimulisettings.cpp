@@ -167,7 +167,11 @@ bool StimuliSettings::getIndexedOrderList(const QString& orderName, QList< QPair
 		{
 			QString stimLabel = it.next();
 			i = stimNames.indexOf(HStimulusOrder::getStim(stimLabel));
-			if (i < 0) b = false;
+			if (i < 0)
+			{
+				b = false;
+				qDebug() << "Cannot find stim \"" << HStimulusOrder::getStim(stimLabel) << "\" in stimulus list: " << stimNames;
+			}
 			else
 				list.append(QPair<int, QString>(i, HStimulusOrder::getLabel(stimLabel)));
 		}
