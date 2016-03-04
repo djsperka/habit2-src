@@ -92,7 +92,10 @@ public:
 		indTrialEndTime = 15,
 		indTotalLook = 16,
 		indTotalAway = 17,
-		indNInit = 18,
+		indTotalLookLeft = 18,
+		indTotalLookCenter = 19,
+		indTotalLookRight = 20,
+		indNInit = 21,
 	};
 
 	HTrialResultsRow(): QList<QString>()
@@ -128,6 +131,10 @@ public:
 		(*this)[indTrialEndTime] = QString("%1").arg(t);
 		(*this)[indTotalLook] = QString("%1").arg(m_totalLookTime);
 		(*this)[indTotalAway] = QString("%1").arg(m_totalLookAwayTime);
+		(*this)[indTotalLookLeft] = QString("%1").arg(m_totalLookLeftTime);
+		(*this)[indTotalLookCenter] = QString("%1").arg(m_totalLookCenterTime);
+		(*this)[indTotalLookRight] = QString("%1").arg(m_totalLookRightTime);
+
 	};
 	void appendLook(HLook look);
 	void appendLookTrans(HLookTrans trans, int t);
@@ -141,6 +148,9 @@ private:
 	int m_lastLookEndTime;
 	int m_totalLookTime;
 	int m_totalLookAwayTime;
+	int m_totalLookLeftTime;
+	int m_totalLookCenterTime;
+	int m_totalLookRightTime;
 	QList<HLook> m_looks;
 	QList<HLook> m_allLooking;
 	HLook m_lookAllLookingPending;	// this is for recording all looking, not necessarily a Look!
@@ -151,6 +161,9 @@ private:
 		m_lastLookEndTime = 0;
 		m_totalLookTime = 0;
 		m_totalLookAwayTime = 0;
+		m_totalLookLeftTime = 0;
+		m_totalLookCenterTime = 0;
+		m_totalLookRightTime = 0;
 		clear();
 		m_looks.clear();
 		m_allLooking.clear();

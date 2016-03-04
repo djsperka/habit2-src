@@ -159,29 +159,6 @@ void HMainWindow::runSavedExperiment()
 				runSettingsForm.getRunLabel(),
 				QCoreApplication::instance()->applicationVersion());
 
-		// display results
-		HResultsDialog dialog(*results, this);
-		dialog.exec();
-
-
-#if OPTIONAL_FILE_SAVE
-		QMessageBox box;
-		box.setText("Save the results of this experiment?");
-		box.setWindowTitle("End of experiment");
-		box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		if (box.exec() == QMessageBox::Yes)
-		{
-			QString fileName = QFileDialog::getSaveFileName(this, tr("Save Experiment Result"),
-															"", tr("Experiment Result File (*.hab)"));
-			if (!fileName.isNull() && !fileName.isEmpty())
-			{
-				if (!results->save(fileName))
-				{
-					qCritical() << "Error - cannot save data to file " << fileName;
-				}
-			}
-		}
-#else
 		// Always save results. No option here.
 		//QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
 		QDir dir (habutilGetResultsDir(habitControlPanel.getExperimentSettings().getName()));
@@ -196,7 +173,10 @@ void HMainWindow::runSavedExperiment()
 			qCritical() << "Error - cannot save data to csv file " << filenameCSV;
 		}
 
-#endif
+		// display results
+		HResultsDialog dialog(*results, this);
+		dialog.exec();
+
     }
     m_openWorkspaceAct->setEnabled(true);
 }

@@ -24,12 +24,14 @@ private slots:
 	void onOpen();
 	void onExport();
 	void onView();
+	void onGenerate();
 private:
 	QString m_sExptName;
 	QPushButton* m_pPrintButton;
 	QPushButton* m_pOpenButton;
 	QPushButton* m_pExportButton;
 	QPushButton* m_pViewButton;
+	QPushButton* m_pGenerateButton;
 	HResultsWidget* m_pResultsWidget;
 };
 

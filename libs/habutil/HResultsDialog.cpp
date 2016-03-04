@@ -17,7 +17,8 @@ HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 	QVBoxLayout* vlayout = new QVBoxLayout;
 	QHBoxLayout* hlayout = new QHBoxLayout;
 	hlayout->addWidget(m_pPrintButton = new QPushButton("Print"));
-	hlayout->addWidget(m_pOpenButton = new QPushButton("Open Results in Excel"));
+	hlayout->addWidget(m_pOpenButton = new QPushButton("Open"));
+	hlayout->addWidget(m_pGenerateButton = new QPushButton("(Re)Generate Results"));
 	hlayout->addWidget(m_pExportButton = new QPushButton("Export Event Log"));
 	hlayout->addWidget(m_pViewButton = new QPushButton("View Experiment Settings"));
 	vlayout->addLayout(hlayout);
@@ -30,6 +31,7 @@ HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 	connect(m_pExportButton, SIGNAL(clicked()), this, SLOT(onExport()));
 	connect(m_pViewButton, SIGNAL(clicked()), this, SLOT(onView()));
 	connect(m_pOpenButton, SIGNAL(clicked()), this, SLOT(onOpen()));
+	connect(m_pGenerateButton, SIGNAL(clicked()), this, SLOT(onGenerate()));
 }
 
 void HResultsDialog::onPrint()
@@ -121,4 +123,11 @@ void HResultsDialog::onOpen()
 #endif
 	}
 
+}
+
+void HResultsDialog::onGenerate()
+{
+	QMessageBox mbox;
+	mbox.setText("Generate results");
+	mbox.exec();
 }

@@ -19,7 +19,7 @@ QStringList HTrialResultsRow::headers =
 						<< "Habituated" << "StimID" << "StimName" << "StimLabel"
 						<< "Left" << "Center" << "Right" << "ISS"
 						<< "Trial Start" << "Trial End"
-						<< "TotalLook" << "TotalLookAway" << "Looks";
+						<< "TotalLook" << "TotalLookAway" << "TotalLeft" << "TotalCenter" << "TotalRight" << "Looks";
 
 
 HResults::HResults()
@@ -104,8 +104,6 @@ bool HResults::save(const QString& filename) const
 		else if (type() == HResultsType::HResultsTypeReliabilityRun)
 		{
 			qCritical() << "Saving reliability results not implemented!";
-			//out << originalFilename();
-			//out << experimentSettings() << runSettings() << reliabilitySettings() << eventLog();
 		}
 		else
 		{
@@ -210,8 +208,6 @@ bool HResults::saveToCSV(const QString& filename) const
 		HTrialResultsRow row;
 		bool bInsidePhase = false;
 		bool bInsideTrial = false;
-		int totalLookTime = 0;
-		int totalLookAwayTime = 0;
 		bool bHabituated = false;
 		bool bHaveStimRequest = false;
 		QString sPendingStimLabel;
@@ -252,8 +248,6 @@ bool HResults::saveToCSV(const QString& filename) const
 				row.setTrialStartTime(ptse->timestamp());
 				row.setTrial(ptse->trialnumber() + 1);		// djs 11-2-2015 Use trial number, not index, in output CSV.
 				row.setRepeat(ptse->repeatnumber());
-				totalLookTime = 0;
-				totalLookAwayTime = 0;
 			}
 			else if (e->type() == HEventType::HEventStimRequest)
 			{
@@ -328,8 +322,6 @@ bool HResults::saveToCSV(const QString& filename) const
 				// set trial end type and flush
 				HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(e);
 				row.setEndType(pte->endtype().name());
-				row.setTotalLook(QString("%1").arg(totalLookTime));
-				row.setTotalLookAway(QString("%1").arg(totalLookAwayTime));
 				row.setTrialEndTime(pte->timestamp());	// automatically sets total look(away) times
 				row.setOrderName(sOrderName);
 				out << row;
@@ -414,6 +406,13 @@ void HTrialResultsRow::appendLook(HLook look)
 	m_looks.append(look);
 	m_totalLookTime += look.lookMS();
 	m_lastLookEndTime = look.endMS();
+	if (look.direction() == HLookDirection::LookLeft) m_totalLookLeftTime += look.lookMS();
+	else if (look.direction() == HLookDirection::LookCenter) m_totalLookCenterTime += look.lookMS();
+	else if (look.direction() == HLookDirection::LookRight) m_totalLookRightTime += look.lookMS();
+	else
+	{
+		qDebug() << "HTrialResultsRow - cannot tally look for direction " << look.direction().name();
+	}
 
 }
 
