@@ -15,9 +15,6 @@
 #include <QtGui>
 #include <QMap>
 
-#define NEWFANGLED_CREATE_EXPERIMENT
-
-
 #include "runsettings.h"
 #include "stimulussettings.h"
 #include "stimulisettings.h"
@@ -30,12 +27,7 @@
 #include "HEventLog.h"
 #include "HMediaStatusWidget.h"
 #include "HExperimentStatusWidget.h"
-
-#ifdef NEWFANGLED_CREATE_EXPERIMENT
 #include "HExperimentUtil.h"
-#endif
-
-
 
 namespace GUILib
 {
@@ -57,9 +49,6 @@ namespace GUILib
 		void components();
 		void connections();
 		void doLayout();
-#ifndef NEWFANGLED_CREATE_EXPERIMENT
-		void createExperiment(HEventLog& log);
-#endif
 
 	private slots:
 		void onStartTrials();
