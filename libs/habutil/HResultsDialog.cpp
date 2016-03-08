@@ -22,9 +22,7 @@ HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 	hlayout->addWidget(m_pExportButton = new QPushButton("Export Event Log"));
 	hlayout->addWidget(m_pViewButton = new QPushButton("View Experiment Settings"));
 	vlayout->addLayout(hlayout);
-	qDebug() << "HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent) - new HResultsWidget";
 	vlayout->addWidget(m_pResultsWidget = new HResultsWidget(results));
-	qDebug() << "HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent) - new HResultsWidget done";
 	setLayout(vlayout);
 
 	connect(m_pPrintButton, SIGNAL(clicked()), this, SLOT(onPrint()));
