@@ -59,9 +59,10 @@ public:
 	static const HEventType HEventScreenStart;
 	static const HEventType HEventTrialAbort;
 	static const HEventType HEventExperimentQuit;
+	static const HEventType HEventIncompleteLook;
 
 	// undefined event not in A[]
-	static const HEventType* A[29];
+	static const HEventType* A[30];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -702,7 +703,39 @@ public:
 private:
 	HLook m_look;
 };
+
+class HIncompleteLookEvent: public HEvent
+{
+public:
+	HIncompleteLookEvent(HLook look = HLook(), int timestamp=0)
+	: HEvent(HEventType::HEventIncompleteLook, timestamp)
+	, m_look(look)
+	{};
+
+	HIncompleteLookEvent(const HLookEvent& e)
+	: HEvent(HEventType::HEventIncompleteLook, e.timestamp())
+	, m_look(e.look())
+	{};
+
+	virtual ~HIncompleteLookEvent() {};
 	
+	const HLook& look() const { return m_look; };
+	QString eventInfo() const;
+	virtual QString eventCSVAdditional() const;
+
+	virtual QDataStream& putAdditional(QDataStream& stream) const;
+	static HIncompleteLookEvent* getEvent(QDataStream& stream, int timestamp);
+
+	HEvent* clone(int ts = 0) const
+	{
+		int t = (ts < 0 ? timestamp() : ts);
+		return new HIncompleteLookEvent(look(), t);
+	};
+
+private:
+	HLook m_look;
+};
+
 
 class HLookTransEvent: public HEvent
 {
