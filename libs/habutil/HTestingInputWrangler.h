@@ -54,6 +54,7 @@ protected slots:
 	void lookDetectorEnabled();
 	void lookDetectorDisabled();
 	void check();
+	void experimentFinished();
 };
 
 QDebug operator<<(QDebug dbg, const HTestingInputWrangler& w);
