@@ -79,7 +79,7 @@ void HStimRunningState::gotLookPending()
 	m_bGotLookPending = true;
 }
 
-void HStimRunningState::gotLookAborted()
+void HStimRunningState::gotLookAborted(HLook l)
 {
 	// Under certain conditions, this signal generates an HNoLookQEvent.
 	m_bGotLookStarted = false;
@@ -88,22 +88,6 @@ void HStimRunningState::gotLookAborted()
 		machine()->postEvent(new HNoLookQEvent());
 	}
 }
-
-#if 0
-void HStimRunningState::gotLookAwayStarted()
-{
-	if (m_bGotLookStarted) return;
-	else if (m_phaseSettings.getIsMaxNoLookTime() && !m_ptimerNoLook->isActive())
-	{
-		machine()->postEvent(new HNoLookQEvent());
-	}
-	else
-	{
-		m_bGotLookAwayStarted = true;
-		m_bGotLookStarted = false;
-	}
-}
-#endif
 
 void HStimRunningState::noLookTimeout()
 {

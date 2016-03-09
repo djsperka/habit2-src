@@ -200,7 +200,7 @@ private slots:
 	void noLookTimeout();
 	void gotLookStarted();
 	void gotLookPending();
-	void gotLookAborted();
+	void gotLookAborted(HLook l);
 
 protected:
 	// Start timer on entry to this state. Also generate kStimRunning event. 
