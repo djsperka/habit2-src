@@ -13,8 +13,6 @@
 
 HEventLog::~HEventLog()
 {
-//	while (!isEmpty())
-//		delete takeFirst();
 };
 
 HPhaseLog HEventLog::getPhaseLog(QString phase)
