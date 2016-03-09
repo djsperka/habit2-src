@@ -10,6 +10,16 @@
 
 #include "HLook.h"
 
+static const int f_iVersion2(-2123);
+
+bool isLookToAnyStimulus(const HLook& look)
+{
+	return (look.direction() == HLookDirection::LookLeft ||
+			look.direction() == HLookDirection::LookCenter ||
+			look.direction() == HLookDirection::LookRight);
+}
+
+
 QTextStream& operator<<(QTextStream& out, const HLookTrans& lt)
 {
 	if (lt == HLookTrans::NoneLeft)
@@ -82,18 +92,34 @@ QTextStream& operator<<(QTextStream& out, const HLook& l)
 
 QDataStream& operator<<(QDataStream& out, const HLook& l)
 {
-	out << l.direction().number() << l.startMS() << l.endMS() << l.lookMS();
+	out << f_iVersion2 << l.direction().number() << l.startMS() << l.endMS() << l.lookMS() << l.sublooks();
 	return out;
 };
 
 QDataStream& operator>>(QDataStream& in, HLook& l)
 {
 	int d, t0, t1, t2;
-	in >> d >> t0 >> t1 >> t2;
-	l.setDirection(getLookDirection(d));
-	l.setStartMS(t0);
-	l.setEndMS(t1);
-	l.setLookMS(t2);
+	QList<HLook> sublooks;
+
+	in >> d;
+	if (d == f_iVersion2)
+	{
+		in >> d >> t0 >> t1 >> t2 >> sublooks;
+		l.setDirection(getLookDirection(d));
+		l.setStartMS(t0);
+		l.setEndMS(t1);
+		l.setLookMS(t2);
+		l.setSublooks(sublooks);
+	}
+	else
+	{
+		in >> t0 >> t1 >> t2;
+		l.setDirection(getLookDirection(d));
+		l.setStartMS(t0);
+		l.setEndMS(t1);
+		l.setLookMS(t2);
+		// no sublooks for old version
+	}
 	return in;
 }
 
@@ -161,13 +187,27 @@ QDebug operator<<(QDebug dbg, const HLookDirection& direction)
 
 QDebug operator<<(QDebug dbg, const HLook& l)
 {
-	dbg.nospace() << l.direction() << ":" << l.startMS() << "-" << l.endMS() << "=" << l.lookMS();
+	dbg.nospace() << l.direction() << ":" << l.startMS() << "-" << l.endMS() << "=" << l.lookMS() << endl << l.sublooks();
+
 	return dbg.space();
 }
 
+QDebug operator<<(QDebug dbg, const QList<HLook>& looklist)
+{
+	dbg.nospace() << "Contains: " << looklist.size() << endl;
+	QListIterator<HLook> it(looklist);
+	int i=1;
+	while (it.hasNext())
+	{
+		dbg << i++ << ": " << it.next() << endl;
+	}
+	return dbg.nospace();
+}
+
+
 bool operator==(const HLook& lhs, const HLook& rhs)
 {
-	return lhs.direction() == rhs.direction() && lhs.startMS() == rhs.startMS() && lhs.endMS() == rhs.endMS() && lhs.lookMS()==rhs.lookMS();
+	return lhs.direction() == rhs.direction() && lhs.startMS() == rhs.startMS() && lhs.endMS() == rhs.endMS() && lhs.lookMS()==rhs.lookMS() && lhs.sublooks() == rhs.sublooks();
 }
 	
 

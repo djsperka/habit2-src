@@ -37,7 +37,13 @@ void HTestingInputWrangler::enable(HLookDetector *pLD, const HExperiment* pExpt)
 	connect(pExpt, SIGNAL(phaseStarted(QString)), this, SLOT(phaseStarted(QString)));
 	connect(pExpt, SIGNAL(trialStarted(int, int)), this, SLOT(trialStarted(int, int)));
 	connect(pExpt, SIGNAL(exited()), this, SLOT(experimentFinished()));
+	connect(pExpt->machine(), SIGNAL(stopped()), this, SLOT(experimentFinished()));
 	m_bIsEnabled = true;
+}
+
+void HTestingInputWrangler::experimentFinished()
+{
+	stop();
 }
 
 
@@ -262,7 +268,7 @@ void HTestingInputWrangler::lookDetectorDisabled()
 {
 	Q_ASSERT(m_bIsEnabled);
 	m_ptimer->stop();
-	qDebug() << "HTestingInputWrangler::lookDetectorEnabled() - timer stopped.";
+	qDebug() << "HTestingInputWrangler::lookDetectorDisabled() - timer stopped.";
 }
 
 void HTestingInputWrangler::check()
@@ -272,7 +278,8 @@ void HTestingInputWrangler::check()
 	int tRelative = t - m_offsetTime;	// compare to tEvent-tEventOffsetTime
 	if (t == m_lastCheckTime) return;
 
-	if (tRelative % 100 == 0)
+#if 0
+	if (tRelative % 1000 == 0)
 	{
 		if (m_inputIterator.hasNext())
 		{
@@ -283,6 +290,7 @@ void HTestingInputWrangler::check()
 			qDebug() << "check() " << tRelative << ": NO NEXT";
 		}
 	}
+#endif
 
 	while (	m_inputIterator.hasNext() &&
 			m_inputIterator.peekNext()->timestamp() <= tRelative)

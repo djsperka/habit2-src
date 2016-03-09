@@ -45,6 +45,12 @@ QVariant HResultsExplorerFilesProxyModel::data(const QModelIndex &index, int rol
 		}
 		result = QVariant(r);
 	}
+	else if (role == Qt::SizeHintRole)
+	{
+		qDebug() << "size hint";
+		QSize s(1,1);
+		result = QVariant(s);
+	}
 	else if (role == Qt::TextAlignmentRole)
 	{
 		result = QVariant(Qt::AlignCenter);

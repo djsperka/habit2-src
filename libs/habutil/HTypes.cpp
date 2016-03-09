@@ -74,11 +74,11 @@ const HLookTrans& getLookTrans(int i)
 	return HLookTrans::UnknownLookTrans;
 };
 
-const HLookDirection HLookDirection::UnknownLookDirection(-1, "UnknownLookDirection");
-const HLookDirection HLookDirection::LookAway(0, "LookAway");
-const HLookDirection HLookDirection::LookLeft(1, "LookLeft");
-const HLookDirection HLookDirection::LookRight(2, "LookRight");
-const HLookDirection HLookDirection::LookCenter(3, "LookCenter");
+const HLookDirection HLookDirection::UnknownLookDirection(-1, false, "UnknownLookDirection");
+const HLookDirection HLookDirection::LookAway(0, false, "LookAway");
+const HLookDirection HLookDirection::LookLeft(1, true, "LookLeft");
+const HLookDirection HLookDirection::LookRight(2, true, "LookRight");
+const HLookDirection HLookDirection::LookCenter(3, true, "LookCenter");
 
 const HLookDirection& getLookDirection(int i)
 {
@@ -118,6 +118,14 @@ const HLookDirection& directionTo(const HLookTrans& type)
 	return HLookDirection::UnknownLookDirection;
 }
 
+const HLookDirection& directionFrom(const HLookTrans& type)
+{
+	if (type == HLookTrans::LeftNone) return HLookDirection::LookLeft;
+	else if (type == HLookTrans::CenterNone) return HLookDirection::LookCenter;
+	else if (type == HLookTrans::RightNone) return HLookDirection::LookRight;
+	else if (type == HLookTrans::NoneLeft || type == HLookTrans::NoneCenter || type == HLookTrans::NoneRight) return HLookDirection::LookAway;
+	return HLookDirection::UnknownLookDirection;
+}
 
 
 

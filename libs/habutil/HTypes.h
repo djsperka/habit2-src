@@ -39,10 +39,12 @@ public:
 	static const HLookDirection UnknownLookDirection;
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
+	bool isToStim() const { return m_bStim; }
 
 private:
-	explicit HLookDirection(int t, const char *name): m_t(t), m_s(name) {}
+	explicit HLookDirection(int t, bool bStim, const char *name): m_t(t), m_bStim(bStim), m_s(name) {}
 	int m_t;
+	bool m_bStim;
 	QString m_s;
 };
 
@@ -72,6 +74,7 @@ private:
 
 
 const HLookDirection& directionTo(const HLookTrans& type);
+const HLookDirection& directionFrom(const HLookTrans& type);
 const HPhaseType& getPhaseType(int i);
 const HPhaseType& getPhaseType(const QString& sPhase);
 const HLookTrans& getLookTrans(int i);

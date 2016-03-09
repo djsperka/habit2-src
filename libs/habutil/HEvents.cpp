@@ -44,10 +44,11 @@ const HEventType HEventType::HEventStimulusOrder(25, "StimulusOrder");
 const HEventType HEventType::HEventTrialAbort(26, "TrialAborted");
 const HEventType HEventType::HEventExperimentQuit(27, "ExperimentQuit");
 const HEventType HEventType::HEventStimLabelRequest(28, "StimLabelRequest");
+const HEventType HEventType::HEventIncompleteLook(29, "IncompleteLook");
 const HEventType HEventType::HEventUndefined(-1, "Undefined");
 
 // Note undefined event not in search array.
-const HEventType* HEventType::A[29] =
+const HEventType* HEventType::A[30] =
 {
 	&HEventType::HEventPhaseStart,
 	&HEventType::HEventPhaseEnd,
@@ -77,7 +78,8 @@ const HEventType* HEventType::A[29] =
 	&HEventType::HEventStimulusOrder,
 	&HEventType::HEventTrialAbort,
 	&HEventType::HEventExperimentQuit,
-	&HEventType::HEventStimLabelRequest
+	&HEventType::HEventStimLabelRequest,
+	&HEventType::HEventIncompleteLook
 };
 	
 bool operator==(const HEventType& lhs, const HEventType& rhs)
@@ -334,6 +336,10 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	else if (etype == HEventType::HEventExperimentQuit)
 	{
 		pevent = HExperimentQuitEvent::getEvent(stream, ts);
+	}
+	else if (etype == HEventType::HEventIncompleteLook)
+	{
+		pevent = HIncompleteLookEvent::getEvent(stream, ts);
 	}
 	else
 	{
@@ -708,6 +714,39 @@ QString HLookEvent::eventCSVAdditional() const
 	tmp << m_look.direction() << "," << m_look.startMS() << "," << m_look.endMS() << "," << m_look.lookMS();
 	return s;
 }
+
+
+QString HIncompleteLookEvent::eventInfo() const
+{
+	QString s;
+	QTextStream tmp(&s);
+	tmp << m_look;
+	return s;
+};
+
+
+QDataStream& HIncompleteLookEvent::putAdditional(QDataStream& stream) const
+{
+	stream << look();
+	return stream;
+}
+
+HIncompleteLookEvent* HIncompleteLookEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	HLook look;
+	stream >> look;
+	return new HIncompleteLookEvent(look, timestamp);
+}
+
+QString HIncompleteLookEvent::eventCSVAdditional() const
+{
+	QString s;
+	QTextStream tmp(&s);
+	tmp << m_look.direction() << "," << m_look.startMS() << "," << m_look.endMS() << "," << m_look.lookMS();
+	return s;
+}
+
+
 
 QString HLookTransEvent::eventInfo() const
 {
