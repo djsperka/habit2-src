@@ -17,19 +17,19 @@ HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)
 	QVBoxLayout* vlayout = new QVBoxLayout;
 	QHBoxLayout* hlayout = new QHBoxLayout;
 	hlayout->addWidget(m_pPrintButton = new QPushButton("Print"));
-	hlayout->addWidget(m_pOpenButton = new QPushButton("Open"));
-	hlayout->addWidget(m_pGenerateButton = new QPushButton("(Re)Generate Results"));
-	hlayout->addWidget(m_pExportButton = new QPushButton("Export Event Log"));
+//	hlayout->addWidget(m_pOpenButton = new QPushButton("Open"));
+	hlayout->addWidget(m_pExportResultsButton = new QPushButton("Export Results"));
+	hlayout->addWidget(m_pExportLogButton = new QPushButton("Export Event Log"));
 	hlayout->addWidget(m_pViewButton = new QPushButton("View Experiment Settings"));
 	vlayout->addLayout(hlayout);
 	vlayout->addWidget(m_pResultsWidget = new HResultsWidget(results));
 	setLayout(vlayout);
 
 	connect(m_pPrintButton, SIGNAL(clicked()), this, SLOT(onPrint()));
-	connect(m_pExportButton, SIGNAL(clicked()), this, SLOT(onExport()));
+	connect(m_pExportLogButton, SIGNAL(clicked()), this, SLOT(onExportLog()));
 	connect(m_pViewButton, SIGNAL(clicked()), this, SLOT(onView()));
-	connect(m_pOpenButton, SIGNAL(clicked()), this, SLOT(onOpen()));
-	connect(m_pGenerateButton, SIGNAL(clicked()), this, SLOT(onGenerate()));
+//	connect(m_pOpenButton, SIGNAL(clicked()), this, SLOT(onOpen()));
+	connect(m_pExportResultsButton, SIGNAL(clicked()), this, SLOT(onExportResults()));
 }
 
 void HResultsDialog::onPrint()
@@ -48,7 +48,7 @@ void HResultsDialog::onPrint()
 	return;
 }
 
-void HResultsDialog::onExport()
+void HResultsDialog::onExportLog()
 {
 	QFileInfo fileinfo(m_pResultsWidget->results().filename());
 	QString tmpfile;
@@ -123,9 +123,32 @@ void HResultsDialog::onOpen()
 
 }
 
-void HResultsDialog::onGenerate()
+void HResultsDialog::onExportResults()
 {
-	QMessageBox mbox;
-	mbox.setText("Generate results");
-	mbox.exec();
-}
+	QFileInfo fileinfo(m_pResultsWidget->results().filename());
+	QString tmpfile;
+
+	// The filename in the results widget's HResults may not have a directory yet. That's the case when the expt has
+	// just been run and we have not saved the results to disk. If a results file has been loaded from disk, though,
+	// the filename will have a dir. Attempt to make the save starting point as close as possible to the location
+	// of the results (even if the results haven't been written - in that case assume they'll get written to the
+	// results dir).
+
+	if (fileinfo.dir().path() == ".")
+	{
+		tmpfile = habutilGetResultsDir(m_sExptName).path().append("/").append(fileinfo.baseName()).append(".csv");
+	}
+	else
+	{
+		tmpfile = fileinfo.dir().path().append("/").append(fileinfo.baseName()).append(".csv");
+	}
+
+	// Get filename. Use the original input filename as starting point...
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Filename for export"), tmpfile, "CSV File (*.csv)");
+	if (!fileName.isNull() && !fileName.isEmpty())
+	{
+		if (!m_pResultsWidget->results().saveToCSV(fileName))
+		{
+			qCritical() << "Error - cannot save data to file " << fileName;
+		}
+	}}
