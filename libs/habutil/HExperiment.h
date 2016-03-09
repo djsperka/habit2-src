@@ -48,6 +48,7 @@ signals:
 private slots:
 	void onAttention();
 	void onLook(HLook l);
+	void onLookAborted(HLook l);
 
 private:
 	HMediaManager& m_mm;

@@ -20,6 +20,7 @@ HExperiment::HExperiment(HEventLog& log, HMediaManager& mm, HLookDetector& ld, Q
 {
 	connect(&m_ld, SIGNAL(attention()), this, SLOT(onAttention()));
 	connect(&m_ld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
+	connect(&m_ld, SIGNAL(lookAborted(HLook)), this, SLOT(onLookAborted(HLook)));
 };
 
 void HExperiment::onAttention()
@@ -32,5 +33,9 @@ void HExperiment::onLook(HLook l)
 	eventLog().append(new HLookEvent(l, HElapsedTimer::elapsed()));
 }
 
+void HExperiment::onLookAborted(HLook l)
+{
+	eventLog().append(new HIncompleteLookEvent(l, HElapsedTimer::elapsed()));
+}
 
 
