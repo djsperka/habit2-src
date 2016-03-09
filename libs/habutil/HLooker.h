@@ -112,14 +112,14 @@ private:
 	// lastLookStartTimeMS: the time of the most recent transition to a look direction
 	// cumulativeLookTimeMS: the total time in a looking state (excludes time looking away)
 	// lastLookAwayStartTimeMS: the time of the most recent transition to a look-away direction.
-	bool analyzeLooking(int m_iLookPendingStartIndex, int& lookStartTimeMS, int& lastLookStartTimeMS, int& cumulativeLookTimeMS, int& lastLookAwayStartTimeMS);
+	bool analyzeLooking(int m_iLookPendingStartIndex, int& lookStartTimeMS, int& lastLookStartTimeMS, int& cumulativeLookTimeMS, int& lastLookAwayStartTimeMS, HLookList& sublist);
 	int getSumOfCompleteLooks();
 
 signals:
 	void look(HLook l);
 	void lookStarted();	// indicates that looking at a target has begun
 	void lookPending();	// looking at a target for at least the min look time
-	void lookAborted();	// a look that started has ended before becoming a complete look
+	void lookAborted(HLook l);	// a look that started has ended before becoming a complete look
 	void lookingDirection(QString);
 	//void lookAwayStarted();
 	void maxLookAwayTime();

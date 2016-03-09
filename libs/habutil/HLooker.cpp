@@ -92,10 +92,6 @@ HLooker::HLooker(HEventLog& log, bool bInclusiveLookTime)
 	connect(sLooking, SIGNAL(exited()), this, SLOT(onLookingStateExited()));
 	connect(sLookingAway, SIGNAL(exited()), this, SLOT(onLookingAwayStateExited()));
 	connect(this, SIGNAL(started()), this, SLOT(onStarted()));
-
-
-
-	qDebug() << "HLooker(): inclusive=" << m_bInclusiveLookTime;
 };
 
 void HLooker::onStarted()
@@ -224,7 +220,7 @@ bool HLooker::setMaxLookAwayTime(int t)
 
 
 // Look at the look transitions recorded, starting at m_transitions.at(iLookStartIndex), up to and including the last transition recorded.
-// This function should only be called when iLookStartIndex is < 0, or when the transition at iLookStartIndex is a transition to looking.
+// This function should only be called when iLookStartIndex is > -1, when the transition at iLookStartIndex is a transition to looking.
 // Sums up all looking based on those transitions. Looks away from target(s) are ignored. No attempt is made to analyze where the looking
 // is directed, so looks at different targets would be summed up together here (best take care of the different looking directions elsewhere).
 // Returns true always;)
@@ -235,7 +231,7 @@ bool HLooker::setMaxLookAwayTime(int t)
 //
 
 
-bool HLooker::analyzeLooking(int iLookStartIndex, int& lookStartTimeMS, int& lastLookStartTimeMS, int& cumulativeLookTimeMS, int& lastLookAwayStartTimeMS)
+bool HLooker::analyzeLooking(int iLookStartIndex, int& lookStartTimeMS, int& lastLookStartTimeMS, int& cumulativeLookTimeMS, int& lastLookAwayStartTimeMS, HLookList& sublooks)
 {
 	int tPrevious = -1;	// time of previous transition
 	bool b = true;
@@ -254,6 +250,11 @@ bool HLooker::analyzeLooking(int iLookStartIndex, int& lookStartTimeMS, int& las
 		for (int i = iLookStartIndex+1; i < (int)m_transitions.size(); i++)
 		{
 			const QPair<const HLookTrans*, int>& p = m_transitions.at(i);
+
+			// create a Look for the sublooks list
+			HLook sub(directionFrom(*(p.first)), tPrevious, p.second);
+			sublooks.append(sub);
+
 			if ((p.first)->isTransToLook())
 			{
 				// the interval from tPrevious to p.second is a look away period.
@@ -298,8 +299,9 @@ void HLooker::onLookingStateEntered()
 	int cumulativeLookTimeMS = 0;
 	int lookStartTimeMS = -1;
 	int lastLookStartTimeMS = -1;
+	HLookList sublooks;
 
-	if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS))
+	if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS, sublooks))
 	{
 		qCritical() << "Cannot analyze looking at index " << m_iLookStartedIndex;
 		return;
@@ -339,6 +341,7 @@ void HLooker::onLookingStateEntered()
 					l.setDirection(*m_pdirectionLookStarted);
 					l.setStartMS(lookStartTimeMS);
 					l.setEndMS(lastLookAwayStartTimeMS);
+					l.setSublooks(sublooks);
 					if (m_bInclusiveLookTime)
 					{
 						l.setLookMS(lastLookAwayStartTimeMS - lookStartTimeMS);
@@ -348,12 +351,27 @@ void HLooker::onLookingStateEntered()
 						l.setLookMS(cumulativeLookTimeMS);
 					}
 					m_looks.append(l);
-					qDebug() << "emit look(1): " << l;
+					//qDebug() << "emit look(1): " << l;
+					//qDebug() << "sublooks follow" << endl << sublooks;
 					emit look(l);
 				}
 				else
 				{
-					emit lookAborted();
+					// Emit lookAborted once for each sublook that is in a look direction.
+					//qDebug() << "emit lookAborted(1)";
+					//qDebug() << "sublooks follow" << endl << sublooks;
+
+					QListIterator<HLook> it(sublooks);
+					while (it.hasNext())
+					{
+						HLook l = it.next();
+						if (isLookToAnyStimulus(l))
+						{
+							//qDebug() << "emit lookAborted: ";
+							//qDebug() << l;
+							emit lookAborted(l);
+						}
+					}
 				}
 
 				// Starting a new potential look.
@@ -482,8 +500,9 @@ void HLooker::minLookTimeReached()
 		int cumulativeLookTimeMS;
 		int lookStartTimeMS;
 		int lastLookStartTimeMS;
+		HLookList sublooks;
 
-		if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS))
+		if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS, sublooks))
 		{
 			qCritical() << "HLooker::minLookTimeReached() - Cannot analyze looking at index " << m_iLookStartedIndex;
 			return;
@@ -518,8 +537,8 @@ void HLooker::minLookAwayTimeout()
 		int cumulativeLookTimeMS;
 		int lookStartTimeMS;
 		int lastLookStartTimeMS;
-
-		if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS))
+		HLookList sublooks;
+		if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS, sublooks))
 		{
 			qCritical() << "HLooker::minLookAwayTimeout() - Cannot analyze looking at index " << m_iLookStartedIndex;
 			return;
@@ -540,6 +559,7 @@ void HLooker::minLookAwayTimeout()
 			l.setDirection(*m_pdirectionLookStarted);
 			l.setStartMS(lookStartTimeMS);
 			l.setEndMS(lastLookAwayStartTimeMS);
+			l.setSublooks(sublooks);
 			if (m_bInclusiveLookTime)
 			{
 				l.setLookMS(lastLookAwayStartTimeMS - lookStartTimeMS);
@@ -550,17 +570,32 @@ void HLooker::minLookAwayTimeout()
 			}
 
 			m_looks.append(l);
-			qDebug() << "emit look(2, inclusive=" << m_bInclusiveLookTime << "): " << l;
+			//qDebug() << "emit look(2, inclusive=" << m_bInclusiveLookTime << "): " << l;
+			//qDebug() << "sublooks follow" << endl << sublooks;
 			emit look(l);
+
 		}
 		else
 		{
-			emit lookAborted();
+			// Emit lookAborted once for each sublook that is in a look direction.
+			//qDebug() << "emit lookAborted(1)";
+			//qDebug() << "sublooks follow" << endl << sublooks;
+
+			QListIterator<HLook> it(sublooks);
+			while (it.hasNext())
+			{
+				HLook l = it.next();
+				if (isLookToAnyStimulus(l))
+				{
+					//qDebug() << "emit lookAborted: ";
+					//qDebug() << l;
+					emit lookAborted(l);
+				}
+			}
 			m_bLookStarted = false;
 			m_iLookStartedIndex = -1;
 		}
 	}
-	//emit lookAwayStarted();
 }
 
 void HLooker::maxLookAwayTimeout()
@@ -591,8 +626,8 @@ void HLooker::stopLooker(int tMS)
 		int cumulativeLookTimeMS;
 		int lookStartTimeMS;
 		int lastLookStartTimeMS;
-
-		if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS))
+		HLookList sublooks;
+		if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS, sublooks))
 		{
 			qCritical() << "Cannot analyze looking at index " << m_iLookStartedIndex;
 			return;
@@ -611,6 +646,7 @@ void HLooker::stopLooker(int tMS)
 				l.setDirection(*m_pdirectionLookStarted);
 				l.setStartMS(lookStartTimeMS);
 				l.setEndMS(lastLookAwayStartTimeMS);
+				l.setSublooks(sublooks);
 				if (m_bInclusiveLookTime)
 				{
 					l.setLookMS(lastLookAwayStartTimeMS - lookStartTimeMS);
@@ -620,7 +656,8 @@ void HLooker::stopLooker(int tMS)
 					l.setLookMS(cumulativeLookTimeMS);
 				}
 				m_looks.append(l);
-				qDebug() << "emit look(3): " << l;
+				//qDebug() << "emit look(3): " << l;
+				//qDebug() << "sublooks follow" << endl << sublooks;
 				emit look(l);
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
@@ -637,6 +674,7 @@ void HLooker::stopLooker(int tMS)
 				l.setDirection(*m_pdirectionLookStarted);
 				l.setStartMS(lookStartTimeMS);
 				l.setEndMS(tMS);
+				l.setSublooks(sublooks);
 				if (m_bInclusiveLookTime)
 				{
 					l.setLookMS(tMS - lookStartTimeMS);
@@ -646,7 +684,8 @@ void HLooker::stopLooker(int tMS)
 					l.setLookMS(cumulativeLookTimeMS);
 				}
 				m_looks.append(l);
-				qDebug() << "emit look(4): " << l;
+				//qDebug() << "emit look(4): " << l;
+				//qDebug() << "sublooks follow" << endl << sublooks;
 				emit look(l);
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
