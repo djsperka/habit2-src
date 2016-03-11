@@ -87,6 +87,7 @@ void HPhase::onEntry(QEvent* e)
 	QObject::connect(&experiment().getMediaManager(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 
 	// update look detector settings  to per-phase values
+	experiment().getLookDetector().setIsInclusiveLookTime(m_lookSettings.getInclusiveLookTime());
 	experiment().getLookDetector().setMinLookTime(m_lookSettings.getMinLookTime());
 	experiment().getLookDetector().setMinLookAwayTime(m_lookSettings.getMinLookAwayTime());
 	experiment().getLookDetector().setMaxAccumulatedLookTime(m_phaseSettings.getIsMaxAccumulatedLookTime() ? m_phaseSettings.getMaxAccumulatedLookTime() : 0);
