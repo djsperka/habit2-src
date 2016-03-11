@@ -102,6 +102,10 @@ void habutilSetLastDir(const QString& d);
 int habutilGetMonitorID(const HPlayerPositionType& type);
 void habutilSetMonitorID(const HPlayerPositionType& type, int id);
 
+// Compare version v1 to v2. If both version numbers follow pattern
+// A.B.C[-Z], where A, B, C are numbers. Z can be any numbers and letters.
+// If A, B, C are all equal, then regular alpha comparison on Z wins.
+bool habutilCompareVersions(QString v1, QString v2, int &result);
 
 
 

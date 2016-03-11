@@ -182,24 +182,23 @@ QDebug operator<<(QDebug dbg, const HLookDirection& direction)
 	{
 		dbg.nospace() << "UnknownLookDirection";
 	}
-	return dbg.space();
+	return dbg.nospace();
 }
 
 QDebug operator<<(QDebug dbg, const HLook& l)
 {
-	dbg.nospace() << l.direction() << ":" << l.startMS() << "-" << l.endMS() << "=" << l.lookMS() << endl << l.sublooks();
-
-	return dbg.space();
+	dbg << l.direction() << ":" << l.startMS() << "-" << l.endMS() << "=" << l.lookMS() << l.sublooks();
+	return dbg.nospace();
 }
 
 QDebug operator<<(QDebug dbg, const QList<HLook>& looklist)
 {
-	dbg.nospace() << "Contains: " << looklist.size() << endl;
-	QListIterator<HLook> it(looklist);
-	int i=1;
-	while (it.hasNext())
-	{
-		dbg << i++ << ": " << it.next() << endl;
+	dbg << "[" << looklist.size() << "] ";
+	HLook l;
+	int num=0;
+	foreach (l, looklist) {
+		num++;
+		dbg << (num > 1 ? "," : "") << num << "(" << l.direction() << ":" << l.startMS() << "-" << l.endMS() << "=" << l.lookMS() << ")";
 	}
 	return dbg.nospace();
 }

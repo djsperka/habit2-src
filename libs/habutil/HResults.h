@@ -42,7 +42,6 @@ public:
 	const Habit::ExperimentSettings& experimentSettings() const { return m_experimentSettings; };
 	const Habit::RunSettings& runSettings() const { return m_runSettings; };
 	const Habit::SubjectSettings& subjectSettings() const { return m_subjectSettings; };
-	// 2-24-15 djs const Habit::ReliabilitySettings& reliabilitySettings() const { return m_reliabilitySettings; };
 	const HEventLog& eventLog() const { return m_log; };
 
 	// Load an HResults object from a file.
@@ -52,8 +51,8 @@ public:
 	bool save(const QString& filename) const;
 
 	// save per-trial results to a CSV file
-	bool saveToCSV(const QString& filename) const;
-	bool scanTrials(HTrialScanner& scanner) const;
+	bool saveToCSV(const QString& filename, bool bReplace = false) const;
+	bool scanTrials(const HTrialScanner& scanner) const;
 
 private:
 	HResults();
@@ -70,159 +69,6 @@ private:
 	// 2-24-15 djs Habit::ReliabilitySettings m_reliabilitySettings;
 	HEventLog m_log;
 };
-
-class HTrialResultsRow: public QList<QString>
-{
-public:
-	static QStringList headers;
-	enum
-	{
-		indSubjectId = 0,
-		indPhase = 1,
-		indOrderName = 2,
-		indTrial = 3,
-		indRepeat = 4,
-		indEndType = 5,
-		indHabituated = 6,
-		indStimId = 7,
-		indStimName = 8,
-		indStimLabel = 9,
-		indStimLeft = 10,
-		indStimCenter = 11,
-		indStimRight = 12,
-		indStimISS = 13,
-		indTrialStartTime = 14,
-		indTrialEndTime = 15,
-		indTotalLook = 16,
-		indTotalAway = 17,
-		indTotalLookLeft = 18,
-		indTotalLookCenter = 19,
-		indTotalLookRight = 20,
-		indNInit = 21,
-	};
-
-	HTrialResultsRow(): QList<QString>()
-	{
-		init();
-	}
-
-	void init(QString& subjectId)
-	{
-		init();
-		setId(subjectId);
-	};
-
-	void setId(QString id) { (*this)[indSubjectId] = id; };
-	void setPhase(QString phase) { (*this)[indPhase] = phase; };
-	void setTrial(int itrial) { (*this)[indTrial] = QString("%1").arg(itrial); };
-	void setOrderName(QString name) { (*this)[indOrderName] = name; };
-	void setRepeat(int irepeat) { (*this)[indRepeat] = QString("%1").arg(irepeat); };
-	void setEndType(QString type) { (*this)[indEndType] = type; };
-	void setHabituated(QString habituated) { (*this)[indHabituated] = habituated; };
-	void setStimId(int stimid) { (*this)[indStimId] = QString("%1").arg(stimid); };
-	void setStimName(QString stim) { (*this)[indStimName] = stim; };
-	void setStimLabel(QString label) { (*this)[indStimLabel] = label; };
-	void setStimLeft(QString stim) { (*this)[indStimLeft] = stim; };
-	void setStimCenter(QString stim) { (*this)[indStimCenter] = stim; };
-	void setStimRight(QString stim) { (*this)[indStimRight] = stim; };
-	void setStimISS(QString stim) { (*this)[indStimISS] = stim; };
-	void setTotalLook(QString look) { (*this)[indTotalLook] = look; };
-	void setTotalLookAway(QString away) { (*this)[indTotalAway] = away; };
-	void setTrialStartTime(int t) { (*this)[indTrialStartTime] = QString("%1").arg(t); m_lastLookEndTime = t; };
-	void setTrialEndTime(int t)
-	{
-		(*this)[indTrialEndTime] = QString("%1").arg(t);
-		(*this)[indTotalLook] = QString("%1").arg(m_totalLookTime);
-		(*this)[indTotalAway] = QString("%1").arg(m_totalLookAwayTime);
-		(*this)[indTotalLookLeft] = QString("%1").arg(m_totalLookLeftTime);
-		(*this)[indTotalLookCenter] = QString("%1").arg(m_totalLookCenterTime);
-		(*this)[indTotalLookRight] = QString("%1").arg(m_totalLookRightTime);
-
-	};
-	void appendLook(HLook look, bool bComplete = true);
-	void appendLookTransEvent(HLookTransEvent* ptrans);
-	//void appendLook(QString direc, QString startMS, QString endMS, QString timeMS) { append(direc); append(startMS); append(endMS); append(timeMS); };
-	const QList<HLook>& looks() const { return m_looks; };
-	const QList<HLook>& all_looks() const { return m_allLooking; };
-	const QList<HLookTransEvent*> trans_events() const { return m_listLookTrans; }
-	// write line of all Looking info to a text stream.
-	void writeAllLooking(QTextStream& out) const;
-
-private:
-	int m_lastLookEndTime;
-	int m_totalLookTime;
-	int m_totalLookAwayTime;
-	int m_totalLookLeftTime;
-	int m_totalLookCenterTime;
-	int m_totalLookRightTime;
-	QList<HLook> m_looks;
-	QList<HLook> m_allLooking;
-	QList<HLookTransEvent*> m_listLookTrans;
-	HLook m_lookAllLookingPending;	// this is for recording all looking, not necessarily a Look!
-	const HLookDirection* m_pdirectionAllLookingPending;
-	int m_startMSAllLookingPending;
-	void init()
-	{
-		m_lastLookEndTime = 0;
-		m_totalLookTime = 0;
-		m_totalLookAwayTime = 0;
-		m_totalLookLeftTime = 0;
-		m_totalLookCenterTime = 0;
-		m_totalLookRightTime = 0;
-		clear();
-		m_looks.clear();
-		m_allLooking.clear();
-		m_listLookTrans.clear();
-		m_lookAllLookingPending.setStartMS(0);
-		m_lookAllLookingPending.setEndMS(0);
-		m_lookAllLookingPending.setLookMS(0);
-		m_lookAllLookingPending.setDirection(HLookDirection::UnknownLookDirection);
-		for (int i=0; i<indNInit; i++) append(QString());
-	};
-
-};
-
-class HTrialScanner
-{
-public:
-	HTrialScanner() {};
-	virtual ~HTrialScanner() {};
-	virtual bool init() = 0;
-	virtual bool trial(const HTrialResultsRow& t) = 0;
-	virtual bool done() = 0;
-};
-
-class HTextResultsDumper: public HTrialScanner
-{
-	QTextStream& m_out;
-	public:
-	HTextResultsDumper(QTextStream& out) : HTrialScanner(), m_out(out) {};
-	virtual ~HTextResultsDumper() {};
-	QTextStream& out() { return m_out; };
-};
-
-class CSV1ResultsDumper: public HTextResultsDumper
-{
-	public:
-	CSV1ResultsDumper(QTextStream& out) : HTextResultsDumper(out) {};
-	virtual ~CSV1ResultsDumper() {};
-	virtual bool init();
-	virtual bool trial(const HTrialResultsRow& t);
-	virtual bool done();
-};
-
-class CSV2ResultsDumper: public HTextResultsDumper
-{
-	public:
-	CSV2ResultsDumper(QTextStream& out) : HTextResultsDumper(out) {};
-	virtual ~CSV2ResultsDumper() {};
-	virtual bool init();
-	virtual bool trial(const HTrialResultsRow& t);
-	virtual bool done();
-};
-
-
-QTextStream& operator<<(QTextStream& out, const HTrialResultsRow& row);
 
 
 #endif /* HRESULTS_H_ */

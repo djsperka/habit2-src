@@ -45,6 +45,7 @@ public:
 	int endMS() const { return m_endMS; };
 	int lookMS() const { return m_lookMS; };
 	const QList<HLook>& sublooks() const { return m_sublooks; };
+	bool isComplete() { return m_sublooks.size() > 0; };
 
 	// TODO These do not need to be friends. Use member functions!
 	//friend QDataStream& operator<<(QDataStream& out, const HLook& l);
@@ -58,10 +59,11 @@ private:
 	QList<HLook> m_sublooks;
 };
 
+Q_DECLARE_METATYPE(HLook);
+
 typedef QList<HLook> HLookList;
 
 
-Q_DECLARE_METATYPE(HLook);
 
 bool isLookToAnyStimulus(const HLook& look);
 

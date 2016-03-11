@@ -13,7 +13,7 @@ HLookDetector* createLookDetector(const Habit::ExperimentSettings& es, HEventLog
 {
 	Q_UNUSED(es);
 	HLookDetector *pld = (HLookDetector *)NULL;
-	pld = new HKeypadLookDetector(log, es.getHLookSettings().getInclusiveLookTime(), pdialog);
+	pld = new HKeypadLookDetector(log, pdialog);
 	return pld;
 }
 

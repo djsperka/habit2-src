@@ -70,8 +70,8 @@ signals:
 	void lookDetectorEnabled();
 	void lookDetectorDisabled();
 public:
-	HLookDetector(HEventLog& log, bool bInclusiveLookTime)
-		: HLooker(log, bInclusiveLookTime)
+	HLookDetector(HEventLog& log)
+		: HLooker(log, true)
 		, m_bAGLookEnabled(false)
 		, m_bLookEnabled(false)
 		, m_bLookTransPending(false)

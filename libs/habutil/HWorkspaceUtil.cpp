@@ -1,5 +1,5 @@
 /*
- * HWorkspaceUtil.cpp
+* HWorkspaceUtil.cpp
  *
  *  Created on: May 30, 2014
  *      Author: Oakeslab
@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QtDebug>
 #include <QMessageBox>
+#include <QRegExp>
 
 // A dir is a valid workspace if all of the following are true
 // 1. dir exists
@@ -429,4 +430,60 @@ void habutilSetMonitorID(const HPlayerPositionType& type, int id)
 	else if (type == HPlayerPositionType::Right)
 		settings.setValue("position/right", QVariant(id));
 	return;
+}
+
+bool habutilCompareVersions(QString v1, QString v2, int &result)
+{
+	bool b = false;
+	int v1_a, v1_b, v1_c;
+	int v2_a, v2_b, v2_c;
+	QString v1_s, v2_s;
+
+	result = 0;
+
+	// parse the two strings
+	QRegExp re("([0-9]+)[.]([0-9]+)[.]([0-9]+)(-([a-zA-Z0-9]+))?");
+	if (re.exactMatch(v1))
+	{
+		v1_a = re.cap(1).toInt();
+		v1_b = re.cap(2).toInt();
+		v1_c = re.cap(3).toInt();
+		v1_s = re.cap(4);
+		b = true;
+	}
+	else
+	{
+		b = false;
+	}
+
+	if (b && re.exactMatch(v2))
+	{
+		v2_a = re.cap(1).toInt();
+		v2_b = re.cap(2).toInt();
+		v2_c = re.cap(3).toInt();
+		v2_s = re.cap(4);
+	}
+	else
+	{
+		b = false;
+	}
+
+	// now do the comparison
+	if (b)
+	{
+		if      (v1_a > v2_a)	result = 1;
+		else if (v1_a < v2_a) 	result = -1;
+		else if (v1_b > v2_b)	result = 1;
+		else if (v1_b < v2_b)	result = -1;
+		else if (v1_c > v2_c)	result = 1;
+		else if (v1_c < v2_c)	result = -1;
+		else if (v1_s > v2_s)	result = 1;
+		else if (v1_s < v2_s)	result = -1;
+		else result = 0;
+	}
+
+
+	qDebug() << "compare " << v1 << " " << v2 << " b " << b << " result " << result;
+
+	return b;
 }
