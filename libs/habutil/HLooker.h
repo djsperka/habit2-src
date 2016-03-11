@@ -25,14 +25,19 @@ class HLooker : public QStateMachine
 	Q_OBJECT
 
 public:
-	HLooker(HEventLog& log, bool bInclusiveLookTime);
+	HLooker(HEventLog& log, bool bLive = true);
 	HLooker(const HLooker& looker);
 	~HLooker() {};
+
+	// by default the looker is live (i.e. it will use timers).
+	// You can only turn it off when looker state machine is not running.
+	bool isLive() const { return m_bIsLive; };
 
 	// Add a transition. A new event is posted to the state machine.
 	void addTrans(const HLookTrans& type, int tMS);
 
-	// Change parameters of the look detector.
+	// Change parameters of the look detector. These must be set before starting the state machine!
+	bool setIsInclusiveLookTime(bool b);
 	bool setMinLookTime(int t);
 	bool setMinLookAwayTime(int t);
 	bool setMaxAccumulatedLookTime(int tMaxAccum);
@@ -79,6 +84,7 @@ protected:
 	HEventLog& log() { return m_log; };
 
 private:
+	bool m_bIsLive;				// if true, then timers will be used, as if in real experiment.
 	int m_minLookTimeMS;		// look must be at least this long
 	int m_minLookAwayTimeMS;	// when look away has been at least this long, current look is ended.
 	int m_maxLookAwayTimeMS;	// when >0, if looking away for this long emit maxLookAwayTime()

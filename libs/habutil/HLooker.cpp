@@ -13,6 +13,7 @@
 
 HLooker::HLooker(const HLooker& looker)
 : QStateMachine()
+, m_bIsLive(looker.isLive())
 , m_minLookTimeMS(looker.m_minLookTimeMS)
 , m_minLookAwayTimeMS(looker.m_minLookAwayTimeMS)
 , m_maxLookAwayTimeMS(looker.m_maxLookAwayTimeMS)
@@ -27,14 +28,15 @@ HLooker::HLooker(const HLooker& looker)
 	qDebug() << "HLooker(const HLooker&) -- ?????";
 }
 
-HLooker::HLooker(HEventLog& log, bool bInclusiveLookTime)
+HLooker::HLooker(HEventLog& log, bool bIsLive)
 : QStateMachine()
+, m_bIsLive(bIsLive)
 , m_minLookTimeMS(0)
 , m_minLookAwayTimeMS(0)
 , m_maxLookAwayTimeMS(0)
 , m_maxAccumulatedLookTimeMS(0)
 , m_log(log)
-, m_bInclusiveLookTime(bInclusiveLookTime)
+, m_bInclusiveLookTime(false)
 , m_bLookStarted(false)
 , m_pdirectionLookStarted(&HLookDirection::LookAway)
 , m_iLookStartedIndex(-1)
@@ -43,22 +45,25 @@ HLooker::HLooker(HEventLog& log, bool bInclusiveLookTime)
 	// There are 4 timers created here. Each is single shot, and each will have its interval set when it is started.
 	// Each can have its associated time values modified when the HLooker is not running.
 
-	m_ptimerMinLookAwayTime = new QTimer();
-	m_ptimerMinLookAwayTime->setSingleShot(true);
-	QObject::connect(m_ptimerMinLookAwayTime, SIGNAL(timeout()), this, SLOT(minLookAwayTimeout()));
+	if (m_bIsLive)
+	{
+		m_ptimerMinLookAwayTime = new QTimer();
+		m_ptimerMinLookAwayTime->setSingleShot(true);
+		QObject::connect(m_ptimerMinLookAwayTime, SIGNAL(timeout()), this, SLOT(minLookAwayTimeout()));
 
-	m_ptimerMinLookTime = new QTimer();
-	m_ptimerMinLookTime->setSingleShot(true);
-	QObject::connect(m_ptimerMinLookTime, SIGNAL(timeout()), this, SLOT(minLookTimeReached()));
+		m_ptimerMinLookTime = new QTimer();
+		m_ptimerMinLookTime->setSingleShot(true);
+		QObject::connect(m_ptimerMinLookTime, SIGNAL(timeout()), this, SLOT(minLookTimeReached()));
 
-	m_ptimerMaxLookAway = new QTimer();
-	m_ptimerMaxLookAway->setSingleShot(true);
-	//QObject::connect(m_ptimerMaxLookAway, SIGNAL(timeout()), this, SIGNAL(maxLookAwayTime()));
-	QObject::connect(m_ptimerMaxLookAway, SIGNAL(timeout()), this, SLOT(maxLookAwayTimeout()));
+		m_ptimerMaxLookAway = new QTimer();
+		m_ptimerMaxLookAway->setSingleShot(true);
+		//QObject::connect(m_ptimerMaxLookAway, SIGNAL(timeout()), this, SIGNAL(maxLookAwayTime()));
+		QObject::connect(m_ptimerMaxLookAway, SIGNAL(timeout()), this, SLOT(maxLookAwayTimeout()));
 
-	m_ptimerMaxAccumulatedLook = new QTimer();
-	m_ptimerMaxAccumulatedLook->setSingleShot(true);
-	QObject::connect(m_ptimerMaxAccumulatedLook, SIGNAL(timeout()), this, SLOT(maxAccumulatedLookTimeReached()));
+		m_ptimerMaxAccumulatedLook = new QTimer();
+		m_ptimerMaxAccumulatedLook->setSingleShot(true);
+		QObject::connect(m_ptimerMaxAccumulatedLook, SIGNAL(timeout()), this, SLOT(maxAccumulatedLookTimeReached()));
+	}
 
 	// Create states and transitions for state machine.
 	QState* sInitial = new QState();
@@ -96,7 +101,6 @@ HLooker::HLooker(HEventLog& log, bool bInclusiveLookTime)
 
 void HLooker::onStarted()
 {
-	qDebug() << "HLooker state machine started.";
 }
 
 void HLooker::addTrans(const HLookTrans& type, int tMS)
@@ -121,6 +125,23 @@ void HLooker::addTrans(const HLookTrans& type, int tMS)
 	return;
 }
 
+bool HLooker::setIsInclusiveLookTime(bool bInclusive)
+{
+	bool b = false;
+
+	// cannot do this if the looker is running
+	if (this->isRunning())
+	{
+		qWarning() << "Cannot set inclusive look time when HLooker is running.";
+		b = false;
+	}
+	else
+	{
+		m_bInclusiveLookTime = bInclusive;
+		b = true;
+	}
+	return b;
+}
 
 
 bool HLooker::setMinLookTime(int t)
@@ -135,11 +156,6 @@ bool HLooker::setMinLookTime(int t)
 	}
 	else
 	{
-
-		// We manage the timer
-		// QTimer *m_ptimerMinLookTime;
-		// Interval set when timer is started.
-
 		m_minLookTimeMS = t;
 		b = true;
 	}
@@ -158,11 +174,6 @@ bool HLooker::setMinLookAwayTime(int t)
 	}
 	else
 	{
-
-		// We manage the timer
-		// QTimer *m_ptimerMinLookAwayTime;
-		// The interval is set when the timer is started
-
 		m_minLookAwayTimeMS = t;
 		b = true;
 	}
@@ -182,12 +193,6 @@ bool HLooker::setMaxAccumulatedLookTime(int t)
 	}
 	else
 	{
-
-		// We manage the timer
-		// QTimer *m_ptimerMaxAccumulatedLook;
-		// by saving the max accumulated time. When the timer is started
-		// the interval is set again.
-
 		m_maxAccumulatedLookTimeMS = t;
 		b = true;
 	}
@@ -206,12 +211,6 @@ bool HLooker::setMaxLookAwayTime(int t)
 	}
 	else
 	{
-
-		// We manage the timer
-		// QTimer *m_ptimerMaxLookAway;
-		// by saving the max accumulated time. When the timer is started
-		// the interval is set again.
-
 		m_maxLookAwayTimeMS = t;
 		b = true;
 	}
@@ -251,10 +250,6 @@ bool HLooker::analyzeLooking(int iLookStartIndex, int& lookStartTimeMS, int& las
 		{
 			const QPair<const HLookTrans*, int>& p = m_transitions.at(i);
 
-			// create a Look for the sublooks list
-			HLook sub(directionFrom(*(p.first)), tPrevious, p.second);
-			sublooks.append(sub);
-
 			if ((p.first)->isTransToLook())
 			{
 				// the interval from tPrevious to p.second is a look away period.
@@ -262,6 +257,11 @@ bool HLooker::analyzeLooking(int iLookStartIndex, int& lookStartTimeMS, int& las
 			}
 			else
 			{
+				// create a Look for the sublooks list
+				HLook sub(directionFrom(*(p.first)), tPrevious, p.second);
+				sublooks.append(sub);
+
+				// tally cumulative look time
 				cumulativeLookTimeMS += (p.second - tPrevious);
 				lastLookAwayStartTimeMS = p.second;
 			}
@@ -308,13 +308,16 @@ void HLooker::onLookingStateEntered()
 	}
 
 	// Stop timers if active.
-	if (m_ptimerMinLookAwayTime->isActive())
+	if (isLive())
 	{
-		m_ptimerMinLookAwayTime->stop();
-	}
-	if (m_ptimerMaxLookAway->isActive())
-	{
-		m_ptimerMaxLookAway->stop();
+		if (m_ptimerMinLookAwayTime->isActive())
+		{
+			m_ptimerMinLookAwayTime->stop();
+		}
+		if (m_ptimerMaxLookAway->isActive())
+		{
+			m_ptimerMaxLookAway->stop();
+		}
 	}
 
 	if (m_bLookStarted)
@@ -380,7 +383,8 @@ void HLooker::onLookingStateEntered()
 				m_bLookStarted = true;
 				m_pdirectionLookStarted = &directionTo(*p.first);
 				m_iLookStartedIndex = m_transitions.size()-1;
-				m_ptimerMinLookTime->start(m_minLookTimeMS);
+				if (isLive())
+					m_ptimerMinLookTime->start(m_minLookTimeMS);
 			}
 
 			// The if here is redundant but left for clarity.
@@ -397,36 +401,39 @@ void HLooker::onLookingStateEntered()
 				// If the min look time has been reached, then we may need to start the max accumulated look timer.
 				// Update: This gets tedious, but separate into two cases, inclusive look time and not.
 
-				if (!m_bInclusiveLookTime)
+				if (isLive())
 				{
-					if (cumulativeLookTimeMS < m_minLookTimeMS)
+					if (!m_bInclusiveLookTime)
 					{
-						m_ptimerMinLookTime->start(m_minLookTimeMS - cumulativeLookTimeMS);
-					}
-					else if (m_maxAccumulatedLookTimeMS > 0)
-					{
-						int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS;
-						if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
+						if (cumulativeLookTimeMS < m_minLookTimeMS)
 						{
-							m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+							m_ptimerMinLookTime->start(m_minLookTimeMS - cumulativeLookTimeMS);
+						}
+						else if (m_maxAccumulatedLookTimeMS > 0)
+						{
+							int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS;
+							if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
+							{
+								m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+							}
 						}
 					}
-				}
-				else
-				{
-					if ((lastLookAwayStartTimeMS - lookStartTimeMS) < m_minLookTimeMS)
+					else
 					{
-						m_ptimerMinLookTime->start(m_minLookTimeMS - (lastLookAwayStartTimeMS - lookStartTimeMS));
-					}
-					else if (m_maxAccumulatedLookTimeMS > 0)
-					{
-						int sumOfAllLooking = getSumOfCompleteLooks() + (lastLookAwayStartTimeMS - lookStartTimeMS);
-						if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
+						if ((lastLookAwayStartTimeMS - lookStartTimeMS) < m_minLookTimeMS)
 						{
-							m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+							m_ptimerMinLookTime->start(m_minLookTimeMS - (lastLookAwayStartTimeMS - lookStartTimeMS));
 						}
-					}
+						else if (m_maxAccumulatedLookTimeMS > 0)
+						{
+							int sumOfAllLooking = getSumOfCompleteLooks() + (lastLookAwayStartTimeMS - lookStartTimeMS);
+							if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
+							{
+								m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+							}
+						}
 
+					}
 				}
 			}
 		}
@@ -443,17 +450,23 @@ void HLooker::onLookingStateEntered()
 		m_bLookAwayStarted = false;
 		m_pdirectionLookStarted = &directionTo(*p.first);
 
-		// Since we are starting a new look, start the min look timer.
-		m_ptimerMinLookTime->start(m_minLookTimeMS - cumulativeLookTimeMS);
+		if (isLive())
+		{
+			// Since we are starting a new look, start the min look timer.
+			m_ptimerMinLookTime->start(m_minLookTimeMS - cumulativeLookTimeMS);
+		}
 	}
 }
 
 void HLooker::onLookingStateExited()
 {
-	if (m_ptimerMinLookTime->isActive())
-		m_ptimerMinLookTime->stop();
-	if (m_ptimerMaxAccumulatedLook->isActive())
-		m_ptimerMaxAccumulatedLook->stop();
+	if (isLive())
+	{
+		if (m_ptimerMinLookTime->isActive())
+			m_ptimerMinLookTime->stop();
+		if (m_ptimerMaxAccumulatedLook->isActive())
+			m_ptimerMaxAccumulatedLook->stop();
+	}
 }
 
 
@@ -462,7 +475,8 @@ void HLooker::onLookingAwayStateEntered()
 	// If a look is already underway, start the look-away timer
 	if (m_bLookStarted)
 	{
-		m_ptimerMinLookAwayTime->start(m_minLookAwayTimeMS);
+		if (isLive())
+			m_ptimerMinLookAwayTime->start(m_minLookAwayTimeMS);
 	}
 	m_bLookAwayStarted = true;
 
@@ -471,16 +485,20 @@ void HLooker::onLookingAwayStateEntered()
 	// there has been at least one complete look. See maxLookAwayTimeout().
 	if (m_maxLookAwayTimeMS > 0)
 	{
-		m_ptimerMaxLookAway->start(m_maxLookAwayTimeMS);
+		if (isLive())
+			m_ptimerMaxLookAway->start(m_maxLookAwayTimeMS);
 	}
 }
 
 void HLooker::onLookingAwayStateExited()
 {
-	if (m_ptimerMinLookAwayTime->isActive())
-		m_ptimerMinLookAwayTime->stop();
-	if (m_ptimerMaxLookAway->isActive())
-		m_ptimerMaxLookAway->stop();
+	if (isLive())
+	{
+		if (m_ptimerMinLookAwayTime->isActive())
+			m_ptimerMinLookAwayTime->stop();
+		if (m_ptimerMaxLookAway->isActive())
+			m_ptimerMaxLookAway->stop();
+	}
 }
 
 void HLooker::maxAccumulatedLookTimeReached()
@@ -523,7 +541,8 @@ void HLooker::minLookTimeReached()
 		}
 		else
 		{
-			m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+			if (isLive())
+				m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
 		}
 	}
 }
@@ -615,10 +634,13 @@ void HLooker::stopLooker(int tMS)
 	// Stop any active timers.
 	// Flush out any look or lookaway pending.
 
-	if (m_ptimerMinLookTime->isActive()) m_ptimerMinLookTime->stop();
-	if (m_ptimerMinLookAwayTime->isActive()) m_ptimerMinLookAwayTime->stop();
-	if (m_ptimerMaxLookAway->isActive()) m_ptimerMaxLookAway->stop();
-	if (m_ptimerMaxAccumulatedLook->isActive()) m_ptimerMaxAccumulatedLook->stop();
+	if (isLive())
+	{
+		if (m_ptimerMinLookTime->isActive()) m_ptimerMinLookTime->stop();
+		if (m_ptimerMinLookAwayTime->isActive()) m_ptimerMinLookAwayTime->stop();
+		if (m_ptimerMaxLookAway->isActive()) m_ptimerMaxLookAway->stop();
+		if (m_ptimerMaxAccumulatedLook->isActive()) m_ptimerMaxAccumulatedLook->stop();
+	}
 
 	if (m_bLookStarted)
 	{
@@ -665,11 +687,13 @@ void HLooker::stopLooker(int tMS)
 		}
 		else
 		{
+			// Stuff a look into the sublooks
+			sublooks.append(HLook(*m_pdirectionLookStarted, lastLookStartTimeMS, tMS));
+
 			// we were in a looking state, so add in the time from tMS to the lastLookStartTime as additional look time and test.
 			cumulativeLookTimeMS += tMS - lastLookStartTimeMS;
 			if (cumulativeLookTimeMS >= m_minLookTimeMS)
 			{
-				//HLook l(*m_pdirectionLookStarted, lookStartTimeMS, tMS, cumulativeLookTimeMS);
 				HLook l;
 				l.setDirection(*m_pdirectionLookStarted);
 				l.setStartMS(lookStartTimeMS);
@@ -690,9 +714,18 @@ void HLooker::stopLooker(int tMS)
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
 			}
+			else
+			{
+				// emit lookAborted for each sublook.
+				HLook l;
+				foreach (l, sublooks) {
+					emit lookAborted(l);
+				}
+				m_bLookStarted = false;
+				m_iLookStartedIndex = -1;
+			}
 		}
 	}
 	stop();
 	QCoreApplication::processEvents(0);
 }
-
