@@ -707,55 +707,6 @@ void MainDao::getAttentionGetterSettings(int experimentId, AttentionGetterSettin
 
 
 
-#if 0
-void MainDao::getAttentionGetterSettingsForExperiment(size_t experimentId, AttentionGetterSettings* attentionGetter)
-{
-	Q_ASSERT(0 != attentionGetter);
-	QString sql = "select * from attention_setup where experiment_id = ?";
-	QSqlQuery q;
-	q.prepare(sql);
-	q.addBindValue((uint)experimentId);
-	q.exec();
-	if (q.lastError().isValid())
-	{
-		qCritical() << "Error in MainDao::getAttentionGetterSettingsForExperiment id=" << experimentId;
-		qDebug() << q.lastQuery() << " : " << q.lastError();
-	}
-	else if(q.next())
-	{
-		int id = q.value(q.record().indexOf("id")).toInt();
-		attentionGetter->setId(id);
-		size_t useAttentionStimulus = q.value(q.record().indexOf("use_attention_stimulus")).toBool();
-		attentionGetter->setUseAttentionGetter(useAttentionStimulus);
-		QString backgroundColor = q.value(q.record().indexOf("background_color")).toString();
-		attentionGetter->setBackGroundColor(QColor(backgroundColor));
-		sql = "select * from attention_getting_stimuli where attention_getter_id = ?";
-		QSqlQuery q2;
-		q2.prepare(sql);
-		q2.addBindValue(id);
-		q2.exec();
-		if (q2.lastError().isValid())
-		{
-			qCritical() << "Error in MainDao::getAttentionGetterSettingsForExperiment id=" << experimentId;
-			qCritical() << q2.lastQuery() << " : " << q2.lastError();
-		}
-		else if(q2.next())
-		{
-			Habit::StimulusSettings ss = getStimulusSettings(q2);
-			attentionGetter->setAttentionGetterStimulus(ss);
-		}
-		else
-		{
-			qCritical() << "No attention_getting_stimuli record found in MainDao::getAttentionGetterSettingsForExperiment id=" << experimentId;
-		}
-	}
-	else
-	{
-		qCritical() << "No attention_setup record found in MainDao::getAttentionGetterSettingsForExperiment id=" << experimentId;
-	}
-}
-#endif
-
 void MainDao::getControlBarOptionsForExperiment(size_t experimentId, ControlBarOptions* controlBarOptions)
 {
 	Q_ASSERT(0 != controlBarOptions);
@@ -1332,17 +1283,14 @@ bool MainDao::deleteExperimentSettings(Habit::ExperimentSettings* settings)
 	{
 		result = 	deleteFromTable("experiments", "id", settings->getId()) &&
 					deleteFromTable("attention_setup", "experiment_id", settings->getId()) &&
-					(settings->getAttentionGetterSettings().getId() <= 0 ||
-							deleteFromTable("attention_getting_stimuli", "attention_getter_id", settings->getAttentionGetterSettings().getId())) &&
 					deleteFromTable("controlbar_options", "experiment_id", settings->getId()) &&
 					deleteFromTable("look_settings", "experiment_id", settings->getId()) &&
 					deleteFromTable("phase_settings", "experiment_id", settings->getId()) &&
 					deleteFromTable("habituation_settings", "experiment_id", settings->getId()) &&
 					deleteFromTable("stimulus_display", "experiment_id", settings->getId()) &&
-					deleteFromTable("pretest_stimuli", "experiment_id", settings->getId()) &&
-					deleteFromTable("habituation_stimuli", "experiment_id", settings->getId()) &&
-					deleteFromTable("test_stimuli", "experiment_id", settings->getId()) &&
 					deleteFromTable("run_settings", "experiment_id", settings->getId());
+
+		// TODO: Must delete from tables "stimulus" and "stimfiles"
 	}
 	else
 	{
@@ -1368,6 +1316,9 @@ QStringList MainDao::getAllExperimentNames(bool bIncludeHiddenExperiments)
 	}
 	return result;
 }
+
+// djs USE_SUBJECT_TABLES is not def'd
+#ifdef USE_SUBJECT_TABLES
 
 QStringList MainDao::getAllSubjectsNames()
 {
@@ -1464,5 +1415,6 @@ Habit::SubjectSettings MainDao::getSubjectSettings(int id) {
 	}
 	return ss;
 }
+#endif
 
 } // namespace Habit

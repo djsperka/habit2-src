@@ -2,7 +2,7 @@
 #ifndef HABIT_MAIN_DAO_H
 #define HABIT_MAIN_DAO_H
 
-#include "configuration.h"
+//#include "configuration.h"
 #include "experimentsettings.h"
 #include "monitorsettings.h"
 #include "controlbaroptions.h"
@@ -114,6 +114,7 @@ public:
 	bool addOrUpdateStimulusOrder(int parentId, Habit::HStimulusOrder& order);
 	bool addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::StimulusDisplayInfo* settings);
 
+#ifdef USE_SUBJECT_TABLES
 	QStringList getAllSubjectsNames();
 	void insertSubject(Habit::SubjectSettings*  subjectSettings_);
 	void updateSubject(const Habit::SubjectSettings& subjectSettings);
@@ -125,6 +126,7 @@ public:
 	Habit::RunSettings getRunSettingsBySubject(const Habit::SubjectSettings& subjectSettings);
 	void addOrUpdateConfigObject(const Habit::ResultViewerSettings& config);
 	Habit::ResultViewerSettings getResultViewerOptions();
+#endif
 
 private:
 	bool deleteFromTable(const QString table, const QString key, int id);

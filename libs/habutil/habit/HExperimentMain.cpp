@@ -14,7 +14,7 @@
 #include "HHabituationSetupWidget.h"
 #include "attentionsetupform.h"
 #include "habituationsettings.h"
-#include "habituationstimuliform.h"
+//#include "habituationstimuliform.h"
 //#include "designsetupform.h"
 #include "HLookSettingsWidget.h"
 #include "HPhaseSettingsWidget.h"

@@ -12,7 +12,7 @@
 #include <QRegExpValidator>
 #include <QList>
 #include "HOrderSettings.h"
-#include "habituationstimulitable.h"
+//#include "habituationstimulitable.h"
 #include "stimulisettings.h"
 
 namespace GUILib
