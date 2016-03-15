@@ -8,6 +8,7 @@ CONFIG(debug, debug|release) {
 	DESTDIR = release
 }
 
+
 HEADERS +=	HLook.h \
 			HLooker.h \
 			HLookerReprocessor.h \
@@ -177,7 +178,6 @@ SOURCES +=	HLook.cpp \
 			habit/habituationsettings.cpp \
 			habit/habituationsetupform.cpp \
 			habit/maindao.cpp \
-			habit/monitormanager.cpp \
 			habit/monitorsettings.cpp \
 			habit/runsettings.cpp \
 			habit/stimulisettings.cpp \
@@ -236,7 +236,6 @@ RESOURCES = habit/resources.qrc
 
 FORMS =		habit/cloneexperimentdialog.ui \
 			habit/controlbaroptionsform.ui \
-			habit/habitapp.ui \
 			habit/monitorsettingsform.ui \
 			habit/reliabilitiesform.ui \
 			habit/resultviewerform.ui \
