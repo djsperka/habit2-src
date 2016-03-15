@@ -58,8 +58,6 @@ HEADERS +=	HLook.h \
 			habit/HControlPanel.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
-			habit/configuration.h \
-			habit/connection.h \
 			habit/controlbaroptions.h \
 			habit/controlbaroptionsform.h \
 			habit/criterionsettings.h \
@@ -87,7 +85,7 @@ HEADERS +=	HLook.h \
 			habit/HPhaseSettings.h \
 			habit/HPhaseSettingsWidget.h \
 			habit/HOrderSettings.h \
-			habit/HOrderSettingsWidget.h \
+#			habit/HOrderSettingsWidget.h \
 			habit/HMonitorSettingsWidget.h \
 			habit/HStimulusDisplayInfoWidget.h \
 			habit/HStimulusInfoWidget.h \
@@ -172,15 +170,12 @@ SOURCES +=	HLook.cpp \
 			habit/HControlPanel.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \
-			habit/configuration.cpp \
-			habit/connection.cpp \
 			habit/controlbaroptions.cpp \
 			habit/controlbaroptionsform.cpp \
 			habit/criterionsettings.cpp \
 			habit/experimentsettings.cpp \
 			habit/habituationsettings.cpp \
 			habit/habituationsetupform.cpp \
-			habit/main.cpp \
 			habit/maindao.cpp \
 			habit/monitormanager.cpp \
 			habit/monitorsettings.cpp \
@@ -200,7 +195,7 @@ SOURCES +=	HLook.cpp \
 			habit/HPhaseSettings.cpp \
 			habit/HPhaseSettingsWidget.cpp \
 			habit/HOrderSettings.cpp \
-			habit/HOrderSettingsWidget.cpp \
+#			habit/HOrderSettingsWidget.cpp \
 			habit/HMonitorSettingsWidget.cpp \
 			habit/HStimulusDisplayInfoWidget.cpp \
 			habit/HStimulusInfoWidget.cpp \
