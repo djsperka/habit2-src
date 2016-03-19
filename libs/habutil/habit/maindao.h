@@ -13,7 +13,7 @@
 #include "stimulussettings.h"
 #include "subjectsettings.h"
 #include "runsettings.h"
-#include "resultviewersettings.h"
+//#include "resultviewersettings.h"
 #include "HLookSettings.h"
 #include "HStimulusOrder.h"
 
