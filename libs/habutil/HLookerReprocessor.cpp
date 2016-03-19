@@ -16,6 +16,8 @@ HLookerReprocessor::HLookerReprocessor(const HLookSettings& lookSettings, const 
 , m_list()
 , m_log()
 {
+	bool bHaveLookEnabled = false;
+
 	m_pLooker = new HLooker(m_log, false);
 
 	// set looker settings.
@@ -52,15 +54,23 @@ HLookerReprocessor::HLookerReprocessor(const HLookSettings& lookSettings, const 
 		else if (e->type() == HEventType::HEventLookEnabled)
 		{
 			qDebug() << "HEvent: " << e->eventCSV();
+			bHaveLookEnabled = true;
 			// nothing done with these events currently
 			//HLookEnabledEvent* ple = static_cast<HLookEnabledEvent*>(e);
 		}
 		else if (e->type() == HEventType::HEventLookDisabled)
 		{
 			qDebug() << "HEvent: " << e->eventCSV();
-			//qDebug() << "Stopping reprocessor at " << e->timestamp();
-			m_pLooker->stopLooker(e->timestamp());
-			QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+			if (bHaveLookEnabled)
+			{
+				qDebug() << "Stopping reprocessor at " << e->timestamp();
+				m_pLooker->stopLooker(e->timestamp());
+				QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+			}
+			else
+			{
+				qDebug() << "Received HLookDisabled event before HLookEnabled event. Ignoring...";
+			}
 		}
 	}
 	QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
