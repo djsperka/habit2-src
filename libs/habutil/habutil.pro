@@ -52,7 +52,6 @@ HEADERS +=	HLook.h \
 			HResultsWidget.h \
 			HResultsDialog.h \
 			HApplication.h \
-			HReliability.h \
 			HStimulusUtil.h \
 			HExperimentUtil.h \
 			HTestingInputWrangler.h \
@@ -64,29 +63,20 @@ HEADERS +=	HLook.h \
 			habit/criterionsettings.h \
 			habit/experimentsettings.h \
 			habit/habituationsettings.h \
-			habit/habituationsetupform.h \
 			habit/maindao.h \
 			habit/monitorsettings.h \
-			habit/resource.h \
-			habit/resource1.h \
 			habit/runsettings.h \
-			habit/sleeper.h \
 			habit/stimulisettings.h \
 			habit/stimulusdisplayinfo.h \
 			habit/stimulusinfo.h \
-			habit/stimulusinfoform.h \
-			habit/stimulusplayer.h \
 			habit/stimulussettings.h \
 			habit/subjectinformation.h \
 			habit/subjectsettings.h \
-			habit/treewizard.h \
-			habit/trialsinfo.h \
 			habit/HLookSettings.h \
 			habit/HLookSettingsWidget.h \
 			habit/HPhaseSettings.h \
 			habit/HPhaseSettingsWidget.h \
 			habit/HOrderSettings.h \
-#			habit/HOrderSettingsWidget.h \
 			habit/HMonitorSettingsWidget.h \
 			habit/HStimulusDisplayInfoWidget.h \
 			habit/HStimulusInfoWidget.h \
@@ -116,13 +106,12 @@ HEADERS +=	HLook.h \
 			habit/HStimulusNameListModel.h \
 			habit/HStimulusOrderList.h \
 			habit/HResultsExplorerDialog.h \
-			habit/HResultsExplorerFilesProxyModel.h \
 			habit/HMediaStatusWidget.h \
 			habit/HExperimentStatusWidget.h \
 			habit/HHabituationSetupWidget.h \
 			habit/HStimulusOrderListItemDelegate.h \
 			habit/HStimulusNameLabelTableModel.h
-			
+		
 
 SOURCES +=	HLook.cpp \
 			HLooker.cpp \
@@ -164,7 +153,6 @@ SOURCES +=	HLook.cpp \
 			HResultsWidget.cpp \
 			HResultsDialog.cpp \
 			HApplication.cpp \
-			HReliability.cpp \
 			HStimulusUtil.cpp \
 			HExperimentUtil.cpp \
 			HTestingInputWrangler.cpp \
@@ -176,26 +164,20 @@ SOURCES +=	HLook.cpp \
 			habit/criterionsettings.cpp \
 			habit/experimentsettings.cpp \
 			habit/habituationsettings.cpp \
-			habit/habituationsetupform.cpp \
 			habit/maindao.cpp \
 			habit/monitorsettings.cpp \
 			habit/runsettings.cpp \
 			habit/stimulisettings.cpp \
 			habit/stimulusdisplayinfo.cpp \
 			habit/stimulusinfo.cpp \
-			habit/stimulusinfoform.cpp \
-			habit/stimulusplayer.cpp \
 			habit/stimulussettings.cpp \
 			habit/subjectinformation.cpp \
 			habit/subjectsettings.cpp \
-			habit/treewizard.cpp \
-			habit/trialsinfo.cpp \
 			habit/HLookSettings.cpp \
 			habit/HLookSettingsWidget.cpp \
 			habit/HPhaseSettings.cpp \
 			habit/HPhaseSettingsWidget.cpp \
 			habit/HOrderSettings.cpp \
-#			habit/HOrderSettingsWidget.cpp \
 			habit/HMonitorSettingsWidget.cpp \
 			habit/HStimulusDisplayInfoWidget.cpp \
 			habit/HStimulusInfoWidget.cpp \
@@ -224,7 +206,6 @@ SOURCES +=	HLook.cpp \
 			habit/HStimulusNameListModel.cpp \
 			habit/HStimulusOrderList.cpp \
 			habit/HResultsExplorerDialog.cpp \
-			habit/HResultsExplorerFilesProxyModel.cpp \
 			habit/HMediaStatusWidget.cpp \
 			habit/HExperimentStatusWidget.cpp \
 			habit/HHabituationSetupWidget.cpp \
@@ -234,7 +215,8 @@ SOURCES +=	HLook.cpp \
 
 RESOURCES = habit/resources.qrc
 
-FORMS =		habit/cloneexperimentdialog.ui \
+FORMS =		\
+#habit/cloneexperimentdialog.ui \
 			habit/controlbaroptionsform.ui \
 			habit/monitorsettingsform.ui \
 			habit/reliabilitiesform.ui \
