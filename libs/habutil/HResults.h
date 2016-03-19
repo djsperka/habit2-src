@@ -13,7 +13,6 @@
 #include "experimentsettings.h"
 #include "runsettings.h"
 #include "subjectsettings.h"
-//#include "reliabilitysettings.h"
 #include "HEventLog.h"
 #include <QTextStream>
 
