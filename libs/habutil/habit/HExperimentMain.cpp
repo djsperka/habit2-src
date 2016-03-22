@@ -7,7 +7,7 @@
 
 #include "HExperimentMain.h"
 
-#include "monitorsettingsform.h"
+//#include "monitorsettingsform.h"
 #include "controlbaroptionsform.h"
 #include "HHabituationSetupWidget.h"
 #include "attentionsetupform.h"
