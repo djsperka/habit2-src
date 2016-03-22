@@ -7,15 +7,11 @@
 
 #include "HExperimentMain.h"
 
-#include "monitorsettingsform.h"
+//#include "monitorsettingsform.h"
 #include "controlbaroptionsform.h"
-//#include "habituationsetupform.h"
-//#include "stimulusdisplayform.h"
 #include "HHabituationSetupWidget.h"
 #include "attentionsetupform.h"
 #include "habituationsettings.h"
-//#include "habituationstimuliform.h"
-//#include "designsetupform.h"
 #include "HLookSettingsWidget.h"
 #include "HPhaseSettingsWidget.h"
 #include "HStimuliSettingsWidget.h"
