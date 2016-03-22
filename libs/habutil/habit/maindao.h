@@ -6,7 +6,6 @@
 #include "experimentsettings.h"
 #include "monitorsettings.h"
 #include "controlbaroptions.h"
-#include "designsettings.h"
 #include "habituationsettings.h"
 #include "stimulusdisplayinfo.h"
 #include "attentiongettersettings.h"
@@ -14,7 +13,7 @@
 #include "stimulussettings.h"
 #include "subjectsettings.h"
 #include "runsettings.h"
-#include "resultviewersettings.h"
+//#include "resultviewersettings.h"
 #include "HLookSettings.h"
 #include "HStimulusOrder.h"
 
