@@ -12,7 +12,6 @@
 #include <QFileSystemModel>
 #include <QDir>
 #include <QFileInfo>
-#include "HResultsExplorerFilesProxyModel.h"
 
 namespace Ui
 {
@@ -40,7 +39,6 @@ namespace GUILib
 		Ui::HResultsExplorerForm *ui;
 		QDir m_rootDir;
 		QFileSystemModel* m_pFolderModel;
-		HResultsExplorerFilesProxyModel* m_pFilesProxyModel;
 		QFileSystemModel* m_pFilesModel;
 
 		void connections();
