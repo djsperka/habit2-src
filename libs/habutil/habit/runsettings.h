@@ -13,6 +13,30 @@ namespace Habit
 
 	typedef QList< QPair< int, QString> > StimLabelList;
 
+	class PhaseRunSettings
+	{
+	private:
+
+		QString m_orderName;			// order name or 'default'
+		StimLabelList m_orderList;	// version 2
+		bool m_isOrderRandomized;
+		int m_randomizeMethod;
+	public:
+		PhaseRunSettings(): m_orderName(), m_isOrderRandomized(false), m_randomizeMethod(-1) {};
+		virtual ~PhaseRunSettings() {};
+		const QString& getOrderName() const { return m_orderName; };
+		void setOrderName(const QString& name) { m_orderName = name; };
+		const StimLabelList& getOrderList() const { return m_orderList; };
+		void setOrderList(const StimLabelList& list) { m_orderList = list; };
+		bool isOrderRandomized() const { return m_isOrderRandomized; };
+		void setOrderRandomized(bool b) { m_isOrderRandomized = b; };
+		int getRandomizeMethod() const { return m_randomizeMethod; };
+		void setRandomizeMethod(int i) { m_randomizeMethod = i; };
+	};
+	QDataStream & operator << (QDataStream& stream, const PhaseRunSettings& prs);
+	QDataStream & operator >> (QDataStream& stream, PhaseRunSettings& prs);
+	bool operator==(const PhaseRunSettings& lhs, const PhaseRunSettings& rhs);
+
 	class RunSettings
 	{
 	public:
@@ -26,62 +50,20 @@ namespace Habit
 		int getExperimentId() const;
 		void setExperimentId(int id);
 
-		QString getHabituationOrderName() const;
-		void setHabituationOrderName(const QString&);
-		bool getHabituationOrderList(StimLabelList& list) const;
-		void setHabituationOrderList(const StimLabelList& list);
-		bool isHabituationRandomized() const;
-		void setHabituationRandomized(bool);
-		int getHabituationRandomizeMethod() const;
-		void setHabituationRandomizeMethod(int);
-
-		QString getPretestOrderName() const;
-		void setPretestOrderName(const QString&);
-		bool getPretestOrderList(StimLabelList& list) const;
-		void setPretestOrderList(const StimLabelList& list);
-		bool isPretestRandomized() const;
-		void setPretestRandomized(bool);
-		int getPretestRandomizeMethod() const;
-		void setPretestRandomizeMethod(int);
-
-		QString getTestOrderName() const;
-		void setTestOrderName(const QString&);
-		bool getTestOrderList(StimLabelList& list) const;
-		void setTestOrderList(const StimLabelList& list);
-		bool isTestRandomized() const;
-		void setTestRandomized(bool);
-		int getTestRandomizeMethod() const;
-		void setTestRandomizeMethod(int);
-
 		int getSubjectId() const;
 		void setSubjectId(int id);
 
-		// space separated or comma-separated string with int.
-		// Returns true and list contains the parsed integers in order,
-		// if each element parses as an int, false otherwise (and list
-		// is undefined).
-		static bool getOrderFromString(StimLabelList& list, QString str);
+		void insert(int seqno, const PhaseRunSettings& prs);
 
+		void setMap(const QMap<int, PhaseRunSettings>& map) {phaseRunSettingsMap_ = map; };
 
+		const QMap<int, PhaseRunSettings>& map() const { return phaseRunSettingsMap_; };
 	private:
 		int id_;
 		int experimentId_;
 		int subjectId_;
 
-		QString habituationTestOrder_;			// order name or 'default'
-		StimLabelList habituationOrderList_;	// version 2
-		bool isHabituationOrderRandomized_;
-		int habituationRandomizeMethod;
-
-		QString pretestTestOrder_;			// order name or 'default'
-		StimLabelList pretestOrderList_;	// version 2
-		bool isPretestOrderRandomized_;
-		int pretestRandomizeMethod;
-
-		QString testTestOrder_;			// order name or 'default'
-		StimLabelList testOrderList_;	// version 2
-		bool isTestOrderRandomized_;
-		int testRandomizeMethod;
+		QMap<int, PhaseRunSettings> phaseRunSettingsMap_;
 	};
 
 	QDataStream & operator << (QDataStream& stream, RunSettings settings);

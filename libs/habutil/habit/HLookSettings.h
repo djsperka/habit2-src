@@ -40,7 +40,7 @@ namespace Habit
 		void setInclusiveLookTime(bool b) { m_bInclusiveLookTime = b; };
 		bool getInclusiveLookTime() const { return m_bInclusiveLookTime; };
 
-		void loadFromDB(int id);
+		bool loadFromDB(int id);
 		bool saveToDB(int id);
 
 	private:

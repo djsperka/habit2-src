@@ -20,7 +20,7 @@ namespace Habit {
 	class StimulusSettings
 	{
 	public:
-		StimulusSettings(const QString& name = "", const HStimContext& context = HStimContext::UnknownContext);
+		StimulusSettings(const QString& name = "");
 		StimulusSettings(const StimulusSettings& s);
 		~StimulusSettings();
 		StimulusSettings clone() const;
@@ -43,8 +43,6 @@ namespace Habit {
 		StimulusInfo& getIndependentSoundInfo();
 		const StimulusInfo& getIndependentSoundInfo() const;
 		void setIndependentSoundInfo(const StimulusInfo& independentSoundInfo);
-		const HStimContext* getContext() const;
-		void setContext(const HStimContext& context);
 		void setStimulusInfo(const StimulusInfo& info, const HPlayerPositionType& position);
 
 
@@ -57,7 +55,6 @@ namespace Habit {
 		StimulusInfo centerStimulusInfo_;
 		StimulusInfo rightStimulusInfo_;
 		StimulusInfo independentSoundInfo_;
-		const HStimContext* pcontext_;
 	};
 	QDataStream & operator<< (QDataStream& stream, StimulusSettings settings);
 	QDataStream & operator>> (QDataStream& stream, StimulusSettings& settings);

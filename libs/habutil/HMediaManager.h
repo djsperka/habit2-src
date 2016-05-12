@@ -65,7 +65,8 @@ private:
 	// A map containing lists of stimulus keys (keys into m_mapStim). Here the key
 	// is HStimContext.
 	// getContextStimList fetches a list of keys for the stimuli added for the Test phase.
-	QMap<HStimContext, QList<unsigned int> > m_mapContext;
+	//QMap<HStimContext, QList<unsigned int> > m_mapContext;
+	QMap<int, QList<unsigned int> > m_mapContext;
 
 	// Get the next key for m_mapStim. The values are doled out sequentially. Nothing special,
 	// this is a convenience.
@@ -73,7 +74,7 @@ private:
 
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss);
 
-	void addOrAppendList(const HStimContext& c, const QList<unsigned int>& list);
+	void addOrAppendList(int context, const QList<unsigned int>& list);
 
 public:
 
@@ -82,13 +83,14 @@ public:
 	void addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex=-1);
 	void clear();
 	unsigned int addAG(const Habit::StimulusSettings& ags);
-	void addStimuli(const Habit::StimuliSettings& ss);
+
+	void addStimuli(const Habit::StimuliSettings& ss, int context);
 	unsigned int addStimulus(const Habit::StimulusSettings& ss);
 
 	const Habit::StimulusSettings& getStimulusSettings(unsigned int key) const;
-	unsigned int getContextStimList(const HStimContext& c, QList<unsigned int>& list);
 
-	//const QMap<unsigned int, const Habit::StimulusSettings>& map() { return m_mapStim; };
+	unsigned int getContextStimList(int context, QList<unsigned int>& list);
+
 	const QMap<unsigned int, const Habit::StimulusSettings *>& pmap() { return m_mapPStimulusSettings; };
 
 	static const unsigned int backgroundKey;

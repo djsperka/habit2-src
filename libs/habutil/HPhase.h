@@ -55,7 +55,7 @@ public:
 	
 	void requestCurrentStim();
 	void requestAG();
-	const HPhaseType& ptype() const { return m_phaseSettings.getPhaseType(); };
+	// DJS const HPhaseType& ptype() const { return m_phaseSettings.getPhaseType(); };
 
 protected:
 	virtual void onEntry(QEvent* e);

@@ -12,13 +12,14 @@ using namespace Habit;
 
 // version string for input/output. See operator<<, operator>>
 static const QString f_sVersion18("2000018");
+static const QString f_sVersion21("2000021");
 
 
-HPhaseSettings::HPhaseSettings(const HPhaseType& type)
-: m_id(-1)
+HPhaseSettings::HPhaseSettings(int phase_id)
+: m_id(phase_id)
 , m_bEnabled(false)
-, m_pPhaseType(&type)
-, m_ntrials(0)
+, m_name()
+, m_seqno(0)
 , m_bUseLookingCriteria(true)
 , m_bIsSingleLook(true)
 , m_bIsMaxAccumulatedLookTime(false)
@@ -32,13 +33,15 @@ HPhaseSettings::HPhaseSettings(const HPhaseType& type)
 , m_bMeasureStimulusTimeFromLooking(false)
 , m_bIsMaxNoLookTime(false)
 , m_uiMaxNoLookTime(0)
+, m_habituationSettings()
+, m_stimuli()
 {};
 
 HPhaseSettings::HPhaseSettings(const HPhaseSettings& ts)
 : m_id(ts.getId())
 , m_bEnabled(ts.getIsEnabled())
-, m_pPhaseType(&ts.getPhaseType())
-, m_ntrials(ts.getNTrials())
+, m_name(ts.getName())
+, m_seqno(ts.getSeqno())
 , m_bUseLookingCriteria(ts.getUseLookingCriteria())
 , m_bIsSingleLook(ts.getIsSingleLook())
 , m_bIsMaxAccumulatedLookTime(ts.getIsMaxAccumulatedLookTime())
@@ -52,6 +55,8 @@ HPhaseSettings::HPhaseSettings(const HPhaseSettings& ts)
 , m_bMeasureStimulusTimeFromLooking(ts.getMeasureStimulusTimeFromLooking())
 , m_bIsMaxNoLookTime(ts.getIsMaxNoLookTime())
 , m_uiMaxNoLookTime(ts.getMaxNoLookTime())
+, m_habituationSettings(ts.getHabituationSettings())
+, m_stimuli(ts.stimuli())
 {};
 
 HPhaseSettings& HPhaseSettings::operator=(const HPhaseSettings& rhs)
@@ -60,8 +65,8 @@ HPhaseSettings& HPhaseSettings::operator=(const HPhaseSettings& rhs)
 	{
 		m_id = rhs.getId();
 		m_bEnabled = rhs.getIsEnabled();
-		this->setPhaseType(rhs.getPhaseType());
-		m_ntrials = rhs.getNTrials();
+		m_name = rhs.getName();
+		m_seqno = rhs.getSeqno();
 		m_bUseLookingCriteria = rhs.getUseLookingCriteria();
 		m_bIsSingleLook = rhs.getIsSingleLook();
 		m_bIsMaxAccumulatedLookTime = rhs.getIsMaxAccumulatedLookTime();
@@ -75,34 +80,47 @@ HPhaseSettings& HPhaseSettings::operator=(const HPhaseSettings& rhs)
 		m_bMeasureStimulusTimeFromLooking = rhs.getMeasureStimulusTimeFromLooking();
 		m_bIsMaxNoLookTime = rhs.getIsMaxNoLookTime();
 		m_uiMaxNoLookTime = rhs.getMaxNoLookTime();
+		m_habituationSettings = rhs.getHabituationSettings();
+		m_stimuli = rhs.stimuli();
 	}
 	return *this;
 }
 
-HPhaseSettings HPhaseSettings::clone()
+HPhaseSettings HPhaseSettings::clone() const
 {
 	HPhaseSettings settings(*this);
 	settings.setId(-1);
 	return settings;
 }
 
-QDataStream & Habit::operator<< (QDataStream& stream, HPhaseSettings settings)
+QDataStream & Habit::operator<< (QDataStream& stream, const HPhaseSettings& settings)
 {
-	stream	<< f_sVersion18
-			<< settings.getId() << settings.getIsEnabled() << settings.getPhaseType().number() << settings.getNTrials()
+	stream	<< f_sVersion21
+			<< settings.getId() << settings.getIsEnabled()
+			<< settings.getName() << settings.getSeqno()
 			<< settings.getUseLookingCriteria() << settings.getIsSingleLook() << settings.getIsMaxAccumulatedLookTime()
 			<< settings.getMaxAccumulatedLookTime() << settings.getIsMaxLookAwayTime()
 			<< settings.getMaxLookAwayTime() << settings.getRepeatTrialOnMaxLookAwayTime()
 			<< settings.getIsMaxStimulusTime()
 			<< settings.getMaxStimulusTime() << settings.getMeasureStimulusTimeFromOnset()
 			<< settings.getMeasureStimulusTimeFromLooking()
-			<< settings.getIsMaxNoLookTime() << settings.getMaxNoLookTime();
+			<< settings.getIsMaxNoLookTime() << settings.getMaxNoLookTime()
+			<< settings.getHabituationSettings() << settings.stimuli();
+//	stream	<< f_sVersion18
+//			<< settings.getId() << settings.getIsEnabled() << settings.getPhaseType().number() << settings.getNTrials()
+//			<< settings.getUseLookingCriteria() << settings.getIsSingleLook() << settings.getIsMaxAccumulatedLookTime()
+//			<< settings.getMaxAccumulatedLookTime() << settings.getIsMaxLookAwayTime()
+//			<< settings.getMaxLookAwayTime() << settings.getRepeatTrialOnMaxLookAwayTime()
+//			<< settings.getIsMaxStimulusTime()
+//			<< settings.getMaxStimulusTime() << settings.getMeasureStimulusTimeFromOnset()
+//			<< settings.getMeasureStimulusTimeFromLooking()
+//			<< settings.getIsMaxNoLookTime() << settings.getMaxNoLookTime();
 	return stream;
 }
 
 QDebug Habit::operator<<(QDebug dbg, const HPhaseSettings& settings)
 {
-	dbg.nospace() << "Id " << settings.getId() << "Enabled " << settings.getIsEnabled() << " ptype " << settings.getPhaseType().number() << " N " << settings.getNTrials()
+	dbg.nospace() << "Id " << settings.getId() << "Enabled " << settings.getIsEnabled() << " Name " << settings.getName() << " Seqno " << settings.getSeqno()
 			<< " use look " << settings.getUseLookingCriteria() << " single " << settings.getIsSingleLook() << " maxaccum " << settings.getIsMaxAccumulatedLookTime()
 			<< settings.getMaxAccumulatedLookTime() << " max lookaway " << settings.getIsMaxLookAwayTime()
 			<< settings.getMaxLookAwayTime() << " repeat? " << settings.getRepeatTrialOnMaxLookAwayTime() << " max stim " << settings.getIsMaxStimulusTime()
@@ -115,17 +133,29 @@ QDebug Habit::operator<<(QDebug dbg, const HPhaseSettings& settings)
 
 QDataStream & Habit::operator>> (QDataStream& stream, HPhaseSettings& settings)
 {
-	int id, nphase;
+	int id, nphase, seqno=0;
 	unsigned int n, maxAccum, maxLA, maxStim, maxNoLook;
 	bool bEnabled, bUseLooking, bSingle, bMaxAccum, bMaxLA, bMaxStim, bMeasOnset, bMeasLook, bMaxNoLook, bRepeat;
-	QString sVersion;
+	QString sVersion, sName;
+	Habit::HabituationSettings habituationSettings;
+	Habit::StimuliSettings stimuliSettings;
 
 	// Save position in stream in case this is an old version
 	qint64 pos = stream.device()->pos();
 	stream >> sVersion;
-	if (sVersion == f_sVersion18)
+	if (sVersion == f_sVersion21)
+	{
+		stream >> id >> bEnabled >> sName >> seqno >> bUseLooking >> bSingle >> bMaxAccum >> maxAccum >> bMaxLA >> maxLA >> bRepeat >> bMaxStim >> maxStim >> bMeasOnset >> bMeasLook >> bMaxNoLook >> maxNoLook >> habituationSettings >> stimuliSettings;
+		settings.setHabituationSettings(habituationSettings);
+		settings.setStimuli(stimuliSettings);
+	}
+	else if (sVersion == f_sVersion18)
 	{
 		stream >> id >> bEnabled >> nphase >> n >> bUseLooking >> bSingle >> bMaxAccum >> maxAccum >> bMaxLA >> maxLA >> bRepeat >> bMaxStim >> maxStim >> bMeasOnset >> bMeasLook >> bMaxNoLook >> maxNoLook;
+
+		// dummy values of name, seqno for older versions
+		sName = getPhaseType(nphase).name();
+		seqno = nphase;
 	}
 	else
 	{
@@ -137,12 +167,17 @@ QDataStream & Habit::operator>> (QDataStream& stream, HPhaseSettings& settings)
 
 		// default was to NOT repeat
 		bRepeat = false;
+
+		// dummy values of name, seqno for older versions
+		sName = getPhaseType(nphase).name();
+		seqno = nphase;
+
 	}
 
 	settings.setId(id);
 	settings.setIsEnabled(bEnabled);
-	settings.setPhaseType(getPhaseType(nphase));
-	settings.setNTrials(n);
+	settings.setName(sName);
+	settings.setSeqno(seqno);
 	settings.setUseLookingCriteria(bUseLooking);
 	settings.setIsSingleLook(bSingle);
 	settings.setIsMaxAccumulatedLookTime(bMaxAccum);
@@ -165,8 +200,8 @@ bool Habit::operator==(const HPhaseSettings& lhs, const HPhaseSettings& rhs)
 {
 	return	lhs.getId() == rhs.getId() &&
 			lhs.getIsEnabled() == rhs.getIsEnabled() &&
-			lhs.getPhaseType() == rhs.getPhaseType() &&
-			lhs.getNTrials() == rhs.getNTrials() &&
+			//lhs.getPhaseType() == rhs.getPhaseType() &&
+			//lhs.getNTrials() == rhs.getNTrials() &&
 			lhs.getUseLookingCriteria() == rhs.getUseLookingCriteria() &&
 			(!lhs.getUseLookingCriteria() || (lhs.getUseLookingCriteria() &&
 					lhs.getIsSingleLook() == rhs.getIsSingleLook() &&
@@ -182,18 +217,25 @@ bool Habit::operator==(const HPhaseSettings& lhs, const HPhaseSettings& rhs)
 					lhs.getMeasureStimulusTimeFromOnset() == rhs.getMeasureStimulusTimeFromOnset() &&
 					lhs.getMeasureStimulusTimeFromLooking() == rhs.getMeasureStimulusTimeFromLooking())) &&
 			lhs.getIsMaxNoLookTime() == rhs.getIsMaxNoLookTime() &&
-			(!lhs.getIsMaxNoLookTime() || (lhs.getIsMaxNoLookTime() && lhs.getMaxNoLookTime() == rhs.getMaxNoLookTime()));
+			(!lhs.getIsMaxNoLookTime() || (lhs.getIsMaxNoLookTime() && lhs.getMaxNoLookTime() == rhs.getMaxNoLookTime())) &&
+			lhs.getHabituationCriteria() == rhs.getHabituationCriteria() &&
+			lhs.stimuli() == rhs.stimuli();
 }
 
-void HPhaseSettings::loadFromDB(int id, int type)
+
+bool HPhaseSettings::loadFromDB(int phaseId)
 {
+	bool b = false;
 	Habit::MainDao maindao;
-	maindao.getHPhaseSettingsForExperiment(id, type, this);
+	b = maindao.getHPhaseSettings(phaseId, this);
+	if (b) b = maindao.getStimuliSettings(phaseId, this->stimuli());
+	if (b) b = maindao.getHabituationSettingsForPhase(phaseId, this->habituationSettings());
+	return b;
 }
 
 
-bool HPhaseSettings::saveToDB(int id)
+bool HPhaseSettings::saveToDB() const
 {
 	Habit::MainDao dao;
-	return dao.addOrUpdateHPhaseSettings(id, this);
+	return dao.addOrUpdateHPhaseSettings(getId(), this);
 }

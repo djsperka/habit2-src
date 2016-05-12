@@ -59,7 +59,7 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings*
 	if (settings->getId() > 0)
 	{
 		sql = "update phase_settings "
-				"set enabled=?, phase_type=?, ntrials=?, "
+				"set enabled=?, name=?, seqno=?, phase_type=?, ntrials=?, "
 				"use_looking_criteria=?, is_single_look=?, is_max_accumulated_look_time=?, max_accumulated_look_time=?, "
 				"is_max_lookaway_time=?, max_lookaway_time=?, "
 				"repeat_trial_on_max_lookaway=?, "
@@ -72,7 +72,7 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings*
 	{
 		sql = "insert into phase_settings "
 				"("
-				"enabled, phase_type, ntrials, use_looking_criteria, is_single_look, is_max_accumulated_look_time, "
+				"enabled, name, seqno, use_looking_criteria, is_single_look, is_max_accumulated_look_time, "
 				"max_accumulated_look_time, is_max_lookaway_time, max_lookaway_time, repeat_trial_on_max_lookaway, "
 				"is_max_stimulus_time, max_stimulus_time, "
 				"measure_from_onset, measure_from_looking, "
@@ -84,8 +84,10 @@ bool MainDao::addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings*
 	QSqlQuery q;
 	q.prepare(sql);
 	q.addBindValue(settings->getIsEnabled() ? 1 : 0);
-	q.addBindValue(settings->getPhaseType().number());
-	q.addBindValue(settings->getNTrials());
+	q.addBindValue(settings->getName());
+	q.addBindValue(settings->getSeqno());
+	//q.addBindValue(settings->getPhaseType().number());
+	//q.addBindValue(settings->getNTrials());
 	q.addBindValue(settings->getUseLookingCriteria() ? 1 : 0);
 	q.addBindValue(settings->getIsSingleLook() ? 1 : 0);
 	q.addBindValue(settings->getIsMaxAccumulatedLookTime() ? 1 : 0);
@@ -222,18 +224,18 @@ bool MainDao::addOrUpdateControlBarOption(size_t experimentId, Habit::ControlBar
 }
 
 
-bool MainDao::addOrUpdateHabituationSetting(size_t experimentId, Habit::HabituationSettings* settings)
+bool MainDao::addOrUpdateHabituationSettings(int phaseId, Habit::HabituationSettings* settings)
 {
 	QString sql;
 	if(settings->getId() > 0)
 	{
-		sql = "update habituation_settings set habituation_type=?, criterion_basis=?, criterion_percent=?, window_size=?, window_type=?, total_look=?, exclude_basis_window=?, require_min_basis_value=?, min_basis_value=?"
-			" where id=? and experiment_id=?";
+		sql = "update habituation_settings set habituation_type=?, criterion_basis=?, criterion_percent=?, window_size=?, window_type=?, total_look=?, exclude_basis_window=?, require_min_basis_value=?, min_basis_value=?, phase_id=?, ntrials=?"
+			" where id=?";
 	}
 	else
 	{
-		sql = "insert into habituation_settings (habituation_type, criterion_basis, criterion_percent, window_size, window_type, total_look, exclude_basis_window, require_min_basis_value, min_basis_value, experiment_id)"
-			" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		sql = "insert into habituation_settings (habituation_type, criterion_basis, criterion_percent, window_size, window_type, total_look, exclude_basis_window, require_min_basis_value, min_basis_value, phase_id, ntrials)"
+			" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 	QSqlQuery q;
 	q.prepare(sql);
@@ -247,11 +249,12 @@ bool MainDao::addOrUpdateHabituationSetting(size_t experimentId, Habit::Habituat
 	q.addBindValue(cs.getExcludeBasisWindow() ? 1 : 0);
 	q.addBindValue(cs.getRequireMinBasisValue() ? 1 : 0);
 	q.addBindValue(cs.getMinBasisValue());
+	q.addBindValue(phaseId);
+	q.addBindValue(settings->getNTrials());
 	if(settings->getId() > 0)
 	{
 		q.addBindValue(settings->getId());
 	}
-	q.addBindValue((uint)experimentId);
 	q.exec();
 	if (!q.lastError().isValid())
 	{
@@ -288,7 +291,7 @@ bool MainDao::deleteOrder(int id)
 	return false;
 }
 
-bool MainDao::addOrUpdateStimuliSettings(int experimentId, Habit::StimuliSettings& stimuli)
+bool MainDao::addOrUpdateStimuliSettings(int phaseId, Habit::StimuliSettings& stimuli)
 {
 	bool result = true;
 	QSet<int> original_ids;
@@ -296,20 +299,24 @@ bool MainDao::addOrUpdateStimuliSettings(int experimentId, Habit::StimuliSetting
 	QSet<int> deleted_ids;
 
 	// See if any stimuli were deleted. First, get stimuli settings from db...
-	Habit::StimuliSettings original = getStimuliSettings(experimentId, stimuli.getStimContext());
-
-	for (int i=0; i<original.stimuli().size(); i++)
-		original_ids.insert(original.stimuli()[i].getId());
-	for (int i=0; i<stimuli.stimuli().size(); i++)
-		edited_ids.insert(stimuli.stimuli()[i].getId());
-	deleted_ids = original_ids.subtract(edited_ids);
-
-	if (!deleted_ids.isEmpty())
+	Habit::StimuliSettings original;
+	result = getStimuliSettings(phaseId, original);
+	if (result)
 	{
-		qDebug() << "addOrUpdateStimuliSetting: deleting " << deleted_ids.size() << " stimuli.";
-		QSetIterator<int> it(deleted_ids);
-		while (result && it.hasNext())
-			result = deleteStimulus(it.next());
+
+		for (int i=0; i<original.stimuli().size(); i++)
+			original_ids.insert(original.stimuli()[i].getId());
+		for (int i=0; i<stimuli.stimuli().size(); i++)
+			edited_ids.insert(stimuli.stimuli()[i].getId());
+		deleted_ids = original_ids.subtract(edited_ids);
+
+		if (!deleted_ids.isEmpty())
+		{
+			qDebug() << "addOrUpdateStimuliSetting: deleting " << deleted_ids.size() << " stimuli.";
+			QSetIterator<int> it(deleted_ids);
+			while (result && it.hasNext())
+				result = deleteStimulus(it.next());
+		}
 	}
 
 	if (result)
@@ -339,9 +346,9 @@ bool MainDao::addOrUpdateStimuliSettings(int experimentId, Habit::StimuliSetting
 	{
 		for (int i=0; result && i<stimuli.stimuli().size(); i++)
 		{
-			result = addOrUpdateStimulusSettings(experimentId, stimuli.stimuli()[i]);
+			result = addOrUpdateStimulusSettings(phaseId, stimuli.stimuli()[i]);
 		}
-		if (!result) qDebug() << "MainDao::addOrUpdateStimuliSettings(" << stimuli.getStimContext().name() << ") error in adding/updating stim settings";
+		if (!result) qDebug() << "MainDao::addOrUpdateStimuliSettings(phaseId=" << phaseId << ") error in adding/updating stim settings";
 	}
 
 
@@ -350,15 +357,15 @@ bool MainDao::addOrUpdateStimuliSettings(int experimentId, Habit::StimuliSetting
 	{
 		for (int i=0; result && i<stimuli.orders().size(); i++)
 		{
-			result = addOrUpdateStimulusOrder(experimentId, stimuli.orders()[i]);
+			result = addOrUpdateStimulusOrder(phaseId, stimuli.orders()[i]);
 		}
-		if (!result) qDebug() << "MainDao::addOrUpdateStimuliSetting(" << stimuli.getStimContext().name() << ") error adding/updating orders";
+		if (!result) qDebug() << "MainDao::addOrUpdateStimuliSetting(phaseId=" << phaseId << ") error adding/updating orders";
 	}
 
 	return result;
 }
 
-bool MainDao::addOrUpdateStimulusSettings(int experiment_id, Habit::StimulusSettings& ss)
+bool MainDao::addOrUpdateStimulusSettings(int phase_id, Habit::StimulusSettings& ss)
 {
 	bool b = false;
 	QString sql;
@@ -366,17 +373,16 @@ bool MainDao::addOrUpdateStimulusSettings(int experiment_id, Habit::StimulusSett
 	if (ss.getId() > 0)
 	{
 		// update stimulus table
-		sql = "update stimulus set name=?, experiment_id=?, context=? where id=?";
+		sql = "update stimulus set name=?, phase_id=? where id=?";
 	}
 	else
 	{
 		// insert into stimulus table. Make sure to set Id in ss object - it will be used to add/update stimfiles.
-		sql = "insert into stimulus (name, experiment_id, context) values (?, ?, ?)";
+		sql = "insert into stimulus (name) values (?)";
 	}
 	q.prepare(sql);
 	q.addBindValue(QVariant(ss.getName()));
-	q.addBindValue(QVariant(experiment_id));
-	q.addBindValue(QVariant(ss.getContext()->number()));
+	q.addBindValue(QVariant(phase_id));
 	if (ss.getId() > 0)
 		q.addBindValue(QVariant(ss.getId()));
 	q.exec();
@@ -480,62 +486,6 @@ bool MainDao::addOrUpdateStimulusOrder(int experiment_id, Habit::HStimulusOrder&
 
 }
 
-#if 0
-bool MainDao::addOrUpdateStimulusSetting(int parentId, Habit::StimulusSettings& ss, const QString& tableName, const QString& parentKeyName)
-{
-	QString sql;
-	if(ss.getId() > 0)
-	{
-		sql = "update " + tableName + " set name=?, is_left_background=?, left_filename=?, is_left_loop_playback=?, is_center_background=?, "
-			" center_filename=?, is_center_loop_playback=?, is_right_background=?, right_filename=?, is_right_loop_playback=?, "
-			" independent_sound_filename=?, is_independent_loop_playback=?, left_audio_balance=?, right_audio_balance=?, center_audio_balance=?,"
-			" independent_audio_balance=?"
-			" where id=? and " + parentKeyName + "=?";
-	}
-	else
-	{
-		sql = "insert into " + tableName + " (name, is_left_background, left_filename, is_left_loop_playback, is_center_background, "
-			" center_filename, is_center_loop_playback, is_right_background, right_filename, is_right_loop_playback, "
-			" independent_sound_filename, is_independent_loop_playback, left_audio_balance, right_audio_balance, center_audio_balance, "
-			" independent_audio_balance, " + parentKeyName + ")"
-			" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	}
-	QSqlQuery q;
-	q.prepare(sql);
-	q.addBindValue(ss.getName());
-	q.addBindValue(ss.getLeftStimulusInfo().isBackground());
-	q.addBindValue(ss.getLeftStimulusInfo().getFileName());
-	q.addBindValue(ss.getLeftStimulusInfo().isLoopPlayBack());
-	q.addBindValue(ss.getCenterStimulusInfo().isBackground());
-	q.addBindValue(ss.getCenterStimulusInfo().getFileName());
-	q.addBindValue(ss.getCenterStimulusInfo().isLoopPlayBack());
-	q.addBindValue(ss.getRightStimulusInfo().isBackground());
-	q.addBindValue(ss.getRightStimulusInfo().getFileName());
-	q.addBindValue(ss.getRightStimulusInfo().isLoopPlayBack());
-	q.addBindValue(ss.getIndependentSoundInfo().getFileName());
-	q.addBindValue(ss.getIndependentSoundInfo().isLoopPlayBack());
-	q.addBindValue(ss.getLeftStimulusInfo().getAudioBalance());
-	q.addBindValue(ss.getRightStimulusInfo().getAudioBalance());
-	q.addBindValue(ss.getCenterStimulusInfo().getAudioBalance());
-	q.addBindValue(ss.getIndependentSoundInfo().getAudioBalance());
-	if (ss.getId() > 0)
-	{
-		q.addBindValue(ss.getId());
-	}
-	q.addBindValue(parentId);
-	q.exec();
-	if (!q.lastError().isValid())
-	{
-		if (ss.getId() < 1) ss.setId(q.lastInsertId().toInt());
-		return true;
-	}
-	qDebug() << "MainDao::addOrUpdateStimulusSetting  sql error: " << q.lastError().text();
-	return false;
-}
-
-#endif
-
-
 bool MainDao::addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::StimulusDisplayInfo* settings)
 {
 	QString sql;
@@ -579,9 +529,10 @@ bool MainDao::addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::Stim
 
 // Retrieve Data from DB
 
-void MainDao::getHLookSettingsForExperiment(int experimentId, HLookSettings* lookSettings)
+bool MainDao::getHLookSettingsForExperiment(int experimentId, HLookSettings* lookSettings)
 {
 	Q_ASSERT(0 != lookSettings);
+	bool b = false;
 	QString sql = "select * from look_settings where experiment_id = ?";
 	QSqlQuery q;
 	q.prepare(sql);
@@ -602,81 +553,95 @@ void MainDao::getHLookSettingsForExperiment(int experimentId, HLookSettings* loo
 		lookSettings->setMinLookAwayTime(minLookAwayTime);
 		int iInclusiveLookTime = q.value(q.record().indexOf("inclusive_look_time")).toInt();
 		lookSettings->setInclusiveLookTime(iInclusiveLookTime!=0);
+		b = true;
 	}
 	else
 	{
 		qCritical() << "No look_settings record found for id=" << experimentId;
 	}
+	return b;
 }
 
-void MainDao::getHPhaseSettingsForExperiment(int experimentId, int type, HPhaseSettings* phaseSettings)
+bool MainDao::getHPhaseSettings(int phaseId, HPhaseSettings& phaseSettings)
 {
-	Q_ASSERT(0 != phaseSettings);
-	QString sql = "select * from phase_settings where experiment_id = ? and phase_type = ?";
+	bool b = false;
+	QString sql = "select * from phase_settings where phaseId = ?";
 	QSqlQuery q;
 	q.prepare(sql);
-	q.addBindValue(experimentId);
-	q.addBindValue(type);
-	q.exec();
-	if (q.lastError().isValid())
+	q.addBindValue(phaseId);
+	b = q.exec();
+	if (!b)
 	{
-		qCritical() << "Error in MainDao::getHPhaseSettingsForExperiment id=" << experimentId << " for phase " << getPhaseType(type).name();
+		qCritical() << "Error in MainDao::getHPhaseSettings id=" << phaseId;
 		qDebug() << q.lastQuery() << " : " << q.lastError();
 	}
 	else if(q.next())
 	{
-		phaseSettings->setId(q.value(q.record().indexOf("id")).toInt());
-		phaseSettings->setPhaseType(getPhaseType(type));
-		phaseSettings->setIsEnabled(q.value(q.record().indexOf("enabled")).toBool());
-		phaseSettings->setNTrials(q.value(q.record().indexOf("ntrials")).toInt());
-		phaseSettings->setUseLookingCriteria(q.value(q.record().indexOf("use_looking_criteria")).toBool());
-		phaseSettings->setIsSingleLook(q.value(q.record().indexOf("is_single_look")).toBool());
-		phaseSettings->setIsMaxAccumulatedLookTime(q.value(q.record().indexOf("is_max_accumulated_look_time")).toBool());
-		phaseSettings->setMaxAccumulatedLookTime(q.value(q.record().indexOf("max_accumulated_look_time")).toUInt());
-		phaseSettings->setIsMaxLookAwayTime(q.value(q.record().indexOf("is_max_lookaway_time")).toBool());
-		phaseSettings->setMaxLookAwayTime(q.value(q.record().indexOf("max_lookaway_time")).toUInt());
-		phaseSettings->setRepeatTrialOnMaxLookAwayTime(q.value(q.record().indexOf("repeat_trial_on_max_lookaway")).toBool());
-		phaseSettings->setIsMaxStimulusTime(q.value(q.record().indexOf("is_max_stimulus_time")).toBool());
-		phaseSettings->setMaxStimulusTime(q.value(q.record().indexOf("max_stimulus_time")).toUInt());
-		phaseSettings->setMeasureStimulusTimeFromOnset(q.value(q.record().indexOf("measure_from_onset")).toBool());
-		phaseSettings->setMeasureStimulusTimeFromLooking(q.value(q.record().indexOf("measure_from_looking")).toBool());
-		phaseSettings->setIsMaxNoLookTime(q.value(q.record().indexOf("is_max_no_look_time")).toBool());
-		phaseSettings->setMaxNoLookTime(q.value(q.record().indexOf("max_no_look_time")).toUInt());
+		int index;
+		phaseSettings.setId(phaseId);
+		phaseSettings.setName(q.value(q.record().indexOf("name")).toString());
+		phaseSettings.setSeqno(q.value(q.record().indexOf("seqno")).toInt());
+		//phaseSettings->setPhaseType(getPhaseType(type));
+		phaseSettings.setIsEnabled(q.value(q.record().indexOf("enabled")).toBool());
+		//phaseSettings.setNTrials(q.value(q.record().indexOf("ntrials")).toInt());
+		phaseSettings.setUseLookingCriteria(q.value(q.record().indexOf("use_looking_criteria")).toBool());
+		phaseSettings.setIsSingleLook(q.value(q.record().indexOf("is_single_look")).toBool());
+		phaseSettings.setIsMaxAccumulatedLookTime(q.value(q.record().indexOf("is_max_accumulated_look_time")).toBool());
+		phaseSettings.setMaxAccumulatedLookTime(q.value(q.record().indexOf("max_accumulated_look_time")).toUInt());
+		phaseSettings.setIsMaxLookAwayTime(q.value(q.record().indexOf("is_max_lookaway_time")).toBool());
+		phaseSettings.setMaxLookAwayTime(q.value(q.record().indexOf("max_lookaway_time")).toUInt());
+		phaseSettings.setRepeatTrialOnMaxLookAwayTime(q.value(q.record().indexOf("repeat_trial_on_max_lookaway")).toBool());
+		phaseSettings.setIsMaxStimulusTime(q.value(q.record().indexOf("is_max_stimulus_time")).toBool());
+		phaseSettings.setMaxStimulusTime(q.value(q.record().indexOf("max_stimulus_time")).toUInt());
+		phaseSettings.setMeasureStimulusTimeFromOnset(q.value(q.record().indexOf("measure_from_onset")).toBool());
+		phaseSettings.setMeasureStimulusTimeFromLooking(q.value(q.record().indexOf("measure_from_looking")).toBool());
+		phaseSettings.setIsMaxNoLookTime(q.value(q.record().indexOf("is_max_no_look_time")).toBool());
+		phaseSettings.setMaxNoLookTime(q.value(q.record().indexOf("max_no_look_time")).toUInt());
+		b = true;
 	}
 	else
 	{
-		qCritical() << "No phase_settings record found for id=" << experimentId << " for phase " << getPhaseType(type).name();
+		qCritical() << "No phase_settings record found for phase id=" << phaseId;
+		b = false;
 	}
+
+	return b;
 }
 
-void MainDao::getMonitorSettingsForExperiment(size_t experimentId, MonitorSettings* monitorSettings)
+
+bool MainDao::getHPhaseSettingsIDs(int experimentID, QList<int>& ids)
 {
-	Q_ASSERT(0 != monitorSettings);
-	QString sql = "select * from monitor_settings where experiment_id = ?";
+	bool b = false;
+	QString sql = "select id from phase_settings where experiment_id=? order by seqno";
 	QSqlQuery q;
 	q.prepare(sql);
-	q.addBindValue((uint)experimentId);
-	q.exec();
-	if(q.next()) {
-		int id = q.value(q.record().indexOf("id")).toInt();
-		monitorSettings->setId(id);
-		int controlMonitor = q.value(q.record().indexOf("control_monitor")).toInt();
-		monitorSettings->setControlMonitorIndex(controlMonitor);
-		int leftMonitor= q.value(q.record().indexOf("left_monitor")).toInt();
-		monitorSettings->setLeftMonitorIndex(leftMonitor);
-		int centerMonitor = q.value(q.record().indexOf("center_monitor")).toInt();
-		monitorSettings->setCenterMonitorIndex(centerMonitor);
-		int rightMonitor = q.value(q.record().indexOf("right_monitor")).toInt();
-		monitorSettings->setRightMonitorIndex(rightMonitor);
+	q.addBindValue(experimentID);
+	b = q.exec();
+	if (!b)
+	{
+		qCritical() << "Error in MainDao::getHPhaseSettingsIDs experimentID=" << experimentID;
+		qDebug() << q.lastQuery() << " : " << q.lastError();
+
 	}
+	else
+	{
+		ids.clear();
+		while(q.next())
+		{
+			ids.push_back(q.value(0).toInt());
+		}
+	}
+	return b;
 }
 
-void MainDao::getAttentionGetterSettings(int experimentId, AttentionGetterSettings* attentionGetter)
+bool MainDao::getAttentionGetterSettings(int experimentId, AttentionGetterSettings* attentionGetter)
 {
 	Q_ASSERT(0 != attentionGetter);
-	StimuliSettings dummyStimuliSettings = getStimuliSettings(experimentId, HStimContext::AttentionGetter);
-	Q_ASSERT(dummyStimuliSettings.stimuli().count() == 1);
+	bool b = false;
+	int stimulusId;
+	StimulusSettings ss;
 	QSqlQuery q("select * from attention_setup where experiment_id=?");
+
 	q.addBindValue(experimentId);
 	q.exec();
 	if (q.lastError().isValid())
@@ -694,22 +659,42 @@ void MainDao::getAttentionGetterSettings(int experimentId, AttentionGetterSettin
 		attentionGetter->setId(id);
 		attentionGetter->setUseAttentionGetter(useAttentionStimulus);
 		attentionGetter->setBackGroundColor(QColor(backgroundColor));
-		attentionGetter->setAttentionGetterStimulus(dummyStimuliSettings.stimuli().at(0));
 		attentionGetter->setIsFixedISI(bFixedISI);
 		attentionGetter->setFixedISIMS(isiMS);
+
+		b = getAttentionStimulusId(experimentId, stimulusId);
+		if (!b)
+		{
+			qCritical() << "Error in MainDao::getAttentionGetterSettings, cannot get ag stimulus id for experimentId=" << experimentId;
+		}
+		else
+		{
+			b = getStimulusSettings(stimulusId, ss);
+			if (!b)
+			{
+				qCritical() << "Error in MainDao::getAttentionGetterSettings, cannot get ag stimulus for experimentId=" << experimentId << " stimulusId=" << stimulusId;
+			}
+			else
+			{
+				attentionGetter->setAttentionGetterStimulus(ss);
+				b = true;
+			}
+		}
 	}
 	else
 	{
 		// There should be a record!
 		qCritical() << "MainDao::getAttentionGetterSettings, no attention_setup record for experiment_id=" << experimentId;
 	}
+	return b;
 }
 
 
 
-void MainDao::getControlBarOptionsForExperiment(size_t experimentId, ControlBarOptions* controlBarOptions)
+bool MainDao::getControlBarOptionsForExperiment(size_t experimentId, ControlBarOptions* controlBarOptions)
 {
 	Q_ASSERT(0 != controlBarOptions);
+	bool b = false;
 	QString sql = "select * from controlbar_options where experiment_id = ?";
 	QSqlQuery q;
 	q.prepare(sql);
@@ -732,26 +717,29 @@ void MainDao::getControlBarOptionsForExperiment(size_t experimentId, ControlBarO
 		controlBarOptions->setDisplayCurrentStimulus(displayCurrentStimulus);
 		int number = q.value(q.record().indexOf("display_looking_direction")).toBool();
 		controlBarOptions->setDisplayLookingDirection(number);
+		b = true;
 	}
 	else
 	{
 		qCritical() << "No controlbar_options record found in MainDao::getControlBarOptionsForExperiment id=" << experimentId;
 	}
+	return b;
 }
 
 
-void MainDao::getHabituationSettingsForExperiment(size_t experimentId, HabituationSettings* habituationSettings)
+bool MainDao::getHabituationSettingsForPhase(int phaseId, HabituationSettings* habituationSettings)
 {
 	int number;
+	bool b = false;
 	Q_ASSERT(0 != habituationSettings);
-	QString sql = "select * from habituation_settings where experiment_id = ?";
+	QString sql = "select * from habituation_settings where phase_id = ?";
 	QSqlQuery q;
 	q.prepare(sql);
-	q.addBindValue((uint)experimentId);
+	q.addBindValue(phaseId);
 	q.exec();
 	if (q.lastError().isValid())
 	{
-		qCritical() << "Error in MainDao::getHabituationSettingsForExperiment id=" << experimentId;
+		qCritical() << "Error in MainDao::getHabituationSettingsForExperiment phaseid=" << phaseId;
 		qCritical() << q.lastQuery() << " : " << q.lastError();
 	}
 	else if (q.next())
@@ -760,6 +748,8 @@ void MainDao::getHabituationSettingsForExperiment(size_t experimentId, Habituati
 		habituationSettings->setId(id);
 		number = q.value(q.record().indexOf("habituation_type")).toInt();
 		habituationSettings->setHabituationType(getHabituationType(number));
+		number = q.value(q.record().indexOf("ntrials")).toInt();
+		habituationSettings->setNTrials(number);
 
 		Habit::CriterionSettings criterionSettings;
 		number = q.value(q.record().indexOf("criterion_basis")).toInt();
@@ -780,16 +770,20 @@ void MainDao::getHabituationSettingsForExperiment(size_t experimentId, Habituati
 		habituationSettings->setCriterionSettings(criterionSettings);
 		number = q.value(q.record().indexOf("total_look")).toInt();
 		habituationSettings->setTotalLookLengthToEnd(number);
+		b = true;
 	}
 	else
 	{
-		qCritical() << "No habituation_settings record found for id=" << experimentId;
+		qCritical() << "No habituation_settings record found for phase id=" << phaseId;
 	}
+	return b;
 }
 
-void MainDao::getStimulusDisplayInfoForExperiment(size_t experimentId, Habit::StimulusDisplayInfo* stimulusDisplayInfo)
+
+bool MainDao::getStimulusDisplayInfoForExperiment(size_t experimentId, Habit::StimulusDisplayInfo* stimulusDisplayInfo)
 {
 	Q_ASSERT(0 != stimulusDisplayInfo);
+	bool b = false;
 	QString sql = "select * from stimulus_display where experiment_id = ?";
 	QSqlQuery q;
 	q.prepare(sql);
@@ -816,28 +810,30 @@ void MainDao::getStimulusDisplayInfoForExperiment(size_t experimentId, Habit::St
 		stimulusDisplayInfo->setBackGroundColor(QColor(color));
 		stimulusDisplayInfo->setStimulusLayoutType(getStimulusLayoutType(stimulusLayout));
 		stimulusDisplayInfo->setUseISS(useISS);
+		b = true;
 	}
 	else
 	{
 		qCritical() << "No stimulus_display record found for id=" << experimentId;
 	}
+	return b;
 }
 
-StimuliSettings MainDao::getStimuliSettings(int experiment_id, const HStimContext& context)
+bool MainDao::getStimuliSettings(int phase_id, StimuliSettings& settings)
 {
-	StimuliSettings stimuli(context);
+	bool b = false;
+	StimuliSettings stimuli;
 
 	/*
 	 * Fetch rows from stimulus table
 	 */
 
-	QSqlQuery q("select id, name from stimulus where experiment_id=? and context=?");
-	q.addBindValue(experiment_id);
-	q.addBindValue(context.number());
-	q.exec();
-	if (q.lastError().isValid())
+	QSqlQuery q("select id, name from stimulus where phase_id=?");
+	q.addBindValue(phase_id);
+	b = q.exec();
+	if (!b)
 	{
-		qCritical() << "Error in MainDao::getStimuliSettings experiment_id=" << experiment_id << " context=" << context.name() << "(" << context.number() << ")";
+		qCritical() << "Error in MainDao::getStimuliSettings phase_id=" << phase_id ;
 		qCritical() << q.lastQuery() << " : " << q.lastError();
 	}
 	else if (q.next())
@@ -846,40 +842,75 @@ StimuliSettings MainDao::getStimuliSettings(int experiment_id, const HStimContex
 		{
 			int stimulus_id = q.value(0).toInt();
 			QString stimulus_name = q.value(1).toString();
-			StimulusSettings settings(stimulus_name, context);
-			settings.setId(stimulus_id);
-			if (getStimulusSettings(settings, stimulus_id))
+			StimulusSettings stimulus(stimulus_name);
+			stimulus.setId(stimulus_id);
+			if (b = getStimulusSettings(stimulus_id, settings))
 			{
 				stimuli.addStimulus(settings);
 			}
-		} while (q.next());
+			else
+			{
+				qCritical() << "Error in MainDao::getStimuliSettings phase_id=" << phase_id << " Cannot load stimulus with stimulus_id=" << stimulus_id;
+			}
+		} while (b && q.next());
 	}
 
+	if (!b) return b;
 
 	// get the HStimulusOrderList
 
-	QSqlQuery q2("select * from stimulus_order where experiment_id=? and context=?");
-	q2.addBindValue(experiment_id);
-	q2.addBindValue(context.number());
-	q2.exec();
-	if (q2.lastError().isValid())
+	QSqlQuery q2("select * from stimulus_order where phase_id=?");
+	q2.addBindValue(phase_id);
+	b = q2.exec();
+	if (!b)
 	{
-		qCritical() << "Error getting orders in MainDao::getStimuliSettings id=" << experiment_id;
+		qCritical() << "Error getting orders in MainDao::getStimuliSettings phase_id=" << phase_id;
 		qCritical() << q2.lastQuery() << " : " << q2.lastError();
 	}
 	else
 	{
-		while (q2.next())
+		while (b && q2.next())
 		{
-			Habit::HStimulusOrder order = getStimulusOrder(q2);
-			order.setContext(context);
-			stimuli.addOrder(order);
+			Habit::HStimulusOrder order;
+			QSqlRecord record = q2.record();
+			if (b = getStimulusOrderFromRecord(record))
+				stimuli.addOrder(order);
+			else
+				qCritical() << "Error in MainDao::getStimuliSettings phase_id=" << phase_id << " Cannot load stimulus orders with stimulus_id=" << stimulus_id;
 		}
 	}
-	return stimuli;
+	return b;
 }
 
-bool MainDao::getStimulusSettings(StimulusSettings& settings, int stimulus_id)
+bool MainDao::getAttentionStimulusId(int experiment_id, int &stimulus_id)
+{
+	bool b = false;
+	QSqlQuery q("select stimulus_id from stimulus where experiment_id=? and phase_id=-1");
+	q.addBindValue(experiment_id);
+	b = q.exec();
+	if (!b)
+	{
+		qCritical() << "Error in MainDao::getAttentionStimulusId experiment_id=" << experiment_id ;
+		qCritical() << q.lastQuery() << " : " << q.lastError();
+
+		//throw HDBException(QString("Error in MainDao::getAttentionStimulusId experiment_id=%1").arg(experiment_id));	// TODO All the getmethods should return void and throw exceptions!
+	}
+	else if (q.next())
+	{
+		if (q.size() > 1)
+		{
+			qCritical() << "Error in MainDao::getAttentionStimulusId experiment_id=" << experiment_id << ": There are " << q.size() << " AG stimuli." ;
+		}
+		else
+		{
+			stimulus_id = q.value(0).toInt();
+			b = true;
+		}
+	}
+	return b;
+}
+
+bool MainDao::getStimulusSettings(int stimulus_id, StimulusSettings& settings)
 {
 	bool b = false;
 	QSqlQuery qsf("select id, position, filename, isLoop, volume, isBackground, isColor, color from stimfiles where stimulus_id=?");
@@ -935,108 +966,6 @@ bool MainDao::deleteStimulus(int stimulus_id)
 
 
 
-
-
-
-#if OLD_STIMULUS_CODE
-
-	
-// DJS Modify these three methods (get(Pretest|Habituation|Test)StimuliSettingsForExperiment to set the
-// stimulus type in each StimulusSettings object. Original habit would set this value later, even though
-// the object's phase (PRETEST|HABITUATION|TEST) is determined at this point. Also modified the 
-// getStimuliSettings method below. 
-Habit::StimuliSettings MainDao::getPretestStimuliSettingsForExperiment(const QString& experiment)
-{
-	Habit::StimuliSettings ss = getStimuliSettings("pretest_stimuli", experiment, HStimContext::PreTestPhase);
-	return ss;
-}
-
-Habit::StimuliSettings MainDao::getHabituationStimuliSettingsForExperiment(const QString& experiment)
-{
-	Habit::StimuliSettings ss = getStimuliSettings("habituation_stimuli", experiment, HStimContext::HabituationPhase);
-	return ss;
-}
-
-Habit::StimuliSettings MainDao::getTestStimuliSettingsForExperiment(const QString& experiment)
-{
-	Habit::StimuliSettings ss = getStimuliSettings("test_stimuli", experiment, HStimContext::TestPhase);
-	return ss;
-}
-
-Habit::StimuliSettings MainDao::getPretestStimuliSettingsForExperiment(int experiment) {
-	QString experimentName = getExperimentNameById(experiment);
-	return getPretestStimuliSettingsForExperiment(experimentName);
-}
-
-Habit::StimuliSettings MainDao::getHabituationStimuliSettingsForExperiment(int experiment) {
-	QString experimentName = getExperimentNameById(experiment);
-	return getHabituationStimuliSettingsForExperiment(experimentName);
-}
-
-Habit::StimuliSettings MainDao::getTestStimuliSettingsForExperiment(int experiment) {
-	QString experimentName = getExperimentNameById(experiment);
-	return getTestStimuliSettingsForExperiment(experimentName);
-}
-
-Habit::StimuliSettings MainDao::getStimuliSettings(const QString& table_name, const QString& experiment, const HStimContext& context)
-{
-	return getStimuliSettings(table_name, getExperimentId(experiment), context);
-}
-
-
-Habit::StimuliSettings MainDao::getStimuliSettings(const QString& table_name, int experiment_id, const HStimContext& context)
-{
-	Habit::StimuliSettings result(context);
-
-	// get the StimulusSettingsList
-
-	QString sql = "select * from " + table_name + " where experiment_id=?";
-	QSqlQuery q;
-	q.prepare(sql);
-	q.addBindValue(experiment_id);
-	q.exec();
-	if (q.lastError().isValid())
-	{
-		qCritical() << "Error in MainDao::getStimuliSettings id=" << experiment_id << " table " << table_name;
-		qCritical() << q.lastQuery() << " : " << q.lastError();
-	}
-	else
-	{
-		while(q.next())
-		{
-			Habit::StimulusSettings ss = getStimulusSettings(q);
-			ss.setContext(context);
-			result.addStimuli(ss);
-		}
-	}
-
-	// get the HStimulusOrderList
-
-	QString sql2("select * from stimulus_order where experiment_id=? and context=?");
-	QSqlQuery q2;
-	q2.prepare(sql2);
-	q2.addBindValue(experiment_id);
-	q2.addBindValue(context.number());
-	q2.exec();
-	if (q2.lastError().isValid())
-	{
-		qCritical() << "Error getting orders in MainDao::getStimuliSettings id=" << experiment_id;
-		qCritical() << q2.lastQuery() << " : " << q2.lastError();
-	}
-	else
-	{
-		while (q2.next())
-		{
-			Habit::HStimulusOrder order = getStimulusOrder(q2);
-			order.setContext(context);
-			result.addOrder(order);
-		}
-	}
-	return result;
-}
-#endif
-
-
 Habit::HStimulusOrder MainDao::getStimulusOrder(const QSqlQuery& q)
 {
 	Habit::HStimulusOrder order;
@@ -1047,57 +976,15 @@ Habit::HStimulusOrder MainDao::getStimulusOrder(const QSqlQuery& q)
 	return order;
 }
 
-
-#if OLD_STIMULUS_CODE
-
-Habit::StimulusSettings MainDao::getStimulusSettings(const QSqlQuery& q)
+bool MainDao::getStimulusOrderFromRecord(const QSqlRecord& record, Habit::StimulusOrder& order)
 {
-	Habit::StimulusSettings ss;
-	QString name = q.value(q.record().indexOf("name")).toString();
-
-	bool is_left_background = q.value(q.record().indexOf("is_left_background")).toBool();
-	QString left_filename = q.value(q.record().indexOf("left_filename")).toString();
-	bool is_left_loop_playback = q.value(q.record().indexOf("is_left_loop_playback")).toBool();
-
-	bool is_center_background = q.value(q.record().indexOf("is_center_background")).toBool();
-	QString center_filename = q.value(q.record().indexOf("center_filename")).toString();
-	bool is_center_loop_playback = q.value(q.record().indexOf("is_center_loop_playback")).toBool();
-
-	bool is_right_background = q.value(q.record().indexOf("is_right_background")).toBool();
-	QString right_filename = q.value(q.record().indexOf("right_filename")).toString();
-	bool is_right_loop_playback = q.value(q.record().indexOf("is_right_loop_playback")).toBool();
-
-	QString independent_sound_filename = q.value(q.record().indexOf("independent_sound_filename")).toString();
-	bool is_independent_loop_playback = q.value(q.record().indexOf("is_independent_loop_playback")).toBool();
-
-	int left_audio_balance = q.value(q.record().indexOf("left_audio_balance")).toInt();
-	int center_audio_balance = q.value(q.record().indexOf("center_audio_balance")).toInt();
-	int right_audio_balance = q.value(q.record().indexOf("right_audio_balance")).toInt();
-	int independent_audio_balance = q.value(q.record().indexOf("independent_audio_balance")).toInt();
-
-	int id = q.value(q.record().indexOf("id")).toInt();
-
-	ss.setId(id);
-	ss.setName(name);
-
-	Habit::StimulusInfo si_left(name, left_filename, is_left_loop_playback, left_audio_balance, is_left_background);
-	Habit::StimulusInfo si_center(name, center_filename, is_center_loop_playback, center_audio_balance, is_center_background);
-	Habit::StimulusInfo si_right(name, right_filename, is_right_loop_playback, right_audio_balance, is_right_background);
-	Habit::StimulusInfo si_ind(name, independent_sound_filename, is_independent_loop_playback, independent_audio_balance);	// no background setting for sound
-
-	ss.setLeftStimulusInfo(si_left);
-	ss.setCenterStimulusInfo(si_center);
-	ss.setRightStimulusInfo(si_right);
-	ss.setIndependentSoundInfo(si_ind);
-
-	return ss;
+	bool b=false;
+	order.setId(q.value(record.indexOf("id")).toInt());
+	order.setPhaseId(record.indexOf("phase_id"));
+	order.setName(record.indexOf("name")).toString());
+	order.setList(record.indexOf("orderlist")).toString().split(QString(",")));
+	return b;
 }
-
-#endif
-
-
-
-
 
 // Utility methods
 
@@ -1202,6 +1089,56 @@ int MainDao::getExperimentId(const QString& name)
 		result = q.value(q.record().indexOf("id")).toInt();
 	}
 	return result;
+}
+
+bool MainDao::getExperimentName(int id, QString& name)
+{
+	bool b = false;
+	name = "";
+	QSqlQuery q("select name from experiments where id=?");
+	q.addBindValue(id);
+	if (q.exec())
+	{
+		if (q.next())
+		{
+			name = q.value(q.record().indexOf("name")).toString();
+			b = true;
+		}
+		else
+		{
+			qError() << "MainDao::getExperimentName(): Cannot find record in experiments table for id=" << id;
+		}
+	}
+	else
+	{
+		qError() << "MainDao::getExperimentName(): " << q.lastQuery() << " : error - " << q.lastError().text();
+	}
+	return b;
+}
+
+bool MainDao::getExperimentID(const QString& name, int& id)
+{
+	bool b = false;
+	id = -1;
+	QSqlQuery q("select id from experiments where name=?");
+	q.addBindValue(name);
+	if (q.exec())
+	{
+		if (q.next())
+		{
+			id = q.value(q.record().indexOf("id")).toInt();
+			b = true;
+		}
+		else
+		{
+			qError() << "Cannot find record in experiments table for name=" << name;
+		}
+	}
+	else
+	{
+		qError() << "MainDao::getExperimentID(): " << q.lastQuery() << " : error - " << q.lastError().text();
+	}
+	return b;
 }
 
 
@@ -1317,104 +1254,5 @@ QStringList MainDao::getAllExperimentNames(bool bIncludeHiddenExperiments)
 	return result;
 }
 
-// djs USE_SUBJECT_TABLES is not def'd
-#ifdef USE_SUBJECT_TABLES
-
-QStringList MainDao::getAllSubjectsNames()
-{
-	QSqlQuery q("select name from subject_settings");
-	QStringList result;
-	while(q.next()) {
-		QString name = q.value(q.record().indexOf("name")).toString();
-		result.append(name);
-	}
-	return result;
-}
-
-void MainDao::insertSubject(Habit::SubjectSettings* subjectSettings)
-{
-	Q_ASSERT(0 != subjectSettings);
-	QString sql = "insert into subject_settings (name, birthdate, testdate, condition, observer, cell_number, comments)"
-		" values(?, ?, ?, ?, ?, ?, ?)";
-	QSqlQuery q;
-	q.prepare(sql);
-	q.addBindValue(subjectSettings->getSubjectName());
-	q.addBindValue(subjectSettings->getBirthDate());
-	q.addBindValue(subjectSettings->getTestDate());
-	q.addBindValue(subjectSettings->getCondition());
-	q.addBindValue(subjectSettings->getObserver());
-	q.addBindValue(subjectSettings->getCellNumber());
-	q.addBindValue(subjectSettings->getComments());
-	q.exec();
-	subjectSettings->setId(q.lastInsertId().toInt());
-}
-
-void MainDao::updateSubject( const Habit::SubjectSettings& subjectSettings )
-{
-	QString sql = "update subject_settings set name=?, birthdate=?, testdate=?, condition=?, observer=?, cell_number=?, comments=?"
-		" where id=?";
-	QSqlQuery q;
-	q.prepare(sql);
-	q.addBindValue(subjectSettings.getSubjectName());
-	q.addBindValue(subjectSettings.getBirthDate());
-	q.addBindValue(subjectSettings.getTestDate());
-	q.addBindValue(subjectSettings.getCondition());
-	q.addBindValue(subjectSettings.getObserver());
-	q.addBindValue(subjectSettings.getCellNumber());
-	q.addBindValue(subjectSettings.getComments());
-	q.addBindValue(subjectSettings.getId());
-	q.exec();
-}
-
-bool MainDao::isSubjectUnique(const Habit::SubjectSettings& subjectSettings)
-{
-	QString sql = "select * from subject_settings where name=?";
-	QSqlQuery q;
-	q.prepare(sql);
-	q.addBindValue(subjectSettings.getSubjectName());
-	q.exec();
-	return !q.next();
-}
-
-Habit::SubjectSettings MainDao::getSubjectSettings(const QString& subj) {
-	QString sql = "select * from subject_settings where name=?";
-	QSqlQuery q;
-	q.prepare(sql);
-	q.addBindValue(subj);
-	q.exec();
-	Habit::SubjectSettings ss;
-	if(q.next()) {
-		ss.setId(q.value(q.record().indexOf("id")).toInt());
-		ss.setSubjectName(q.value(q.record().indexOf("name")).toString());
-		ss.setBirthDate(q.value(q.record().indexOf("birthdate")).toDateTime());
-		ss.setTestDate(q.value(q.record().indexOf("testdate")).toDateTime());
-		ss.setCondition(q.value(q.record().indexOf("condition")).toString());
-		ss.setObserver(q.value(q.record().indexOf("observer")).toString());
-		ss.setCellNumber(q.value(q.record().indexOf("cell_number")).toString());
-		ss.setComments(q.value(q.record().indexOf("comments")).toString());
-	}
-	return ss;
-}
-
-Habit::SubjectSettings MainDao::getSubjectSettings(int id) {
-	QString sql = "select * from subject_settings where id=?";
-	QSqlQuery q;
-	q.prepare(sql);
-	q.addBindValue(id);
-	q.exec();
-	Habit::SubjectSettings ss;
-	if(q.next()) {
-		ss.setId(q.value(q.record().indexOf("id")).toInt());
-		ss.setSubjectName(q.value(q.record().indexOf("name")).toString());
-		ss.setBirthDate(q.value(q.record().indexOf("birthdate")).toDateTime());
-		ss.setTestDate(q.value(q.record().indexOf("testdate")).toDateTime());
-		ss.setCondition(q.value(q.record().indexOf("condition")).toString());
-		ss.setObserver(q.value(q.record().indexOf("observer")).toString());
-		ss.setCellNumber(q.value(q.record().indexOf("cell_number")).toString());
-		ss.setComments(q.value(q.record().indexOf("comments")).toString());
-	}
-	return ss;
-}
-#endif
 
 } // namespace Habit

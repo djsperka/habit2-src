@@ -39,10 +39,10 @@ HLookSettings HLookSettings::clone()
 	return settings;
 }
 
-void HLookSettings::loadFromDB(int id)
+bool HLookSettings::loadFromDB(int id)
 {
 	Habit::MainDao maindao;
-	maindao.getHLookSettingsForExperiment(id, this);
+	return maindao.getHLookSettingsForExperiment(id, this);
 }
 
 bool HLookSettings::saveToDB(int id_)

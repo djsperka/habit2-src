@@ -35,7 +35,7 @@ public:
     void setIsFixedISI(bool b);
     int getFixedISIMS() const;
     void setFixedISIMS(int ms);
-	void loadFromDB(size_t id);
+	bool loadFromDB(size_t id);
 	bool saveToDB(size_t id_);
 
 private:

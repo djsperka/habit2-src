@@ -146,10 +146,10 @@ void Habit::ControlBarOptions::setDisplayLookingDirection(bool display)
 }
 
 
-void Habit::ControlBarOptions::loadFromDB(size_t id)
+bool Habit::ControlBarOptions::loadFromDB(size_t id)
 {
 	Habit::MainDao mainDao;
-	mainDao.getControlBarOptionsForExperiment(id, this);
+	return mainDao.getControlBarOptionsForExperiment(id, this);
 }
 
 bool Habit::ControlBarOptions::saveToDB( size_t id_ )

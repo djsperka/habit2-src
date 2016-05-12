@@ -116,38 +116,40 @@ unsigned int HMediaManager::addAG(const Habit::StimulusSettings& ssAG)
 	// This code allows more than one ag....nothing here prevents multiple ags to be added to the list.
 	QList<unsigned int> list;
 	list.append(agKey);
-	addOrAppendList(HStimContext::AttentionGetter, list);
+
+	// TODO Using -1 as context for attention getters!
+	addOrAppendList(-1, list);
 
 	return agKey;
 }
 
 
-void HMediaManager::addOrAppendList(const HStimContext& c, const QList<unsigned int>& list)
+void HMediaManager::addOrAppendList(int context, const QList<unsigned int>& list)
 {
-	if (m_mapContext.contains(c))
+	if (m_mapContext.contains(context))
 	{
-		m_mapContext[c].append(list);
+		m_mapContext[context].append(list);
 	}
 	else
 	{
-		m_mapContext.insert(c, list);
+		m_mapContext.insert(context, list);
 	}
 }
 
-unsigned int HMediaManager::getContextStimList(const HStimContext& c, QList<unsigned int>& list)
+unsigned int HMediaManager::getContextStimList(int context, QList<unsigned int>& list)
 {
 	unsigned int n=0;
-	if (m_mapContext.contains(c))
+	if (m_mapContext.contains(context))
 	{
-		n = m_mapContext.value(c).size();
-		list.append(m_mapContext.value(c));
+		n = m_mapContext.value(context).size();
+		list.append(m_mapContext.value(context));
 	}
 	return list.size();
 }
 
 
 //void HMediaManager::addStimuli(const Habit::StimuliSettings& ss, QList<unsigned int>& idList)
-void HMediaManager::addStimuli(const Habit::StimuliSettings& ss)
+void HMediaManager::addStimuli(const Habit::StimuliSettings& ss, int context)
 {
 	QList<unsigned int> idList;
 	QListIterator<Habit::StimulusSettings> it(ss.stimuli());	// note: getting const HStimulusSettingsList&, it.next() will be const StimulusSettings&
@@ -155,7 +157,7 @@ void HMediaManager::addStimuli(const Habit::StimuliSettings& ss)
 	{
 		idList.append(addStimulus(it.next()));
 	}
-	addOrAppendList(ss.getStimContext(), idList);
+	addOrAppendList(context, idList);
 	return;
 }
 

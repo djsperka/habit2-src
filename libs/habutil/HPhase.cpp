@@ -15,7 +15,7 @@
 #include <QtDebug>
 
 HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput)
-	: HExperimentChildState(exp, log, phaseSettings.getPhaseType().name())
+	: HExperimentChildState(exp, log, phaseSettings.getName())
 	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
 	, m_phaseSettings(phaseSettings)
@@ -41,7 +41,7 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
 
 	// Set object name - trick to allow updating status labels when this phase is entered.
-	setObjectName(QString(phaseSettings.getPhaseType().name()));
+	setObjectName(QString(phaseSettings.getName()));
 
 	connect(this, SIGNAL(phaseStarted(QString)), &exp, SIGNAL(phaseStarted(QString)));
 	connect(m_sTrial, SIGNAL(trialStarted(int, int)), &exp, SIGNAL(trialStarted(int, int)));
@@ -75,7 +75,9 @@ void HPhase::onEntry(QEvent* e)
 	m_sTrial->setTrialNumber(m_itrial);
 
 	// post 'phase start' event to event log.
-	eventLog().append(new HPhaseStartEvent(ptype(), HElapsedTimer::elapsed()));
+	// TODO: Fix HPhaseStartEvent
+	qWarning() << "Phase start event has incorrect type!";
+	eventLog().append(new HPhaseStartEvent(HPhaseType::UnknownPhase, HElapsedTimer::elapsed()));
 	
 
 	// connect media manager signal screen(int) to slot screenStarted(int)
@@ -97,7 +99,7 @@ void HPhase::onEntry(QEvent* e)
 	// djs 10-7-2015 Moved this to be the last statement in the function.
 	// NOTE: onEntry() is called first, then QAbstractState emits SIGNAL(entered()),
 	// so this signal comes before the state is "entered"?
-	emit phaseStarted(m_phaseSettings.getPhaseType().name());
+	emit phaseStarted(m_phaseSettings.getName());
 
 };
 
@@ -152,6 +154,9 @@ void HPhase::onTrialCompleteEntered()
 	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog(), isHabituated))
 	{
 		machine()->postEvent(new HAllTrialsDoneEvent());
+
+		qWarning() << "Habituation success/fail event not implemented!!!";
+/*
 		if (ptype() == HPhaseType::Habituation)
 		{
 			if (isHabituated)
@@ -159,6 +164,7 @@ void HPhase::onTrialCompleteEntered()
 			else 
 				eventLog().append(new HHabituationFailureEvent(HElapsedTimer::elapsed()));
 		}
+*/
 	}
 	else 
 	{

@@ -24,13 +24,11 @@ namespace GUILib
 		Q_OBJECT
 
 		const Habit::ExperimentSettings& m_exptSettings;
-		QMap<int, GUILib::HStimulusOrderSelectionWidget*> m_map;
+		QMap<int, QPair<GUILib::HStimulusOrderSelectionWidget*, bool> > m_map;
 		GUILib::HSubjectSettingsWidget* m_pSubjectSettingsWidget;
 		QPushButton *m_pbRun;
 		QPushButton *m_pbCancel;
-		bool m_bPreTestOrderChosen;
-		bool m_bHabituationOrderChosen;
-		bool m_bTestOrderChosen;
+		QMap<int, bool> m_mapSeqnoOrderChosen;	// initialize to false for each enabled phase, set to true if chosen
 
 		void components(bool bTestRun);
 		void connections();
@@ -44,9 +42,7 @@ namespace GUILib
 		QString getRunLabel() const;
 
 	private slots:
-		void preTestOrderChosen();
-		void habituationOrderChosen();
-		void testOrderChosen();
+		void orderChosen(int seqno);
 	};
 }
 

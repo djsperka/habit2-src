@@ -181,10 +181,10 @@ void Habit::StimulusDisplayInfo::setBackGroundColor(const QColor& backGroundColo
     backGroundColor_ = backGroundColor;
 }
 
-void Habit::StimulusDisplayInfo::loadFromDB( size_t id )
+bool Habit::StimulusDisplayInfo::loadFromDB( size_t id )
 {
 	Habit::MainDao dao;
-	dao.getStimulusDisplayInfoForExperiment(id, this);
+	return dao.getStimulusDisplayInfoForExperiment(id, this);
 }
 
 bool Habit::StimulusDisplayInfo::saveToDB(size_t id_)

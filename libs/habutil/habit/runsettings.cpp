@@ -1,23 +1,17 @@
 #include "runsettings.h"
+#include "HTypes.h"
 #include <QDebug>
 #include <QStringList>
 #include <QRegExp>
 
 using namespace Habit;
 
+const QString f_sVersion("rs2000021");
+
 RunSettings::RunSettings()
 	: id_(-1)
 	, experimentId_(-1)
 	, subjectId_(-1)
-	, habituationTestOrder_("")
-	, isHabituationOrderRandomized_(false)
-	, habituationRandomizeMethod(-1)
-	, pretestTestOrder_("")
-	, isPretestOrderRandomized_(false)
-	, pretestRandomizeMethod(-1)
-	, testTestOrder_("")
-	, isTestOrderRandomized_(false)
-	, testRandomizeMethod(-1)
 {}
 
 RunSettings::~RunSettings()
@@ -54,151 +48,22 @@ void RunSettings::setSubjectId(int id)
 	subjectId_ = id;
 }
 
-QString RunSettings::getHabituationOrderName() const
+void RunSettings::insert(int seqno, const PhaseRunSettings& prs)
 {
-	return habituationTestOrder_;
+	phaseRunSettingsMap_.insert(seqno, prs);
 }
 
-void RunSettings::setHabituationOrderName(const QString& order)
+QDataStream & Habit::operator << (QDataStream& stream, const Habit::PhaseRunSettings& prs)
 {
-	habituationTestOrder_ = order;
-	return;
+	stream << prs.getOrderName() << prs.getOrderList() << prs.isOrderRandomized() << prs.getRandomizeMethod();
+	return stream;
 }
 
-bool RunSettings::isHabituationRandomized() const
+QDataStream & Habit::operator << (QDataStream& stream, const Habit::RunSettings& settings)
 {
-	return isHabituationOrderRandomized_;
-}
+	stream << f_sVersion << settings.getId() << settings.getExperimentId() << settings.getSubjectId() << settings.map();
 
-void RunSettings::setHabituationRandomized(bool t)
-{
-	isHabituationOrderRandomized_ = t;
-}
-
-int RunSettings::getHabituationRandomizeMethod() const
-{
-	return habituationRandomizeMethod;
-}
-
-void RunSettings::setHabituationRandomizeMethod(int m)
-{
-	habituationRandomizeMethod = m;
-}
-
-QString RunSettings::getPretestOrderName() const
-{
-	return pretestTestOrder_;
-}
-
-void RunSettings::setPretestOrderName(const QString& ordername)
-{
-	pretestTestOrder_ = ordername;
-	return;
-}
-
-bool RunSettings::isPretestRandomized() const
-{
-	return isPretestOrderRandomized_;
-}
-
-void RunSettings::setPretestRandomized(bool t)
-{
-	isPretestOrderRandomized_ = t;
-}
-
-int RunSettings::getPretestRandomizeMethod() const
-{
-	return pretestRandomizeMethod;
-}
-
-void RunSettings::setPretestRandomizeMethod(int m)
-{
-	pretestRandomizeMethod = m;
-}
-
-QString RunSettings::getTestOrderName() const
-{
-	return testTestOrder_;
-}
-
-void RunSettings::setTestOrderName(const QString& order)
-{
-	testTestOrder_ = order;
-}
-
-bool RunSettings::isTestRandomized() const
-{
-	return isTestOrderRandomized_;
-}
-
-void RunSettings::setTestRandomized(bool t)
-{
-	isTestOrderRandomized_ = t;
-}
-
-int RunSettings::getTestRandomizeMethod() const
-{
-	return testRandomizeMethod;
-}
-
-void RunSettings::setTestRandomizeMethod(int m)
-{
-	testRandomizeMethod = m;
-}
-
-bool RunSettings::getPretestOrderList(StimLabelList& list) const
-{
-	list = pretestOrderList_;
-	return true;
-}
-
-bool RunSettings::getHabituationOrderList(StimLabelList& list) const
-{
-	list = habituationOrderList_;
-	return true;
-}
-
-bool RunSettings::getTestOrderList(StimLabelList& list) const
-{
-	list = testOrderList_;
-	return true;
-}
-
-
-void RunSettings::setPretestOrderList(const StimLabelList& list)
-{
-	pretestOrderList_ = list;
-}
-
-void RunSettings::setHabituationOrderList(const StimLabelList& list)
-{
-	habituationOrderList_ = list;
-}
-
-void RunSettings::setTestOrderList(const StimLabelList& list)
-{
-	testOrderList_ = list;
-}
-
-
-bool RunSettings::getOrderFromString(StimLabelList& list, QString str)
-{
-	bool b = true;
-	QRegExp resep("[ ,]+");
-	// the regexp allows spaces and commas as separators. Extra spaces, and extra commas for
-	// that matter, are allowed.
-	QStringList orderList = str.split(resep);
-	for (QStringList::iterator it = orderList.begin(); it != orderList.end() && b; ++it)
-	{
-		int num = it->toInt(&b);
-		if (b) list.append(QPair<int, QString>(num, QString()));
-	}
-	return b;
-}
-
-
-QDataStream & Habit::operator << (QDataStream& stream, Habit::RunSettings settings)
-{
+/* original
 	stream << settings.getId();
 	stream << settings.getExperimentId();
 	stream << settings.getSubjectId();
@@ -211,56 +76,90 @@ QDataStream & Habit::operator << (QDataStream& stream, Habit::RunSettings settin
 	stream << settings.getTestOrderName();
 	stream << settings.isTestRandomized();
 	stream << settings.getTestRandomizeMethod();
+	*/
 	return stream;
 }
 
 QDataStream & Habit::operator >> (QDataStream& stream, Habit::RunSettings& settings)
 {
-	int experimentId_;
-	int subjectId_;
-	int id_;
+	QString sVersion;
+	int experimentId;
+	int subjectId;
+	int id;
 
-	QString habituationOrderName;
-	bool isHabituationOrderRandomized_;
-	int habituationRandomizeMethod;
+	// Save position in stream in case this is an old version
+	qint64 pos = stream.device()->pos();
+	stream >> sVersion;
+	if (sVersion == f_sVersion)
+	{
+		QMap<int, PhaseRunSettings> map;
+		stream >> id; settings.setId(id);
+		stream >> experimentId; settings.setExperimentId(experimentId);
+		stream >> subjectId; settings.setSubjectId(subjectId);
+		stream >> map; settings.setMap(map);
+	}
+	else
+	{
+		// reset stream to position before trying to read version
+		stream.device()->seek(pos);
 
-	QString pretestOrderName;
-	bool isPretestOrderRandomized_;
-	int pretestRandomizeMethod;
+		QString orderName;
+		bool isOrderRandomized;
+		int randomizeMethod;
+		PhaseRunSettings prs;
 
-	QString testOrderName;
-	bool isTestOrderRandomized_;
-	int testRandomizeMethod;
+		stream >> id; settings.setId(id);
+		stream >> experimentId; settings.setExperimentId(experimentId);
+		stream >> subjectId; settings.setSubjectId(subjectId);
 
-	stream >> id_; settings.setId(id_);
-	stream >> experimentId_; settings.setExperimentId(experimentId_);
-	stream >> subjectId_; settings.setSubjectId(subjectId_);
-	stream >> pretestOrderName; settings.setPretestOrderName(pretestOrderName);
-	stream >> isPretestOrderRandomized_; settings.setPretestRandomized(isPretestOrderRandomized_);
-	stream >> pretestRandomizeMethod; settings.setPretestRandomizeMethod(pretestRandomizeMethod);
-	stream >> habituationOrderName; settings.setHabituationOrderName(habituationOrderName);
-	stream >> isHabituationOrderRandomized_; settings.setHabituationRandomized(isHabituationOrderRandomized_);
-	stream >> habituationRandomizeMethod; settings.setHabituationRandomizeMethod(habituationRandomizeMethod);
-	stream >> testOrderName; settings.setTestOrderName(testOrderName);
-	stream >> isTestOrderRandomized_; settings.setTestRandomized(isTestOrderRandomized_);
-	stream >> testRandomizeMethod; settings.setTestRandomizeMethod(testRandomizeMethod);
+		stream >> orderName >> isOrderRandomized >> randomizeMethod;
+		prs.setOrderName(orderName);
+		prs.setOrderRandomized(isOrderRandomized);
+		prs.setRandomizeMethod(randomizeMethod);
+		settings.insert(HStimContext::PreTestPhase.number(), prs);
+
+		stream >> orderName >> isOrderRandomized >> randomizeMethod;
+		prs.setOrderName(orderName);
+		prs.setOrderRandomized(isOrderRandomized);
+		prs.setRandomizeMethod(randomizeMethod);
+		settings.insert(HStimContext::HabituationPhase.number(), prs);
+
+		stream >> orderName >> isOrderRandomized >> randomizeMethod;
+		prs.setOrderName(orderName);
+		prs.setOrderRandomized(isOrderRandomized);
+		prs.setRandomizeMethod(randomizeMethod);
+		settings.insert(HStimContext::TestPhase.number(), prs);
+	}
 	return stream;
 }
 
+QDataStream& Habit::operator>>(QDataStream& stream, Habit::PhaseRunSettings prs)
+{
+	QString orderName;
+	StimLabelList sllist;
+	bool isRandomized;
+	int randomizeMethod;
+	stream >> orderName >> sllist >> isRandomized >> randomizeMethod;
+	prs.setOrderName(orderName);
+	prs.setOrderList(sllist);
+	prs.setOrderRandomized(isRandomized);
+	prs.setRandomizeMethod(randomizeMethod);
+	return stream;
+}
+
+bool Habit::operator==(const Habit::PhaseRunSettings& lhs, const Habit::PhaseRunSettings& rhs)
+{
+	return	lhs.getOrderName() == rhs.getOrderName() &&
+			lhs.getOrderList() == rhs.getOrderList() &&
+			lhs.isOrderRandomized == rhs.isOrderRandomized() &&
+			lhs.getRandomizeMethod() == rhs.getRandomizeMethod();
+}
 
 bool Habit::operator==(const Habit::RunSettings& lhs, const Habit::RunSettings& rhs)
 {
 	return (lhs.getId() == rhs.getId() &&
 			lhs.getExperimentId() == rhs.getExperimentId() &&
 			lhs.getSubjectId() == rhs.getSubjectId() &&
-			lhs.getHabituationOrderName() == rhs.getHabituationOrderName() &&
-			lhs.isHabituationRandomized() == rhs.isHabituationRandomized() &&
-			lhs.getHabituationRandomizeMethod() == rhs.getHabituationRandomizeMethod() &&
-			lhs.getPretestOrderName() == rhs.getPretestOrderName() &&
-			lhs.isPretestRandomized() == rhs.isPretestRandomized() &&
-			lhs.getPretestRandomizeMethod() == rhs.getPretestRandomizeMethod() &&
-			lhs.getTestOrderName() == rhs.getTestOrderName() &&
-			lhs.isTestRandomized() == rhs.isTestRandomized() &&
-			lhs.getTestRandomizeMethod() == rhs.getTestRandomizeMethod());
+			lhs.map() == rhs.map();
 }
 

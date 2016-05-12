@@ -35,13 +35,16 @@ public:
     void setCriterionSettings(Habit::CriterionSettings criterionsettings);
 	int getTotalLookLengthToEnd() const;
 	void setTotalLookLengthToEnd(int length);
-	void loadFromDB(size_t id);
-	bool saveToDB(size_t id_);
+	bool loadFromDB(int phaseId);
+	bool saveToDB(int phaseId);
+	int getNTrials() const { return ntrials_; };
+	void setNTrials(int n) { ntrials_ = n; };
 
 private:
 	int id_;
 	int lookTime_;
 	const HHabituationType* phtype_;
+	int ntrials_;
 	CriterionSettings criterionsettings_;
 };
 

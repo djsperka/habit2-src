@@ -32,7 +32,7 @@ public:
     void setDisplayCurrentStimulus(bool display);
     bool isLookingDirectionDisplayed() const;
     void setDisplayLookingDirection(bool display);
-	void loadFromDB(size_t id);
+	bool loadFromDB(size_t id);
 	bool saveToDB(size_t id_);
 	ControlBarOptions clone();
 

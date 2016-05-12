@@ -140,7 +140,8 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 	const int iRepeatTrialOnMaxLookAway							= 2000018;
 	const int iAddColumnToControlBarOptions						= 2000019;
 	const int iAddFixedISIAttentionGetter						= 2000020;
-	const int iLatestVersion									= 2000020;
+	const int iPhaseReOrg										= 2000021;
+	const int iLatestVersion									= 2000021;
 	int iVersion = getDBVersion();
 
 	// Will any updates be required? If so, close db, make a copy, then reopen.
@@ -583,6 +584,87 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 					}
 				}
 
+
+
+				if (result && iVersion < iPhaseReOrg)
+				{
+					QSqlQuery qq;
+					QStringList queries;
+
+					// phase_settings
+					QString q0("alter table phase_settings add column name VARCHAR NOT NULL DEFAULT unnamed");
+					QString q1("alter table phase_settings add column seqno INTEGER NOT NULL DEFAULT -1");
+					QString q2("update phase_settings set name=\"PreTest\" where phase_type=1");
+					QString q3("update phase_settings set name=\"Habituation\" where phase_type=2");
+					QString q4("update phase_settings set name=\"Test\" where phase_type=3");
+					QString q5("update phase_settings set seqno=phase_type");
+
+					// stimulus
+					QString q6("alter table stimulus add column phase_id INTEGER NOT NULL DEFAULT -1");
+					QString q7("UPDATE stimulus SET phase_id = "
+								"(SELECT phase_settings.id from phase_settings "
+									"WHERE stimulus.experiment_id = phase_settings.experiment_id AND stimulus.context = phase_settings.phase_type) "
+								" WHERE EXISTS (SELECT * from phase_settings "
+												"WHERE stimulus.experiment_id = phase_settings.experiment_id AND stimulus.context = phase_settings.phase_type)");
+
+					// stimulus_order
+					QString q8("alter table stimulus_order add column phase_id INTEGER NOT NULL DEFAULT -1");
+					QString q9("UPDATE stimulus_order SET phase_id = "
+								"(SELECT phase_settings.id from phase_settings "
+									"WHERE stimulus_order.experiment_id = phase_settings.experiment_id AND stimulus_order.context = phase_settings.phase_type) "
+								" WHERE EXISTS (SELECT * FROM phase_settings WHERE stimulus_order.experiment_id = phase_settings.experiment_id AND stimulus_order.context = phase_settings.phase_type)");
+
+					// habituation_settings
+					QString q10("alter table habituation_settings add column phase_id INTEGER NOT NULL DEFAULT -1");
+					QString q11("UPDATE habituation_settings SET phase_id = (SELECT phase_settings.id from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id) "
+									" WHERE EXISTS (SELECT * from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id AND phase_settings.phase_type = 2)");
+					QString q12("INSERT into habituation_settings (experiment_id, habituation_type, phase_id) SELECT experiment_id,0,id from phase_settings where phase_type=1 or phase_type=3");
+
+					// habituation_settings again
+					QString q13("ALTER TABLE habituation_settings ADD COLUMN ntrials INTEGER NOT NULL DEFAULT 0");
+					QString q14("UPDATE habituation_settings SET ntrials=(SELECT phase_settings.ntrials from phase_settings WHERE habituation_settings.phase_id = phase_settings.id)");
+
+					queries << q0 << q1 << q2 << q3 << q4 << q5 << q6 << q7 << q8 << q9 << q10 << q11 << q12 << q13 << q14;
+
+
+					db.transaction();
+					for (int i=0; i<queries.size(); i++)
+					{
+						result = qq.exec(queries.at(i));
+						if (!result)
+						{
+							qCritical() << "Error in updateDBVersion at version " << iPhaseReOrg;
+							qDebug() << qq.lastQuery() << " : " << qq.lastError();
+							break;
+						}
+					}
+
+					if (result)
+					{
+						QSqlQuery qv("insert into habit_version (version) values(?)");
+						qv.bindValue(0, iPhaseReOrg);
+						result = qv.exec();
+						if (!result)
+						{
+							qCritical() << "Error in updateDBVersion at version " << iPhaseReOrg;
+							qDebug() << qv.lastQuery() << " : " << qv.lastError();
+						}
+					}
+
+					if (result)
+					{
+						qDebug() << "Database updated to version " << iPhaseReOrg;
+						db.commit();
+					}
+					else
+					{
+						db.rollback();
+					}
+				}
+
+
+
+
 				// If failed, revert to to original database
 				if (!result)
 				{
@@ -618,6 +700,14 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 
 	return result;
 }
+
+
+
+
+
+
+
+
 
 bool populateStimulusTable(QSqlQuery& q, const HStimContext& context)
 {

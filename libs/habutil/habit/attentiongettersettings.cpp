@@ -7,7 +7,7 @@ static const QString f_sVersion2("AGS2");
 Habit::AttentionGetterSettings::AttentionGetterSettings()
 : id_(-1)
 , isAttentionGetterUsed_(false)
-, attentionGetterStimulus_("", HStimContext::AttentionGetter)
+, attentionGetterStimulus_("")
 , backGroundColor_(0, 0, 0, 0)
 , isFixedISI_(false)
 , isiMS_(0)
@@ -171,10 +171,10 @@ void Habit::AttentionGetterSettings::setBackGroundColor(const QColor& backGround
     backGroundColor_ = backGroundColor;
 }
 
-void Habit::AttentionGetterSettings::loadFromDB( size_t id )
+bool Habit::AttentionGetterSettings::loadFromDB( size_t id )
 {
 	Habit::MainDao dao;
-	dao.getAttentionGetterSettings(id, this);
+	return dao.getAttentionGetterSettings(id, this);
 }
 
 bool Habit::AttentionGetterSettings::saveToDB( size_t id_ )
