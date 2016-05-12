@@ -34,7 +34,7 @@
 // affects the display of the stimuli - they play at full screen and visually there is no
 // difference when the focus is on them or something else.
 
-class Habit::StimulusInfo;
+class StimulusInfo;
 
 class HVIPlayer : public HPlayer
 {
