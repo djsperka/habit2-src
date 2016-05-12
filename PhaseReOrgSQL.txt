@@ -69,3 +69,17 @@ WHERE
                           
 INSERT into habituation_settings (experiment_id,habituation_type, phase_id) 
 select experiment_id,0,id from phase_settings where phase_type = 1 or phase_type = 3
+
+
+---------------------------------------------------------
+---- add ntrials column to habituation_settings, populate with value from phase_settngs.ntrials
+
+ALTER TABLE main.habituation_settings
+ADD COLUMN "ntrials" INTEGER NOT NULL DEFAULT 0
+
+UPDATE habituation_settings
+SET ntrials = (SELECT phase_settings.ntrials from phase_settings
+							WHERE habituation_settings.phase_id = phase_settings.id)
+							
+							
+							
