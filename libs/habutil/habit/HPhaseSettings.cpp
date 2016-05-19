@@ -55,7 +55,7 @@ HPhaseSettings::HPhaseSettings(const HPhaseSettings& ts)
 , m_bMeasureStimulusTimeFromLooking(ts.getMeasureStimulusTimeFromLooking())
 , m_bIsMaxNoLookTime(ts.getIsMaxNoLookTime())
 , m_uiMaxNoLookTime(ts.getMaxNoLookTime())
-, m_habituationSettings(ts.getHabituationSettings())
+, m_habituationSettings(ts.habituationSettings())
 , m_stimuli(ts.stimuli())
 {};
 
@@ -80,7 +80,7 @@ HPhaseSettings& HPhaseSettings::operator=(const HPhaseSettings& rhs)
 		m_bMeasureStimulusTimeFromLooking = rhs.getMeasureStimulusTimeFromLooking();
 		m_bIsMaxNoLookTime = rhs.getIsMaxNoLookTime();
 		m_uiMaxNoLookTime = rhs.getMaxNoLookTime();
-		m_habituationSettings = rhs.getHabituationSettings();
+		m_habituationSettings = rhs.habituationSettings();
 		m_stimuli = rhs.stimuli();
 	}
 	return *this;
@@ -105,7 +105,7 @@ QDataStream & Habit::operator<< (QDataStream& stream, const HPhaseSettings& sett
 			<< settings.getMaxStimulusTime() << settings.getMeasureStimulusTimeFromOnset()
 			<< settings.getMeasureStimulusTimeFromLooking()
 			<< settings.getIsMaxNoLookTime() << settings.getMaxNoLookTime()
-			<< settings.getHabituationSettings() << settings.stimuli();
+			<< settings.habituationSettings() << settings.stimuli();
 //	stream	<< f_sVersion18
 //			<< settings.getId() << settings.getIsEnabled() << settings.getPhaseType().number() << settings.getNTrials()
 //			<< settings.getUseLookingCriteria() << settings.getIsSingleLook() << settings.getIsMaxAccumulatedLookTime()
@@ -218,24 +218,26 @@ bool Habit::operator==(const HPhaseSettings& lhs, const HPhaseSettings& rhs)
 					lhs.getMeasureStimulusTimeFromLooking() == rhs.getMeasureStimulusTimeFromLooking())) &&
 			lhs.getIsMaxNoLookTime() == rhs.getIsMaxNoLookTime() &&
 			(!lhs.getIsMaxNoLookTime() || (lhs.getIsMaxNoLookTime() && lhs.getMaxNoLookTime() == rhs.getMaxNoLookTime())) &&
-			lhs.getHabituationCriteria() == rhs.getHabituationCriteria() &&
+			lhs.habituationSettings() == rhs.habituationSettings() &&
 			lhs.stimuli() == rhs.stimuli();
 }
 
 
-bool HPhaseSettings::loadFromDB(int phaseId)
+void HPhaseSettings::loadFromDB(int phaseId)
 {
-	bool b = false;
 	Habit::MainDao maindao;
-	b = maindao.getHPhaseSettings(phaseId, this);
-	if (b) b = maindao.getStimuliSettings(phaseId, this->stimuli());
-	if (b) b = maindao.getHabituationSettingsForPhase(phaseId, this->habituationSettings());
-	return b;
+	maindao.getHPhaseSettings(phaseId, *this);
+	maindao.getStimuliSettings(phaseId, this->stimuli());
+	maindao.getHabituationSettingsForPhase(phaseId, this->habituationSettings());
+	return;
 }
 
 
-bool HPhaseSettings::saveToDB() const
+void HPhaseSettings::saveToDB(int experimentID)
 {
 	Habit::MainDao dao;
-	return dao.addOrUpdateHPhaseSettings(getId(), this);
+	dao.addOrUpdateHPhaseSettings(experimentID, *this);
+	m_habituationSettings.saveToDB(this->getId());
+	m_stimuli.saveToDB(this->getId());
+	return;
 }

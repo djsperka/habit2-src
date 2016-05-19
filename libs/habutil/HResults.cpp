@@ -201,11 +201,11 @@ bool HResults::scanTrials(const HTrialScanner& scanner) const
 			{
 				HPhaseStartEvent* pse = static_cast<HPhaseStartEvent*>(e);
 				sPhase = pse->phase();
-
-				if (pse->phasetype() == HPhaseType::PreTest) sOrderName = runSettings().getPretestOrderName();
-				else if (pse->phasetype() == HPhaseType::Habituation) sOrderName = runSettings().getHabituationOrderName();
-				else if (pse->phasetype() == HPhaseType::Test) sOrderName = runSettings().getTestOrderName();
-				else sOrderName="";
+				sOrderName = "";
+				if (runSettings().map().contains(pse->seqno()))
+				{
+					sOrderName = runSettings().map().value(pse->seqno()).getOrderName();
+				}
 
 				if (bInsidePhase) qCritical("Found phase start without preceding phase end event!");
 				bInsidePhase = true;

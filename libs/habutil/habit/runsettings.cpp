@@ -59,7 +59,7 @@ QDataStream & Habit::operator << (QDataStream& stream, const Habit::PhaseRunSett
 	return stream;
 }
 
-QDataStream & Habit::operator << (QDataStream& stream, const Habit::RunSettings& settings)
+QDataStream & Habit::operator<<(QDataStream& stream, const Habit::RunSettings& settings)
 {
 	stream << f_sVersion << settings.getId() << settings.getExperimentId() << settings.getSubjectId() << settings.map();
 
@@ -133,7 +133,7 @@ QDataStream & Habit::operator >> (QDataStream& stream, Habit::RunSettings& setti
 	return stream;
 }
 
-QDataStream& Habit::operator>>(QDataStream& stream, Habit::PhaseRunSettings prs)
+QDataStream& Habit::operator>>(QDataStream& stream, Habit::PhaseRunSettings& prs)
 {
 	QString orderName;
 	StimLabelList sllist;
@@ -151,7 +151,7 @@ bool Habit::operator==(const Habit::PhaseRunSettings& lhs, const Habit::PhaseRun
 {
 	return	lhs.getOrderName() == rhs.getOrderName() &&
 			lhs.getOrderList() == rhs.getOrderList() &&
-			lhs.isOrderRandomized == rhs.isOrderRandomized() &&
+			lhs.isOrderRandomized() == rhs.isOrderRandomized() &&
 			lhs.getRandomizeMethod() == rhs.getRandomizeMethod();
 }
 
@@ -160,6 +160,6 @@ bool Habit::operator==(const Habit::RunSettings& lhs, const Habit::RunSettings& 
 	return (lhs.getId() == rhs.getId() &&
 			lhs.getExperimentId() == rhs.getExperimentId() &&
 			lhs.getSubjectId() == rhs.getSubjectId() &&
-			lhs.map() == rhs.map();
+			lhs.map() == rhs.map());
 }
 

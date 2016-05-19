@@ -37,10 +37,10 @@ public:
 	bool isEmpty() { return (m_type == EMPTY); };
 	QImage* image() { return m_pImage; };
 	bool isBackground() { return (m_type == BACKGROUND); };
-	const HStimulusSourceType type() const { return m_type; };
+	HStimulusSourceType type() const { return m_type; };
 	const QString& filename() const { return m_filename; };
-	const bool isLooped() const { return m_isLooped; };
-	const int getAudioBalance() const { return m_audioBalance; };
+	bool isLooped() const { return m_isLooped; };
+	int getAudioBalance() const { return m_audioBalance; };
 	
 private:
 	bool isImageFile(const QString& filename);

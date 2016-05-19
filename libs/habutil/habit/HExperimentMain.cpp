@@ -155,10 +155,8 @@ Habit::ExperimentSettings GUILib::HExperimentMain::getSettings()
 	settings.setPreTestPhaseSettings(m_pPreTestPhaseWidget->getHPhaseSettings());
 	settings.setHabituationPhaseSettings(m_pHabituationPhaseWidget->getHPhaseSettings());
 	settings.setTestPhaseSettings(m_pTestPhaseWidget->getHPhaseSettings());
-	//settings.setHabituationSettings(m_pHabituationSetupForm->getConfigurationObject());
 	settings.setHabituationSettings(m_pHabituationSetupWidget->getHabituationSettings());
 	settings.setStimulusDisplayInfo(m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo());
-//TODO 	settings.setMonitorSettings(m_pMonitorSettingsForm->getConfigurationObject());
 
 	settings.setHabituationStimuliSettings(m_pHabituationStimuliWidget->getStimuliSettings());
 	settings.setPreTestStimuliSettings(m_pPreTestStimuliWidget->getStimuliSettings());

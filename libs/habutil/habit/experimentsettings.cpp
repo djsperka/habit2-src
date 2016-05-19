@@ -62,12 +62,12 @@ QDataStream& Habit::operator>> (QDataStream& stream, Habit::ExperimentSettings& 
 {
 	int id, value, version=0;
 	QString name;
-	MonitorSettings monitorSettings;
 	ControlBarOptions controlBarOptions;
 	HLookSettings lookSettings;
 	HabituationSettings habituationSettings;
 	StimulusDisplayInfo stimulusDisplayInfo;
 	AttentionGetterSettings attentionGetterSettings;
+	MonitorSettings monitorSettings;
 
 	// djs 11/10/2014
 	// Put a version number into the output for an experiment.
@@ -258,91 +258,75 @@ void Habit::ExperimentSettings::setAttentionGetterSettings(const AttentionGetter
     m_attentionGetterSettings = attentionGetterSettings;
 }
 
-bool Habit::ExperimentSettings::saveToDB()
+void Habit::ExperimentSettings::saveToDB()
 {
 	MainDao dao;
-	bool result = false;
 	QSqlDatabase db = QSqlDatabase::database();	// default connection, assumed to be open.
 	Q_ASSERT(db.isOpen());
 	db.transaction();
-	if(dao.insertOrUpdateExperimentSettings(this)) {
-		result = m_attentionGetterSettings.saveToDB(id_) && m_controlBarOptions.saveToDB(id_)
-			&& m_lookSettings.saveToDB(id_)
-			&& m_stimulusDisplayInfo.saveToDB(id_);
-		if (result)
+	try
+	{
+		dao.addOrUpdateExperimentSettings(*this);
+		m_attentionGetterSettings.saveToDB(getId());
+		m_controlBarOptions.saveToDB(getId());
+		m_lookSettings.saveToDB(getId());
+		m_stimulusDisplayInfo.saveToDB(getId());
+		for (int i=0; i<this->getNumberOfPhases(); i++)
 		{
-			QListIterator<HPhaseSettings> phaseIterator = this->phaseIterator();
-			while (result && phaseIterator.hasNext())
-			{
-				result = phaseIterator.next().saveToDB();
-			}
+			(this->phases())[i].saveToDB(this->getId());
 		}
 	}
-
-	if(result) {
-		db.commit();
-	} else {
+	catch(HDBException& e)
+	{
 		db.rollback();
+		throw e;
 	}
-	return result;
+
+	db.commit();
+	return;
 }
 
-bool Habit::ExperimentSettings::loadFromDB(const QString& name)
+void Habit::ExperimentSettings::loadFromDB(const QString& name)
 {
 	MainDao dao;
 	int id;
-	bool b = dao.getExperimentID(name, id);
-	if (b) b = loadFromDB(id);
-	return b;
+	dao.getExperimentID(name, id);
+	loadFromDB(id);
+	return;
 }
 
 
-bool Habit::ExperimentSettings::loadFromDB(int experimentID)
+// Caution: Can throw HDBException
+
+void Habit::ExperimentSettings::loadFromDB(int experimentID)
 {
-	bool b = false;
 	QString name;
 	MainDao dao;
 
-	b = dao.getExperimentName(experimentID, name);
-	if (b)
-	{
-		setId(experimentID);
-		setName(name);
-
-		b = m_controlBarOptions.loadFromDB(experimentID);
-		if (b) b = m_stimulusDisplayInfo.loadFromDB(experimentID);
-		if (b) b = m_attentionGetterSettings.loadFromDB(experimentID);
-		if (b) b = m_lookSettings.loadFromDB(experimentID);
-		if (b) b = loadPhasesFromDB(experimentID);
-	}
-	return b;
+	dao.getExperimentName(experimentID, name);
+	setId(experimentID);
+	setName(name);
+	m_controlBarOptions.loadFromDB(experimentID);
+	m_stimulusDisplayInfo.loadFromDB(experimentID);
+	m_attentionGetterSettings.loadFromDB(experimentID);
+	m_lookSettings.loadFromDB(experimentID);
+	loadPhasesFromDB(experimentID);
+	return;
 }
 
-
-bool Habit::ExperimentSettings::loadPhasesFromDB(int experimentID)
+void Habit::ExperimentSettings::loadPhasesFromDB(int experimentID)
 {
 	MainDao dao;
-	bool b = false;
+	int i;
 	QList<int> phaseIDs;
-	b = dao.getHPhaseSettingsIDs(experimentID, phaseIDs);
-	if (b)
+	dao.getHPhaseSettingsIDs(experimentID, phaseIDs);
+	foreach(i, phaseIDs)
 	{
-		int i;
-		foreach(i, phaseIDs)
-		{
-			HPhaseSettings p(i);
-			if (dao.getHPhaseSettings(i, p))
-			{
-				m_phases.append(p);
-			}
-			else
-			{
-				qDebug() << "ExperimentSettings::loadPhasesFromDB error loading phaseID " << i;
-				b = false;
-			}
-		}
+		HPhaseSettings p;
+		p.loadFromDB(i);
+		m_phases.append(p);
 	}
-	return b;
+	return;
 }
 
 
@@ -399,23 +383,25 @@ bool Habit::ExperimentSettings::load(ExperimentSettings& settings, const QString
 
 
 
-bool Habit::ExperimentSettings::deleteFromDB()
+void Habit::ExperimentSettings::deleteFromDB()
 {
 	MainDao dao;
 	bool result = false;
 	QSqlDatabase db = QSqlDatabase::database();	// default connection, assumed to be open.
 
-	Q_ASSERT(db.isOpen());
 	db.transaction();
-	result = dao.deleteExperimentSettings(this);
-	if(result)
+	try
 	{
-		db.commit();
-	} else
+		dao.deleteExperiment(*this);
+	}
+	catch(HDBException& e)
 	{
 		db.rollback();
+		throw e;
 	}
-	return result;
+
+	db.commit();
+	return;
 }
 
 

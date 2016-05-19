@@ -35,8 +35,8 @@ public:
     void setCriterionSettings(Habit::CriterionSettings criterionsettings);
 	int getTotalLookLengthToEnd() const;
 	void setTotalLookLengthToEnd(int length);
-	bool loadFromDB(int phaseId);
-	bool saveToDB(int phaseId);
+	void loadFromDB(int phaseId);	// can throw HDBException
+	void saveToDB(int phaseId);		// can throw HDBException
 	int getNTrials() const { return ntrials_; };
 	void setNTrials(int n) { ntrials_ = n; };
 

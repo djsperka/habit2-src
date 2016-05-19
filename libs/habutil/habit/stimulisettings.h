@@ -19,7 +19,7 @@ namespace Habit
 	class StimuliSettings
 	{
 	public:
-		StimuliSettings(int phase_id = -1);
+		StimuliSettings();
 		StimuliSettings(const StimuliSettings& s);
 		~StimuliSettings();
 		StimuliSettings& operator=(const StimuliSettings& rhs);
@@ -34,8 +34,8 @@ namespace Habit
 		void addOrder(const HStimulusOrder& order);
 		HStimulusOrderList& orders();
 		const HStimulusOrderList& orders() const;
-		bool loadFromDB(int phaseId);
-		bool saveToDB(int phaseId);
+		void loadFromDB(int phaseId);
+		void saveToDB(int phaseId);
 
 		QStringList getStimulusNames() const;
 		QStringList getOrderNames() const;

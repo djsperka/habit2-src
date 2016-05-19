@@ -37,8 +37,8 @@ public:
     void setStimulusLayoutType(const HStimulusLayoutType& type);
     bool getUseISS() const;
     void setUseISS(bool use);
-	bool loadFromDB(size_t id);
-	bool saveToDB(size_t id_);
+	void loadFromDB(int experimentID);	// can throw HDBException
+	void saveToDB(int experimentID);	// can throw HDBException
 
 private:
 	int id_;

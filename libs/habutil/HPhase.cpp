@@ -75,9 +75,7 @@ void HPhase::onEntry(QEvent* e)
 	m_sTrial->setTrialNumber(m_itrial);
 
 	// post 'phase start' event to event log.
-	// TODO: Fix HPhaseStartEvent
-	qWarning() << "Phase start event has incorrect type!";
-	eventLog().append(new HPhaseStartEvent(HPhaseType::UnknownPhase, HElapsedTimer::elapsed()));
+	eventLog().append(new HPhaseStartEvent(m_phaseSettings.getName(), m_phaseSettings.getSeqno(), HElapsedTimer::elapsed()));
 	
 
 	// connect media manager signal screen(int) to slot screenStarted(int)

@@ -55,6 +55,7 @@ HEADERS +=	HLook.h \
 			HStimulusUtil.h \
 			HExperimentUtil.h \
 			HTestingInputWrangler.h \
+			habit/HDBException.h \
 			habit/HControlPanel.h \
 			habit/attentiongettersettings.h \
 			habit/attentionsetupform.h \
@@ -156,6 +157,7 @@ SOURCES +=	HLook.cpp \
 			HStimulusUtil.cpp \
 			HExperimentUtil.cpp \
 			HTestingInputWrangler.cpp \
+			habit/HDBException.cpp \
 			habit/HControlPanel.cpp \
 			habit/attentiongettersettings.cpp \
 			habit/attentionsetupform.cpp \

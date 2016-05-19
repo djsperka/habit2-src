@@ -624,7 +624,13 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 					QString q13("ALTER TABLE habituation_settings ADD COLUMN ntrials INTEGER NOT NULL DEFAULT 0");
 					QString q14("UPDATE habituation_settings SET ntrials=(SELECT phase_settings.ntrials from phase_settings WHERE habituation_settings.phase_id = phase_settings.id)");
 
-					queries << q0 << q1 << q2 << q3 << q4 << q5 << q6 << q7 << q8 << q9 << q10 << q11 << q12 << q13 << q14;
+					// attention_setup
+					QString q15("ALTER TABLE main.attention_setup ADD COLUMN stimulus_id INTEGER NOT NULL DEFAULT -1");
+					QString q16("UPDATE attention_setup SET stimulus_id = "
+								"(SELECT stimulus.id from stimulus WHERE stimulus.experiment_id = attention_setup.experiment_id AND stimulus.context = 4) "
+								"WHERE EXISTS ( SELECT * FROM stimulus WHERE stimulus.experiment_id = attention_setup.experiment_id	AND stimulus.context = 4)");
+
+					queries << q0 << q1 << q2 << q3 << q4 << q5 << q6 << q7 << q8 << q9 << q10 << q11 << q12 << q13 << q14 << q15 << q16;
 
 
 					db.transaction();

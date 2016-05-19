@@ -1,0 +1,115 @@
+ExperimentDBNotes.txt
+ Created on: May 19, 2016
+     Author: dan
+
+     
+     
+     HExperimentSettings::saveToDB()
+     	MainDao::addOrUpdateExperimentSettings(ExperimentSettings&)
+     		
+     		"update experiments set name=?, hidden=? where id=?"
+     		
+     			q.addBindValue(experimentSettings.getName());
+				q.addBindValue(experimentSettings.isHidden() ? 1 : 0);
+				.addBindValue(experimentSettings.getId());
+     		
+     		 "INSERT INTO experiments (name, hidden) VALUES (?, ?)"
+		
+		m_attentionGetterSettings.saveToDB(experimentSettings.getId());
+
+			dao.addOrUpdateAttentionGetterSettings(experimentID, *this);
+				
+				"update attention_setup set use_attention_stimulus=?, stimulus_name=?, background_color=?, 
+				use_fixed_isi=?, isi_ms=? where id=? and experiment_id=?";
+				
+				"insert into attention_setup (use_attention_stimulus, stimulus_name, background_color, 
+				use_fixed_isi, isi_ms, experiment_id) values(?, ?, ?, ?, ?, ?)";
+				
+		m_controlBarOptions.saveToDB(experimentSettings.getId());
+			
+			dao.addOrUpdateControlBarOptions(experimentID, *this);
+				
+				"update controlbar_options set is_used=?, display_current_experiment=?, 
+				display_current_stimulus=?, display_looking_direction=? where id=? and experiment_id=?";
+				
+				"insert into controlbar_options (is_used, display_current_experiment, 
+				display_current_stimulus, display_looking_direction, experiment_id) values(?, ?, ?, ?, ?)";
+				
+		m_lookSettings.saveToDB(experimentSettings.getId());
+		
+			dao.addOrUpdateHLookSettings(experimentID, *this);
+			
+				"update look_settings set min_look_time=?, min_lookaway_time=?, inclusive_look_time=? 
+				where experiment_id=? and id=?";
+				
+				"insert into look_settings (min_look_time, min_lookaway_time, inclusive_look_time, 
+				experiment_id) values (?, ?, ?, ?)";
+
+		m_stimulusDisplayInfo.saveToDB(experimentSettings.getId());				
+		
+			dao.addOrUpdateStimulusDisplaySetting(experimentID, *this);
+			
+				"update stimulus_display set presentation_style=?, display_type=?, is_original_aspect_ratio=?, 
+				background_color=?, stimulus_layout=?, use_iss=? where id=? and experiment_id=?";
+				
+				"insert into stimulus_display (presentation_style, display_type, is_original_aspect_ratio, 
+
+		(this->phases())[i].saveToDB(this->getId());
+		
+			dao.addOrUpdateHPhaseSettings(experimentID, *this);
+			
+				"update phase_settings "
+				"set enabled=?, name=?, seqno=?, phase_type=?, ntrials=?, "
+				"use_looking_criteria=?, is_single_look=?, is_max_accumulated_look_time=?, max_accumulated_look_time=?, "
+				"is_max_lookaway_time=?, max_lookaway_time=?, "
+				"repeat_trial_on_max_lookaway=?, "
+				"is_max_stimulus_time=?, max_stimulus_time=?, "
+				"measure_from_onset=?, measure_from_looking=?, "
+				"is_max_no_look_time=?, max_no_look_time=? "
+				"where experiment_id=? and id=?";
+				
+				"insert into phase_settings "
+				"("
+				"enabled, name, seqno, use_looking_criteria, is_single_look, is_max_accumulated_look_time, "
+				"max_accumulated_look_time, is_max_lookaway_time, max_lookaway_time, repeat_trial_on_max_lookaway, "
+				"is_max_stimulus_time, max_stimulus_time, "
+				"measure_from_onset, measure_from_looking, "
+				"is_max_no_look_time, max_no_look_time, "
+				"experiment_id"
+				") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+			m_habituationSettings.saveToDB(this->getId());				
+	
+				dao.addOrUpdateHabituationSettings(phaseId, *this);
+				
+					"update habituation_settings set habituation_type=?, criterion_basis=?, criterion_percent=?, 
+					window_size=?, window_type=?, total_look=?, exclude_basis_window=?, require_min_basis_value=?, 
+					min_basis_value=?, phase_id=?, ntrials=? where id=?";
+					
+					"insert into habituation_settings (habituation_type, criterion_basis, criterion_percent, 
+					window_size, window_type, total_look, exclude_basis_window, require_min_basis_value, 
+					min_basis_value, phase_id, ntrials) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					
+			m_stimuli.saveToDB(this->getId());
+			
+				dao.addOrUpdateStimulusSettings(phaseId, stimuli.stimuli()[i]);
+				
+					"update stimulus set name=?, phase_id=? where id=?";
+					
+					"insert into stimulus (name, phase_id) values (?)";
+					
+					addOrUpdateStimulusInfo(ss.getId(), HPlayerPositionType::Left, ss.getLeftStimulusInfo());
+					addOrUpdateStimulusInfo(ss.getId(), HPlayerPositionType::Center, ss.getCenterStimulusInfo());
+					addOrUpdateStimulusInfo(ss.getId(), HPlayerPositionType::Right, ss.getRightStimulusInfo());
+					addOrUpdateStimulusInfo(ss.getId(), HPlayerPositionType::Sound, ss.getIndependentSoundInfo());
+					
+						"update stimfiles set stimulus_id=?, position=?, filename=?, isLoop=?, volume=?, isBackground=?, isColor=?, color=? where id=?";
+						
+						"insert into stimfiles (stimulus_id, position, filename, isLoop, volume, isBackground, isColor, color) values (?, ?, ?, ?, ?, ?, ?, ?)";						
+
+				dao.addOrUpdateStimulusOrder(phaseId, stimuli.orders()[i]);
+				
+					"update stimulus_order set name=?, phase_id=?, context=?, orderlist=? where id=?";
+					"insert into stimulus_order (name, phase_id, context, orderlist) values (?, ?, ?, ?)";
+										
+									

@@ -72,6 +72,7 @@ void Habit::MonitorSettings::setRightMonitorIndex(int index)
     rightMonitorIndex_ = index;
 }
 
+#ifdef DONTUSENOTINDB
 void Habit::MonitorSettings::loadFromDB(size_t id) 
 {
 	Habit::MainDao dao;
@@ -82,7 +83,7 @@ bool Habit::MonitorSettings::saveToDB(size_t id_) {
 	Habit::MainDao dao;
 	return dao.addOrUpdateMonitorSetting(id_, this);
 }
-
+#endif
 
 QDataStream& Habit::operator<< (QDataStream& stream, Habit::MonitorSettings settings)
 {

@@ -132,16 +132,16 @@ void Habit::HabituationSettings::setCriterionSettings(Habit::CriterionSettings c
     criterionsettings_ = criterionsettings;
 }
 
-bool Habit::HabituationSettings::loadFromDB(int phaseId)
+void Habit::HabituationSettings::loadFromDB(int phaseId)
 {
 	Habit::MainDao maindao;
-	return maindao.getHabituationSettingsForPhase(phaseId, this);
+	maindao.getHabituationSettingsForPhase(phaseId, *this);
 }
 
-bool Habit::HabituationSettings::saveToDB(int phaseId)
+void Habit::HabituationSettings::saveToDB(int phaseId)
 {
 	Habit::MainDao dao;
-	return dao.addOrUpdateHabituationSettings(phaseId, this);
+	dao.addOrUpdateHabituationSettings(phaseId, *this);
 }
 
 int Habit::HabituationSettings::getTotalLookLengthToEnd() const

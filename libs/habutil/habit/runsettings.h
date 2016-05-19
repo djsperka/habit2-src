@@ -6,6 +6,7 @@
 #include <QtCore/QDataStream>
 #include <QList>
 #include <QPair>
+#include <QMap>
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -33,8 +34,8 @@ namespace Habit
 		int getRandomizeMethod() const { return m_randomizeMethod; };
 		void setRandomizeMethod(int i) { m_randomizeMethod = i; };
 	};
-	QDataStream & operator << (QDataStream& stream, const PhaseRunSettings& prs);
-	QDataStream & operator >> (QDataStream& stream, PhaseRunSettings& prs);
+	QDataStream& operator<<(QDataStream& stream, const PhaseRunSettings& prs);
+	QDataStream& operator>>(QDataStream& stream, PhaseRunSettings& prs);
 	bool operator==(const PhaseRunSettings& lhs, const PhaseRunSettings& rhs);
 
 	class RunSettings
@@ -66,8 +67,8 @@ namespace Habit
 		QMap<int, PhaseRunSettings> phaseRunSettingsMap_;
 	};
 
-	QDataStream & operator << (QDataStream& stream, RunSettings settings);
-	QDataStream & operator >> (QDataStream& stream, RunSettings& settings);
+	QDataStream& operator<<(QDataStream& stream, const RunSettings& settings);
+	QDataStream& operator>>(QDataStream& stream, RunSettings& settings);
 	bool operator==(const RunSettings& lhs, const RunSettings& rhs);
 
 

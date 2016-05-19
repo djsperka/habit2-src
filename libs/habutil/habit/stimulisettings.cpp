@@ -34,7 +34,7 @@ StimuliSettings& StimuliSettings::operator=(const StimuliSettings& rhs)
 
 StimuliSettings StimuliSettings::clone()
 {
-	StimuliSettings settings();
+	StimuliSettings settings;
 	StimulusSettingsList list;
 	QListIterator<StimulusSettings> it(stimuli());
 	HStimulusOrderList olist;
@@ -121,10 +121,7 @@ void StimuliSettings::setStimuli(const StimulusSettingsList& stimuli)
 
 void StimuliSettings::addStimulus(const StimulusSettings& settings)
 {
-	// make sure that new stimuli have correct context set
-	StimulusSettings tmp(settings);
-	tmp.setContext(getStimContext());
-	ssList_.append(tmp);
+	ssList_.append(settings);
 }
 
 void StimuliSettings::setOrderList(const HStimulusOrderList& list)
@@ -173,13 +170,13 @@ bool StimuliSettings::getIndexedOrderList(const QString& orderName, QList< QPair
 	return b;
 }
 
-bool StimuliSettings::loadFromDB(int phaseId)
+void StimuliSettings::loadFromDB(int phaseId)
 {
 	MainDao dao;
-	return dao.getStimuliSettings(phaseId);
+	return dao.getStimuliSettings(phaseId, *this);
 }
 
-bool Habit::StimuliSettings::saveToDB(int phaseId)
+void Habit::StimuliSettings::saveToDB(int phaseId)
 {
 	Habit::MainDao dao;
 	return dao.addOrUpdateStimuliSettings(phaseId, *this);
@@ -207,7 +204,7 @@ QDebug Habit::operator<<(QDebug dbg, const StimuliSettings& ss)
 {
 	const StimulusSettingsList& c = ss.stimuli();
 	HStimulusOrderList o = ss.orders();
-	dbg.nospace() << "StimuliSettings: phaseId " << ss.getPhaseId() << endl;
+	dbg.nospace() << "StimuliSettings: "<< endl;
 	for (int i=0; i<c.size(); i++)
 	{
 		dbg.nospace() << "Stimulus " << i << endl;

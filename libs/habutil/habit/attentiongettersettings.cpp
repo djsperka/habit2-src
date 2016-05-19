@@ -171,14 +171,33 @@ void Habit::AttentionGetterSettings::setBackGroundColor(const QColor& backGround
     backGroundColor_ = backGroundColor;
 }
 
-bool Habit::AttentionGetterSettings::loadFromDB( size_t id )
+int Habit::AttentionGetterSettings::getStimulusID() const
 {
-	Habit::MainDao dao;
-	return dao.getAttentionGetterSettings(id, this);
+	return stimulusID_;
 }
 
-bool Habit::AttentionGetterSettings::saveToDB( size_t id_ )
+void Habit::AttentionGetterSettings::setStimulusID(int stimulusID)
+{
+	stimulusID_ = stimulusID;
+}
+
+void Habit::AttentionGetterSettings::loadFromDB(int experimentID)
 {
 	Habit::MainDao dao;
-	return dao.addOrUpdateAttentionGetterSetting(id_, this);
+	Habit::StimulusSettings agss;
+	dao.getAttentionGetterSettings(experimentID, *this);
+	dao.getStimulusSettings(this->getStimulusID(), agss);
+	setAttentionGetterStimulus(agss);
+}
+
+void Habit::AttentionGetterSettings::saveToDB(int experimentID)
+{
+	Habit::MainDao dao;
+
+	// attention getters use phase_id = -1. Their stimulus_id is saved in attention_setup table.
+	// Note that we add/update attention_setup table after saving the stimulus (because that record
+	// needs the stimulus_id).
+	dao.addOrUpdateStimulusSettings(-1, getAttentionGetterStimulus());
+	dao.addOrUpdateAttentionGetterSettings(experimentID, *this);
+
 }

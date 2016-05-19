@@ -55,8 +55,6 @@ namespace GUILib
 		QTreeWidget *m_pContentsWidget;
 		QStackedWidget *m_pPagesWidget;
 		QWidget* m_pBlank;
-		//GUILib::MonitorSettingsForm* m_pMonitorSettingsForm;
-		//GUILib::HMonitorSettingsWidget* m_pMonitorSettingsWidget;
 		GUILib::HStimulusDisplayInfoWidget* m_pStimulusDisplayInfoWidget;
 		GUILib::ControlBarOptionsForm* m_pControlBarOptionsForm;
 		GUILib::HLookSettingsWidget* m_pLookSettingsWidget;
@@ -65,7 +63,6 @@ namespace GUILib
 		GUILib::HStimuliSettingsWidget* m_pPreTestStimuliWidget;
 		GUILib::HPhaseSettingsWidget* m_pHabituationPhaseWidget;
 		GUILib::HStimuliSettingsWidget*  m_pHabituationStimuliWidget;
-		//GUILib::HabituationSetupForm* m_pHabituationSetupForm;
 		GUILib::HHabituationSetupWidget* m_pHabituationSetupWidget;
 		GUILib::HPhaseSettingsWidget* m_pTestPhaseWidget;
 		GUILib::HStimuliSettingsWidget*  m_pTestStimuliWidget;

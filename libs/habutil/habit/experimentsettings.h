@@ -54,14 +54,13 @@ public:
     AttentionGetterSettings& getAttentionGetterSettings();
     void setAttentionGetterSettings(const AttentionGetterSettings& attentionGetterSettings);
 
-    //void loadFromDB(bool byId = false);
-    bool loadFromDB(int experimentID);
-    bool loadFromDB(const QString& name);
+    void loadFromDB(int experimentID);		// can throw HDBException
+    void loadFromDB(const QString& name);	// can throw HDBException
 
-    bool loadPhasesFromDB(int experimentID);
+    void loadPhasesFromDB(int experimentID);	// can throw HDBException
 
-    bool saveToDB();
-	bool deleteFromDB();
+    void saveToDB();		// can throw HDBException
+	void deleteFromDB();
 
 	static bool load(ExperimentSettings& settings, int id);
 	static bool load(ExperimentSettings& settings, const QString& name);
@@ -70,13 +69,15 @@ public:
 	void appendPhase(const HPhaseSettings& phase) { m_phases.append(phase); return; };
 
 	const QList<HPhaseSettings>& phases() const { return m_phases; };
+	QList<HPhaseSettings>& phases() { return m_phases; };
+
 	void setPhases(const QList<HPhaseSettings>& phases) { m_phases = phases; };
 
 	// return true if phase with this name exists
 	int phaseExists(const QString& name) const;
 	int phaseExists(int seqno) const;
 
-	QListIterator<HPhaseSettings> phaseIterator() const{ return QListIterator<HPhaseSettings>(m_phases); };
+	QListIterator<HPhaseSettings> phaseIterator() const { return QListIterator<HPhaseSettings>(m_phases); };
 
 	// just like QList.at(int)
 	const HPhaseSettings& phaseAt(int index) const;

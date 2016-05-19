@@ -40,8 +40,8 @@ namespace Habit
 		void setInclusiveLookTime(bool b) { m_bInclusiveLookTime = b; };
 		bool getInclusiveLookTime() const { return m_bInclusiveLookTime; };
 
-		bool loadFromDB(int id);
-		bool saveToDB(int id);
+		void loadFromDB(int experimentID);	// can throw HDBException
+		void saveToDB(int experimentID);		// can throw HDBException
 
 	private:
 		int m_id;

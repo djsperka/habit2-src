@@ -68,16 +68,14 @@ namespace Habit
 		HabituationSettings& habituationSettings() { return m_habituationSettings; };
 		void setHabituationSettings(const HabituationSettings& habituationSettings) { m_habituationSettings = habituationSettings; };
 
-		bool loadFromDB(int phaseID);
-		bool saveToDB() const;
+		void loadFromDB(int phaseID);
+		void saveToDB(int experimentID);
 
 	private:
 		int m_id;
 		bool m_bEnabled;
 		QString m_name;
 		int m_seqno;
-		//const HPhaseType* m_pPhaseType;
-		//unsigned int m_ntrials;
 		bool m_bUseLookingCriteria;	// if true, then must select either single look or accum look time
 		bool m_bIsSingleLook;	// trials end on completion of a single look
 		bool m_bIsMaxAccumulatedLookTime; 	// trials end when max accumulated look time reached

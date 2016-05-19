@@ -21,8 +21,8 @@
     <rect>
      <x>60</x>
      <y>20</y>
-     <width>684</width>
-     <height>486</height>
+     <width>634</width>
+     <height>432</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -38,46 +38,6 @@
     <bool>false</bool>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_8">
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Number of trials</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spinboxNTrials">
-        <property name="toolTip">
-         <string>For pretest and test phase, this is the number of trials. For habituation phase, this is the MAXIMUM number of trials (the phase may end sooner if the subject habituates, according to your habituation settings.)</string>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>999</number>
-        </property>
-        <property name="value">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
     <item>
      <widget class="QGroupBox" name="groupBox_2">
       <property name="title">

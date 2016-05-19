@@ -23,7 +23,7 @@ class HNonPlayer : public HPlayer
 public:
 	HNonPlayer(int id = 0, QWidget* w = 0) { Q_UNUSED(id); Q_UNUSED(w); };
 	~HNonPlayer() {};
-	virtual void play(int number);
+	virtual void play(unsigned int number);
 	virtual void stop(); 
 	virtual void clear();
 	friend QTextStream& operator<<(QTextStream& out, const HNonPlayer& player);

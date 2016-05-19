@@ -11,7 +11,7 @@
 
 using namespace Habit;
 
-void HNonPlayer::play(int number)
+void HNonPlayer::play(unsigned int number)
 {
 	const StimulusInfo& info = getStimulusInfo(number);
 	qDebug() << "HNonPlayer::play(" << number << ")";

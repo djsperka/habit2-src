@@ -81,5 +81,18 @@ UPDATE habituation_settings
 SET ntrials = (SELECT phase_settings.ntrials from phase_settings
 							WHERE habituation_settings.phase_id = phase_settings.id)
 							
-							
+---------------------------------------------------------
+---- add stimulus_id column to attention_setup, populate with value from stimulus table
+
+ALTER TABLE main.attention_setup
+ADD COLUMN "stimulus_id" INTEGER NOT NULL DEFAULT -1
+
+UPDATE attention_setup
+SET stimulus_id = (SELECT stimulus.id from stimulus 
+					WHERE stimulus.experiment_id = attention_setup.experiment_id 
+					AND stimulus.context = 4)
+WHERE 
+	EXISTS ( SELECT * FROM stimulus 
+				WHERE stimulus.experiment_id = attention_setup.experiment_id 
+					AND stimulus.context = 4)
 							
