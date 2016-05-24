@@ -13,6 +13,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QRegExp>
+#include <QListIterator>
 
 #include "H2MainWindow.h"
 #include "HExperimentListWidget.h"
@@ -29,6 +30,7 @@
 #include "HMediaManagerUtil.h"
 #include "HLookDetectorUtil.h"
 #include "HTestingInputWrangler.h"
+#include "HDBException.h"
 
 using namespace GUILib;
 using namespace Habit;
@@ -391,54 +393,25 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 		}
 	}
 
-	// check pretest stimuli
-	if (settings.getPreTestPhaseSettings().getIsEnabled())
+	// iterate over phases that are enabled
+	QListIterator<Habit::HPhaseSettings> iterator = settings.phaseIterator();
+	while (iterator.hasNext())
 	{
-		Habit::StimuliSettings stimuli = settings.getPreTestStimuliSettings();
-		QListIterator<Habit::StimulusSettings> it(stimuli.stimuli());
-		while (it.hasNext())
+		const Habit::HPhaseSettings& ps = iterator.next();
+		if (ps.getIsEnabled())
 		{
-			Habit::StimulusSettings ss = it.next();
-			if (!habutilStimulusFilesFound(ss, layoutType))
+			QListIterator<Habit::StimulusSettings> it(ps.stimuli().stimuli());
+			while (it.hasNext())
 			{
-				b = false;
-				sProblems.append(QString("PreTest stimulus \"%1\" file(s) not found.\n").arg(ss.getName()));
+				const StimulusSettings& ss = it.next();
+				if (!habutilStimulusFilesFound(ss, layoutType))
+				{
+					b = false;
+					sProblems.append(QString("%1 stimulus \"%2\" file(s) not found.\n").arg(ps.getName().arg(ss.getName())));
+				}
 			}
 		}
 	}
-
-	// check habituation stimuli
-	if (settings.getHabituationPhaseSettings().getIsEnabled())
-	{
-		Habit::StimuliSettings stimuli = settings.getHabituationStimuliSettings();
-		QListIterator<Habit::StimulusSettings> it(stimuli.stimuli());
-		while (it.hasNext())
-		{
-			Habit::StimulusSettings ss = it.next();
-			if (!habutilStimulusFilesFound(ss, layoutType))
-			{
-				b = false;
-				sProblems.append(QString("Habituation stimulus \"%1\" file(s) not found.\n").arg(ss.getName()));
-			}
-		}
-	}
-
-	// check test stimuli
-	if (settings.getTestPhaseSettings().getIsEnabled())
-	{
-		Habit::StimuliSettings stimuli = settings.getTestStimuliSettings();
-		QListIterator<Habit::StimulusSettings> it(stimuli.stimuli());
-		while (it.hasNext())
-		{
-			Habit::StimulusSettings ss = it.next();
-			if (!habutilStimulusFilesFound(ss, layoutType))
-			{
-				b = false;
-				sProblems.append(QString("Test stimulus \"%1\" file(s) not found.\n").arg(ss.getName()));
-			}
-		}
-	}
-
 	return b;
 }
 
@@ -599,14 +572,18 @@ void GUILib::H2MainWindow::deleteExperiment()
 		Habit::ExperimentSettings settings;
 		if (Habit::ExperimentSettings::load(settings, expt))
 		{
-			if (settings.deleteFromDB())
+			try
 			{
+				// TODO wrap this in transaction
+				settings.deleteFromDB();
 				qDebug() << "Experiment " << expt << " deleted from database. Results files were NOT deleted.";
 				m_pExperimentListWidget->reload();
+				// TODO commit()
 			}
-			else
+			catch (const HDBException& e)
 			{
-				QMessageBox::warning(this, "Delete Experiment", "There was an error deleting the experiment, check log file.");
+				// TODO rollback()
+				QMessageBox::warning(this, "Delete Experiment", QString(e.what()));
 			}
 		}
 	}

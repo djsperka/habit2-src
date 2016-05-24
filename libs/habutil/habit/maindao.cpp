@@ -404,18 +404,17 @@ void MainDao::addOrUpdateStimulusOrder(int phase_id, Habit::HStimulusOrder& orde
 	QString sql;
 	if (order.getId() > 0)
 	{
-		sql = "update stimulus_order set name=?, phase_id=?, context=?, orderlist=? where id=?";
+		sql = "update stimulus_order set name=?, phase_id=?, orderlist=? where id=?";
 	}
 	else
 	{
-		sql = "insert into stimulus_order (name, phase_id, context, orderlist) values (?, ?, ?, ?)";
+		sql = "insert into stimulus_order (name, phase_id, orderlist) values (?, ?, ?)";
 	}
 	QSqlQuery q;
 
 	q.prepare(sql);
 	q.addBindValue(order.getName());
 	q.addBindValue(phase_id);
-	q.addBindValue(order.getContext()->number());
 	q.addBindValue(order.getList().join(QString(",")));
 	if (order.getId() > 0)
 	{

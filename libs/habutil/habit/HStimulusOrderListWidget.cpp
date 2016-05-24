@@ -15,11 +15,10 @@
 using namespace GUILib;
 using namespace Habit;
 
-HStimulusOrderListWidget::HStimulusOrderListWidget(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList, const HStimContext& context, const HStimulusLayoutType& layoutType, QWidget *parent)
+HStimulusOrderListWidget::HStimulusOrderListWidget(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList, const HStimulusLayoutType& layoutType, QWidget *parent)
 : QWidget(parent)
 , m_list(list)
 , m_ssList(ssList)
-, m_pcontext(&context)
 , m_playoutType(&layoutType)
 {
 	create();
@@ -146,7 +145,7 @@ void HStimulusOrderListWidget::editItem(const QModelIndex& index)
 
 void HStimulusOrderListWidget::newClicked()
 {
-	HStimulusOrder order(*m_pcontext);
+	HStimulusOrder order;
 	HStimulusOrderEditor* pEditor = new HStimulusOrderEditor(order, m_ssList, *m_playoutType, this);
 	int status = pEditor->exec();
 	if (status == QDialog::Accepted)

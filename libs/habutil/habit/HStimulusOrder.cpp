@@ -66,17 +66,15 @@ QString Habit::HStimulusOrder::formatStimLabel(const QString& stim, const QStrin
 
 
 
-Habit::HStimulusOrder::HStimulusOrder(const HStimContext& context, QString name, QStringList list)
+Habit::HStimulusOrder::HStimulusOrder(QString name, QStringList list)
 : m_id(-1)
-, m_pcontext(&context)
 , m_name(name)
 , m_list(list)
 {
 };
 
-Habit::HStimulusOrder::HStimulusOrder(int id, const HStimContext& context, QString name, QStringList list)
+Habit::HStimulusOrder::HStimulusOrder(int id, QString name, QStringList list)
 : m_id(id)
-, m_pcontext(&context)
 , m_name(name)
 , m_list(list)
 {
@@ -84,7 +82,6 @@ Habit::HStimulusOrder::HStimulusOrder(int id, const HStimContext& context, QStri
 
 Habit::HStimulusOrder::HStimulusOrder(const HStimulusOrder& o)
 : m_id(o.getId())
-, m_pcontext(o.getContext())
 , m_name(o.getName())
 , m_list(o.getList())
 {
@@ -93,13 +90,15 @@ Habit::HStimulusOrder::HStimulusOrder(const HStimulusOrder& o)
 
 QDebug Habit::operator<<(QDebug dbg, const Habit::HStimulusOrder& order)
 {
-	dbg.nospace() << "name=" << order.getName() << " context=" << order.getContext()->name() << " order=" << order.getList().join(QString(",")) << endl;
+	dbg.nospace() << "name=" << order.getName() << " order=" << order.getList().join(QString(",")) << endl;
 	return dbg.nospace();
 }
 
+// to maintain compatibility, write out an int in lieu of the context(which has been removed).
 QDataStream & Habit::operator<< (QDataStream& stream, Habit::HStimulusOrder order)
 {
-	stream << order.getId() << order.getName() << order.getContext()->number() << order.getList();
+	int i=0;
+	stream << order.getId() << order.getName() << i << order.getList();
 	return stream;
 }
 
@@ -110,7 +109,7 @@ QDataStream & Habit::operator>> (QDataStream& stream, Habit::HStimulusOrder& set
 	QStringList list;
 	stream >> id >> name >> icontext >> list;
 	settings.setId(id);
-	settings.setContext(getStimContext(icontext));
+	// djs context removed. We ignore the value read in. Output method dumps a zero here. //settings.setContext(getStimContext(icontext));
 	settings.setName(name);
 	settings.setList(list);
 	return stream;
@@ -118,22 +117,10 @@ QDataStream & Habit::operator>> (QDataStream& stream, Habit::HStimulusOrder& set
 
 bool Habit::operator==(const Habit::HStimulusOrder&lhs, const Habit::HStimulusOrder& rhs)
 {
-	return (lhs.getContext() == rhs.getContext() &&
-			lhs.getName() == rhs.getName() &&
+	return (lhs.getName() == rhs.getName() &&
 			lhs.getList() == rhs.getList() &&
 			lhs.getId() == rhs.getId());
 }
-
-const HStimContext* Habit::HStimulusOrder::getContext() const
-{
-	return m_pcontext;
-}
-
-void Habit::HStimulusOrder::setContext(const HStimContext& context)
-{
-	m_pcontext = &context;
-}
-
 
 Habit::HStimulusOrder& Habit::HStimulusOrder::operator=(const HStimulusOrder& rhs)
 {

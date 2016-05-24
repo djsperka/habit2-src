@@ -17,6 +17,7 @@
 #include "HStimuliSettingsWidget.h"
 #include "HStimulusDisplayInfoWidget.h"
 #include "HExperimentTreeWidgetItem.h"
+#include "HDBException.h"
 
 
 GUILib::HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSettings, QWidget *parent, bool bReadOnly)
@@ -53,13 +54,17 @@ void GUILib::HExperimentMain::cancelButtonClicked()
 void GUILib::HExperimentMain::saveButtonClicked()
 {
 	m_settings = getSettings();
-	if(!m_settings.saveToDB())
+	try
 	{
-		QMessageBox::warning(this, "Save failed", "Failed to save experiment settings into database");
-	}
-	else
-	{
+		//TODO transation()
+		m_settings.saveToDB();
+		//TODO commit()
 		accept();
+	}
+	catch (const HDBException& e)
+	{
+		//TODO rollback()
+		QMessageBox::warning(this, "Save failed", "Failed to save experiment settings into database");
 	}
 }
 
@@ -120,6 +125,9 @@ bool GUILib::HExperimentMain::isModified()
 		qDebug() << "Control Bar Options changed";
 	if (!(settings.getHLookSettings() == m_settings.getHLookSettings()))
 		qDebug() << "HLook settings changed";
+
+	// TODO: testing of phases must account for deleted/added phases, stimuli.
+#if 0
 	if (!(settings.getPreTestPhaseSettings() == m_settings.getPreTestPhaseSettings()))
 		qDebug() << "Pretest Phase settings changed";
 	if (!(settings.getHabituationPhaseSettings() == m_settings.getHabituationPhaseSettings()))
@@ -136,6 +144,10 @@ bool GUILib::HExperimentMain::isModified()
 		qDebug() << "habituation stimuli changed";
 	if (!(settings.getTestStimuliSettings() == m_settings.getTestStimuliSettings()))
 		qDebug() << "test stimuli changed";
+#else
+	qWarn() << "Not testing equality of phases/stimuli!"
+#endif
+
 	if (settings.getId() != m_settings.getId())
 		qDebug() << "Id changed";
 	if (settings.getName() != m_settings.getName())
@@ -180,14 +192,15 @@ void GUILib::HExperimentMain::closeEvent(QCloseEvent* event)
 		{
 			case QMessageBox::Save:
 				m_settings = getSettings();
-				if(!m_settings.saveToDB())
+				try
 				{
-					QMessageBox::warning(this, "Save failed", "Failed to save experiment settings into database");
-					event->ignore();
-				}
-				else
-				{
+					m_settings.saveToDB();
 					event->accept();
+				}
+				catch (const HDBException& e)
+				{
+					QMessageBox::warning(this, "Save failed", e.what());
+					event->ignore();
 				}
 				break;
 			case QMessageBox::Discard:

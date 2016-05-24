@@ -29,10 +29,10 @@ namespace GUILib
 		HStimulusOrderListWidget *m_pStimulusOrderListWidget;
 		HStimulusPreviewWidget *m_pStimulusPreviewWidget;
 		QPushButton *m_pbImport;
-		void create();
+		void create(const QString& labelName);
 		void connections();
 	public:
-		HStimuliSettingsWidget(const Habit::StimuliSettings& stimuli, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent=0);
+		HStimuliSettingsWidget(const QString& labelName, const Habit::StimuliSettings& stimuli, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent=0);
 		virtual ~HStimuliSettingsWidget() {};
 
 		// Get stimulisettings as currently defined in the widget (including changes)

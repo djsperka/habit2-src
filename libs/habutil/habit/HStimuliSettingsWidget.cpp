@@ -19,29 +19,29 @@
 using namespace Habit;
 using namespace GUILib;
 
-HStimuliSettingsWidget::HStimuliSettingsWidget(const StimuliSettings& stimuli, const StimulusDisplayInfo& info, QWidget* parent)
+HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const StimuliSettings& stimuli, const StimulusDisplayInfo& info, QWidget* parent)
 : QWidget(parent)
 , m_stimuli(stimuli)
 , m_stimulusDisplayInfo(info)
 {
-	create();
+	create(labelName);
 	connections();
 }
 
-void HStimuliSettingsWidget::create()
+void HStimuliSettingsWidget::create(const QString& labelName)
 {
 	QDir root;
 	habutilGetStimulusRootDir(root);
 
 	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
-	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimuli.getStimContext(), m_stimulusDisplayInfo.getStimulusLayoutType());
+	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
 	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, root, this);
 
-	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(m_stimuli.getStimContext().name()));
+	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(labelName));
 	QVBoxLayout *v1 = new QVBoxLayout;
 	v1->addWidget(m_pStimulusSettingsListWidget);
 	g1->setLayout(v1);
-	QGroupBox *g2 = new QGroupBox(QString("%1 Orders").arg(m_stimuli.getStimContext().name()));
+	QGroupBox *g2 = new QGroupBox(QString("%1 Orders").arg(labelName));
 	QVBoxLayout *v2 = new QVBoxLayout;
 	v2->addWidget(m_pStimulusOrderListWidget);
 	g2->setLayout(v2);
@@ -133,7 +133,7 @@ void HStimuliSettingsWidget::importClicked()
 	qDebug() << "Selected file " << filename;
 	if (!filename.isEmpty())
 	{
-		b = importStimulusSettingsAndOrders(filename, slist, olist, m_stimuli.getStimContext());
+		b = importStimulusSettingsAndOrders(filename, slist, olist);
 		qDebug() << slist.size() << "stim imported " << olist.size() << " orders imported";
 
 		// We append the stimuli and orders to the widgets so the display isupdated correctly.
@@ -228,7 +228,7 @@ void HStimuliSettingsWidget::stimulusLayoutTypeChanged(int i)
 
 Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()
 {
-	Habit::StimuliSettings settings(m_stimuli.getStimContext());
+	Habit::StimuliSettings settings;
 	settings.setStimuli(m_stimuli.stimuli());
 	settings.setOrderList(m_stimuli.orders());
 	return settings;

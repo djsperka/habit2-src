@@ -18,21 +18,18 @@ namespace Habit
 	class HStimulusOrder
 	{
 		int m_id;
-		const HStimContext* m_pcontext;
 		QString m_name;
 		QStringList m_list;
 
 
 	public:
-		HStimulusOrder(const HStimContext& context = HStimContext::UnknownContext, QString name = QString(), QStringList list = QStringList());
-		HStimulusOrder(int id, const HStimContext& context = HStimContext::UnknownContext, QString name = QString(), QStringList list = QStringList());
+		HStimulusOrder(QString name = QString(), QStringList list = QStringList());
+		HStimulusOrder(int id, QString name = QString(), QStringList list = QStringList());
 		HStimulusOrder(const HStimulusOrder& o);
 		virtual ~HStimulusOrder() {};
 		HStimulusOrder& operator=(const HStimulusOrder& rhs);
 		void setId(int id) { m_id = id; };
 		int getId() const { return m_id; };
-		const HStimContext* getContext() const;
-		void setContext(const HStimContext& context);
 		void setName(const QString& name) { m_name = name; };
 		QString getName() const { return m_name; };
 
