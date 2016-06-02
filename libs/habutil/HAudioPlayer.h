@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QList>
 #include <QTextStream>
+#include <QMap>
 #include <Phonon/MediaObject>
 #include <Phonon/AudioOutput>
 #include "HStimulusSource.h"
@@ -32,12 +33,17 @@ public:
 	virtual void clear();
 	friend QTextStream& operator<<(QTextStream& out, const HAudioPlayer& player);
 
+	virtual void loadBuffer(unsigned int id);
+	virtual void freeBuffer(unsigned int id);
+
 	
 private:
 	bool m_pendingStop;
 	Phonon::MediaObject *m_pMediaObject;
 	Phonon::AudioOutput *m_pAudioOutput;
 	QString m_nowPlayingFilename;
+	QMap<unsigned int, HStimulusSource*> m_mapSources;
+
 
 	unsigned int addStimulusPrivate(unsigned int id);
 

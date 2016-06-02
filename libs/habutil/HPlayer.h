@@ -62,9 +62,17 @@ public:
 	unsigned int addStimulus(const unsigned int id, const Habit::StimulusInfo& info);
 
 	/// should stimuli be buffered? This is advisory, subclasses may ignore. Put here especially for
-	/// video types, see HVIPlayer
+	/// video types, see HVIPlayer.
+	// More specifically (djs 5-26-16), this specifies whether the stimulus should be buffered
+	// when the stimulus is added to the player.
+	// When loadBuffer(id) is called, the file/stimulus should be buffered if that is possible.
+	// When freeBuffer(id) is called, it should NOT be freed if preferBufferedStimulus() returns
+	// true.
+
 	bool preferBufferedStimulus() const { return 	m_preferBufferedStimulus; };
 	void setPreferBufferedStimulus(bool buffer) { m_preferBufferedStimulus = buffer; };
+	virtual void loadBuffer(unsigned int id) { Q_UNUSED(id); return; };
+	virtual void freeBuffer(unsigned int id) { Q_UNUSED(id); return; };
 
 	// dummy value to be returned when getStimulusInfo gets a bad key.
 	static const Habit::StimulusInfo dummyStimulusInfo;

@@ -44,6 +44,9 @@ unsigned int HAudioPlayer::addStimulusPrivate(unsigned int id)
 {
 	// TODO: Store buffer of audio file?
 	//qDebug() << "HAudioPlayer::addStimulusPrivate(" << id << ")";
+	const Habit::StimulusInfo& info = getStimulusInfo(id);
+	HStimulusSource* s = new HStimulusSource(&info, getStimulusRoot(), preferBufferedStimulus());
+	m_mapSources.insert(id, s);
 	return id;
 }
 
@@ -58,12 +61,40 @@ void HAudioPlayer::stop()
 
 void HAudioPlayer::play(unsigned int number)
 {
-	const StimulusInfo& info = getStimulusInfo(number);
-	m_pMediaObject->setCurrentSource(info.getAbsoluteFileName(getStimulusRoot()));
-	m_pAudioOutput->setVolume((double)info.getVolume()/100.0);
+	HStimulusSource *s = m_mapSources.value(number);
+	m_nowPlayingFilename = s->filename();
+	if (s->hasBuffer())
+	{
+		if (s->hasBuffer())
+		{
+			m_pMediaObject->setCurrentSource(*(new Phonon::MediaSource(s->buffer())));
+			qDebug() << "HAudioPlayer::play(" << number << ") : playing buffered source.";
+		}
+		else
+		{
+			m_pMediaObject->setCurrentSource(s->filename());
+			qDebug() << "HAudioPlayer::play(" << number << ") : playing unbuffered source.";
+		}
+	}
+	m_pAudioOutput->setVolume((double)s->getAudioBalance()/100.0);
 	m_pMediaObject->play();
 	m_iCurrentStim = number;
-	m_nowPlayingFilename = info.getFileName();
+}
+
+void HAudioPlayer::loadBuffer(unsigned int id)
+{
+	if (m_mapSources.contains(id))
+	{
+		m_mapSources[id]->loadBuffer();
+	}
+}
+
+void HAudioPlayer::freeBuffer(unsigned int id)
+{
+	if (m_mapSources.contains(id))
+	{
+		m_mapSources[id]->freeBuffer();
+	}
 }
 
 

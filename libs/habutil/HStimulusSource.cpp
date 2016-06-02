@@ -76,6 +76,7 @@ void HStimulusSource::init(const QString& filename, bool buffer)
 		// If there's a filename, then its either IMAGE, AUDIO or VIDEO.
 		// Each type has a different method for loading. In addition,
 		// VIDEO types may be buffered or not.
+		// IMAGE types are not buffered.
 
 		QFile file(filename);
 		m_filename = filename;
@@ -83,7 +84,7 @@ void HStimulusSource::init(const QString& filename, bool buffer)
 		{
 			if (isImageFile(filename))
 			{
-				m_pImage = new QImage(filename);
+				//m_pImage = new QImage(filename);
 				m_type = IMAGE;
 			}
 			else if (isAudioFile(filename))
@@ -129,6 +130,88 @@ void HStimulusSource::init(const QString& filename, bool buffer)
 		m_type = BACKGROUND;
 	}
 }
+
+void HStimulusSource::loadBuffer()
+{
+	if (isVideo() || isAudio())
+	{
+		// Load file into a QByteArray, and create a QBuffer that manages it.
+		qDebug() << "HStimulusSource::loadBuffer - Buffering video/audio " << m_filename;
+		QFile file(m_filename);
+		if (!file.open(QIODevice::ReadOnly))
+		{
+			qCritical() << "Cannot read stimulus file " << m_filename;
+		}
+		else
+		{
+			m_pByteArray = new QByteArray(file.readAll());
+			m_pBuffer = new QBuffer(m_pByteArray);
+			file.close();
+		}
+	}
+	else
+	{
+		qDebug() << "HStimulusSource::loadBuffer - not buffered, not video/audio " << m_filename;
+	}
+}
+
+void HStimulusSource::freeBuffer()
+{
+	if (hasBuffer())
+	{
+		delete m_pBuffer;
+		delete m_pByteArray;
+		m_pBuffer = (QBuffer*) NULL;
+		m_pByteArray = (QByteArray*) NULL;
+	}
+	else if (hasImage())
+	{
+		freeImage();
+	}
+}
+
+
+void HStimulusSource::loadImage(const QSize& parentSize, bool bFullScreen, bool bMaintainAspectRatio)
+{
+	QImage image(m_filename);
+	//m_pImage = new QImage(m_filename);
+	QSize size = image.size();
+	if (bFullScreen)
+	{
+		double scaleX = size.width()*1.0 / parentSize.width();
+		double scaleY = size.height()*1.0 / parentSize.height();
+		if (bMaintainAspectRatio)
+		{
+			if (scaleX < scaleY)
+			{
+				m_pImage = new QImage(image.scaledToHeight(parentSize.height(), Qt::SmoothTransformation));
+			}
+			else
+			{
+				m_pImage = new QImage(image.scaledToWidth(parentSize.width(), Qt::SmoothTransformation));
+			}
+		}
+		else
+		{
+			m_pImage = new QImage(image.scaled(parentSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+		}
+		qDebug() << "HStimulusSource::loadImage: " << m_filename;
+		qDebug() << "Original image size " << image.size();
+		qDebug() << "Scaled image size " << m_pImage->size();
+		//qDebug() << "            FSimage  size " << m_pImage->size().width() << "x" << m_pImage->size().height();
+	}
+}
+
+void HStimulusSource::freeImage()
+{
+	if (m_pImage)
+	{
+		delete m_pImage;
+		m_pImage = (QImage *)NULL;
+	}
+}
+
+
 
 
 HStimulusSource::~HStimulusSource()

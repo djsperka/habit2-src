@@ -21,11 +21,13 @@ public:
 	HImageWidget(QWidget *parent = 0, bool fullScreen = false, bool aspectRatio = false, QColor background = QColor("black"));
 	~HImageWidget();
 	void setCurrentSource(const QString& filename);
+	void setCurrentSource(QImage* pImage);
 protected:
 	void paintEvent ( QPaintEvent * event );
 	
 private:
-	QImage m_image;
+	QImage m_image;		// this is used when the image is not buffered, and setCurrentSource(filename) is called.
+	QImage *m_pImage;
 	bool m_fullscreen;
 	bool m_maintainAspectRatio;
 	

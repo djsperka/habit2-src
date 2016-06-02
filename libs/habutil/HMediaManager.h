@@ -91,6 +91,11 @@ public:
 	//const QMap<unsigned int, const Habit::StimulusSettings>& map() { return m_mapStim; };
 	const QMap<unsigned int, const Habit::StimulusSettings *>& pmap() { return m_mapPStimulusSettings; };
 
+	// tell each Player to buffer/free the stimulus at 'key'.
+	// Its up to each HPlayer subclass to decide what that means (and this can be ignored).
+	void loadBuffers(unsigned int key);
+	void freeBuffers(unsigned int key);
+
 	static const unsigned int backgroundKey;
 	static const unsigned int agKey;
 

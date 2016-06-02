@@ -55,6 +55,12 @@ public:
 	
 	void requestCurrentStim();
 	void requestAG();
+
+	// These will trickle down and lead to HPlayer::loadBuffer()/freeBuffer() being called for
+	// the AG (if applicable) and the stimulus for the current trial.
+	void loadCurrentStimBuffers();
+	void freeCurrentStimBuffers();
+
 	const HPhaseType& ptype() const { return m_phaseSettings.getPhaseType(); };
 
 protected:

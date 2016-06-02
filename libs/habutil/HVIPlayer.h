@@ -49,6 +49,10 @@ public:
 	friend QTextStream& operator<<(QTextStream& out, const HVIPlayer& player);
 
 	virtual QSize sizeHint() const { return QSize(200, 150); };
+
+	virtual void loadBuffer(unsigned int id);
+	virtual void freeBuffer(unsigned int id);
+
 protected:
 
 private:

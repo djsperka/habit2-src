@@ -89,25 +89,6 @@ HPlayer(id, w, stimRootDir), m_pendingClear(false), m_parent(w), m_pMediaObject(
 		m_pVideoWidget->setAspectRatio(Phonon::VideoWidget::AspectRatioWidget);
 	}
 
-#if 0
-	if (fullscreen)
-	{
-		m_pVideoWidget->setScaleMode(Phonon::VideoWidget::FitInView);
-		if (maintainAspectRatio)
-		{
-			m_pVideoWidget->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
-		}
-		else
-		{
-			m_pVideoWidget->setAspectRatio(Phonon::VideoWidget::AspectRatioWidget);
-		}
-	}
-	else
-	{
-
-	}
-#endif
-
 	// Create paths
 	Phonon::createPath(m_pMediaObject, m_pVideoWidget);
 	Phonon::createPath(m_pMediaObject, m_pAudioOutput);
@@ -218,10 +199,12 @@ void HVIPlayer::play(unsigned int number)
 			if (s->hasBuffer())
 			{
 				m_pMediaObject->setCurrentSource(*(new Phonon::MediaSource(s->buffer())));
+				qDebug() << "HVIPlayer::play(" << number << ") : playing buffered source (VIDEO).";
 			}
 			else
 			{
 				m_pMediaObject->setCurrentSource(s->filename());
+				qDebug() << "HVIPlayer::play(" << number << ") : playing unbuffered source (VIDEO).";
 			}
 			m_pAudioOutput->setVolume((double)s->getAudioBalance()/100.0);
 			m_pMediaObject->play();
@@ -231,7 +214,17 @@ void HVIPlayer::play(unsigned int number)
 			s = m_mapSources.value(number);
 			m_nowPlayingFilename = s->filename();
 			m_pImageWidget->setGeometry(QRect(0, 0, geometry().width(), geometry().height()));
-			m_pImageWidget->setCurrentSource(s->filename());
+
+			if (s->hasImage())
+			{
+				qDebug() << "HVIPlayer::play(): setting buffered image, filename " << s->filename();
+				m_pImageWidget->setCurrentSource(s->image());
+			}
+			else
+			{
+				qDebug() << "HVIPlayer::play(): setting source to filename " << s->filename();
+				m_pImageWidget->setCurrentSource(s->filename());
+			}
 			m_pStackedLayout->setCurrentIndex(m_imageIndex);
 			break;
 		case HStimulusSource::BACKGROUND:
@@ -270,4 +263,32 @@ unsigned int HVIPlayer::addStimulusPrivate(const unsigned int id)
 	HStimulusSource* s = new HStimulusSource(&info, getStimulusRoot(), preferBufferedStimulus());
 	m_mapSources.insert(id, s);
 	return id;
+}
+
+
+void HVIPlayer::loadBuffer(unsigned int id)
+{
+	if (m_mapSources.contains(id))
+	{
+		HStimulusSource *s = m_mapSources[id];
+		if (s->isAudio() || s->isVideo())
+		{
+			qDebug() << "HVIPlayer::loadBuffer - audio/video";
+			m_mapSources[id]->loadBuffer();
+		}
+		else if (s->isImage())
+		{
+			// This will load the image and scale it using the player's current size.
+			qDebug() << "HVIPlayer::loadBuffer - image";
+			m_mapSources[id]->loadImage(this->size(), m_isFullScreen, m_maintainAspectRatio);
+		}
+	}
+}
+
+void HVIPlayer::freeBuffer(unsigned int id)
+{
+	if (m_mapSources.contains(id))
+	{
+		m_mapSources[id]->freeBuffer();
+	}
 }

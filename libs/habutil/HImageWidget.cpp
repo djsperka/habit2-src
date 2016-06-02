@@ -25,6 +25,13 @@ HImageWidget::~HImageWidget()
 {
 }
 
+void HImageWidget::setCurrentSource(QImage* pImage)
+{
+	m_pImage = pImage;
+	repaint();
+	return;
+}
+
 void HImageWidget::setCurrentSource(const QString& filename)
 {
 	m_image.load(filename);
@@ -63,7 +70,11 @@ void HImageWidget::setCurrentSource(const QString& filename)
 		}
 		qDebug() << "            FSimage  size " << m_image.size().width() << "x" << m_image.size().height();
 	}
+
+	m_pImage = &m_image;
+
 	repaint();
+
 	return;
 }
 
@@ -73,8 +84,8 @@ void HImageWidget::paintEvent(QPaintEvent* event)
     QPainter painter(this); 
 	QPalette palette = this->palette();
 	painter.fillRect(this->rect(), palette.color(QPalette::Window));
-	int x = (this->width() - m_image.width())/2;
-	int y = (this->height() - m_image.height())/2;
-    painter.drawImage(x, y, m_image); 
+	int x = (this->width() - m_pImage->width())/2;
+	int y = (this->height() - m_pImage->height())/2;
+    painter.drawImage(x, y, *m_pImage);
 	emit painted();
 }  

@@ -146,9 +146,24 @@ void HPhase::requestAG()
 	experiment().getMediaManager().ag();
 }
 
+
+void HPhase::loadCurrentStimBuffers()
+{
+	experiment().getMediaManager().loadBuffers(m_stimuli.at(m_itrial).first);
+	experiment().getMediaManager().loadBuffers(HMediaManager::agKey);
+}
+
+void HPhase::freeCurrentStimBuffers()
+{
+	experiment().getMediaManager().freeBuffers(m_stimuli.at(m_itrial).first);
+
+	// do not unload the attention getter. It gets used each trial anyways.
+}
+
 void HPhase::onTrialCompleteEntered()
 {
 	bool isHabituated = false;
+	freeCurrentStimBuffers();
 	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog(), isHabituated))
 	{
 		machine()->postEvent(new HAllTrialsDoneEvent());

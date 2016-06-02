@@ -201,6 +201,24 @@ const Habit::StimulusSettings& HMediaManager::getStimulusSettings(unsigned int k
 	else return dummyStimulusSettings;
 }
 
+void HMediaManager::loadBuffers(unsigned int key)
+{
+	QMapIterator<HPlayerPositionType, HPlayer *> it(m_players);
+	while (it.hasNext())
+	{
+		it.next().value()->loadBuffer(key);
+	}
+}
+
+void HMediaManager::freeBuffers(unsigned int key)
+{
+	QMapIterator<HPlayerPositionType, HPlayer *> it(m_players);
+	while (it.hasNext())
+	{
+		it.next().value()->freeBuffer(key);
+	}
+}
+
 
 void HMediaManager::stim(int i)
 {

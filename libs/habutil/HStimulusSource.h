@@ -27,6 +27,7 @@ public:
 	HStimulusSource(const Habit::StimulusInfo* pinfo, const QDir& stimRootDir = QDir("/"), bool buffer = true);
 	HStimulusSource();
 	HStimulusSource(const QString& filename, int audioBalance = 0, bool islooped=false);
+	HStimulusSource(const QString& filename, QImage *pImage);
 
 	~HStimulusSource();
 	bool isVideo() { return (m_type == VIDEO); };
@@ -35,12 +36,17 @@ public:
 	bool isImage() { return (m_type == IMAGE); };
 	bool isAudio() { return (m_type == AUDIO); };
 	bool isEmpty() { return (m_type == EMPTY); };
+	bool hasImage() { return m_pImage!=NULL; };
 	QImage* image() { return m_pImage; };
 	bool isBackground() { return (m_type == BACKGROUND); };
 	const HStimulusSourceType type() const { return m_type; };
 	const QString& filename() const { return m_filename; };
 	const bool isLooped() const { return m_isLooped; };
 	const int getAudioBalance() const { return m_audioBalance; };
+	void loadBuffer();
+	void freeBuffer();
+	void loadImage(const QSize& size, bool bFullScreen, bool bMaintainAspectRatio);
+	void freeImage();
 	
 private:
 	bool isImageFile(const QString& filename);
