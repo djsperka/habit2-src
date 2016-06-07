@@ -61,23 +61,26 @@ void HAudioPlayer::stop()
 
 void HAudioPlayer::play(unsigned int number)
 {
-	HStimulusSource *s = m_mapSources.value(number);
-	m_nowPlayingFilename = s->filename();
-	if (s->hasBuffer())
+	if (m_mapSources.contains(number))
 	{
+		HStimulusSource *s = m_mapSources.value(number);
+		m_nowPlayingFilename = s->filename();
 		if (s->hasBuffer())
 		{
-			m_pMediaObject->setCurrentSource(*(new Phonon::MediaSource(s->buffer())));
-			qDebug() << "HAudioPlayer::play(" << number << ") : playing buffered source.";
+			if (s->hasBuffer())
+			{
+				m_pMediaObject->setCurrentSource(*(new Phonon::MediaSource(s->buffer())));
+				qDebug() << "HAudioPlayer::play(" << number << ") : playing buffered source.";
+			}
+			else
+			{
+				m_pMediaObject->setCurrentSource(s->filename());
+				qDebug() << "HAudioPlayer::play(" << number << ") : playing unbuffered source.";
+			}
 		}
-		else
-		{
-			m_pMediaObject->setCurrentSource(s->filename());
-			qDebug() << "HAudioPlayer::play(" << number << ") : playing unbuffered source.";
-		}
+		m_pAudioOutput->setVolume((double)s->getAudioBalance()/100.0);
+		m_pMediaObject->play();
 	}
-	m_pAudioOutput->setVolume((double)s->getAudioBalance()/100.0);
-	m_pMediaObject->play();
 	m_iCurrentStim = number;
 }
 
