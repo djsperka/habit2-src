@@ -59,7 +59,7 @@ QDataStream & Habit::operator << (QDataStream& stream, const Habit::PhaseRunSett
 	return stream;
 }
 
-QDataStream & Habit::operator<<(QDataStream& stream, const Habit::RunSettings& settings)
+QDataStream & Habit::operator<<(QDataStream& stream, Habit::RunSettings settings)
 {
 	stream << f_sVersion << settings.getId() << settings.getExperimentId() << settings.getSubjectId() << settings.map();
 

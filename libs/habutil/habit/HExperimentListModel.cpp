@@ -40,16 +40,15 @@ bool GUILib::HExperimentListModel::setData (const QModelIndex& index, const QVar
 	else
 	{
 		// Update database
-		Habit::MainDao dao;
-		b = dao.updateExperimentName(exptOriginal, exptNew);
-		if (!b)
+		try
+		{
+			Habit::MainDao dao;
+			dao.updateExperimentName(exptOriginal, exptNew);
+			b = QStringListModel::setData(index, value, role);
+		}
+		catch (const Habit::HDBException& e)
 		{
 			QMessageBox::warning(NULL, "Change Experiment Name", QString("Cannot update experiment name: check log."));
-		}
-		else
-		{
-			// Assuming that this will emit dataChanged() signal.
-			b = QStringListModel::setData(index, value, role);
 		}
 	}
 	return b;
@@ -63,11 +62,17 @@ QVariant GUILib::HExperimentListModel::data(const QModelIndex & index, int role)
 		// Check experiment settings and set color accordingly
 		Habit::ExperimentSettings settings;
 		QStringList sProblems;
-		if (!Habit::ExperimentSettings::load(settings, stringList().at(index.row())))
+		try
 		{
+			settings.loadFromDB(stringList().at(index.row()));
+		}
+		catch (const Habit::HDBException& e)
+		{
+			qCritical() << "Cannot load experiment " << stringList().at(index.row()) << endl << e.what();
 			return QBrush(Qt::red);
 		}
-		else if (!H2MainWindow::checkExperimentSettings(settings, sProblems))
+
+		if (!H2MainWindow::checkExperimentSettings(settings, sProblems))
 		{
 			return QBrush(Qt::yellow);
 		}

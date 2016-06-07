@@ -48,6 +48,8 @@ Habit::RunSettings GUILib::HRunSettingsDialog::getRunSettings() const
 	int seqno;
 	GUILib::HStimulusOrderSelectionWidget* w;
 	Habit::PhaseRunSettings prs;
+	Habit::StimLabelList list;
+
 	while (iterator.hasNext())
 	{
 		iterator.next();
@@ -58,11 +60,11 @@ Habit::RunSettings GUILib::HRunSettingsDialog::getRunSettings() const
 		if (w->isDefaultOrder())
 		{
 			Q_ASSERT(m_exptSettings.phaseExists(seqno) >= 0);
-			int nstim = m_exptSettings.phaseAt(m_exptSettings.phaseExists(seqno)).stimuli().size();
+			int nstim = m_exptSettings.phaseAt(m_exptSettings.phaseExists(seqno)).stimuli().stimuli().size();
 			for (int i=0; i<nstim; i++)
 				list.append(QPair<int, QString>(i, QString()));
 		}
-		else if (m_map[HStimContext::PreTestPhase.number()]->isDefinedOrder())
+		else if (w->isDefinedOrder())
 		{
 			Q_ASSERT(m_exptSettings.phaseExists(seqno) >= 0);
 			prs.setOrderName(w->getDefinedOrderName());
@@ -96,7 +98,7 @@ void GUILib::HRunSettingsDialog::components(bool bTestRun)
 		{
 			GUILib::HStimulusOrderSelectionWidget* w = new HStimulusOrderSelectionWidget(ps.stimuli(), ps.getName(), this);
 			v->addWidget(w);
-			m_map.insert(ps.getSeqno(), QPair<w, false>);
+			m_map.insert(ps.getSeqno(), QPair<GUILib::HStimulusOrderSelectionWidget*, bool>(w, false));
 		}
 	}
 
@@ -132,7 +134,7 @@ void GUILib::HRunSettingsDialog::connections()
 void GUILib::HRunSettingsDialog::orderChosen(int seqno)
 {
 	// TODO: test this, and updateRunButton()
-	m_map.insert(seqno, QPair<int, bool>(m_map.value(seqno).first, true));
+	m_map.insert(seqno, qMakePair(m_map.value(seqno).first, true));
 	updateRunButton();
 }
 

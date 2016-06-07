@@ -330,7 +330,7 @@ void MainDao::addOrUpdateStimulusSettings(int phaseID, Habit::StimulusSettings& 
 	else
 	{
 		// insert into stimulus table. Make sure to set Id in ss object - it will be used to add/update stimfiles.
-		sql = "insert into stimulus (name, phase_id) values (?)";
+		sql = "insert into stimulus (name, phase_id) values (?, ?)";
 	}
 	q.prepare(sql);
 	q.addBindValue(QVariant(ss.getName()));
@@ -511,7 +511,7 @@ void MainDao::getHLookSettingsForExperiment(int experimentID, HLookSettings& loo
 
 void MainDao::getHPhaseSettings(int phaseId, HPhaseSettings& phaseSettings)
 {
-	QString sql = "select * from phase_settings where phaseId = ?";
+	QString sql = "select * from phase_settings where id = ?";
 	QSqlQuery q;
 	q.prepare(sql);
 	q.addBindValue(phaseId);

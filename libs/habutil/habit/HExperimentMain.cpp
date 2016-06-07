@@ -19,6 +19,7 @@
 #include "HExperimentTreeWidgetItem.h"
 #include "HDBException.h"
 
+using namespace Habit;
 
 GUILib::HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSettings, QWidget *parent, bool bReadOnly)
 : QDialog(parent)
@@ -145,7 +146,7 @@ bool GUILib::HExperimentMain::isModified()
 	if (!(settings.getTestStimuliSettings() == m_settings.getTestStimuliSettings()))
 		qDebug() << "test stimuli changed";
 #else
-	qWarn() << "Not testing equality of phases/stimuli!"
+	qWarning() << "Not testing equality of phases/stimuli!";
 #endif
 
 	if (settings.getId() != m_settings.getId())
@@ -158,6 +159,12 @@ bool GUILib::HExperimentMain::isModified()
 
 Habit::ExperimentSettings GUILib::HExperimentMain::getSettings()
 {
+
+	//TODO Fix getSettings in HExperimentMain!!!!
+	QMessageBox::warning(this, "Bad Move", "Cannot save settings.");
+	return m_settings;
+
+#if 0
 	Habit::ExperimentSettings settings;
 	settings.setId(m_settings.getId());
 	settings.setName(m_settings.getName());
@@ -174,6 +181,7 @@ Habit::ExperimentSettings GUILib::HExperimentMain::getSettings()
 	settings.setPreTestStimuliSettings(m_pPreTestStimuliWidget->getStimuliSettings());
 	settings.setTestStimuliSettings(m_pTestStimuliWidget->getStimuliSettings());
 	return settings;
+#endif
 }
 
 void GUILib::HExperimentMain::closeEvent(QCloseEvent* event)
@@ -267,6 +275,38 @@ void GUILib::HExperimentMain::createComponents()
 	m_pLookSettingsWidget = new HLookSettingsWidget(m_settings.getHLookSettings());
 	iLookSettingsWidget = m_pPagesWidget->addWidget(m_pLookSettingsWidget);
 
+
+
+#if 1
+	// Build the General items
+	HExperimentTreeWidgetItem* ptwiGeneral = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "General");
+	//HExperimentTreeWidgetItem* ptwiStimulusDisplayInfo =
+	new HExperimentTreeWidgetItem(ptwiGeneral, iStimulusDisplayInfo, "Stimulus Display");
+	//HExperimentTreeWidgetItem* ptwiControlBar =
+	new HExperimentTreeWidgetItem(ptwiGeneral, iControlBarOptions, "Control Panel Display Options");
+	//HExperimentTreeWidgetItem* ptwiAttentionGetter =
+	new HExperimentTreeWidgetItem(ptwiGeneral, iAttentionSetupForm, "Intertrial Interval");
+	//HExperimentTreeWidgetItem* ptwiLookSettings =
+	new HExperimentTreeWidgetItem(ptwiGeneral, iLookSettingsWidget, "Look Settings");
+
+	HExperimentTreeWidgetItem* ptwiPhases = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "Phases");
+
+	// iterate over phases, create page for each, add to tree as children of ptwiPhases
+
+	QListIterator<HPhaseSettings> phaseIterator = m_settings.phaseIterator();
+	while (phaseIterator.hasNext())
+	{
+		const Habit::HPhaseSettings& ps = phaseIterator.next();
+
+		// create phase settings widget and add to stack widget
+		HPhaseSettingsWidget* pPhaseSettingsWidget = new HPhaseSettingsWidget(ps);
+		int item = m_pPagesWidget->addWidget(pPhaseSettingsWidget);
+
+		new HExperimentTreeWidgetItem(ptwiPhases, item, ps.getName());
+	}
+
+
+#else
 	// pretest trial settings
 	m_pPreTestPhaseWidget = new HPhaseSettingsWidget(m_settings.getPreTestPhaseSettings());
 	iPreTestPhaseWidget = m_pPagesWidget->addWidget(m_pPreTestPhaseWidget);
@@ -331,7 +371,7 @@ void GUILib::HExperimentMain::createComponents()
 	new HExperimentTreeWidgetItem(ptwiTest, iTestPhaseWidget, "Trial Settings");
 	//HExperimentTreeWidgetItem* ptwiTestStimuli =
 	new HExperimentTreeWidgetItem(ptwiTest, m_stackidTestStimuli, "Stimuli");
-
+#endif
 
 
     QHBoxLayout *horizontalLayout = new QHBoxLayout;

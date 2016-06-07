@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QRegExp>
 #include <QTextStream>
+#include <QMessageBox>
 
 using namespace Habit;
 
@@ -109,9 +110,13 @@ bool parseStim(const QString& s, StimulusSettings& settings)
 }
 
 
+// TODO: Re-enable import function!
 bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSettingsList& stimList, Habit::HStimulusOrderList& orderList, const HStimContext& context)
 {
 	bool b = false;
+	QMessageBox::warning(NULL, "Not implemented", "The import function is disabled.");
+
+#if 0
 	int skipped=0;
 	int comment=0;
 	//int nstim=0;
@@ -177,5 +182,6 @@ bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSet
 		file.close();
 		b = true;	// return true if file was opened ok.
 	}
+#endif
 	return b;
 }

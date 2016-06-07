@@ -67,7 +67,7 @@ namespace Habit
 		QMap<int, PhaseRunSettings> phaseRunSettingsMap_;
 	};
 
-	QDataStream& operator<<(QDataStream& stream, const RunSettings& settings);
+	QDataStream& operator<<(QDataStream& stream, RunSettings settings);
 	QDataStream& operator>>(QDataStream& stream, RunSettings& settings);
 	bool operator==(const RunSettings& lhs, const RunSettings& rhs);
 

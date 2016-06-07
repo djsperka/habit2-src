@@ -15,6 +15,9 @@ using namespace GUILib;
 HStimulusOrderSelectionWidget::HStimulusOrderSelectionWidget(const Habit::StimuliSettings& s, const QString& phaseName, QWidget *parent)
 : QWidget(parent)
 , ui(new Ui::HStimulusOrderSelectionForm)
+, m_ssList(s.stimuli())
+, m_orderList(s.orders())
+
 {
 	ui->setupUi(this);
 	for (unsigned int i=0; i<sizeof(HRandomizationType::A)/sizeof(HRandomizationType*); i++)
@@ -24,7 +27,7 @@ HStimulusOrderSelectionWidget::HStimulusOrderSelectionWidget(const Habit::Stimul
 	connect(ui->cbxOrders, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStatusLabel()));
 	connect(ui->checkboxRandomize, SIGNAL(toggled(bool)), this, SLOT(updateStatusLabel()));
 	connect(ui->cbxRandomizationType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStatusLabel()));
-	initialize(s, phaseName);
+	initialize(phaseName);
 }
 
 HStimulusOrderSelectionWidget::~HStimulusOrderSelectionWidget()
@@ -61,17 +64,17 @@ QString HStimulusOrderSelectionWidget::getDefinedOrderName()
 	return QString();
 }
 
-void HStimulusOrderSelectionWidget::initialize(const Habit::StimuliSettings& s, const QString& phaseName)
+void HStimulusOrderSelectionWidget::initialize(const QString& phaseName)
 {
 	ui->labelMain->setText(QString("%1 Phase Stimulus Order").arg(phaseName));
-	m_pmodel = new HStimulusOrderListModel(s.orders(), s.stimuli());
+	m_pmodel = new HStimulusOrderListModel(m_orderList, m_ssList);
 	ui->cbxOrders->setModel(m_pmodel);
 	ui->cbxOrders->setEnabled(false);
 	ui->checkboxRandomize->setChecked(false);
 	ui->cbxRandomizationType->setEnabled(false);
 
 	// If there are no orders, make the select checkbox disabled
-	if (s.orders().isEmpty())
+	if (m_orderList.isEmpty())
 		ui->rbSelect->setEnabled(false);
 
 	updateStatusLabel();

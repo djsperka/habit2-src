@@ -43,7 +43,7 @@ Habit::ExperimentSettings Habit::ExperimentSettings::clone(const QString& name)
 }
 
 
-QDataStream & operator<< (QDataStream& stream, const Habit::ExperimentSettings& settings)
+QDataStream & Habit::operator<< (QDataStream& stream, const Habit::ExperimentSettings& settings)
 {
 	int version = getDBVersion();
 	stream <<
@@ -181,7 +181,7 @@ QDataStream& Habit::operator>> (QDataStream& stream, Habit::ExperimentSettings& 
 	return stream;
 }
 
-bool operator==(const Habit::ExperimentSettings& lhs, const Habit::ExperimentSettings& rhs)
+bool Habit::operator==(const Habit::ExperimentSettings& lhs, const Habit::ExperimentSettings& rhs)
 {
 	return (lhs.getId() == rhs.getId() &&
 			lhs.getName() == rhs.getName() &&

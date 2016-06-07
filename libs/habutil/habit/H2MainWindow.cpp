@@ -65,10 +65,15 @@ void GUILib::H2MainWindow::experimentActivated(QString expt)
 {
 	// Get experiment settings
 	Habit::ExperimentSettings settings;
-	if (Habit::ExperimentSettings::load(settings, expt))
+	try
 	{
+		settings.loadFromDB(expt);
 		HExperimentMain *exptMain = new HExperimentMain(settings, this);
 		exptMain->exec();
+	}
+	catch (const Habit::HDBException& e)
+	{
+		QMessageBox::warning(this, "Habit database error", e.what());
 	}
 }
 
@@ -256,11 +261,16 @@ void GUILib::H2MainWindow::editExperiment()
 	else
 	{
 		Habit::ExperimentSettings settings;
-		if (Habit::ExperimentSettings::load(settings, expt))
+		try
 		{
+			settings.loadFromDB(expt);
 			// Show experiment main window
 			HExperimentMain *exptMain = new HExperimentMain(settings, this);
 			exptMain->exec();
+		}
+		catch (const Habit::HDBException& e)
+		{
+			QMessageBox::warning(this, "Habit database error", e.what());
 		}
 	}
 }
@@ -435,7 +445,11 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	else
 	{
 		Habit::ExperimentSettings settings;
-		if (!Habit::ExperimentSettings::load(settings, expt))
+		try
+		{
+			settings.loadFromDB(expt);
+		}
+		catch (const Habit::HDBException& e)
 		{
 			QMessageBox::critical(this, "Cannot load experiment", "Cannot load experiment from database!");
 			qCritical() << "Cannot load experiment \"" << expt << "\" from database.";
@@ -551,14 +565,21 @@ void GUILib::H2MainWindow::cloneExperiment()
 	if (inputExperimentName(sName, sDefault))
 	{
 		Habit::ExperimentSettings settings;
-		if (Habit::ExperimentSettings::load(settings, m_pExperimentListWidget->selectedExperiment()))
+		try
 		{
+			settings.loadFromDB(m_pExperimentListWidget->selectedExperiment());
 			Habit::ExperimentSettings cloned = settings.clone(sName);
 			HExperimentMain *exptMain = new HExperimentMain(cloned, this);
 			if (exptMain->exec() == QDialog::Accepted)
 			{
 				m_pExperimentListWidget->reload();
 			}
+		}
+		catch (const Habit::HDBException& e)
+		{
+			QMessageBox::critical(this, "Cannot load experiment", "Cannot load experiment from database!");
+			qCritical() << "Cannot load experiment \"" << m_pExperimentListWidget->selectedExperiment() << "\" from database.";
+			return;
 		}
 	}
 }
@@ -570,21 +591,20 @@ void GUILib::H2MainWindow::deleteExperiment()
 			QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Yes)
 	{
 		Habit::ExperimentSettings settings;
-		if (Habit::ExperimentSettings::load(settings, expt))
+		try
 		{
-			try
-			{
-				// TODO wrap this in transaction
-				settings.deleteFromDB();
-				qDebug() << "Experiment " << expt << " deleted from database. Results files were NOT deleted.";
-				m_pExperimentListWidget->reload();
-				// TODO commit()
-			}
-			catch (const HDBException& e)
-			{
-				// TODO rollback()
-				QMessageBox::warning(this, "Delete Experiment", QString(e.what()));
-			}
+			settings.loadFromDB(expt);
+
+			// TODO wrap this in transaction
+			settings.deleteFromDB();
+			qDebug() << "Experiment " << expt << " deleted from database. Results files were NOT deleted.";
+			m_pExperimentListWidget->reload();
+			// TODO commit()
+		}
+		catch (const HDBException& e)
+		{
+			// TODO rollback()
+			QMessageBox::warning(this, "Delete Experiment", QString(e.what()));
 		}
 	}
 }

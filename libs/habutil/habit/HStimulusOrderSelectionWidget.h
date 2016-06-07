@@ -39,11 +39,10 @@ namespace GUILib
 
 		Ui::HStimulusOrderSelectionForm *ui;
 		GUILib::HStimulusOrderListModel* m_pmodel;
-		const HStimContext& m_stimContext;
 		Habit::HStimulusSettingsList m_ssList;
 		Habit::HStimulusOrderList m_orderList;
 
-		void initialize(const Habit::StimuliSettings& ss, const QString& phaseName);
+		void initialize(const QString& phaseName);
 	signals:
 		void orderChosen();
 
