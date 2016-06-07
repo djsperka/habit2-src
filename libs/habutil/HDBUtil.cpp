@@ -616,8 +616,9 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 
 					// habituation_settings
 					QString q10("alter table habituation_settings add column phase_id INTEGER NOT NULL DEFAULT -1");
-					QString q11("UPDATE habituation_settings SET phase_id = (SELECT phase_settings.id from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id) "
-									" WHERE EXISTS (SELECT * from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id AND phase_settings.phase_type = 2)");
+					QString q11("UPDATE habituation_settings SET phase_id = (SELECT phase_settings.id from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id and phase_settings.phase_type=2)");
+					//					QString q11("UPDATE habituation_settings SET phase_id = (SELECT phase_settings.id from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id) "
+					//									" WHERE EXISTS (SELECT * from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id AND phase_settings.phase_type = 2)");
 					QString q12("INSERT into habituation_settings (experiment_id, habituation_type, phase_id) SELECT experiment_id,0,id from phase_settings where phase_type=1 or phase_type=3");
 
 					// habituation_settings again
