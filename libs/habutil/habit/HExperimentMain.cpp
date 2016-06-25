@@ -13,15 +13,17 @@
 #include "attentionsetupform.h"
 #include "habituationsettings.h"
 #include "HLookSettingsWidget.h"
-#include "HPhaseSettingsWidget.h"
-#include "HStimuliSettingsWidget.h"
+#include "HPhaseSettingsTabWidget.h"
 #include "HStimulusDisplayInfoWidget.h"
 #include "HExperimentTreeWidgetItem.h"
 #include "HDBException.h"
 
 using namespace Habit;
 
-GUILib::HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSettings, QWidget *parent, bool bReadOnly)
+namespace GUILib
+{
+
+HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSettings, QWidget *parent, bool bReadOnly)
 : QDialog(parent)
 , m_settings(experimentSettings)
 {
@@ -33,26 +35,30 @@ GUILib::HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experi
 	m_pbSave->setDisabled(bReadOnly);
  }
 
-void GUILib::HExperimentMain::makeConnections()
+void HExperimentMain::makeConnections()
 {
-	connect(m_pContentsWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
-			this, SLOT(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
+//	connect(m_pContentsWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
+//			this, SLOT(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
+	connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(generalItemClicked(const QModelIndex&)));
 	connect(m_pbCancel, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
 	connect(m_pbSave, SIGNAL(clicked()), this, SLOT(saveButtonClicked()));
 	connect(m_pbExport, SIGNAL(clicked()), this, SLOT(exportButtonClicked()));
 
+	qCritical() << "RE-CONNECT to stimulus layout changes. See HExperimentMain::makeConnections()";
+	/*
 	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pPreTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
 	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pHabituationStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
 	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
 	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pAttentionSetupForm, SLOT(stimulusLayoutTypeChanged(int)));
+	*/
 }
 
-void GUILib::HExperimentMain::cancelButtonClicked()
+void HExperimentMain::cancelButtonClicked()
 {
 	reject();
 }
 
-void GUILib::HExperimentMain::saveButtonClicked()
+void HExperimentMain::saveButtonClicked()
 {
 	m_settings = getSettings();
 	try
@@ -69,7 +75,7 @@ void GUILib::HExperimentMain::saveButtonClicked()
 	}
 }
 
-void GUILib::HExperimentMain::exportButtonClicked()
+void HExperimentMain::exportButtonClicked()
 {
 	Habit::ExperimentSettings cloned = getSettings().clone(m_settings.getName());
 	QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
@@ -90,33 +96,39 @@ void GUILib::HExperimentMain::exportButtonClicked()
 	}
 }
 
+void HExperimentMain::generalItemClicked(const QModelIndex& index)
+{
+//	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
+	m_pPagesWidget->setCurrentIndex(m_vecStackPages.at(index.row()));
+}
 
-void GUILib::HExperimentMain::currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous)
+void HExperimentMain::currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous)
 {
 	Q_UNUSED(previous);
 	HExperimentTreeWidgetItem* p = static_cast<HExperimentTreeWidgetItem*>(current);
 	m_pPagesWidget->setCurrentIndex(p->stackid());
 
-	// check if we are switching to a stimuli page. if so, then we fetch the current setting for
-	// stimulus layout and update the stimuli page to correctly display the stim layout.
+	// If the currently selected item is a phase, enable the add/del buttons,
+	// otherwise disable them
 
-	if (p->stackid() == m_stackidPreTestStimuli)
+	if (p->isPhase())
 	{
-		Habit::ExperimentSettings s = getSettings();
+		//m_actionNewPhase->setEnabled(true);
+		//if (p->childCount() == 0)
+			//m_actionDelPhase->setEnabled(true);
+		//else
+			//m_actionDelPhase->setEnabled(false);
 	}
-	else if (p->stackid() == m_stackidHabituationStimuli)
+	else
 	{
-		Habit::ExperimentSettings s = getSettings();
-	}
-	else if (p->stackid() == m_stackidTestStimuli)
-	{
-		Habit::ExperimentSettings s = getSettings();
+		//m_actionNewPhase->setEnabled(false);
+		//ßm_actionDelPhase->setEnabled(false);
 	}
 
 
 }
 
-bool GUILib::HExperimentMain::isModified()
+bool HExperimentMain::isModified()
 {
 	// Get HExperimentSettings from the pages
 	Habit::ExperimentSettings settings = getSettings();
@@ -157,7 +169,7 @@ bool GUILib::HExperimentMain::isModified()
 	return !(getSettings() == m_settings);
 }
 
-Habit::ExperimentSettings GUILib::HExperimentMain::getSettings()
+Habit::ExperimentSettings HExperimentMain::getSettings()
 {
 
 	//TODO Fix getSettings in HExperimentMain!!!!
@@ -184,7 +196,7 @@ Habit::ExperimentSettings GUILib::HExperimentMain::getSettings()
 #endif
 }
 
-void GUILib::HExperimentMain::closeEvent(QCloseEvent* event)
+void HExperimentMain::closeEvent(QCloseEvent* event)
 {
 	if (isModified())
 	{
@@ -228,56 +240,51 @@ void GUILib::HExperimentMain::closeEvent(QCloseEvent* event)
 	}
 }
 
-void GUILib::HExperimentMain::createComponents()
+void HExperimentMain::createComponents()
 {
-	int iBlank;
-	int iStimulusDisplayInfo;
-	int iControlBarOptions;
-	int iAttentionSetupForm;
-	int iLookSettingsWidget;
-	int iPreTestPhaseWidget;
-	//int iPreTestStimuliWidget;
-	int iHabituationPhaseWidget;
-	//int iHabituationSetupForm;
-	int iHabituationSetupWidget;
-	//int iHabituationStimuliWidget;
-	int iTestPhaseWidget;
-	//int iTestStimuliWidget;
+	//int iBlank;
+	//int iStimulusDisplayInfo;
+	//int iControlBarOptions;
+	//int iAttentionSetupForm;
+	//int iLookSettingsWidget;
+	QStringList slGeneral;
+	slGeneral << "Stimulus Display" << "Run-time Control Panel Display" << "Intertrial Interval" << "Look Settings";
 
+	m_pGeneralListView = new QListView(this);
+	m_pGeneralListView->setModel(new QStringListModel(slGeneral));
+	m_pGeneralListView->setCurrentIndex(m_pGeneralListView->model()->index(0, 0));
+	m_pGeneralListView->setFixedHeight(m_pGeneralListView->sizeHintForRow(0) * slGeneral.count() + 2*m_pGeneralListView->frameWidth());
 
-	//m_pContentsWidget = createContentsWidget();
-	m_pContentsWidget = new QTreeWidget(this);
-	m_pContentsWidget->setColumnCount(1);
-	m_pContentsWidget->header()->hide();
+//	m_pContentsWidget = new QTreeWidget(this);
+//	m_pContentsWidget->setColumnCount(1);
+//	m_pContentsWidget->header()->hide();
 	m_pPagesWidget = new QStackedWidget;
 
 	// blank page
-	m_pBlank = new QWidget();
-	QPalette Pal(palette());
-	Pal.setColor(QPalette::Background, Qt::gray);
-	m_pBlank->setAutoFillBackground(true);
-	m_pBlank->setPalette(Pal);
-	iBlank = m_pPagesWidget->addWidget(m_pBlank);
+	//m_pBlank = new QWidget();
+	//QPalette Pal(palette());
+	//Pal.setColor(QPalette::Background, Qt::gray);
+	//m_pBlank->setAutoFillBackground(true);
+	//m_pBlank->setPalette(Pal);
+	//iBlank = m_pPagesWidget->addWidget(m_pBlank);
 
 	// Stimulus display info
 	m_pStimulusDisplayInfoWidget = new HStimulusDisplayInfoWidget(m_settings.getStimulusDisplayInfo());
-	iStimulusDisplayInfo = m_pPagesWidget->addWidget(m_pStimulusDisplayInfoWidget);
+	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pStimulusDisplayInfoWidget));
 
 	// control bar options
 	m_pControlBarOptionsForm = new ControlBarOptionsForm(m_settings.getControlBarOptions());
-	iControlBarOptions = m_pPagesWidget->addWidget(m_pControlBarOptionsForm);
+	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pControlBarOptionsForm));
 
 	// Attention Getter
 	m_pAttentionSetupForm = new AttentionSetupForm(m_settings.getAttentionGetterSettings(), m_settings.getStimulusDisplayInfo());
-	iAttentionSetupForm = m_pPagesWidget->addWidget(m_pAttentionSetupForm);
+	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pAttentionSetupForm));
 
 	// Look settings
 	m_pLookSettingsWidget = new HLookSettingsWidget(m_settings.getHLookSettings());
-	iLookSettingsWidget = m_pPagesWidget->addWidget(m_pLookSettingsWidget);
+	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pLookSettingsWidget));
 
-
-
-#if 1
+#if 0
 	// Build the General items
 	HExperimentTreeWidgetItem* ptwiGeneral = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "General");
 	//HExperimentTreeWidgetItem* ptwiStimulusDisplayInfo =
@@ -288,94 +295,52 @@ void GUILib::HExperimentMain::createComponents()
 	new HExperimentTreeWidgetItem(ptwiGeneral, iAttentionSetupForm, "Intertrial Interval");
 	//HExperimentTreeWidgetItem* ptwiLookSettings =
 	new HExperimentTreeWidgetItem(ptwiGeneral, iLookSettingsWidget, "Look Settings");
+#endif
 
-	HExperimentTreeWidgetItem* ptwiPhases = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "Phases");
-
-	// iterate over phases, create page for each, add to tree as children of ptwiPhases
-
+#if 0
+	// Now build phase stuff
+	HExperimentTreeWidgetItem* ptwiPhases = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "Phases", true);
 	QListIterator<HPhaseSettings> phaseIterator = m_settings.phaseIterator();
 	while (phaseIterator.hasNext())
 	{
 		const Habit::HPhaseSettings& ps = phaseIterator.next();
 
 		// create phase settings widget and add to stack widget
-		HPhaseSettingsWidget* pPhaseSettingsWidget = new HPhaseSettingsWidget(ps);
-		int item = m_pPagesWidget->addWidget(pPhaseSettingsWidget);
+		//HPhaseSettingsWidget* pPhaseSettingsWidget = new HPhaseSettingsWidget(ps);
+		//int item = m_pPagesWidget->addWidget(pPhaseSettingsWidget);
+		HPhaseSettingsTabWidget* pPhaseSettingsTabWidget = new HPhaseSettingsTabWidget(ps, ps.getName(), m_settings.getStimulusDisplayInfo());
+		int item = m_pPagesWidget->addWidget(pPhaseSettingsTabWidget);
 
-		new HExperimentTreeWidgetItem(ptwiPhases, item, ps.getName());
+		new HExperimentTreeWidgetItem(ptwiPhases, item, ps.getName(), true);
 	}
 
+	m_pPhaseToolBar = new QToolBar();
+	m_actionNewPhase = new QAction(QIcon(":/resources/plus.png"), "Add new phase", this);
+	m_actionDelPhase = new QAction(QIcon(":/resources/delete.png"), "Delete selected phase", this);
+	m_pPhaseToolBar->addAction(m_actionNewPhase);
+	connect(m_actionNewPhase, SIGNAL(triggered()), this, SLOT(addPhase()));
+	m_pPhaseToolBar->addAction(m_actionDelPhase);
+	connect(m_actionDelPhase, SIGNAL(triggered()), this, SLOT(delPhase()));
 
+	QVBoxLayout *vboxContents = new QVBoxLayout;
+	vboxContents->addWidget(m_pContentsWidget);
+	vboxContents->addWidget(m_pPhaseToolBar);
 #else
-	// pretest trial settings
-	m_pPreTestPhaseWidget = new HPhaseSettingsWidget(m_settings.getPreTestPhaseSettings());
-	iPreTestPhaseWidget = m_pPagesWidget->addWidget(m_pPreTestPhaseWidget);
 
-	// pretest stimuli
-	m_pPreTestStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getPreTestStimuliSettings(), m_settings.getStimulusDisplayInfo());
-	m_stackidPreTestStimuli = m_pPagesWidget->addWidget(m_pPreTestStimuliWidget);
-
-	// habituation trial settings
-	m_pHabituationPhaseWidget = new HPhaseSettingsWidget(m_settings.getHabituationPhaseSettings());
-	iHabituationPhaseWidget = m_pPagesWidget->addWidget(m_pHabituationPhaseWidget);
-
-	// habituation criteria
-	//m_pHabituationSetupForm = new HabituationSetupForm(m_settings.getHabituationSettings());
-	//iHabituationSetupForm = m_pPagesWidget->addWidget(m_pHabituationSetupForm);
-	m_pHabituationSetupWidget = new GUILib::HHabituationSetupWidget(m_settings.getHabituationSettings());
-	iHabituationSetupWidget = m_pPagesWidget->addWidget(m_pHabituationSetupWidget);
-
-	// habituation stimuli
-	m_pHabituationStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getHabituationStimuliSettings(), m_settings.getStimulusDisplayInfo());
-	m_stackidHabituationStimuli = m_pPagesWidget->addWidget(m_pHabituationStimuliWidget);
-
-	// test trial settings
-	m_pTestPhaseWidget = new HPhaseSettingsWidget(m_settings.getTestPhaseSettings());
-	iTestPhaseWidget = m_pPagesWidget->addWidget(m_pTestPhaseWidget);
-
-	// test stimuli
-	m_pTestStimuliWidget = new GUILib::HStimuliSettingsWidget(m_settings.getTestStimuliSettings(), m_settings.getStimulusDisplayInfo());
-	m_stackidTestStimuli = m_pPagesWidget->addWidget(m_pTestStimuliWidget);
+	m_pPhaseListWidget = new HPhaseListWidget(m_settings.getPhaseNames());
 
 
-	// Build the General items
-	HExperimentTreeWidgetItem* ptwiGeneral = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "General");
-	//HExperimentTreeWidgetItem* ptwiStimulusDisplayInfo =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iStimulusDisplayInfo, "Stimulus Display");
-	//HExperimentTreeWidgetItem* ptwiControlBar =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iControlBarOptions, "Control Panel Display Options");
-	//HExperimentTreeWidgetItem* ptwiAttentionGetter =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iAttentionSetupForm, "Intertrial Interval");
-	//HExperimentTreeWidgetItem* ptwiLookSettings =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iLookSettingsWidget, "Look Settings");
+	QVBoxLayout *vboxContents = new QVBoxLayout;
+//	vboxContents->addWidget(m_pContentsWidget);
+	vboxContents->addWidget(new QLabel("Experiment Settings"));
+	vboxContents->addWidget(m_pGeneralListView);
+	vboxContents->addWidget(m_pPhaseListWidget);
+	vboxContents->addStretch(1);
 
-	// PreTest stuff
-	HExperimentTreeWidgetItem* ptwiPreTest = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "PreTest Phase");
-	//HExperimentTreeWidgetItem* ptwiPreTestSettings =
-	new HExperimentTreeWidgetItem(ptwiPreTest, iPreTestPhaseWidget, "Trial Settings");
-	//HExperimentTreeWidgetItem* ptwiPreTestStimuli =
-	new HExperimentTreeWidgetItem(ptwiPreTest, m_stackidPreTestStimuli, "Stimuli");
-
-	// habituation stuff
-	HExperimentTreeWidgetItem* ptwiHabituation = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "Habituation Phase");
-	//HExperimentTreeWidgetItem* ptwiHabituationTrialSettings =
-	new HExperimentTreeWidgetItem(ptwiHabituation, iHabituationPhaseWidget, "Trial Settings");
-	//HExperimentTreeWidgetItem* ptwiHabituationStimuli =
-	new HExperimentTreeWidgetItem(ptwiHabituation, m_stackidHabituationStimuli, "Stimuli");
-	//HExperimentTreeWidgetItem* ptwiHabituationSetup =
-	new HExperimentTreeWidgetItem(ptwiHabituation, iHabituationSetupWidget, "Habituation Settings");
-
-	// Test stuff
-	HExperimentTreeWidgetItem* ptwiTest = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "Test Phase");
-	//HExperimentTreeWidgetItem* ptwiTestSettings =
-	new HExperimentTreeWidgetItem(ptwiTest, iTestPhaseWidget, "Trial Settings");
-	//HExperimentTreeWidgetItem* ptwiTestStimuli =
-	new HExperimentTreeWidgetItem(ptwiTest, m_stackidTestStimuli, "Stimuli");
 #endif
-
-
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
-    horizontalLayout->addWidget(m_pContentsWidget);
+    //horizontalLayout->addWidget(m_pContentsWidget);
+    horizontalLayout->addLayout(vboxContents);
     horizontalLayout->addWidget(m_pPagesWidget, 1);
 
     m_pbExport = new QPushButton("Export");
@@ -398,10 +363,9 @@ void GUILib::HExperimentMain::createComponents()
     setWindowTitle(QString("Experiment Settings"));
 
 
- }
+}
 
-
-Habit::StimulusSettings GUILib::HExperimentMain::getTestSS()
+Habit::StimulusSettings HExperimentMain::getTestSS()
 {
 	Habit::StimulusSettings ss;
 	Habit::StimulusInfo l, c, r, s;
@@ -427,3 +391,4 @@ Habit::StimulusSettings GUILib::HExperimentMain::getTestSS()
 }
 
 
+}; /* namespace GUILib */

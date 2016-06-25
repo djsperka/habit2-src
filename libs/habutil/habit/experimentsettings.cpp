@@ -457,3 +457,10 @@ const HPhaseSettings& Habit::ExperimentSettings::phaseAt(const QString& name) co
 	return f_dummyPhaseSettings;
 }
 
+QStringList Habit::ExperimentSettings::getPhaseNames() const
+{
+	QStringList list;
+	for (unsigned int i=0; i<m_phases.size(); i++)
+		list << m_phases.at(i).getName();
+	return list;
+}

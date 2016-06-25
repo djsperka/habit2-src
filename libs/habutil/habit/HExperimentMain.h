@@ -9,9 +9,14 @@
 #define HEXPERIMENTMAIN_H_
 
 #include "experimentsettings.h"
+#include "HPhaseListWidget.h"
 #include <QDialog>
 #include <QTreeWidget>
+#include <QListView>
 #include <QStackedWidget>
+#include <QVector>
+#include <QToolBar>
+#include <QAction>
 
 namespace GUILib
 {
@@ -19,9 +24,10 @@ namespace GUILib
 	class ControlBarOptionsForm;
 	class HLookSettingsWidget;
 	class AttentionSetupForm;
-	class HPhaseSettingsWidget;
+	class HPhaseSettingsTabWidget;
+	//class HPhaseSettingsWidget;
 	//class HabituationSetupForm;
-	class HStimuliSettingsWidget;
+	//class HStimuliSettingsWidget;
 	class HHabituationSetupWidget;
 
 	class HExperimentMain : public QDialog
@@ -37,6 +43,7 @@ namespace GUILib
 
 	private slots:
 		void currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+		void generalItemClicked(const QModelIndex& index);
 		void cancelButtonClicked();
 		void saveButtonClicked();
 		void exportButtonClicked();
@@ -49,16 +56,19 @@ namespace GUILib
 		Habit::StimulusSettings getTestSS();
 
 		Habit::ExperimentSettings m_settings;
-		int m_stackidPreTestStimuli;
-		int m_stackidHabituationStimuli;
-		int m_stackidTestStimuli;
+		QListView *m_pGeneralListView;
 		QTreeWidget *m_pContentsWidget;
 		QStackedWidget *m_pPagesWidget;
-		QWidget* m_pBlank;
+		//QWidget* m_pBlank;
 		GUILib::HStimulusDisplayInfoWidget* m_pStimulusDisplayInfoWidget;
 		GUILib::ControlBarOptionsForm* m_pControlBarOptionsForm;
 		GUILib::HLookSettingsWidget* m_pLookSettingsWidget;
 		GUILib::AttentionSetupForm* m_pAttentionSetupForm;
+		QVector<GUILib::HPhaseSettingsTabWidget*> m_pvecPhaseSettingsWidgets;
+		QVector<int> m_vecStackPages;
+		HPhaseListWidget *m_pPhaseListWidget;
+
+		/*
 		GUILib::HPhaseSettingsWidget* m_pPreTestPhaseWidget;
 		GUILib::HStimuliSettingsWidget* m_pPreTestStimuliWidget;
 		GUILib::HPhaseSettingsWidget* m_pHabituationPhaseWidget;
@@ -66,6 +76,7 @@ namespace GUILib
 		GUILib::HHabituationSetupWidget* m_pHabituationSetupWidget;
 		GUILib::HPhaseSettingsWidget* m_pTestPhaseWidget;
 		GUILib::HStimuliSettingsWidget*  m_pTestStimuliWidget;
+		*/
 		QPushButton* m_pbCancel;
 		QPushButton* m_pbSave;
 		QPushButton* m_pbExport;

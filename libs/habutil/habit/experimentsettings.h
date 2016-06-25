@@ -9,6 +9,7 @@
 #include <QMap>
 #include <QList>
 #include <QListIterator>
+#include <QStringList>
 #include "monitorsettings.h"
 #include "controlbaroptions.h"
 #include "habituationsettings.h"
@@ -70,6 +71,7 @@ public:
 
 	const QList<HPhaseSettings>& phases() const { return m_phases; };
 	QList<HPhaseSettings>& phases() { return m_phases; };
+	QStringList getPhaseNames() const;
 
 	void setPhases(const QList<HPhaseSettings>& phases) { m_phases = phases; };
 
