@@ -1,7 +1,7 @@
 MAKEFILE = Makefile.qmake
 TEMPLATE = subdirs
 CONFIG += qt debug_and_release
-SUBDIRS = habutil habit
+SUBDIRS = habutil habit testlv testsw
 habutil.subdir = libs/habutil
 habit.subdir = apps/habit
 habit.depends = habutil
@@ -9,3 +9,7 @@ testmm.subdir = apps/testmm
 testmm.depends = habutil
 testkeypadld.subdir = apps/testkeypadld
 testkeypadld.depends = habutil
+testlv.subdir = apps/testlv
+testlv.depends = habutil
+testsw.subdir = apps/testsw
+testsw.depends = habutil
