@@ -317,7 +317,11 @@ void MainDao::addOrUpdateStimuliSettings(int phaseId, Habit::StimuliSettings& st
 }
 
 
-// TODO: fix this WILL NOT WORK
+// TODO: Insert statement below puts "0" in for experiment_id. In a future release,
+// that column should be dropped from stimulus table (it is NOT NULL). Its not used
+// any more, but it was a crucial link in getting attention stimulus connected....so keep
+// it around just in case. Similar for "context" column. Using phase_id eliminates need for
+// both.
 void MainDao::addOrUpdateStimulusSettings(int phaseID, Habit::StimulusSettings& ss)
 {
 	QString sql;
@@ -330,7 +334,7 @@ void MainDao::addOrUpdateStimulusSettings(int phaseID, Habit::StimulusSettings& 
 	else
 	{
 		// insert into stimulus table. Make sure to set Id in ss object - it will be used to add/update stimfiles.
-		sql = "insert into stimulus (name, phase_id) values (?, ?)";
+		sql = "insert into stimulus (name, phase_id, experiment_id, context) values (?, ?, 0, 0)";
 	}
 	q.prepare(sql);
 	q.addBindValue(QVariant(ss.getName()));
