@@ -8,7 +8,6 @@ CONFIG(debug, debug|release) {
 	DESTDIR = release
 }
 
-
 HEADERS +=	HLook.h \
 			HLooker.h \
 			HLookerReprocessor.h \
@@ -77,6 +76,8 @@ HEADERS +=	HLook.h \
 			habit/HLookSettingsWidget.h \
 			habit/HPhaseSettings.h \
 			habit/HPhaseSettingsWidget.h \
+			habit/HPhaseSettingsTabWidget.h \
+			habit/HPhaseListWidget.h \
 			habit/HOrderSettings.h \
 			habit/HMonitorSettingsWidget.h \
 			habit/HStimulusDisplayInfoWidget.h \
@@ -179,6 +180,8 @@ SOURCES +=	HLook.cpp \
 			habit/HLookSettingsWidget.cpp \
 			habit/HPhaseSettings.cpp \
 			habit/HPhaseSettingsWidget.cpp \
+			habit/HPhaseSettingsTabWidget.cpp \
+			habit/HPhaseListWidget.cpp \
 			habit/HOrderSettings.cpp \
 			habit/HMonitorSettingsWidget.cpp \
 			habit/HStimulusDisplayInfoWidget.cpp \
