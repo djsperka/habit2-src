@@ -26,6 +26,9 @@ namespace GUILib
 		QToolBar *m_pPhaseToolBar;
 		QAction *m_actionNewPhase;
 		QAction *m_actionDelPhase;
+		QAction *m_actionUpPhase;
+		QAction *m_actionDownPhase;
+		QAction *m_actionEditPhase;
 
 		void components();
 		void connections();
@@ -33,10 +36,16 @@ namespace GUILib
 	public:
 		HPhaseListWidget(const QStringList& phaseNames, QWidget* parent=NULL);
 		virtual ~HPhaseListWidget();
+		void clearSelection();
+		QString selectedPhase();
 
-	private slots:
+	signals:
+		void phaseListViewItemClicked(const QModelIndex&);
 		void addPhase();
 		void delPhase();
+		void upPhase();
+		void downPhase();
+		void editPhase();
 	};
 
 };

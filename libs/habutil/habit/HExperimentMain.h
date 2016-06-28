@@ -42,15 +42,21 @@ namespace GUILib
 		void closeEvent(QCloseEvent *event);
 
 	private slots:
-		void currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+
 		void generalItemClicked(const QModelIndex& index);
 		void cancelButtonClicked();
 		void saveButtonClicked();
 		void exportButtonClicked();
+		void phaseListViewItemClicked(const QModelIndex&);
+		void addPhase();
+		void delPhase();
+		void editPhase();
+		void upPhase();
+		void downPhase();
 
 	private:
-		void createComponents();
-		void makeConnections();
+		void components();
+		void connections();
 		bool isModified();
 		Habit::ExperimentSettings getSettings();	// get settings from current state of all forms
 		Habit::StimulusSettings getTestSS();

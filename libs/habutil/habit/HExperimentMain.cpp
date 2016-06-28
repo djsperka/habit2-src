@@ -27,22 +27,28 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 : QDialog(parent)
 , m_settings(experimentSettings)
 {
-	createComponents();
-	makeConnections();
+	components();
+	connections();
 	setWindowTitle(QString("Edit Experiment Settings: %1").arg(m_settings.getName()));
 
 	// this dialog is read-only when used to view results, e.g.
 	m_pbSave->setDisabled(bReadOnly);
  }
 
-void HExperimentMain::makeConnections()
+void HExperimentMain::connections()
 {
-//	connect(m_pContentsWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
-//			this, SLOT(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
 	connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(generalItemClicked(const QModelIndex&)));
 	connect(m_pbCancel, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
 	connect(m_pbSave, SIGNAL(clicked()), this, SLOT(saveButtonClicked()));
 	connect(m_pbExport, SIGNAL(clicked()), this, SLOT(exportButtonClicked()));
+
+	//connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), m_pPhaseListWidget, SLOT(generalListViewItemClicked(const QModelIndex&)));
+	connect(m_pPhaseListWidget, SIGNAL(phaseListViewItemClicked(const QModelIndex&)), this, SLOT(phaseListViewItemClicked(const QModelIndex&)));
+	connect(m_pPhaseListWidget, SIGNAL(addPhase()), this, SLOT(addPhase()));
+	connect(m_pPhaseListWidget, SIGNAL(delPhase()), this, SLOT(delPhase()));
+	connect(m_pPhaseListWidget, SIGNAL(editPhase()), this, SLOT(editPhase()));
+	connect(m_pPhaseListWidget, SIGNAL(upPhase()), this, SLOT(upPhase()));
+	connect(m_pPhaseListWidget, SIGNAL(downPhase()), this, SLOT(downPhase()));
 
 	qCritical() << "RE-CONNECT to stimulus layout changes. See HExperimentMain::makeConnections()";
 	/*
@@ -99,34 +105,44 @@ void HExperimentMain::exportButtonClicked()
 void HExperimentMain::generalItemClicked(const QModelIndex& index)
 {
 //	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
+	m_pPhaseListWidget->clearSelection();
 	m_pPagesWidget->setCurrentIndex(m_vecStackPages.at(index.row()));
 }
 
-void HExperimentMain::currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous)
+void HExperimentMain::phaseListViewItemClicked(const QModelIndex& index)
 {
-	Q_UNUSED(previous);
-	HExperimentTreeWidgetItem* p = static_cast<HExperimentTreeWidgetItem*>(current);
-	m_pPagesWidget->setCurrentIndex(p->stackid());
-
-	// If the currently selected item is a phase, enable the add/del buttons,
-	// otherwise disable them
-
-	if (p->isPhase())
-	{
-		//m_actionNewPhase->setEnabled(true);
-		//if (p->childCount() == 0)
-			//m_actionDelPhase->setEnabled(true);
-		//else
-			//m_actionDelPhase->setEnabled(false);
-	}
-	else
-	{
-		//m_actionNewPhase->setEnabled(false);
-		//ßm_actionDelPhase->setEnabled(false);
-	}
-
-
+//	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
+	m_pGeneralListView->selectionModel()->select(m_pGeneralListView->selectionModel()->selection(), QItemSelectionModel::Deselect);
 }
+
+
+void HExperimentMain::addPhase()
+{
+	QMessageBox::warning(this, "AddPhase", QString("Add Phase"));
+}
+
+void HExperimentMain::delPhase()
+{
+	QMessageBox::warning(this, "DelPhase", QString("Del Phase"));
+}
+
+void HExperimentMain::upPhase()
+{
+	QMessageBox::warning(this, "UpPhase", QString("Move Phase up"));
+}
+
+void HExperimentMain::downPhase()
+{
+	QMessageBox::warning(this, "DownPhase", QString("Move Phase down"));
+}
+
+void HExperimentMain::editPhase()
+{
+	QMessageBox::warning(this, "EditPhase", m_pPhaseListWidget->selectedPhase());
+}
+
+
+
 
 bool HExperimentMain::isModified()
 {
@@ -240,13 +256,8 @@ void HExperimentMain::closeEvent(QCloseEvent* event)
 	}
 }
 
-void HExperimentMain::createComponents()
+void HExperimentMain::components()
 {
-	//int iBlank;
-	//int iStimulusDisplayInfo;
-	//int iControlBarOptions;
-	//int iAttentionSetupForm;
-	//int iLookSettingsWidget;
 	QStringList slGeneral;
 	slGeneral << "Stimulus Display" << "Run-time Control Panel Display" << "Intertrial Interval" << "Look Settings";
 
@@ -255,18 +266,7 @@ void HExperimentMain::createComponents()
 	m_pGeneralListView->setCurrentIndex(m_pGeneralListView->model()->index(0, 0));
 	m_pGeneralListView->setFixedHeight(m_pGeneralListView->sizeHintForRow(0) * slGeneral.count() + 2*m_pGeneralListView->frameWidth());
 
-//	m_pContentsWidget = new QTreeWidget(this);
-//	m_pContentsWidget->setColumnCount(1);
-//	m_pContentsWidget->header()->hide();
 	m_pPagesWidget = new QStackedWidget;
-
-	// blank page
-	//m_pBlank = new QWidget();
-	//QPalette Pal(palette());
-	//Pal.setColor(QPalette::Background, Qt::gray);
-	//m_pBlank->setAutoFillBackground(true);
-	//m_pBlank->setPalette(Pal);
-	//iBlank = m_pPagesWidget->addWidget(m_pBlank);
 
 	// Stimulus display info
 	m_pStimulusDisplayInfoWidget = new HStimulusDisplayInfoWidget(m_settings.getStimulusDisplayInfo());
@@ -284,18 +284,6 @@ void HExperimentMain::createComponents()
 	m_pLookSettingsWidget = new HLookSettingsWidget(m_settings.getHLookSettings());
 	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pLookSettingsWidget));
 
-#if 0
-	// Build the General items
-	HExperimentTreeWidgetItem* ptwiGeneral = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "General");
-	//HExperimentTreeWidgetItem* ptwiStimulusDisplayInfo =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iStimulusDisplayInfo, "Stimulus Display");
-	//HExperimentTreeWidgetItem* ptwiControlBar =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iControlBarOptions, "Control Panel Display Options");
-	//HExperimentTreeWidgetItem* ptwiAttentionGetter =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iAttentionSetupForm, "Intertrial Interval");
-	//HExperimentTreeWidgetItem* ptwiLookSettings =
-	new HExperimentTreeWidgetItem(ptwiGeneral, iLookSettingsWidget, "Look Settings");
-#endif
 
 #if 0
 	// Now build phase stuff

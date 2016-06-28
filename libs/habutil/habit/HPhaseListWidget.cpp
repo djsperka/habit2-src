@@ -30,13 +30,23 @@ void  GUILib::HPhaseListWidget::components()
 	m_pListView = new QListView(this);
 
 	m_pPhaseToolBar = new QToolBar();
-	m_actionNewPhase = new QAction(QIcon(":/resources/plus.png"), "Add new phase", this);
-	m_actionDelPhase = new QAction(QIcon(":/resources/delete.png"), "Delete selected phase", this);
+	m_actionNewPhase = new QAction(QIcon(":/resources/expt-main/p-add.png"), "Add new phase", this);
+	m_actionDelPhase = new QAction(QIcon(":/resources/expt-main/p-delete.png"), "Delete selected phase", this);
+	m_actionUpPhase = new QAction(QIcon(":/resources/expt-main/p-up.png"), "Move selected phase up", this);
+	m_actionDownPhase = new QAction(QIcon(":/resources/expt-main/p-down.png"), "Move selected phase down", this);
+	m_actionEditPhase = new QAction(QIcon(":/resources/expt-main/p-edit.png"), "Edit selected phase", this);
 	m_pPhaseToolBar->addAction(m_actionNewPhase);
-	connect(m_actionNewPhase, SIGNAL(triggered()), this, SLOT(addPhase()));
+	connect(m_actionNewPhase, SIGNAL(triggered()), this, SIGNAL(addPhase()));
 	m_pPhaseToolBar->addAction(m_actionDelPhase);
-	connect(m_actionDelPhase, SIGNAL(triggered()), this, SLOT(delPhase()));
+	connect(m_actionDelPhase, SIGNAL(triggered()), this, SIGNAL(delPhase()));
+	m_pPhaseToolBar->addAction(m_actionEditPhase);
+	connect(m_actionEditPhase, SIGNAL(triggered()), this, SIGNAL(editPhase()));
+	m_pPhaseToolBar->addAction(m_actionUpPhase);
+	connect(m_actionUpPhase, SIGNAL(triggered()), this, SIGNAL(upPhase()));
+	m_pPhaseToolBar->addAction(m_actionDownPhase);
+	connect(m_actionDownPhase, SIGNAL(triggered()), this, SIGNAL(downPhase()));
 
+	connect(m_pListView, SIGNAL(clicked(const QModelIndex&)), this, SIGNAL(phaseListViewItemClicked(const QModelIndex&)));
 
 	QVBoxLayout *pvbox = new QVBoxLayout;
 	pvbox->addWidget(new QLabel("Phases"));
@@ -45,19 +55,24 @@ void  GUILib::HPhaseListWidget::components()
 	setLayout(pvbox);
 }
 
+void HPhaseListWidget::clearSelection()
+{
+	m_pListView->selectionModel()->select(m_pListView->selectionModel()->selection(), QItemSelectionModel::Deselect);
+}
+
 void HPhaseListWidget::connections()
 {
 
 }
 
-void GUILib::HPhaseListWidget::addPhase()
+QString HPhaseListWidget::selectedPhase()
 {
-	QMessageBox::warning(this, "AddPhase", QString("Add Phase"));
-}
-
-void GUILib::HPhaseListWidget::delPhase()
-{
-	QMessageBox::warning(this, "DelPhase", QString("Del Phase"));
-
-	// delete this phase?
+	QString s;
+	QModelIndexList miList = m_pListView->selectionModel()->selectedIndexes();
+	if (miList.size() == 1)
+	{
+		QStringListModel *model = dynamic_cast<QStringListModel*>(m_pListView->model());
+		s = model->data(miList.at(0), Qt::DisplayRole).toString();
+	}
+	return s;
 }
