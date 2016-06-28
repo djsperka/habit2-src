@@ -20,6 +20,11 @@
     <file>resources/reliabilities.png</file>
     <file>resources/attention.png</file> 
     <file>resources/stim-now-playing.png</file>
+    <file>resources/expt-main/p-add.png</file>
+    <file>resources/expt-main/p-delete.png</file>
+    <file>resources/expt-main/p-up.png</file>
+    <file>resources/expt-main/p-down.png</file>
+    <file>resources/expt-main/p-edit.png</file>
     <file>resources/stim/AG7_5.avi</file>
     <file>resources/stim/FourCirclesColor1config6.jpg</file>
     <file>resources/stim/FourCirclesColor4config1.jpg</file>
