@@ -42,7 +42,7 @@ void HPhaseSettingsWidget::setValidators()
 //TODO: NTrials is now in habituation criteria!
 void HPhaseSettingsWidget::initialize()
 {
-	ui->gbxEnabled->setChecked(m_settings.getIsEnabled());
+	//TODO ui->gbxEnabled->setChecked(m_settings.getIsEnabled());
 	ui->cbxUseLookSettings->setChecked(m_settings.getUseLookingCriteria());
 	ui->rbSingleCompleteLook->setChecked(m_settings.getIsSingleLook());
 	ui->rbAccumulatedLookTime->setChecked(m_settings.getIsMaxAccumulatedLookTime());
@@ -80,7 +80,7 @@ const HPhaseSettings& HPhaseSettingsWidget::getHPhaseSettings()
 
 	// Update m_settings with the current contents of all the little checkboxes etc.
 
-	m_settings.setIsEnabled(ui->gbxEnabled->isChecked());
+	// TODO m_settings.setIsEnabled(ui->gbxEnabled->isChecked());
 	m_settings.setUseLookingCriteria(ui->cbxUseLookSettings->isChecked());
 	m_settings.setIsSingleLook(ui->rbSingleCompleteLook->isChecked());
 	m_settings.setIsMaxAccumulatedLookTime(ui->rbAccumulatedLookTime->isChecked());

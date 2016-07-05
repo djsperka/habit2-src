@@ -10,6 +10,7 @@
 
 #include <QWidget>
 #include <QStringList>
+#include <QStringListModel>
 #include <QListView>
 #include <QToolBar>
 #include <QAction>
@@ -23,12 +24,12 @@ namespace GUILib
 
 	private:
 		QListView *m_pListView;
+		QStringListModel *m_pModel;
 		QToolBar *m_pPhaseToolBar;
 		QAction *m_actionNewPhase;
 		QAction *m_actionDelPhase;
 		QAction *m_actionUpPhase;
 		QAction *m_actionDownPhase;
-		QAction *m_actionEditPhase;
 
 		void components();
 		void connections();
@@ -38,6 +39,11 @@ namespace GUILib
 		virtual ~HPhaseListWidget();
 		void clearSelection();
 		QString selectedPhase();
+		int selectedPhaseIndex();
+		int phaseCount();
+		void movePhaseDown();
+		void movePhaseUp();
+		void removePhase(int row);
 
 	signals:
 		void phaseListViewItemClicked(const QModelIndex&);
@@ -45,7 +51,11 @@ namespace GUILib
 		void delPhase();
 		void upPhase();
 		void downPhase();
-		void editPhase();
+
+	public slots:
+		void phaseClicked();
+		void phaseNameChanged(const QString&);
+		void phaseEnabledClicked(bool);
 	};
 
 };

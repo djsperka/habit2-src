@@ -43,14 +43,13 @@ namespace GUILib
 
 	private slots:
 
-		void generalItemClicked(const QModelIndex& index);
+		void generalListViewItemClicked(const QModelIndex& index);
 		void cancelButtonClicked();
 		void saveButtonClicked();
 		void exportButtonClicked();
 		void phaseListViewItemClicked(const QModelIndex&);
 		void addPhase();
 		void delPhase();
-		void editPhase();
 		void upPhase();
 		void downPhase();
 
@@ -65,24 +64,16 @@ namespace GUILib
 		QListView *m_pGeneralListView;
 		QTreeWidget *m_pContentsWidget;
 		QStackedWidget *m_pPagesWidget;
-		//QWidget* m_pBlank;
+
 		GUILib::HStimulusDisplayInfoWidget* m_pStimulusDisplayInfoWidget;
 		GUILib::ControlBarOptionsForm* m_pControlBarOptionsForm;
 		GUILib::HLookSettingsWidget* m_pLookSettingsWidget;
 		GUILib::AttentionSetupForm* m_pAttentionSetupForm;
+
 		QVector<GUILib::HPhaseSettingsTabWidget*> m_pvecPhaseSettingsWidgets;
 		QVector<int> m_vecStackPages;
 		HPhaseListWidget *m_pPhaseListWidget;
 
-		/*
-		GUILib::HPhaseSettingsWidget* m_pPreTestPhaseWidget;
-		GUILib::HStimuliSettingsWidget* m_pPreTestStimuliWidget;
-		GUILib::HPhaseSettingsWidget* m_pHabituationPhaseWidget;
-		GUILib::HStimuliSettingsWidget*  m_pHabituationStimuliWidget;
-		GUILib::HHabituationSetupWidget* m_pHabituationSetupWidget;
-		GUILib::HPhaseSettingsWidget* m_pTestPhaseWidget;
-		GUILib::HStimuliSettingsWidget*  m_pTestStimuliWidget;
-		*/
 		QPushButton* m_pbCancel;
 		QPushButton* m_pbSave;
 		QPushButton* m_pbExport;

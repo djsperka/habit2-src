@@ -37,20 +37,18 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 
 void HExperimentMain::connections()
 {
-	connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(generalItemClicked(const QModelIndex&)));
+	connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(generalListViewItemClicked(const QModelIndex&)));
 	connect(m_pbCancel, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
 	connect(m_pbSave, SIGNAL(clicked()), this, SLOT(saveButtonClicked()));
 	connect(m_pbExport, SIGNAL(clicked()), this, SLOT(exportButtonClicked()));
 
-	//connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), m_pPhaseListWidget, SLOT(generalListViewItemClicked(const QModelIndex&)));
 	connect(m_pPhaseListWidget, SIGNAL(phaseListViewItemClicked(const QModelIndex&)), this, SLOT(phaseListViewItemClicked(const QModelIndex&)));
 	connect(m_pPhaseListWidget, SIGNAL(addPhase()), this, SLOT(addPhase()));
 	connect(m_pPhaseListWidget, SIGNAL(delPhase()), this, SLOT(delPhase()));
-	connect(m_pPhaseListWidget, SIGNAL(editPhase()), this, SLOT(editPhase()));
 	connect(m_pPhaseListWidget, SIGNAL(upPhase()), this, SLOT(upPhase()));
 	connect(m_pPhaseListWidget, SIGNAL(downPhase()), this, SLOT(downPhase()));
 
-	qCritical() << "RE-CONNECT to stimulus layout changes. See HExperimentMain::makeConnections()";
+	qCritical() << "RE-CONNECT to stimulus layout changes. See HExperimentMain::connections()";
 	/*
 	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pPreTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
 	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pHabituationStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
@@ -102,7 +100,7 @@ void HExperimentMain::exportButtonClicked()
 	}
 }
 
-void HExperimentMain::generalItemClicked(const QModelIndex& index)
+void HExperimentMain::generalListViewItemClicked(const QModelIndex& index)
 {
 //	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
 	m_pPhaseListWidget->clearSelection();
@@ -111,10 +109,9 @@ void HExperimentMain::generalItemClicked(const QModelIndex& index)
 
 void HExperimentMain::phaseListViewItemClicked(const QModelIndex& index)
 {
-//	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
 	m_pGeneralListView->selectionModel()->select(m_pGeneralListView->selectionModel()->selection(), QItemSelectionModel::Deselect);
+	m_pPagesWidget->setCurrentIndex(4 + m_pPhaseListWidget->selectedPhaseIndex());
 }
-
 
 void HExperimentMain::addPhase()
 {
@@ -123,26 +120,60 @@ void HExperimentMain::addPhase()
 
 void HExperimentMain::delPhase()
 {
-	QMessageBox::warning(this, "DelPhase", QString("Del Phase"));
+	QString sQuestion = QString("Are you sure you want to delete phase \"%1\"?").arg(m_pPhaseListWidget->selectedPhase());
+	if (QMessageBox::Yes == QMessageBox::question(this, "Delete phase?", sQuestion, QMessageBox::Yes|QMessageBox::No, QMessageBox::No))
+	{
+		int iRefocusIndex;
+		int iPhaseIndex = m_pPhaseListWidget->selectedPhaseIndex();
+		int iToBeRemoved = 4 + iPhaseIndex;
+		if (m_pPhaseListWidget->phaseCount() == 1)
+			iRefocusIndex = -1;	// refocus in m_pGeneralListView
+		else
+			if (iPhaseIndex == m_pPhaseListWidget->phaseCount()-1)
+				iRefocusIndex = iPhaseIndex-1;
+			else
+				iRefocusIndex = iPhaseIndex;
+
+		// Now remove widget
+		m_pPagesWidget->removeWidget(m_pPagesWidget->widget(iToBeRemoved));
+
+		// remove from StringListModel...
+		m_pPhaseListWidget->removePhase(iPhaseIndex);
+
+		// Refocus selection on first page for simplicity.
+		m_pPhaseListWidget->clearSelection();
+		m_pPagesWidget->setCurrentIndex(0);
+		m_pGeneralListView->setCurrentIndex(m_pGeneralListView->model()->index(0, 0));
+	}
 }
 
 void HExperimentMain::upPhase()
 {
-	QMessageBox::warning(this, "UpPhase", QString("Move Phase up"));
+	// need to swap the widgets in the QTabWidget
+	int iToBeMoved = 4+m_pPhaseListWidget->selectedPhaseIndex();
+	QWidget* pWidgetToBeMoved = m_pPagesWidget->widget(iToBeMoved);
+	m_pPagesWidget->removeWidget(pWidgetToBeMoved);
+	m_pPagesWidget->insertWidget(iToBeMoved-1, pWidgetToBeMoved);
+	m_pPagesWidget->setCurrentIndex(iToBeMoved-1);
+
+	// Move the phase name up in the QListWidget
+	m_pPhaseListWidget->movePhaseUp();
+	m_pPhaseListWidget->phaseClicked();
 }
 
 void HExperimentMain::downPhase()
 {
-	QMessageBox::warning(this, "DownPhase", QString("Move Phase down"));
+	// need to swap the widgets in the QTabWidget
+	int iToBeMoved = 4+m_pPhaseListWidget->selectedPhaseIndex();
+	QWidget* pWidgetToBeMoved = m_pPagesWidget->widget(iToBeMoved);
+	m_pPagesWidget->removeWidget(pWidgetToBeMoved);
+	m_pPagesWidget->insertWidget(iToBeMoved+1, pWidgetToBeMoved);
+	m_pPagesWidget->setCurrentIndex(iToBeMoved+1);
+
+	// Move the phase name down in the QListWidget
+	m_pPhaseListWidget->movePhaseDown();
+	m_pPhaseListWidget->phaseClicked();
 }
-
-void HExperimentMain::editPhase()
-{
-	QMessageBox::warning(this, "EditPhase", m_pPhaseListWidget->selectedPhase());
-}
-
-
-
 
 bool HExperimentMain::isModified()
 {
@@ -263,6 +294,7 @@ void HExperimentMain::components()
 
 	m_pGeneralListView = new QListView(this);
 	m_pGeneralListView->setModel(new QStringListModel(slGeneral));
+	m_pGeneralListView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_pGeneralListView->setCurrentIndex(m_pGeneralListView->model()->index(0, 0));
 	m_pGeneralListView->setFixedHeight(m_pGeneralListView->sizeHintForRow(0) * slGeneral.count() + 2*m_pGeneralListView->frameWidth());
 
@@ -284,50 +316,28 @@ void HExperimentMain::components()
 	m_pLookSettingsWidget = new HLookSettingsWidget(m_settings.getHLookSettings());
 	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pLookSettingsWidget));
 
+	// create phase list widget
+	QStringList phaseNames = m_settings.getPhaseNames();
+	m_pPhaseListWidget = new HPhaseListWidget(phaseNames);
+	m_pPhaseListWidget->clearSelection();	// disables tool buttons
 
-#if 0
-	// Now build phase stuff
-	HExperimentTreeWidgetItem* ptwiPhases = new HExperimentTreeWidgetItem(m_pContentsWidget, iBlank, "Phases", true);
-	QListIterator<HPhaseSettings> phaseIterator = m_settings.phaseIterator();
-	while (phaseIterator.hasNext())
+	// add phase settings tab widgets...
+	QString s;
+	foreach(s, phaseNames)
 	{
-		const Habit::HPhaseSettings& ps = phaseIterator.next();
-
-		// create phase settings widget and add to stack widget
-		//HPhaseSettingsWidget* pPhaseSettingsWidget = new HPhaseSettingsWidget(ps);
-		//int item = m_pPagesWidget->addWidget(pPhaseSettingsWidget);
-		HPhaseSettingsTabWidget* pPhaseSettingsTabWidget = new HPhaseSettingsTabWidget(ps, ps.getName(), m_settings.getStimulusDisplayInfo());
-		int item = m_pPagesWidget->addWidget(pPhaseSettingsTabWidget);
-
-		new HExperimentTreeWidgetItem(ptwiPhases, item, ps.getName(), true);
+		HPhaseSettingsTabWidget *pTabWidget = new HPhaseSettingsTabWidget(m_settings.phaseAt(s), s, m_settings.getStimulusDisplayInfo());
+		m_pPagesWidget->addWidget(pTabWidget);
+		connect(pTabWidget, SIGNAL(phaseNameChanged(const QString&)), m_pPhaseListWidget, SLOT(phaseNameChanged(const QString&)));
+		connect(pTabWidget, SIGNAL(phaseEnabledClicked(bool)), m_pPhaseListWidget, SLOT(phaseEnabledClicked(bool)));
 	}
 
-	m_pPhaseToolBar = new QToolBar();
-	m_actionNewPhase = new QAction(QIcon(":/resources/plus.png"), "Add new phase", this);
-	m_actionDelPhase = new QAction(QIcon(":/resources/delete.png"), "Delete selected phase", this);
-	m_pPhaseToolBar->addAction(m_actionNewPhase);
-	connect(m_actionNewPhase, SIGNAL(triggered()), this, SLOT(addPhase()));
-	m_pPhaseToolBar->addAction(m_actionDelPhase);
-	connect(m_actionDelPhase, SIGNAL(triggered()), this, SLOT(delPhase()));
-
 	QVBoxLayout *vboxContents = new QVBoxLayout;
-	vboxContents->addWidget(m_pContentsWidget);
-	vboxContents->addWidget(m_pPhaseToolBar);
-#else
-
-	m_pPhaseListWidget = new HPhaseListWidget(m_settings.getPhaseNames());
-
-
-	QVBoxLayout *vboxContents = new QVBoxLayout;
-//	vboxContents->addWidget(m_pContentsWidget);
 	vboxContents->addWidget(new QLabel("Experiment Settings"));
 	vboxContents->addWidget(m_pGeneralListView);
 	vboxContents->addWidget(m_pPhaseListWidget);
 	vboxContents->addStretch(1);
 
-#endif
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
-    //horizontalLayout->addWidget(m_pContentsWidget);
     horizontalLayout->addLayout(vboxContents);
     horizontalLayout->addWidget(m_pPagesWidget, 1);
 
@@ -349,8 +359,6 @@ void HExperimentMain::components()
     setLayout(mainLayout);
 
     setWindowTitle(QString("Experiment Settings"));
-
-
 }
 
 Habit::StimulusSettings HExperimentMain::getTestSS()
