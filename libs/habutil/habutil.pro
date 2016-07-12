@@ -112,7 +112,9 @@ HEADERS +=	HLook.h \
 			habit/HExperimentStatusWidget.h \
 			habit/HHabituationSetupWidget.h \
 			habit/HStimulusOrderListItemDelegate.h \
-			habit/HStimulusNameLabelTableModel.h
+			habit/HStimulusNameLabelTableModel.h \
+			wizards/PhaseWizardPages.h
+			
 		
 
 SOURCES +=	HLook.cpp \
@@ -215,13 +217,13 @@ SOURCES +=	HLook.cpp \
 			habit/HExperimentStatusWidget.cpp \
 			habit/HHabituationSetupWidget.cpp \
 			habit/HStimulusOrderListItemDelegate.cpp \
-			habit/HStimulusNameLabelTableModel.cpp
+			habit/HStimulusNameLabelTableModel.cpp \
+			wizards/PhaseWizardPages.cpp
 			
 
 RESOURCES = habit/resources.qrc
 
 FORMS =		\
-#habit/cloneexperimentdialog.ui \
 			habit/controlbaroptionsform.ui \
 			habit/monitorsettingsform.ui \
 			habit/reliabilitiesform.ui \
@@ -240,5 +242,10 @@ FORMS =		\
 			habit/HExperimentStatusForm.ui \
 			habit/HLookSettingsForm.ui \
 			habit/HPhaseSettingsForm.ui \
-			habit/HHabituationSetupForm.ui 
-			
+			habit/HHabituationSetupForm.ui \
+			wizards/PhaseWPFirst.ui \
+			wizards/PhaseWPFamiliarizationSelect.ui \
+			wizards/PhaseWPMinLooking.ui \
+			wizards/PhaseWPHabit1.ui \
+			wizards/PhaseWPHabit2.ui \
+			wizards/PhaseWPFixedStim.ui
