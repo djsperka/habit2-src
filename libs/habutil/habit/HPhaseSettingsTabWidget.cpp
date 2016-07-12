@@ -30,8 +30,10 @@ HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& ph
 	hbox->addStretch(1);
 
 	m_pTabWidget = new QTabWidget(this);
+	m_pHabituationWidget = new HHabituationSetupWidget(phaseSettings.habituationSettings());
+	m_pTabWidget->addTab(m_pHabituationWidget, "Phase Settings");
 	m_pPhaseSettingsWidget = new HPhaseSettingsWidget(phaseSettings);
-	m_pTabWidget->addTab(m_pPhaseSettingsWidget, QString("Phase/Trial Settings"));
+	m_pTabWidget->addTab(m_pPhaseSettingsWidget, QString("Trial Settings"));
 	m_pStimuliWidget = new HStimuliSettingsWidget(labelName, phaseSettings.stimuli(), stimulusDisplayInfo);
 	m_pTabWidget->addTab(m_pStimuliWidget, QString("Stimuli"));
 

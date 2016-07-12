@@ -34,7 +34,7 @@ namespace GUILib
 	private:
 		void initializeComponents();
 		void initialize();
-
+		void connections();
 
 		Ui::HHabituationSetupForm *ui;
 		Habit::HabituationSettings m_settings;
