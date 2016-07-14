@@ -17,7 +17,7 @@
 #include "HStimulusDisplayInfoWidget.h"
 #include "HExperimentTreeWidgetItem.h"
 #include "HDBException.h"
-
+#include "PhaseWizardPages.h"
 using namespace Habit;
 
 namespace GUILib
@@ -115,7 +115,9 @@ void HExperimentMain::phaseListViewItemClicked(const QModelIndex& index)
 
 void HExperimentMain::addPhase()
 {
-	QMessageBox::warning(this, "AddPhase", QString("Add Phase"));
+	PhaseWizard wiz(m_pPhaseListWidget->currentPhaseNames(), this);
+	int i = wiz.exec();
+	qDebug() << "wiz return " << i;
 }
 
 void HExperimentMain::delPhase()

@@ -8,57 +8,74 @@
 #ifndef PHASEWPFIRST_H_
 #define PHASEWPFIRST_H_
 
+#include <QWizard>
 #include <QWizardPage>
+#include <QStringList>
 
 namespace Ui
 {
-	class PhaseWPFirst;
-	class PhaseWPFamiliarizationSelect;
-	class PhaseWPMinLooking;
-	class PhaseWPHabit1;
-	class PhaseWPHabit2;
-	class PhaseWPFixedStim;
+	class PhaseWPFirst;					// id = 1
+	class PhaseWPFamPref; 				// id = 2
+	class PhaseWPHabituation;			// id = 3
+	class PhaseWPHabit1;				// id = 4
+	class PhaseWPHabit2;				// id = 5
 }
 
 
 namespace GUILib
 {
+	class PhaseWizard: public QWizard
+	{
+		Q_OBJECT
+
+	public:
+		PhaseWizard(const QStringList& phaseNames, QWidget *parent = 0);
+		~PhaseWizard() {};
+
+	};
+
 	class PhaseWPFirst : public QWizardPage
 	{
 		Q_OBJECT
 
 	public:
-		PhaseWPFirst(QWidget* w = 0);
-		~PhaseWPFirst();
+		PhaseWPFirst(const QStringList& phaseNames, QWidget* w = 0);
+		~PhaseWPFirst() {};
+		int nextId() const;
+		bool validatePage();
 
 	private:
 		Ui::PhaseWPFirst *ui;
+		QStringList m_phaseNames;
 
 	};
 
-	class PhaseWPFamiliarizationSelect : public QWizardPage
+	class PhaseWPFamPref : public QWizardPage
 	{
 		Q_OBJECT
 
 	public:
-		PhaseWPFamiliarizationSelect(QWidget* w = 0);
-		~PhaseWPFamiliarizationSelect();
+		PhaseWPFamPref(QWidget* w = 0);
+		~PhaseWPFamPref() {};
+		int nextId() const { return -1; } // final button activated
+		bool validatePage();
 
 	private:
-		Ui::PhaseWPFamiliarizationSelect *ui;
+		Ui::PhaseWPFamPref *ui;
 
 	};
 
-	class PhaseWPMinLooking : public QWizardPage
+	class PhaseWPHabituation : public QWizardPage
 	{
 		Q_OBJECT
 
 	public:
-		PhaseWPMinLooking(QWidget* w = 0);
-		~PhaseWPMinLooking();
+		PhaseWPHabituation(QWidget* w = 0);
+		~PhaseWPHabituation() {};
+		int nextId() const;
 
 	private:
-		Ui::PhaseWPMinLooking *ui;
+		Ui::PhaseWPHabituation *ui;
 
 	};
 
@@ -68,7 +85,8 @@ namespace GUILib
 
 	public:
 		PhaseWPHabit1(QWidget* w = 0);
-		~PhaseWPHabit1();
+		~PhaseWPHabit1() {};
+		int nextId() const { return -1; } // final button activated
 
 	private:
 		Ui::PhaseWPHabit1 *ui;
@@ -81,23 +99,11 @@ namespace GUILib
 
 	public:
 		PhaseWPHabit2(QWidget* w = 0);
-		~PhaseWPHabit2();
+		~PhaseWPHabit2() {};
+		int nextId() const { return -1; } // final button activated
 
 	private:
 		Ui::PhaseWPHabit2 *ui;
-
-	};
-
-	class PhaseWPFixedStim : public QWizardPage
-	{
-		Q_OBJECT
-
-	public:
-		PhaseWPFixedStim(QWidget* w = 0);
-		~PhaseWPFixedStim();
-
-	private:
-		Ui::PhaseWPFixedStim *ui;
 
 	};
 

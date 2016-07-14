@@ -33,7 +33,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineeditTotalLookingTime"/>
+      <widget class="QLineEdit" name="leTotalLookingTime">
+       <property name="text">
+        <string>10000</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_12">

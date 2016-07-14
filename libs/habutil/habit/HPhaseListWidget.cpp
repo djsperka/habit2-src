@@ -174,3 +174,8 @@ void HPhaseListWidget::movePhaseUp()
 		}
 	}
 }
+
+QStringList HPhaseListWidget::currentPhaseNames() const
+{
+	return m_pModel->stringList();
+}

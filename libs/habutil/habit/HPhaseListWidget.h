@@ -44,6 +44,7 @@ namespace GUILib
 		void movePhaseDown();
 		void movePhaseUp();
 		void removePhase(int row);
+		QStringList currentPhaseNames() const;
 
 	signals:
 		void phaseListViewItemClicked(const QModelIndex&);

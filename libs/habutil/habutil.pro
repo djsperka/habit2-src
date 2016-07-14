@@ -1,7 +1,7 @@
 TEMPLATE = lib
 CONFIG += qt staticlib debug_and_release
 QMAKE_CXXFLAGS += -fvisibility=hidden
-INCLUDEPATH += . ./habit
+INCLUDEPATH += . ./habit ./wizards
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
 } else {
@@ -244,8 +244,7 @@ FORMS =		\
 			habit/HPhaseSettingsForm.ui \
 			habit/HHabituationSetupForm.ui \
 			wizards/PhaseWPFirst.ui \
-			wizards/PhaseWPFamiliarizationSelect.ui \
-			wizards/PhaseWPMinLooking.ui \
+			wizards/PhaseWPFamPref.ui \
+			wizards/PhaseWPHabituation.ui \
 			wizards/PhaseWPHabit1.ui \
 			wizards/PhaseWPHabit2.ui \
-			wizards/PhaseWPFixedStim.ui

@@ -33,7 +33,14 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QSpinBox" name="spinboxHabNTrials"/>
+      <widget class="QSpinBox" name="spinboxHabNTrials">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>3</number>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -50,6 +57,9 @@
         </property>
         <property name="text">
          <string>Looking time reduction criteria</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

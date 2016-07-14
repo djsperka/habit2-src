@@ -36,5 +36,7 @@
     <file>resources/stim/TenCirclesColor4config1.jpg</file>
     <file>resources/stim/TenCirclesColor6config1.jpg</file>
     <file>resources/stim/TwoCirclesColor4config4.jpg</file>
+    <file>resources/logo/habit-large.png</file>
+    <file>resources/logo/habit-small.png</file>
   </qresource>
 </RCC>
