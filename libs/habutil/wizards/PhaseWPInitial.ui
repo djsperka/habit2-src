@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PhaseWPFirst</class>
- <widget class="QWizardPage" name="PhaseWPFirst">
+ <class>PhaseWPInitial</class>
+ <widget class="QWizardPage" name="PhaseWPInitial">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>303</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
   <attribute name="pageId">
    <string notr="true">1</string>
   </attribute>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -42,7 +42,7 @@
      <property name="title">
       <string>Phase Type:</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QRadioButton" name="rbFamiliarizationPreference">
         <property name="toolTip">
@@ -69,6 +69,38 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QGroupBox" name="gbHabituationType">
+        <property name="title">
+         <string>Habituation Type:</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QRadioButton" name="rbHabReduction">
+           <property name="toolTip">
+            <string>Looking time decreases to a specified level</string>
+           </property>
+           <property name="text">
+            <string>Looking time reduction criteria</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="rbHabAccum">
+           <property name="toolTip">
+            <string>Subject must accumulate a specified amount of looking time over the entire phase</string>
+           </property>
+           <property name="text">
+            <string>Accumulated looking time</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -80,7 +112,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>141</height>
+       <height>85</height>
       </size>
      </property>
     </spacer>

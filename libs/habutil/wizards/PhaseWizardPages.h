@@ -21,9 +21,21 @@ namespace Ui
 	class PhaseWPHabit2;				// id = 5
 }
 
+namespace Habit
+{
+	class HPhaseSettings;
+}
 
 namespace GUILib
 {
+	// forward declaratins
+	class HHabituationCriteriaWidget;
+	class PhaseWPFirst;
+	class PhaseWPFamPref;
+	class PhaseWPHabituation;
+	class PhaseWPHabit1;
+	class PhaseWPHabit2;
+
 	class PhaseWizard: public QWizard
 	{
 		Q_OBJECT
@@ -31,7 +43,16 @@ namespace GUILib
 	public:
 		PhaseWizard(const QStringList& phaseNames, QWidget *parent = 0);
 		~PhaseWizard() {};
+		//QWizardPage* createHabit1Page();
+		QWizardPage* createHabit2Page();
+		Habit::HPhaseSettings getHPhaseSettings();
 
+	private:
+		GUILib::PhaseWPFirst* wpFirst;
+		GUILib::PhaseWPFamPref* wpFamPref;
+		GUILib::PhaseWPHabituation* wpHabituation;
+		GUILib::PhaseWPHabit1* wpHabit1;
+		GUILib::PhaseWPHabit2* wpHabit2;
 	};
 
 	class PhaseWPFirst : public QWizardPage
@@ -43,6 +64,9 @@ namespace GUILib
 		~PhaseWPFirst() {};
 		int nextId() const;
 		bool validatePage();
+		QString getName();
+		bool getIsFamPrefType();	// this will set habituation type to FixedN
+		bool getIsHabType();		// this means habituation type is criterion or totalLookTime
 
 	private:
 		Ui::PhaseWPFirst *ui;
@@ -59,6 +83,13 @@ namespace GUILib
 		~PhaseWPFamPref() {};
 		int nextId() const { return -1; } // final button activated
 		bool validatePage();
+		bool isMaxAccumulatedLookTime();
+		int getMaxAccumulatedLookTime();
+		bool isMaxStimulusTime();
+		int getMaxStimulusTime();
+		bool getMeasureStimulusTimeFromOnset();
+		bool getMeasureStimulusTimeFromLooking();
+		int getNTrials();
 
 	private:
 		Ui::PhaseWPFamPref *ui;
@@ -90,7 +121,7 @@ namespace GUILib
 
 	private:
 		Ui::PhaseWPHabit1 *ui;
-
+		GUILib::HHabituationCriteriaWidget *m_pCriteriaWidget;
 	};
 
 	class PhaseWPHabit2 : public QWizardPage

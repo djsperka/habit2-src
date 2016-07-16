@@ -14,66 +14,36 @@
    <string>WizardPage</string>
   </property>
   <property name="title">
-   <string>Habituation phase type</string>
+   <string>Habituation type</string>
   </property>
   <property name="subTitle">
-   <string>Enter details for a habituation phase</string>
+   <string>Which type of habituation would you like to use?</string>
   </property>
   <attribute name="pageId">
    <string notr="true">3</string>
   </attribute>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Maximum number of trials:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSpinBox" name="spinboxHabNTrials">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>3</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QRadioButton" name="rbHabReduction">
+     <property name="toolTip">
+      <string>Looking time decreases to a specified level</string>
+     </property>
+     <property name="text">
+      <string>Looking time reduction criteria</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Habituation type:</string>
+    <widget class="QRadioButton" name="rbHabAccum">
+     <property name="toolTip">
+      <string>Subject must accumulate a specified amount of looking time over the entire phase</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QRadioButton" name="rbHabReduction">
-        <property name="toolTip">
-         <string>Looking time decreases to a specified level</string>
-        </property>
-        <property name="text">
-         <string>Looking time reduction criteria</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="rbHabAccum">
-        <property name="toolTip">
-         <string>Subject must accumulate a specified amount of looking time over the entire phase</string>
-        </property>
-        <property name="text">
-         <string>Accumulated looking time</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="text">
+      <string>Accumulated looking time</string>
+     </property>
     </widget>
    </item>
    <item>
@@ -84,7 +54,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>155</height>
+       <height>234</height>
       </size>
      </property>
     </spacer>

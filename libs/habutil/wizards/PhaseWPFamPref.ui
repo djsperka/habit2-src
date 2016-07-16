@@ -17,7 +17,7 @@
    <string>Familiarization/Preference phase</string>
   </property>
   <property name="subTitle">
-   <string>Enter details for this phase</string>
+   <string>Enter the number of trials, and the requirements for ending each trial in this phase.</string>
   </property>
   <attribute name="pageId">
    <string notr="true">2</string>

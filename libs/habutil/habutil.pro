@@ -113,6 +113,8 @@ HEADERS +=	HLook.h \
 			habit/HHabituationSetupWidget.h \
 			habit/HStimulusOrderListItemDelegate.h \
 			habit/HStimulusNameLabelTableModel.h \
+			habit/HHabituationTypeWidget.h \
+			habit/HHabituationCriteriaWidget.h \
 			wizards/PhaseWizardPages.h
 			
 		
@@ -218,6 +220,8 @@ SOURCES +=	HLook.cpp \
 			habit/HHabituationSetupWidget.cpp \
 			habit/HStimulusOrderListItemDelegate.cpp \
 			habit/HStimulusNameLabelTableModel.cpp \
+			habit/HHabituationTypeWidget.cpp \
+			habit/HHabituationCriteriaWidget.cpp \
 			wizards/PhaseWizardPages.cpp
 			
 
@@ -243,6 +247,8 @@ FORMS =		\
 			habit/HLookSettingsForm.ui \
 			habit/HPhaseSettingsForm.ui \
 			habit/HHabituationSetupForm.ui \
+			habit/HHabituationTypeWidget.ui \
+			habit/HHabituationCriteriaWidget.ui \
 			wizards/PhaseWPFirst.ui \
 			wizards/PhaseWPFamPref.ui \
 			wizards/PhaseWPHabituation.ui \

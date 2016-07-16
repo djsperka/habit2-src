@@ -222,7 +222,7 @@ Habit::ExperimentSettings HExperimentMain::getSettings()
 {
 
 	//TODO Fix getSettings in HExperimentMain!!!!
-	QMessageBox::warning(this, "Bad Move", "Cannot save settings.");
+	QMessageBox::warning(this, "Bad Move", "HExperimentMain::getSettings() not implemented.");
 	return m_settings;
 
 #if 0
