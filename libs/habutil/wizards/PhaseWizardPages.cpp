@@ -8,6 +8,8 @@
 #include "PhaseWizardPages.h"
 #include "ui_PhaseWPFirst.h"
 #include "ui_PhaseWPFamPref.h"
+#include "ui_PhaseWPTrialSettings.h"
+#include "ui_PhaseWPTrial.h"
 #include "ui_PhaseWPHabituation.h"
 #include "ui_PhaseWPHabit1.h"
 #include "ui_PhaseWPHabit2.h"
@@ -27,10 +29,11 @@ static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");
 static const QRegExp reWordWithSpaces(sreWordWithSpaces);
 
 static const int pageFirst = 1;
-static const int pageFamPref = 2;
-static const int pageHabituation = 3;
-static const int pageHabit1 = 4;
-static const int pageHabit2 = 5;
+static const int pageTrialSettings = 2;
+static const int pageTrial = 2;
+static const int pageHabit0 = 4;
+static const int pageHabit1 = 5;
+static const int pageHabit2 = 6;
 
 namespace GUILib
 {
@@ -40,82 +43,62 @@ namespace GUILib
 		setWizardStyle(QWizard::MacStyle);
 		setPixmap(QWizard::BackgroundPixmap, QPixmap(":/resources/logo/habit-large.png").scaled(256, 256));
 		setPage(pageFirst, (wpFirst = new PhaseWPFirst(phaseNames, this)));
-		setPage(pageFamPref, (wpFamPref = new PhaseWPFamPref(this)));
-		setPage(pageHabituation, (wpHabituation = new PhaseWPHabituation(this)));
-		setPage(pageHabit1, (wpHabit1 = new PhaseWPHabit1(this)));
-		//setPage(pageHabit1, new PhaseWPHabit1(this));
-		setPage(pageHabit2, createHabit2Page());
-		//setPage(pageHabit2, new PhaseWPHabit2(this));
+		//setPage(pageTrialSettings, (wpTrialSettings = new PhaseWPTrialSettings(this)));
+		setPage(pageTrial, (wpTrial = new PhaseWPTrial(this)));
+		setPage(pageHabit0, wpHabit0 = new PhaseWPHabit0(this));
+		setPage(pageHabit1, wpHabit1 = new PhaseWPHabit1(this));
+		setPage(pageHabit2, wpHabit2 = new PhaseWPHabit2(this));
 	}
 
-#if 0
-	QWizardPage* PhaseWizard::createHabit1Page()
-	{
-		QWizardPage* page = new QWizardPage;
-		page->setTitle("Habituation by looking time reduction");
-		page->setSubTitle("Specify the maximum number of trials, window type, percentage, and window size.");
-		GUILib::HHabituationCriteriaWidget* pc = new GUILib::HHabituationCriteriaWidget();
-		pc->setCurrentIndex(1);	// habituation criteria page
-		QVBoxLayout *vbox = new QVBoxLayout;
-		vbox->addWidget(pc);
-		page->setLayout(vbox);
-		return page;
-	}
-#endif
-
-	QWizardPage* PhaseWizard::createHabit2Page()
-	{
-		QWizardPage* page = new QWizardPage;
-		page->setTitle("Habituation by total looking time summed over all trials");
-		page->setSubTitle("Specify the required looking time and maximum number of trials.");
-		GUILib::HHabituationCriteriaWidget* pc = new GUILib::HHabituationCriteriaWidget();
-		pc->setCurrentIndex(2);	// total looking page
-		QVBoxLayout *vbox = new QVBoxLayout;
-		vbox->addWidget(pc);
-		page->setLayout(vbox);
-		return page;
-	}
 
 	Habit::HPhaseSettings PhaseWizard::getHPhaseSettings()
 	{
 		Habit::HPhaseSettings ps;
 		ps.setIsEnabled(true);
-		ps.setName(wpFirst->getName());
-		if (wpFirst->getIsFamPrefType())
+
+		ps.setName(field("PhaseName").toString());
+		if (field("isMaxAccumulatedLookTime").toBool())
 		{
-			if (wpFamPref->isMaxAccumulatedLookTime())
-			{
-				ps.setUseLookingCriteria(true);
-				ps.setIsMaxAccumulatedLookTime(true);
-				ps.setIsSingleLook(false);
-				ps.setMaxAccumulatedLookTime(wpFamPref->getMaxStimulusTime());
-			}
-			else
-			{
-				ps.setUseLookingCriteria(false);
-				ps.setIsMaxAccumulatedLookTime(false);
-				ps.setIsSingleLook(false);
-			}
-
-			if (wpFamPref->isMaxStimulusTime())
-			{
-				ps.setIsMaxStimulusTime(true);
-				ps.setMaxStimulusTime(wpFamPref->getMaxAccumulatedLookTime());
-				ps.setMeasureStimulusTimeFromOnset(wpFamPref->getMeasureStimulusTimeFromOnset());
-				ps.setMeasureStimulusTimeFromLooking(wpFamPref->getMeasureStimulusTimeFromLooking());
-			}
-			else
-			{
-				ps.setIsMaxStimulusTime(false);
-			}
-
-			Habit::HabituationSettings habituationSettings;
-			habituationSettings.setHabituationType(HHabituationType::HHabituationTypeFixedN);
-			habituationSettings.setNTrials(wpFamPref->getNTrials());
-			ps.setHabituationSettings(habituationSettings);
-
+			ps.setUseLookingCriteria(true);
+			ps.setIsMaxAccumulatedLookTime(true);
+			ps.setIsSingleLook(false);
+			ps.setMaxAccumulatedLookTime(field("MaxAccumulatedLookTime").toInt());
+		}
+		else
+		{
+			ps.setUseLookingCriteria(false);
+			ps.setIsMaxAccumulatedLookTime(false);
+			ps.setIsSingleLook(false);
 		}
 
+		if (field("isMaxStimulusTime").toBool())
+		{
+			ps.setIsMaxStimulusTime(true);
+			ps.setMaxStimulusTime(field("MaxStimulusTime").toInt());
+			ps.setMeasureStimulusTimeFromOnset(field("isMeasuredFromStimulusOnset").toBool());
+			ps.setMeasureStimulusTimeFromLooking(field("isMeasuredFromInitialLooking").toBool());
+		}
+		else
+		{
+			ps.setIsMaxStimulusTime(false);
+		}
+
+		if (field("FamPref").toBool())
+		{
+			ps.setHabituationSettings(wpHabit0->getHabituationSettings());
+		}
+		else
+		{
+			if (field("HabReduction").toBool())
+			{
+				ps.setHabituationSettings(wpHabit1->getHabituationSettings());
+			}
+			else
+			{
+				ps.setHabituationSettings(wpHabit2->getHabituationSettings());
+			}
+		}
+		return ps;
 	}
 
 
@@ -133,17 +116,25 @@ namespace GUILib
 		// validator for phase name
 		ui->lePhaseName->setValidator(new QRegExpValidator(reWordWithSpaces));
 
+		// connect rbHabituation with gbHabituation enabled state
+		connect(ui->rbHabituation, SIGNAL(toggled(bool)), ui->gbHabituationType, SLOT(setEnabled(bool)));
+
 		// register field for completeness
 		registerField("PhaseName*", ui->lePhaseName);
+		registerField("FamPref", ui->rbFamiliarizationPreference);
+		registerField("Habituation", ui->rbHabituation);
+		registerField("HabReduction", ui->rbHabReduction);
+		registerField("HabAccum", ui->rbHabAccum);
+
+		ui->rbFamiliarizationPreference->setChecked(true);
+		ui->rbHabReduction->setChecked(true);
+		ui->gbHabituationType->setEnabled(false);
 
 	}
 
 	int PhaseWPFirst::nextId() const
 	{
-		if (ui->rbFamiliarizationPreference->isChecked())
-			return pageFamPref;
-		else
-			return pageHabituation;
+		return pageTrialSettings;
 	}
 
 	bool PhaseWPFirst::validatePage()
@@ -178,6 +169,8 @@ namespace GUILib
 	{
 		return ui->rbHabituation->isChecked();
 	}
+
+#if 0
 
 	PhaseWPFamPref::PhaseWPFamPref(QWidget* parent)
 	: QWizardPage(parent)
@@ -238,6 +231,126 @@ namespace GUILib
 	{
 		return ui->sbNTrials->value();
 	}
+#endif
+
+	PhaseWPTrial::PhaseWPTrial(QWidget* parent)
+	: QWizardPage(parent)
+	, ui(new Ui::PhaseWPTrial)
+	{
+		ui->setupUi(this);
+		ui->leMaxStimulusTime->setValidator(new QIntValidator(1, 1000000));
+		ui->leMaxAccumulatedLookTime->setValidator(new QIntValidator(1, 1000000));
+
+		// register fields
+		registerField("isMaxAccumulatedLookTime", ui->cbMaxAccumulatedLookTime);
+		registerField("MaxAccumulatedLookTime", ui->leMaxAccumulatedLookTime);
+		registerField("isMaxStimulusTime", ui->cbMaxStimulusTime);
+		registerField("MaxStimulusTime", ui->leMaxStimulusTime);
+		registerField("isMeasuredFromStimulusOnset", ui->rbMeasuredFromStimulusOnset);
+		registerField("isMeasuredFromInitialLooking", ui->rbMeasuredFromInitialLooking);
+	}
+
+	int PhaseWPTrial::nextId() const
+	{
+		if (field("FamPref").toBool()) return pageHabit0;
+		else
+		{
+			if (field("HabReduction").toBool())
+				return pageHabit1;
+			else
+				return pageHabit2;
+		}
+	}
+
+	bool PhaseWPTrial::validatePage()
+	{
+		bool b = true;
+		//if (!ui->gbMaxStimulusTime->isChecked() && !ui->gbMinLookingTime->isChecked()) b = false;
+		if (!(field("isMaxStimulusTime").toBool()) && !(field("isMaxAccumulatedLookTime").toBool())) b = false;
+		else
+		{
+			// One of the two is checked.
+			//if (ui->gbMinLookingTime->isChecked() && !ui->gbMaxStimulusTime->isChecked())
+			if ((field("isMaxAccumulatedLookTime").toBool()) && !(field("isMaxStimulusTime").toBool()))
+			{
+				b = (QMessageBox::Yes == QMessageBox::warning(this, "Are you sure?", "You have specified minimum looking time, but you have not specified a maximum stimulus time. If your subject does not look at the stimulus, your trial(s) may never end! Are you sure you want to create a new phase without specifying a maximum stimulus time?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No));
+			}
+		}
+		return b;
+	}
+
+
+#if 0
+	//dddddd
+	PhaseWPTrialSettings::PhaseWPTrialSettings(QWidget* parent)
+	: QWizardPage(parent)
+	, ui(new Ui::PhaseWPTrialSettings)
+	{
+		ui->setupUi(this);
+		ui->leMaxStimulusTime->setValidator(new QIntValidator(1, 1000000));
+		ui->leMinLookingTime->setValidator(new QIntValidator(1, 1000000));
+
+		// register fields
+
+	}
+
+	int PhaseWPTrialSettings::nextId() const
+	{
+		if (field("FamPref").toBool()) return pageHabit0;
+		else
+		{
+			if (field("HabReduction").toBool())
+				return pageHabit1;
+			else
+				return pageHabit2;
+		}
+	}
+	bool PhaseWPTrialSettings::validatePage()
+	{
+		bool b = true;
+		if (!ui->gbMaxStimulusTime->isChecked() && !ui->gbMinLookingTime->isChecked()) b = false;
+		else
+		{
+			// One of the two is checked.
+			if (ui->gbMinLookingTime->isChecked() && !ui->gbMaxStimulusTime->isChecked())
+			{
+				b = (QMessageBox::Yes == QMessageBox::warning(this, "Are you sure?", "You have specified minimum looking time, but you have not specified a maximum stimulus time. If your subject does not look at the stimulus, your trial(s) may never end! Are you sure you want to create a new phase without specifying a maximum stimulus time?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No));
+			}
+		}
+		return b;
+	}
+
+
+	bool PhaseWPTrialSettings::isMaxAccumulatedLookTime()
+	{
+		return ui->gbMinLookingTime->isChecked();
+	}
+
+	int PhaseWPTrialSettings::getMaxAccumulatedLookTime()
+	{
+		return ui->leMinLookingTime->text().toInt();
+	}
+
+	bool PhaseWPTrialSettings::isMaxStimulusTime()
+	{
+		return ui->gbMaxStimulusTime->isChecked();
+	}
+
+	int PhaseWPTrialSettings::getMaxStimulusTime()
+	{
+		return ui->leMaxStimulusTime->text().toInt();
+	}
+
+	bool PhaseWPTrialSettings::getMeasureStimulusTimeFromOnset()
+	{
+		return ui->rbMeasuredFromStimulusOnset->isChecked();
+	}
+
+	bool PhaseWPTrialSettings::getMeasureStimulusTimeFromLooking()
+	{
+		return ui->rbMeasuredFromInitialLooking->isChecked();
+	}
+#endif
 
 	PhaseWPHabituation::PhaseWPHabituation(QWidget *parent)
 	: QWizardPage(parent)
@@ -256,6 +369,27 @@ namespace GUILib
 	}
 
 
+	PhaseWPHabit0::PhaseWPHabit0(QWidget *p)
+	: QWizardPage(p)
+	{
+		setTitle("Familiarization/Preference type phase");
+		setSubTitle("Specify the number of trials for this phase.");
+		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget();
+		m_pCriteriaWidget->setCurrentIndex(0);
+		QVBoxLayout *vbox = new QVBoxLayout;
+		vbox->addWidget(m_pCriteriaWidget);
+		setLayout(vbox);
+	}
+
+	Habit::HabituationSettings PhaseWPHabit0::getHabituationSettings()
+	{
+		Habit::HabituationSettings hs;
+		hs.setNTrials(m_pCriteriaWidget->getNTrials());
+		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
+		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
+		return hs;
+	}
+
 	PhaseWPHabit1::PhaseWPHabit1(QWidget *p)
 	: QWizardPage(p)
 	{
@@ -268,33 +402,35 @@ namespace GUILib
 		setLayout(vbox);
 	}
 
-#if 0
-	PhaseWPHabit1::PhaseWPHabit1(QWidget *parent)
-	: QWizardPage(parent)
-	, ui(new Ui::PhaseWPHabit1)
+	Habit::HabituationSettings PhaseWPHabit1::getHabituationSettings()
 	{
-		ui->setupUi(this);
-
-		// populate window type combo
-		QStringList items;
-		items << HCriterionWindowType::HCriterionWindowFixed.label() << HCriterionWindowType::HCriterionWindowSliding.label();
-		ui->comboWindowType->addItems(items);
-
-		// default selection is first window
-		ui->rbUseFirstWindow->setChecked(true);
-
-		// validator for min basis value
-		ui->lineeditMinBasisValue->setValidator(new QIntValidator(1, 1000000));
+		Habit::HabituationSettings hs;
+		hs.setNTrials(m_pCriteriaWidget->getNTrials());
+		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
+		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
+		return hs;
 	}
 
-	PhaseWPHabit2::PhaseWPHabit2(QWidget *parent)
-	: QWizardPage(parent)
-	, ui(new Ui::PhaseWPHabit2)
+	PhaseWPHabit2::PhaseWPHabit2(QWidget *p)
+	: QWizardPage(p)
 	{
-		ui->setupUi(this);
-		ui->leTotalLookingTime->setValidator(new QIntValidator(1, 1000000));
+		setTitle("Habituation by cumulative looking time");
+		setSubTitle("Specify the maximum number of trials, and total looking time required for habituation.");
+		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget();
+		m_pCriteriaWidget->setCurrentIndex(2);	// habituation criteria page
+		QVBoxLayout *vbox = new QVBoxLayout;
+		vbox->addWidget(m_pCriteriaWidget);
+		setLayout(vbox);
 	}
-#endif
+
+	Habit::HabituationSettings PhaseWPHabit2::getHabituationSettings()
+	{
+		Habit::HabituationSettings hs;
+		hs.setNTrials(m_pCriteriaWidget->getNTrials());
+		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
+		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
+		return hs;
+	}
 
 }
 
