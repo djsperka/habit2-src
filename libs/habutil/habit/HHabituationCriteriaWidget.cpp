@@ -62,7 +62,7 @@ namespace GUILib
 
 	}
 
-
+	// this assumes that the above connections for the spinboxes work....
 	int HHabituationCriteriaWidget::getNTrials()
 	{
 		return ui->spinBoxNTrials->value();
