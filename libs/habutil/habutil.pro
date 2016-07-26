@@ -115,6 +115,7 @@ HEADERS +=	HLook.h \
 			habit/HStimulusNameLabelTableModel.h \
 			habit/HHabituationTypeWidget.h \
 			habit/HHabituationCriteriaWidget.h \
+			habit/HHabituationSettingsWidget.h \
 			wizards/PhaseWizardPages.h
 			
 		
@@ -222,6 +223,7 @@ SOURCES +=	HLook.cpp \
 			habit/HStimulusNameLabelTableModel.cpp \
 			habit/HHabituationTypeWidget.cpp \
 			habit/HHabituationCriteriaWidget.cpp \
+			habit/HHabituationSettingsWidget.cpp \
 			wizards/PhaseWizardPages.cpp
 			
 

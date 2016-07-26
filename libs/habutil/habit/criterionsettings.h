@@ -51,6 +51,7 @@ private:
 
 QDataStream & operator<< (QDataStream& stream, Habit::CriterionSettings d);
 QDataStream & operator>> (QDataStream& stream, Habit::CriterionSettings& d);
+QDebug operator<<(QDebug dbg, const CriterionSettings& settings);
 bool operator==(const Habit::CriterionSettings& lhs, const Habit::CriterionSettings& rhs);
 
 

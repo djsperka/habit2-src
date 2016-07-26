@@ -271,6 +271,33 @@ void Habit::ExperimentSettings::saveToDB()
 		m_controlBarOptions.saveToDB(getId());
 		m_lookSettings.saveToDB(getId());
 		m_stimulusDisplayInfo.saveToDB(getId());
+
+		// When saving phases, we have to account for phases that may have been deleted.
+		QList<int> existingPhaseIDs;
+		dao.getHPhaseSettingsIDs(getId(), existingPhaseIDs);
+		qDebug() << "Existing phase ids: " << existingPhaseIDs;
+		QListIterator<HPhaseSettings> phaseIterator = this->phaseIterator();
+		while (phaseIterator.hasNext())
+		{
+			int id = phaseIterator.next().getID();
+			int foundAt = existingPhaseIDs.indexOf(id);
+			qDebug() << "check id " << id << " found at " << foundAt;
+			if (foundAt > -1)
+			{
+				existingPhaseIDs.removeAt(foundAt);
+			}
+		}
+
+		// Anything remaining in 'existingPhaseIDs' has been deleted.
+		QListIterator itDelete<int>(existingPhaseIDs);
+		while (itDelete.hasNext())
+		{
+			int idel = itDelete.hasNext();
+			qDebug() << "Deleting phase id " << idel;
+			dao.
+		}
+
+
 		for (int i=0; i<this->getNumberOfPhases(); i++)
 		{
 			(this->phases())[i].saveToDB(this->getId());

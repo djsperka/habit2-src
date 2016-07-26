@@ -90,6 +90,7 @@ public:
 	void deleteStimulus(int stimulus_id);	// can throw HDBException
 	void deleteOrder(int id);	// can throw HDBException
 	void deleteExperiment(Habit::ExperimentSettings& experimentSettings);
+	void deletePhase(int id);
 
 	void addOrUpdateExperimentSettings(Habit::ExperimentSettings& experimentSettings);	// can throw HDBException
 	void addOrUpdateHLookSettings(int experimentID, Habit::HLookSettings& settings);

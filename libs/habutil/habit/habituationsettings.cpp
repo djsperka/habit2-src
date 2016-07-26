@@ -100,6 +100,14 @@ bool Habit::operator==(const Habit::HabituationSettings& lhs, const Habit::Habit
 	return b;
 }
 
+QDebug Habit::operator<<(QDebug dbg, const HabituationSettings& settings)
+{
+	dbg.space() << "Id:" << settings.getId() << "Type:" << settings.getHabituationType().name() << endl;
+	dbg.space() << "NTrials:" << settings.getNTrials() << endl;
+	dbg.space() << "TotalLookLength:" << settings.getTotalLookLengthToEnd() << endl;
+	dbg.space() << "CriterionSettings:" << settings.getCriterionSettings() << endl;
+	return dbg.space();
+}
 
 
 int Habit::HabituationSettings::getId() const

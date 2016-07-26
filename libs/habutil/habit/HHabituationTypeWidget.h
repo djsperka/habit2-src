@@ -23,6 +23,9 @@ namespace GUILib
 	{
 		Q_OBJECT
 
+	signals:
+	    void currentIndexChanged(int);
+
 	public:
 		HHabituationTypeWidget(const HHabituationType& type = HHabituationType::HHabituationTypeFixedN, QWidget* w = 0);
 		~HHabituationTypeWidget() {};

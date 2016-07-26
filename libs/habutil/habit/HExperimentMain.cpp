@@ -33,260 +33,6 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 
 	// this dialog is read-only when used to view results, e.g.
 	m_pbSave->setDisabled(bReadOnly);
- }
-
-void HExperimentMain::connections()
-{
-	connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(generalListViewItemClicked(const QModelIndex&)));
-	connect(m_pbCancel, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
-	connect(m_pbSave, SIGNAL(clicked()), this, SLOT(saveButtonClicked()));
-	connect(m_pbExport, SIGNAL(clicked()), this, SLOT(exportButtonClicked()));
-
-	connect(m_pPhaseListWidget, SIGNAL(phaseListViewItemClicked(const QModelIndex&)), this, SLOT(phaseListViewItemClicked(const QModelIndex&)));
-	connect(m_pPhaseListWidget, SIGNAL(addPhase()), this, SLOT(addPhase()));
-	connect(m_pPhaseListWidget, SIGNAL(delPhase()), this, SLOT(delPhase()));
-	connect(m_pPhaseListWidget, SIGNAL(upPhase()), this, SLOT(upPhase()));
-	connect(m_pPhaseListWidget, SIGNAL(downPhase()), this, SLOT(downPhase()));
-
-	qCritical() << "RE-CONNECT to stimulus layout changes. See HExperimentMain::connections()";
-	/*
-	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pPreTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
-	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pHabituationStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
-	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
-	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pAttentionSetupForm, SLOT(stimulusLayoutTypeChanged(int)));
-	*/
-}
-
-void HExperimentMain::cancelButtonClicked()
-{
-	reject();
-}
-
-void HExperimentMain::saveButtonClicked()
-{
-	m_settings = getSettings();
-	try
-	{
-		//TODO transation()
-		m_settings.saveToDB();
-		//TODO commit()
-		accept();
-	}
-	catch (const HDBException& e)
-	{
-		//TODO rollback()
-		QMessageBox::warning(this, "Save failed", "Failed to save experiment settings into database");
-	}
-}
-
-void HExperimentMain::exportButtonClicked()
-{
-	Habit::ExperimentSettings cloned = getSettings().clone(m_settings.getName());
-	QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
-	QString tmpfile(dir.absoluteFilePath(QString("%1.hbx").arg(cloned.getName())));
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Filename for export"), tmpfile, "Habit Export File (*.hbx)");
-	if (!fileName.isNull() && !fileName.isEmpty())
-	{
-		qDebug() << "Got filename for export: " << fileName;
-
-		// Open file.... will it clobber?
-		QFile file(fileName);
-		if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-		{
-			QDataStream out(&file);
-			out << QCoreApplication::instance()->applicationVersion() << cloned;
-			file.close();
-		}
-	}
-}
-
-void HExperimentMain::generalListViewItemClicked(const QModelIndex& index)
-{
-//	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
-	m_pPhaseListWidget->clearSelection();
-	m_pPagesWidget->setCurrentIndex(m_vecStackPages.at(index.row()));
-}
-
-void HExperimentMain::phaseListViewItemClicked(const QModelIndex& index)
-{
-	m_pGeneralListView->selectionModel()->select(m_pGeneralListView->selectionModel()->selection(), QItemSelectionModel::Deselect);
-	m_pPagesWidget->setCurrentIndex(4 + m_pPhaseListWidget->selectedPhaseIndex());
-}
-
-void HExperimentMain::addPhase()
-{
-	PhaseWizard wiz(m_pPhaseListWidget->currentPhaseNames(), this);
-	int i = wiz.exec();
-	qDebug() << "wiz return " << i;
-}
-
-void HExperimentMain::delPhase()
-{
-	QString sQuestion = QString("Are you sure you want to delete phase \"%1\"?").arg(m_pPhaseListWidget->selectedPhase());
-	if (QMessageBox::Yes == QMessageBox::question(this, "Delete phase?", sQuestion, QMessageBox::Yes|QMessageBox::No, QMessageBox::No))
-	{
-		int iRefocusIndex;
-		int iPhaseIndex = m_pPhaseListWidget->selectedPhaseIndex();
-		int iToBeRemoved = 4 + iPhaseIndex;
-		if (m_pPhaseListWidget->phaseCount() == 1)
-			iRefocusIndex = -1;	// refocus in m_pGeneralListView
-		else
-			if (iPhaseIndex == m_pPhaseListWidget->phaseCount()-1)
-				iRefocusIndex = iPhaseIndex-1;
-			else
-				iRefocusIndex = iPhaseIndex;
-
-		// Now remove widget
-		m_pPagesWidget->removeWidget(m_pPagesWidget->widget(iToBeRemoved));
-
-		// remove from StringListModel...
-		m_pPhaseListWidget->removePhase(iPhaseIndex);
-
-		// Refocus selection on first page for simplicity.
-		m_pPhaseListWidget->clearSelection();
-		m_pPagesWidget->setCurrentIndex(0);
-		m_pGeneralListView->setCurrentIndex(m_pGeneralListView->model()->index(0, 0));
-	}
-}
-
-void HExperimentMain::upPhase()
-{
-	// need to swap the widgets in the QTabWidget
-	int iToBeMoved = 4+m_pPhaseListWidget->selectedPhaseIndex();
-	QWidget* pWidgetToBeMoved = m_pPagesWidget->widget(iToBeMoved);
-	m_pPagesWidget->removeWidget(pWidgetToBeMoved);
-	m_pPagesWidget->insertWidget(iToBeMoved-1, pWidgetToBeMoved);
-	m_pPagesWidget->setCurrentIndex(iToBeMoved-1);
-
-	// Move the phase name up in the QListWidget
-	m_pPhaseListWidget->movePhaseUp();
-	m_pPhaseListWidget->phaseClicked();
-}
-
-void HExperimentMain::downPhase()
-{
-	// need to swap the widgets in the QTabWidget
-	int iToBeMoved = 4+m_pPhaseListWidget->selectedPhaseIndex();
-	QWidget* pWidgetToBeMoved = m_pPagesWidget->widget(iToBeMoved);
-	m_pPagesWidget->removeWidget(pWidgetToBeMoved);
-	m_pPagesWidget->insertWidget(iToBeMoved+1, pWidgetToBeMoved);
-	m_pPagesWidget->setCurrentIndex(iToBeMoved+1);
-
-	// Move the phase name down in the QListWidget
-	m_pPhaseListWidget->movePhaseDown();
-	m_pPhaseListWidget->phaseClicked();
-}
-
-bool HExperimentMain::isModified()
-{
-	// Get HExperimentSettings from the pages
-	Habit::ExperimentSettings settings = getSettings();
-	if (!(settings.getAttentionGetterSettings() == m_settings.getAttentionGetterSettings()))
-		qDebug() << "AG settings changed";
-	if (!(settings.getControlBarOptions() == m_settings.getControlBarOptions()))
-		qDebug() << "Control Bar Options changed";
-	if (!(settings.getHLookSettings() == m_settings.getHLookSettings()))
-		qDebug() << "HLook settings changed";
-
-	// TODO: testing of phases must account for deleted/added phases, stimuli.
-#if 0
-	if (!(settings.getPreTestPhaseSettings() == m_settings.getPreTestPhaseSettings()))
-		qDebug() << "Pretest Phase settings changed";
-	if (!(settings.getHabituationPhaseSettings() == m_settings.getHabituationPhaseSettings()))
-		qDebug() << "Habituation phase settigns changed";
-	if (!(settings.getTestPhaseSettings() == m_settings.getTestPhaseSettings()))
-		qDebug() << "Test phase settings chagned";
-	if (!(settings.getHabituationSettings() == m_settings.getHabituationSettings()))
-		qDebug() << "habituation settings changed";
-	if (!(settings.getStimulusDisplayInfo() == m_settings.getStimulusDisplayInfo()))
-		qDebug() << "stimulus display info changed";
-	if (!(settings.getPreTestStimuliSettings() == m_settings.getPreTestStimuliSettings()))
-		qDebug() << "pretest stimuli changed";
-	if (!(settings.getHabituationStimuliSettings() == m_settings.getHabituationStimuliSettings()))
-		qDebug() << "habituation stimuli changed";
-	if (!(settings.getTestStimuliSettings() == m_settings.getTestStimuliSettings()))
-		qDebug() << "test stimuli changed";
-#else
-	qWarning() << "Not testing equality of phases/stimuli!";
-#endif
-
-	if (settings.getId() != m_settings.getId())
-		qDebug() << "Id changed";
-	if (settings.getName() != m_settings.getName())
-		qDebug() << "Name changed";
-
-	return !(getSettings() == m_settings);
-}
-
-Habit::ExperimentSettings HExperimentMain::getSettings()
-{
-
-	//TODO Fix getSettings in HExperimentMain!!!!
-	QMessageBox::warning(this, "Bad Move", "HExperimentMain::getSettings() not implemented.");
-	return m_settings;
-
-#if 0
-	Habit::ExperimentSettings settings;
-	settings.setId(m_settings.getId());
-	settings.setName(m_settings.getName());
-	settings.setAttentionGetterSettings(m_pAttentionSetupForm->getConfigurationObject());
-	settings.setControlBarOptions(m_pControlBarOptionsForm->getConfigurationObject());
-	settings.setHLookSettings(m_pLookSettingsWidget->getHLookSettings());
-	settings.setPreTestPhaseSettings(m_pPreTestPhaseWidget->getHPhaseSettings());
-	settings.setHabituationPhaseSettings(m_pHabituationPhaseWidget->getHPhaseSettings());
-	settings.setTestPhaseSettings(m_pTestPhaseWidget->getHPhaseSettings());
-	settings.setHabituationSettings(m_pHabituationSetupWidget->getHabituationSettings());
-	settings.setStimulusDisplayInfo(m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo());
-
-	settings.setHabituationStimuliSettings(m_pHabituationStimuliWidget->getStimuliSettings());
-	settings.setPreTestStimuliSettings(m_pPreTestStimuliWidget->getStimuliSettings());
-	settings.setTestStimuliSettings(m_pTestStimuliWidget->getStimuliSettings());
-	return settings;
-#endif
-}
-
-void HExperimentMain::closeEvent(QCloseEvent* event)
-{
-	if (isModified())
-	{
-		QMessageBox msgBox;
-		msgBox.setText("The settings for this experiment have been modified.");
-		msgBox.setInformativeText("Do you want to save your changes?");
-		msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-		msgBox.setDefaultButton(QMessageBox::Save);
-		int ret = msgBox.exec();
-
-
-		switch (ret)
-		{
-			case QMessageBox::Save:
-				m_settings = getSettings();
-				try
-				{
-					m_settings.saveToDB();
-					event->accept();
-				}
-				catch (const HDBException& e)
-				{
-					QMessageBox::warning(this, "Save failed", e.what());
-					event->ignore();
-				}
-				break;
-			case QMessageBox::Discard:
-				event->accept();
-				break;
-			case QMessageBox::Cancel:
-				event->ignore();
-				break;
-			default:
-				// should never be reached
-				break;
-		}
-	}
-	else
-	{
-		event->accept();
-	}
 }
 
 void HExperimentMain::components()
@@ -362,6 +108,252 @@ void HExperimentMain::components()
 
     setWindowTitle(QString("Experiment Settings"));
 }
+
+
+void HExperimentMain::connections()
+{
+	connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(generalListViewItemClicked(const QModelIndex&)));
+	connect(m_pbCancel, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
+	connect(m_pbSave, SIGNAL(clicked()), this, SLOT(saveButtonClicked()));
+	connect(m_pbExport, SIGNAL(clicked()), this, SLOT(exportButtonClicked()));
+
+	connect(m_pPhaseListWidget, SIGNAL(phaseListViewItemClicked(const QModelIndex&)), this, SLOT(phaseListViewItemClicked(const QModelIndex&)));
+	connect(m_pPhaseListWidget, SIGNAL(addPhase()), this, SLOT(addPhase()));
+	connect(m_pPhaseListWidget, SIGNAL(delPhase()), this, SLOT(delPhase()));
+	connect(m_pPhaseListWidget, SIGNAL(upPhase()), this, SLOT(upPhase()));
+	connect(m_pPhaseListWidget, SIGNAL(downPhase()), this, SLOT(downPhase()));
+
+	qCritical() << "RE-CONNECT to stimulus layout changes. See HExperimentMain::connections()";
+	/*
+	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pPreTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
+	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pHabituationStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
+	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
+	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pAttentionSetupForm, SLOT(stimulusLayoutTypeChanged(int)));
+	*/
+}
+
+void HExperimentMain::cancelButtonClicked()
+{
+	reject();
+}
+
+void HExperimentMain::saveButtonClicked()
+{
+	m_settings = getSettings();
+	try
+	{
+		m_settings.saveToDB();
+		accept();
+	}
+	catch (const HDBException& e)
+	{
+		QMessageBox::warning(this, "Save failed", "Failed to save experiment settings into database");
+	}
+}
+
+void HExperimentMain::exportButtonClicked()
+{
+	Habit::ExperimentSettings cloned = getSettings().clone(m_settings.getName());
+	QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
+	QString tmpfile(dir.absoluteFilePath(QString("%1.hbx").arg(cloned.getName())));
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Filename for export"), tmpfile, "Habit Export File (*.hbx)");
+	if (!fileName.isNull() && !fileName.isEmpty())
+	{
+		qDebug() << "Got filename for export: " << fileName;
+
+		// Open file.... will it clobber?
+		QFile file(fileName);
+		if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+		{
+			QDataStream out(&file);
+			out << QCoreApplication::instance()->applicationVersion() << cloned;
+			file.close();
+		}
+	}
+}
+
+void HExperimentMain::generalListViewItemClicked(const QModelIndex& index)
+{
+//	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
+	m_pPhaseListWidget->clearSelection();
+	m_pPagesWidget->setCurrentIndex(m_vecStackPages.at(index.row()));
+}
+
+void HExperimentMain::phaseListViewItemClicked(const QModelIndex& index)
+{
+	m_pGeneralListView->selectionModel()->select(m_pGeneralListView->selectionModel()->selection(), QItemSelectionModel::Deselect);
+	m_pPagesWidget->setCurrentIndex(4 + m_pPhaseListWidget->selectedPhaseIndex());
+}
+
+void HExperimentMain::addPhase()
+{
+	PhaseWizard wiz(m_pPhaseListWidget->currentPhaseNames(), this);
+	int i = wiz.exec();
+	if (i == QDialog::Accepted)
+	{
+		HPhaseSettings ps = wiz.getHPhaseSettings();
+		int insertIndex = m_pPagesWidget->currentIndex();		// insertIndex is index into m_pPagesWidget, subtract 4 to get index in PhaseListWidget
+		if (insertIndex < 4) insertIndex = 4;
+
+		// Add page to pagesWidget
+		HPhaseSettingsTabWidget *pTabWidget = new HPhaseSettingsTabWidget(ps, ps.getName(), m_settings.getStimulusDisplayInfo());
+		m_pPagesWidget->insertWidget(insertIndex, pTabWidget);
+		connect(pTabWidget, SIGNAL(phaseNameChanged(const QString&)), m_pPhaseListWidget, SLOT(phaseNameChanged(const QString&)));
+		connect(pTabWidget, SIGNAL(phaseEnabledClicked(bool)), m_pPhaseListWidget, SLOT(phaseEnabledClicked(bool)));
+
+		// Add name to PhaseListWidget
+		m_pGeneralListView->clearSelection();
+		m_pPhaseListWidget->insertPhase(insertIndex-4, ps.getName());
+		m_pPhaseListWidget->setCurrentIndex(insertIndex-4);
+		m_pPagesWidget->setCurrentIndex(insertIndex);
+	}
+}
+
+void HExperimentMain::delPhase()
+{
+	QString sQuestion = QString("Are you sure you want to delete phase \"%1\"?").arg(m_pPhaseListWidget->selectedPhase());
+	if (QMessageBox::Yes == QMessageBox::question(this, "Delete phase?", sQuestion, QMessageBox::Yes|QMessageBox::No, QMessageBox::No))
+	{
+		int iRefocusIndex;
+		int iPhaseIndex = m_pPhaseListWidget->selectedPhaseIndex();
+		int iToBeRemoved = 4 + iPhaseIndex;
+		if (m_pPhaseListWidget->phaseCount() == 1)
+			iRefocusIndex = -1;	// refocus in m_pGeneralListView
+		else
+			if (iPhaseIndex == m_pPhaseListWidget->phaseCount()-1)
+				iRefocusIndex = iPhaseIndex-1;
+			else
+				iRefocusIndex = iPhaseIndex;
+
+		// Now remove widget
+		m_pPagesWidget->removeWidget(m_pPagesWidget->widget(iToBeRemoved));
+
+		// remove from StringListModel...
+		m_pPhaseListWidget->removePhase(iPhaseIndex);
+
+		// Refocus selection on first page for simplicity.
+		m_pPhaseListWidget->clearSelection();
+		m_pPagesWidget->setCurrentIndex(0);
+		m_pGeneralListView->setCurrentIndex(m_pGeneralListView->model()->index(0, 0));
+	}
+}
+
+void HExperimentMain::upPhase()
+{
+	// need to swap the widgets in the QTabWidget
+	int iToBeMoved = 4+m_pPhaseListWidget->selectedPhaseIndex();
+	QWidget* pWidgetToBeMoved = m_pPagesWidget->widget(iToBeMoved);
+	m_pPagesWidget->removeWidget(pWidgetToBeMoved);
+	m_pPagesWidget->insertWidget(iToBeMoved-1, pWidgetToBeMoved);
+	m_pPagesWidget->setCurrentIndex(iToBeMoved-1);
+
+	// Move the phase name up in the QListWidget
+	m_pPhaseListWidget->movePhaseUp();
+	m_pPhaseListWidget->phaseClicked();
+}
+
+void HExperimentMain::downPhase()
+{
+	// need to swap the widgets in the QTabWidget
+	int iToBeMoved = 4+m_pPhaseListWidget->selectedPhaseIndex();
+	QWidget* pWidgetToBeMoved = m_pPagesWidget->widget(iToBeMoved);
+	m_pPagesWidget->removeWidget(pWidgetToBeMoved);
+	m_pPagesWidget->insertWidget(iToBeMoved+1, pWidgetToBeMoved);
+	m_pPagesWidget->setCurrentIndex(iToBeMoved+1);
+
+	// Move the phase name down in the QListWidget
+	m_pPhaseListWidget->movePhaseDown();
+	m_pPhaseListWidget->phaseClicked();
+}
+
+bool HExperimentMain::isModified()
+{
+	// Get HExperimentSettings from the pages
+	Habit::ExperimentSettings settings = getSettings();
+	if (!(settings.getAttentionGetterSettings() == m_settings.getAttentionGetterSettings()))
+		qDebug() << "AG settings changed";
+	if (!(settings.getControlBarOptions() == m_settings.getControlBarOptions()))
+		qDebug() << "Control Bar Options changed";
+	if (!(settings.getHLookSettings() == m_settings.getHLookSettings()))
+		qDebug() << "HLook settings changed";
+	if (!(settings.getStimulusDisplayInfo() == m_settings.getStimulusDisplayInfo()))
+		qDebug() << "stimulus display info changed";
+	if (!(settings.phases() == m_settings.phases()))
+		qDebug() << "phases changed.";
+	if (settings.getId() != m_settings.getId())
+		qDebug() << "Id changed";
+	if (settings.getName() != m_settings.getName())
+		qDebug() << "Name changed";
+
+	return !(getSettings() == m_settings);
+}
+
+Habit::ExperimentSettings HExperimentMain::getSettings()
+{
+	Habit::ExperimentSettings settings;
+	settings.setId(m_settings.getId());
+	settings.setName(m_settings.getName());
+	settings.setAttentionGetterSettings(m_pAttentionSetupForm->getConfigurationObject());
+	settings.setControlBarOptions(m_pControlBarOptionsForm->getConfigurationObject());
+	settings.setHLookSettings(m_pLookSettingsWidget->getHLookSettings());
+	settings.setStimulusDisplayInfo(m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo());
+	// Iterate over PhaseSettingsTabWidgets and append phase settings for each. Set the seqno as
+	// they are configured.
+	for (int i=0; i<m_pPagesWidget->count()-4; i++)
+	{
+		QWidget *w = m_pPagesWidget->widget(4+i);
+		HPhaseSettingsTabWidget *ptw = dynamic_cast<HPhaseSettingsTabWidget *>(w);
+		HPhaseSettings ps = ptw->getPhaseSettings();
+		ps.setSeqno(i);
+		settings.appendPhase(ps);
+	}
+	return settings;
+}
+
+void HExperimentMain::closeEvent(QCloseEvent* event)
+{
+	if (isModified())
+	{
+		QMessageBox msgBox;
+		msgBox.setText("The settings for this experiment have been modified.");
+		msgBox.setInformativeText("Do you want to save your changes?");
+		msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+		msgBox.setDefaultButton(QMessageBox::Save);
+		int ret = msgBox.exec();
+
+
+		switch (ret)
+		{
+			case QMessageBox::Save:
+				m_settings = getSettings();
+				try
+				{
+					m_settings.saveToDB();
+					event->accept();
+				}
+				catch (const HDBException& e)
+				{
+					QMessageBox::warning(this, "Save failed", e.what());
+					event->ignore();
+				}
+				break;
+			case QMessageBox::Discard:
+				event->accept();
+				break;
+			case QMessageBox::Cancel:
+				event->ignore();
+				break;
+			default:
+				// should never be reached
+				break;
+		}
+	}
+	else
+	{
+		event->accept();
+	}
+}
+
 
 Habit::StimulusSettings HExperimentMain::getTestSS()
 {

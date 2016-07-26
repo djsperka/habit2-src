@@ -5,8 +5,8 @@
  *      Author: dan
  */
 
-#ifndef HHABITUATIONTYPEWIDGET_H_
-#define HHABITUATIONTYPEWIDGET_H_
+#ifndef HHABITUATIONCRITERIAWIDGET_H_
+#define HHABITUATIONCRITERIAWIDGET_H_
 
 #include "ui_HHabituationCriteriaWidget.h"
 #include "HTypes.h"
@@ -15,7 +15,7 @@
 namespace Ui
 {
 	class HHabituationCriteriaWidget;
-}
+};
 
 
 namespace GUILib

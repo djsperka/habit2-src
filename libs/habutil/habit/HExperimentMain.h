@@ -70,7 +70,6 @@ namespace GUILib
 		GUILib::HLookSettingsWidget* m_pLookSettingsWidget;
 		GUILib::AttentionSetupForm* m_pAttentionSetupForm;
 
-		QVector<GUILib::HPhaseSettingsTabWidget*> m_pvecPhaseSettingsWidgets;
 		QVector<int> m_vecStackPages;
 		HPhaseListWidget *m_pPhaseListWidget;
 

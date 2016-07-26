@@ -50,6 +50,7 @@ private:
 
 QDataStream & operator<< (QDataStream& stream, Habit::HabituationSettings d);
 QDataStream & operator>> (QDataStream& stream, Habit::HabituationSettings& d);
+QDebug operator<<(QDebug dbg, const HabituationSettings& settings);
 bool operator==(const Habit::HabituationSettings& lhs, const Habit::HabituationSettings& rhs);
 
 } // namespace Habit

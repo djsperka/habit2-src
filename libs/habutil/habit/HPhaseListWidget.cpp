@@ -58,7 +58,7 @@ void  GUILib::HPhaseListWidget::components()
 void HPhaseListWidget::clearSelection()
 {
 	m_pListView->selectionModel()->select(m_pListView->selectionModel()->selection(), QItemSelectionModel::Deselect);
-	m_actionNewPhase->setEnabled(false);
+	m_actionNewPhase->setEnabled(true);
 	m_actionDelPhase->setEnabled(false);
 	m_actionUpPhase->setEnabled(false);
 	m_actionDownPhase->setEnabled(false);
@@ -174,6 +174,19 @@ void HPhaseListWidget::movePhaseUp()
 		}
 	}
 }
+
+void HPhaseListWidget::setCurrentIndex(int row)
+{
+	QModelIndex index = m_pModel->index(row);
+	m_pListView->setCurrentIndex(index);
+}
+
+void HPhaseListWidget::insertPhase(int row, const QString& name)
+{
+	m_pModel->insertRows(row, 1);
+	m_pModel->setData(m_pModel->index(row), name);
+}
+
 
 QStringList HPhaseListWidget::currentPhaseNames() const
 {

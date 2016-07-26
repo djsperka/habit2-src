@@ -21,6 +21,7 @@ namespace GUILib
 		QStringList items;
 		items << HHabituationType::HHabituationTypeFixedN.label() << HHabituationType::HHabituationTypeCriterion.label() << HHabituationType::HHabituationTypeTotalLookingTime.label();
 		ui->comboHabituationType->addItems(items);
+		connect(ui->comboHabituationType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(currentIndexChanged(int)));
 		ui->comboHabituationType->setCurrentIndex(type.number());
 	}
 

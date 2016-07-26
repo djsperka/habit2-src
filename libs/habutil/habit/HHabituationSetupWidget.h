@@ -16,7 +16,6 @@ namespace Ui
 	class HHabituationSetupForm;
 }
 
-
 namespace GUILib
 {
 	class HHabituationSetupWidget : public QWidget
@@ -38,7 +37,6 @@ namespace GUILib
 
 		Ui::HHabituationSetupForm *ui;
 		Habit::HabituationSettings m_settings;
-
 	};
 };
 

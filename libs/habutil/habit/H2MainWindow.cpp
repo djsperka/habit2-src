@@ -595,11 +595,9 @@ void GUILib::H2MainWindow::deleteExperiment()
 		{
 			settings.loadFromDB(expt);
 
-			// TODO wrap this in transaction
 			settings.deleteFromDB();
 			qDebug() << "Experiment " << expt << " deleted from database. Results files were NOT deleted.";
 			m_pExperimentListWidget->reload();
-			// TODO commit()
 		}
 		catch (const HDBException& e)
 		{

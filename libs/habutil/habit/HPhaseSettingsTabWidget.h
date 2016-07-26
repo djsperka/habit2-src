@@ -13,7 +13,7 @@
 #include <QCheckBox>
 #include "HPhaseSettingsWidget.h"
 #include "HStimuliSettingsWidget.h"
-#include "HHabituationSetupWidget.h"
+#include "HHabituationSettingsWidget.h"
 
 namespace GUILib {
 
@@ -27,7 +27,8 @@ private:
 	QTabWidget *m_pTabWidget;
 	HPhaseSettingsWidget* m_pPhaseSettingsWidget;
 	HStimuliSettingsWidget* m_pStimuliWidget;
-	HHabituationSetupWidget* m_pHabituationWidget;
+	//HHabituationSetupWidget* m_pHabituationWidget;
+	HHabituationSettingsWidget *m_pHabituationSettingsWidget;
 
 public:
 	HPhaseSettingsTabWidget(const Habit::HPhaseSettings& phaseSettings, const QString& labelName, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent=0);

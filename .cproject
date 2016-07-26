@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595" moduleId="org.eclipse.cdt.core.settings" name="Default">
@@ -89,8 +87,6 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.1411083628" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
 								<option id="gnu.both.asm.option.include.paths.1155507105" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
 								</option>
@@ -99,10 +95,11 @@
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.799675237" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.404769459" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
 								<option id="gnu.cpp.compiler.option.include.paths.1522647538" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.6/lib/QtCore.framework/Versions/4/Headers"/>
+									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.6/lib/QtSql.framework/Versions/4/Headers"/>
+									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.6/lib/QtGui.framework/Versions/4/Headers"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1636335141" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
