@@ -6,6 +6,7 @@
  */
 
 #include <HHabituationSettingsWidget.h>
+#include <QtDebug>
 
 namespace GUILib {
 
@@ -21,6 +22,7 @@ HHabituationSettingsWidget::HHabituationSettingsWidget(const Habit::HabituationS
 	setLayout(vbox);
 
 	// Initialize page for  criteria widget. Type widget is initialized automatically.
+	qDebug() << "m_pCriteriaWidget->setCurrentIndex(" << m_settings.getHabituationType().number() << ")" << m_settings.getHabituationType().name();
 	m_pCriteriaWidget->setCurrentIndex(m_settings.getHabituationType().number());
 	connect(m_pTypeWidget, SIGNAL(currentIndexChanged(int)), m_pCriteriaWidget, SLOT(setCurrentIndex(int)));
 }
@@ -32,6 +34,7 @@ HHabituationSettingsWidget::~HHabituationSettingsWidget() {
 Habit::HabituationSettings HHabituationSettingsWidget::getHabituationSettings()
 {
 	Habit::HabituationSettings hs;
+	hs.setId(m_settings.getId());
 	hs.setHabituationType(m_pTypeWidget->getHabituationType());
 	hs.setNTrials(m_pCriteriaWidget->getNTrials());
 	hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());

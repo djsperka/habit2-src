@@ -148,6 +148,7 @@ void HExperimentMain::saveButtonClicked()
 	catch (const HDBException& e)
 	{
 		QMessageBox::warning(this, "Save failed", "Failed to save experiment settings into database");
+		qCritical() << e.what();
 	}
 }
 

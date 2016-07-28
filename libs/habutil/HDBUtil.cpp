@@ -71,6 +71,10 @@ bool openDB(const QDir& dir)
 				bval = false;
 				qDebug() << "Database update failed.";
 			}
+			else
+			{
+				validateDB();
+			}
 		}
 		else
 		{
@@ -80,6 +84,13 @@ bool openDB(const QDir& dir)
 	return bval;
 }
 
+
+void validateDB()
+{
+	qDebug() << "Validating database...";
+
+	QList<QVariant> listExperimentIDs = getColumn
+}
 
 int getDBVersion()
 {

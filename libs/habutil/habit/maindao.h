@@ -57,6 +57,12 @@ public:
 	void getHPhaseSettings(int phaseId, HPhaseSettings& phaseSettings);
 
 	/*
+	 * Get a bunch of ids
+	 */
+	QList<QVariant> getColumnValuesFromTable(const QString& tableName, const QString& column, const QString& key = QString(), const QVariant& keyValue = QVariant());
+	void getListFromTable(const QString& table, const QString& key, int id, const QString& column, QList<int>& list);
+
+	/*
 	 * These are OLD methods for handling StimuliSettings, StimulusSettings
 	 */
 
@@ -91,6 +97,8 @@ public:
 	void deleteOrder(int id);	// can throw HDBException
 	void deleteExperiment(Habit::ExperimentSettings& experimentSettings);
 	void deletePhase(int id);
+	void deleteFromTable(const QString table, const QString key, int id);
+	void deleteFromTable(const QString table, const QString key, const QList<int>& ids);
 
 	void addOrUpdateExperimentSettings(Habit::ExperimentSettings& experimentSettings);	// can throw HDBException
 	void addOrUpdateHLookSettings(int experimentID, Habit::HLookSettings& settings);
@@ -99,9 +107,6 @@ public:
 	void addOrUpdateHabituationSettings(int phaseID, Habit::HabituationSettings& habituationSettings);
 	void addOrUpdateStimulusOrder(int parentId, Habit::HStimulusOrder& order);
 	void addOrUpdateStimulusDisplayInfo(int experimentId, Habit::StimulusDisplayInfo& stimulusDisplayInfo);
-
-private:
-	void deleteFromTable(const QString table, const QString key, int id);
 };
 
 } // namespace Habit 

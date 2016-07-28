@@ -74,6 +74,7 @@ void GUILib::H2MainWindow::experimentActivated(QString expt)
 	catch (const Habit::HDBException& e)
 	{
 		QMessageBox::warning(this, "Habit database error", e.what());
+		qCritical() << e.what();
 	}
 }
 
@@ -271,6 +272,7 @@ void GUILib::H2MainWindow::editExperiment()
 		catch (const Habit::HDBException& e)
 		{
 			QMessageBox::warning(this, "Habit database error", e.what());
+			qCritical() << e.what();
 		}
 	}
 }
@@ -453,6 +455,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 		{
 			QMessageBox::critical(this, "Cannot load experiment", "Cannot load experiment from database!");
 			qCritical() << "Cannot load experiment \"" << expt << "\" from database.";
+			qCritical() << e.what();
 			return;
 		}
 
@@ -579,6 +582,7 @@ void GUILib::H2MainWindow::cloneExperiment()
 		{
 			QMessageBox::critical(this, "Cannot load experiment", "Cannot load experiment from database!");
 			qCritical() << "Cannot load experiment \"" << m_pExperimentListWidget->selectedExperiment() << "\" from database.";
+			qCritical() << e.what();
 			return;
 		}
 	}
@@ -603,6 +607,7 @@ void GUILib::H2MainWindow::deleteExperiment()
 		{
 			// TODO rollback()
 			QMessageBox::warning(this, "Delete Experiment", QString(e.what()));
+			qCritical() << e.what();
 		}
 	}
 }

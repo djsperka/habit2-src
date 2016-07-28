@@ -2,6 +2,7 @@
 #include "maindao.h"
 #include "HTypes.h"
 #include <QtSql/QSqlDatabase>
+#include <QListIterator>
 #include "HDBUtil.h"
 
 
@@ -279,7 +280,7 @@ void Habit::ExperimentSettings::saveToDB()
 		QListIterator<HPhaseSettings> phaseIterator = this->phaseIterator();
 		while (phaseIterator.hasNext())
 		{
-			int id = phaseIterator.next().getID();
+			int id = phaseIterator.next().getId();
 			int foundAt = existingPhaseIDs.indexOf(id);
 			qDebug() << "check id " << id << " found at " << foundAt;
 			if (foundAt > -1)
@@ -289,12 +290,12 @@ void Habit::ExperimentSettings::saveToDB()
 		}
 
 		// Anything remaining in 'existingPhaseIDs' has been deleted.
-		QListIterator itDelete<int>(existingPhaseIDs);
+		QListIterator<int> itDelete(existingPhaseIDs);
 		while (itDelete.hasNext())
 		{
-			int idel = itDelete.hasNext();
+			int idel = itDelete.next();
 			qDebug() << "Deleting phase id " << idel;
-			dao.
+			dao.deletePhase(idel);
 		}
 
 
@@ -413,7 +414,6 @@ bool Habit::ExperimentSettings::load(ExperimentSettings& settings, const QString
 void Habit::ExperimentSettings::deleteFromDB()
 {
 	MainDao dao;
-	bool result = false;
 	QSqlDatabase db = QSqlDatabase::database();	// default connection, assumed to be open.
 
 	db.transaction();
@@ -487,7 +487,7 @@ const HPhaseSettings& Habit::ExperimentSettings::phaseAt(const QString& name) co
 QStringList Habit::ExperimentSettings::getPhaseNames() const
 {
 	QStringList list;
-	for (unsigned int i=0; i<m_phases.size(); i++)
+	for (int i=0; i<m_phases.size(); i++)
 		list << m_phases.at(i).getName();
 	return list;
 }

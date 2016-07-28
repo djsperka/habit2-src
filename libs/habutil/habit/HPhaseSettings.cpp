@@ -90,6 +90,8 @@ HPhaseSettings HPhaseSettings::clone() const
 {
 	HPhaseSettings settings(*this);
 	settings.setId(-1);
+	settings.setStimuli(stimuli().clone());
+	settings.setHabituationSettings(habituationSettings().clone());
 	return settings;
 }
 

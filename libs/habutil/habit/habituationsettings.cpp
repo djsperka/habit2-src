@@ -40,7 +40,7 @@ Habit::HabituationSettings& Habit::HabituationSettings::operator=(const Habit::H
 }
 
 
-Habit::HabituationSettings Habit::HabituationSettings::clone()
+Habit::HabituationSettings Habit::HabituationSettings::clone() const
 {
 	Habit::HabituationSettings settings(*this);
 	settings.setId(-1);

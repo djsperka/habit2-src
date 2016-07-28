@@ -12,6 +12,7 @@
 #include <QtGui/QColor>
 #include <QtCore/QTDebug>
 #include <QSet>
+#include <QList>
 
 namespace Habit {
 
@@ -61,7 +62,7 @@ void MainDao::addOrUpdateHPhaseSettings(int experimentID, Habit::HPhaseSettings&
 	if (phaseSettings.getId() > 0)
 	{
 		sql = "update phase_settings "
-				"set enabled=?, name=?, seqno=?, phase_type=?, ntrials=?, "
+				"set enabled=?, name=?, seqno=?, "
 				"use_looking_criteria=?, is_single_look=?, is_max_accumulated_look_time=?, max_accumulated_look_time=?, "
 				"is_max_lookaway_time=?, max_lookaway_time=?, "
 				"repeat_trial_on_max_lookaway=?, "
@@ -210,6 +211,8 @@ void MainDao::addOrUpdateHabituationSettings(int phaseId, Habit::HabituationSett
 		sql = "insert into habituation_settings (habituation_type, criterion_basis, criterion_percent, window_size, window_type, total_look, exclude_basis_window, require_min_basis_value, min_basis_value, phase_id, ntrials)"
 			" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
+	qDebug() << "MainDao::addOrUpdateHabituationSettings phaseID " << phaseId << " habsettings.id " << habituationSettings.getId();
+	qDebug() << sql;
 	QSqlQuery q;
 	q.prepare(sql);
 	q.addBindValue(habituationSettings.getHabituationType().number());
@@ -254,6 +257,77 @@ void MainDao::deleteOrder(int id)
 	}
 	return;
 }
+
+void MainDao::deletePhase(int id)
+{
+	// delete stimulus records, key "phase_id". The deleteStimulus()
+	// method removes the stimfiles records as well.
+	QList<int> IDs;
+	getListFromTable("stimulus", "phase_id", id, "id", IDs);
+	QListIterator<int> itIDs(IDs);
+	while (itIDs.hasNext())
+		deleteStimulus(itIDs.next());
+
+	// delete habituation_settings record
+	deleteFromTable("habituation_settings", "phase_id", id);
+
+	// delete phase_settings record
+	deleteFromTable("phase_settings", "id", id);
+}
+
+QList<QVariant> MainDao::getColumnValuesFromTable(const QString& tableName, const QString& column, const QString& key, const QVariant& keyValue)
+{
+	QString s;
+	QSqlQuery q;
+	QList<QVariant> list;
+	if (key.isEmpty())
+	{
+		s = QString("select %1 from %2").arg(column).arg(tableName);
+		q.prepare(s);
+	}
+	else
+	{
+		s = QString("select %1 from %2 where %3 = ?").arg(column).arg(tableName).arg(key);
+		q.prepare(s);
+		q.addBindValue(keyValue);
+	}
+
+	// execute query
+	if (!q.exec())
+	{
+		qCritical() << "MainDao::getColumnValuesFromTable error: " << q.lastQuery() << " : " << q.lastError().text();
+		throw HDBException(string("MainDao::addOrUpdateStimulusSetting"), q.lastQuery().toStdString(), q.lastError().text().toStdString());
+	}
+	else
+	{
+		while(q.next())
+		{
+			list.push_back(q.value(0));
+		}
+	}
+	return list;
+}
+
+
+
+void MainDao::getListFromTable(const QString& table, const QString& key, int id, const QString& column, QList<int>& list)
+{
+	QString s = QString("select %1 from %2 where %3=%4").arg(column).arg(table).arg(key).arg(id);
+	QSqlQuery q(s);
+	if (q.lastError().isValid())
+	{
+		throw HDBException(string("MainDao::deleteFromTable"), q.lastQuery().toStdString(), q.lastError().text().toStdString());
+	}
+	else
+	{
+		while(q.next())
+		{
+			list.push_back(q.value(0).toInt());
+		}
+	}
+	return;
+}
+
 
 void MainDao::addOrUpdateStimuliSettings(int phaseId, Habit::StimuliSettings& stimuli)
 {
@@ -1039,6 +1113,13 @@ void MainDao::addOrUpdateExperimentSettings(Habit::ExperimentSettings& experimen
 	return;
 }
 
+void MainDao::deleteFromTable(const QString table, const QString key, const QList<int>& ids)
+{
+	QListIterator<int> it(ids);
+	while (it.hasNext())
+		deleteFromTable(table, key, it.next());
+}
+
 void MainDao::deleteFromTable(const QString table, const QString key, int id)
 {
 	QString s = QString("delete from %1 where %2=%3").arg(table).arg(key).arg(id);
@@ -1058,11 +1139,11 @@ void MainDao::deleteExperiment(Habit::ExperimentSettings& experimentSettings)
 		// delete attention getter stimulus
 		deleteStimulus(experimentSettings.getAttentionGetterSettings().getStimulusID());
 
-		// delete attention_setup, control_bar_options, look_settings, stimulus_display_info records
+		// delete attention_setup, control_bar_options, look_settings, stimulus_display records
 		deleteFromTable("attention_setup", "id", experimentSettings.getAttentionGetterSettings().getId());
 		deleteFromTable("controlbar_options", "id", experimentSettings.getControlBarOptions().getId());
 		deleteFromTable("look_settings", "id", experimentSettings.getHLookSettings().getId());
-		deleteFromTable("stimulus_display_info", "id", experimentSettings.getStimulusDisplayInfo().getId());
+		deleteFromTable("stimulus_display", "id", experimentSettings.getStimulusDisplayInfo().getId());
 
 		// delete each phase records in habituation_settings, phase_settings, and all stimuli/orders
 		for (int i=0; i<experimentSettings.getNumberOfPhases(); i++)
@@ -1077,6 +1158,9 @@ void MainDao::deleteExperiment(Habit::ExperimentSettings& experimentSettings)
 			for (int j=0; j<orders.size(); j++)
 				deleteOrder(orders.at(j).getId());
 		}
+
+		// finally delete the experiments record
+		deleteFromTable("experiments", "id", experimentSettings.getId());
 	}
 	else
 	{

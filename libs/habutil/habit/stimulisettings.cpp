@@ -32,7 +32,7 @@ StimuliSettings& StimuliSettings::operator=(const StimuliSettings& rhs)
 	return *this;
 }
 
-StimuliSettings StimuliSettings::clone()
+StimuliSettings StimuliSettings::clone() const
 {
 	StimuliSettings settings;
 	StimulusSettingsList list;

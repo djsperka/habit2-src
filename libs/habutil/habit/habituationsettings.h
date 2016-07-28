@@ -21,7 +21,7 @@ public:
     HabituationSettings(const HabituationSettings& settings);
     HabituationSettings& operator=(const HabituationSettings& rhs);
     ~HabituationSettings();
-    HabituationSettings clone();
+    HabituationSettings clone() const;
 
 public:
 	int getId() const;

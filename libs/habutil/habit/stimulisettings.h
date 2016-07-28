@@ -23,7 +23,7 @@ namespace Habit
 		StimuliSettings(const StimuliSettings& s);
 		~StimuliSettings();
 		StimuliSettings& operator=(const StimuliSettings& rhs);
-		StimuliSettings clone();
+		StimuliSettings clone() const;
 
 	public:
 		HStimulusSettingsList& stimuli();
