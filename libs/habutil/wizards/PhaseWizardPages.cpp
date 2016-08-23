@@ -383,7 +383,7 @@ namespace GUILib
 
 	Habit::HabituationSettings PhaseWPHabit0::getHabituationSettings()
 	{
-		Habit::HabituationSettings hs;
+		Habit::HabituationSettings hs(HHabituationType::HHabituationTypeFixedN);
 		hs.setNTrials(m_pCriteriaWidget->getNTrials());
 		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
 		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
@@ -404,7 +404,7 @@ namespace GUILib
 
 	Habit::HabituationSettings PhaseWPHabit1::getHabituationSettings()
 	{
-		Habit::HabituationSettings hs;
+		Habit::HabituationSettings hs(HHabituationType::HHabituationTypeCriterion);
 		hs.setNTrials(m_pCriteriaWidget->getNTrials());
 		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
 		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
@@ -425,7 +425,7 @@ namespace GUILib
 
 	Habit::HabituationSettings PhaseWPHabit2::getHabituationSettings()
 	{
-		Habit::HabituationSettings hs;
+		Habit::HabituationSettings hs(HHabituationType::HHabituationTypeTotalLookingTime);
 		hs.setNTrials(m_pCriteriaWidget->getNTrials());
 		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
 		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
