@@ -34,7 +34,7 @@ public:
 	Habit::AttentionGetterSettings getConfigurationObject();
 	void setConfigurationObject(const Habit::AttentionGetterSettings&);
 	void initialize();
-	void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
+	//void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 
 private slots:
 	void stimulusLayoutTypeChanged(int);

@@ -77,6 +77,7 @@ void HExperimentMain::components()
 		m_pPagesWidget->addWidget(pTabWidget);
 		connect(pTabWidget, SIGNAL(phaseNameChanged(const QString&)), m_pPhaseListWidget, SLOT(phaseNameChanged(const QString&)));
 		connect(pTabWidget, SIGNAL(phaseEnabledClicked(bool)), m_pPhaseListWidget, SLOT(phaseEnabledClicked(bool)));
+		connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), pTabWidget, SIGNAL(stimulusLayoutTypeChanged(int)));
 	}
 
 	QVBoxLayout *vboxContents = new QVBoxLayout;
@@ -123,13 +124,7 @@ void HExperimentMain::connections()
 	connect(m_pPhaseListWidget, SIGNAL(upPhase()), this, SLOT(upPhase()));
 	connect(m_pPhaseListWidget, SIGNAL(downPhase()), this, SLOT(downPhase()));
 
-	qCritical() << "RE-CONNECT to stimulus layout changes. See HExperimentMain::connections()";
-	/*
-	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pPreTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
-	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pHabituationStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
-	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pTestStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
 	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pAttentionSetupForm, SLOT(stimulusLayoutTypeChanged(int)));
-	*/
 }
 
 void HExperimentMain::cancelButtonClicked()

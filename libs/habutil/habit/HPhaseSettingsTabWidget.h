@@ -38,9 +38,11 @@ public:
 signals:
 	void phaseNameChanged(const QString&);
 	void phaseEnabledClicked(bool);
+	void stimulusLayoutTypeChanged(int);
 
 private slots:
 	void phaseNameTextChanged(const QString& s);
+
 };
 
 } /* namespace Habit */

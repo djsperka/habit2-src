@@ -12,12 +12,12 @@
 
 using namespace GUILib;
 
-HStimulusOrderSelectionWidget::HStimulusOrderSelectionWidget(const Habit::StimuliSettings& s, const QString& phaseName, QWidget *parent)
+HStimulusOrderSelectionWidget::HStimulusOrderSelectionWidget(const Habit::StimuliSettings& s, const QString& phaseName, int seqno, QWidget *parent)
 : QWidget(parent)
 , ui(new Ui::HStimulusOrderSelectionForm)
 , m_ssList(s.stimuli())
 , m_orderList(s.orders())
-
+, m_seqno(seqno)
 {
 	ui->setupUi(this);
 	for (unsigned int i=0; i<sizeof(HRandomizationType::A)/sizeof(HRandomizationType*); i++)
@@ -107,5 +107,5 @@ void HStimulusOrderSelectionWidget::updateStatusLabel()
 		ui->labelStatus->setStyleSheet("QLabel { background-color : lightpink; }");
 	}
 	ui->labelStatus->setText(s);
-	emit orderChosen();
+	emit orderChosen(m_seqno);
 }

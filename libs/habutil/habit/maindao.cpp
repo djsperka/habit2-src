@@ -211,8 +211,6 @@ void MainDao::addOrUpdateHabituationSettings(int phaseId, Habit::HabituationSett
 		sql = "insert into habituation_settings (habituation_type, criterion_basis, criterion_percent, window_size, window_type, total_look, exclude_basis_window, require_min_basis_value, min_basis_value, phase_id, ntrials)"
 			" values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
-	qDebug() << "MainDao::addOrUpdateHabituationSettings phaseID " << phaseId << " habsettings.id " << habituationSettings.getId();
-	qDebug() << sql;
 	QSqlQuery q;
 	q.prepare(sql);
 	q.addBindValue(habituationSettings.getHabituationType().number());
@@ -648,6 +646,27 @@ void MainDao::getHPhaseSettingsIDs(int experimentID, QList<int>& ids)
 		}
 	}
 	return;
+}
+
+
+QString MainDao::getHPhaseName(int phaseId)
+{
+	QString name;
+	QString sql = "select name from phase_settings where id=?";
+	QSqlQuery q;
+	q.prepare(sql);
+	q.addBindValue(phaseId);
+	if (!q.exec())
+	{
+		qCritical() << "Error in MainDao::getHPhaseName phaseId=" << phaseId;
+		throw HDBException(string("MainDao::getHPhaseName"), q.lastQuery().toStdString(), q.lastError().text().toStdString());
+	}
+	else
+	{
+		if (q.next())
+			name = q.value(0).toString();
+	}
+	return name;
 }
 
 void MainDao::getAttentionGetterSettings(int experimentID, AttentionGetterSettings& attentionGetterSettings)

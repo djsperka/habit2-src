@@ -55,6 +55,7 @@ public:
 	void getHLookSettingsForExperiment(int experimentID, HLookSettings& lookSettings);
 	void getHPhaseSettingsIDs(int experimentID, QList<int>& ids);
 	void getHPhaseSettings(int phaseId, HPhaseSettings& phaseSettings);
+	QString getHPhaseName(int phaseId);
 
 	/*
 	 * Get a bunch of ids

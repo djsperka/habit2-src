@@ -419,7 +419,7 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 				if (!habutilStimulusFilesFound(ss, layoutType))
 				{
 					b = false;
-					sProblems.append(QString("%1 stimulus \"%2\" file(s) not found.\n").arg(ps.getName().arg(ss.getName())));
+					sProblems.append(QString("%1 stimulus \"%2\" file(s) not found.\n").arg(ps.getName()).arg(ss.getName()));
 				}
 			}
 		}

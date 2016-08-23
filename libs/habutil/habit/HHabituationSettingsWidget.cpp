@@ -22,7 +22,6 @@ HHabituationSettingsWidget::HHabituationSettingsWidget(const Habit::HabituationS
 	setLayout(vbox);
 
 	// Initialize page for  criteria widget. Type widget is initialized automatically.
-	qDebug() << "m_pCriteriaWidget->setCurrentIndex(" << m_settings.getHabituationType().number() << ")" << m_settings.getHabituationType().name();
 	m_pCriteriaWidget->setCurrentIndex(m_settings.getHabituationType().number());
 	connect(m_pTypeWidget, SIGNAL(currentIndexChanged(int)), m_pCriteriaWidget, SLOT(setCurrentIndex(int)));
 }

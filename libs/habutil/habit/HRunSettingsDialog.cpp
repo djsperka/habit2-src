@@ -96,7 +96,7 @@ void GUILib::HRunSettingsDialog::components(bool bTestRun)
 		const Habit::HPhaseSettings& ps = iterator.next();
 		if (ps.getIsEnabled())
 		{
-			GUILib::HStimulusOrderSelectionWidget* w = new HStimulusOrderSelectionWidget(ps.stimuli(), ps.getName(), this);
+			GUILib::HStimulusOrderSelectionWidget* w = new HStimulusOrderSelectionWidget(ps.stimuli(), ps.getName(), ps.getSeqno(), this);
 			v->addWidget(w);
 			m_map.insert(ps.getSeqno(), QPair<GUILib::HStimulusOrderSelectionWidget*, bool>(w, false));
 		}

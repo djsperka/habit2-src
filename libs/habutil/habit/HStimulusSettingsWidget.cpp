@@ -30,18 +30,15 @@ GUILib::HStimulusSettingsWidget::HStimulusSettingsWidget(const Habit::StimulusSe
 	m_pName = new QLineEdit(m_settings.getName(), this);
 	m_pName->setValidator(new QRegExpValidator(Habit::HStimulusOrder::getStimlusNameLabelRE()));
 
-	// stack
+	// stack for single stim or l/r stim.
 	m_pStack = new QStackedWidget(this);
-
 
 	// Construct the pages in the stack. Sound not added until initialize() is called.
 	// first page of stack is for single stim
 	QWidget *pwSingle = new QWidget();
 	QVBoxLayout *vSingle = new QVBoxLayout();
 	vSingle->addWidget(m_pCenter);
-	//vSingle->addWidget(m_pISSSingle);
 
-	//vSingle->addStretch(1);
 	pwSingle->setLayout(vSingle);
 	m_stackidSingle = m_pStack->addWidget(pwSingle);
 
@@ -50,8 +47,6 @@ GUILib::HStimulusSettingsWidget::HStimulusSettingsWidget(const Habit::StimulusSe
 	QVBoxLayout *vLR = new QVBoxLayout();
 	vLR->addWidget(m_pLeft);
 	vLR->addWidget(m_pRight);
-	//vLR->addWidget(m_pISSLR);
-	//vLR->addStretch(1);
 	pwLR->setLayout(vLR);
 	m_stackidLR = m_pStack->addWidget(pwLR);
 

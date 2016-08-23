@@ -13,9 +13,10 @@
 #include <QList>
 #include <QPushButton>
 #include <QLabel>
+#include <QStackedWidget>
 #include "stimulisettings.h"
 #include "stimulusdisplayinfo.h"
-#include "HMediaManager.h"
+#include "HPreviewMediaManager.h"
 
 namespace GUILib
 {
@@ -24,7 +25,7 @@ namespace GUILib
 	{
 		Q_OBJECT
 		const Habit::HStimulusSettingsList m_stimlist;
-		HMediaManager *m_pmm;
+		HPreviewMediaManager *m_pmm;
 		QList<unsigned int> m_idList;
 		unsigned int m_idListCurrent;
 		QPushButton *m_pbDown;
@@ -33,6 +34,7 @@ namespace GUILib
 		QPushButton *m_pbNext;
 		QPushButton *m_pbPrev;
 		QPushButton *m_pbStop;
+		QStackedWidget *m_pstack;
 
 		void updateNavigation();
 		void updateNavigation(QString stimName);
@@ -43,6 +45,7 @@ namespace GUILib
 		void preview(const Habit::StimulusSettings& stimulus);
 		void preview(const Habit::HStimulusSettingsList& stimuli, QList< QPair<int, QString> > list);
 		void clear();
+		void setStimulusLayoutType(const HStimulusLayoutType& type);
 
 	protected slots:
 		void nextClicked();

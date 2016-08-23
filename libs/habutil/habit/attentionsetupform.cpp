@@ -22,15 +22,19 @@ AttentionSetupForm::~AttentionSetupForm()
 {
 }
 
+#if 0
 void AttentionSetupForm::setStimulusLayoutType(const HStimulusLayoutType& layoutType)
 {
 	qDebug() << "Cannot set stimuluslayout type -- see AttentionSetupForm!";
 	//m_pLayoutType = &layoutType;
 }
+#endif
 
 void AttentionSetupForm::stimulusLayoutTypeChanged(int i)
 {
-	setStimulusLayoutType(getStimulusLayoutType(i));
+	//setStimulusLayoutType(getStimulusLayoutType(i));
+	m_pStimulusPreviewWidget->setStimulusLayoutType(getStimulusLayoutType(i));
+	m_pStimulusSettingsWidget->setStimulusLayoutType(getStimulusLayoutType(i));
 }
 
 void AttentionSetupForm::stimulusSettingsChanged()
@@ -88,14 +92,23 @@ void AttentionSetupForm::components()
 
 void AttentionSetupForm::initialize()
 {
+	stimulusLayoutTypeChanged(m_stimulusDisplayInfo.getStimulusLayoutType().number());
 	m_pStimulusPreviewWidget->preview(m_pStimulusSettingsWidget->getStimulusSettings());
 	m_plineeditISI->setText(QString("%1").arg(m_agSettings.getFixedISIMS()));
+	m_plineeditISI->setEnabled(false);
 	if (m_agSettings.isAttentionGetterUsed())
+	{
 		m_prbUseAG->setChecked(true);
+	}
 	else if (m_agSettings.isFixedISI())
+	{
 		m_prbUseISI->setChecked(true);
+		m_plineeditISI->setEnabled(true);
+	}
 	else
+	{
 		m_prbNoISI->setChecked(true);
+	}
 }
 
 Habit::AttentionGetterSettings AttentionSetupForm::getConfigurationObject()
@@ -114,6 +127,7 @@ void AttentionSetupForm::connections()
 {
 	//connect(modifyButton_, SIGNAL(clicked()), this, SLOT(onModifyClick()));
 	connect(m_pStimulusSettingsWidget, SIGNAL(stimulusSettingsChanged()), this, SLOT(stimulusSettingsChanged()));
+	connect(m_prbUseISI, SIGNAL(toggled(bool)), m_plineeditISI, SLOT(setEnabled(bool)));
 }
 
 void AttentionSetupForm::setConfigurationObject(const Habit::AttentionGetterSettings& settings)

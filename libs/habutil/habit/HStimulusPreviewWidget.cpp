@@ -13,34 +13,40 @@
 GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, const QDir& dirStimRoot, QWidget *parent)
 : QWidget(parent)
 {
-	// HBoxLayout to hold the players, even if there's just 1
-	QHBoxLayout *hbox = new QHBoxLayout;
 
-	m_pmm = new HMediaManager(false);
+	m_pmm = new HPreviewMediaManager(info.getStimulusLayoutType());
 	if (info.getUseISS())
 	{
 		HPlayer *p = new HAudioPlayer(-1, NULL, dirStimRoot);
 		m_pmm->addPlayer(HPlayerPositionType::Sound, p, -1);
 	}
 
-	if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		HPlayer *p = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
-		p->setPreferBufferedStimulus(false);
-		m_pmm->addPlayer(HPlayerPositionType::Center, p, -1);
-		hbox->addWidget(p);
-	}
-	else if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		HPlayer *pl = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
-		pl->setPreferBufferedStimulus(false);
-		m_pmm->addPlayer(HPlayerPositionType::Left, pl, -1);
-		hbox->addWidget(pl);
-		HPlayer *pr = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
-		pr->setPreferBufferedStimulus(false);
-		m_pmm->addPlayer(HPlayerPositionType::Right, pr, -1);
-		hbox->addWidget(pr);
-	}
+	QHBoxLayout *hbox0 = new QHBoxLayout;
+	HPlayer *p0 = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
+	p0->setPreferBufferedStimulus(false);
+	m_pmm->addPlayer(HPlayerPositionType::Center, p0, -1);
+	hbox0->addWidget(p0);
+
+	QHBoxLayout *hbox1 = new QHBoxLayout;
+	HPlayer *p1l = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
+	p1l->setPreferBufferedStimulus(false);
+	m_pmm->addPlayer(HPlayerPositionType::Left, p1l, -1);
+	hbox1->addWidget(p1l);
+	HPlayer *p1r = new HVIPlayer(-1, NULL, dirStimRoot, info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, info.getBackGroundColor());
+	p1r->setPreferBufferedStimulus(false);
+	m_pmm->addPlayer(HPlayerPositionType::Right, p1r, -1);
+	hbox1->addWidget(p1r);
+
+	m_pstack = new QStackedWidget;
+
+	QWidget *w0 = new QWidget;
+	w0->setLayout(hbox0);
+	m_pstack->addWidget(w0);
+
+	QWidget *w1 = new QWidget;
+	w1->setLayout(hbox1);
+	m_pstack->addWidget(w1);
+
 
 	// set up label for stim name and buttons for advancing stim through orders.
 	m_pbNext = new QPushButton(">");
@@ -60,7 +66,8 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 
 	// Now do the layout for the entire thing
     QVBoxLayout* vbox = new QVBoxLayout;
-    vbox->addLayout(hbox);
+    //vbox->addLayout(hbox);
+    vbox->addWidget(m_pstack);
     vbox->addLayout(hlb);
     setLayout(vbox);
 
@@ -148,5 +155,12 @@ void GUILib::HStimulusPreviewWidget::clear()
 	m_pmm->clear();
 }
 
-
+void GUILib::HStimulusPreviewWidget::setStimulusLayoutType(const HStimulusLayoutType& type)
+{
+	m_pmm->setLayoutType(type);
+	if (type == HStimulusLayoutType::HStimulusLayoutSingle)
+		m_pstack->setCurrentIndex(0);
+	else if (type == HStimulusLayoutType::HStimulusLayoutLeftRight)
+		m_pstack->setCurrentIndex(1);
+}
 

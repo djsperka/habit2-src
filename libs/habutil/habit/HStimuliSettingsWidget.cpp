@@ -24,18 +24,19 @@ HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const S
 , m_stimuli(stimuli)
 , m_stimulusDisplayInfo(info)
 {
-	create(labelName);
+	create(labelName, info);
 	connections();
+	stimulusLayoutTypeChanged(info.getStimulusLayoutType().number());
 }
 
-void HStimuliSettingsWidget::create(const QString& labelName)
+void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisplayInfo& info)
 {
 	QDir root;
 	habutilGetStimulusRootDir(root);
 
-	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
-	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
-	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, root, this);
+	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), info.getStimulusLayoutType());
+	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), info.getStimulusLayoutType());
+	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(info, root, this);
 
 	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(labelName));
 	QVBoxLayout *v1 = new QVBoxLayout;
@@ -222,8 +223,9 @@ void HStimuliSettingsWidget::importClicked()
 
 void HStimuliSettingsWidget::stimulusLayoutTypeChanged(int i)
 {
-	m_pStimulusSettingsListWidget->setStimulusLayoutType(m_stimulusDisplayInfo.getStimulusLayoutType());
-	m_pStimulusOrderListWidget->setStimulusLayoutType(m_stimulusDisplayInfo.getStimulusLayoutType());
+	m_pStimulusSettingsListWidget->setStimulusLayoutType(getStimulusLayoutType(i));
+	m_pStimulusOrderListWidget->setStimulusLayoutType(getStimulusLayoutType(i));
+	m_pStimulusPreviewWidget->setStimulusLayoutType(getStimulusLayoutType(i));
 }
 
 Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()

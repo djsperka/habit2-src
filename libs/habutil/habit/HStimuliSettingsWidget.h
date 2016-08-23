@@ -29,7 +29,7 @@ namespace GUILib
 		HStimulusOrderListWidget *m_pStimulusOrderListWidget;
 		HStimulusPreviewWidget *m_pStimulusPreviewWidget;
 		QPushButton *m_pbImport;
-		void create(const QString& labelName);
+		void create(const QString& labelName, const Habit::StimulusDisplayInfo& info);
 		void connections();
 	public:
 		HStimuliSettingsWidget(const QString& labelName, const Habit::StimuliSettings& stimuli, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent=0);
