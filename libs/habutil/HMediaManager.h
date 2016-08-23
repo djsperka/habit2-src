@@ -48,15 +48,7 @@ class HMediaManager : public QObject
 	Q_OBJECT
 
 private:
-	bool m_pendingStartSignal;
-	bool m_pendingAGStartSignal;
-	bool m_pendingClearSignal;
-	int m_pendingStimNumber;
-	bool m_bPlayersAreFullScreen;	// if set, players will be moved and resized to be full screen.
-									// if not set, then do not adjust position of players here when added.
 
-	// A map containing HPlayers. The key is the HPlayerPositionType (Left, Right, etc)
-	QMap<HPlayerPositionType, HPlayer *> m_players;
 
 	// A map containing StimulusSettings objects, key is an integer.
 	//QMap<unsigned int, Habit::StimulusSettings> m_mapStim;
@@ -75,6 +67,18 @@ private:
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss);
 
 	void addOrAppendList(int context, const QList<unsigned int>& list);
+
+protected:
+	bool m_pendingStartSignal;
+	bool m_pendingAGStartSignal;
+	bool m_pendingClearSignal;
+	int m_pendingStimNumber;
+	bool m_bPlayersAreFullScreen;	// if set, players will be moved and resized to be full screen.
+									// if not set, then do not adjust position of players here when added.
+
+	// A map containing HPlayers. The key is the HPlayerPositionType (Left, Right, etc)
+	QMap<HPlayerPositionType, HPlayer *> m_players;
+
 
 public:
 
@@ -101,7 +105,7 @@ public:
 
 public slots:
 
-	void stim(int);
+	virtual void stim(int);
 	void ag();
 	void playerStarted(int i, const QString& filename);
 	void playerCleared(int i);

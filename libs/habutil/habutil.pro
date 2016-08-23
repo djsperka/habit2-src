@@ -32,6 +32,7 @@ HEADERS +=	HLook.h \
 			HStimulusSource.h \
 			HImageWidget.h \
 			HMediaManager.h \
+			HPreviewMediaManager.h \
 			HMediaManagerUtil.h \
 			HTrialGenerator.h \
 			HPhaseCriteria.h \
@@ -142,6 +143,7 @@ SOURCES +=	HLook.cpp \
 			HStimulusSource.cpp \
 			HImageWidget.cpp \
 			HMediaManager.cpp \
+			HPreviewMediaManager.cpp \
 			HMediaManagerUtil.cpp \
 			HTrialGenerator.cpp \
 			HPhaseCriteria.cpp \

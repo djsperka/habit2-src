@@ -8,6 +8,7 @@
 
 #include "HDButil.h"
 #include "HTypes.h"
+#include "maindao.h"
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
@@ -20,7 +21,8 @@
 
 bool populateStimulusTable(QSqlQuery& q, const HStimContext& context);
 bool populateStimulusTableSingle(QSqlQuery& q, const HStimContext& context, int& stimulus_id);
-
+static bool validateExperiment(int exptId);
+static bool validateStimulus(int stimulus_id);
 
 // Close database on default connection.
 
@@ -85,11 +87,167 @@ bool openDB(const QDir& dir)
 }
 
 
+bool validateStimulus(int stimulus_id)
+{
+	Habit::MainDao dao;
+	bool bval = false;
+	QList<QVariant> list;
+	list = dao.getColumnValuesFromTable("stimulus", "id", "id", stimulus_id);
+	if (list.size() == 1)
+	{
+//		qDebug() << "  found 1 stimulus record...OK...check stimfiles...";
+		list = dao.getColumnValuesFromTable("stimfiles", "position", "stimulus_id", stimulus_id);
+		if (list.size() == 4)
+		{
+			if (list.contains(QVariant(1)) && list.contains(QVariant(2)) && list.contains(QVariant(3)) && list.contains(QVariant(4)))
+			{
+//				qDebug () << "    stimfiles OK";
+				bval = true;
+			}
+			else
+			{
+				qDebug() << "    stimfiles ERR (all positions not found)";
+				bval = false;
+			}
+
+		}
+		else
+		{
+			qDebug() << "    found " << list.size() << " stimfiles records (expect 4) for stimulus_id " << stimulus_id;
+			bval = false;
+		}
+	}
+	else
+	{
+		qDebug() << "  found " << list.size() << " stimulus records...ERR";
+		bval = false;
+	}
+	return bval;
+}
+
+bool validateExperiment(int experimentId)
+{
+	Habit::MainDao dao;
+	bool bval = true;
+	QString sExptName;
+	QList<QVariant> list;
+
+	dao.getExperimentName(experimentId, sExptName);
+	qDebug() << "expt id " << experimentId << " name: " << sExptName;
+
+	// check look_settings
+	list = dao.getColumnValuesFromTable("look_settings", "id", "experiment_id", QVariant(experimentId));
+	if (list.size() == 1)
+		qDebug() << " look_settings...OK";
+	else
+	{
+		qDebug() << " look_settings...ERR: found " << list.size() << " records (expect 1)";
+		bval = false;
+	}
+
+	// check stimulus_display
+	list = dao.getColumnValuesFromTable("stimulus_display", "id", "experiment_id", QVariant(experimentId));
+	if (list.size() == 1)
+		qDebug() << " stimulus_display...OK";
+	else
+	{
+		qDebug() << " stimulus_display...ERR: found " << list.size() << " records (expect 1)";
+		bval = false;
+	}
+
+	// check controlbar_options
+	list = dao.getColumnValuesFromTable("controlbar_options", "id", "experiment_id", QVariant(experimentId));
+	if (list.size() == 1)
+		qDebug() << " controlbar_options...OK";
+	else
+	{
+		qDebug() << " controlbar_options...ERR: found " << list.size() << " records (expect 1)";
+		bval = false;
+	}
+
+	// check attention_setup
+	list = dao.getColumnValuesFromTable("attention_setup", "stimulus_id", "experiment_id", QVariant(experimentId));
+	if (list.size() == 1)
+	{
+		qDebug() << " attention_setup...OK";
+		if (validateStimulus(list.at(0).toInt()))
+			qDebug() << "  attention stimulus...OK";
+		else
+		{
+			qDebug() << "  attention stimulus...ERR";
+			bval = false;
+		}
+	}
+	else
+	{
+		qDebug() << " attention_setup...ERR: found " << list.size() << " records (expect 1)";
+		bval = false;
+	}
+
+	// check phase_settings
+	list = dao.getColumnValuesFromTable("phase_settings", "id", "experiment_id", QVariant(experimentId));
+	qDebug() << " phase_settings: found " << list.size() << " phases...";
+	QListIterator<QVariant> itPhases(list);
+	while (itPhases.hasNext())
+	{
+		QList<QVariant> listHab;
+		QList<QVariant> listStim;
+		QVariant phaseId = itPhases.next();
+
+		// habituation_settings
+		listHab = dao.getColumnValuesFromTable("habituation_settings", "id", "phase_id", QVariant(phaseId));
+		if (listHab.size() == 1)
+			qDebug() << "  habituation_settings...OK";
+		else
+		{
+			qDebug() << "  habituation_settings...ERR: found " << listHab.size() << " records (expect 1): " << listHab;
+			bval = false;
+		}
+
+		// stimulus
+		listStim = dao.getColumnValuesFromTable("stimulus", "id", "phase_id", phaseId);
+		qDebug() << "  phase id " << phaseId.toInt() << " (" << dao.getHPhaseName(phaseId.toInt()) << ") has " << listStim.size() << " stimuli";
+		QListIterator<QVariant> itStimuli(listStim);
+		while (itStimuli.hasNext())
+		{
+			bool bval;
+			QVariant stimid = itStimuli.next();
+//			qDebug() << "     check stimulus id " << stimid.toInt();
+			if (validateStimulus(stimid.toInt()))
+			{
+				qDebug() << "   stimulus id " << stimid.toInt() << "...OK";
+			}
+			else
+			{
+				qDebug() << "   stimulus id " << stimid.toInt() << "...ERR";
+				bval = false;
+			}
+		}
+	}
+	return bval;
+}
+
 void validateDB()
 {
+	Habit::MainDao dao;
 	qDebug() << "Validating database...";
 
-	QList<QVariant> listExperimentIDs = getColumn
+	try
+	{
+		QList<QVariant> listExperimentIDs = dao.getColumnValuesFromTable("experiments", "id");
+		QListIterator<QVariant> itExptId(listExperimentIDs);
+		while (itExptId.hasNext())
+		{
+			// validate this experiment
+			validateExperiment(itExptId.next().toInt());
+		}
+
+	}
+	catch (const Habit::HDBException& e)
+	{
+		qCritical() << e.what();
+	}
+
 }
 
 int getDBVersion()
