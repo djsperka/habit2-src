@@ -52,6 +52,7 @@ void HStimulusSettingsListWidget::create()
 void HStimulusSettingsListWidget::setStimulusLayoutType(const HStimulusLayoutType& layoutType)
 {
 	m_pLayoutType = &layoutType;
+	m_pmodel->setLayoutType(layoutType);
 }
 
 
