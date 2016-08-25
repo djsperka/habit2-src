@@ -26,8 +26,8 @@ void HPreviewMediaManager::stim(int i)
 	}
 	else if (*m_pLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		if (m_players.contains(HPlayerPositionType::Center))
-			m_players[HPlayerPositionType::Center]->play(i);
+		if (m_players.contains(HPlayerPositionType::Left))
+			m_players[HPlayerPositionType::Left]->play(i);
 		if (m_players.contains(HPlayerPositionType::Right))
 			m_players[HPlayerPositionType::Right]->play(i);
 		if (m_players.contains(HPlayerPositionType::Sound))
