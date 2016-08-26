@@ -66,6 +66,11 @@ Habit::HPhaseSettings HPhaseSettingsTabWidget::getPhaseSettings()
 	Habit::HPhaseSettings ps = m_pPhaseSettingsWidget->getHPhaseSettings();
 	ps.setStimuli(m_pStimuliWidget->getStimuliSettings());
 	ps.setHabituationSettings(m_pHabituationSettingsWidget->getHabituationSettings());
+
+	// get name and 'phase enabled' settings. Seqno should be the same
+	// as it was -- the PhaseSettingsWidget will set it so.
+	ps.setName(m_plineeditPhaseName->text().trimmed());
+	ps.setIsEnabled(m_pcbEnabled->isChecked());
 	return ps;
 }
 
