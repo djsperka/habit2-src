@@ -170,69 +170,6 @@ namespace GUILib
 		return ui->rbHabituation->isChecked();
 	}
 
-#if 0
-
-	PhaseWPFamPref::PhaseWPFamPref(QWidget* parent)
-	: QWizardPage(parent)
-	, ui(new Ui::PhaseWPFamPref)
-	{
-		ui->setupUi(this);
-		ui->leMaxStimulusTime->setValidator(new QIntValidator(1, 1000000));
-		ui->leMinLookingTime->setValidator(new QIntValidator(1, 1000000));
-	}
-
-	bool PhaseWPFamPref::validatePage()
-	{
-		bool b = true;
-		if (!ui->gbMaxStimulusTime->isChecked() && !ui->gbMinLookingTime->isChecked()) b = false;
-		else
-		{
-			// One of the two is checked.
-			if (ui->gbMinLookingTime->isChecked() && !ui->gbMaxStimulusTime->isChecked())
-			{
-				b = (QMessageBox::Yes == QMessageBox::warning(this, "Are you sure?", "You have specified minimum looking time, but you have not specified a maximum stimulus time. If your subject does not look at the stimulus, your trial(s) may never end! Are you sure you want to create a new phase without specifying a maximum stimulus time?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No));
-			}
-		}
-		return b;
-	}
-
-
-	bool PhaseWPFamPref::isMaxAccumulatedLookTime()
-	{
-		return ui->gbMinLookingTime->isChecked();
-	}
-
-	int PhaseWPFamPref::getMaxAccumulatedLookTime()
-	{
-		return ui->leMinLookingTime->text().toInt();
-	}
-
-	bool PhaseWPFamPref::isMaxStimulusTime()
-	{
-		return ui->gbMaxStimulusTime->isChecked();
-	}
-
-	int PhaseWPFamPref::getMaxStimulusTime()
-	{
-		return ui->leMaxStimulusTime->text().toInt();
-	}
-
-	bool PhaseWPFamPref::getMeasureStimulusTimeFromOnset()
-	{
-		return ui->rbMeasuredFromStimulusOnset->isChecked();
-	}
-
-	bool PhaseWPFamPref::getMeasureStimulusTimeFromLooking()
-	{
-		return ui->rbMeasuredFromInitialLooking->isChecked();
-	}
-
-	int PhaseWPFamPref::getNTrials()
-	{
-		return ui->sbNTrials->value();
-	}
-#endif
-
 	PhaseWPTrial::PhaseWPTrial(QWidget* parent)
 	: QWizardPage(parent)
 	, ui(new Ui::PhaseWPTrial)
@@ -252,13 +189,26 @@ namespace GUILib
 
 	int PhaseWPTrial::nextId() const
 	{
-		if (field("FamPref").toBool()) return pageHabit0;
+		if (field("FamPref").toBool()) return -1;
 		else
 		{
 			if (field("HabReduction").toBool())
 				return pageHabit1;
 			else
 				return pageHabit2;
+		}
+	}
+
+	void PhaseWPTrial::initializePage()
+	{
+		// In habituation type trials, hide the "Number of Trials" spinbox
+		if (field("Habituation").toBool())
+		{
+			ui->frameNTrials->hide();
+		}
+		else
+		{
+			ui->frameNTrials->show();
 		}
 	}
 

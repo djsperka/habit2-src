@@ -133,6 +133,7 @@ namespace GUILib
 		~PhaseWPTrial() {};
 		int nextId() const;
 		bool validatePage();
+		void initializePage();
 	private:
 		Ui::PhaseWPTrial *ui;
 
