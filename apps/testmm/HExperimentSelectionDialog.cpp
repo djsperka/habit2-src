@@ -11,8 +11,9 @@
 #include "HExperimentSelectionDialog.h"
 #include "experimentsettings.h"
 #include "HWorkspaceUtil.h"
+#include "HDBException.h"
 #include <QtGui>
-#include "MMPreviewDialog.h"
+//#include "MMPreviewDialog.h"
 
 
 using namespace Habit;
@@ -50,14 +51,27 @@ void HExperimentSelectionDialog::experimentActivated(QString expt)
 {
 	// Get experiment settings
 	Habit::ExperimentSettings settings;
-	if (Habit::ExperimentSettings::load(settings, expt))
+
+	try
 	{
-		QDir dirStimRoot;
-		habutilGetStimulusRootDir(dirStimRoot);
+		settings.loadFromDB(expt);
+	}
+	catch (const Habit::HDBException& e)
+	{
+		QMessageBox::critical(this, "Cannot load experiment", "Cannot load experiment from database!");
+		qCritical() << "Cannot load experiment \"" << expt << "\" from database.";
+		qCritical() << e.what();
+		return;
+	}
+
+	QMessageBox::information(this, "Loaded experiment", expt);
+	QDir dirStimRoot;
+	habutilGetStimulusRootDir(dirStimRoot);
+
 
 		// Start up mm test dialog
-		MMPreviewDialog* preview = new MMPreviewDialog(settings.getStimulusDisplayInfo(), dirStimRoot, this);
-		preview->exec();
+//		MMPreviewDialog* preview = new MMPreviewDialog(settings.getStimulusDisplayInfo(), dirStimRoot, this);
+//		preview->exec();
 
 #if 0
 		QMessageBox mbox;
@@ -65,7 +79,6 @@ void HExperimentSelectionDialog::experimentActivated(QString expt)
 		mbox.exec();
 #endif
 
-	}
 }
 
 void HExperimentSelectionDialog::selectClicked()
