@@ -375,27 +375,33 @@ void habutilSetStimulusRootDir(const QString& d)
 
 
 // get last dir that a stim was selected from
-bool habutilGetLastDir(QDir& dir)
+bool habutilGetLastDir(QDir& dir, bool isVideoImage)
 {
 	QSettings settings;
+	QString key;
 	dir = QDir::root();
-	if (!settings.contains("lastdir"))
+	if (isVideoImage) key = QString("lastdir/selectVideoImage");
+	else key = QString("lastdir/selectAudio");
+	if (!settings.contains(key))
 	{
-		settings.setValue("lastdir", dir.absolutePath());
+		settings.setValue(key, dir.absolutePath());
 	}
 	else
 	{
-		dir.setPath(settings.value("lastdir").toString());
+		dir.setPath(settings.value(key).toString());
 	}
 
 	return dir.exists();
 }
 
 // set last dir that a stim was selected from
-void habutilSetLastDir(const QString& d)
+void habutilSetLastDir(const QString& d, bool isVideoImage)
 {
 	QSettings settings;
-	settings.setValue("lastdir", QDir(d).absolutePath());
+	QString key;
+	if (isVideoImage) key = QString("lastdir/selectVideoImage");
+	else key = QString("lastdir/selectAudio");
+	settings.setValue(key, QDir(d).absolutePath());
 	return;
 }
 

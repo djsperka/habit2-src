@@ -93,10 +93,10 @@ bool habutilGetUseDefaultStimRoot();
 void habutilSetUseDefaultStimRoot(bool b);
 
 // get last dir that a stim was selected from
-bool habutilGetLastDir(QDir& dir);
+bool habutilGetLastDir(QDir& dir, bool isVideoImage = true);
 
 // set last dir that a stim was selected from
-void habutilSetLastDir(const QString& d);
+void habutilSetLastDir(const QString& d, bool isVideoImage = true);
 
 // get/set monitor id for Control, left, right, etc
 int habutilGetMonitorID(const HPlayerPositionType& type);
