@@ -20,7 +20,7 @@ namespace Habit {
 	class StimulusSettings
 	{
 	public:
-		StimulusSettings(const QString& name = "");
+		StimulusSettings();
 		StimulusSettings(const StimulusSettings& s);
 		~StimulusSettings();
 		StimulusSettings clone() const;

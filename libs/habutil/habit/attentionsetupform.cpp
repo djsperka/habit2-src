@@ -34,7 +34,8 @@ void AttentionSetupForm::stimulusLayoutTypeChanged(int i)
 {
 	//setStimulusLayoutType(getStimulusLayoutType(i));
 	m_pStimulusPreviewWidget->setStimulusLayoutType(getStimulusLayoutType(i));
-	m_pStimulusSettingsWidget->setStimulusLayoutType(getStimulusLayoutType(i));
+	//m_pStimulusSettingsWidget->setStimulusLayoutType(getStimulusLayoutType(i));
+	// TODO fix - Attention setup form does not update if layout type changed. Have to save/reload expt editor
 }
 
 void AttentionSetupForm::stimulusSettingsChanged()
@@ -49,7 +50,7 @@ void AttentionSetupForm::components()
 {
 	QGroupBox *pIntervalGroup = new QGroupBox(tr("Intertrial Interval"));
 	QGroupBox *pStimulusGroup = new QGroupBox(tr("Intertrial Stimulus"));
-	m_pStimulusSettingsWidget = new HStimulusSettingsWidget(m_agSettings.getAttentionGetterStimulus(), m_stimulusDisplayInfo.getStimulusLayoutType(), this);
+	m_pStimulusSettingsWidget = new HStimulusSettingsWidget(m_agSettings.getAttentionGetterStimulus(), m_stimulusDisplayInfo, this);
 
 	QDir dir;
 	habutilGetStimulusRootDir(dir);

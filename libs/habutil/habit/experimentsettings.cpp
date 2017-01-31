@@ -234,7 +234,7 @@ void Habit::ExperimentSettings::setControlBarOptions(const ControlBarOptions& co
 }
 
 
-StimulusDisplayInfo Habit::ExperimentSettings::getStimulusDisplayInfo() const
+const StimulusDisplayInfo& Habit::ExperimentSettings::getStimulusDisplayInfo() const
 {
     return m_stimulusDisplayInfo;
 }

@@ -34,8 +34,8 @@ void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisp
 	QDir root;
 	habutilGetStimulusRootDir(root);
 
-	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), info.getStimulusLayoutType());
-	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), info.getStimulusLayoutType());
+	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_stimulusDisplayInfo);
+	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
 	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(info, root, this);
 
 	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(labelName));
@@ -219,7 +219,6 @@ void HStimuliSettingsWidget::importClicked()
 		}
 	}
 }
-
 
 void HStimuliSettingsWidget::stimulusLayoutTypeChanged(int i)
 {

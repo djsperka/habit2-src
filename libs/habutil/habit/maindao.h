@@ -81,6 +81,8 @@ public:
 	 */
 
 	void getStimuliSettings(int phase_id, StimuliSettings& settings);
+
+	// will set Id and Name in this method. Previous value(s) are overwritten.
 	void getStimulusSettings(int stimulus_id, StimulusSettings& settings);
 	void addOrUpdateStimuliSettings(int phase_id, Habit::StimuliSettings& settings);
 	void addOrUpdateStimulusSettings(int phaseID, Habit::StimulusSettings& ss);

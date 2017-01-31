@@ -158,6 +158,7 @@ void HMediaStatusWidget::setStatusStim(const Habit::StimulusSettings& settings)
 	ui->statusStack->setCurrentIndex(2);
 }
 
+
 void HMediaStatusWidget::onAGStarted(int key)
 {
 	Habit::StimulusSettings settings;

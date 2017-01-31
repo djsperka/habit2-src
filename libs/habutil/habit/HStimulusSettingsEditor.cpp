@@ -13,12 +13,13 @@
 
 using namespace GUILib;
 
-HStimulusSettingsEditor::HStimulusSettingsEditor(const Habit::StimulusSettings& settings, const HStimulusLayoutType& stimLayout, const QStringList& names, const QString& title, QWidget *parent)
+HStimulusSettingsEditor::HStimulusSettingsEditor(const Habit::StimulusSettings& settings, const Habit::StimulusDisplayInfo& sdi, const QStringList& names, const QString& title, QWidget *parent)
 : QDialog(parent)
 , m_originalSettings(settings)
+, m_sdi(sdi)
 , m_names(names)
 {
-	m_pStimulusSettingsWidget = new HStimulusSettingsWidget(settings, stimLayout, parent);
+	m_pStimulusSettingsWidget = new HStimulusSettingsWidget(settings, sdi, parent);
 	m_pPreviewWidget = new QWidget;
 
 	setWindowTitle(title);

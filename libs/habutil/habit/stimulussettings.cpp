@@ -5,9 +5,9 @@ using namespace Habit;
 // version string for input/output. See operator<<, operator>>
 static const QString f_sVersion2("SIV2");
 
-StimulusSettings::StimulusSettings(const QString& name)
+StimulusSettings::StimulusSettings()
 : id_(-1)
-, name_(name)
+, name_("")
 {};
 
 StimulusSettings::StimulusSettings(const StimulusSettings& s)

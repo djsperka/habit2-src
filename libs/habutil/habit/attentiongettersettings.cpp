@@ -7,7 +7,7 @@ static const QString f_sVersion2("AGS2");
 Habit::AttentionGetterSettings::AttentionGetterSettings()
 : id_(-1)
 , isAttentionGetterUsed_(false)
-, attentionGetterStimulus_("")
+, attentionGetterStimulus_()
 , backGroundColor_(0, 0, 0, 0)
 , isFixedISI_(false)
 , isiMS_(0)

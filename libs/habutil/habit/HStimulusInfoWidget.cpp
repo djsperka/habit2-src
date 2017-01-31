@@ -14,17 +14,22 @@
 #include <QColorDialog>
 
 
-GUILib::HStimulusInfoWidget::HStimulusInfoWidget(const Habit::StimulusInfo& info, const QString& label, QWidget *parent, QDir dir)
+
+GUILib::HStimulusInfoWidget::HStimulusInfoWidget(const Habit::StimulusInfo& info, const QString& label, QWidget *parent, bool isVideoImage)
 : QWidget(parent)
 , ui(new Ui::HStimulusInfoForm)
 , m_info(info)
 , m_label(label)
-, m_rootDir(dir)
+, m_bIsVideoImage(isVideoImage)
 {
 	//setFixedHeight(50);
 	ui->setupUi(this);
 	connections();
 	initialize();
+	// djs - Qt4.8 on mac has a bug in the uri passed with the drop event. The filename
+	// ends up looking like this: file:///.file/id=6571367.1706496
+	// I think this is fixed for Qt>5.2. Wait until then....
+	//setAcceptDrops(true);
 }
 
 GUILib::HStimulusInfoWidget::~HStimulusInfoWidget()
@@ -80,6 +85,10 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 	QString path;
 	Habit::StimulusInfo stimulusInfo = getStimulusInfo();	// get current filename, in case user has already changed it
 	QFileInfo fileInfo(stimulusInfo.getFileName());
+	const QString filterVideoImage("All Video and Images (*.avi *.mp4 *.wmf *.asf *.wmv *.mov *.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);;All Video (*.avi *.mp4 *.wmf *.asf *.wmv *.mov);;All Audio (*.mp3 *.ogg *.wma *.wav *.aiff);;All Images (*.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);; Audio Video Interleave (*.avi);;MP4 file format (*.mp4);;Windows Media Video (*.wmf *.asf *.wmv);;QuickTime (*.mov);;All Files (*.*)");
+	const QString filterAudio("All Audio (*.mp3 *.ogg *.wma *.wav *.aiff);;All Files (*.*)");
+	QString filter;
+	QString filename;
 	QDir stimroot;
 	habutilGetStimulusRootDir(stimroot);
 
@@ -87,7 +96,7 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 	if (stimulusInfo.getFileName().isEmpty())
 	{
 		QDir lastdir;
-		habutilGetLastDir(lastdir);
+		habutilGetLastDir(lastdir, m_bIsVideoImage);
 		path = lastdir.absolutePath();
 	}
 	else
@@ -96,8 +105,9 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 	}
 
 	// Select file dialog....
-	QString filter("All Video, Audio and Images (*.avi *.mp4 *.wmf *.asf *.wmv *.mov *.mp3 *.ogg *.wma *.wav *.aiff *.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);;All Video (*.avi *.mp4 *.wmf *.asf *.wmv *.mov);;All Audio (*.mp3 *.ogg *.wma *.wav *.aiff);;All Images (*.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);; Audio Video Interleave (*.avi);;MP4 file format (*.mp4);;Windows Media Video (*.wmf *.asf *.wmv);;QuickTime (*.mov);;All Files (*.*)");
-	QString filename = QFileDialog::getOpenFileName(this, "", path, filter);
+	if (m_bIsVideoImage) filter = filterVideoImage;
+	else filter = filterAudio;
+	filename = QFileDialog::getOpenFileName(this, "", path, filter);
 	qDebug() << "Selected file " << filename;
 
 	// See if the file is below the stim root dir. If it is, then store the file as a relative path.
@@ -106,7 +116,7 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 	{
 		QFileInfo newFileInfo(filename);
 		QString newFileCanonicalPath(newFileInfo.canonicalPath());
-		habutilSetLastDir(newFileCanonicalPath);
+		habutilSetLastDir(newFileCanonicalPath, m_bIsVideoImage);
 		if (newFileCanonicalPath.startsWith(stimroot.canonicalPath()))
 		{
 			filename = stimroot.relativeFilePath(newFileInfo.canonicalFilePath());
@@ -139,4 +149,19 @@ void GUILib::HStimulusInfoWidget::customColorClicked()
 		setStimulusInfo(stimulusInfo);
 	}
 }
+
+#if 0
+
+void GUILib::HStimulusInfoWidget::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (event->mimeData()->hasFormat("text/uri-list"))
+		event->acceptProposedAction();
+}
+
+void GUILib::HStimulusInfoWidget::dropEvent(QDropEvent * event)
+{
+	qDebug() << "got drop: " << event->mimeData()->data("text/uri-list");
+}
+
+#endif
 

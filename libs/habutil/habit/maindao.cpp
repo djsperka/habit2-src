@@ -121,6 +121,7 @@ void MainDao::addOrUpdateAttentionGetterSettings(int experimentID, Habit::Attent
 	QString sql;
 
 	// add/update stimulus first
+	qDebug() << "addOrUpdateAGS - stim name " << attentionGetterSettings.getAttentionGetterStimulus().getName();
 	addOrUpdateStimulusSettings(-1, attentionGetterSettings.getAttentionGetterStimulus());
 	attentionGetterSettings.setStimulusID(attentionGetterSettings.getAttentionGetterStimulus().getId());
 	if(attentionGetterSettings.getId() > 0)
@@ -833,7 +834,7 @@ void MainDao::getStimulusDisplayInfoForExperiment(int experimentID, Habit::Stimu
 
 void MainDao::getStimuliSettings(int phaseID, StimuliSettings& stimuli)
 {
-	QSqlQuery q("select id, name from stimulus where phase_id=?");
+	QSqlQuery q("select id from stimulus where phase_id=?");
 	q.addBindValue(phaseID);
 	if (!q.exec())
 	{
@@ -845,9 +846,7 @@ void MainDao::getStimuliSettings(int phaseID, StimuliSettings& stimuli)
 		do
 		{
 			int stimulus_id = q.value(0).toInt();
-			QString stimulus_name = q.value(1).toString();
-			StimulusSettings stimulus(stimulus_name);
-			stimulus.setId(stimulus_id);
+			StimulusSettings stimulus;
 			getStimulusSettings(stimulus_id, stimulus);
 			stimuli.addStimulus(stimulus);
 		} while (q.next());
@@ -878,6 +877,28 @@ void MainDao::getStimuliSettings(int phaseID, StimuliSettings& stimuli)
 
 void MainDao::getStimulusSettings(int stimulus_id, StimulusSettings& settings)
 {
+	// Fetch stimulus name
+	QSqlQuery q0("select name from stimulus where id=?");
+	q0.addBindValue(stimulus_id);
+	if (!q0.exec())
+	{
+		qCritical() << "Error in MainDao::getStimulusSettings stimulus_id=" << stimulus_id << " SQL error!";
+		throw HDBException(string("MainDao::getStimulusSettings"), q0.lastQuery().toStdString(), q0.lastError().text().toStdString());
+	}
+	else
+	{
+		if (q0.next())
+		{
+			settings.setId(stimulus_id);
+			settings.setName(q0.value(0).toString());
+		}
+		else
+		{
+			qCritical() << "Error in MainDao::getStimulusSettings stimulus_id=" << stimulus_id << " Not found in stimulus table!";
+			throw HDBException(string("MainDao::getStimulusSettings"), q0.lastQuery().toStdString(), q0.lastError().text().toStdString());
+		}
+	}
+
 	QSqlQuery qsf("select id, position, filename, isLoop, volume, isBackground, isColor, color from stimfiles where stimulus_id=?");
 	qsf.addBindValue(stimulus_id);
 	if (!qsf.exec())

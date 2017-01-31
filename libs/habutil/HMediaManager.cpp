@@ -20,7 +20,7 @@
 
 const unsigned int HMediaManager::backgroundKey = UINT_MAX;
 const unsigned int HMediaManager::agKey = 0;
-const Habit::StimulusSettings HMediaManager::dummyStimulusSettings(QString("dummySS"));
+const Habit::StimulusSettings HMediaManager::dummyStimulusSettings;
 
 HMediaManager::HMediaManager(bool bPlayersAreFullScreen)
 : QObject()

@@ -14,16 +14,21 @@
 #include <QLineEdit>
 #include "HTypes.h"
 #include "stimulussettings.h"
+#include "stimulusdisplayinfo.h"
 #include "HStimulusInfoWidget.h"
 
 namespace GUILib
 {
+
+// Note: The layout type and USEiss at creation are used. NO changing, hassle.
 	class HStimulusSettingsWidget: public QWidget
 	{
 		Q_OBJECT
 	private:
 		Habit::StimulusSettings m_settings;
-		const HStimulusLayoutType* m_pStimulusLayout;
+		const Habit::StimulusDisplayInfo& m_sdi;
+//		bool m_bUseSoundPlayer;
+//		const HStimulusLayoutType* m_pStimulusLayout;
 		GUILib::HStimulusInfoWidget *m_pLeft;
 		GUILib::HStimulusInfoWidget *m_pCenter;
 		GUILib::HStimulusInfoWidget *m_pRight;
@@ -32,15 +37,18 @@ namespace GUILib
 		QLineEdit *m_pName;		// make this editable?
 		int m_stackidSingle;
 		int m_stackidLR;
+		QWidget *m_pwSingle;
+		QWidget *m_pwLR;
+
 		void initialize();
 		void connections();
 
 	public:
-		HStimulusSettingsWidget(const Habit::StimulusSettings& settings, const HStimulusLayoutType& stimLayout = HStimulusLayoutType::HStimulusLayoutSingle, QWidget *parent=0);
+		HStimulusSettingsWidget(const Habit::StimulusSettings& settings, const Habit::StimulusDisplayInfo& info, QWidget *parent=0);
 		virtual ~HStimulusSettingsWidget();
 
 		// StimulusLayoutType denotes single screen, LR screens, sound/nosound.
-		void setStimulusLayoutType(const HStimulusLayoutType& type);
+		//void setStimulusLayoutType(const HStimulusLayoutType& type);
 
 		// Get the settings as currently defined in the widget (i.e. incorporating user changes)
 		Habit::StimulusSettings getStimulusSettings();

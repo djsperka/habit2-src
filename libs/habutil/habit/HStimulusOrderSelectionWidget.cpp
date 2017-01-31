@@ -95,11 +95,13 @@ void HStimulusOrderSelectionWidget::updateStatusLabel()
 	{
 		s = QString("Default order selected, %1").arg(sRandom);
 		ui->labelStatus->setStyleSheet("QLabel { background-color : lightgreen; }");
+		emit orderChosen(m_seqno);
 	}
 	else if (ui->rbSelect->isChecked())
 	{
 		s = QString("Order \"%1\" selected, %2").arg(ui->cbxOrders->currentText()).arg(sRandom);
 		ui->labelStatus->setStyleSheet("QLabel { background-color : lightgreen; }");
+		emit orderChosen(m_seqno);
 	}
 	else
 	{
@@ -107,5 +109,4 @@ void HStimulusOrderSelectionWidget::updateStatusLabel()
 		ui->labelStatus->setStyleSheet("QLabel { background-color : lightpink; }");
 	}
 	ui->labelStatus->setText(s);
-	emit orderChosen(m_seqno);
 }

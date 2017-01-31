@@ -13,10 +13,10 @@
 #include <QStringList>
 using namespace GUILib;
 
-HStimulusSettingsListWidget::HStimulusSettingsListWidget(Habit::HStimulusSettingsList& list, const HStimulusLayoutType& layoutType, QWidget *parent)
+HStimulusSettingsListWidget::HStimulusSettingsListWidget(Habit::HStimulusSettingsList& list, const Habit::StimulusDisplayInfo& sdi, QWidget *parent)
 : QWidget(parent)
 , m_list(list)
-, m_pLayoutType(&layoutType)
+, m_sdi(sdi)
 {
 	create();
 	connections();
@@ -25,7 +25,7 @@ HStimulusSettingsListWidget::HStimulusSettingsListWidget(Habit::HStimulusSetting
 
 void HStimulusSettingsListWidget::create()
 {
-	m_pmodel = new HStimulusSettingsListModel(m_list, *m_pLayoutType);
+	m_pmodel = new HStimulusSettingsListModel(m_list, m_sdi.getStimulusLayoutType());
 	m_pListView = new QListView(this);
 	m_pListView->setModel(m_pmodel);
 
@@ -51,7 +51,6 @@ void HStimulusSettingsListWidget::create()
 
 void HStimulusSettingsListWidget::setStimulusLayoutType(const HStimulusLayoutType& layoutType)
 {
-	m_pLayoutType = &layoutType;
 	m_pmodel->setLayoutType(layoutType);
 }
 
@@ -148,7 +147,7 @@ void HStimulusSettingsListWidget::editItem(const QModelIndex& index)
 		names.append(it.next().getName());
 
 	// Create a new HStimulusSettingsEditor, using the currently selected item
-	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(m_list.at(index.row()), *m_pLayoutType, names, QString("Modify Stimulus"), this);
+	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(m_list.at(index.row()), m_sdi, names, QString("Modify Stimulus"), this);
 	if (pEditor->exec() == QDialog::Accepted)
 	{
 		// update the stimulus settings in the saved list
@@ -169,7 +168,7 @@ void HStimulusSettingsListWidget::newClicked()
 		names.append(it.next().getName());
 
 	// Create a new HStimulusSettingsEditor, using the currently selected item
-	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(Habit::StimulusSettings(), *m_pLayoutType, names, QString("Create New Stimulus"), this);
+	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(Habit::StimulusSettings(), m_sdi, names, QString("Create New Stimulus"), this);
 	if (pEditor->exec() == QDialog::Accepted)
 	{
 		// append stimulus settings to the StimulusSettingsList

@@ -11,6 +11,7 @@
 #include "stimulisettings.h"
 #include "HStimulusSettingsList.h"
 #include "HStimulusSettingsListModel.h"
+#include "stimulusdisplayinfo.h"
 #include <QWidget>
 #include <QListView>
 #include <QPushButton>
@@ -22,7 +23,7 @@ namespace GUILib
 		Q_OBJECT
 	private:
 		Habit::HStimulusSettingsList& m_list;
-		const HStimulusLayoutType* m_pLayoutType;
+		const Habit::StimulusDisplayInfo& m_sdi;
 		HStimulusSettingsListModel *m_pmodel;
 		QListView *m_pListView;
 		QPushButton *m_pbNew;
@@ -32,14 +33,15 @@ namespace GUILib
 		void create();
 		void connections();
 		void editItem(const QModelIndex& index);
+		const Habit::StimulusDisplayInfo& getStimulusDisplayInfo() const { return m_sdi; };
 	public:
-		HStimulusSettingsListWidget(Habit::HStimulusSettingsList& list, const HStimulusLayoutType& layoutType = HStimulusLayoutType::HStimulusLayoutSingle, QWidget *parent=NULL);
+		HStimulusSettingsListWidget(Habit::HStimulusSettingsList& list, const Habit::StimulusDisplayInfo& sdi, QWidget *parent=NULL);
 		virtual ~HStimulusSettingsListWidget() { delete m_pmodel;};
-		void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 		void append(const Habit::HStimulusSettingsList& list);
 		void append(const Habit::HStimulusSettings& ss);
 		void clobber(const Habit::HStimulusSettings& ss);
 		void clearSelection();
+		void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 
 	signals:
 		void previewStimulus(int);

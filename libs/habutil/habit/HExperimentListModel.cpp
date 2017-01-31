@@ -32,7 +32,11 @@ bool GUILib::HExperimentListModel::setData (const QModelIndex& index, const QVar
 	QString exptOriginal = stringList().at(index.row());
 	QString exptNew = value.toString();
 
-	if (stringList().contains(exptNew))
+	if (exptNew == exptOriginal)
+	{
+		// do nothing, same name for same expt
+	}
+	else if (stringList().contains(exptNew))
 	{
 		QMessageBox::warning(NULL, "Change Experiment Name", "Duplicate experiment name!");
 		b = false;

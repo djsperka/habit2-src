@@ -42,7 +42,7 @@ Habit::StimulusDisplayInfo& Habit::StimulusDisplayInfo::operator=(const Habit::S
 	return *this;
 }
 
-Habit::StimulusDisplayInfo Habit::StimulusDisplayInfo::clone()
+Habit::StimulusDisplayInfo Habit::StimulusDisplayInfo::clone() const
 {
 	Habit::StimulusDisplayInfo info(*this);
 	info.setId(-1);

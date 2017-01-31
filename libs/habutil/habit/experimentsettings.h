@@ -48,7 +48,7 @@ public:
     HLookSettings getHLookSettings() const { return m_lookSettings; };
     void setHLookSettings(const HLookSettings& lookSettings) { m_lookSettings = lookSettings; };
 
-    StimulusDisplayInfo getStimulusDisplayInfo() const;
+    const StimulusDisplayInfo& getStimulusDisplayInfo() const;
     void setStimulusDisplayInfo(const StimulusDisplayInfo& stimulusDisplayInfo);
 
     const AttentionGetterSettings& getAttentionGetterSettings() const;

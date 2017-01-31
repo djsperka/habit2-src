@@ -20,7 +20,7 @@ public:
     StimulusDisplayInfo(const StimulusDisplayInfo& info);
     ~StimulusDisplayInfo();
     StimulusDisplayInfo& operator=(const StimulusDisplayInfo& rhs);
-    StimulusDisplayInfo clone();
+    StimulusDisplayInfo clone() const;
 
 public:
 	int getId() const;
