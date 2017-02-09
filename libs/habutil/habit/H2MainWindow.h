@@ -31,7 +31,7 @@ namespace Habit
 		 Q_OBJECT
 
 	 public:
-		 H2MainWindow(bool bDefaultTestRun=true, bool bShowTestingIcon=false);
+		 H2MainWindow(bool bDefaultTestRun=true, bool bShowTestingIcon=false, bool bEditTemplates = false);
 		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems);
 
 	 protected:
@@ -74,6 +74,7 @@ namespace Habit
 	//    QMap<QString, HExperimentMain> m_mapExperiments;
 		 bool m_bTestRunIsDefault;
 		 bool m_bShowTestingIcon;
+		 bool m_bEditTemplates;
 		 GUILib::HExperimentListWidget *m_pExperimentListWidget;
 		 QToolBar *m_pToolBar;
 		 QAction *m_actionEdit;

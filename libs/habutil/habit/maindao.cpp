@@ -1212,18 +1212,25 @@ void MainDao::deleteExperiment(Habit::ExperimentSettings& experimentSettings)
 
 
 
-QStringList MainDao::getAllExperimentNames(bool bIncludeHiddenExperiments)
+QStringList MainDao::getExperimentNames(bool bIncludeExperiments, bool bIncludeTemplates)
 {
 	QSqlQuery q;
-	if (bIncludeHiddenExperiments)
-		q.exec("select name from experiments");
-	else
-		q.exec("select name from experiments where hidden=0");
 	QStringList result;
-	while(q.next())
+	if (bIncludeExperiments)
 	{
-		QString name = q.value(q.record().indexOf("name")).toString();
-		result.append(name);
+		q.exec("select name from experiments where hidden=0");
+		while(q.next())
+		{
+			result << q.value(0).toString();
+		}
+	}
+	if (bIncludeTemplates)
+	{
+		q.exec("select name from experiments where hidden=1");
+		while(q.next())
+		{
+			result << q.value(0).toString();
+		}
 	}
 	return result;
 }

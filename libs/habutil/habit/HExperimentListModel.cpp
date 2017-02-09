@@ -13,7 +13,9 @@
 #include <QMessageBox>
 #include <QStringList>
 
-GUILib::HExperimentListModel::HExperimentListModel()
+GUILib::HExperimentListModel::HExperimentListModel(bool bExp, bool bTemp)
+: m_bExperiments(bExp)
+, m_bTemplates(bTemp)
 {
 	reload();
 }
@@ -21,7 +23,7 @@ GUILib::HExperimentListModel::HExperimentListModel()
 void GUILib::HExperimentListModel::reload()
 {
 	Habit::MainDao dao;
-	setStringList(dao.getAllExperimentNames());
+	setStringList(dao.getExperimentNames(m_bExperiments, m_bTemplates));
 }
 
 bool GUILib::HExperimentListModel::setData (const QModelIndex& index, const QVariant& value, int role)

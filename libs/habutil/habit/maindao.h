@@ -41,7 +41,8 @@ public:
 	bool experimentExists(int id);
 
 	void updateExperimentName(const QString& oldName, const QString& newName);
-	QStringList getAllExperimentNames(bool includeHidden = false);
+	QStringList getExperimentNames(bool includeExperiments = true, bool includeTemplates = false);
+
 
 	// djs Clean up interface for fetching experiments. These return false when the id/name not found.
 	void getExperimentName(int id, QString& name);			// can throw HDBException

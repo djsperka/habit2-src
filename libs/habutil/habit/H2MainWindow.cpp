@@ -37,12 +37,13 @@ using namespace GUILib;
 using namespace Habit;
 
 
-GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon)
+GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon, bool bEditTemplates)
 : QMainWindow()
 , m_bTestRunIsDefault(bDefaultTestRun)
 , m_bShowTestingIcon(bShowTestingIcon)
+, m_bEditTemplates(bEditTemplates)
 {
-	m_pExperimentListWidget = new GUILib::HExperimentListWidget();
+	m_pExperimentListWidget = new GUILib::HExperimentListWidget(this, true, m_bEditTemplates);
 	setCentralWidget(m_pExperimentListWidget);
     createActions();
     createToolBars();
@@ -246,7 +247,17 @@ void GUILib::H2MainWindow::newExperiment()
 	HExperimentNameDialog dlg(m_pExperimentListWidget->experimentList(), sDefault, this);
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		settings.setName(dlg.getNewValue());
+		// Using a template?
+		if (dlg.isTemplateChosen())
+		{
+			Habit::ExperimentSettings templateSettings;
+			templateSettings.loadFromDB(dlg.getTemplateChosen());
+			settings = templateSettings.clone(dlg.getNewValue());
+		}
+		else
+		{
+			settings.setName(dlg.getNewValue());
+		}
 		HExperimentMain *exptMain = new HExperimentMain(settings, this);
 		exptMain->exec();
 

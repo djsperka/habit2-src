@@ -19,7 +19,7 @@ namespace GUILib
 		Q_OBJECT
 		HExperimentListModel *m_pModel;
 	public:
-		HExperimentListWidget(QWidget *parent=0);
+		HExperimentListWidget(QWidget *parent=0, bool bExp = true, bool bTemplates = false);
 		virtual ~HExperimentListWidget();
 		// get currently selected experiment; return empty string if no selection
 		QString selectedExperiment();
