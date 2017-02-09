@@ -18,7 +18,6 @@ bool f_bScreenLog = false;
 bool f_bFileLog = false;
 
 
-
 void fileLoggingHandler(QtMsgType type, const char *msg)
 {    
 	switch (type) 
@@ -67,6 +66,7 @@ int main(int argc, char *argv[])
 	bool bDBUpdateOnly = false;
 	bool bTestRunIsDefault = false;
 	bool bShowTestingIcon = false;
+	bool bEditTemplates = false;
 
 	// by default add debugging output goes to the screen unless we install
 	// a handler for logging msgs. Until Habit is at a good release state
@@ -115,6 +115,10 @@ int main(int argc, char *argv[])
 		{
 			bShowTestingIcon = true;
 		}
+		else if (!strcmp(argv[i], "-e"))
+		{
+			bEditTemplates = true;
+		}
 	}
 
     HApplication h(argc, argv);
@@ -133,7 +137,7 @@ int main(int argc, char *argv[])
 	if (!habutilInitWorkspace() || bDBUpdateOnly)
 		return 0;
 
-	GUILib::H2MainWindow w(bTestRunIsDefault, bShowTestingIcon);
+	GUILib::H2MainWindow w(bTestRunIsDefault, bShowTestingIcon, bEditTemplates);
 	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
 	Q_INIT_RESOURCE(resources);
 
