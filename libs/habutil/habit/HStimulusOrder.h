@@ -9,9 +9,9 @@
 #define HSTIMULUSORDER_H_
 
 #include <QStringList>
-#include <QRegExp>
 #include <QDebug>
 #include "HTypes.h"
+#include "HNameValidator.h"
 
 namespace Habit
 {
@@ -20,7 +20,7 @@ namespace Habit
 		int m_id;
 		QString m_name;
 		QStringList m_list;
-
+		GUILib::HNameAndLabelRegExp m_re;
 
 	public:
 		HStimulusOrder(QString name = QString(), QStringList list = QStringList());

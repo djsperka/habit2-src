@@ -164,4 +164,3 @@ void GUILib::HStimulusInfoWidget::dropEvent(QDropEvent * event)
 }
 
 #endif
-

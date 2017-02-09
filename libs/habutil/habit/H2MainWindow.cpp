@@ -31,6 +31,7 @@
 #include "HLookDetectorUtil.h"
 #include "HTestingInputWrangler.h"
 #include "HDBException.h"
+#include "HExperimentNameDialog.h"
 
 using namespace GUILib;
 using namespace Habit;
@@ -209,7 +210,7 @@ QString GUILib::H2MainWindow::getExperimentNewName()
 }
 
 
-
+#if 0
 bool GUILib::H2MainWindow::inputExperimentName(QString& newName, const QString defaultName)
 {
 	bool bOK = false;
@@ -231,6 +232,7 @@ bool GUILib::H2MainWindow::inputExperimentName(QString& newName, const QString d
     }
 	return bOK;
 }
+#endif
 
 void GUILib::H2MainWindow::newExperiment()
 {
@@ -241,9 +243,10 @@ void GUILib::H2MainWindow::newExperiment()
 	// Create default experiment name for the lazy
 	sDefault = getExperimentNewName();
 
-	if (inputExperimentName(sName, sDefault))
+	HExperimentNameDialog dlg(m_pExperimentListWidget->experimentList(), sDefault, this);
+	if (dlg.exec() == QDialog::Accepted)
 	{
-		settings.setName(sName);
+		settings.setName(dlg.getNewValue());
 		HExperimentMain *exptMain = new HExperimentMain(settings, this);
 		exptMain->exec();
 
@@ -565,13 +568,14 @@ void GUILib::H2MainWindow::cloneExperiment()
 	// Create default experiment name for the lazy
 	sDefault = getExperimentCopyName(m_pExperimentListWidget->selectedExperiment());
 
-	if (inputExperimentName(sName, sDefault))
+	HExperimentNameDialog dlg(m_pExperimentListWidget->experimentList(), sDefault, this);
+	if (dlg.exec() == QDialog::Accepted)
 	{
 		Habit::ExperimentSettings settings;
 		try
 		{
 			settings.loadFromDB(m_pExperimentListWidget->selectedExperiment());
-			Habit::ExperimentSettings cloned = settings.clone(sName);
+			Habit::ExperimentSettings cloned = settings.clone(dlg.getNewValue());
 			HExperimentMain *exptMain = new HExperimentMain(cloned, this);
 			if (exptMain->exec() == QDialog::Accepted)
 			{

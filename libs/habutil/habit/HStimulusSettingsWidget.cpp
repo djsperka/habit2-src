@@ -8,6 +8,7 @@
 
 #include "HStimulusSettingsWidget.h"
 #include "HStimulusOrder.h"
+#include "HNameValidator.h"
 #include "HTypes.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -28,7 +29,7 @@ GUILib::HStimulusSettingsWidget::HStimulusSettingsWidget(const Habit::StimulusSe
 	// label
 	QLabel *pNameLabel = new QLabel("Stimulus name:");
 	m_pName = new QLineEdit(m_settings.getName(), this);
-	m_pName->setValidator(new QRegExpValidator(Habit::HStimulusOrder::getStimlusNameLabelRE()));
+	m_pName->setValidator(new HNameValidator());
 
 	QWidget *pwidget = new QWidget(this);
 	QVBoxLayout *vbox = new QVBoxLayout();

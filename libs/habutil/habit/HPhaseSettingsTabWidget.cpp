@@ -6,6 +6,7 @@
  */
 
 #include <HPhaseSettingsTabWidget.h>
+#include <HNameValidator.h>
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -22,6 +23,7 @@ HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& ph
 {
 	QLabel *plabel = new QLabel("Phase name:");
 	m_plineeditPhaseName = new QLineEdit;
+	m_plineeditPhaseName->setValidator(new HNameValidator());
 	m_pcbEnabled = new QCheckBox("Enable this phase");
 	QHBoxLayout *hbox = new QHBoxLayout;
 	hbox->addWidget(plabel);

@@ -55,6 +55,7 @@ HEADERS +=	HLook.h \
 			HStimulusUtil.h \
 			HExperimentUtil.h \
 			HTestingInputWrangler.h \
+			HNameValidator.h \
 			habit/HDBException.h \
 			habit/HControlPanel.h \
 			habit/attentiongettersettings.h \
@@ -117,6 +118,7 @@ HEADERS +=	HLook.h \
 			habit/HHabituationTypeWidget.h \
 			habit/HHabituationCriteriaWidget.h \
 			habit/HHabituationSettingsWidget.h \
+			habit/HExperimentNameDialog.h \
 			wizards/PhaseWizardPages.h
 			
 		
@@ -165,6 +167,7 @@ SOURCES +=	HLook.cpp \
 			HStimulusUtil.cpp \
 			HExperimentUtil.cpp \
 			HTestingInputWrangler.cpp \
+			HNameValidator.cpp \
 			habit/HDBException.cpp \
 			habit/HControlPanel.cpp \
 			habit/attentiongettersettings.cpp \
@@ -226,6 +229,7 @@ SOURCES +=	HLook.cpp \
 			habit/HHabituationTypeWidget.cpp \
 			habit/HHabituationCriteriaWidget.cpp \
 			habit/HHabituationSettingsWidget.cpp \
+			habit/HExperimentNameDialog.cpp \
 			wizards/PhaseWizardPages.cpp
 			
 

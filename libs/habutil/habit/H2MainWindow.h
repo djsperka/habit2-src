@@ -47,7 +47,7 @@ namespace Habit
 		 QString getExperimentNewName();
 
 		 // Query user for a valid experiment name.
-		 bool inputExperimentName(QString& newName, const QString defaultName);
+//		 bool inputExperimentName(QString& newName, const QString defaultName);
 
 	 private slots:
 		 void newExperiment();

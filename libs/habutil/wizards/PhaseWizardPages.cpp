@@ -24,6 +24,7 @@
 #include "HHabituationCriteriaWidget.h"
 #include "HPhaseSettings.h"
 #include "habituationsettings.h"
+#include "HNameValidator.h"
 
 static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");
 static const QRegExp reWordWithSpaces(sreWordWithSpaces);
@@ -114,7 +115,7 @@ namespace GUILib
 		ui->rbFamiliarizationPreference->setChecked(true);
 
 		// validator for phase name
-		ui->lePhaseName->setValidator(new QRegExpValidator(reWordWithSpaces));
+		ui->lePhaseName->setValidator(new HNameValidator());
 
 		// connect rbHabituation with gbHabituation enabled state
 		connect(ui->rbHabituation, SIGNAL(toggled(bool)), ui->gbHabituationType, SLOT(setEnabled(bool)));

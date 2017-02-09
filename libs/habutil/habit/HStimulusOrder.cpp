@@ -6,17 +6,20 @@
  */
 
 #include "HStimulusOrder.h"
+#include "HNameValidator.h"
 #include <QDebug>
 #include <QRegExp>
 
 //static const QRegExp re("(\\w+)(/(\\w+))?");
-static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");
-static const QRegExp reStimAndLabel(sreWordWithSpaces + "(/" + sreWordWithSpaces + ")?");
+//static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");
+//static const QString sreWordWithPunctuation("((\\w)|(\\w[ \\(\\)\\!\\#\\$\\%\\&\\*\\[\\]\\{\\}\\:\\<\\>'_-\\w]*\\w))");
+//static const QRegExp reStimAndLabel(GUILib::HNameAndLabelValidator::getNameAndLabelRE());
+//static const QRegExp reHabitNames(sreWordWithPunctuation + "(/" + sreWordWithPunctuation + ")?");
 
-const QRegExp& Habit::HStimulusOrder::getStimlusNameLabelRE()
-{
-	return reStimAndLabel;
-}
+//const QRegExp& Habit::HStimulusOrder::getStimlusNameLabelRE()
+//{
+//	return reStimAndLabel;
+//}
 
 
 QString Habit::HStimulusOrder::getStim(const QString& stimAndLabel)
@@ -38,12 +41,10 @@ QString Habit::HStimulusOrder::getStim(const QString& stimAndLabel)
 	}
 #endif
 
-	if (reStimAndLabel.indexIn(stimAndLabel) > -1)
+	if (GUILib::HName::getNameAndLabelRE().indexIn(stimAndLabel) > -1)
 	{
-		result = reStimAndLabel.cap(1);
+		result = GUILib::HName::getNameAndLabelRE().cap(1);
 	}
-
-
 
 	return result;
 }
@@ -51,9 +52,9 @@ QString Habit::HStimulusOrder::getStim(const QString& stimAndLabel)
 QString Habit::HStimulusOrder::getLabel(const QString& stimAndLabel)
 {
 	QString result;
-	if (reStimAndLabel.indexIn(stimAndLabel) > -1)
+	if (GUILib::HName::getNameAndLabelRE().indexIn(stimAndLabel) > -1)
 	{
-		result = reStimAndLabel.cap(5);
+		result = GUILib::HName::getNameAndLabelRE().cap(3);
 	}
 	return result;
 }

@@ -50,8 +50,8 @@ namespace GUILib
 		bool m_bIsVideoImage;
 
 	protected:
-		void dragEnterEvent(QDragEnterEvent *event);
-		void dropEvent(QDropEvent * event);
+//		void dragEnterEvent(QDragEnterEvent *event);
+//		void dropEvent(QDropEvent * event);
 
 	signals:
 		void stimulusInfoChanged();

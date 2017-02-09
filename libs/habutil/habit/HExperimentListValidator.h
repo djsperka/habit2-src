@@ -10,6 +10,8 @@
 
 #include <QValidator>
 #include <QStringList>
+#include <QRegExp>
+#include "HNameValidator.h"
 
 namespace GUILib
 {
@@ -18,8 +20,9 @@ namespace GUILib
 		Q_OBJECT
 	private:
 		QStringList m_list;
+		QRegExp m_re;
 	public:
-		HExperimentListValidator(QStringList list, QObject *parent=0): QValidator(parent), m_list(list) {};
+		HExperimentListValidator(QStringList list, QObject *parent=0): QValidator(parent), m_list(list), m_re(HNameValidator::getNameRE()) {};
 		virtual ~HExperimentListValidator() {};
 		QValidator::State validate(QString& input, int& pos) const;
 	};
