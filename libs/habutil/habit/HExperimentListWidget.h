@@ -35,31 +35,6 @@ namespace GUILib
 
 	};
 
-
-
-#if 0
-	class HExperimentListWidget: public QListWidget
-	{
-		Q_OBJECT
-	private:
-		QStringList m_list;
-
-	signals:
-		void experimentActivated(QString);
-
-	private slots:
-		void myItemActivated(QListWidgetItem* item);
-
-	public:
-		HExperimentListWidget(QWidget *parent=0);
-		virtual ~HExperimentListWidget() {};
-
-		// get currently selected experiment; return empty string if no selection
-		QString selectedExperiment();
-
-	};
-#endif
-
 };
 
 
