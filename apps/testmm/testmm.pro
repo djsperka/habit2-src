@@ -19,6 +19,5 @@ CONFIG(debug, debug|release) {
 INCLUDEPATH += ../../libs/habutil
 INCLUDEPATH += ../../libs/habutil/habit
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
-SOURCES			=	main.cpp SDIDialog.cpp HExperimentSelectionDialog.cpp
-HEADERS			=	SDIDialog.h HExperimentSelectionDialog.h
-					
+SOURCES			=	main.cpp TestMMDialog.cpp TestMMController.cpp
+HEADERS			=	TestMMDialog.h TestMMController.h

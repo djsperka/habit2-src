@@ -7,12 +7,14 @@
  *
  */
 
-#include "stimulusdisplayinfo.h"
-#include "HExperimentSelectionDialog.h"
+//#include "stimulusdisplayinfo.h"
+//#include "HExperimentSelectionDialog.h"
+#include "HExperimentListWidget.h"
 #include "HWorkspaceUtil.h"
 #include <QApplication>
+#include <QtDebug>
 
-using namespace Habit;
+#include "TestMMDialog.h"
 
 int main(int argc, char **argv)
 {
@@ -55,10 +57,13 @@ int main(int argc, char **argv)
 		return 0;
 
 	// Select an experiment to test with
-	HExperimentSelectionDialog *dialog = new HExperimentSelectionDialog();
+	//HExperimentSelectionDialog *dialog = new HExperimentSelectionDialog();
+	//HExperimentListWidget *w = new HExperimentListWidget(0, true, true);
+	//w->show();
+	//dialog->show();
 
-	dialog->show();
+	TestMMDialog *dialog = new TestMMDialog;
+	dialog->exec();
 
-
-	return app.exec();
+	return 0;
 }
