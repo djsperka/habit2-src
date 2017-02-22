@@ -34,8 +34,8 @@
 								<option id="gnu.both.asm.option.include.paths.792789101" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
 									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/habit2/libs/habutil}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/habit2/libs/habutil/habit}&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
+									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1904260639" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
@@ -45,8 +45,8 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1511724153" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
 									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/habit2/libs/habutil}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/habit2/libs/habutil/habit}&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
+									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1758584700" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -55,8 +55,8 @@
 								<option id="gnu.c.compiler.option.include.paths.1281054788" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
 									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/habit2/libs/habutil}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/habit2/libs/habutil/habit}&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
+									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.620655973" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
