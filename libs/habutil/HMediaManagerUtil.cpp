@@ -8,10 +8,29 @@
  */
 
 #include "HMediaManagerUtil.h"
+
+#include <QtGlobal>
+#if QT_VERSION >= 0x050000
+#else
 #include "HVIPlayer.h"
 #include "HAudioPlayer.h"
+#endif
 #include "HWorkspaceUtil.h"
 
+
+#if QT_VERSION >= 0x050000
+
+HMediaManager* createMediaManager(const Habit::ExperimentSettings& es)
+{
+	return (HMediaManager *)NULL;
+}
+
+HPreviewMediaManager* createPreviewMediaManager(const Habit::StimulusDisplayInfo& sdi)
+{
+	return (HPreviewMediaManager *)NULL;
+}
+
+#else
 
 HMediaManager* createMediaManager(const Habit::ExperimentSettings& es)
 {
@@ -53,3 +72,27 @@ HMediaManager* createMediaManager(const Habit::ExperimentSettings& es)
 	return pmm;
 }
 
+
+HPreviewMediaManager* createPreviewMediaManager(const Habit::StimulusDisplayInfo& sdi)
+{
+	HPreviewMediaManager* pmm = new HPreviewMediaManager(sdi.getStimulusLayoutType());
+	HPlayer *psound = NULL;
+	if (sdi.getUseISS())
+	{
+		psound = new HAudioPlayer(-1, NULL, dirStimRoot);
+		pmm->addPlayer(HPlayerPositionType::Sound, p, -1);
+	}
+
+	HPlayer *p0 = new HVIPlayer(-1, NULL, dirStimRoot, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
+	p0->setPreferBufferedStimulus(false);
+	HPlayer *p1l = new HVIPlayer(-1, NULL, dirStimRoot, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
+	p1l->setPreferBufferedStimulus(false);
+	HPlayer *p1r = new HVIPlayer(-1, NULL, dirStimRoot, sdi.getDisplayType() == HDisplayType::HDisplayTypeFullScreen, sdi.getBackGroundColor());
+	p1r->setPreferBufferedStimulus(false);
+
+	pmm->addPlayers(p0, p1l, p1r, psound);
+
+
+}
+
+#endif  /* QT_VERSION < 5 */

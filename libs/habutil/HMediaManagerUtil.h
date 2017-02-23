@@ -8,8 +8,10 @@
  */
 
 #include "HMediaManager.h"
+#include "HPreviewMediaManager.h"
 #include "experimentsettings.h"
 #include "stimulussettings.h"
+#include "stimulusdisplayinfo.h"
 #include <QVector>
 
 
@@ -22,3 +24,4 @@
 // used this position is filled with a background stimulus). 
 
 HMediaManager* createMediaManager(const Habit::ExperimentSettings& es);
+HPreviewMediaManager* createPreviewMediaManager(const Habit::StimulusDisplayInfo& sdi);

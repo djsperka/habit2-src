@@ -1,5 +1,9 @@
 TEMPLATE = lib
 CONFIG += qt staticlib debug_and_release
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += widgets printsupport
+}
+
 QMAKE_CXXFLAGS += -fvisibility=hidden
 INCLUDEPATH += . ./habit ./wizards
 CONFIG(debug, debug|release) {
@@ -26,9 +30,7 @@ HEADERS +=	HLook.h \
 			HPhase.h \
 			HElapsedTimer.h \
 			HPlayer.h \
-			HAudioPlayer.h \
 			HNonPlayer.h \
-			HVIPlayer.h \
 			HStimulusSource.h \
 			HImageWidget.h \
 			HMediaManager.h \
@@ -120,7 +122,7 @@ HEADERS +=	HLook.h \
 			habit/HHabituationSettingsWidget.h \
 			habit/HExperimentNameDialog.h \
 			wizards/PhaseWizardPages.h
-			
+
 		
 
 SOURCES +=	HLook.cpp \
@@ -139,9 +141,7 @@ SOURCES +=	HLook.cpp \
 			HPhase.cpp \
 			HElapsedTimer.cpp \
 			HPlayer.cpp \
-			HAudioPlayer.cpp \
 			HNonPlayer.cpp \
-			HVIPlayer.cpp \
 			HStimulusSource.cpp \
 			HImageWidget.cpp \
 			HMediaManager.cpp \
@@ -232,6 +232,19 @@ SOURCES +=	HLook.cpp \
 			habit/HExperimentNameDialog.cpp \
 			wizards/PhaseWizardPages.cpp
 			
+
+lessThan(QT_MAJOR_VERSION, 5) {
+	HEADERS += \
+			HAudioPlayer.h \
+			HVIPlayer.h
+			
+	SOURCES += \
+			HAudioPlayer.cpp \
+			HVIPlayer.cpp
+}
+			
+
+
 
 RESOURCES = habit/resources.qrc
 

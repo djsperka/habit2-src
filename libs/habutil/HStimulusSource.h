@@ -13,7 +13,7 @@
 #include <QImage>
 #include <QTextStream>
 #include <QBuffer>
-#include <Phonon/MediaSource>
+//#include <Phonon/MediaSource>
 #include "stimulusinfo.h"
 
 class HStimulusSource

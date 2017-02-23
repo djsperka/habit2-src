@@ -10,7 +10,7 @@
 #define HABITNONPLAYER_H
 
 
-#include <QtGui/QLabel>
+#include <QLabel>
 #include <QMap>
 #include <QTextStream>
 //#include "HStimulusSource.h"

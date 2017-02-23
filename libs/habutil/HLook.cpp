@@ -9,6 +9,7 @@
 
 
 #include "HLook.h"
+#include <QDataStream>
 
 static const int f_iVersion2(-2123);
 

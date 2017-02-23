@@ -10,8 +10,8 @@
 #ifndef IMAGEWIDGET_H
 #define IMAGEWIDGET_H
 
-#include <QtGui/QWidget>
-#include <QtGui/QImage>
+#include <QWidget>
+#include <QImage>
 
 class HImageWidget : public QWidget
 {

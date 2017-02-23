@@ -16,6 +16,13 @@
 #include <QtDebug>
 #include <QMessageBox>
 #include <QRegExp>
+#include <QtGlobal>
+#if QT_VERSION < 0x050000
+#include <QDesktopServices>
+#endif
+
+
+
 
 // A dir is a valid workspace if all of the following are true
 // 1. dir exists
@@ -197,7 +204,11 @@ bool habutilGetWorkspaceDir(QDir& dir)
 	QSettings settings;
 	if (!settings.contains("workspace"))
 	{
-		QString defaultDir = QString("%1/habit").arg(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
+#if QT_VERSION >= 0x050000
+		QString defaultDir = QString("%1/habit").arg(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)[0]);
+#else
+		QString defaultDir = QString("%1/habit").arg(QDesktopServices::standardLocations(QDesktopServices::DocumentsLocation));
+#endif
 		dir.setPath(defaultDir);
 		settings.setValue("workspace", dir.absolutePath());
 	}
