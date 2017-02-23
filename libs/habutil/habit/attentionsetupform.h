@@ -6,12 +6,12 @@
 #include "stimulusdisplayinfo.h"
 #include "HStimulusSettingsWidget.h"
 #include "HStimulusPreviewWidget.h"
+#include <QtGlobal>
+#if QT_VERSION >= 0x050000
+#include <QtWidgets>
+#else
 #include <QtGui>
-
-class QGroupBox;
-class QLabel;
-class QPushButton;
-class QVBoxLayout;
+#endif
 
 
 namespace GUILib {

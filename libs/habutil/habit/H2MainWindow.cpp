@@ -14,6 +14,13 @@
 #include <QMessageBox>
 #include <QRegExp>
 #include <QListIterator>
+#include <QtGlobal>
+#if QT_VERSION < 0x050000
+#include <QDesktopServices>
+#else
+#include <QStandardPaths>
+#endif
+
 
 #include "H2MainWindow.h"
 #include "HExperimentListWidget.h"
@@ -504,7 +511,12 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				pWrangler->enable(pld, &psm->experiment());
 				// Get input file
 
+#if QT_VERSION >= 0x050000
+				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QStandardPaths::standardLocations(QStandardPaths::DesktopLocation)[0], "(*.txt)");
+#else
 				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation), "(*.txt)");
+#endif
+
 				qDebug() << "Selected input file " << selectedFileName;
 				QFile file(selectedFileName);
 				if (!pWrangler->load(file))
@@ -526,7 +538,6 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 					QCoreApplication::instance()->applicationVersion());
 
 			// Always save results. No option here.
-			//QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
 			QDir dir (habutilGetResultsDir(expt));
 			QString filename(dir.absoluteFilePath(QString("%1.hab").arg(dlg.getRunLabel())));
 			qDebug() << "Saving results to " << filename;

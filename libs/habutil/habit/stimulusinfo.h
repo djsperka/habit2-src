@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QColor>
+#include <QDataStream>
 
 /// Common namespace for all entities of the Habit
 namespace Habit

@@ -20,6 +20,15 @@
 #include "PhaseWizardPages.h"
 using namespace Habit;
 
+#include <QtGlobal>
+#if QT_VERSION < 0x050000
+#include <QDesktopServices>
+#else
+#include <QStandardPaths>
+#endif
+
+
+
 namespace GUILib
 {
 
@@ -150,7 +159,12 @@ void HExperimentMain::saveButtonClicked()
 void HExperimentMain::exportButtonClicked()
 {
 	Habit::ExperimentSettings cloned = getSettings().clone(m_settings.getName());
+#if QT_VERSION >= 0x050000
+	QDir dir(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)[0]);
+#else
 	QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
+#endif
+
 	QString tmpfile(dir.absoluteFilePath(QString("%1.hbx").arg(cloned.getName())));
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Filename for export"), tmpfile, "Habit Export File (*.hbx)");
 	if (!fileName.isNull() && !fileName.isEmpty())

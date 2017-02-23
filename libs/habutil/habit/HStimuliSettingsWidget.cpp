@@ -12,9 +12,15 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
-#include <QDesktopServices>
 #include <QFileDialog>
 #include <QMessageBox>
+
+#include <QtGlobal>
+#if QT_VERSION < 0x050000
+#include <QDesktopServices>
+#else
+#include <QStandardPaths>
+#endif
 
 using namespace Habit;
 using namespace GUILib;
@@ -124,7 +130,13 @@ void HStimuliSettingsWidget::previewOrder(int row)
 
 void HStimuliSettingsWidget::importClicked()
 {
+#if QT_VERSION >= 0x050000
+	QString filename = QFileDialog::getOpenFileName(this, "", QStandardPaths::standardLocations(QStandardPaths::DesktopLocation)[0]);
+#else
 	QString filename = QFileDialog::getOpenFileName(this, "", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
+#endif
+
+
 	bool b;
 	Habit::StimulusSettingsList slist;
 	Habit::HStimulusOrderList olist;

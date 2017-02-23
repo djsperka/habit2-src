@@ -9,6 +9,7 @@
 #include "HNameValidator.h"
 #include <QDebug>
 #include <QRegExp>
+#include <QDataStream>
 
 //static const QRegExp re("(\\w+)(/(\\w+))?");
 //static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");

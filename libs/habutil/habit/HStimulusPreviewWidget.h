@@ -34,7 +34,6 @@ namespace GUILib
 		QPushButton *m_pbNext;
 		QPushButton *m_pbPrev;
 		QPushButton *m_pbStop;
-		QStackedWidget *m_pstack;
 
 		void updateNavigation();
 		void updateNavigation(QString stimName);
