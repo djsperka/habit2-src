@@ -2,7 +2,13 @@ TARGET = habit
 TEMPLATE = app
 QMAKE_CXXFLAGS += -fvisibility=hidden
 
-QT += phonon sql
+QT += sql
+lessThan(QT_MAJOR_VERSION, 5) {
+    QT += phonon
+}
+else {
+	QT += widgets multimedia printsupport
+}
 CONFIG += qt debug_and_release
 
 CONFIG(debug, debug|release) {

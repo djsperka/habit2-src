@@ -2,6 +2,10 @@
 #include "H2MainWindow.h"
 #include "HWorkspaceUtil.h"
 #include "version.h"
+#include <QtGlobal>  // for QT_VERSION
+#if QT_VERSION >= 0x050000
+#include <QtMessageHandler>
+#endif
 #include <QApplication>
 #include <QTime>
 #include <QDesktopServices>
@@ -18,27 +22,28 @@ bool f_bScreenLog = false;
 bool f_bFileLog = false;
 
 
+#if QT_VERSION < 0x050000
 void fileLoggingHandler(QtMsgType type, const char *msg)
 {    
 	switch (type) 
 	{
 	case QtDebugMsg:
-		f_streamFileLog << QTime::currentTime().toString().toAscii().data() << " Debug: " << msg << "\n";
+		f_streamFileLog << QTime::currentTime().toString() << " Debug: " << msg << "\n";
 		break;
 	case QtCriticalMsg:
-		f_streamFileLog << QTime::currentTime().toString().toAscii().data() << " Critical: " << msg << "\n";
+		f_streamFileLog << QTime::currentTime().toString() << " Critical: " << msg << "\n";
 		break;
 	case QtWarningMsg:
-		f_streamFileLog << QTime::currentTime().toString().toAscii().data() << " Warning: " << msg << "\n";
+		f_streamFileLog << QTime::currentTime().toString() << " Warning: " << msg << "\n";
 		break;
 	case QtFatalMsg:
-		f_streamFileLog << QTime::currentTime().toString().toAscii().data() <<  " Fatal: " << msg << "\n";
+		f_streamFileLog << QTime::currentTime().toString() <<  " Fatal: " << msg << "\n";
 		abort();
 		break;
 	}
 }
 
-void screenLoggingHandler(QtMsgType type, const char* msg)
+void screenLoggingHandler(QtMsgType type, const char *msg)
 {
     const char symbols[] = { 'I', 'E', '!', 'X' };
     QString output = QString("[%1] %2").arg( symbols[type] ).arg( msg );
@@ -46,8 +51,64 @@ void screenLoggingHandler(QtMsgType type, const char* msg)
     cerr << endl;
     if( type == QtFatalMsg ) abort();
 }
+#else
+void fileLoggingHandler(QtMsgType type, const QString& msg)
+{
+	switch (type)
+	{
+	case QtDebugMsg:
+		f_streamFileLog << QTime::currentTime().toString() << " Debug: " << msg << "\n";
+		break;
+	case QtInfoMsg:
+		f_streamFileLog << QTime::currentTime().toString() << " Info: " << msg << "\n";
+		break;
+	case QtCriticalMsg:
+		f_streamFileLog << QTime::currentTime().toString() << " Critical: " << msg << "\n";
+		break;
+	case QtWarningMsg:
+		f_streamFileLog << QTime::currentTime().toString() << " Warning: " << msg << "\n";
+		break;
+	case QtFatalMsg:
+		f_streamFileLog << QTime::currentTime().toString() <<  " Fatal: " << msg << "\n";
+		abort();
+		break;
+	}
+}
 
+void screenLoggingHandler(QtMsgType type, const QString& msg)
+{
+    char symbol;
+	switch (type)
+	{
+	case QtDebugMsg:
+		symbol = 'D';
+		break;
+	case QtInfoMsg:
+		symbol = 'I';
+		break;
+	case QtCriticalMsg:
+		symbol = 'C';
+		break;
+	case QtWarningMsg:
+		symbol = 'W';
+		break;
+	case QtFatalMsg:
+		symbol = 'F';
+		break;
+	}
+
+    QString output = QString("[%1] %2").arg( symbol ).arg( msg );
+    cerr << output.toStdString();
+    cerr << endl;
+    if( type == QtFatalMsg ) abort();
+}
+
+#endif
+#if QT_VERSION < 0x050000
 void habitLoggingHandler(QtMsgType type, const char *msg)
+#else
+void habitLoggingHandler(QtMsgType type, const QMessageLogContext &, const QString& msg)
+#endif
 {
 	if (f_bScreenLog)
 		screenLoggingHandler(type, msg);
@@ -155,7 +216,11 @@ int main(int argc, char *argv[])
 		f_streamFileLog.setDevice(f_pFileLog);
 		f_streamFileLog.flush();
 		f_bFileLog = true;
+#if QT_VERSION < 0x050000
 		qInstallMsgHandler(habitLoggingHandler);
+#else
+		qInstallMessageHandler(habitLoggingHandler);
+#endif
 	}
 	qDebug() << "Starting Habit, version " << HABIT_VERSION;
 
