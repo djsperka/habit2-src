@@ -1,18 +1,16 @@
-TARGET = habresults
+TARGET = q5player
 TEMPLATE = app
 QMAKE_CXXFLAGS += -fvisibility=hidden
+
 
 QT += sql
 lessThan(QT_MAJOR_VERSION, 5) {
     QT += phonon
 }
 else {
-	QT += widgets multimedia printsupport
-	QMAKE_LFLAGS += -F/Users/dan/git/vlc-qt/build/src/lib
-	LIBS       += -framework VLCQtCore -framework VLCQtWidgets
-	INCLUDEPATH += /Users/dan/install/include /Users/dan/git/vlc-qt/libvlc-headers/include
+	QT += widgets multimedia multimediawidgets printsupport
 }
-CONFIG += qt debug_and_release c++11
+CONFIG += qt debug_and_release
 
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
@@ -26,7 +24,7 @@ CONFIG(debug, debug|release) {
 
 INCLUDEPATH += ../../libs/habutil
 INCLUDEPATH += ../../libs/habutil/habit
-DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit
-SOURCES			=	habresults.cpp 
-HEADERS			=
-					
+DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
+SOURCES			=	q5player.cpp HPlayer5.cpp HAudioPlayer5.cpp HVIPlayer5.cpp Q5PlayerTestDialog.cpp HMediaHandle.cpp
+HEADERS			=	HPlayer5.h HAudioPlayer5.h HVIPlayer5.h Q5PlayerTestDialog.h HMediaHandle.h
+
