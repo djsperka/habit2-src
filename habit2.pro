@@ -1,7 +1,7 @@
 MAKEFILE = Makefile.qmake
 TEMPLATE = subdirs
 CONFIG += qt debug_and_release
-SUBDIRS = habutil habit habresults testmm
+SUBDIRS = habutil habit habresults q5player vlcplayer testmm
 habutil.subdir = libs/habutil
 habit.subdir = apps/habit
 habit.depends = habutil
@@ -11,3 +11,7 @@ testmm.subdir = apps/testmm
 testmm.depends = habutil
 testkeypadld.subdir = apps/testkeypadld
 testkeypadld.depends = habutil
+q5player.subdir = apps/q5player
+q5player.depends = habutil
+vlcplayer.subdir = apps/vlcplayer
+vlcplayer.depends = habutil

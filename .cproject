@@ -37,6 +37,13 @@
 									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
 									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="../habit2/habit2/apps/q5player"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1904260639" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -48,6 +55,13 @@
 									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
 									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="../habit2/habit2/apps/q5player"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1758584700" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -58,6 +72,13 @@
 									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
 									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="../habit2/habit2/apps/q5player"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.620655973" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -102,18 +123,21 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.799675237" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.404769459" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
-								<option id="gnu.cpp.compiler.option.include.paths.1522647538" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.1522647538" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.6/lib/QtCore.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.6/lib/QtSql.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.6/lib/QtGui.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/apps/q5player}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1636335141" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1329786685" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
-								<option id="gnu.c.compiler.option.include.paths.250562498" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.c.compiler.option.include.paths.250562498" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
 									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
@@ -166,9 +190,13 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1303757464" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
-									<listOptionValue builtIn="false" value="/usr/local/Cellar/qt/4.8.7_2/lib/QtCore.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Cellar/qt/4.8.7_2/lib/QtGui.framework/Versions/4/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/apps/q5player}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1044185024" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -200,7 +228,6 @@
 			<resource resourceType="PROJECT" workspacePath="/habit2"/>
 		</configuration>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.328219213;cdt.managedbuild.tool.gnu.cpp.compiler.input.1044185024">
@@ -221,5 +248,17 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.93897259;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1216360762;cdt.managedbuild.tool.gnu.cpp.compiler.input.1758584700">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+		<buildTargets>
+			<target name="vlcplayer" path="apps/vlcplayer" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>release</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+		</buildTargets>
 	</storageModule>
 </cproject>
