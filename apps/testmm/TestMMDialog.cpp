@@ -141,6 +141,8 @@ void TestMMDialog::experimentActivated(QString expt)
 		qDebug() << itIndices.next() << " " << itNames.next();
 	}
 
+	// Create widgets....
+
 
 	// Now create a controller and exec() it
 	TestMMController controller(m_stimNames);
