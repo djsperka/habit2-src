@@ -42,8 +42,10 @@ private:
 	unsigned int addStimulusPrivate(unsigned int id);
 
 public slots:
-	void onPrefinishMarkReached(qint32);
-	void onStateChanged(Phonon::State newState, Phonon::State oldState);
+	//void onPrefinishMarkReached(qint32);
+	//void onStateChanged(Phonon::State newState, Phonon::State oldState);
+	void mediaStatusChanged(QMediaPlayer::MediaStatus);
+
 	
 };
 

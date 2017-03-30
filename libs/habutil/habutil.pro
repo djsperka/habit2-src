@@ -242,8 +242,19 @@ lessThan(QT_MAJOR_VERSION, 5) {
 			HAudioPlayer.cpp \
 			HVIPlayer.cpp
 }
+else {
+	HEADERS += \
+			HVLCMediaPlayer.h \
+			HVLCVideoWidget.h
 			
+	SOURCES += \
+			HVLCMediaPlayer.cpp \
+			HVLCVideoWidget.cpp
 
+	QMAKE_LFLAGS += -F/Users/dan/git/vlc-qt/build/src/lib
+	LIBS       += -framework VLCQtCore -framework VLCQtWidgets
+	INCLUDEPATH += /Users/dan/install/include /Users/dan/git/vlc-qt/libvlc-headers/include
+}			
 
 
 RESOURCES = habit/resources.qrc

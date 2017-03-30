@@ -40,6 +40,7 @@ void HPreviewMediaManager::stim(int i)
 
 void HPreviewMediaManager::addPlayers(HPlayer *p0, HPlayer *p1l, HPlayer *p1r, HPlayer *psound)
 {
+#if 0
 	QHBoxLayout *hbox0 = new QHBoxLayout;
 	addPlayer(HPlayerPositionType::Center, p0, -1);
 	hbox0->addWidget(p0);
@@ -62,5 +63,7 @@ void HPreviewMediaManager::addPlayers(HPlayer *p0, HPlayer *p1l, HPlayer *p1r, H
 	QWidget *w1 = new QWidget;
 	w1->setLayout(hbox1);
 	m_pstack->addWidget(w1);
+#endif
+
 }
 

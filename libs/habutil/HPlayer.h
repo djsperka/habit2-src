@@ -10,7 +10,7 @@
 #ifndef HABITPLAYER_H
 #define HABITPLAYER_H
 
-#include <QWidget>
+#include <QObject>
 #include <QMap>
 #include <QDir>
 #include "HStimulusSource.h"
@@ -24,15 +24,17 @@
 // are at index>0. This is a convenience for Habit, which allows users
 // to number stimuli with positive integers. 
 
-class HPlayer : public QWidget
+class HPlayer : public QObject
 {
 
 	Q_OBJECT
 	
 public:
-	HPlayer(int ID = 0, QWidget* w = 0, const QDir& dir = QDir("/"));
+	HPlayer(int ID = 0, QObject* w = 0, const QDir& dir = QDir("/"));
 	virtual ~HPlayer();
 
+	/// get the id
+	int id() { return m_id; }
 	
 	/// Play the stim at index 'number'. Out of range index defaults to background.
 	virtual void play(unsigned int number) = 0;

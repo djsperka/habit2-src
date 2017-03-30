@@ -249,12 +249,12 @@ void HVIPlayer::play(unsigned int number)
 			break;
 	}
 	m_iCurrentStim = number;
-
 }
 
 
 void HVIPlayer::onPrefinishMarkReached(qint32 msec)
 {
+
 	Q_UNUSED(msec);
 	if (m_iCurrentStim > -1 && m_iCurrentStim < m_mapSources.count() && (m_mapSources.value(m_iCurrentStim))->type() == HStimulusSource::VIDEO && (m_mapSources.value(m_iCurrentStim))->isLooped())
 	{

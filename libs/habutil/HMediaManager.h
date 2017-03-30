@@ -85,6 +85,7 @@ public:
 	HMediaManager(bool bPlayersAreFullScreen = true);
 	~HMediaManager();
 	void addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex=-1);
+	HPlayer *getPlayer(const HPlayerPositionType& ppt);
 	void clear();
 	unsigned int addAG(const Habit::StimulusSettings& ags);
 

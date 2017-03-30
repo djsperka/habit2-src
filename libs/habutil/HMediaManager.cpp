@@ -57,6 +57,16 @@ unsigned int HMediaManager::nextKey()
 	return (unsigned int)(m_mapPStimulusSettings.size() - 1);
 }
 
+#if QT_VERSION >= 0x050000
+
+void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex)
+{
+	connect(player, SIGNAL(started(int, const QString&)), this, SLOT(playerStarted(int, const QString&)));
+	m_players[ppt] = player;
+}
+
+#else
+
 void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex)
 {
 	// TODO: This should be governed by fullscreen setting!
@@ -86,6 +96,16 @@ void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, i
 	//else if (player->windowModality() == Qt::ApplicationModal) qDebug() << "ApplicationModal";
 	//else if (player->windowModality() == Qt::NonModal) qDebug() << "NonModal";
 	//else qDebug() << "Modality???";
+}
+#endif
+
+
+HPlayer *HMediaManager::getPlayer(const HPlayerPositionType& ppt)
+{
+	HPlayer *p = (HPlayer *)NULL;
+	if (m_players.contains(ppt))
+		p = m_players[ppt];
+	return p;
 }
 
 

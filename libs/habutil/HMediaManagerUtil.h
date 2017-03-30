@@ -13,7 +13,7 @@
 #include "stimulussettings.h"
 #include "stimulusdisplayinfo.h"
 #include <QVector>
-
+#include <QWidget>
 
 // Will create players and add stimuli to them based on the experiment settings. It is assumed that the 
 // experiment settings have been fully loaded from the db - loadFromDB is NOT called in this function. 
@@ -25,3 +25,11 @@
 
 HMediaManager* createMediaManager(const Habit::ExperimentSettings& es);
 HPreviewMediaManager* createPreviewMediaManager(const Habit::StimulusDisplayInfo& sdi);
+
+#if QT_VERSION >= 0x050000
+// In Qt5-vlc version, the widget nature is removed completely from the media manager.
+// These utility functions create viewing widgets
+
+QWidget *createPlayerWidget(HMediaManager *pmm, const HPlayerPositionType& ppt);
+
+#endif
