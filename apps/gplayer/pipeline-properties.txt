@@ -1,0 +1,205 @@
+pipeline property:  "name"
+nick:  "Name"
+description:  "The name of the object"
+type:  "gchararray"
+
+pipeline property:  "parent"
+nick:  "Parent"
+description:  "The parent of the object"
+type:  "GstObject"
+
+pipeline property:  "async-handling"
+nick:  "Async Handling"
+description:  "The bin will handle Asynchronous state changes"
+type:  "gboolean"
+
+pipeline property:  "message-forward"
+nick:  "Message Forward"
+description:  "Forwards all children messages"
+type:  "gboolean"
+
+pipeline property:  "delay"
+nick:  "Delay"
+description:  "Expected delay needed for elements to spin up to PLAYING in nanoseconds"
+type:  "guint64"
+
+pipeline property:  "auto-flush-bus"
+nick:  "Auto Flush Bus"
+description:  "Whether to automatically flush the pipeline's bus when going from READY into NULL state"
+type:  "gboolean"
+
+pipeline property:  "latency"
+nick:  "Latency"
+description:  "Latency to configure on the pipeline"
+type:  "guint64"
+
+pipeline property:  "uri"
+nick:  "URI"
+description:  "URI of the media to play"
+type:  "gchararray"
+
+pipeline property:  "current-uri"
+nick:  "Current URI"
+description:  "The currently playing URI"
+type:  "gchararray"
+
+pipeline property:  "suburi"
+nick:  ".sub-URI"
+description:  "Optional URI of a subtitle"
+type:  "gchararray"
+
+pipeline property:  "current-suburi"
+nick:  "Current .sub-URI"
+description:  "The currently playing URI of a subtitle"
+type:  "gchararray"
+
+pipeline property:  "source"
+nick:  "Source"
+description:  "Source element"
+type:  "GstElement"
+
+pipeline property:  "flags"
+nick:  "Flags"
+description:  "Flags to control behaviour"
+type:  "GstPlayFlags"
+
+pipeline property:  "n-video"
+nick:  "Number Video"
+description:  "Total number of video streams"
+type:  "gint"
+
+pipeline property:  "current-video"
+nick:  "Current Video"
+description:  "Currently playing video stream (-1 = auto)"
+type:  "gint"
+
+pipeline property:  "n-audio"
+nick:  "Number Audio"
+description:  "Total number of audio streams"
+type:  "gint"
+
+pipeline property:  "current-audio"
+nick:  "Current audio"
+description:  "Currently playing audio stream (-1 = auto)"
+type:  "gint"
+
+pipeline property:  "n-text"
+nick:  "Number Text"
+description:  "Total number of text streams"
+type:  "gint"
+
+pipeline property:  "current-text"
+nick:  "Current Text"
+description:  "Currently playing text stream (-1 = auto)"
+type:  "gint"
+
+pipeline property:  "subtitle-encoding"
+nick:  "subtitle encoding"
+description:  "Encoding to assume if input subtitles are not in UTF-8 encoding. If not set, the GST_SUBTITLE_ENCODING environment variable will be checked for an encoding to use. If that is not set either, ISO-8859-15 will be assumed."
+type:  "gchararray"
+
+pipeline property:  "audio-sink"
+nick:  "Audio Sink"
+description:  "the audio output element to use (NULL = default sink)"
+type:  "GstElement"
+
+pipeline property:  "video-sink"
+nick:  "Video Sink"
+description:  "the video output element to use (NULL = default sink)"
+type:  "GstElement"
+
+pipeline property:  "vis-plugin"
+nick:  "Vis plugin"
+description:  "the visualization element to use (NULL = default)"
+type:  "GstElement"
+
+pipeline property:  "text-sink"
+nick:  "Text plugin"
+description:  "the text output element to use (NULL = default subtitleoverlay)"
+type:  "GstElement"
+
+pipeline property:  "video-stream-combiner"
+nick:  "Video stream combiner"
+description:  "Current video stream combiner (NULL = input-selector)"
+type:  "GstElement"
+
+pipeline property:  "audio-stream-combiner"
+nick:  "Audio stream combiner"
+description:  "Current audio stream combiner (NULL = input-selector)"
+type:  "GstElement"
+
+pipeline property:  "text-stream-combiner"
+nick:  "Text stream combiner"
+description:  "Current text stream combiner (NULL = input-selector)"
+type:  "GstElement"
+
+pipeline property:  "volume"
+nick:  "Volume"
+description:  "The audio volume, 1.0=100%"
+type:  "gdouble"
+
+pipeline property:  "mute"
+nick:  "Mute"
+description:  "Mute the audio channel without changing the volume"
+type:  "gboolean"
+
+pipeline property:  "sample"
+nick:  "Sample"
+description:  "The last sample (NULL = no video available)"
+type:  "GstSample"
+
+pipeline property:  "subtitle-font-desc"
+nick:  "Subtitle font description"
+description:  "Pango font description of font to be used for subtitle rendering"
+type:  "gchararray"
+
+pipeline property:  "connection-speed"
+nick:  "Connection Speed"
+description:  "Network connection speed in kbps (0 = unknown)"
+type:  "guint64"
+
+pipeline property:  "buffer-size"
+nick:  "Buffer size (bytes)"
+description:  "Buffer size when buffering network streams"
+type:  "gint"
+
+pipeline property:  "buffer-duration"
+nick:  "Buffer duration (ns)"
+description:  "Buffer duration when buffering network streams"
+type:  "gint64"
+
+pipeline property:  "av-offset"
+nick:  "AV Offset"
+description:  "The synchronisation offset between audio and video in nanoseconds"
+type:  "gint64"
+
+pipeline property:  "ring-buffer-max-size"
+nick:  "Max. ring buffer size (bytes)"
+description:  "Max. amount of data in the ring buffer (bytes, 0 = ring buffer disabled)"
+type:  "guint64"
+
+pipeline property:  "force-aspect-ratio"
+nick:  "Force Aspect Ratio"
+description:  "When enabled, scaling will respect original aspect ratio"
+type:  "gboolean"
+
+pipeline property:  "audio-filter"
+nick:  "Audio filter"
+description:  "the audio filter(s) to apply, if possible"
+type:  "GstElement"
+
+pipeline property:  "video-filter"
+nick:  "Video filter"
+description:  "the video filter(s) to apply, if possible"
+type:  "GstElement"
+
+pipeline property:  "video-multiview-mode"
+nick:  "Multiview Mode Override"
+description:  "Re-interpret a video stream as one of several frame-packed stereoscopic modes."
+type:  "GstVideoMultiviewFramePacking"
+
+pipeline property:  "video-multiview-flags"
+nick:  "Multiview Flags Override"
+description:  "Override details of the multiview frame layout"
+type:  "GstVideoMultiviewFlags"
+
