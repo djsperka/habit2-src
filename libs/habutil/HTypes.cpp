@@ -485,3 +485,48 @@ const HPlayerPositionType& getPlayerPositionType(int number_value)
 		if (number_value == HPlayerPositionType::A[i]->number()) result = HPlayerPositionType::A[i];
 	return *result;
 };
+
+
+
+// HMediaContainerType
+
+const HMediaContainerType HMediaContainerType::UnknownContainerType(-1, "UnknownContainer");
+const HMediaContainerType HMediaContainerType::Audio(1, "audio");
+const HMediaContainerType HMediaContainerType::Video(2, "video");
+const HMediaContainerType HMediaContainerType::AudioVideo(3, "audio+video");
+const HMediaContainerType HMediaContainerType::Image(4, "image");
+const HMediaContainerType* HMediaContainerType::A[4] =
+{
+		&HMediaContainerType::Audio,
+		&HMediaContainerType::Video,
+		&HMediaContainerType::AudioVideo,
+		&HMediaContainerType::Image
+};
+
+HMediaContainerType& HMediaContainerType::operator=(const HMediaContainerType& rhs)
+{
+	if (this->number() != rhs.number())
+	{
+		m_t = rhs.number();
+		m_s = rhs.name();
+	}
+	return *this;
+};
+
+bool operator==(const HMediaContainerType& lhs, const HMediaContainerType& rhs)
+{
+	return lhs.number() == rhs.number();
+};
+
+bool operator!=(const HMediaContainerType& lhs, const HMediaContainerType& rhs)
+{
+	return lhs.number() != rhs.number();
+};
+
+const HMediaContainerType& getMediaContainerType(int number_value)
+{
+	const HMediaContainerType* result = &HMediaContainerType::UnknownContainerType;
+	for (unsigned int i=0; i<sizeof(HMediaContainerType::A)/sizeof(HMediaContainerType *) && result==&HMediaContainerType::UnknownContainerType; i++)
+		if (number_value == HMediaContainerType::A[i]->number()) result = HMediaContainerType::A[i];
+	return *result;
+};

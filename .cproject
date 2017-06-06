@@ -105,7 +105,7 @@
 					<folderInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.macosx.base.1782731437" name="cdt.managedbuild.toolchain.gnu.macosx.base" superClass="cdt.managedbuild.toolchain.gnu.macosx.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.gnu.platform.macosx.base.26309351" name="Debug Platform" osList="macosx" superClass="cdt.managedbuild.target.gnu.platform.macosx.base"/>
-							<builder id="cdt.managedbuild.target.gnu.builder.macosx.base.1186214894" incrementalBuildTarget="release" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.macosx.base"/>
+							<builder arguments="release" command="make" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.macosx.base.1186214894" incrementalBuildTarget="${config_name}" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1944386958" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.1897515355" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base">
 								<inputType id="cdt.managedbuild.tool.macosx.cpp.linker.input.1399750001" superClass="cdt.managedbuild.tool.macosx.cpp.linker.input">
@@ -117,7 +117,6 @@
 								<option id="gnu.both.asm.option.include.paths.1155507105" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1110383730" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -126,23 +125,14 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1522647538" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/apps/q5player}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/local/opt/qt5/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1636335141" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1329786685" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
 								<option id="gnu.c.compiler.option.include.paths.250562498" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1188537221" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -181,7 +171,6 @@
 								<option id="gnu.both.asm.option.include.paths.1230740604" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.731193867" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -190,13 +179,7 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1303757464" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/apps/q5player}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/local/opt/qt5/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1044185024" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -204,7 +187,6 @@
 								<option id="gnu.c.compiler.option.include.paths.1794226785" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.319113949" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -261,4 +243,5 @@
 			</target>
 		</buildTargets>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

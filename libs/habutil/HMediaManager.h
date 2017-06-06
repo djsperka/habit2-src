@@ -35,7 +35,6 @@
 #ifndef _HMEDIAMANAGER_H_
 #define _HMEDIAMANAGER_H_
 
-#include <QObject>
 #include <QMap>
 #include "HPlayer.h"
 #include "HTypes.h"
@@ -43,7 +42,7 @@
 #include "stimulisettings.h"
 
 
-class HMediaManager : public QObject
+class HMediaManager: public QObject
 {
 	Q_OBJECT
 

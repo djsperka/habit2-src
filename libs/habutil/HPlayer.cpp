@@ -13,9 +13,7 @@
 const Habit::StimulusInfo HPlayer::dummyStimulusInfo(QString("dummy"), QString(), false, 0, true);
 
 HPlayer::HPlayer(int ID, QObject *w, const QDir& stimRootDir)
-: QObject(w)
-, m_id(ID)
-, m_iCurrentStim(0)
+: m_id(ID)
 , m_dirStimulusRoot(stimRootDir)
 , m_preferBufferedStimulus(true)
 {

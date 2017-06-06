@@ -23,8 +23,7 @@ const unsigned int HMediaManager::agKey = 0;
 const Habit::StimulusSettings HMediaManager::dummyStimulusSettings;
 
 HMediaManager::HMediaManager(bool bPlayersAreFullScreen)
-: QObject()
-, m_pendingStartSignal(false)
+: m_pendingStartSignal(false)
 , m_pendingAGStartSignal(false)
 , m_pendingClearSignal(false)
 , m_pendingStimNumber(-1)

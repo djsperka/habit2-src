@@ -10,7 +10,6 @@
 #ifndef HABITPLAYER_H
 #define HABITPLAYER_H
 
-#include <QObject>
 #include <QMap>
 #include <QDir>
 #include "HStimulusSource.h"
@@ -80,13 +79,13 @@ protected:
 	//QMap<unsigned int, HStimulusSource *> m_sources;
 	
 	/// index of currently playing stim. An out of range index defaults to playing background.
-	int m_iCurrentStim;
+	//int m_iCurrentStim;
 
 	// Get the StimulusInfo object for given key.
 	const Habit::StimulusInfo& getStimulusInfo(unsigned int key);
 
 	// Get current stim info
-	const Habit::StimulusInfo& getCurrentStimulusInfo() { return getStimulusInfo(m_iCurrentStim); };
+	//const Habit::StimulusInfo& getCurrentStimulusInfo() { return getStimulusInfo(m_iCurrentStim); };
 
 	// returns the next key to be used. Equal to the largest current key + 1.
 	unsigned int nextKey() { return m_mapPStimulusInfo.count() - 1;};
@@ -109,7 +108,7 @@ private:
 	virtual unsigned int addStimulusPrivate(unsigned int id) = 0;
 
 
-signals:
+Q_SIGNALS:
 	void started(int i, const QString& filename);
 	void cleared(int i);
 

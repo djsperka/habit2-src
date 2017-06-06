@@ -12,6 +12,21 @@ CONFIG(debug, debug|release) {
 	DESTDIR = release
 }
 
+# Tell qmake to use pkg-config to find QtGStreamer.
+CONFIG += link_pkgconfig c++11
+
+QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
+
+# Now tell qmake to link to QtGStreamer and also use its include path and Cflags.
+contains(QT_VERSION, ^4\\..*) {
+  PKGCONFIG += QtGStreamer-1.0 QtGStreamerUi-1.0
+}
+contains(QT_VERSION, ^5\\..*) {
+  PKGCONFIG += Qt5GStreamer-1.0 Qt5GStreamerUi-1.0
+  QT += widgets
+}
+
+
 HEADERS +=	HLook.h \
 			HLooker.h \
 			HLookerReprocessor.h \
@@ -244,16 +259,25 @@ lessThan(QT_MAJOR_VERSION, 5) {
 }
 else {
 	HEADERS += \
-			HVLCMediaPlayer.h \
-			HVLCVideoWidget.h
+			HGstPlayer.h \
+			HGstPlayer2.h
 			
 	SOURCES += \
-			HVLCMediaPlayer.cpp \
-			HVLCVideoWidget.cpp
+			HGstPlayer.cpp \
+			HGstPlayer2.cpp
 
-	QMAKE_LFLAGS += -F/Users/dan/git/vlc-qt/build/src/lib
-	LIBS       += -framework VLCQtCore -framework VLCQtWidgets
-	INCLUDEPATH += /Users/dan/install/include /Users/dan/git/vlc-qt/libvlc-headers/include
+#	QMAKE_LFLAGS += -F/Users/dan/git/vlc-qt/build/src/lib
+#	LIBS       += -framework VLCQtCore -framework VLCQtWidgets
+#	INCLUDEPATH += /Users/dan/install/include /Users/dan/git/vlc-qt/libvlc-headers/include
+
+# gst-plugins-base
+	INCLUDEPATH += /Users/dan/git/gst-plugins-base
+
+
+
+# need this for boost?
+	INCLUDEPATH += "/usr/local/include"
+
 }			
 
 

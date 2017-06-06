@@ -13,8 +13,9 @@
 
 #if QT_VERSION >= 0x050000
 #include <QFrame>
-#include "HVLCMediaPlayer.h"
-#include "HVLCVideoWidget.h"
+#include "HGstPlayer.h"
+//#include "HVLCMediaPlayer.h"
+//#include "HVLCVideoWidget.h"
 #else
 #include "HVIPlayer.h"
 #include "HAudioPlayer.h"
