@@ -66,7 +66,7 @@ void Player::setUri(const QString & uri)
             bus->addSignalWatch();
             QGlib::connect(bus, "message", this, &Player::onBusMessage);
 
-
+#if 0
             QList< QGlib::ParamSpecPtr > list = m_pipeline->listProperties();
             QListIterator< QGlib::ParamSpecPtr > iterator(list);
             while (iterator.hasNext())
@@ -77,6 +77,8 @@ void Player::setUri(const QString & uri)
             	qInfo() << "description: " << param->description();
             	qInfo() << "type: " << param->valueType().name();
             }
+#endif
+
         } else {
             qCritical() << "Failed to create the pipeline";
         }
@@ -184,6 +186,7 @@ void Player::stop()
 
 void Player::onBusMessage(const QGst::MessagePtr & message)
 {
+	qInfo() << "Player::onBusMessage(): type name " << message->typeName();
     switch (message->type()) {
     case QGst::MessageEos: //End of stream. We reached the end of the file.
         stop();
@@ -197,13 +200,42 @@ void Player::onBusMessage(const QGst::MessagePtr & message)
             handlePipelineStateChange(message.staticCast<QGst::StateChangedMessage>());
         }
         break;
+    case QGst::MessageBuffering:
+    	qInfo() << "Buffering";
+    	break;
     default:
         break;
     }
 }
 
+QString stateName(QGst::State s)
+{
+	QString name("UNKNOWN");
+	switch (s)
+	{
+	case 0:
+		name = QString("StateVoidPending");
+		break;
+	case 1:
+		name = QString("StateNull");
+		break;
+	case 2:
+		name = QString("StateReady");
+		break;
+	case 3:
+		name = QString("StatePaused");
+		break;
+	case 4:
+		name = QString("StatePlaying");
+		break;
+	}
+	return name;
+}
+
+
 void Player::handlePipelineStateChange(const QGst::StateChangedMessagePtr & scm)
 {
+	qInfo() << "Player::handlePipelineStateChange: " << stateName(scm->oldState()) << "-->" << stateName(scm->newState());
     switch (scm->newState()) {
     case QGst::StatePlaying:
         //start the timer when the pipeline starts playing
@@ -213,6 +245,7 @@ void Player::handlePipelineStateChange(const QGst::StateChangedMessagePtr & scm)
     case QGst::StatePaused:
         //stop the timer when the pipeline pauses
     	qInfo() << "QGst::StatePaused";
+    	update();
         if(scm->oldState() == QGst::StatePlaying) {
             m_positionTimer.stop();
         }
@@ -225,4 +258,3 @@ void Player::handlePipelineStateChange(const QGst::StateChangedMessagePtr & scm)
     Q_EMIT stateChanged();
 }
 
-#include "moc_player.cpp"

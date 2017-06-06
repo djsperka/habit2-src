@@ -21,8 +21,11 @@
 
 #include <QTimer>
 #include <QTime>
+
+#ifndef Q_MOC_RUN
 #include <QGst/Pipeline>
 #include <QGst/Ui/VideoWidget>
+#endif
 
 class Player : public QGst::Ui::VideoWidget
 {

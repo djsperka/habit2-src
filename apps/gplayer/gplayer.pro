@@ -1,7 +1,7 @@
 # This is a qmake project file, provided as an example on how to use qmake with QtGStreamer.
 
 TEMPLATE = app
-TARGET = player
+TARGET = gplayer
 
 # need this for boost?
 INCLUDEPATH += "/usr/local/include"
@@ -10,7 +10,7 @@ INCLUDEPATH += "/usr/local/include"
 #CONFIG += silent
 
 # Tell qmake to use pkg-config to find QtGStreamer.
-CONFIG += link_pkgconfig c++11
+CONFIG += qt debug_and_release link_pkgconfig c++11
 
 QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
 
@@ -28,9 +28,29 @@ contains(QT_VERSION, ^5\\..*) {
 
 # Recommended, to avoid possible issues with the "emit" keyword
 # You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.
-DEFINES += QT_NO_KEYWORDS
+#DEFINES += QT_NO_KEYWORDS
+#CONFIG += no_keywords
+
+
+CONFIG(debug, debug|release) {
+	DESTDIR = debug
+	LIBS += -L../../libs/habutil/debug -lhabutil
+	PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
+} else {
+	DESTDIR = release
+	LIBS += -L../../libs/habutil/release -lhabutil
+	PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
+}
+
+INCLUDEPATH += ../../libs/habutil 
+INCLUDEPATH += ../../libs/habutil/habit
+DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
+
+
 
 # Input
-HEADERS += mediaapp.h player.h
-SOURCES += main.cpp mediaapp.cpp player.cpp
+HEADERS = mediaapp.h player.h
+SOURCES = main.cpp mediaapp.cpp player.cpp
 
+#message(PKG_CONFIG_PATH when qmake is run $$PKG_CONFIG_PATH)
+#message(PKG_CONFIG_LIBDIR when qmake is run $$PKG_CONFIG_LIBDIR)

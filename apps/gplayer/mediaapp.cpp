@@ -65,7 +65,8 @@ void MediaApp::openFile(const QString & fileName)
 
     m_player->stop();
     m_player->setUri(fileName);
-    m_player->play();
+    m_player->pause();
+    //m_player->play();
 }
 
 void MediaApp::open()
@@ -241,4 +242,3 @@ void MediaApp::createUI(QBoxLayout *appLayout)
     appLayout->addLayout(btnLayout);
 }
 
-#include "moc_mediaapp.cpp"

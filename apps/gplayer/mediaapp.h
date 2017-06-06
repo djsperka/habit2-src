@@ -33,26 +33,6 @@ class QTimer;
 class MediaApp : public QWidget
 {
     Q_OBJECT
-public:
-    MediaApp(QWidget *parent = 0);
-    ~MediaApp();
-
-    void openFile(const QString & fileName);
-
-private Q_SLOTS:
-    void open();
-    void toggleFullScreen();
-
-    void onStateChanged();
-    void onPositionChanged();
-
-    void setPosition(int position);
-
-    void showControls(bool show = true);
-    void hideControls() { showControls(false); }
-
-protected:
-    void mouseMoveEvent(QMouseEvent *event);
 
 private:
     QToolButton *initButton(QStyle::StandardPixmap icon, const QString & tip,
@@ -71,6 +51,30 @@ private:
     QLabel *m_positionLabel;
     QLabel *m_volumeLabel;
     QTimer m_fullScreenTimer;
+
+public:
+    MediaApp(QWidget *parent = 0);
+    ~MediaApp();
+
+    void openFile(const QString & fileName);
+
+protected:
+    void mouseMoveEvent(QMouseEvent *event);
+
+
+private Q_SLOTS:
+    void open();
+    void toggleFullScreen();
+
+    void onStateChanged();
+    void onPositionChanged();
+
+    void setPosition(int position);
+
+    void showControls(bool show = true);
+    void hideControls() { showControls(false); };
+
+
 };
 
 #endif
