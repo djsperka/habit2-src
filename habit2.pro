@@ -17,5 +17,5 @@ vlcplayer.subdir = apps/vlcplayer
 vlcplayer.depends = habutil
 gplayer.subdir = apps/gplayer
 gplayer.depends = habutil
-hgstplayer.subdir = apps/hgstplayer
+hgstplayer.file = apps/gstx/hgstplayer.pro
 hgstplayer.depends = habutil
