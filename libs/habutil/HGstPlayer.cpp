@@ -25,10 +25,10 @@ GstPadProbeReturn HGstPlayer::cb_blocked_active (GstPad *pad, GstPadProbeInfo *i
 {
 	GST_INFO("HGstPlayer::cb_blocked_active - start");
 	qDebug() << "HGstPlayer::cb_blocked_active - start";
-	//qDebug() << "CB_BLOCKED_ACTIVE on pad " << name;
 	HGstPlayer *player = (HGstPlayer *)user_data;
-	//gchar *name = gst_pad_get_name(pad);
-	//g_free(name);
+	gchar *name = gst_pad_get_name(pad);
+	qDebug() << "CB_BLOCKED_ACTIVE on pad " << name;
+	g_free(name);
 
 	// Now can remove probe from the pending pad and set it as the active pad
 	qDebug() << "HGstPlayer::cb_blocked_active - call setActivePad";
@@ -118,7 +118,7 @@ unsigned int HGstPlayer::addBackground(unsigned int id, const QColor& bkgdColor)
 		ptrs.inputSelectorPadPtr = sinkPad;
 		ptrs.videoSrcPadPtr = srcPad;
 		m_pads.insert(id, ptrs);
-		//m_pads[id].uiVideoPadProbeID = srcPad->addProbe(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HGstPlayer::cb_blocked, &m_pads[id]);
+		m_pads[id].uiVideoPadProbeID = srcPad->addProbe(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HGstPlayer::cb_blocked, &m_pads[id]);
 	}
 	else
 	{
@@ -212,8 +212,8 @@ void HGstPlayer::decodebinPadAdded(const QGlib::ObjectPtr & sender, const QGst::
 
 					ptrs->inputSelectorPadPtr = sinkPad;
 					ptrs->videoSrcPadPtr = srcPad;
-					//ptrs->uiVideoPadProbeID = srcPad->addProbe(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HGstPlayer::cb_blocked, ptrs);
-					//qDebug() << "decodebinPadAdded - Video pad, add blocking probe, returned probe id " << ptrs->uiVideoPadProbeID;
+					ptrs->uiVideoPadProbeID = srcPad->addProbe(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HGstPlayer::cb_blocked, ptrs);
+					qDebug() << "decodebinPadAdded - Video pad, add blocking probe, returned probe id " << ptrs->uiVideoPadProbeID;
 
 				}
 				else
@@ -260,8 +260,8 @@ void HGstPlayer::decodebinPadAdded(const QGlib::ObjectPtr & sender, const QGst::
 					// Note for image sources, the imagefreeze element is already connected to the input-selector, so
 					// that pad is already set in ptrs->inputSelectorPadPtr
 					ptrs->videoSrcPadPtr = srcPad;
-					//NOBLOCKptrs->uiVideoPadProbeID = srcPad->addProbe(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, cb_blocked, ptrs);
-					//NOBLOCKqDebug() << "decodebinPadAdded: Video pad, add blocking probe, returned probe id " << ptrs->uiVideoPadProbeID;
+					ptrs->uiVideoPadProbeID = srcPad->addProbe(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, cb_blocked, ptrs);
+					qDebug() << "decodebinPadAdded: Video pad, add blocking probe, returned probe id " << ptrs->uiVideoPadProbeID;
 				}
 				else
 				{
@@ -412,10 +412,10 @@ void HGstPlayer::play(unsigned int num)
 		QGstPtrs *ptrs = &m_pads[num];
 		if (ptrs->inputSelectorPadPtr)
 		{
-			qDebug() << "HGstPlayer::play - pause pipeline";
-			m_pipeline->setState(QGst::StatePaused);
+			//qDebug() << "HGstPlayer::play - pause pipeline";
+			//m_pipeline->setState(QGst::StatePaused);
 
-#if 1
+#if 0
 			m_input_selector->setProperty("active-pad", ptrs->inputSelectorPadPtr);
 			m_pipeline->setState(QGst::StatePlaying);
 
@@ -428,7 +428,7 @@ void HGstPlayer::play(unsigned int num)
 			{
 				QGstPtrs *ptrsCurrent = &m_pads[m_iCurrentStimulusId];
 				qDebug() << "HGstPlayer::play - current stim id " << m_iCurrentStimulusId << " send blocking probe to " << ptrsCurrent->videoSrcPadPtr->parentElement()->name() << ":" << ptrsCurrent->videoSrcPadPtr->name();
-				ptrsCurrent->uiVideoPadProbeID = ptrsCurrent->videoSrcPadPtr->addProbe(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, cb_blocked_active,  ptrsCurrent);
+				ptrsCurrent->uiVideoPadProbeID = ptrsCurrent->videoSrcPadPtr->addProbe(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, cb_blocked_active,  this);
 
 
 				// HACK FIXME
@@ -470,9 +470,8 @@ void HGstPlayer::setActivePad(unsigned int num)
 	QGst::ClockTime baseTime = m_pipeline->getBaseTime();
 	QGst::ClockTime absTime = m_pipeline->clock()->clockTime();
 
-	qDebug() << "setActivePad - abs time " << absTime;
-	qDebug() << "setActivePad - basetime " << baseTime;
-	//ptrs->inputSelectorPadPtr->setOffset(absTime - baseTime);
+	qDebug() << "setActivePad - abs time " << absTime << " pipeline basetime " << baseTime << " running time " << absTime-baseTime;
+	ptrs->inputSelectorPadPtr->setOffset(absTime - baseTime);
 
 	qDebug() << "setActivePad - remove blocking probe id " << ptrs->uiVideoPadProbeID << " from " << ptrs->videoSrcPadPtr->parentElement()->name() << ":" << ptrs->videoSrcPadPtr->name();
 
@@ -519,12 +518,22 @@ void HGstPlayer::onBusMessage(const QGst::MessagePtr & message)
         stop();
         break;
     case QGst::MessageStateChanged: //The element in message->source() has changed state
-       	//qDebug() << "HGstPlayer::onBusMessage( state changed )";
+       	qDebug() << "HGstPlayer::onBusMessage( state changed )";
             //handlePipelineStateChange(message.staticCast<QGst::StateChangedMessage>());
         break;
-//    case QGst::MessageStreamStatus:
+    case QGst::MessageAsyncDone:
+    	//ClockTime ct = message.staticCast<QGst::AsyncDoneMessage>()->runningTime();
+    	qDebug() << "onBusMessage: AsyncDone, running time " <<
+    			message.staticCast<QGst::AsyncDoneMessage>()->runningTime() <<
+				" , source " <<
+				message.staticCast<QGst::AsyncDoneMessage>()->source()->name();
+    case QGst::MessageQos:
+    	qDebug() << "onBusMessage: running time " << message.staticCast<QGst::QosMessage>()->runningTime() <<
+				" jitter " << message.staticCast<QGst::QosMessage>()->jitter() <<
+				" stream time " << message.staticCast<QGst::QosMessage>()->streamTime() <<
+				" timestamp " << message.staticCast<QGst::QosMessage>()->timestamp();
 //    	handleStreamStatusMessage(message.staticCast<QGst::StreamStatusMessage>());
-//    	break;
+    	break;
     default:
     	qDebug() << "Unknown msg: " << message->typeName() << " type " << message->type();
         break;
@@ -532,3 +541,6 @@ void HGstPlayer::onBusMessage(const QGst::MessagePtr & message)
 }
 //10 00000 00000 00000 00000
 
+#if 0
+ClockTime AsyncDoneMessage::runningTime() const
+#endif
