@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QGst/Ui/VideoWidget>
 #include "../../libs/habutil/HGstPlayer.h"
+#include "../../libs/habutil/HGstMediaManager.h"
 
 class Q5PlayerTestDialog: public QDialog
 {
@@ -27,12 +28,15 @@ protected Q_SLOTS:
 	//void mediaChanged(libvlc_media_t *media);
 
 private:
-	HGstPlayer *m_paudioHGstPlayer;
-	HGstPlayer *m_pvideoHGstPlayer;
+	HGstMediaManager *m_phgstmm;
+	//HGstPlayer *m_paudioHGstPlayer;
+	//HGstPlayer *m_pvideoHGstPlayer;
 	QGst::Ui::VideoWidget *m_pVideoWidget;
 	QSpinBox *m_pSpinIndex;
 
-	HGstPlayer *createMediaPlayerAndPopulate(const QDir& dirStimRoot, bool isAudio);
+
+	//HGstPlayer *createMediaPlayerAndPopulate(const QDir& dirStimRoot, bool isAudio);
+	HGstMediaManager *createMM(QGst::Ui::VideoWidget *v);
 };
 
 #endif /* APPS_Q5PLAYER_Q5PLAYERTESTDIALOG_H_ */

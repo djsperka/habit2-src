@@ -12,6 +12,9 @@ INCLUDEPATH += 	"/usr/local/include"
 # Tell qmake to use pkg-config to find QtGStreamer.
 CONFIG += debug_and_release link_pkgconfig c++11
 
+# need sql libs
+QT += sql
+
 QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
 
 # Now tell qmake to link to QtGStreamer and also use its include path and Cflags.
