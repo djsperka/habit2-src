@@ -260,11 +260,13 @@ lessThan(QT_MAJOR_VERSION, 5) {
 else {
 	HEADERS += \
 			HGstPlayer.h \
-			HGstPlayer2.h
+			HGstPlayer2.h \
+			HGstMediaManager.h
 			
 	SOURCES += \
 			HGstPlayer.cpp \
-			HGstPlayer2.cpp
+			HGstPlayer2.cpp \
+			HGstMediaManager.cpp
 
 #	QMAKE_LFLAGS += -F/Users/dan/git/vlc-qt/build/src/lib
 #	LIBS       += -framework VLCQtCore -framework VLCQtWidgets
@@ -311,4 +313,4 @@ FORMS =		\
 			wizards/PhaseWPTrial.ui \
 			wizards/PhaseWPHabituation.ui \
 			wizards/PhaseWPHabit1.ui \
-			wizards/PhaseWPHabit2.ui \
+			wizards/PhaseWPHabit2.ui

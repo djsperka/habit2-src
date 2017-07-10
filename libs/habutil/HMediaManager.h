@@ -49,10 +49,8 @@ class HMediaManager: public QObject
 private:
 
 
-	// A map containing StimulusSettings objects, key is an integer.
-	//QMap<unsigned int, Habit::StimulusSettings> m_mapStim;
-	QMap<unsigned int, const Habit::StimulusSettings *> m_mapPStimulusSettings;
 
+	// Every stimulus added (via addStimuli(
 	// A map containing lists of stimulus keys (keys into m_mapStim). Here the key
 	// is HStimContext.
 	// getContextStimList fetches a list of keys for the stimuli added for the Test phase.
@@ -63,9 +61,9 @@ private:
 	// this is a convenience.
 	unsigned int nextKey();
 
+	virtual unsigned int addStimulusPrivate(unsigned int key, const Habit::StimulusSettings& ss);
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss);
 
-	void addOrAppendList(int context, const QList<unsigned int>& list);
 
 protected:
 	bool m_pendingStartSignal;
@@ -78,18 +76,24 @@ protected:
 	// A map containing HPlayers. The key is the HPlayerPositionType (Left, Right, etc)
 	QMap<HPlayerPositionType, HPlayer *> m_players;
 
+	// A map containing StimulusSettings objects, key is an integer.
+	QMap<unsigned int, const Habit::StimulusSettings *> m_mapPStimulusSettings;
+
+	// saves the list of stim indices for the given context. Creates new list if needed.
+	void addOrAppendList(int context, const QList<unsigned int>& list);
+
 
 public:
 
 	HMediaManager(bool bPlayersAreFullScreen = true);
-	~HMediaManager();
+	virtual ~HMediaManager();
 	void addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex=-1);
 	HPlayer *getPlayer(const HPlayerPositionType& ppt);
-	void clear();
-	unsigned int addAG(const Habit::StimulusSettings& ags);
+	virtual void clear();
+	virtual unsigned int addAG(const Habit::StimulusSettings& ags);
 
-	void addStimuli(const Habit::StimuliSettings& ss, int context);
-	unsigned int addStimulus(const Habit::StimulusSettings& ss);
+	virtual void addStimuli(const Habit::StimuliSettings& ss, int context);
+	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss);
 
 	const Habit::StimulusSettings& getStimulusSettings(unsigned int key) const;
 
@@ -103,14 +107,14 @@ public:
 	// used as placeholder for background and AG. Also returned when getStimulusSettings is passed a bad key.
 	static const Habit::StimulusSettings dummyStimulusSettings;
 
-public slots:
+public Q_SLOTS:
 
-	virtual void stim(int);
+	void stim(int);
 	void ag();
 	void playerStarted(int i, const QString& filename);
 	void playerCleared(int i);
 
-signals:
+Q_SIGNALS:
 	void agStarted(int);
 	void stimStarted(int);
 	void cleared();

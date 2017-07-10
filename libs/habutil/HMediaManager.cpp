@@ -111,25 +111,7 @@ HPlayer *HMediaManager::getPlayer(const HPlayerPositionType& ppt)
 unsigned int HMediaManager::addAG(const Habit::StimulusSettings& ssAG)
 {
 	m_mapPStimulusSettings.insert(agKey, &ssAG);
-
-	// Assume that if the player is here, then there is a stimulus configured for it.
-
-	if (m_players.contains(HPlayerPositionType::Left))
-	{
-		m_players.value(HPlayerPositionType::Left)->addStimulus(agKey, ssAG.getLeftStimulusInfo());
-	}
-	if (m_players.contains(HPlayerPositionType::Center))
-	{
-		m_players.value(HPlayerPositionType::Center)->addStimulus(agKey, ssAG.getCenterStimulusInfo());
-	}
-	if (m_players.contains(HPlayerPositionType::Right))
-	{
-		m_players.value(HPlayerPositionType::Right)->addStimulus(agKey, ssAG.getRightStimulusInfo());
-	}
-	if (m_players.contains(HPlayerPositionType::Sound))
-	{
-		m_players.value(HPlayerPositionType::Sound)->addStimulus(agKey, ssAG.getIndependentSoundInfo());
-	}
+	addStimulusPrivate(agKey, ssAG);
 
 	// Append to context list.
 	// This code allows more than one ag....nothing here prevents multiple ags to be added to the list.
@@ -183,7 +165,11 @@ void HMediaManager::addStimuli(const Habit::StimuliSettings& ss, int context)
 unsigned int HMediaManager::addStimulus(unsigned int key, const Habit::StimulusSettings& settings)
 {
 	m_mapPStimulusSettings.insert(key, &settings);
+	return addStimulusPrivate(key, settings);
+}
 
+unsigned int HMediaManager::addStimulusPrivate(unsigned int key, const Habit::StimulusSettings& settings)
+{
 	if (m_players.contains(HPlayerPositionType::Left))
 	{
 		m_players.value(HPlayerPositionType::Left)->addStimulus(key, settings.getLeftStimulusInfo());
