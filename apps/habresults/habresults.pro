@@ -8,9 +8,6 @@ lessThan(QT_MAJOR_VERSION, 5) {
 }
 else {
 	QT += widgets multimedia printsupport
-	QMAKE_LFLAGS += -F/Users/dan/git/vlc-qt/build/src/lib
-	LIBS       += -framework VLCQtCore -framework VLCQtWidgets
-	INCLUDEPATH += /Users/dan/install/include /Users/dan/git/vlc-qt/libvlc-headers/include
 }
 CONFIG += qt debug_and_release c++11
 
