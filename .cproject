@@ -3,6 +3,9 @@
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595" moduleId="org.eclipse.cdt.core.settings" name="Default">
+				<macros>
+					<stringMacro name="QT_ROOT" type="VALUE_TEXT" value="/Users/dan/Qt/5.9.1/clang_64"/>
+				</macros>
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -31,56 +34,65 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.57649575" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
-								<option id="gnu.both.asm.option.include.paths.792789101" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
-									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="../habit2/habit2/apps/q5player"/>
-								</option>
+								<option id="gnu.both.asm.option.include.paths.792789101" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1904260639" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1728693830" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1216360762" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
-								<option id="gnu.cpp.compiler.option.include.paths.1511724153" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
-									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="../habit2/habit2/apps/q5player"/>
+								<option id="gnu.cpp.compiler.option.include.paths.1511724153" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtNetwork.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1758584700" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1909747358" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
-								<option id="gnu.c.compiler.option.include.paths.1281054788" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtCore.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/usr/local/Trolltech/Qt-4.8.1-x86_64-no-dbus-dynamic/lib/QtSql.framework/Versions/4/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil"/>
-									<listOptionValue builtIn="false" value="/Users/dan/work/habit2/habit2/habit2/libs/habutil/habit"/>
-									<listOptionValue builtIn="false" value="/usr/local/include"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtCore.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtGui.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtMultimedia.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtPrintSupport.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtSql.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="/Users/dan/Qt5.7.1/5.7/clang_64/lib/QtWidgets.framework/Versions/5/Headers"/>
-									<listOptionValue builtIn="false" value="../habit2/habit2/apps/q5player"/>
-								</option>
+								<option id="gnu.c.compiler.option.include.paths.1281054788" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.620655973" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.2135649662" name="/" resourcePath="apps/hg2">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.macosx.base.1549800230" name="cdt.managedbuild.toolchain.gnu.macosx.base" superClass="cdt.managedbuild.toolchain.gnu.macosx.base" unusedChildren="">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.gnu.platform.macosx.base" name="Debug Platform" osList="macosx" superClass="cdt.managedbuild.target.gnu.platform.macosx.base"/>
+							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1753428808" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1160314222"/>
+							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.1975397194" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.1870467054"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.892241231" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base.57649575">
+								<option id="gnu.both.asm.option.include.paths.1491963103" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1498551612" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.344642562" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base.1728693830"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.2081196147" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1216360762">
+								<option id="gnu.cpp.compiler.option.include.paths.333153912" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtNetwork.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2075612271" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1983230868" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1909747358">
+								<option id="gnu.c.compiler.option.include.paths.1671511448" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1502878445" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
@@ -90,6 +102,9 @@
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994" moduleId="org.eclipse.cdt.core.settings" name="release">
+				<macros>
+					<stringMacro name="QT_ROOT" type="VALUE_TEXT" value="/Users/dan/Qt/5.9.1/clang_64"/>
+				</macros>
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -114,10 +129,7 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.1411083628" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
-								<option id="gnu.both.asm.option.include.paths.1155507105" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-								</option>
+								<option id="gnu.both.asm.option.include.paths.1155507105" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1110383730" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.799675237" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
@@ -125,15 +137,21 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1522647538" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/opt/qt5/include"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtNetwork.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer/QGst/Utils"/>
+									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1636335141" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1329786685" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
-								<option id="gnu.c.compiler.option.include.paths.250562498" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-								</option>
+								<option id="gnu.c.compiler.option.include.paths.250562498" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1188537221" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 						</toolChain>
@@ -144,6 +162,9 @@
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058" moduleId="org.eclipse.cdt.core.settings" name="debug">
+				<macros>
+					<stringMacro name="QT_ROOT" type="VALUE_TEXT" value="/Users/dan/Qt/5.9.1/clang_64"/>
+				</macros>
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -168,26 +189,28 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.720644737" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
-								<option id="gnu.both.asm.option.include.paths.1230740604" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-								</option>
+								<option id="gnu.both.asm.option.include.paths.1230740604" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.731193867" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1747392358" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.328219213" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
-								<option id="gnu.cpp.compiler.option.include.paths.1303757464" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.1303757464" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/opt/qt5/include"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtNetwork.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1044185024" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1706754614" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
-								<option id="gnu.c.compiler.option.include.paths.1794226785" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
-								</option>
+								<option id="gnu.c.compiler.option.include.paths.1794226785" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.319113949" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 						</toolChain>
@@ -210,27 +233,6 @@
 			<resource resourceType="PROJECT" workspacePath="/habit2"/>
 		</configuration>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.328219213;cdt.managedbuild.tool.gnu.cpp.compiler.input.1044185024">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.404769459;cdt.managedbuild.tool.gnu.cpp.compiler.input.1636335141">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.93897259;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1909747358;cdt.managedbuild.tool.gnu.c.compiler.input.620655973">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1706754614;cdt.managedbuild.tool.gnu.c.compiler.input.319113949">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1329786685;cdt.managedbuild.tool.gnu.c.compiler.input.1188537221">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.93897259;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1216360762;cdt.managedbuild.tool.gnu.cpp.compiler.input.1758584700">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 		<buildTargets>
 			<target name="vlcplayer" path="apps/vlcplayer" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
@@ -244,4 +246,25 @@
 		</buildTargets>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.328219213;cdt.managedbuild.tool.gnu.cpp.compiler.input.1044185024">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.404769459;cdt.managedbuild.tool.gnu.cpp.compiler.input.1636335141">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1329786685;cdt.managedbuild.tool.gnu.c.compiler.input.1188537221">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1706754614;cdt.managedbuild.tool.gnu.c.compiler.input.319113949">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.93897259;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1909747358;cdt.managedbuild.tool.gnu.c.compiler.input.620655973">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.93897259;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1216360762;cdt.managedbuild.tool.gnu.cpp.compiler.input.1758584700">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>
