@@ -6,9 +6,6 @@ TARGET = gplayer
 # need this for boost?
 INCLUDEPATH += "/usr/local/include"
 
-# produce nice compilation output
-#CONFIG += silent
-
 # Tell qmake to use pkg-config to find QtGStreamer.
 CONFIG += qt debug_and_release link_pkgconfig c++11
 
@@ -22,15 +19,6 @@ contains(QT_VERSION, ^5\\..*) {
   PKGCONFIG += Qt5GStreamer-1.0 Qt5GStreamerUi-1.0
   QT += widgets
 }
-
-# Recommended if you are using g++ 4.5 or later. Must be removed for other compilers.
-#QMAKE_CXXFLAGS += -std=c++0x
-
-# Recommended, to avoid possible issues with the "emit" keyword
-# You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.
-#DEFINES += QT_NO_KEYWORDS
-#CONFIG += no_keywords
-
 
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
