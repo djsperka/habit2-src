@@ -24,6 +24,7 @@ contains(QT_VERSION, ^4\\..*) {
 contains(QT_VERSION, ^5\\..*) {
   PKGCONFIG += Qt5GStreamer-1.0 Qt5GStreamerUi-1.0
   QT += widgets
+  INCLUDEPATH += "/Users/dan/install/include/gst-plugins-base-1.12.1"
 }
 
 
@@ -136,7 +137,9 @@ HEADERS +=	HLook.h \
 			habit/HHabituationCriteriaWidget.h \
 			habit/HHabituationSettingsWidget.h \
 			habit/HExperimentNameDialog.h \
-			wizards/PhaseWizardPages.h
+			wizards/PhaseWizardPages.h \
+			gst/HGMM.h \
+			gst/HGMMHelper.h
 
 		
 
@@ -245,7 +248,9 @@ SOURCES +=	HLook.cpp \
 			habit/HHabituationCriteriaWidget.cpp \
 			habit/HHabituationSettingsWidget.cpp \
 			habit/HExperimentNameDialog.cpp \
-			wizards/PhaseWizardPages.cpp
+			wizards/PhaseWizardPages.cpp \
+			gst/HGMM.cpp \
+			gst/HGMMHelper.cpp
 			
 
 lessThan(QT_MAJOR_VERSION, 5) {
