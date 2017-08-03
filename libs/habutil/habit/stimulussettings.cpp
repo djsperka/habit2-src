@@ -19,6 +19,16 @@ StimulusSettings::StimulusSettings(const StimulusSettings& s)
 , independentSoundInfo_(s.getIndependentSoundInfo())
 {};
 
+StimulusSettings::StimulusSettings(const QString& name, const QColor& color)
+:id_(-1)
+, name_(name)
+{
+	leftStimulusInfo_ = Habit::StimulusInfo(color);
+	centerStimulusInfo_ = Habit::StimulusInfo(color);
+	rightStimulusInfo_ = Habit::StimulusInfo(color);
+}
+
+
 StimulusSettings& StimulusSettings::operator=(const StimulusSettings& rhs)
 {
 	if (this != &rhs)

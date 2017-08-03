@@ -22,6 +22,7 @@ namespace Habit {
 	public:
 		StimulusSettings();
 		StimulusSettings(const StimulusSettings& s);
+		StimulusSettings(const QString& name, const QColor& color = Qt::gray);
 		~StimulusSettings();
 		StimulusSettings clone() const;
 		StimulusSettings& operator=(const StimulusSettings& rhs);

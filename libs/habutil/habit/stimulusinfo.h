@@ -23,6 +23,7 @@ namespace Habit
 		StimulusInfo();
 		StimulusInfo(const QString& name, const QString& filename, bool is_loop=false, float audio=0, bool isBackground = false, bool isColor = false, QColor color = QColor());
 		StimulusInfo(const QString& filename, bool is_loop=false, float audio=0, bool isBackground = false, bool isColor = false, QColor color = QColor());
+		StimulusInfo(const QColor& color);
 		StimulusInfo(const StimulusInfo& );
 		StimulusInfo(const StimulusInfoOld& oldInfo);
 		~StimulusInfo();
@@ -48,6 +49,9 @@ namespace Habit
 		QColor getColor() const;
 		void setColor(const QColor& color);
 		QString label() const;
+
+		bool isJPG() const;	// NOT BACKGROUND, and NOT COLOR and jpg/jpeg extension
+		bool isPNG() const; // NOT BACKGROUND, and NOT COLOR and png extension
 
 		friend bool operator==(const Habit::StimulusInfo& lhs, const Habit::StimulusInfo& rhs);
 	private:
