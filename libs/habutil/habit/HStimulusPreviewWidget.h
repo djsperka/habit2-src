@@ -16,7 +16,8 @@
 #include <QStackedWidget>
 #include "stimulisettings.h"
 #include "stimulusdisplayinfo.h"
-#include "HPreviewMediaManager.h"
+//#include "HPreviewMediaManager.h"
+#include "HGMM.h"
 
 namespace GUILib
 {
@@ -25,7 +26,8 @@ namespace GUILib
 	{
 		Q_OBJECT
 		const Habit::HStimulusSettingsList m_stimlist;
-		HPreviewMediaManager *m_pmm;
+		//HPreviewMediaManager *m_pmm;
+		HGMM *m_pmm;
 		QList<unsigned int> m_idList;
 		unsigned int m_idListCurrent;
 		QPushButton *m_pbDown;

@@ -25,7 +25,7 @@
 using namespace GUILib;
 
 
-HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEventLog& log, const Habit::RunSettings& runSettings, HMediaManager *pmm, QWidget* w)
+HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEventLog& log, const Habit::RunSettings& runSettings, HGMM *pmm, QWidget* w)
 : QDialog(w)
 , m_experimentSettings(exptSettings)
 , m_log(log)

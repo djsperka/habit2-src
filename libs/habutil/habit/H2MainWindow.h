@@ -11,11 +11,14 @@
 
 #include <QMainWindow>
 #include <QMap>
+#include <QObject>
+#include <QGst/Ui/VideoWidget>
 class QAction;
 class QMenu;
 class QPlainTextEdit;
 class QItemSelection;
 class QLabel;
+class HGMM;
 
 namespace Habit
 {
@@ -32,7 +35,7 @@ namespace Habit
 
 	 public:
 		 H2MainWindow(bool bDefaultTestRun=true, bool bShowTestingIcon=false, bool bEditTemplates = false);
-		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems);
+		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems, bool bCheckMonitors = true);
 
 	 protected:
 		 void closeEvent(QCloseEvent *event);
@@ -49,7 +52,7 @@ namespace Habit
 		 // Query user for a valid experiment name.
 //		 bool inputExperimentName(QString& newName, const QString defaultName);
 
-	 private slots:
+	 public Q_SLOTS:
 		 void newExperiment();
 		 void cloneExperiment();
 		 void deleteExperiment();
@@ -66,10 +69,10 @@ namespace Habit
 
 	 private:
 		 void createActions();
-	//     void createMenus();
 		 void createToolBars();
-	//     void createStatusBar();
 		 void run(bool bInputTesting);
+		 void adaptVideoWidgets(HGMM *pmm);
+		 QDialog *createStimulusWidget(HGMM *pmm);
 
 	//    QMap<QString, HExperimentMain> m_mapExperiments;
 		 bool m_bTestRunIsDefault;

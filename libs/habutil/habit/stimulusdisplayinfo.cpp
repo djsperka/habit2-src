@@ -11,7 +11,7 @@ Habit::StimulusDisplayInfo::StimulusDisplayInfo()
 , pdtype_(&HDisplayType::HDisplayTypeFullScreen)
 , isOriginalAspectRatioMaintained_(true)
 , backGroundColor_(0, 0, 0, 255)
-, playouttype_(&HStimulusLayoutType::HStimulusLayoutUnknown)
+, playouttype_(&HStimulusLayoutType::HStimulusLayoutSingle)
 , useISS_(false)
 {
 }

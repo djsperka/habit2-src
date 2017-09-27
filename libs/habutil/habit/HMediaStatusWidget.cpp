@@ -35,7 +35,7 @@ void HMediaStatusWidget::connections()
 	connect(m_pMediaManager, SIGNAL(cleared()), this, SLOT(onCleared()));
 }
 
-void HMediaStatusWidget::setMediaManager(const HMediaManager* pmm)
+void HMediaStatusWidget::setMediaManager(const HGMM* pmm)
 {
 	m_pMediaManager = pmm;
 	connections();

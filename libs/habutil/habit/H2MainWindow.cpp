@@ -39,6 +39,7 @@
 #include "HTestingInputWrangler.h"
 #include "HDBException.h"
 #include "HExperimentNameDialog.h"
+#include <hgst/HStimulusWidget.h>
 
 using namespace GUILib;
 using namespace Habit;
@@ -264,6 +265,8 @@ void GUILib::H2MainWindow::newExperiment()
 		else
 		{
 			settings.setName(dlg.getNewValue());
+			// Make sure to have a decent stimulus layout
+			settings.getStimulusDisplayInfo();
 		}
 		HExperimentMain *exptMain = new HExperimentMain(settings, this);
 		exptMain->exec();
@@ -360,7 +363,7 @@ void GUILib::H2MainWindow::showResultsFile(const QString filename)
 
 
 
-bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems)
+bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems, bool bCheckMonitors)
 {
 	bool b = true;
 	sProblems.clear();
@@ -370,59 +373,62 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 	int iRight = habutilGetMonitorID(HPlayerPositionType::Right);
 	const HStimulusLayoutType& layoutType = settings.getStimulusDisplayInfo().getStimulusLayoutType();
 
-	// Control monitor specified?
-	if (iControl < 0)
+	if (bCheckMonitors)
 	{
-		b = false;
-		sProblems.append("No control monitor specified. Check preferences.");
-	}
+		// Control monitor specified?
+		if (iControl < 0)
+		{
+			b = false;
+			sProblems.append("No control monitor specified. Check preferences.");
+		}
 
-	// Check stimulus layout type, then check preferences for monitor assignments.
-	if (layoutType == HStimulusLayoutType::HStimulusLayoutUnknown)
-	{
-		b = false;
-		sProblems.append("Stimulus layout not set. Check preferences.");
-	}
-	else if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		// Must have a setting for the center stim.
-		if (iCenter < 0)
+		// Check stimulus layout type, then check preferences for monitor assignments.
+		if (layoutType == HStimulusLayoutType::HStimulusLayoutUnknown)
 		{
 			b = false;
-			sProblems.append("Stimulus layout type is \"single\". Please specify \"Center Monitor\" in preferences.");
+			sProblems.append("Stimulus layout not set. Check preferences.");
 		}
-		else if (iCenter == iControl)
+		else if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 		{
-			b = false;
-			sProblems.append("Center and Control monitors are the same! Check preferences.");
+			// Must have a setting for the center stim.
+			if (iCenter < 0)
+			{
+				b = false;
+				sProblems.append("Stimulus layout type is \"single\". Please specify \"Center Monitor\" in preferences.");
+			}
+			else if (iCenter == iControl)
+			{
+				b = false;
+				sProblems.append("Center and Control monitors are the same! Check preferences.");
+			}
 		}
-	}
-	else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		if (iLeft < 0)
+		else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
 		{
-			b = false;
-			sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Left Monitor\" in preferences.");
-		}
-		else if (iLeft == iControl)
-		{
-			b = false;
-			sProblems.append("Left and Control monitors are the same! Check preferences.");
-		}
-		if (iRight < 0)
-		{
-			b = false;
-			sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Right Monitor\" in preferences.");
-		}
-		else if (iRight == iControl)
-		{
-			b = false;
-			sProblems.append("Right and Control monitors are the same! Check preferences.");
-		}
-		if (iRight == iLeft)
-		{
-			b = false;
-			sProblems.append("Left and Right monitors are the same. Check preferences.");
+			if (iLeft < 0)
+			{
+				b = false;
+				sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Left Monitor\" in preferences.");
+			}
+			else if (iLeft == iControl)
+			{
+				b = false;
+				sProblems.append("Left and Control monitors are the same! Check preferences.");
+			}
+			if (iRight < 0)
+			{
+				b = false;
+				sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Right Monitor\" in preferences.");
+			}
+			else if (iRight == iControl)
+			{
+				b = false;
+				sProblems.append("Right and Control monitors are the same! Check preferences.");
+			}
+			if (iRight == iLeft)
+			{
+				b = false;
+				sProblems.append("Left and Right monitors are the same. Check preferences.");
+			}
 		}
 	}
 
@@ -482,7 +488,10 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 		// pre-flight check. Verify that monitors have been configured, etc.
 		QStringList sProblems;
-		if (!H2MainWindow::checkExperimentSettings(settings, sProblems))
+
+		// HACK false here is 'checkMonitors' - so the check skips looking at monitor preferences.
+		// see OTHER HACK below
+		if (!H2MainWindow::checkExperimentSettings(settings, sProblems, false))
 		{
 			QMessageBox msgBox;
 			msgBox.setText("This experiment cannot be run.");
@@ -499,11 +508,37 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 		if (i == QDialog::Accepted)
 		{
 			HEventLog log;
-			HMediaManager *pmm = createMediaManager(settings);
+			HGMM *pmm = createMediaManager(settings);
+			QDialog *pStimulusDisplayDialog  = NULL;
 
+			// The media manager has created video widgets as needed, specified in the experiment settings "stimulus layout type".
+			// We should now adapt those widgets to their respective screens.
+
+			// OTHER HACK - force all stim display to widgets.
+			// this should be where we check preferences?
+			// Run settings should ultimately tell us what to use for display.
+
+			bool bWidgetStimulusDisplay = true;
+			if (bWidgetStimulusDisplay)
+			{
+				pStimulusDisplayDialog = createStimulusWidget(pmm);
+			}
+			else
+			{
+				adaptVideoWidgets(pmm);
+			}
 			HControlPanel habitControlPanel(settings, log, dlg.getRunSettings(), pmm, this);
 			HLookDetector* pld = createLookDetector(settings, log, &habitControlPanel);
 			HStateMachine *psm = createExperiment(this, dlg.getRunSettings(), settings, pld, pmm, log, bTestInput);
+
+			// Check that stimuli are ready.
+			if (!pmm->getReady(1000))
+			{
+				QMessageBox::critical(this, "Cannot display all stimuli.", "There was a problem loading some stimuli.");
+				return;
+			}
+
+			// If there is a testing input file (which simulates mouse clicks for look/look away), load it now.
 			HTestingInputWrangler *pWrangler;
 			if (bTestInput)
 			{
@@ -525,11 +560,46 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 					return;
 				}
 			}
-			habitControlPanel.setStateMachine(psm);
 
-			// set dialog title
+			// set state machine and dialog title
+			habitControlPanel.setStateMachine(psm);
 			habitControlPanel.setWindowTitle(dlg.getRunLabel());
-			if (habitControlPanel.exec() != QDialog::Accepted)
+
+			// if dialog-type stimulus display, show the thing now
+			if (pStimulusDisplayDialog)
+			{
+				qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
+				pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
+				pStimulusDisplayDialog->show();
+			}
+
+			// This is where the experiment is actually run.
+			int cpStatus = habitControlPanel.exec();
+
+			// delete the video widgets.
+			// TODO: This should be guarded against cases where the widgets are owned by something else -
+			// like when they are contained in another widget -
+			// in which case they will be deleted when that thing is deleted.
+
+#if 0
+			if (!pStimulusDisplayDialog)
+			{
+				QGst::Ui::VideoWidget *p;
+				if ((p = pmm->getVideoWidget(HPlayerPositionType::Center)))
+					delete p;
+				if ((p = pmm->getVideoWidget(HPlayerPositionType::Left)))
+					delete p;
+				if ((p = pmm->getVideoWidget(HPlayerPositionType::Right)))
+					delete p;
+			}
+			else
+			{
+				delete pStimulusDisplayDialog;
+			}
+#endif
+			if (pStimulusDisplayDialog)
+				delete pStimulusDisplayDialog;
+			if (cpStatus != QDialog::Accepted)
 				return;
 
 			HResults* results = new HResults(settings, dlg.getRunSettings(),
@@ -560,6 +630,67 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 }
 
 
+QDialog* GUILib::H2MainWindow::createStimulusWidget(HGMM *pmm)
+{
+	QDialog *pDialog = new QDialog;
+	QHBoxLayout *hbox = new QHBoxLayout;
+	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	{
+		HStimulusWidget *video = pmm->getHStimulusWidget(HPlayerPositionType::Center);
+		connect(pmm, SIGNAL(stimulusChanged()), video->getHVideoWidget(), SLOT(stimulusChanged()));
+		hbox->addWidget(video);
+		pDialog->setLayout(hbox);
+		pDialog->setMinimumSize(320, 240);
+	}
+	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		HStimulusWidget *videoLeft = pmm->getHStimulusWidget(HPlayerPositionType::Left);
+		HStimulusWidget *videoRight = pmm->getHStimulusWidget(HPlayerPositionType::Right);
+		connect(pmm, SIGNAL(stimulusChanged()), videoLeft->getHVideoWidget(), SLOT(stimulusChanged()));
+		connect(pmm, SIGNAL(stimulusChanged()), videoRight->getHVideoWidget(), SLOT(stimulusChanged()));
+		hbox->addWidget(videoLeft);
+		hbox->addWidget(videoRight);
+		pDialog->setLayout(hbox);
+		//pDialog->setMinimumSize(640, 240);	// double wide - can do better than this
+	}
+	return pDialog;
+}
+
+
+void GUILib::H2MainWindow::adaptVideoWidgets(HGMM *pmm)
+{
+	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	{
+		HStimulusWidget *player = pmm->getHStimulusWidget(HPlayerPositionType::Center);
+		QRect rect = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
+		player->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+		player->move(rect.x(), rect.y());
+		player->setGeometry(rect);
+		player->showFullScreen();
+		qDebug() << "Player index " << habutilGetMonitorID(HPlayerPositionType::Center) << " moved to rect " << rect;
+	}
+	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		HStimulusWidget *playerLeft = pmm->getHStimulusWidget(HPlayerPositionType::Left);
+		QRect rectLeft = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Left));
+		playerLeft->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+		playerLeft->move(rectLeft.x(), rectLeft.y());
+		playerLeft->setGeometry(rectLeft);
+		playerLeft->showFullScreen();
+		qDebug() << "Player index " << habutilGetMonitorID(HPlayerPositionType::Left) << " moved to rect " << rectLeft;
+
+		HStimulusWidget *playerRight = pmm->getHStimulusWidget(HPlayerPositionType::Right);
+		QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
+		playerRight->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+		playerRight->move(rectRight.x(), rectRight.y());
+		playerRight->setGeometry(rectRight);
+		playerRight->showFullScreen();
+		qDebug() << "Player index " << habutilGetMonitorID(HPlayerPositionType::Right) << " moved to rect " << rectRight;
+
+	}
+	return;
+
+}
 
 
 void GUILib::H2MainWindow::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
