@@ -8,6 +8,8 @@
 #ifndef APPS_HG2_HGMM_H_
 #define APPS_HG2_HGMM_H_
 
+#include <hgst/HStimulusWidget.h>
+
 #include <QObject>
 #include <QDir>
 #include <QMultiMap>
@@ -21,6 +23,14 @@
 #include "stimulussettings.h"
 #include "stimulisettings.h"
 
+
+// Media manager for Habit.
+// This media manager is entirely new for Habit 2.2+. It uses GStreamer, a media library available
+// on all platforms (mac, windows, linux).
+// The HGMM object is constructed with video widgets (HVideoWidget to be precise). The widgets are needed
+// by this class (and its associated class, HGMMHelper) to direct media streams to the screen(s) and
+// audio outputs.
+
 class HGMM: public QObject
 {
 	Q_OBJECT
@@ -28,14 +38,16 @@ class HGMM: public QObject
 	const HStimulusLayoutType& m_stimulusLayoutType;
 	QDir m_root;
 	bool m_bUseISS;
-	QGst::Ui::VideoWidget *m_pCenter, *m_pLeft, *m_pRight;
+	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
 	QTimer *m_readyTimeout, *m_readyCheck;
 	HGMMHelper *m_pHelperCurrent;
 
-	// A map containing lists of stimulus keys (keys into m_mapStim). Here the key
-	// is HStimContext.
-	// getContextStimList fetches a list of keys for the stimuli added for the Test phase.
-	//QMap<HStimContext, QList<unsigned int> > m_mapContext;
+	// A map containing lists of stimulus keys (which can be played with stim(key), and whose
+	// StimulusSettings can be fetched with getStimulusSettings(key)), saved according to their
+	// context. The context is a logical grouping of stimuli. Each phase has its own context, as does
+	// the "attention getters", which has a fixed context.
+	//
+	// getContextStimList fetches a list of keys for the stimuli added for a given context.
 	QMultiMap<int, unsigned int> m_mapContext;
 	unsigned int m_backgroundKey;
 	unsigned int m_agKey;
@@ -60,8 +72,8 @@ protected:
 	QMap<unsigned int, HGMMHelper *> m_mapData;
 
 public:
-	HGMM(QGst::Ui::VideoWidget *center, const QDir& dir = QDir("/"), bool useISS = true);
-	HGMM(QGst::Ui::VideoWidget *left, QGst::Ui::VideoWidget *right, const QDir& dir = QDir("/"), bool useISS = true);
+	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray);
+	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray);
 	virtual ~HGMM();
 
 
@@ -72,16 +84,21 @@ public:
 	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context);
 	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context);
 
-
+	//QGst::Ui::VideoWidget *getVideoWidget(const HPlayerPositionType& type);
+	HStimulusWidget *getHStimulusWidget(const HPlayerPositionType& type);
+	const HStimulusLayoutType& getStimulusLayoutType() const { return m_stimulusLayoutType; };
 	const Habit::StimulusSettings& getStimulusSettings(int key) const;
 	QList<unsigned int> getContextStimList(int context);
 
-	// set all pipelines to paused state, then monior and wait for all pads to be assigned.
+	// check if all pipelines are prerolled (in paused state and async done); this means any can be started and it will start up asap.
+	bool isReady() const;
+
+	// set all pipelines to paused state, then monitor and wait for all pads to be assigned.
 	// emit mmReady() if all are ready; emit mmFail() if not ready before timeout ms.
-	void getReady(int ms);
+	bool getReady(int ms);
 
 	//const QMap<unsigned int, const Habit::StimulusSettings *>& pmap() { return m_mapPStimulusSettings; };
-
+	const QMap<unsigned int, HGMMHelper *>& dataMap() { return m_mapData; };
 public Q_SLOTS:
 
 	void stim(unsigned int);
@@ -99,6 +116,7 @@ Q_SIGNALS:
 	void screen(int, const QString&);
 	void mmReady();
 	void mmFail();
+	void stimulusChanged();
 
 };
 #endif /* APPS_HG2_HGMM_H_ */
