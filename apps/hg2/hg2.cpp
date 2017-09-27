@@ -22,6 +22,7 @@ int main(int argc, char **argv)
 	QGst::init(&argc, &argv);
 	int screen = -1;
 
+
 	app.setApplicationName("hgstplayer");
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
@@ -36,11 +37,8 @@ int main(int argc, char **argv)
 	if (argc == 2)
 		screen = QString(argv[1]).toInt();
 	HG2Dialog dialog(QDir("/Users/dan/Desktop/habit22/stim/examples"), screen);
-
+	dialog.show();
 	dialog.exec();
-//	QMessageBox msgBox;
-//	msgBox.setText("The document has been modified.");
-//	msgBox.exec();
 	return 0;
 }
 

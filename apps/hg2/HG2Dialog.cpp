@@ -12,6 +12,7 @@
 #include <QtDebug>
 
 #include "stimulisettings.h"
+#include "stimulusdisplayinfo.h"
 
 #define MAX_INFO 5
 Habit::StimulusInfo f_vinfo[MAX_INFO];
@@ -30,13 +31,26 @@ HG2Dialog::HG2Dialog(const QDir& dirStimRoot, int screen, QWidget *parent)
 	buttonBox->addButton(pb, QDialogButtonBox::ActionRole);
 	connect(pb, SIGNAL(clicked()), this, SLOT(playClicked()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(accept()));
-	if (screen == 1)
+
+	Habit::StimulusDisplayInfo sdi;
+	sdi.setBackGroundColor(QColor(Qt::blue));
+	sdi.setDisplayType(HDisplayType::HDisplayTypeOriginalSize);
+	sdi.setMaintainOriginalAspectRatio(true);
+	sdi.setPresentationStyle(HPresentationStyle::HPresentationStyleMonitorDefined);
+	sdi.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutLeftRight); // not used?
+	sdi.setUseISS(true);
+
+	if (screen < 1)
 	{
-		vbox->addLayout(initSingleScreen(dirStimRoot));
+		vbox->addWidget(new QLabel("HELLO"));
+	}
+	else if (screen == 1)
+	{
+		vbox->addLayout(initSingleScreen(sdi, dirStimRoot));
 	}
 	else
 	{
-		vbox->addLayout(initLRScreen(dirStimRoot));
+		vbox->addLayout(initLRScreen(sdi, dirStimRoot));
 	}
 	m_pSpinIndex = new QSpinBox(this);
 	m_pSpinIndex->setMinimum(0);
@@ -69,12 +83,11 @@ void HG2Dialog::agStarted()
 	qDebug() << "HG2Dialog::agStarted";
 }
 
-QHBoxLayout *HG2Dialog::initSingleScreen(const QDir& dirStimRoot)
+QHBoxLayout *HG2Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot)
 {
 	QHBoxLayout *hbox = new QHBoxLayout;
-	m_pVideoWidgetCenter = new QGst::Ui::VideoWidget(this);
+	m_pVideoWidgetCenter = new HStimulusWidget(sdi, 320, 240);
 	m_pVideoWidgetCenter->setMinimumSize(320, 240);
-
 	hbox->addWidget(m_pVideoWidgetCenter);
 
 	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot);
@@ -82,6 +95,7 @@ QHBoxLayout *HG2Dialog::initSingleScreen(const QDir& dirStimRoot)
 	connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
+	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetCenter->getHVideoWidget(), SLOT(stimulusChanged()));
 
 	// create background
 	m_pmm->addBackground(QColor(Qt::green));
@@ -120,12 +134,12 @@ QHBoxLayout *HG2Dialog::initSingleScreen(const QDir& dirStimRoot)
 }
 
 
-QHBoxLayout *HG2Dialog::initLRScreen(const QDir& dirStimRoot)
+QHBoxLayout *HG2Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot)
 {
 	QHBoxLayout *hbox = new QHBoxLayout;
-	m_pVideoWidgetLeft = new QGst::Ui::VideoWidget(this);
+	m_pVideoWidgetLeft = new HStimulusWidget(sdi, 320, 240);
 	m_pVideoWidgetLeft->setMinimumSize(320, 240);
-	m_pVideoWidgetRight = new QGst::Ui::VideoWidget(this);
+	m_pVideoWidgetRight = new HStimulusWidget(sdi, 320, 240);
 	m_pVideoWidgetRight->setMinimumSize(320, 240);
 	hbox->addWidget(m_pVideoWidgetLeft);
 	hbox->addWidget(m_pVideoWidgetRight);
@@ -135,6 +149,8 @@ QHBoxLayout *HG2Dialog::initLRScreen(const QDir& dirStimRoot)
 	connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
+	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetLeft->getHVideoWidget(), SLOT(stimulusChanged()));
+	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetRight->getHVideoWidget(), SLOT(stimulusChanged()));
 
 	// create background
 	m_pmm->addBackground(QColor(Qt::green));

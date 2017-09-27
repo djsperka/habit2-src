@@ -40,14 +40,16 @@ CONFIG(debug, debug|release) {
 	DESTDIR = debug
 	LIBS += -L../../libs/habutil/debug -lhabutil
 	PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
+	QMAKE_POST_LINK = ./uip.sh debug
 } else {
 	DESTDIR = release
 	LIBS += -L../../libs/habutil/release -lhabutil
 	PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
+	QMAKE_POST_LINK = ./uip.sh release
 }
 
 INCLUDEPATH += ../../libs/habutil 
-INCLUDEPATH += ../../libs/habutil/habit
+INCLUDEPATH += ../../libs/habutil/habit ../../libs/habutil/hgst
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
 
 

@@ -8,6 +8,8 @@
 #ifndef APPS_Q5PLAYER_Q5PLAYERTESTDIALOG_H_
 #define APPS_Q5PLAYER_Q5PLAYERTESTDIALOG_H_
 
+#include <hgst/HStimulusWidget.h>
+
 #include <QtWidgets>
 #include <QDir>
 #include <QGst/Ui/VideoWidget>
@@ -31,13 +33,13 @@ private:
 	//HGstPlayer *m_paudioHGstPlayer;
 	//HGstPlayer *m_pvideoHGstPlayer;
 	HGMM *m_pmm;
-	QGst::Ui::VideoWidget *m_pVideoWidgetLeft;
-	QGst::Ui::VideoWidget *m_pVideoWidgetRight;
-	QGst::Ui::VideoWidget *m_pVideoWidgetCenter;
+	HStimulusWidget *m_pVideoWidgetLeft;
+	HStimulusWidget *m_pVideoWidgetRight;
+	HStimulusWidget *m_pVideoWidgetCenter;
 	QSpinBox *m_pSpinIndex;
 
-	QHBoxLayout *initSingleScreen(const QDir& d);
-	QHBoxLayout *initLRScreen(const QDir& d);
+	QHBoxLayout *initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d);
+	QHBoxLayout *initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d);
 
 	//HGstPlayer *createMediaPlayerAndPopulate(const QDir& dirStimRoot, bool isAudio);
 //	HGstMediaManager *createMM(QGst::Ui::VideoWidget *v);
