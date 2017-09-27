@@ -5,7 +5,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 }
 
 QMAKE_CXXFLAGS += -fvisibility=hidden
-INCLUDEPATH += . ./habit ./wizards
+INCLUDEPATH += . ./habit ./wizards ./hgst
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
 } else {
@@ -138,8 +138,10 @@ HEADERS +=	HLook.h \
 			habit/HHabituationSettingsWidget.h \
 			habit/HExperimentNameDialog.h \
 			wizards/PhaseWizardPages.h \
-			gst/HGMM.h \
-			gst/HGMMHelper.h
+			hgst/HGMM.h \
+			hgst/HGMMHelper.h \
+			hgst/HStimulusWidget.h \
+			hgst/HVideoWidget.h
 
 		
 
@@ -249,8 +251,10 @@ SOURCES +=	HLook.cpp \
 			habit/HHabituationSettingsWidget.cpp \
 			habit/HExperimentNameDialog.cpp \
 			wizards/PhaseWizardPages.cpp \
-			gst/HGMM.cpp \
-			gst/HGMMHelper.cpp
+			hgst/HGMM.cpp \
+			hgst/HGMMHelper.cpp \
+			hgst/HStimulusWidget.cpp \
+			hgst/HVideoWidget.cpp
 			
 
 lessThan(QT_MAJOR_VERSION, 5) {

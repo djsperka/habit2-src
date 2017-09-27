@@ -13,7 +13,7 @@
 #include "HExperiment.h"
 #include "HEvents.h"
 #include "HElapsedTimer.h"
-#include "HMediaManager.h"
+#include "HGMM.h"
 #include <QFinalState>
 #include <QTimerEvent>
 #include <QtDebug>

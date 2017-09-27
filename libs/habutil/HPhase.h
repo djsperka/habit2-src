@@ -17,7 +17,7 @@
 #include "HPhaseCriteria.h"
 #include "HPhaseSettings.h"
 #include "HLookSettings.h"
-#include "stimulusSettings.h"
+#include "stimulussettings.h"
 #include "attentiongettersettings.h"
 #include <QList>
 #include <QPair>

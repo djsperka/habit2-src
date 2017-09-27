@@ -7,7 +7,7 @@
  *
  */
 
-#include "HMediaManager.h"
+#include "HGMM.h"
 #include "HPreviewMediaManager.h"
 #include "experimentsettings.h"
 #include "stimulussettings.h"
@@ -23,13 +23,7 @@
 // Position 0 in the players is reserved for the attention getter (even if there is no attention getter
 // used this position is filled with a background stimulus). 
 
-HMediaManager* createMediaManager(const Habit::ExperimentSettings& es);
-HPreviewMediaManager* createPreviewMediaManager(const Habit::StimulusDisplayInfo& sdi);
+HGMM* createMediaManager(const Habit::ExperimentSettings& es, int screenWidth=320, int screenHeight = 240);
+HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth = 320, int screenHeight = 240);
 
-#if QT_VERSION >= 0x050000
-// In Qt5-vlc version, the widget nature is removed completely from the media manager.
-// These utility functions create viewing widgets
 
-QWidget *createPlayerWidget(HMediaManager *pmm, const HPlayerPositionType& ppt);
-
-#endif

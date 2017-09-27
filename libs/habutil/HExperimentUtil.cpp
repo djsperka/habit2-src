@@ -16,7 +16,7 @@
 
 using namespace Habit;
 
-HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HMediaManager* pmm, HEventLog& log, bool bTestingInput)
+HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HGMM* pmm, HEventLog& log, bool bTestingInput)
 {
 	Q_UNUSED(w);
 	HStateMachine *psm;
@@ -62,7 +62,7 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 			// These are in the order that they were added to the stim list, which is the same as the
 			// order they are pulled from the DB.
 			// Any randomization or other ordering will come later.
-			pmm->getContextStimList(ps.getSeqno(), stimidListInitial);
+			stimidListInitial = pmm->getContextStimList(ps.getSeqno());
 
 			// Now get the order list from HRunSettings.
 			// This order list should consist of numbers from 0...n-1, where
@@ -110,12 +110,19 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	}
 
 	// Store the stimulus settings events in the log
+	QMapIterator<unsigned int, HGMMHelper *> it(pmm->dataMap());
+	while (it.hasNext())
+	{
+	    it.next();
+	    log.append(new HStimulusSettingsEvent(it.value()->stimulusSettings(), it.key()));
+	}
+#if 0
 	QMapIterator<unsigned int, const Habit::StimulusSettings *> it(pmm->pmap());
 	while (it.hasNext())
 	{
 		it.next();
 		log.append(new HStimulusSettingsEvent(*it.value(), it.key()));
 	}
-
+#endif
 	return psm;
 }

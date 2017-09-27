@@ -10,7 +10,7 @@
 #include "HLookDetector.h"
 #include <QObject>
 
-HExperiment::HExperiment(HEventLog& log, HMediaManager& mm, HLookDetector& ld, QState* parent)
+HExperiment::HExperiment(HEventLog& log, HGMM& mm, HLookDetector& ld, QState* parent)
 : HLogState(log, "HExperiment", parent)
 , m_mm(mm)
 , m_ld(ld)

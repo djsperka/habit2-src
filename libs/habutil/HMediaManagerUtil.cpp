@@ -7,15 +7,12 @@
  *
  */
 
+#include <hgst/HStimulusWidget.h>
 #include "HMediaManagerUtil.h"
-
 #include <QtGlobal>
 
 #if QT_VERSION >= 0x050000
 #include <QFrame>
-#include "HGstPlayer.h"
-//#include "HVLCMediaPlayer.h"
-//#include "HVLCVideoWidget.h"
 #else
 #include "HVIPlayer.h"
 #include "HAudioPlayer.h"
@@ -27,63 +24,47 @@
 
 
 // Always first create a media manager.
-// In 2.2 HPlayer is a QObject, not a QWidget. That makes the notion of the
-// HPlayer similar to the usage of the term in multimedia packages like vlc.
-// After creating the manager you can populate it - the media are created and
-// saved for use later.
-// In 2.2 there are new utility functions here
-// createPlayerWidget() et al - these return a QWidget. It must be shown
-// - call show(), even if you add it to a layout, etc.
-//
 
-QWidget *createMediaPlayerWidget(HMediaManager *pmm)
+
+
+
+HGMM* createMediaManager(const Habit::ExperimentSettings& es, int screenWidth, int screenHeight)
 {
-	// Create a single frame to hold all viewers (even if there's just one)
-
+	return createMediaManager(es.getStimulusDisplayInfo(), screenWidth, screenHeight);
 }
 
-HMediaManager* createMediaManager(const Habit::ExperimentSettings& es)
+HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth, int screenHeight)
 {
-	HMediaManager* pmm = new HMediaManager();
-	Habit::StimulusDisplayInfo sdi = es.getStimulusDisplayInfo();
+	HGMM* pmm;
 	QDir rootDir;
 	habutilGetStimulusRootDir(rootDir);
 
-#if 0
-	if (sdi.getUseISS())
-	{
-		HVLCPlayer5 *sound = new HVLCPlayer5(habutilGetMonitorID(HPlayerPositionType::Control), NULL, rootDir);
-		pmm->addPlayer(HPlayerPositionType::Sound, sound);
-	}
+	//	    HVideoWidget(QGst::Ui::VideoWidget *widget, float screenWidth, float screenHeight, const HDisplayType& dType = HDisplayType::HDisplayTypeOriginalSize, bool bMaintainAspectRatio = true, QWidget *parent = 0);
+
 	if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		HVLCPlayer5 *single = new HVLCPlayer5(habutilGetMonitorID(HPlayerPositionType::Center), NULL, rootDir);
-		single->setPreferBufferedStimulus(false);
-		pmm->addPlayer(HPlayerPositionType::Center, single);
+		HStimulusWidget *pSingle = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		pmm = new HGMM(pSingle, rootDir, sdi.getUseISS(), sdi.getBackGroundColor());
 	}
 	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		HVLCPlayer5 *left = new HVLCPlayer5(habutilGetMonitorID(HPlayerPositionType::Left), NULL, rootDir);
-		HVLCPlayer5 *right = new HVLCPlayer5(habutilGetMonitorID(HPlayerPositionType::Right), NULL, rootDir);
-		pmm->addPlayer(HPlayerPositionType::Left, left);
-		pmm->addPlayer(HPlayerPositionType::Right, right);
+		HStimulusWidget *pLeft = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		HStimulusWidget *pRight = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		pmm = new HGMM(pLeft, pRight, rootDir, sdi.getUseISS(), sdi.getBackGroundColor());
 	}
-#endif
-	return pmm;
-}
+	else
+	{
+		qFatal(QString("Unknown stimulus layout type in createMediaManager: ").append(sdi.getStimulusLayoutType().name()).toStdString().c_str());
+	}
 
-
-HPreviewMediaManager* createPreviewMediaManager(const Habit::StimulusDisplayInfo& sdi)
-{
-	HPreviewMediaManager* pmm = new HPreviewMediaManager(sdi.getStimulusLayoutType());
 	return pmm;
 }
 
 #else
 
-HMediaManager* createMediaManager(const Habit::ExperimentSettings& es)
+HGMM* createMediaManager(const Habit::ExperimentSettings& es)
 {
-	HMediaManager* pmm = new HMediaManager();
+	HGMM* pmm = new HGMM();
 
 	// Stimulus Display info
 	Habit::StimulusDisplayInfo sdi = es.getStimulusDisplayInfo();

@@ -18,7 +18,7 @@ public:
 	~HApplication() {};
 protected:
 	bool event(QEvent* event);
-signals:
+Q_SIGNALS:
 	void showResultsFile(QString filename);
 };
 

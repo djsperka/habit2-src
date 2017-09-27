@@ -10,13 +10,13 @@
 
 
 #include "HStateMachine.h"
-#include "HMediaManager.h"
+#include "HGMM.h"
 #include "HLookDetector.h"
 #include "HEventLog.h"
 #include "runsettings.h"
 #include "experimentsettings.h"
 
-HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HMediaManager* pmm, HEventLog& log, bool bInputTesting=false);
+HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HGMM* pmm, HEventLog& log, bool bInputTesting=false);
 
 
 

@@ -10,7 +10,7 @@
 #include "HPhase.h"
 #include "HTrial.h"
 #include "HElapsedTimer.h"
-#include "HMediaManager.h"
+#include "HGMM.h"
 #include <QFinalState>
 #include <QtDebug>
 
