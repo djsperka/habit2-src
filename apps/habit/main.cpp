@@ -13,14 +13,17 @@
 #include <QFile>
 #include <QtDebug>
 #include <QMenuBar>
+#include <QProcessEnvironment>
+#include <QDesktopWidget>
+#include <QGst/Init>
 #include <iostream>
+
 
 using namespace std;
 QFile *f_pFileLog = NULL;
 QTextStream f_streamFileLog;
 bool f_bScreenLog = false;
 bool f_bFileLog = false;
-
 
 #if QT_VERSION < 0x050000
 void fileLoggingHandler(QtMsgType type, const char *msg)
@@ -182,6 +185,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// Initialize gstreamer
+	QGst::init(&argc, &argv);
+
+	// create application
     HApplication h(argc, argv);
 	h.setApplicationVersion(HABIT_VERSION);
 	h.setApplicationName("habit2");
@@ -223,6 +230,16 @@ int main(int argc, char *argv[])
 #endif
 	}
 	qDebug() << "Starting Habit, version " << HABIT_VERSION;
+
+	// dump process environment
+	QStringList envVars = QProcessEnvironment::systemEnvironment().toStringList();
+	qDebug() << "Environment: " << envVars;
+	qInfo() << "Number of screens: " << QApplication::desktop()->screenCount();
+	for (int i=0; i<QApplication::desktop()->screenCount(); i++)
+	{
+		qInfo() << "screen " << i << ": screenGeometry: " << QApplication::desktop()->screenGeometry(i);
+		qInfo() << "screen " << i << ": availableGeometry: " << QApplication::desktop()->availableGeometry(i);
+	}
 
 	// Now show dialog and start event loop.
     w.show();
