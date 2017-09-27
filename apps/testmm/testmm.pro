@@ -9,7 +9,9 @@ lessThan(QT_MAJOR_VERSION, 5) {
 else {
 	QT += widgets multimedia printsupport
 }
-CONFIG += qt debug_and_release
+CONFIG += qt debug_and_release link_pkgconfig c++11
+
+PKGCONFIG += Qt5GStreamer-1.0 Qt5GStreamerUi-1.0 gstreamer-1.0
 
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
@@ -21,9 +23,9 @@ CONFIG(debug, debug|release) {
 	PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
 }
 
-
+INCLUDEPATH += 	"/usr/local/include" 
 INCLUDEPATH += ../../libs/habutil
-INCLUDEPATH += ../../libs/habutil/habit
+INCLUDEPATH += ../../libs/habutil/habit ../../libs/habutil/hgst
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
 SOURCES			=	main.cpp TestMMDialog.cpp TestMMController.cpp
 HEADERS			=	TestMMDialog.h TestMMController.h

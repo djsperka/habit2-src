@@ -26,7 +26,7 @@ class TestMMController: public QDialog
 	QListView *m_list;
 
 public:
-	TestMMController(const QStringList& names, QWidget *parent=0);
+	TestMMController(const QStringList& names, QWidget *screens=0, QWidget *parent=0);
 	~TestMMController() {};
 
 signals:

@@ -11,7 +11,7 @@
 #include "experimentsettings.h"
 #include "HPhaseSettings.h"
 #include "H2MainWindow.h"
-#include "HMediaManager.h"
+#include "HGMM.h"
 #include "HDBException.h"
 #include "HMediaManagerUtil.h"
 #include <QVBoxLayout>
@@ -40,7 +40,8 @@ void TestMMDialog::components()
 	GUILib::HExperimentListWidget *list = new GUILib::HExperimentListWidget(this, true, true);
 	vbox->addWidget(list);
 	connect(list, SIGNAL(experimentActivated(const QString&)), this, SLOT(experimentActivated(const QString&)));
-
+	m_pFullScreen = new QCheckBox("Use full screen (using current preferences)?");
+	vbox->addWidget(m_pFullScreen);
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     vbox->addWidget(buttonBox);
@@ -67,7 +68,7 @@ void TestMMDialog::experimentActivated(QString expt)
 
 	// pre-flight check. Verify that monitors have been configured, etc.
 	QStringList sProblems;
-	if (!GUILib::H2MainWindow::checkExperimentSettings(settings, sProblems))
+	if (!GUILib::H2MainWindow::checkExperimentSettings(settings, sProblems, m_pFullScreen->isChecked()))
 	{
 		QMessageBox msgBox;
 		msgBox.setText("This experiment cannot be run.");
@@ -85,53 +86,37 @@ void TestMMDialog::experimentActivated(QString expt)
 	m_pmm = createMediaManager(settings);
 
 	// connect to media manager signals
-	connect(this, SIGNAL(stim(int)), m_pmm, SLOT(stim(int)));
+	connect(this, SIGNAL(stim(unsigned int)), m_pmm, SLOT(stim(unsigned int)));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	connect(m_pmm, SIGNAL(screen(int, QString)), this, SLOT(screen(int, QString)));
-
-	if (m_pmm->pmap().contains(HMediaManager::backgroundKey))
-	{
-		m_stimIndices.append(HMediaManager::backgroundKey);
-		m_stimNames.append("BACKGROUND");
-	}
-
-	// populate (from createExperiment())
-	// Need to know if AG is used. If it is, add attention getter settings to media manager
-	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
-	{
-		m_pmm->addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus());
-
-		m_stimIndices.append(HMediaManager::agKey);
-		m_stimNames.append(settings.getAttentionGetterSettings().getAttentionGetterStimulus().getName());
-	}
-
 
 	QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
 	while (phaseIterator.hasNext())
 	{
 		const Habit::HPhaseSettings& ps = phaseIterator.next();
-//		QList< QPair<int, QString> > list;
 		QList<unsigned int> stimidListInitial;
-//		QList< QPair<int, QString> > stimidListOrdered;
 
 		if (ps.getIsEnabled())
 		{
 			m_pmm->addStimuli(ps.stimuli(), ps.getSeqno());
 
-			QList<unsigned int> stimidListInitial;
-			m_pmm->getContextStimList(ps.getSeqno(), stimidListInitial);
+			QList<unsigned int> stimidListInitial = m_pmm->getContextStimList(ps.getSeqno());
 
+			qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno();
 			QListIterator<unsigned int> it(stimidListInitial);
 			unsigned int uistim;
 			while (it.hasNext())
 			{
 				uistim = it.next();
-//				qDebug() << "phase " << ps.getName() << " stim " << uistim << " name " << m_pmm->pmap()[uistim]->getName();
+				qDebug() << "phase " << ps.getName() << " stim " << uistim << " name " << m_pmm->getStimulusSettings(uistim).getName();
 				m_stimIndices.append(uistim);
-				m_stimNames.append(QString("%1:%2").arg(ps.getName()).arg(m_pmm->pmap()[uistim]->getName()));
+				m_stimNames.append(QString("%1:%2").arg(ps.getName()).arg(m_pmm->getStimulusSettings(uistim).getName()));
 			}
+			qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno() << " DONE";
 		}
 	}
+	m_pmm->getReady(5000);
+
 
 	QListIterator<unsigned int> itIndices(m_stimIndices);
 	QListIterator<QString> itNames(m_stimNames);
@@ -142,10 +127,33 @@ void TestMMDialog::experimentActivated(QString expt)
 	}
 
 	// Create widgets....
+	QWidget *w = new QWidget();
+	QHBoxLayout *hbox = new QHBoxLayout;
+	if (m_pFullScreen->isChecked())
+	{
+		// TODO: Create full screen widgets
+		qFatal("Not ready for full screen");
+	}
+	else
+	{
+		// create a widget with videowidgets inside it
+		if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+		{
+			hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Center));
+		}
+		else if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+		{
+			hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Left));
+			hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Right));
+		}
+		else
+			qFatal("TestMMDialog: cannot handle stimulus display type");
+		w->setLayout(hbox);
 
+	}
 
 	// Now create a controller and exec() it
-	TestMMController controller(m_stimNames);
+	TestMMController controller(m_stimNames, w);
 	connect(&controller, SIGNAL(playItem(unsigned int)), this, SLOT(playItem(unsigned int)));
 	connect(&controller, SIGNAL(stopItem()), this, SLOT(stopItem()));
 	controller.exec();
@@ -161,11 +169,13 @@ void TestMMDialog::experimentActivated(QString expt)
 
 void TestMMDialog::playItem(unsigned int uistim)
 {
+	qDebug() << "playItem(" << uistim << ") : " << m_stimIndices[uistim];
 	emit stim(m_stimIndices[uistim]);
 }
 
 void TestMMDialog::stopItem()
 {
+	qDebug() << "stopItem()";
 	emit stim(m_stimIndices[0]);
 }
 
@@ -173,7 +183,7 @@ void TestMMDialog::stopItem()
 void TestMMDialog::stimStarted(int index)
 {
 	qDebug() << "started index " << index;
-	qDebug() << "pmap " << m_pmm->pmap()[index]->getName();
+	//qDebug() << "pmap " << m_pmm->pmap()[index]->getName();
 }
 
 void TestMMDialog::screen(int screenid, QString filename)

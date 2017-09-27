@@ -14,7 +14,7 @@
 #include <QModelIndex>
 #include <QList>
 
-TestMMController::TestMMController(const QStringList& names, QWidget *parent)
+TestMMController::TestMMController(const QStringList& names, QWidget *screens, QWidget *parent)
 : QDialog(parent)
 {
 	QVBoxLayout *vbox = new QVBoxLayout;
@@ -36,6 +36,7 @@ TestMMController::TestMMController(const QStringList& names, QWidget *parent)
 
     vbox->addWidget(m_list);
     vbox->addWidget(buttonBox);
+    if (screens) vbox->addWidget(screens);
     setLayout(vbox);
 }
 
@@ -43,6 +44,7 @@ void TestMMController::playClicked()
 {
 	QList<QModelIndex> selected = m_list->selectionModel()->selectedIndexes();
 	QListIterator<QModelIndex> it(selected);
+	qDebug() << "playClicked";
 	if (it.hasNext())
 	{
 		// expected to have just 1

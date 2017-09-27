@@ -11,25 +11,26 @@
 #include <QDialog>
 #include <QWidget>
 #include <QString>
+#include <QCheckBox>
 
-class HMediaManager;
+class HGMM;
 
 class TestMMDialog: public QDialog
 {
 	Q_OBJECT
 
 private:
-	HMediaManager *m_pmm;
+	HGMM *m_pmm;
 	QStringList m_stimNames;
 	QList<unsigned int> m_stimIndices;
-
+	QCheckBox *m_pFullScreen;
 public:
 	TestMMDialog(QWidget *parent=0);
 	~TestMMDialog();
 	void components();
 
 signals:
-	void stim(int);
+	void stim(unsigned int);
 
 public slots:
 

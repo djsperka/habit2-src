@@ -13,13 +13,15 @@
 #include "HWorkspaceUtil.h"
 #include <QApplication>
 #include <QtDebug>
+#include <QGst/Init>
+
 
 #include "TestMMDialog.h"
 
 int main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
-
+	QGst::init(&argc, &argv);
 	app.setApplicationName("habit2");
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
