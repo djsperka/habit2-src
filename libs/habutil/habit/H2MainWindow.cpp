@@ -45,11 +45,12 @@ using namespace GUILib;
 using namespace Habit;
 
 
-GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon, bool bEditTemplates)
+GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon, bool bEditTemplates, bool bStimInDialog)
 : QMainWindow()
 , m_bTestRunIsDefault(bDefaultTestRun)
 , m_bShowTestingIcon(bShowTestingIcon)
 , m_bEditTemplates(bEditTemplates)
+, m_bStimInDialog(bStimInDialog)
 {
 	m_pExperimentListWidget = new GUILib::HExperimentListWidget(this, true, m_bEditTemplates);
 	setCentralWidget(m_pExperimentListWidget);
@@ -473,15 +474,14 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	}
 	else
 	{
-		Habit::ExperimentSettings settings;
 		try
 		{
-			settings.loadFromDB(expt);
+			m_experimentSettings.loadFromDB(m_pExperimentListWidget->selectedExperiment());
 		}
 		catch (const Habit::HDBException& e)
 		{
 			QMessageBox::critical(this, "Cannot load experiment", "Cannot load experiment from database!");
-			qCritical() << "Cannot load experiment \"" << expt << "\" from database.";
+			qCritical() << "Cannot load experiment \"" << m_pExperimentListWidget->selectedExperiment() << "\" from database.";
 			qCritical() << e.what();
 			return;
 		}
@@ -491,7 +491,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 		// HACK false here is 'checkMonitors' - so the check skips looking at monitor preferences.
 		// see OTHER HACK below
-		if (!H2MainWindow::checkExperimentSettings(settings, sProblems, false))
+		if (!H2MainWindow::checkExperimentSettings(m_experimentSettings, sProblems, false))
 		{
 			QMessageBox msgBox;
 			msgBox.setText("This experiment cannot be run.");
@@ -503,47 +503,22 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			return;
 		}
 
-		GUILib::HRunSettingsDialog dlg(settings, m_bTestRunIsDefault, this);
-		int i = dlg.exec();
+		m_pRunSettingsDialog = new GUILib::HRunSettingsDialog(m_experimentSettings, m_bTestRunIsDefault, this);
+		int i = m_pRunSettingsDialog->exec();
 		if (i == QDialog::Accepted)
 		{
-			HEventLog log;
-			HGMM *pmm = createMediaManager(settings);
-			QDialog *pStimulusDisplayDialog  = NULL;
+			m_pmm = createMediaManager(m_experimentSettings);
 
-			// The media manager has created video widgets as needed, specified in the experiment settings "stimulus layout type".
-			// We should now adapt those widgets to their respective screens.
-
-			// OTHER HACK - force all stim display to widgets.
-			// this should be where we check preferences?
-			// Run settings should ultimately tell us what to use for display.
-
-			bool bWidgetStimulusDisplay = true;
-			if (bWidgetStimulusDisplay)
-			{
-				pStimulusDisplayDialog = createStimulusWidget(pmm);
-			}
-			else
-			{
-				adaptVideoWidgets(pmm);
-			}
-			HControlPanel habitControlPanel(settings, log, dlg.getRunSettings(), pmm, this);
-			HLookDetector* pld = createLookDetector(settings, log, &habitControlPanel);
-			HStateMachine *psm = createExperiment(this, dlg.getRunSettings(), settings, pld, pmm, log, bTestInput);
-
-			// Check that stimuli are ready.
-			if (!pmm->getReady(1000))
-			{
-				QMessageBox::critical(this, "Cannot display all stimuli.", "There was a problem loading some stimuli.");
-				return;
-			}
+			m_pControlPanel = new HControlPanel(m_experimentSettings, m_eventLog, m_pRunSettingsDialog->getRunSettings(), m_pmm, this);
+			m_pld = createLookDetector(m_experimentSettings, m_eventLog, m_pControlPanel);
+			m_psm = createExperiment(this, m_pRunSettingsDialog->getRunSettings(), m_experimentSettings, m_pld, m_pmm, m_eventLog, bTestInput);
 
 			// If there is a testing input file (which simulates mouse clicks for look/look away), load it now.
 			HTestingInputWrangler *pWrangler;
 			if (bTestInput)
 			{
 				pWrangler = new HTestingInputWrangler();
-				pWrangler->enable(pld, &psm->experiment());
+				pWrangler->enable(m_pld, &m_psm->experiment());
 				// Get input file
 
 #if QT_VERSION >= 0x050000
@@ -562,71 +537,102 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			}
 
 			// set state machine and dialog title
-			habitControlPanel.setStateMachine(psm);
-			habitControlPanel.setWindowTitle(dlg.getRunLabel());
+			m_pControlPanel->setStateMachine(m_psm);
+			m_pControlPanel->setWindowTitle(m_pRunSettingsDialog->getRunLabel());
 
-			// if dialog-type stimulus display, show the thing now
-			if (pStimulusDisplayDialog)
-			{
-				qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
-				pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
-				pStimulusDisplayDialog->show();
-			}
 
-			// This is where the experiment is actually run.
-			int cpStatus = habitControlPanel.exec();
+			// The media manager has created video widgets as needed, specified in the experiment settings "stimulus layout type".
+			// Check whether the gstreamer pipelines are all PAUSED.
+			// Jumping off here. HGMM will emit mmReady() when all stim are ready to be played, mmFail() if it times out.
 
-			// delete the video widgets.
-			// TODO: This should be guarded against cases where the widgets are owned by something else -
-			// like when they are contained in another widget -
-			// in which case they will be deleted when that thing is deleted.
+			connect(m_pmm, SIGNAL(mmReady()), this, SLOT(secondHalf()));
+			connect(m_pmm, SIGNAL(mmFail()), this, SLOT(secondFail()));
+			m_pmm->getReady(5000);
 
-#if 0
-			if (!pStimulusDisplayDialog)
-			{
-				QGst::Ui::VideoWidget *p;
-				if ((p = pmm->getVideoWidget(HPlayerPositionType::Center)))
-					delete p;
-				if ((p = pmm->getVideoWidget(HPlayerPositionType::Left)))
-					delete p;
-				if ((p = pmm->getVideoWidget(HPlayerPositionType::Right)))
-					delete p;
-			}
-			else
-			{
-				delete pStimulusDisplayDialog;
-			}
-#endif
-			if (pStimulusDisplayDialog)
-				delete pStimulusDisplayDialog;
-			if (cpStatus != QDialog::Accepted)
-				return;
-
-			HResults* results = new HResults(settings, dlg.getRunSettings(),
-					dlg.getSubjectSettings(), log,
-					dlg.getRunLabel(),
-					QCoreApplication::instance()->applicationVersion());
-
-			// Always save results. No option here.
-			QDir dir (habutilGetResultsDir(expt));
-			QString filename(dir.absoluteFilePath(QString("%1.hab").arg(dlg.getRunLabel())));
-			qDebug() << "Saving results to " << filename;
-			if (!results->save(filename))
-			{
-				qCritical() << "Error - cannot save data to file " << filename;
-			}
-			QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(dlg.getRunLabel())));
-			if (!results->saveToCSV(filenameCSV))
-			{
-				qCritical() << "Error - cannot save data to csv file " << filenameCSV;
-			}
-
-			// display results
-			HResultsDialog dialog(*results, this);
-			dialog.exec();
-
+			//======================top half ^^^^^^^
 		}
 	}
+	return;
+}
+
+void H2MainWindow::secondFail()
+{
+	QMessageBox msgBox;
+	msgBox.setText("This experiment cannot be run.");
+	msgBox.setInformativeText("Trouble queueing stimuli for this experiment.");
+//	msgBox.setDetailedText(sProblems.join("\n"));
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.setDefaultButton(QMessageBox::Ok);
+	msgBox.exec();
+	return;
+
+}
+
+
+
+void H2MainWindow::secondHalf()
+{
+	//======================bottom half vvvvvvv
+
+	// IWe should now adapt those widgets to their respective screens.
+	QDialog *pStimulusDisplayDialog  = NULL;
+
+	if (m_bStimInDialog)
+	{
+		pStimulusDisplayDialog = createStimulusWidget(m_pmm);
+		qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
+		//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
+		pStimulusDisplayDialog->show();
+	}
+	else
+	{
+		adaptVideoWidgets(m_pmm);
+	}
+
+	// if dialog-type stimulus display, show the thing now
+	if (pStimulusDisplayDialog)
+	{
+	}
+	else
+		qDebug() << "FULL SCREEN STIM";
+
+	// This is where the experiment is actually run.
+	int cpStatus = m_pControlPanel->exec();
+
+	// delete the video widgets.
+	// TODO: This should be guarded against cases where the widgets are owned by something else -
+	// like when they are contained in another widget -
+	// in which case they will be deleted when that thing is deleted.
+
+
+	if (pStimulusDisplayDialog)
+		delete pStimulusDisplayDialog;
+	if (cpStatus != QDialog::Accepted)
+		return;
+
+	HResults* results = new HResults(m_experimentSettings, m_pRunSettingsDialog->getRunSettings(),
+			m_pRunSettingsDialog->getSubjectSettings(), m_eventLog,
+			m_pRunSettingsDialog->getRunLabel(),
+			QCoreApplication::instance()->applicationVersion());
+
+	// Always save results. No option here.
+	QDir dir (habutilGetResultsDir(m_pExperimentListWidget->selectedExperiment()));
+	QString filename(dir.absoluteFilePath(QString("%1.hab").arg(m_pRunSettingsDialog->getRunLabel())));
+	qDebug() << "Saving results to " << filename;
+	if (!results->save(filename))
+	{
+		qCritical() << "Error - cannot save data to file " << filename;
+	}
+	QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(m_pRunSettingsDialog->getRunLabel())));
+	if (!results->saveToCSV(filenameCSV))
+	{
+		qCritical() << "Error - cannot save data to csv file " << filenameCSV;
+	}
+
+	// display results
+	HResultsDialog dialog(*results, this);
+	dialog.exec();
+
 }
 
 
@@ -634,8 +640,10 @@ QDialog* GUILib::H2MainWindow::createStimulusWidget(HGMM *pmm)
 {
 	QDialog *pDialog = new QDialog;
 	QHBoxLayout *hbox = new QHBoxLayout;
+	qDebug() << "createStimulusWidget";
 	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
+		qDebug() << "createStimulusWidget - single";
 		HStimulusWidget *video = pmm->getHStimulusWidget(HPlayerPositionType::Center);
 		connect(pmm, SIGNAL(stimulusChanged()), video->getHVideoWidget(), SLOT(stimulusChanged()));
 		hbox->addWidget(video);
@@ -651,6 +659,7 @@ QDialog* GUILib::H2MainWindow::createStimulusWidget(HGMM *pmm)
 		hbox->addWidget(videoLeft);
 		hbox->addWidget(videoRight);
 		pDialog->setLayout(hbox);
+		qDebug() << "createStimulusWidget - L/R";
 		//pDialog->setMinimumSize(640, 240);	// double wide - can do better than this
 	}
 	return pDialog;
