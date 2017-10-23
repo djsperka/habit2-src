@@ -15,6 +15,8 @@
 #include <QMenuBar>
 #include <QProcessEnvironment>
 #include <QDesktopWidget>
+#include <QMutexLocker>
+#include <QMutex>
 #include <QGst/Init>
 #include <iostream>
 
@@ -24,6 +26,7 @@ QFile *f_pFileLog = NULL;
 QTextStream f_streamFileLog;
 bool f_bScreenLog = false;
 bool f_bFileLog = false;
+QMutex f_mutex;
 
 #if QT_VERSION < 0x050000
 void fileLoggingHandler(QtMsgType type, const char *msg)
@@ -113,6 +116,7 @@ void habitLoggingHandler(QtMsgType type, const char *msg)
 void habitLoggingHandler(QtMsgType type, const QMessageLogContext &, const QString& msg)
 #endif
 {
+	QMutexLocker locker(&f_mutex);
 	if (f_bScreenLog)
 		screenLoggingHandler(type, msg);
 	if (f_bFileLog)
@@ -131,6 +135,7 @@ int main(int argc, char *argv[])
 	bool bTestRunIsDefault = false;
 	bool bShowTestingIcon = false;
 	bool bEditTemplates = false;
+	bool bStimInDialog = false;
 
 	// by default add debugging output goes to the screen unless we install
 	// a handler for logging msgs. Until Habit is at a good release state
@@ -183,6 +188,10 @@ int main(int argc, char *argv[])
 		{
 			bEditTemplates = true;
 		}
+		else if (!strcmp(argv[i], "-z"))
+		{
+			bStimInDialog = true;
+		}
 	}
 
 	// Initialize gstreamer
@@ -205,7 +214,7 @@ int main(int argc, char *argv[])
 	if (!habutilInitWorkspace() || bDBUpdateOnly)
 		return 0;
 
-	GUILib::H2MainWindow w(bTestRunIsDefault, bShowTestingIcon, bEditTemplates);
+	GUILib::H2MainWindow w(bTestRunIsDefault, bShowTestingIcon, bEditTemplates, bStimInDialog);
 	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
 	Q_INIT_RESOURCE(resources);
 
