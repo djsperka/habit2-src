@@ -9,6 +9,10 @@
 #include <QString>
 #include <QStringList>
 #include <QMapIterator>
+
+#include <QThread>
+#include <QApplication>
+
 #include <QGst/ElementFactory>
 #include <QGst/Pad>
 #include <QGlib/Connect>
@@ -22,15 +26,18 @@
 
 #define SPECIALPLAYHACK 1
 
-QGst::ElementPtr HGMMHelper::makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number)
+QString HGMMHelper::makeElementName(const char *factoryName, const HPlayerPositionType& ppt, int number)
 {
 	QString format("%1-%2-%3");
-	QString elementName;
-	elementName = format.arg(QString(factoryName)).arg(ppt.name()).arg(number);
+	return format.arg(QString(factoryName)).arg(ppt.name()).arg(number);
+}
+
+QGst::ElementPtr HGMMHelper::makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number)
+{
+	QString elementName = makeElementName(factoryName, ppt, number);
 	QGst::ElementPtr element = QGst::ElementFactory::make(factoryName, elementName.toStdString().c_str());
 	return element;
 }
-
 
 QString HGMMHelper::stateName(QGst::State s)
 {
@@ -81,6 +88,9 @@ HGMMHelper::HGMMHelper(int id, const Habit::StimulusSettings& stimulus, const QD
     QGst::BusPtr bus = m_pipeline->bus();
     bus->addSignalWatch();
     QGlib::connect(bus, "message", this, &HGMMHelper::onBusMessage);
+
+    // set up signal/slot for padAdded.
+    connect(this, SIGNAL(handlePadAdded(int)), this, SLOT(doPadAdded(int)), Qt::QueuedConnection);
 
     // assign stimulus
 	setStimulus(stimulus.getCenterStimulusInfo(), pCenter, HPlayerPositionType::Center);
@@ -143,9 +153,9 @@ QGst::ElementPtr HGMMHelper::sink(const HPlayerPositionType& ppt) const
 
 void HGMMHelper::padAdded(const QGlib::ObjectPtr & sender, const QGst::PadPtr & srcPad)
 {
-	qDebug() << "padAdded: sender obj " << sender->property("name").get<QString>();
-	qDebug() << "src CAPS: " << srcPad->currentCaps()->toString();
-
+	QString senderName = sender->property("name").get<QString>();
+	//qDebug() << "padAdded (" << senderName << ") src CAPS: " << srcPad->currentCaps()->toString();
+	qDebug() << "padAdded - main thread? " << (QThread::currentThread() == QApplication::instance()->thread());
 	const HPlayerPositionType& ppt = getPPTFromElementName(sender->property("name").get<QString>());
 	Q_ASSERT(ppt != HPlayerPositionType::UnknownPlayerPositionType);
 
@@ -153,9 +163,82 @@ void HGMMHelper::padAdded(const QGlib::ObjectPtr & sender, const QGst::PadPtr & 
 	QString caps = srcPad->currentCaps()->toString();
 	if (caps.startsWith(QString("video/x-raw")))
 	{
-		qDebug() << "This is a video src pad";
+		qDebug() << "padAdded (" << senderName << ") This is a video src pad";
 
-		// There are no downstream elements at this point.....
+		// get resolution
+		QGst::StructurePtr structure = srcPad->currentCaps()->internalStructure(0);
+		m_mapPaths[ppt].size.setHeight(structure->value("height").toInt());
+		m_mapPaths[ppt].size.setWidth(structure->value("width").toInt());
+
+		// get frame rate
+		QGlib::Value fr = structure->value("framerate");
+		QString sfr = fr.toString();
+		QStringList slfr = sfr.split("/");
+		bool hasFramerate = false;
+		bool isImage = false;
+		if (slfr.size() == 2)
+		{
+			bool bOK;
+			int n = slfr[0].toInt(&bOK);
+			if (bOK)
+			{
+				isImage = (n==0);
+				hasFramerate = true;
+			}
+		}
+		m_mapPaths[ppt].isImage = isImage;
+		m_mapPaths[ppt].isVideo = !isImage;
+		m_mapPaths[ppt].isAudio = false;
+		m_mapPaths[ppt].srcPad = srcPad;
+		qDebug() << "padAdded (" << senderName << ") framerate " << sfr << " has framerate? " << hasFramerate << " isImage? " << isImage;
+
+#ifndef CREATE_BEFORE_PAD_ADDED
+		Q_EMIT handlePadAdded(ppt.number());
+#else
+		// elements are created and saved in m_mapPaths[ppt]
+		if (isImage)
+		{
+			pipeline()->add(m_mapPaths[ppt].convert, m_mapPaths[ppt].imagefreeze, m_mapPaths[ppt].sink);
+			srcPad->link(m_mapPaths[ppt].convert->getStaticPad("sink"));
+			m_mapPaths[ppt].convert->link(m_mapPaths[ppt].imagefreeze);
+			m_mapPaths[ppt].imagefreeze->link(m_mapPaths[ppt].sink);
+		}
+		else
+		{
+			pipeline()->add(m_mapPaths[ppt].convert, m_mapPaths[ppt].identity, m_mapPaths[ppt].sink);
+			srcPad->link(m_mapPaths[ppt].convert->getStaticPad("sink"));
+			m_mapPaths[ppt].convert->link(m_mapPaths[ppt].identity);
+			m_mapPaths[ppt].identity->link(m_mapPaths[ppt].sink);
+		}
+#endif
+	}
+	else if (caps.startsWith(QString("audio/x-raw")))
+	{
+		qDebug() << "padAdded (" << senderName << ") This is an audio src pad. TODO - DEAL WITH THIS PAD";
+		m_mapPaths[ppt].isImage = false;
+		m_mapPaths[ppt].isVideo = false;
+		m_mapPaths[ppt].isAudio = true;
+		m_mapPaths[ppt].srcPad = srcPad;
+
+#ifndef CREATE_BEFORE_PAD_ADDED
+		Q_EMIT handlePadAdded(ppt.number());
+#endif
+
+	}
+	else
+	{
+		qDebug() << "padAdded (" << senderName << ") UNKNOWN CAPS TYPE IN HGMMHelper::padAdded";
+	}
+}
+
+
+void HGMMHelper::doPadAdded(int ippt)
+{
+	const HPlayerPositionType& ppt = getPlayerPositionType(ippt);
+	qDebug() << "doPadAdded - " << ppt.name() << " main thread? " << (QThread::currentThread() == QApplication::instance()->thread());
+
+	if (m_mapPaths[ppt].isVideo)
+	{
 
 		QGst::ElementPtr convert = makeElement("videoconvert", ppt, id());
 		Q_ASSERT(convert);
@@ -164,59 +247,75 @@ void HGMMHelper::padAdded(const QGlib::ObjectPtr & sender, const QGst::PadPtr & 
 		Q_ASSERT(identity);
 		identity->setProperty("single-segment", true);
 
-		QGst::ElementPtr scale = makeElement("videoscale", ppt, id());
-		Q_ASSERT(scale);
-
-		m_mapPaths[ppt].capsfilter = makeElement("capsfilter", ppt, id());
-		Q_ASSERT(m_mapPaths[ppt].capsfilter);
-
+//			QGst::ElementPtr scale = makeElement("videoscale", ppt, id());
+//			Q_ASSERT(scale);
+//
+//			m_mapPaths[ppt].capsfilter = makeElement("capsfilter", ppt, id());
+//			Q_ASSERT(m_mapPaths[ppt].capsfilter);
+//
 		m_mapPaths[ppt].sink = makeElement("qwidget5videosink", ppt, id());
 		Q_ASSERT(m_mapPaths[ppt].sink);
 
 
-		m_pipeline->add(convert, identity, scale, m_mapPaths[ppt].capsfilter, m_mapPaths[ppt].sink);
+//			m_pipeline->add(convert, identity, scale, m_mapPaths[ppt].capsfilter, m_mapPaths[ppt].sink);
+		m_pipeline->add(convert, identity, m_mapPaths[ppt].sink);
 
 		// start linking
-		QGst::PadPtr sinkPad = convert->getStaticPad("sink");
-		srcPad->link(sinkPad);
-
+		m_mapPaths[ppt].srcPad->link(convert->getStaticPad("sink"));
 		convert->link(identity);
-		identity->link(scale);
-		scale->link(m_mapPaths[ppt].capsfilter);
-		m_mapPaths[ppt].capsfilter->link(m_mapPaths[ppt].sink);
-
+		identity->link(m_mapPaths[ppt].sink);
 	}
-	else if (caps.startsWith(QString("audio/x-raw")))
+	else if (m_mapPaths[ppt].isImage)
 	{
-		qDebug() << "This is an audio src pad. TODO - DEAL WITH THIS PAD";
-	}
-}
 
+		QGst::ElementPtr convert = makeElement("autovideoconvert", ppt, id());
+		Q_ASSERT(convert);
+
+		QGst::ElementPtr imagefreeze = makeElement("imagefreeze", ppt, id());
+		Q_ASSERT(imagefreeze);
+
+		m_mapPaths[ppt].sink = makeElement("qwidget5videosink", ppt, id());
+		Q_ASSERT(m_mapPaths[ppt].sink);
+
+		m_pipeline->add(convert, imagefreeze, m_mapPaths[ppt].sink);
+		m_mapPaths[ppt].srcPad->link(convert->getStaticPad("sink"));
+		convert->link(imagefreeze);
+		imagefreeze->link(m_mapPaths[ppt].sink);
+	}
+	else if (m_mapPaths[ppt].isAudio)
+	{
+		qDebug() << "doPadAdded: AUDIO PAD TODO TODO TODO";
+	}
+
+
+}
+// The entry in m_mapPaths is created here.
 void HGMMHelper::setStimulus(const Habit::StimulusInfo& info, QGst::Ui::VideoWidget *pwidget, const HPlayerPositionType& ppt)
 {
-	HelperPath path;
 	m_mapPaths[ppt].isLoop = info.isLoopPlayBack();
 	m_mapPaths[ppt].videoWidget = pwidget;
 
 	if (info.isColor())
 	{
 		setSolidColorStimulus(info.getColor(), ppt);
-		path.needPad = false;
+		m_mapPaths[ppt].needPad = false;
 	}
 	else if (info.isJPG())
 	{
-		setJPGStimulus(info, ppt);
-		path.needPad = false;
+		setUnknownStimulus(info, ppt);
+//		setJPGStimulus(info, ppt);
+		m_mapPaths[ppt].needPad = false;
 	}
 	else if (info.isPNG())
 	{
-		setPNGStimulus(info, ppt);
-		path.needPad = false;
+		setUnknownStimulus(info, ppt);
+//		setPNGStimulus(info, ppt);
+		m_mapPaths[ppt].needPad = false;
 	}
 	else
 	{
 		setUnknownStimulus(info, ppt);
-		path.needPad = true;
+		m_mapPaths[ppt].needPad = true;
 	}
 }
 
@@ -226,6 +325,8 @@ void HGMMHelper::setUnknownStimulus(const Habit::StimulusInfo& info, const HPlay
 	// Video has filesrc!decodebin. Video pad will go directly into the input selector.
 	QString filename = info.getAbsoluteFileName(m_root);
 	qDebug() << "HGMMHelper::setUnknownStimulus " << info.getFileName() << "   filename " << filename;
+	qDebug() << "HGMMHelper::setUnknownStimulus - main thread? " << (QThread::currentThread() == QApplication::instance()->thread());
+
 
 	QGst::ElementPtr filesrc = makeElement("filesrc", ppt, id());
 	Q_ASSERT(filesrc);
@@ -236,6 +337,27 @@ void HGMMHelper::setUnknownStimulus(const Habit::StimulusInfo& info, const HPlay
 
 	m_pipeline->add(filesrc, decodebin);
 	filesrc->link(decodebin);	// src pad on decodebin will be connected to 'lnkToPad' input arg.
+
+#ifdef CREATE_BEFORE_PAD_ADDED
+
+	// Create elements that may be needed in padAdded.
+	// Elements must be created in main thread
+	m_mapPaths[ppt].convert = makeElement("autovideoconvert", ppt, id());
+	Q_ASSERT(m_mapPaths[ppt].convert);
+
+	// for images
+	m_mapPaths[ppt]. imagefreeze = makeElement("imagefreeze", ppt, id());
+	Q_ASSERT(m_mapPaths[ppt].imagefreeze);
+
+	// for movies
+	m_mapPaths[ppt].identity = makeElement("identity", ppt, id());
+	Q_ASSERT(m_mapPaths[ppt].identity);
+	m_mapPaths[ppt].identity->setProperty("single-segment", true);
+
+	m_mapPaths[ppt].sink = makeElement("qwidget5videosink", ppt, id());
+	Q_ASSERT(m_mapPaths[ppt].sink);
+
+#endif
 
 	QGlib::connect(decodebin, "pad_added", this, &HGMMHelper::padAdded, QGlib::PassSender);
 
@@ -279,13 +401,14 @@ void HGMMHelper::setUnknownStimulus(const Habit::StimulusInfo& info, const HPlay
 
 void HGMMHelper::play()
 {
+
 	// Do something special when movies
 	QMapIterator<HPlayerPositionType, HelperPath> it(m_mapPaths);
 	while (it.hasNext())
 	{
 		it.next();
 //		if (it.value().isLoop)
-		if (it.value().linkTo)
+		if (it.value().sink)
 		{
 			qDebug() << "flushing seek play (loop=" << it.value().isLoop << ") for " << it.key().name();
 			QGst::SeekEventPtr seekEv = QGst::SeekEvent::create(
@@ -297,7 +420,10 @@ void HGMMHelper::play()
 			it.value().sink->sendEvent(seekEv);
 		}
 	}
+
 	m_pipeline->setState(QGst::StatePlaying);
+
+	//GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS("pipeline", GST_DEBUG_GRAPH_SHOW_ALL, "pipeline")
 }
 
 const HPlayerPositionType& HGMMHelper::getPPTFromElementName(const QString& elementName)
@@ -420,19 +546,21 @@ void HGMMHelper::setSolidColorStimulus(const QColor& color, const HPlayerPositio
 	m_mapPaths[ppt].sink = makeElement("qwidget5videosink", ppt, id());
 	Q_ASSERT(m_mapPaths[ppt].sink);
 
-	QGst::ElementPtr videotestsrc = makeElement("videotestsrc", ppt, id());
+	QString sDescription = QString("videotestsrc pattern=solid-color foreground-color=%1 name=%2").arg(color.rgba()).arg(makeElementName("videotestsrc", ppt, id()));
+	qDebug() << "solid color descr: "<< sDescription;
+	QGst::BinPtr videotestsrc = QGst::Bin::fromDescription(sDescription);
+
+
+//	QGst::ElementPtr videotestsrc = makeElement("videotestsrc", ppt, id());
 	Q_ASSERT(videotestsrc);
-	videotestsrc->setProperty("pattern", QString("solid-color"));
-	videotestsrc->setProperty("foreground-color", QString("%1").arg(color.rgba()));
+	//videotestsrc->setProperty("pattern", QString("solid-color"));
+//	videotestsrc->setProperty<GstVideoTestSrcPattern>("pattern", GST_VIDEO_TEST_SRC_SOLID);
+//	videotestsrc->setProperty("foreground-color", QString("%1").arg(color.rgba()));
 
 	qDebug() << "TODO - setSolidColorStimulus - need additional elements";
 
-	m_mapPaths[ppt].capsfilter = makeElement("capsfilter", ppt, id());
-	Q_ASSERT(m_mapPaths[ppt].capsfilter);
-
-	m_pipeline->add(videotestsrc, m_mapPaths[ppt].capsfilter, m_mapPaths[ppt].sink);
-	videotestsrc->link(m_mapPaths[ppt].capsfilter);
-	m_mapPaths[ppt].capsfilter->link(m_mapPaths[ppt].sink);
+	m_pipeline->add(videotestsrc, m_mapPaths[ppt].sink);
+	videotestsrc->link(m_mapPaths[ppt].sink);
 }
 
 //void HGMMHelper::setSoundStimulus(const Habit::StimulusInfo& info, QGst::Ui::VideoWidget *pwidget)
@@ -440,6 +568,7 @@ void HGMMHelper::setSolidColorStimulus(const QColor& color, const HPlayerPositio
 //
 //}
 
+#if 0
 void HGMMHelper::setJPGStimulus(const Habit::StimulusInfo& info, const HPlayerPositionType& ppt)
 {
 	// jpg has filesrc!jpegdec!imagefreeze. Video pad will go directly into the input selector.
@@ -514,6 +643,7 @@ void HGMMHelper::setPNGStimulus(const Habit::StimulusInfo& info, const HPlayerPo
 	scale->link(m_mapPaths[ppt].capsfilter);
 	m_mapPaths[ppt].capsfilter->link(m_mapPaths[ppt].sink);
 }
+#endif
 
 void HGMMHelper::handlePipelineStateChange(const QGst::StateChangedMessagePtr & scm)
 {
@@ -542,8 +672,6 @@ void HGMMHelper::onBusMessage(const QGst::MessagePtr & message)
 		return;
 	}
 	QGst::SeekingQueryPtr query;
-	bool bb;
-
 	QGst::SeekEventPtr seekEv;
 
 	switch (message->type())

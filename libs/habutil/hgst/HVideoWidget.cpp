@@ -15,11 +15,12 @@
 
 HVideoWidget::HVideoWidget(const HDisplayType& displayType, bool bMaintain, QWidget *parent)
 : QGst::Ui::VideoWidget(parent)
+, m_sizeStimulus(320, 240)
 , m_displayType(displayType)
 , m_bMaintainAspectRatio(bMaintain)
 {
-	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	setMinimumSize(QSize(320,240));
+	//setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	//setMinimumSize(QSize(320,240));
 }
 
 HVideoWidget::~HVideoWidget()
@@ -48,26 +49,26 @@ void HVideoWidget::stimulusChanged()
 }
 
 //QSize HVideoWidget::sizeHint() const
-QSize HVideoWidget::getSize() const
-{
-	if (m_displayType == HDisplayType::HDisplayTypeFullScreen && m_bMaintainAspectRatio)
-	{
-		qDebug() << "sizeHint - full/maintain " << m_sizeStimulus.scaled(parentWidget()->size(), Qt::KeepAspectRatio);
-		return m_sizeStimulus.scaled(parentWidget()->size(), Qt::KeepAspectRatio);
-	}
-	else if (m_displayType == HDisplayType::HDisplayTypeFullScreen && !m_bMaintainAspectRatio)
-	{
-		qDebug() << "sizeHint - full/!maintain " << parentWidget()->size();
-		return parentWidget()->size();
-	}
-	else if (m_displayType == HDisplayType::HDisplayTypeOriginalSize)
-	{
-		qDebug() << "sizeHint - original " << m_sizeStimulus;
-		return m_sizeStimulus;
-	}
-	else
-	{
-		qDebug() << "sizeHint - ??? " << m_sizeStimulus;
-		return m_sizeStimulus;
-	}
-}
+//QSize HVideoWidget::getSize() const
+//{
+//	if (m_displayType == HDisplayType::HDisplayTypeFullScreen && m_bMaintainAspectRatio)
+//	{
+//		qDebug() << "sizeHint - full/maintain " << m_sizeStimulus.scaled(parentWidget()->size(), Qt::KeepAspectRatio);
+//		return m_sizeStimulus.scaled(parentWidget()->size(), Qt::KeepAspectRatio);
+//	}
+//	else if (m_displayType == HDisplayType::HDisplayTypeFullScreen && !m_bMaintainAspectRatio)
+//	{
+//		qDebug() << "sizeHint - full/!maintain " << parentWidget()->size();
+//		return parentWidget()->size();
+//	}
+//	else if (m_displayType == HDisplayType::HDisplayTypeOriginalSize)
+//	{
+//		qDebug() << "sizeHint - original " << m_sizeStimulus;
+//		return m_sizeStimulus;
+//	}
+//	else
+//	{
+//		qDebug() << "sizeHint - ??? " << m_sizeStimulus;
+//		return m_sizeStimulus;
+//	}
+//}

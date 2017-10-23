@@ -18,6 +18,9 @@
 #include "HTypes.h"
 #include "stimulussettings.h"
 
+#define CREATE_BEFORE_PAD_ADDED 1
+
+
 QString stateName(QGst::State s);
 
 
@@ -30,11 +33,19 @@ class HGMMHelper: public QObject
 	struct HelperPath
 	{
 		QGst::ElementPtr sink;
-		QGst::ElementPtr linkTo;
-		QGst::ElementPtr capsfilter;
+		QGst::PadPtr srcPad;
 		QGst::Ui::VideoWidget *videoWidget;
+		QSize size;		// stimulus size, as found in file
 		bool needPad;
 		bool isLoop;
+		bool isImage;
+		bool isVideo;
+		bool isAudio;
+#ifdef CREATE_BEFORE_PAD_ADDED
+		QGst::ElementPtr convert;
+		QGst::ElementPtr identity;
+		QGst::ElementPtr imagefreeze;
+#endif
 	};
 
 	QMap<HPlayerPositionType, HelperPath> m_mapPaths;
@@ -53,6 +64,7 @@ public:
 	const Habit::StimulusSettings& stimulusSettings() const { return m_stimulus; };
 	QGst::ElementPtr sink(const HPlayerPositionType& ppt) const;
 
+	static QString makeElementName(const char *factoryName, const HPlayerPositionType& ppt, int number);
 	static QGst::ElementPtr makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number);
 	static QString stateName(QGst::State s);
 	static const HPlayerPositionType& getPPTFromElementName(const QString& elementName);
@@ -74,9 +86,6 @@ private:
 	void handlePipelineStateChange(const QGst::StateChangedMessagePtr & scm);
 
 	// These will create sink and connect it
-	//void leftPadAdded(const QGlib::ObjectPtr & sender, const QGst::PadPtr & srcPad);
-	//void rightPadAdded(const QGlib::ObjectPtr & sender, const QGst::PadPtr & srcPad);
-	//void centerPadAdded(const QGlib::ObjectPtr & sender, const QGst::PadPtr & srcPad);
 	void padAdded(const QGlib::ObjectPtr & sender, const QGst::PadPtr & srcPad);
 
 	// These are for sinks that were created elsewhere and are already linked
@@ -107,6 +116,10 @@ private:
 
 	Q_SIGNALS:
 		void nowPlaying();
+		void handlePadAdded(int);
+
+	public Q_SLOTS:
+		void doPadAdded(int);
 };
 
 #endif /* APPS_HG2_HGMMHELPER_H_ */

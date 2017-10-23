@@ -25,9 +25,10 @@ public:
 	virtual ~HVideoWidget();
 
 	void setStimulusSize(float width, float height);
+	const QSize& getStimulusSize() const;
 
 	//QSize sizeHint() const;
-	QSize getSize() const;
+	//QSize getSize() const;
 
 	public Q_SLOTS:
 		void stimulusChanged();

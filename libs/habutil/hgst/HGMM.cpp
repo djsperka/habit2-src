@@ -65,18 +65,6 @@ HGMM::~HGMM()
 	}
 }
 
-#if 0
-QGst::Ui::VideoWidget *HGMM::getVideoWidget(const HPlayerPositionType& type)
-{
-	HStimulusWidget *w = getHVideoWidget(type);
-	QGst::Ui::VideoWidget *vw = NULL;
-	if (w)
-		vw = w->getVideoWidget();
-	return vw;
-}
-#endif
-
-
 HStimulusWidget *HGMM::getHStimulusWidget(const HPlayerPositionType& type)
 {
 	if (type == HPlayerPositionType::Left)
@@ -254,14 +242,19 @@ void HGMM::playStim(unsigned int key)
 		if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 		{
 			HVideoWidget *pc = m_pCenter->getHVideoWidget();
+			qDebug() << "releaseVideoSink";
 			pc->releaseVideoSink();
+			qDebug() << "setVideoSink";
 			pc->setVideoSink(phelper->sink(HPlayerPositionType::Center));
 
+			qDebug() << "emit";
 			// let everybody know we just switched to a new sink
 			Q_EMIT stimulusChanged();
 
 			// now set the pipeline in motion
+			qDebug() << "play";
 			phelper->play();
+			qDebug() << "play done";
 			m_pHelperCurrent = phelper;
 		}
 		else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
@@ -283,65 +276,32 @@ void HGMM::playStim(unsigned int key)
 	}
 }
 
-bool HGMM::getReady(int ms)
+void HGMM::getReady(int ms)
 {
 	m_readyTimeout->start(ms);
 	m_readyCheck->start(500);
 
-	QEventLoop loop;
 	connect(m_readyCheck,  SIGNAL(timeout()), this, SLOT(readyCheck()) );
-	connect(m_readyTimeout, SIGNAL(timeout()), &loop, SLOT(quit()));
-	m_readyTimeout->start(ms);
-	m_readyCheck->start(500);
-	loop.exec();
-
-	return isReady();
-#if 0
-	// start a timer for the longest we'll wait for things to be ready
+	connect(m_readyTimeout, SIGNAL(timeout()), this, SLOT(readyFail()));
 	m_readyTimeout->start(ms);
 	m_readyCheck->start(500);
 
-	// set all pipelines to PAUSED
-	QMapIterator<unsigned int, HGMMHelper *> it(m_mapData);
-	while (it.hasNext())
-	{
-	    it.next();
-	    it.value()->pipeline()->setState(QGst::StatePaused);
-	}
-#endif
+	return;
 }
-
-
-
-#if 0
-QTimer timer;
-timer.setSingleShot(true);
-QEventLoop loop;
-connect(sslSocket,  SIGNAL(encrypted()), &loop, SLOT(quit()) );
-connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
-timer.start(msTimeout);
-loop.exec();
-
-if(timer.isActive())
-    qDebug("encrypted");
-else
-    qDebug("timeout");
-
-#endif
 
 // TODO: need locking???
 
-bool HGMM::isReady() const
-{
-	bool bReady = true;
-	QMapIterator<unsigned int, HGMMHelper *> it(m_mapData);
-	while (bReady && it.hasNext())
-	{
-	    it.next();
-	    if (!it.value()->hasPads()) bReady = false;
-	}
-	return bReady;
-}
+//bool HGMM::isReady() const
+//{
+//	bool bReady = true;
+//	QMapIterator<unsigned int, HGMMHelper *> it(m_mapData);
+//	while (bReady && it.hasNext())
+//	{
+//	    it.next();
+//	    if (!it.value()->hasPads()) bReady = false;
+//	}
+//	return bReady;
+//}
 
 void HGMM::readyCheck()
 {
@@ -352,18 +312,19 @@ void HGMM::readyCheck()
 	while (it.hasNext())
 	{
 	    it.next();
-	    qDebug() << it.key() << ": has pads? " << it.value()->hasPads() << " state " << HGMMHelper::stateName(it.value()->pipeline()->currentState());
+	    //qDebug() << it.key() << ": has pads? " << it.value()->hasPads() << " state " << HGMMHelper::stateName(it.value()->pipeline()->currentState());
 	    if (it.value()->pipeline()->currentState() != QGst::StatePaused && it.value()->pipeline()->currentState() != QGst::StatePlaying) bReady = false;
 	}
 	if (bReady)
 	{
-		qDebug() << "Ready";
 		m_readyCheck->stop();
 		m_readyTimeout->stop();
+		qDebug() << "emit mmReady()";
 		Q_EMIT mmReady();
 
 		// start display here
-		stim(m_defaultKey);
+		//stim(m_defaultKey);
+		//qDebug() << "readyCheck - starting stim";
 	}
 	else
 		qDebug() << "Not Ready";

@@ -47,15 +47,14 @@ class HStimulusWidget: public QFrame
 
 	private:
 		Habit::StimulusDisplayInfo m_sdi;
-		float m_screenWidth; 		// screen width, or the screen we should emulate (force aspect ratio)
-		float m_screenHeight; 		// screen height, ".
+		QSize m_sizeTargetScreen;
 		HVideoWidget *m_videoWidget;
 
 	public:
 	    HStimulusWidget(const Habit::StimulusDisplayInfo& sdi, float screenWidth, float screenHeight, QWidget *parent = 0);
 	    virtual ~HStimulusWidget();
-	    bool hasHeightForWidth() const { return true; }
-	    int heightForWidth(int w) const { return w * m_screenHeight / m_screenWidth; }
+	    //bool hasHeightForWidth() const { return true; }
+	    //int heightForWidth(int w) const { return w * m_screenHeight / m_screenWidth; }
 	    inline HVideoWidget *getHVideoWidget() const { return m_videoWidget; }
 
 };

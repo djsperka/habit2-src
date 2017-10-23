@@ -91,11 +91,11 @@ public:
 	QList<unsigned int> getContextStimList(int context);
 
 	// check if all pipelines are prerolled (in paused state and async done); this means any can be started and it will start up asap.
-	bool isReady() const;
+	//bool isReady() const;
 
 	// set all pipelines to paused state, then monitor and wait for all pads to be assigned.
 	// emit mmReady() if all are ready; emit mmFail() if not ready before timeout ms.
-	bool getReady(int ms);
+	void getReady(int ms);
 
 	//const QMap<unsigned int, const Habit::StimulusSettings *>& pmap() { return m_mapPStimulusSettings; };
 	const QMap<unsigned int, HGMMHelper *>& dataMap() { return m_mapData; };
