@@ -17,8 +17,8 @@
 #include <QDesktopWidget>
 #include <QMutexLocker>
 #include <QMutex>
-#include <QGst/Init>
 #include <iostream>
+#include <gst/gst.h>
 
 
 using namespace std;
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Initialize gstreamer
-	QGst::init(&argc, &argv);
+	gst_init (&argc, &argv);
 
 	// create application
     HApplication h(argc, argv);
