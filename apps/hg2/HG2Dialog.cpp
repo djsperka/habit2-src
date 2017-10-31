@@ -32,13 +32,6 @@ HG2Dialog::HG2Dialog(const QDir& dirStimRoot, int screen, QWidget *parent)
 	connect(pb, SIGNAL(clicked()), this, SLOT(playClicked()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(accept()));
 
-	Habit::StimulusDisplayInfo sdi;
-	sdi.setBackGroundColor(QColor(Qt::blue));
-	sdi.setDisplayType(HDisplayType::HDisplayTypeOriginalSize);
-	sdi.setMaintainOriginalAspectRatio(true);
-	sdi.setPresentationStyle(HPresentationStyle::HPresentationStyleMonitorDefined);
-	sdi.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutLeftRight); // not used?
-	sdi.setUseISS(true);
 
 	if (screen < 1)
 	{
@@ -46,10 +39,24 @@ HG2Dialog::HG2Dialog(const QDir& dirStimRoot, int screen, QWidget *parent)
 	}
 	else if (screen == 1)
 	{
+		Habit::StimulusDisplayInfo sdi;
+		sdi.setBackGroundColor(QColor(Qt::blue));
+		sdi.setDisplayType(HDisplayType::HDisplayTypeOriginalSize);
+		sdi.setMaintainOriginalAspectRatio(true);
+		sdi.setPresentationStyle(HPresentationStyle::HPresentationStyleMonitorDefined);
+		sdi.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutSingle);
+		sdi.setUseISS(true);
 		vbox->addLayout(initSingleScreen(sdi, dirStimRoot));
 	}
 	else
 	{
+		Habit::StimulusDisplayInfo sdi;
+		sdi.setBackGroundColor(QColor(Qt::blue));
+		sdi.setDisplayType(HDisplayType::HDisplayTypeOriginalSize);
+		sdi.setMaintainOriginalAspectRatio(true);
+		sdi.setPresentationStyle(HPresentationStyle::HPresentationStyleMonitorDefined);
+		sdi.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutLeftRight); // not used?
+		sdi.setUseISS(true);
 		vbox->addLayout(initLRScreen(sdi, dirStimRoot));
 	}
 	m_pSpinIndex = new QSpinBox(this);
@@ -86,8 +93,8 @@ void HG2Dialog::agStarted()
 QHBoxLayout *HG2Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot)
 {
 	QHBoxLayout *hbox = new QHBoxLayout;
-	m_pVideoWidgetCenter = new HStimulusWidget(sdi, 320, 240);
-	m_pVideoWidgetCenter->setMinimumSize(320, 240);
+	m_pVideoWidgetCenter = new HStimulusWidget(sdi, 800, 600);
+	//m_pVideoWidgetCenter->setMinimumSize(320, 240);
 	hbox->addWidget(m_pVideoWidgetCenter);
 
 	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot);

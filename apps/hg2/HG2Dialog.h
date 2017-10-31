@@ -12,7 +12,7 @@
 
 #include <QtWidgets>
 #include <QDir>
-#include <QGst/Ui/VideoWidget>
+#include "HStimulusWidget.h"
 #include "HGMM.h"
 //#include "../../libs/habutil/HMediaManager.h"
 

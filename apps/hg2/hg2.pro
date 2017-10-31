@@ -5,7 +5,7 @@ TARGET = hg2
 
 # need this for boost?
 INCLUDEPATH += 	"/usr/local/include" 
-INCLUDEPATH += "/Users/dan/install/include/gst-plugins-base-1.12.1"
+#INCLUDEPATH += "/Users/dan/install/include/gst-plugins-base-1.12.1"
 
 # produce nice compilation output
 #CONFIG += silent
@@ -16,16 +16,11 @@ CONFIG += debug_and_release link_pkgconfig c++11
 # need sql libs
 QT += sql
 
-QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
+#QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
 
-# Now tell qmake to link to QtGStreamer and also use its include path and Cflags.
-contains(QT_VERSION, ^4\\..*) {
-  PKGCONFIG += QtGStreamer-1.0 QtGStreamerUi-1.0
-}
-contains(QT_VERSION, ^5\\..*) {
-  PKGCONFIG += Qt5GStreamer-1.0 Qt5GStreamerUi-1.0 gstreamer-1.0
-  QT += widgets
-}
+PKGCONFIG += gstreamer-1.0
+QT += widgets
+
 
 # Recommended if you are using g++ 4.5 or later. Must be removed for other compilers.
 #QMAKE_CXXFLAGS += -std=c++0x

@@ -10,7 +10,7 @@
 #include <QMessageBox>
 #include <QDir>
 #include <QDesktopWidget>
-#include <QGst/Init>
+#include <gst/gst.h>
 
 
 //#include "HAudioPlayer5.h"
@@ -19,7 +19,7 @@
 int main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
-	QGst::init(&argc, &argv);
+	gst_init(&argc, &argv);
 	int screen = -1;
 
 	app.setApplicationName("hgstplayer");
