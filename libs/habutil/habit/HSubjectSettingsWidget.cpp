@@ -22,6 +22,7 @@ HSubjectSettingsWidget::HSubjectSettingsWidget(bool bTestRun, QWidget *parent)
 
 HSubjectSettingsWidget::~HSubjectSettingsWidget()
 {
+	qDebug() << "HSubjectSettingsWidget::~HSubjectSettingsWidget()";
 	delete ui;
 }
 

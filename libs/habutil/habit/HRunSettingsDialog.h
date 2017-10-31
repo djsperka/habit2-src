@@ -36,7 +36,7 @@ namespace GUILib
 
 	public:
 		HRunSettingsDialog(const Habit::ExperimentSettings& s, bool bTestRun=false, QWidget* parent=NULL);
-		virtual ~HRunSettingsDialog() {};
+		virtual ~HRunSettingsDialog();
 		Habit::RunSettings getRunSettings() const;
 		Habit::SubjectSettings getSubjectSettings() const;
 		QString getRunLabel() const;

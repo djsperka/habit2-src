@@ -24,6 +24,7 @@ HExperimentStatusWidget::HExperimentStatusWidget(const QString& name, bool bDisp
 
 HExperimentStatusWidget::~HExperimentStatusWidget()
 {
+	qDebug() << "HExperimentStatusWidget::~HExperimentStatusWidget()";
 	delete ui;
 }
 

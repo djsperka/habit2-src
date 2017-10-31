@@ -12,7 +12,6 @@
 #include <QMainWindow>
 #include <QMap>
 #include <QObject>
-#include <QGst/Ui/VideoWidget>
 #include "experimentsettings.h"
 #include "HEventLog.h"
 
@@ -67,8 +66,6 @@ class HStateMachine;
 		 void testExperiment();
 		 void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 		 void workspaceChanged();
-		 void secondHalf();		// running experiment, this called when all stim ready
-		 void secondFail();		// running experiment, call when ready check times out
 
 	 private:
 		 void createActions();
@@ -82,13 +79,13 @@ class HStateMachine;
 		 bool m_bShowTestingIcon;
 		 bool m_bEditTemplates;
 		 bool m_bStimInDialog;
-		 Habit::ExperimentSettings m_experimentSettings;
-		 HGMM *m_pmm;
+		 //Habit::ExperimentSettings m_experimentSettings;
+		 //HGMM *m_pmm;
 		 GUILib::HRunSettingsDialog *m_pRunSettingsDialog;
 		 HControlPanel *m_pControlPanel;
 		 HLookDetector* m_pld;
 		 HStateMachine *m_psm;
-		 HEventLog m_eventLog;
+		 //HEventLog m_eventLog;
 
 		 GUILib::HExperimentListWidget *m_pExperimentListWidget;
 		 QToolBar *m_pToolBar;

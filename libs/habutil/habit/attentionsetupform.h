@@ -39,15 +39,21 @@ public:
 private slots:
 	void stimulusLayoutTypeChanged(int);
 	void stimulusSettingsChanged();
+	void toggleNoISI(bool checked);
+	void toggleUseAG(bool checked);
+	void toggleUseISI(bool checked);
+	void toggleSoundOnlyAG(bool checked);
 
 private:
 	Habit::AttentionGetterSettings m_agSettings;
 	Habit::StimulusDisplayInfo m_stimulusDisplayInfo;
+	QGroupBox *m_pStimulusGroup;
 	HStimulusSettingsWidget* m_pStimulusSettingsWidget;
 	HStimulusPreviewWidget* m_pStimulusPreviewWidget;
 	QRadioButton *m_prbNoISI;
 	QRadioButton *m_prbUseAG;
 	QRadioButton *m_prbUseISI;
+	QRadioButton *m_prbSoundOnlyAG;
 	QLineEdit *m_plineeditISI;
 };
 }

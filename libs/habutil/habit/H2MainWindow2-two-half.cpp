@@ -469,9 +469,6 @@ void GUILib::H2MainWindow::runExperiment()
 
 void GUILib::H2MainWindow::run(bool bTestInput)
 {
-	Habit::ExperimentSettings experimentSettings;
-	HEventLog eventLog;
-	HGMM *pMediaManager = NULL;
 	QString expt = m_pExperimentListWidget->selectedExperiment();	// the experiment to run
 	if (expt.isEmpty())
 	{
@@ -481,7 +478,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	{
 		try
 		{
-			experimentSettings.loadFromDB(m_pExperimentListWidget->selectedExperiment());
+			m_experimentSettings.loadFromDB(m_pExperimentListWidget->selectedExperiment());
 		}
 		catch (const Habit::HDBException& e)
 		{
@@ -496,7 +493,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 		// HACK false here is 'checkMonitors' - so the check skips looking at monitor preferences.
 		// see OTHER HACK below
-		if (!H2MainWindow::checkExperimentSettings(experimentSettings, sProblems, false))
+		if (!H2MainWindow::checkExperimentSettings(m_experimentSettings, sProblems, false))
 		{
 			QMessageBox msgBox;
 			msgBox.setText("This experiment cannot be run.");
@@ -509,23 +506,23 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 		}
 
 		// m_pRunSettingsDialog has no parent -- DELETE
-		m_pRunSettingsDialog = new GUILib::HRunSettingsDialog(experimentSettings, m_bTestRunIsDefault, NULL);
+		m_pRunSettingsDialog = new GUILib::HRunSettingsDialog(m_experimentSettings, m_bTestRunIsDefault, NULL);
 		int i = m_pRunSettingsDialog->exec();
 		if (i == QDialog::Accepted)
 		{
 			if (m_bStimInDialog)
-				pMediaManager = createMediaManager(experimentSettings, 320, 240);
+				m_pmm = createMediaManager(m_experimentSettings, 320, 240);
 			else
-				pMediaManager = createMediaManager(experimentSettings);
+				m_pmm = createMediaManager(m_experimentSettings);
 
 			// m_ControlPanel has no parent -- DELETE
-			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, NULL);
+			m_pControlPanel = new HControlPanel(m_experimentSettings, m_eventLog, m_pRunSettingsDialog->getRunSettings(), m_pmm, NULL);
 
 			// m_pld has no parent -- DELETE BEFORE m_pControlPanel
-			m_pld = createLookDetector(experimentSettings, eventLog, m_pControlPanel);
+			m_pld = createLookDetector(m_experimentSettings, m_eventLog, m_pControlPanel);
 
 			// state machine has no parent -- DELETE
-			m_psm = createExperiment(this, m_pRunSettingsDialog->getRunSettings(), experimentSettings, m_pld, pMediaManager, eventLog, bTestInput);
+			m_psm = createExperiment(this, m_pRunSettingsDialog->getRunSettings(), m_experimentSettings, m_pld, m_pmm, m_eventLog, bTestInput);
 
 			// set state machine and dialog title
 			m_pControlPanel->setStateMachine(m_psm);
@@ -555,97 +552,118 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				}
 			}
 
-			if (!pMediaManager->waitForStimuliReady(5000))
-			{
-				QMessageBox msgBox;
-				msgBox.setText("This experiment cannot be run.");
-				msgBox.setInformativeText("Trouble queueing stimuli for this experiment.");
-				msgBox.setStandardButtons(QMessageBox::Ok);
-				msgBox.setDefaultButton(QMessageBox::Ok);
-				msgBox.exec();
 
-			}
-			else
-			{
-				QDialog *pStimulusDisplayDialog  = NULL;
-				if (m_bStimInDialog)
-				{
-					pStimulusDisplayDialog = createStimulusWidget(pMediaManager);
-					qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
-					//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
-					pStimulusDisplayDialog->show();
-				}
-				else
-				{
-					adaptVideoWidgets(pMediaManager);
-				}
+			// The media manager has created video widgets as needed, specified in the experiment settings "stimulus layout type".
+			// Check whether the gstreamer pipelines are all PAUSED.
+			// Jumping off here. HGMM will emit mmReady() when all stim are ready to be played, mmFail() if it times out.
 
-				// This is where the experiment is actually run.
-				int cpStatus = m_pControlPanel->exec();
+			connect(m_pmm, SIGNAL(mmReady()), this, SLOT(secondHalf()));
+			connect(m_pmm, SIGNAL(mmFail()), this, SLOT(secondFail()));
+			m_pmm->getReady(5000);
 
-				// delete the video widgets.
-				// TODO: This should be guarded against cases where the widgets are owned by something else -
-				// like when they are contained in another widget -
-				// in which case they will be deleted when that thing is deleted.
-
-				qDebug() << "pMediaManager->stop()";
-				pMediaManager->stop();
-				if (pStimulusDisplayDialog)
-					delete pStimulusDisplayDialog;
-				else
-				{
-					qDebug() << " delete widgets";
-					// must explicitly delete the stim widgets
-					HStimulusWidget *w;
-					w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Center);
-					if (w) delete w;
-					w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Left);
-					if (w) delete w;
-					w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Right);
-					if (w) delete w;
-					qDebug() << " delete widgets done";
-				}
-
-
-				if (cpStatus == QDialog::Accepted)
-				{
-					HResults* results = new HResults(experimentSettings, m_pRunSettingsDialog->getRunSettings(),
-							m_pRunSettingsDialog->getSubjectSettings(), eventLog,
-							m_pRunSettingsDialog->getRunLabel(),
-							QCoreApplication::instance()->applicationVersion());
-
-					// Always save results. No option here.
-					qDebug() << "save results";
-					QDir dir (habutilGetResultsDir(m_pExperimentListWidget->selectedExperiment()));
-					QString filename(dir.absoluteFilePath(QString("%1.hab").arg(m_pRunSettingsDialog->getRunLabel())));
-					qDebug() << "Saving results to " << filename;
-					if (!results->save(filename))
-					{
-						qCritical() << "Error - cannot save data to file " << filename;
-					}
-					QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(m_pRunSettingsDialog->getRunLabel())));
-					if (!results->saveToCSV(filenameCSV))
-					{
-						qCritical() << "Error - cannot save data to csv file " << filenameCSV;
-					}
-
-					// display results
-					HResultsDialog dialog(*results, this);
-					dialog.exec();
-
-					delete results;
-				}
-
-				// clean up stuff
-				qDebug() << "Cleaning up...";
-				delete m_psm;
-				delete m_pld;
-				delete m_pControlPanel;
-				delete pMediaManager;
-				delete m_pRunSettingsDialog;
-				qDebug() << "Cleaning up...done";
-			}
+			//======================top half ^^^^^^^
 		}
+	}
+	return;
+}
+
+void H2MainWindow::secondFail()
+{
+	QMessageBox msgBox;
+	msgBox.setText("This experiment cannot be run.");
+	msgBox.setInformativeText("Trouble queueing stimuli for this experiment.");
+//	msgBox.setDetailedText(sProblems.join("\n"));
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.setDefaultButton(QMessageBox::Ok);
+	msgBox.exec();
+	return;
+
+}
+
+
+
+void H2MainWindow::secondHalf()
+{
+	//======================bottom half vvvvvvv
+
+	// IWe should now adapt those widgets to their respective screens.
+	QDialog *pStimulusDisplayDialog  = NULL;
+
+	if (m_bStimInDialog)
+	{
+		pStimulusDisplayDialog = createStimulusWidget(m_pmm);
+		qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
+		//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
+		pStimulusDisplayDialog->show();
+	}
+	else
+	{
+		adaptVideoWidgets(m_pmm);
+	}
+
+	// This is where the experiment is actually run.
+	int cpStatus = m_pControlPanel->exec();
+
+	// delete the video widgets.
+	// TODO: This should be guarded against cases where the widgets are owned by something else -
+	// like when they are contained in another widget -
+	// in which case they will be deleted when that thing is deleted.
+
+	qDebug() << "m_pmm->stop()";
+	m_pmm->stop();
+	if (pStimulusDisplayDialog)
+		delete pStimulusDisplayDialog;
+	else
+	{
+		qDebug() << " delete widgets";
+		// must explicitly delete the stim widgets
+		HStimulusWidget *w;
+		w = m_pmm->getHStimulusWidget(HPlayerPositionType::Center);
+		if (w) delete w;
+		w = m_pmm->getHStimulusWidget(HPlayerPositionType::Left);
+		if (w) delete w;
+		w = m_pmm->getHStimulusWidget(HPlayerPositionType::Right);
+		if (w) delete w;
+		qDebug() << " delete widgets done";
+	}
+
+
+	if (cpStatus == QDialog::Accepted)
+	{
+		HResults* results = new HResults(m_experimentSettings, m_pRunSettingsDialog->getRunSettings(),
+				m_pRunSettingsDialog->getSubjectSettings(), m_eventLog,
+				m_pRunSettingsDialog->getRunLabel(),
+				QCoreApplication::instance()->applicationVersion());
+
+		// Always save results. No option here.
+		qDebug() << "save results";
+		QDir dir (habutilGetResultsDir(m_pExperimentListWidget->selectedExperiment()));
+		QString filename(dir.absoluteFilePath(QString("%1.hab").arg(m_pRunSettingsDialog->getRunLabel())));
+		qDebug() << "Saving results to " << filename;
+		if (!results->save(filename))
+		{
+			qCritical() << "Error - cannot save data to file " << filename;
+		}
+		QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(m_pRunSettingsDialog->getRunLabel())));
+		if (!results->saveToCSV(filenameCSV))
+		{
+			qCritical() << "Error - cannot save data to csv file " << filenameCSV;
+		}
+
+		// display results
+		HResultsDialog dialog(*results, this);
+		dialog.exec();
+
+		delete results;
+
+		// clean up stuff
+		qDebug() << "Cleaning up...";
+		delete m_psm;
+		delete m_pld;
+		delete m_pControlPanel;
+		delete m_pmm;
+		delete m_pRunSettingsDialog;
+		qDebug() << "Cleaning up...done";
 	}
 }
 

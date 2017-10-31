@@ -36,7 +36,7 @@ namespace GUILib
 
 	public:
 		HExperimentMain(const Habit::ExperimentSettings& experimentSettings, QWidget *parent = 0, bool bReadOnly = false);
-		virtual ~HExperimentMain() {};
+		virtual ~HExperimentMain();
 
 	protected:
 		void closeEvent(QCloseEvent *event);

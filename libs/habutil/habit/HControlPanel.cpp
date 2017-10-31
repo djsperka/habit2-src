@@ -48,7 +48,7 @@ HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEve
 HControlPanel::~HControlPanel()
 {
 	qDebug() << "HControlPanel::~HControlPanel()";
-	delete m_pmm;
+	//delete m_pmm;
 }
 
 void HControlPanel::setStateMachine(HStateMachine *psm)
@@ -168,11 +168,11 @@ void HControlPanel::onStopTrials()
 void HControlPanel::onExperimentFinished()
 {
 	m_log.append(new HExperimentEndEvent(HElapsedTimer::elapsed()));
-	if (m_pmm)
-	{
-		delete m_pmm;
-		m_pmm = NULL;
-	}
+//	if (m_pmm)
+//	{
+//		delete m_pmm;
+//		m_pmm = NULL;
+//	}
 	accept();
 }
 

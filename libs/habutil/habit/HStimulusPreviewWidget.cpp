@@ -16,8 +16,8 @@ const int f_previewContext = 0;
 GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, const QDir& dirStimRoot, QWidget *parent)
 : QWidget(parent)
 {
-
-	m_pmm = createMediaManager(info);
+	qDebug() << "HStimulusPreviewWidget::HStimulusPreviewWidget(" << (parent ? "parent" : "NULL") << ")";
+	m_pmm = createMediaManager(info, 320, 240);
 	m_pmm->addBackground(info.getBackGroundColor());
 
 	// make an hbox to hold the widgets
@@ -68,7 +68,8 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 
 GUILib::HStimulusPreviewWidget::~HStimulusPreviewWidget()
 {
-	m_pmm->clear();
+	qDebug() << "HStimulusPreviewWidget::~HStimulusPreviewWidget()";
+	m_pmm->stop();
 	delete m_pmm;
 }
 
@@ -143,6 +144,11 @@ void GUILib::HStimulusPreviewWidget::preview(const Habit::HStimulusSettingsList&
 void GUILib::HStimulusPreviewWidget::clear()
 {
 	m_pmm->clear();
+}
+
+void GUILib::HStimulusPreviewWidget::pause()
+{
+	//m_pmm->pause();
 }
 
 void GUILib::HStimulusPreviewWidget::setStimulusLayoutType(const HStimulusLayoutType& type)

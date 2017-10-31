@@ -44,6 +44,11 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 	m_pbSave->setDisabled(bReadOnly);
 }
 
+HExperimentMain::~HExperimentMain()
+{
+	qDebug() << "HExperimentMain::~HExperimentMain()";
+}
+
 void HExperimentMain::components()
 {
 	QStringList slGeneral;
@@ -55,7 +60,7 @@ void HExperimentMain::components()
 	m_pGeneralListView->setCurrentIndex(m_pGeneralListView->model()->index(0, 0));
 	m_pGeneralListView->setFixedHeight(m_pGeneralListView->sizeHintForRow(0) * slGeneral.count() + 2*m_pGeneralListView->frameWidth());
 
-	m_pPagesWidget = new QStackedWidget;
+	m_pPagesWidget = new QStackedWidget(this);
 
 	// Stimulus display info
 	m_pStimulusDisplayInfoWidget = new HStimulusDisplayInfoWidget(m_settings.getStimulusDisplayInfo());

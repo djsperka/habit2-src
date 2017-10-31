@@ -46,6 +46,7 @@ namespace GUILib
 		void preview(const Habit::StimulusSettings& stimulus);
 		void preview(const Habit::HStimulusSettingsList& stimuli, QList< QPair<int, QString> > list);
 		void clear();
+		void pause();
 		void setStimulusLayoutType(const HStimulusLayoutType& type);
 
 	protected slots:

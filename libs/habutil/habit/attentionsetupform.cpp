@@ -49,7 +49,7 @@ void AttentionSetupForm::stimulusSettingsChanged()
 void AttentionSetupForm::components()
 {
 	QGroupBox *pIntervalGroup = new QGroupBox(tr("Intertrial Interval"));
-	QGroupBox *pStimulusGroup = new QGroupBox(tr("Intertrial Stimulus"));
+	m_pStimulusGroup = new QGroupBox(tr("Intertrial Stimulus"));
 	m_pStimulusSettingsWidget = new HStimulusSettingsWidget(m_agSettings.getAttentionGetterStimulus(), m_stimulusDisplayInfo, this);
 
 	QDir dir;
@@ -61,7 +61,7 @@ void AttentionSetupForm::components()
 	QVBoxLayout* pStimulusLayout = new QVBoxLayout();
 	QVBoxLayout* pIntervalLayout = new QVBoxLayout();
 
-	pStimulusGroup->setLayout(pStimulusLayout);
+	m_pStimulusGroup->setLayout(pStimulusLayout);
 	pStimulusLayout->addWidget(m_pStimulusSettingsWidget);
 	pStimulusLayout->addWidget(m_pStimulusPreviewWidget);
 
@@ -74,6 +74,7 @@ void AttentionSetupForm::components()
 	m_prbUseISI->setToolTip(QString("Trials proceed automatically after time interval"));
 	m_plineeditISI = new QLineEdit;
 	m_plineeditISI->setValidator(new QIntValidator(1, 999999));
+	m_prbSoundOnlyAG =  new QRadioButton("Sound-only attention getter");
 	QLabel *pISI = new QLabel("ms");
 	QHBoxLayout *hbox = new QHBoxLayout;
 	hbox->addWidget(m_prbUseISI);
@@ -85,9 +86,10 @@ void AttentionSetupForm::components()
 	pIntervalLayout->addWidget(m_prbUseAG);
 	pIntervalLayout->addLayout(hbox);
 	pIntervalLayout->addWidget(m_prbNoISI);
+	pIntervalLayout->addWidget(m_prbSoundOnlyAG);
 
-	pMainLayout->addWidget(pStimulusGroup);
 	pMainLayout->addWidget(pIntervalGroup);
+	pMainLayout->addWidget(m_pStimulusGroup);
 	pMainLayout->addStretch(1);
 }
 
@@ -129,6 +131,10 @@ void AttentionSetupForm::connections()
 	//connect(modifyButton_, SIGNAL(clicked()), this, SLOT(onModifyClick()));
 	connect(m_pStimulusSettingsWidget, SIGNAL(stimulusSettingsChanged()), this, SLOT(stimulusSettingsChanged()));
 	connect(m_prbUseISI, SIGNAL(toggled(bool)), m_plineeditISI, SLOT(setEnabled(bool)));
+	connect(m_prbNoISI, SIGNAL(toggled(bool)), this, SLOT(toggleNoISI(bool)));
+	connect(m_prbUseAG, SIGNAL(toggled(bool)), this, SLOT(toggleUseAG(bool)));
+	connect(m_prbUseISI, SIGNAL(toggled(bool)), this, SLOT(toggleUseISI(bool)));
+	connect(m_prbSoundOnlyAG, SIGNAL(toggled(bool)), this, SLOT(toggleSoundOnlyAG(bool)));
 }
 
 void AttentionSetupForm::setConfigurationObject(const Habit::AttentionGetterSettings& settings)
@@ -136,5 +142,43 @@ void AttentionSetupForm::setConfigurationObject(const Habit::AttentionGetterSett
 	m_agSettings = settings;
 	initialize();
 }
+
+void AttentionSetupForm::toggleNoISI(bool checked)
+{
+	qDebug() << "NoISI " << (checked ? "checked" : "not checked");
+	if (checked)
+	{
+		m_pStimulusGroup->setEnabled(false);
+	}
+}
+
+void AttentionSetupForm::toggleUseAG(bool checked)
+{
+	qDebug() << "UseAG " << (checked ? "checked" : "not checked");
+	if (checked)
+	{
+		m_pStimulusGroup->setEnabled(true);
+	}
+}
+
+void AttentionSetupForm::toggleUseISI(bool checked)
+{
+	qDebug() << "UseISI " << (checked ? "checked" : "not checked");
+	if (checked)
+	{
+		m_pStimulusGroup->setEnabled(true);
+	}
+}
+
+void AttentionSetupForm::toggleSoundOnlyAG(bool checked)
+{
+	qDebug() << "SoundOnly " << (checked ? "checked" : "not checked");
+	if (checked)
+	{
+		m_pStimulusGroup->setEnabled(true);
+	}
+}
+
+
 
 }

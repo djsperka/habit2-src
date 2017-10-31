@@ -18,6 +18,10 @@ GUILib::HRunSettingsDialog::HRunSettingsDialog(const Habit::ExperimentSettings& 
 	connections();
 }
 
+GUILib::HRunSettingsDialog::~HRunSettingsDialog()
+{
+	qDebug() << "GUILib::HRunSettingsDialog::~HRunSettingsDialog()";
+}
 
 QString GUILib::HRunSettingsDialog::getRunLabel() const
 {
