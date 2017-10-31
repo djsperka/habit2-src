@@ -1,7 +1,7 @@
 MAKEFILE = Makefile.qmake
 TEMPLATE = subdirs
 CONFIG += qt debug_and_release
-SUBDIRS = habutil habit hg2 testmm hvw
+SUBDIRS = habutil habit hg2 testmm
 
 # habresults gplayer testmm hgstplayer 
 habutil.subdir = libs/habutil
