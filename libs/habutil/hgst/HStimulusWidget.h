@@ -50,6 +50,7 @@ class HStimulusWidget: public QFrame
 		QSize m_sizeTargetScreen;
 		HVideoWidget *m_videoWidget;
 
+
 	public:
 	    HStimulusWidget(const Habit::StimulusDisplayInfo& sdi, float screenWidth, float screenHeight, QWidget *parent = 0);
 	    virtual ~HStimulusWidget();

@@ -8,7 +8,7 @@
 
 #include <hgst/HStimulusWidget.h>
 #include <hgst/HStimulusLayout.h>
-
+#include <QHBoxLayout>
 
 
 HStimulusWidget::HStimulusWidget(const Habit::StimulusDisplayInfo& sdi, float screenWidth, float screenHeight, QWidget *parent)
@@ -27,9 +27,15 @@ HStimulusWidget::HStimulusWidget(const Habit::StimulusDisplayInfo& sdi, float sc
 	setAutoFillBackground(true);
 
 	// create video widget
-	m_videoWidget = new HVideoWidget(sdi.getDisplayType(), sdi.isOriginalAspectRatioMaintained(), this);
+	m_videoWidget = new HVideoWidget(this);
 
+
+#if 0
 	// layout
+	QHBoxLayout *layout = new QHBoxLayout;
+	layout->addWidget(m_videoWidget);
+    setLayout(layout);
+#endif
     HStimulusLayout *layout = new HStimulusLayout(m_videoWidget, sdi.getDisplayType(), sdi.isOriginalAspectRatioMaintained(), m_sizeTargetScreen);
     setLayout(layout);
 }

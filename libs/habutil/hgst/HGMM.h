@@ -8,20 +8,16 @@
 #ifndef APPS_HG2_HGMM_H_
 #define APPS_HG2_HGMM_H_
 
-#include <hgst/HStimulusWidget.h>
-
 #include <QObject>
 #include <QDir>
 #include <QMultiMap>
 #include <QTimer>
-#include <QGst/Ui/VideoWidget>
-#include <QGst/Element>
-#include <QGst/Pipeline>
-#include <QGst/Pad>
-#include "HGMMHelper.h"
+#include <glib.h>
+#include "HGMMPipeline.h"
 #include "HTypes.h"
 #include "stimulussettings.h"
 #include "stimulisettings.h"
+#include "HStimulusWidget.h"
 
 
 // Media manager for Habit.
@@ -40,7 +36,11 @@ class HGMM: public QObject
 	bool m_bUseISS;
 	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
 	QTimer *m_readyTimeout, *m_readyCheck;
-	HGMMHelper *m_pHelperCurrent;
+	HGMMPipeline *m_pipelineCurrent;
+	GThread *m_gthread;
+	GMainLoop *m_pgml;
+	bool m_bReady;
+
 
 	// A map containing lists of stimulus keys (which can be played with stim(key), and whose
 	// StimulusSettings can be fetched with getStimulusSettings(key)), saved according to their
@@ -54,13 +54,14 @@ class HGMM: public QObject
 	unsigned int m_defaultKey;	// this key will always work
 
 	void playStim(unsigned int key);
+	static gpointer threadFunc(gpointer user_data);
+	void updateGeometry();
 
 	// Get the next key for m_mapStim. The values are doled out sequentially. Nothing special,
 	// this is a convenience.
 	unsigned int nextKey();
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss, int context);
 	unsigned int addStimulus(unsigned int key, const QString& name, const QColor& color, int context);
-	//void addToPipeline(HGMMData *pdata, const Habit::StimulusInfo& info);
 
 	bool m_bPendingAG;
 	bool m_bPendingStim;
@@ -69,7 +70,7 @@ class HGMM: public QObject
 protected:
 
 	// A map containing StimulusSettings objects, key is an integer.
-	QMap<unsigned int, HGMMHelper *> m_mapData;
+	QMap<unsigned int, HGMMPipeline *> m_mapPipelines;
 
 public:
 	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray);
@@ -83,7 +84,7 @@ public:
 	virtual void addStimuli(const Habit::StimuliSettings& ss, int context);
 	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context);
 	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context);
-
+	virtual void stop();
 	//QGst::Ui::VideoWidget *getVideoWidget(const HPlayerPositionType& type);
 	HStimulusWidget *getHStimulusWidget(const HPlayerPositionType& type);
 	const HStimulusLayoutType& getStimulusLayoutType() const { return m_stimulusLayoutType; };
@@ -97,8 +98,10 @@ public:
 	// emit mmReady() if all are ready; emit mmFail() if not ready before timeout ms.
 	void getReady(int ms);
 
+	bool waitForStimuliReady(int maxMS, int checkInterval = 200);
+
 	//const QMap<unsigned int, const Habit::StimulusSettings *>& pmap() { return m_mapPStimulusSettings; };
-	const QMap<unsigned int, HGMMHelper *>& dataMap() { return m_mapData; };
+	const QMap<unsigned int, HGMMPipeline *>& pipelineMap() { return m_mapPipelines; };
 public Q_SLOTS:
 
 	void stim(unsigned int);

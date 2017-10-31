@@ -8,27 +8,23 @@
 #ifndef LIBS_HABUTIL_HGST_HVIDEOWIDGET_H_
 #define LIBS_HABUTIL_HGST_HVIDEOWIDGET_H_
 
-#include <QGst/Ui/VideoWidget>
+#include <QWidget>
 #include "HTypes.h"
 
 
-class HVideoWidget: public QGst::Ui::VideoWidget
+class HVideoWidget: public QWidget
 {
 	Q_OBJECT
 
 	QSize m_sizeStimulus;
-	const HDisplayType& m_displayType;
-	bool m_bMaintainAspectRatio;
 
 public:
-	HVideoWidget(const HDisplayType& dType, bool bMaintainAspectRatio, QWidget *parent = NULL);
+	HVideoWidget(QWidget *parent = NULL);
 	virtual ~HVideoWidget();
 
-	void setStimulusSize(float width, float height);
-	const QSize& getStimulusSize() const;
+	void setStimulusSize(const QSize& size) { m_sizeStimulus = size; };
+	const QSize& getStimulusSize() const { return m_sizeStimulus; };
 
-	//QSize sizeHint() const;
-	//QSize getSize() const;
 
 	public Q_SLOTS:
 		void stimulusChanged();

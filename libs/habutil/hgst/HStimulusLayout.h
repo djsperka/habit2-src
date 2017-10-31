@@ -29,13 +29,10 @@ public:
   QLayoutItem *itemAt(int) const;
   QLayoutItem *takeAt(int);
   void setGeometry(const QRect &rect);
-
-protected:
-  void addItem(QLayoutItem *item) {}; // DO NOT CALL - NO-OP
+  void addItem(QLayoutItem *item);
 
 private:
-  QList<QLayoutItem*> m_list;
-  HVideoWidget *m_pVideoWidget;
+  QLayoutItem* m_item;	// only one item is allowed, and it must be an HVideoWidget
   const HDisplayType& m_displayType;
   bool m_bMaintainAspectRatio;		// only applies to display type HDisplayType::HDisplayTypeFullScreen
   QSize m_targetDisplaySize;			// only applies to HDisplayType::HDisplayTypeOriginalSize
