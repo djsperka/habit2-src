@@ -11,7 +11,7 @@ else {
 }
 CONFIG += qt debug_and_release link_pkgconfig c++11
 
-PKGCONFIG += Qt5GStreamer-1.0 Qt5GStreamerUi-1.0 gstreamer-1.0
+PKGCONFIG += gstreamer-1.0
 
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
@@ -26,6 +26,7 @@ CONFIG(debug, debug|release) {
 INCLUDEPATH += 	"/usr/local/include" 
 INCLUDEPATH += ../../libs/habutil
 INCLUDEPATH += ../../libs/habutil/habit ../../libs/habutil/hgst
+
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
 SOURCES			=	main.cpp TestMMDialog.cpp TestMMController.cpp
 HEADERS			=	TestMMDialog.h TestMMController.h

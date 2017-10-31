@@ -13,7 +13,7 @@
 #include "HWorkspaceUtil.h"
 #include <QApplication>
 #include <QtDebug>
-#include <QGst/Init>
+#include <gst/gst.h>
 
 
 #include "TestMMDialog.h"
@@ -21,11 +21,10 @@
 int main(int argc, char **argv)
 {
 	QApplication app(argc, argv);
-	QGst::init(&argc, &argv);
+	gst_init(&argc, &argv);
 	app.setApplicationName("habit2");
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
-
 
 	// Default is to always have log file.
 	for (int i=1; i<argc; i++)
