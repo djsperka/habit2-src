@@ -23,7 +23,8 @@
 // Position 0 in the players is reserved for the attention getter (even if there is no attention getter
 // used this position is filled with a background stimulus). 
 
-HGMM* createMediaManager(const Habit::ExperimentSettings& es, int screenWidth=320, int screenHeight = 240);
-HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth = 320, int screenHeight = 240);
+HGMM* createMediaManager(const Habit::ExperimentSettings& es, int screenWidth, int screenHeight);
+HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth, int screenHeight);
+HGMM* createMediaManager(const Habit::ExperimentSettings& es);
 
 

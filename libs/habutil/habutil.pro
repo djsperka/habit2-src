@@ -12,21 +12,15 @@ CONFIG(debug, debug|release) {
 	DESTDIR = release
 }
 
-# Tell qmake to use pkg-config to find QtGStreamer.
+# Tell qmake to use pkg-config to find gstreamer.
 CONFIG += link_pkgconfig c++11
 
-QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
+# Now tell qmake to link to gstreamer and also use its include path and Cflags.
+PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-bad-1.0
+QT += widgets
 
-# Now tell qmake to link to QtGStreamer and also use its include path and Cflags.
-contains(QT_VERSION, ^4\\..*) {
-  PKGCONFIG += QtGStreamer-1.0 QtGStreamerUi-1.0
-}
-contains(QT_VERSION, ^5\\..*) {
-  PKGCONFIG += Qt5GStreamer-1.0 Qt5GStreamerUi-1.0
-  QT += widgets
-  INCLUDEPATH += "/Users/dan/install/include/gst-plugins-base-1.12.1"
-}
-
+# videotestsrc include files
+INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
 
 HEADERS +=	HLook.h \
 			HLooker.h \
@@ -139,9 +133,10 @@ HEADERS +=	HLook.h \
 			habit/HExperimentNameDialog.h \
 			wizards/PhaseWizardPages.h \
 			hgst/HGMM.h \
-			hgst/HGMMHelper.h \
+			hgst/HGMMPipeline.h \
 			hgst/HStimulusWidget.h \
-			hgst/HVideoWidget.h
+			hgst/HVideoWidget.h \
+			hgst/HStimulusLayout.h
 
 		
 
@@ -252,45 +247,13 @@ SOURCES +=	HLook.cpp \
 			habit/HExperimentNameDialog.cpp \
 			wizards/PhaseWizardPages.cpp \
 			hgst/HGMM.cpp \
-			hgst/HGMMHelper.cpp \
+			hgst/HGMMPipeline.cpp \
 			hgst/HStimulusWidget.cpp \
-			hgst/HVideoWidget.cpp
+			hgst/HVideoWidget.cpp \
+			hgst/HStimulusLayout.cpp
 			
-
-lessThan(QT_MAJOR_VERSION, 5) {
-	HEADERS += \
-			HAudioPlayer.h \
-			HVIPlayer.h
 			
-	SOURCES += \
-			HAudioPlayer.cpp \
-			HVIPlayer.cpp
-}
-else {
-	HEADERS += \
-			HGstPlayer.h \
-			HGstPlayer2.h \
-			HGstMediaManager.h
-			
-	SOURCES += \
-			HGstPlayer.cpp \
-			HGstPlayer2.cpp \
-			HGstMediaManager.cpp
-
-#	QMAKE_LFLAGS += -F/Users/dan/git/vlc-qt/build/src/lib
-#	LIBS       += -framework VLCQtCore -framework VLCQtWidgets
-#	INCLUDEPATH += /Users/dan/install/include /Users/dan/git/vlc-qt/libvlc-headers/include
-
-# gst-plugins-base
-	INCLUDEPATH += /Users/dan/git/gst-plugins-base
-
-
-
-# need this for boost?
-	INCLUDEPATH += "/usr/local/include"
-
-}			
-
+INCLUDEPATH += "/usr/local/include"
 
 RESOURCES = habit/resources.qrc
 

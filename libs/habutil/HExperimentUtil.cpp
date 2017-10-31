@@ -110,7 +110,7 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	}
 
 	// Store the stimulus settings events in the log
-	QMapIterator<unsigned int, HGMMHelper *> it(pmm->dataMap());
+	QMapIterator<unsigned int, HGMMPipeline *> it(pmm->pipelineMap());
 	while (it.hasNext())
 	{
 	    it.next();
