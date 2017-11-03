@@ -115,7 +115,7 @@ void TestMMDialog::experimentActivated(QString expt)
 			qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno() << " DONE";
 		}
 	}
-	m_pmm->getReady(5000);
+	//m_pmm->getReady(5000);
 
 
 	QListIterator<unsigned int> itIndices(m_stimIndices);
