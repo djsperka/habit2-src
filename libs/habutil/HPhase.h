@@ -70,6 +70,7 @@ public slots:
 	void screenStarted(int, const QString&);
 	void agStarted(int);
 	void stimStarted(int);
+	void checkPrerollStatus(int trialnumber=-1, int repeat=0);
 };
 
 class HAllTrialsDoneTransition: public QAbstractTransition

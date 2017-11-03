@@ -45,6 +45,8 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 
 	connect(this, SIGNAL(phaseStarted(QString)), &exp, SIGNAL(phaseStarted(QString)));
 	connect(m_sTrial, SIGNAL(trialStarted(int, int)), &exp, SIGNAL(trialStarted(int, int)));
+
+	checkPrerollStatus();
 };
 
 
@@ -61,6 +63,38 @@ void HPhase::agStarted(int id)
 void HPhase::stimStarted(int stimid)
 {
 	eventLog().append(new HStimStartEvent(stimid, HElapsedTimer::elapsed()));
+}
+
+void HPhase::checkPrerollStatus(int trialnumber, int repeat)
+{
+	// If trialnumber is negative, then preroll the first stim
+	if (trialnumber < 0)
+	{
+		if (m_stimuli.size() > 0)
+		{
+			qDebug() << "HPhase::checkPrerollStatus() - preroll first stimulus";
+			experiment().getMediaManager().preroll(m_stimuli[0].first);
+		}
+	}
+	else
+	{
+		int prerollID = m_itrial+1;
+		qDebug() << "Check preroll status for trial " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial];
+		if (prerollID < m_stimuli.size())
+		{
+			qDebug() << "Initiate preroll for stim id " << m_stimuli[prerollID];
+			experiment().getMediaManager().preroll(m_stimuli[prerollID].first);
+		}
+		else
+		{
+			qDebug() << "At last stim in phase; nothing to preroll.";
+		}
+		if (m_itrial > 0)
+		{
+			qDebug() << "Set ready state for stimulus " << m_stimuli[m_itrial-1];
+			experiment().getMediaManager().ready(m_stimuli[m_itrial-1].first);
+		}
+	}
 }
 
 void HPhase::onEntry(QEvent* e)
