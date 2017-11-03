@@ -15,8 +15,7 @@ CONFIG(debug, debug|release) {
 # Tell qmake to use pkg-config to find gstreamer.
 CONFIG += link_pkgconfig c++11
 
-# Now tell qmake to link to gstreamer and also use its include path and Cflags.
-PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-bad-1.0
+PKGCONFIG += gstreamer-1.0
 QT += widgets
 
 # videotestsrc include files
@@ -134,9 +133,12 @@ HEADERS +=	HLook.h \
 			wizards/PhaseWizardPages.h \
 			hgst/HGMM.h \
 			hgst/HGMMPipeline.h \
+			hgst/HPipeline.h \
+			hgst/HPipelineColor.h \
 			hgst/HStimulusWidget.h \
 			hgst/HVideoWidget.h \
-			hgst/HStimulusLayout.h
+			hgst/HStimulusLayout.h \
+			hgst/HGMMException.h
 
 		
 
@@ -248,9 +250,12 @@ SOURCES +=	HLook.cpp \
 			wizards/PhaseWizardPages.cpp \
 			hgst/HGMM.cpp \
 			hgst/HGMMPipeline.cpp \
+			hgst/HPipeline.cpp \
+			hgst/HPipelineColor.cpp \
 			hgst/HStimulusWidget.cpp \
 			hgst/HVideoWidget.cpp \
-			hgst/HStimulusLayout.cpp
+			hgst/HStimulusLayout.cpp \
+			hgst/HGMMException.cpp
 			
 			
 INCLUDEPATH += "/usr/local/include"
