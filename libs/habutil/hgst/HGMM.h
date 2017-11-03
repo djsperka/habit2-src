@@ -78,30 +78,36 @@ public:
 	virtual ~HGMM();
 
 
-	virtual void clear();
 	virtual unsigned int addAG(const Habit::StimulusSettings& ags);
 	virtual unsigned int addBackground(const QColor& color);
 	virtual void addStimuli(const Habit::StimuliSettings& ss, int context);
 	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context);
 	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context);
-	virtual void stop();
-	//QGst::Ui::VideoWidget *getVideoWidget(const HPlayerPositionType& type);
+
+
 	HStimulusWidget *getHStimulusWidget(const HPlayerPositionType& type);
 	const HStimulusLayoutType& getStimulusLayoutType() const { return m_stimulusLayoutType; };
 	const Habit::StimulusSettings& getStimulusSettings(int key) const;
 	QList<unsigned int> getContextStimList(int context);
 
-	// check if all pipelines are prerolled (in paused state and async done); this means any can be started and it will start up asap.
-	//bool isReady() const;
-
 	// set all pipelines to paused state, then monitor and wait for all pads to be assigned.
 	// emit mmReady() if all are ready; emit mmFail() if not ready before timeout ms.
-	void getReady(int ms);
+	// DO NOT USE void getReady(int ms);
 
+	// currently a no-op, that may change djs 11-1-17
 	bool waitForStimuliReady(int maxMS, int checkInterval = 200);
 
-	//const QMap<unsigned int, const Habit::StimulusSettings *>& pmap() { return m_mapPStimulusSettings; };
+	// each pipeline represents a single stimulus (single or dual screen, i.e. Habit::StimulusSettings)
 	const QMap<unsigned int, HGMMPipeline *>& pipelineMap() { return m_mapPipelines; };
+	unsigned int nStimuli() const { return m_mapPipelines.size(); };
+
+	// pipeline control
+	void preroll(unsigned int id);
+	void ready(unsigned int id);
+	void pause(unsigned int id);
+	virtual void clear();
+	virtual void stop();
+
 public Q_SLOTS:
 
 	void stim(unsigned int);

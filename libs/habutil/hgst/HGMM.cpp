@@ -186,13 +186,17 @@ unsigned int HGMM::addStimulus(const QString& name, const QColor& color, int con
 
 unsigned int HGMM::addAG(const Habit::StimulusSettings& ssAG)
 {
-	return (m_agKey = addStimulus(ssAG, -1));
+	m_agKey = addStimulus(ssAG, -1);
+	preroll(m_agKey);
+	return m_agKey;
 }
 
 unsigned int HGMM::addBackground(const QColor& color)
 {
 	qWarning() << "TODO: ensure addBackground is called only once";
-	return (m_backgroundKey = addStimulus(QString("background"), color, -2));
+	m_backgroundKey = addStimulus(QString("background"), color, -2);
+	preroll(m_backgroundKey);
+	return(m_backgroundKey);
 }
 
 void HGMM::clear()
@@ -230,8 +234,48 @@ void HGMM::stim(unsigned int key)
 	playStim(key);
 }
 
+void HGMM::ready(unsigned int key)
+{
+	qDebug() << "ready " << key << " stim " << getStimulusSettings(key).getName();
+
+	if (m_mapPipelines.contains(key))
+	{
+		m_mapPipelines.value(key)->ready();
+	}
+	else
+	{
+		qWarning() << "HGMM::ready(): key " << key << " not found!";
+	}
+}
+
+void HGMM::preroll(unsigned int key)
+{
+	qDebug() << "preroll " << key << " stim " << getStimulusSettings(key).getName();
+	if (m_mapPipelines.contains(key))
+	{
+		m_mapPipelines.value(key)->preroll();
+	}
+	else
+	{
+		qWarning() << "HGMM::preroll(): key " << key << " not found!";
+	}
+}
+
+void HGMM::pause(unsigned int key)
+{
+	if (m_mapPipelines.contains(key))
+	{
+		m_mapPipelines.value(key)->pause();
+	}
+	else
+	{
+		qWarning() << "HGMM::pause(): key " << key << " not found!";
+	}
+}
+
 void HGMM::playStim(unsigned int key)
 {
+	qDebug() << "playstim " << key << " stim " << getStimulusSettings(key).getName();
 	HGMMPipeline *pipeline = NULL;		// the pipeline that will be played
 
 	// get pipeline that will be displayed/played.
@@ -313,21 +357,24 @@ void HGMM::updateGeometry()
 	}
 }
 
-void HGMM::getReady(int ms)
-{
-	m_readyTimeout->start(ms);
-	m_readyCheck->start(500);
-
-	connect(m_readyCheck,  SIGNAL(timeout()), this, SLOT(readyCheck()) );
-	connect(m_readyTimeout, SIGNAL(timeout()), this, SLOT(readyFail()));
-	m_readyTimeout->start(ms);
-	m_readyCheck->start(500);
-
-	return;
-}
+//void HGMM::getReady(int ms)
+//{
+//	m_readyTimeout->start(ms);
+//	m_readyCheck->start(500);
+//
+//	connect(m_readyCheck,  SIGNAL(timeout()), this, SLOT(readyCheck()) );
+//	connect(m_readyTimeout, SIGNAL(timeout()), this, SLOT(readyFail()));
+//	m_readyTimeout->start(ms);
+//	m_readyCheck->start(500);
+//
+//	return;
+//}
 
 bool HGMM::waitForStimuliReady(int maxMS, int checkIntervalMS)
 {
+#if 1
+	return true;
+#else
 	QTimer maxTimer;
 	maxTimer.setSingleShot(true);
 	maxTimer.setInterval(maxMS);
@@ -353,6 +400,7 @@ bool HGMM::waitForStimuliReady(int maxMS, int checkIntervalMS)
 	checkTimer.start();
 	loop.exec();
 	return m_bReady;
+#endif
 }
 
 void HGMM::readyCheck()

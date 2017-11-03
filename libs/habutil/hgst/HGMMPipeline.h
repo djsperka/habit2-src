@@ -42,14 +42,16 @@ class HGMMPipeline: public QObject
 		GstElement *sink;
 		GstElement *convert;
 		GstElement *identity;
+		GstElement *volume;	// sound only
 		GstElement *freeze;
 		HVideoWidget *videoWidget;
 		QSize size;		// stimulus size, as found in file
 		bool needPad;
 		bool isVideo;
 		bool isLoop;
-		bool isLoopingStarted;
-		PipelineData() : sink(NULL), convert(NULL), identity(NULL), freeze(NULL), videoWidget(NULL), size(), needPad(true), isVideo(false), isLoop(false), isLoopingStarted(false) {};
+		bool isAudio;
+		//bool isPrerolled;
+		PipelineData() : sink(NULL), convert(NULL), identity(NULL), freeze(NULL), videoWidget(NULL), size(), needPad(true), isVideo(false), isLoop(false), isAudio(false) {};
 	};
 
 	QMap<HPlayerPositionType, PipelineData> m_mapPipelineData;
@@ -67,6 +69,8 @@ public:
 	GstPipeline *pipeline() { return GST_PIPELINE(m_pipeline); };
 	void play();
 	void pause();
+	void preroll();
+	void ready();
 	const Habit::StimulusSettings& stimulusSettings() const { return m_stimulus; };
 	GstElement* sink(const HPlayerPositionType& ppt) const;
 
@@ -90,6 +94,8 @@ private:
 	QDir m_root;
 	bool m_bISS;
 	GstElement *m_pipeline;
+	bool isPrerolled;
+	bool isPrerollPending;
 
 	QMap<HPlayerPositionType, PipelineData>& getPipelineDataMap() { return m_mapPipelineData; };
 
@@ -100,8 +106,14 @@ private:
 
 	static gboolean busCallback(GstBus *bus, GstMessage *msg, gpointer pdata);
 
+	static GstPadProbeReturn eventProbeCB (GstPad * pad, GstPadProbeInfo * info, gpointer user_data);
+
+
 	// add stimulus to this helper
 	void addMedia(const Habit::StimulusInfo& info, const HPlayerPositionType& ppt);
+
+	// add sound stimulus to this helper
+	void setSoundStimulus(const Habit::StimulusInfo& info, const HPlayerPositionType& ppt);
 
 	// use videotestsrc, static (known) sink.
 	void setSolidColorStimulus(const QColor& color, const HPlayerPositionType& ppt);
