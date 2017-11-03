@@ -21,7 +21,7 @@ class HG2Dialog: public QDialog
 	Q_OBJECT
 
 public:
-	HG2Dialog(const QDir& stimRootDir, int screen = -1, QWidget *parent = NULL);
+	HG2Dialog(const QDir& stimRootDir, int screen = -1, bool bUseToggle=false, QWidget *parent = NULL);
 	virtual ~HG2Dialog();
 protected Q_SLOTS:
 	void playClicked();
@@ -33,10 +33,11 @@ private:
 	//HGstPlayer *m_paudioHGstPlayer;
 	//HGstPlayer *m_pvideoHGstPlayer;
 	HGMM *m_pmm;
+	QPushButton *m_pb;
 	HStimulusWidget *m_pVideoWidgetLeft;
 	HStimulusWidget *m_pVideoWidgetRight;
 	HStimulusWidget *m_pVideoWidgetCenter;
-	QSpinBox *m_pSpinIndex;
+	unsigned int m_iCurrent;
 
 	QHBoxLayout *initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d);
 	QHBoxLayout *initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d);

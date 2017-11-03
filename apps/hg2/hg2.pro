@@ -5,7 +5,6 @@ TARGET = hg2
 
 # need this for boost?
 INCLUDEPATH += 	"/usr/local/include" 
-#INCLUDEPATH += "/Users/dan/install/include/gst-plugins-base-1.12.1"
 
 # produce nice compilation output
 #CONFIG += silent
@@ -16,14 +15,8 @@ CONFIG += debug_and_release link_pkgconfig c++11
 # need sql libs
 QT += sql
 
-#QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
-
 PKGCONFIG += gstreamer-1.0
 QT += widgets
-
-
-# Recommended if you are using g++ 4.5 or later. Must be removed for other compilers.
-#QMAKE_CXXFLAGS += -std=c++0x
 
 # Recommended, to avoid possible issues with the "emit" keyword
 # You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.

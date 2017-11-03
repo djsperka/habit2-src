@@ -34,10 +34,19 @@ int main(int argc, char **argv)
 	}
 
 	if (argc == 2)
+	{
 		screen = QString(argv[1]).toInt();
-	HG2Dialog dialog(QDir("/Users/dan/Desktop/habit22/stim/examples"), screen);
+		HG2Dialog dialog(QDir("/Users/dan/Desktop/habit22/stim/examples"), screen);
+		dialog.exec();
+	}
+	else if (argc == 3)
+	{
+		// ignore second arg
+		screen = QString(argv[1]).toInt();
+		HG2Dialog dialog(QDir("/Users/dan/Desktop/habit22/stim/examples"), screen, true);
+		dialog.exec();
+	}
 	//dialog.show();
-	dialog.exec();
 	return 0;
 }
 
