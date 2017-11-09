@@ -194,7 +194,7 @@ void HExperimentMain::generalListViewItemClicked(const QModelIndex& index)
 	m_pPagesWidget->setCurrentIndex(m_vecStackPages.at(index.row()));
 }
 
-void HExperimentMain::phaseListViewItemClicked(const QModelIndex& index)
+void HExperimentMain::phaseListViewItemClicked(const QModelIndex&)
 {
 	m_pGeneralListView->selectionModel()->select(m_pGeneralListView->selectionModel()->selection(), QItemSelectionModel::Deselect);
 	m_pPagesWidget->setCurrentIndex(4 + m_pPhaseListWidget->selectedPhaseIndex());
