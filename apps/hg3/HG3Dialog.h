@@ -21,7 +21,7 @@ class HG3Dialog: public QDialog
 	Q_OBJECT
 
 public:
-	HG3Dialog(const QDir& stimRootDir, int screen = -1, bool bUseToggle=false, QWidget *parent = NULL);
+	HG3Dialog(const QDir& stimRootDir, int screen = -1, const QString& flag = QString(""), QWidget *parent = NULL);
 	virtual ~HG3Dialog();
 protected Q_SLOTS:
 void readyClicked();
@@ -46,8 +46,8 @@ private:
 	HStimulusWidget *m_pVideoWidgetCenter;
 	unsigned int m_iCurrent;
 
-	QHBoxLayout *initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d);
-	QHBoxLayout *initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d);
+	QHBoxLayout *initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d, const QString& flag);
+	QHBoxLayout *initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d, const QString& flag);
 
 	//HGstPlayer *createMediaPlayerAndPopulate(const QDir& dirStimRoot, bool isAudio);
 //	HGstMediaManager *createMM(QGst::Ui::VideoWidget *v);
