@@ -37,12 +37,9 @@ HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const S
 
 void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisplayInfo& info)
 {
-	QDir root;
-	habutilGetStimulusRootDir(root);
-
 	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_stimulusDisplayInfo);
 	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
-	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(info, root, this);
+	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(info, this);
 
 	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(labelName));
 	QVBoxLayout *v1 = new QVBoxLayout;
@@ -249,6 +246,8 @@ Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()
 
 void HStimuliSettingsWidget::currentStimulusSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
+	Q_UNUSED(previous);
+
 	//qDebug() << "HStimuliSettingsWidget::currentStimulusSelectionChanged( " << current.row() << ", " << previous.row() << ")";
 
 	// look at current selection in order widget
@@ -260,6 +259,7 @@ void HStimuliSettingsWidget::currentStimulusSelectionChanged(const QModelIndex& 
 
 void HStimuliSettingsWidget::currentOrderSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
+	Q_UNUSED(previous);
 	//qDebug() << "HStimuliSettingsWidget::currentOrderSelectionChanged( " << current.row() << ", " << previous.row() << ")";
 	if (current.row() > -1)
 	{

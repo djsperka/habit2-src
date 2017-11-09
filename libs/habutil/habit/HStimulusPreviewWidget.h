@@ -41,7 +41,7 @@ namespace GUILib
 		void updateNavigation(QString stimName);
 
 	public:
-		HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, const QDir& dirStimRoot = QDir(), QWidget *parent = NULL);
+		HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, QWidget *parent = NULL);
 		~HStimulusPreviewWidget();
 		void preview(const Habit::StimulusSettings& stimulus);
 		void preview(const Habit::HStimulusSettingsList& stimuli, QList< QPair<int, QString> > list);
