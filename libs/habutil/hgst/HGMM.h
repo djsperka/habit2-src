@@ -13,12 +13,15 @@
 #include <QMultiMap>
 #include <QTimer>
 #include <glib.h>
+#include "HPipeline.h"
 #include "HGMMPipeline.h"
 #include "HTypes.h"
 #include "stimulussettings.h"
 #include "stimulisettings.h"
 #include "HStimulusWidget.h"
 
+
+typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, QObject *parent);
 
 // Media manager for Habit.
 // This media manager is entirely new for Habit 2.2+. It uses GStreamer, a media library available
@@ -36,18 +39,20 @@ class HGMM: public QObject
 	bool m_bUseISS;
 	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
 	QTimer *m_readyTimeout, *m_readyCheck;
-	HGMMPipeline *m_pipelineCurrent;
+	HPipeline *m_pipelineCurrent;
 	GThread *m_gthread;
 	GMainLoop *m_pgml;
 	bool m_bReady;
+	PipelineFactory m_pipelineFactory;
 
+	QMap<unsigned int, Habit::StimulusSettings> m_mapStimulusSettings;
 
 	// A map containing lists of stimulus keys (which can be played with stim(key), and whose
 	// StimulusSettings can be fetched with getStimulusSettings(key)), saved according to their
 	// context. The context is a logical grouping of stimuli. Each phase has its own context, as does
 	// the "attention getters", which has a fixed context.
 	//
-	// getContextStimList fetches a list of keys for the stimuli added for a given context.
+	// getContextStimList fetches a list of keys for the stimuli keys added for a given context.
 	QMultiMap<int, unsigned int> m_mapContext;
 	unsigned int m_backgroundKey;
 	unsigned int m_agKey;
@@ -70,11 +75,12 @@ class HGMM: public QObject
 protected:
 
 	// A map containing StimulusSettings objects, key is an integer.
-	QMap<unsigned int, HGMMPipeline *> m_mapPipelines;
+	QMap<unsigned int, HPipeline *> m_mapPipelines;
 
 public:
-	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray);
-	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray);
+
+	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = &HGMMPipeline::createHGMMPipeline);
+	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = &HGMMPipeline::createHGMMPipeline);
 	virtual ~HGMM();
 
 
@@ -87,7 +93,7 @@ public:
 
 	HStimulusWidget *getHStimulusWidget(const HPlayerPositionType& type);
 	const HStimulusLayoutType& getStimulusLayoutType() const { return m_stimulusLayoutType; };
-	const Habit::StimulusSettings& getStimulusSettings(int key) const;
+	const Habit::StimulusSettings getStimulusSettings(unsigned int key) const;
 	QList<unsigned int> getContextStimList(int context);
 
 	// set all pipelines to paused state, then monitor and wait for all pads to be assigned.
@@ -98,7 +104,7 @@ public:
 	bool waitForStimuliReady(int maxMS, int checkInterval = 200);
 
 	// each pipeline represents a single stimulus (single or dual screen, i.e. Habit::StimulusSettings)
-	const QMap<unsigned int, HGMMPipeline *>& pipelineMap() { return m_mapPipelines; };
+	const QMap<unsigned int, HPipeline *>& pipelineMap() { return m_mapPipelines; };
 	unsigned int nStimuli() const { return m_mapPipelines.size(); };
 
 	// pipeline control
@@ -112,8 +118,8 @@ public Q_SLOTS:
 
 	void stim(unsigned int);
 	void ag();
-	void readyCheck();
-	void readyFail();
+//	void readyCheck();
+//	void readyFail();
 	void nowPlaying();
 //	void playerStarted(int i, const QString& filename);
 //	void playerCleared(int i);

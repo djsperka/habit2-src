@@ -7,6 +7,7 @@
 
 
 #include "HGMMPipeline.h"
+#include "HGMMException.h"
 #include <QString>
 #include <gst/videotestsrc/gstvideotestsrc.h>
 
@@ -14,28 +15,26 @@
 
 // default constructor
 HGMMPipeline::HGMMPipeline(QObject *parent)
-: QObject(parent)
-, m_id(-999)
-, m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutUnknown)
+: HPipeline(-999, parent)
+, m_stimulusLayoutType(HStimulusLayoutType::HStimulusLayoutUnknown)
 , m_root("/")
 , m_bISS(false)
 , m_pipeline()
 {}
 
 HGMMPipeline::HGMMPipeline(int id, const Habit::StimulusSettings& stimulus, const QDir& stimRoot, HVideoWidget *pCenter, bool bISS, QObject *parent)
-: QObject(parent)
-, m_id(id)
-, m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutSingle)
+: HPipeline(id, parent)
+, m_stimulusLayoutType(HStimulusLayoutType::HStimulusLayoutSingle)
 , m_stimulus(stimulus)
 , m_root(stimRoot)
 , m_bISS(bISS)
 {
 	// create the pipeline itself
-	m_pipeline = gst_pipeline_new(C_STR(makeElementName("pipeline", HPlayerPositionType::Control, m_id)));
+	m_pipeline = gst_pipeline_new(C_STR(makeElementName("pipeline", HPlayerPositionType::Control, this->id())));
 	m_mapPipelineData[HPlayerPositionType::Center].pipeline = m_pipeline;
 
 	// create PipelineData struct. Referencing it in the map will create it.
-	m_mapPipelineData[HPlayerPositionType::Center].videoWidget = pCenter;
+	// no longer used m_mapPipelineData[HPlayerPositionType::Center].videoWidget = pCenter;
 
 	// add media elements to pipeline
 	addMedia(stimulus.getCenterStimulusInfo(), HPlayerPositionType::Center);
@@ -57,20 +56,19 @@ HGMMPipeline::HGMMPipeline(int id, const Habit::StimulusSettings& stimulus, cons
 }
 
 HGMMPipeline::HGMMPipeline(int id, const Habit::StimulusSettings& stimulus, const QDir& stimRoot, HVideoWidget *pLeft, HVideoWidget *pRight, bool bISS, QObject *parent)
-: QObject(parent)
-, m_id(id)
-, m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutLeftRight)
+: HPipeline(id, parent)
+, m_stimulusLayoutType(HStimulusLayoutType::HStimulusLayoutLeftRight)
 , m_stimulus(stimulus)
 , m_root(stimRoot)
 , m_bISS(bISS)
 {
 	// create the pipeline itself
-	m_pipeline = gst_pipeline_new(C_STR(makeElementName("pipeline", HPlayerPositionType::Control, m_id)));
+	m_pipeline = gst_pipeline_new(C_STR(makeElementName("pipeline", HPlayerPositionType::Control, this->id())));
 
 	// create PipelineData structs. Referencing it in the map will create them.
-	m_mapPipelineData[HPlayerPositionType::Left].videoWidget = pLeft;
+	// no longer used m_mapPipelineData[HPlayerPositionType::Left].videoWidget = pLeft;
 	m_mapPipelineData[HPlayerPositionType::Left].pipeline = m_pipeline;
-	m_mapPipelineData[HPlayerPositionType::Right].videoWidget = pRight;
+	// no longer used m_mapPipelineData[HPlayerPositionType::Right].videoWidget = pRight;
 	m_mapPipelineData[HPlayerPositionType::Right].pipeline = m_pipeline;
 
 	// add media elements to pipeline
@@ -91,6 +89,15 @@ HGMMPipeline::HGMMPipeline(int id, const Habit::StimulusSettings& stimulus, cons
 
 	// set to ready state
 	ready();
+}
+
+HPipeline *HGMMPipeline::createHGMMPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, QObject *parent)
+{
+	if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
+		return new HGMMPipeline(id, stimulusSettings, stimRoot, NULL, bISS, parent);
+	else
+		return new HGMMPipeline(id, stimulusSettings, stimRoot, NULL, NULL, bISS, parent);
+
 }
 
 HGMMPipeline::~HGMMPipeline()
@@ -219,21 +226,39 @@ void HGMMPipeline::detachWidgetsFromSinks()
 
 
 // set the "widget" property for each sink to its respective widget value
-void HGMMPipeline::attachWidgetsToSinks()
+void HGMMPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
 {
 	GValue v = G_VALUE_INIT;
 	g_value_init(&v, G_TYPE_POINTER);
-	QMapIterator<HPlayerPositionType, PipelineData> it(m_mapPipelineData);
-	while (it.hasNext())
+	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-	    it.next();
-	    if (it.key() != HPlayerPositionType::Sound)
-	    {
-			g_value_set_pointer(&v, it.value().videoWidget);
-			g_object_set_property(G_OBJECT(it.value().sink), "widget", &v);
-			it.value().videoWidget->setStimulusSize(it.value().size);
-	    }
+		if (m_mapPipelineData.contains(HPlayerPositionType::Center))
+		{
+			g_value_set_pointer(&v, w0);
+			g_object_set_property(G_OBJECT(m_mapPipelineData[HPlayerPositionType::Center].sink), "widget", &v);
+			if (w0)
+				w0->setStimulusSize(m_mapPipelineData[HPlayerPositionType::Center].size);
+		}
 	}
+	else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		if (m_mapPipelineData.contains(HPlayerPositionType::Left))
+		{
+			g_value_set_pointer(&v, w0);
+			g_object_set_property(G_OBJECT(m_mapPipelineData[HPlayerPositionType::Left].sink), "widget", &v);
+			if (w0)
+				w0->setStimulusSize(m_mapPipelineData[HPlayerPositionType::Left].size);
+		}
+		if (m_mapPipelineData.contains(HPlayerPositionType::Right))
+		{
+			g_value_set_pointer(&v, w1);
+			g_object_set_property(G_OBJECT(m_mapPipelineData[HPlayerPositionType::Right].sink), "widget", &v);
+			if (w1)
+				w1->setStimulusSize(m_mapPipelineData[HPlayerPositionType::Right].size);
+		}
+	}
+	else
+		throw HGMMException("Unhandled stimulus layout type!");
 }
 
 
@@ -313,9 +338,8 @@ void HGMMPipeline::emitNowPlaying()
 	emit nowPlaying();
 }
 
-gboolean HGMMPipeline::busCallback(GstBus *bus, GstMessage *msg, gpointer pdata)
+gboolean HGMMPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdata)
 {
-	bool bLoop = false;
 	GstState state, old_state;
 	QString factoryName;
 	int id;
@@ -516,7 +540,7 @@ void HGMMPipeline::padAdded(GstElement *src, GstPad *new_pad, PipelineData *pdat
 }
 
 
-GstPadProbeReturn HGMMPipeline::eventProbeCB (GstPad * pad, GstPadProbeInfo * info, gpointer user_data)
+GstPadProbeReturn HGMMPipeline::eventProbeCB (GstPad * pad, GstPadProbeInfo * info, gpointer)
 {
 	GstElement* parent = GST_PAD_PARENT(pad);
 	gchar *parentName = gst_element_get_name(parent);

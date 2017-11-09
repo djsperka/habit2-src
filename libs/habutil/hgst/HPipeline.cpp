@@ -21,44 +21,102 @@ void HPipeline::detachWidgetsFromSinks()
 	//no-op
 }
 
-void HPipeline::attachWidgetsToSinks(QWidget *w0, QWidget *w1)
+void HPipeline::attachWidgetsToSinks(HVideoWidget *, HVideoWidget *)
 {
 	// no-op
 }
 
 
-HPipeline *HPipeline::createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& stimulusLayoutType, bool bSound, bool bISS)
+//HPipeline *HPipeline::createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& stimulusLayoutType, bool bSound, bool bISS)
+//{
+//	if (stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
+//	{
+//		return createPipelineSingle(id, stimulusSettings, stimRoot, bSound, bISS);
+//	}
+//	else if (stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
+//	{
+//		return NULL;
+//		createPipelineLeftRight(id, stimulusSettings, stimRoot, bSound, bISS);
+//	}
+//	else
+//	{
+//		throw HGMMException(std::string("Unknown stimulus layout type: ") + C_STR(stimulusLayoutType.name()));
+//	}
+//}
+
+
+//HPipeline *HPipeline::createPipelineSingle (int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, bool bSound, bool bISS)
+//{
+//	HPipeline *pipeline = NULL;
+//
+//	// is center stimulus a solid color or a file?
+////	if (stimulusSettings.getCenterStimulusInfo().isColor() || stimulusSettings.getCenterStimulusInfo().isBackground())
+////	{
+////		return new HPipelineColor(id, stimulusSettings.getCenterStimulusInfo().getColor(), bISS);
+////	}
+//	return pipeline;
+//}
+//
+//HPipeline *HPipeline::createPipelineLeftRight(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, bool bSound, bool bISS)
+//{
+//	HPipeline *pipeline = NULL;
+//	return pipeline;
+//}
+
+QString HPipeline::makeElementName(const char *factoryName, const HPlayerPositionType& ppt, int number, const char *prefix)
 {
-	if (stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
+	QString result;
+	if (!prefix)
 	{
-		return createPipelineSingle(id, stimulusSettings, stimRoot, bSound, bISS);
-	}
-	else if (stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		return NULL;
-		createPipelineLeftRight(id, stimulusSettings, stimRoot, bSound, bISS);
+		QString format("%1-%2-%3");
+		result = format.arg(QString(factoryName)).arg(ppt.name()).arg(number);
 	}
 	else
 	{
-		throw HGMMException(std::string("Unknown stimulus layout type: ") + C_STR(stimulusLayoutType.name()));
+		QString format("%1-%2-%3-%4");
+		result = format.arg(QString(prefix)).arg(QString(factoryName)).arg(ppt.name()).arg(number);
 	}
+	return result;
+}
+
+GstElement *HPipeline::makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number, const char *prefix)
+{
+	return gst_element_factory_make(factoryName, makeElementName(factoryName, ppt, number, prefix).toStdString().c_str());
+}
+
+bool HPipeline::parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id, QString& prefix)
+{
+	bool b = false;
+	int iPrefix=0;
+	QStringList l = elementName.toLower().split('-');
+	if (l.size() == 4) iPrefix = 1;
+	else if (l.size() != 3) return false;
+
+	factoryName = l[0 + iPrefix];
+
+	if (l[1 + iPrefix] == QString("left"))
+		pppt = &HPlayerPositionType::Left;
+	else if (l[1 + iPrefix] == QString("right"))
+		pppt = &HPlayerPositionType::Right;
+	else if (l[1 + iPrefix] == QString("center"))
+		pppt = &HPlayerPositionType::Center;
+	else if (l[1 + iPrefix] == QString("control"))
+		pppt = &HPlayerPositionType::Control;
+	else
+		return false;
+
+	id = l[2 + iPrefix].toInt(&b);
+	return b;
 }
 
 
-HPipeline *HPipeline::createPipelineSingle (int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, bool bSound, bool bISS)
+void HPipeline::write(std::ostream& os) const
 {
-	HPipeline *pipeline = NULL;
-
-	// is center stimulus a solid color or a file?
-//	if (stimulusSettings.getCenterStimulusInfo().isColor() || stimulusSettings.getCenterStimulusInfo().isBackground())
-//	{
-//		return new HPipelineColor(id, stimulusSettings.getCenterStimulusInfo().getColor(), bISS);
-//	}
-	return pipeline;
+    os << "Pipeline Key: " << id() << std::endl;
 }
 
-HPipeline *HPipeline::createPipelineLeftRight(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, bool bSound, bool bISS)
+std::ostream& operator<<(std::ostream& os, const HPipeline& p)
 {
-	HPipeline *pipeline = NULL;
-	return pipeline;
+    p.write(os);
+    return os;
 }

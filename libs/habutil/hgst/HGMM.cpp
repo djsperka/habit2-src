@@ -10,13 +10,14 @@
 #include <QMapIterator>
 #include <QEventLoop>
 #include <gst/gst.h>
+#include <iostream>
 
 
 #define SPECIALPLAYHACK 1
 
 //const Habit::StimulusSettings HGMM::dummyStimulusSettings;
 
-HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& bkgdColor)
+HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
 : m_stimulusLayoutType(HStimulusLayoutType::HStimulusLayoutSingle)
 , m_root(dir)
 , m_bUseISS(useISS)
@@ -27,12 +28,13 @@ HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& 
 , m_gthread(NULL)
 , m_pgml(NULL)
 , m_bReady(false)
+, m_pipelineFactory(factory)
 {
-	m_readyTimeout = new QTimer(this);
-	m_readyTimeout->setSingleShot(true);
-	m_readyCheck = new QTimer(this);
-	connect(m_readyTimeout, SIGNAL(timeout()), this, SLOT	(readyFail()));
-	connect(m_readyCheck, SIGNAL(timeout()), this, SLOT(readyCheck()));
+//	m_readyTimeout = new QTimer(this);
+//	m_readyTimeout->setSingleShot(true);
+//	m_readyCheck = new QTimer(this);
+//	connect(m_readyTimeout, SIGNAL(timeout()), this, SLOT	(readyFail()));
+//	connect(m_readyCheck, SIGNAL(timeout()), this, SLOT(readyCheck()));
 	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
 	addBackground(bkgdColor);
 
@@ -41,7 +43,7 @@ HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& 
 	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
 }
 
-HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool useISS, const QColor& bkgdColor)
+HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
 : m_stimulusLayoutType(HStimulusLayoutType::HStimulusLayoutLeftRight)
 , m_root(dir)
 , m_bUseISS(useISS)
@@ -52,12 +54,13 @@ HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool 
 , m_gthread(NULL)
 , m_pgml(NULL)
 , m_bReady(false)
+, m_pipelineFactory(factory)
 {
-	m_readyTimeout = new QTimer(this);
-	m_readyTimeout->setSingleShot(true);
-	m_readyCheck = new QTimer(this);
-	connect(m_readyTimeout, SIGNAL(timeout()), this, SIGNAL(readyFail()));
-	connect(m_readyCheck, SIGNAL(timeout()), this, SLOT(readyCheck()));
+//	m_readyTimeout = new QTimer(this);
+//	m_readyTimeout->setSingleShot(true);
+//	m_readyCheck = new QTimer(this);
+//	connect(m_readyTimeout, SIGNAL(timeout()), this, SIGNAL(readyFail()));
+//	connect(m_readyCheck, SIGNAL(timeout()), this, SLOT(readyCheck()));
 	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
 	addBackground(bkgdColor);
 
@@ -73,6 +76,7 @@ gpointer HGMM::threadFunc(gpointer user_data)
 	qDebug() << "starting main loop\n";
 	g_main_loop_run(pgml);
 	qDebug() << "main loop ended\n";
+	return NULL;
 }
 
 HGMM::~HGMM()
@@ -123,22 +127,23 @@ void HGMM::addStimuli(const Habit::StimuliSettings& ss, int context)
 
 unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& stimulus, int context)
 {
-	HGMMPipeline *pipeline;
+	HPipeline *pipeline;
 
 	qDebug() << "Adding stimulus (key " << key << "): " << stimulus << " context " << context;
 
-	// Create a helper.
-	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pCenter->getHVideoWidget(), m_bUseISS, this);
-
-	}
-	else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget(), m_bUseISS, this);
-	}
-
-	// Add helper to map
+	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, this);
+//	// Create a helper.
+//	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
+//	{
+//		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pCenter->getHVideoWidget(), m_bUseISS, this);
+//
+//	}
+//	else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
+//	{
+//		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget(), m_bUseISS, this);
+//	}
+//
+//	// Add helper to map
 	m_mapPipelines.insert(key, pipeline);
 
 	// add key to context map
@@ -149,22 +154,23 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 
 unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QColor& color, int context)
 {
-	HGMMPipeline *pipeline;
+	HPipeline *pipeline;
 	Habit::StimulusSettings stimulus(name, color);
 
 	qDebug() << "Adding solid color stimulus (key " << key << "): " << color << " context " << context;
 
-	// Create a helper.
-	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pCenter->getHVideoWidget(), m_bUseISS, this);
-	}
-	else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget(), m_bUseISS, this);
-	}
-
-	// Add helper to map
+	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, this);
+//	// Create a helper.
+//	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
+//	{
+//		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pCenter->getHVideoWidget(), m_bUseISS, this);
+//	}
+//	else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
+//	{
+//		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget(), m_bUseISS, this);
+//	}
+//
+//	// Add helper to map
 	m_mapPipelines.insert(key, pipeline);
 
 	// add key to context map
@@ -253,6 +259,7 @@ void HGMM::preroll(unsigned int key)
 	qDebug() << "preroll " << key << " stim " << getStimulusSettings(key).getName();
 	if (m_mapPipelines.contains(key))
 	{
+		std::cout << "pipeline: " << *m_mapPipelines.value(key);
 		m_mapPipelines.value(key)->preroll();
 	}
 	else
@@ -276,7 +283,7 @@ void HGMM::pause(unsigned int key)
 void HGMM::playStim(unsigned int key)
 {
 	qDebug() << "playstim " << key << " stim " << getStimulusSettings(key).getName();
-	HGMMPipeline *pipeline = NULL;		// the pipeline that will be played
+	HPipeline *pipeline = NULL;		// the pipeline that will be played
 
 	// get pipeline that will be displayed/played.
 	// If the key is not found, that's bad. Use default.
@@ -296,20 +303,11 @@ void HGMM::playStim(unsigned int key)
 
 	if (pipeline != m_pipelineCurrent)
 	{
-		// pause current stim and disconnect widget(s) from it
-		if (m_pipelineCurrent)
-		{
-			m_pipelineCurrent->pause();
-		}
-		else
-		{
-			qDebug() << "no current stim";
-		}
-
 
 		// deal with current pipeline
 		if (m_pipelineCurrent)
 		{
+			//qDebug() << "pause current stim";
 			disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 			m_pipelineCurrent->pause();
 			m_pipelineCurrent->detachWidgetsFromSinks();
@@ -317,7 +315,14 @@ void HGMM::playStim(unsigned int key)
 
 		// set things up for new pipeline
 		connect(pipeline, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
-		pipeline->attachWidgetsToSinks();
+		if (m_stimulusLayoutType==HStimulusLayoutType::HStimulusLayoutSingle)
+		{
+			pipeline->attachWidgetsToSinks(m_pCenter->getHVideoWidget());
+		}
+		else if (m_stimulusLayoutType==HStimulusLayoutType::HStimulusLayoutLeftRight)
+		{
+			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget());
+		}
 		pipeline->play();
 		m_pipelineCurrent = pipeline;
 
@@ -373,6 +378,8 @@ void HGMM::updateGeometry()
 bool HGMM::waitForStimuliReady(int maxMS, int checkIntervalMS)
 {
 #if 1
+	Q_UNUSED(maxMS);
+	Q_UNUSED(checkIntervalMS);
 	return true;
 #else
 	QTimer maxTimer;
@@ -403,13 +410,14 @@ bool HGMM::waitForStimuliReady(int maxMS, int checkIntervalMS)
 #endif
 }
 
+#if 0
 void HGMM::readyCheck()
 {
 	qDebug() << "readyCheck():";
 	//if (m_bReady) return;
 
 	// iterate through helpers, check whether each has needed pads connected (and hence is prerolled)
-	QMapIterator<unsigned int, HGMMPipeline *> it(m_mapPipelines);
+	QMapIterator<unsigned int, HPipeline *> it(m_mapPipelines);
 	while (it.hasNext())
 	{
 	    it.next();
@@ -421,21 +429,13 @@ void HGMM::readyCheck()
 	qDebug() << "emit mmReady()";
 	Q_EMIT mmReady();
 }
+#endif
 
-void HGMM::readyFail()
-{
-	// kill check timer
-	m_readyCheck->stop();
-
-	// emit failure signal
-	Q_EMIT mmFail();
-}
-
-const Habit::StimulusSettings& HGMM::getStimulusSettings(int key) const
+const Habit::StimulusSettings HGMM::getStimulusSettings(unsigned int key) const
 {
 	static Habit::StimulusSettings dummy;
-	if (m_mapPipelines.contains(key))
-		return m_mapPipelines[key]->stimulusSettings();
+	if (m_mapStimulusSettings.contains(key))
+		return m_mapStimulusSettings.value(key);
 	else
 		return dummy;
 }

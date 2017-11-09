@@ -6,6 +6,7 @@
  */
 
 #include <hgst/HGMMException.h>
+std::ostringstream HGMMException::m_cnvt;
 
 HGMMException::HGMMException(const std::string& reason)
 {

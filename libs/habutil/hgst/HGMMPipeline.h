@@ -14,6 +14,7 @@
 #include "HTypes.h"
 #include "stimulussettings.h"
 #include "HVideoWidget.h"
+#include "HPipeline.h"
 
 #include <glib.h>
 #include <gst/gst.h>
@@ -27,7 +28,7 @@
 QString stateName(GstState s);
 
 
-class HGMMPipeline: public QObject
+class HGMMPipeline: public HPipeline
 {
 	Q_OBJECT
 
@@ -44,14 +45,14 @@ class HGMMPipeline: public QObject
 		GstElement *identity;
 		GstElement *volume;	// sound only
 		GstElement *freeze;
-		HVideoWidget *videoWidget;
+		// no longer used HVideoWidget *videoWidget;
 		QSize size;		// stimulus size, as found in file
 		bool needPad;
 		bool isVideo;
 		bool isLoop;
 		bool isAudio;
 		//bool isPrerolled;
-		PipelineData() : sink(NULL), convert(NULL), identity(NULL), freeze(NULL), videoWidget(NULL), size(), needPad(true), isVideo(false), isLoop(false), isAudio(false) {};
+		PipelineData() : sink(NULL), convert(NULL), identity(NULL), freeze(NULL), size(), needPad(true), isVideo(false), isLoop(false), isAudio(false) {};
 	};
 
 	QMap<HPlayerPositionType, PipelineData> m_mapPipelineData;
@@ -65,20 +66,18 @@ public:
 
 	HGMMPipeline& operator=(const HGMMPipeline& rhs);
 	bool hasPads() const;
-	int id() const { return m_id; };
+	//int id() const { return m_id; };
 	GstPipeline *pipeline() { return GST_PIPELINE(m_pipeline); };
-	void play();
-	void pause();
-	void preroll();
-	void ready();
-	const Habit::StimulusSettings& stimulusSettings() const { return m_stimulus; };
+	virtual void play();
+	virtual void pause();
+	virtual void preroll();
+	virtual void ready();
+
+	virtual void detachWidgetsFromSinks();	// default is a no-op
+	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL);
+
+	virtual const Habit::StimulusSettings& stimulusSettings() const { return m_stimulus; };
 	GstElement* sink(const HPlayerPositionType& ppt) const;
-
-	// set the "widget" property for each sink to NULL
-	void detachWidgetsFromSinks();
-
-	// set the "widget" property for each sink to its respective widget value
-	void attachWidgetsToSinks();
 
 	// (static) utility functions
 	static QString makeElementName(const char *factoryName, const HPlayerPositionType& ppt, int number);
@@ -87,9 +86,10 @@ public:
 	static QString stateName(GstState s);
 	static const HPlayerPositionType& getPPTFromElementName(const QString& elementName);
 
+	static HPipeline *createHGMMPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, QObject *parent);
+
 private:
-	int m_id;
-	const HStimulusLayoutType *m_pStimulusLayoutType;
+	const HStimulusLayoutType& m_stimulusLayoutType;
 	Habit::StimulusSettings m_stimulus;
 	QDir m_root;
 	bool m_bISS;

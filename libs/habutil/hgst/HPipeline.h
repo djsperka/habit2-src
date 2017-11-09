@@ -11,8 +11,11 @@
 
 #include <gst/gst.h>
 #include "stimulussettings.h"
+#include <ostream>
 
 #define C_STR(x) x.toStdString().c_str()
+
+class HVideoWidget;
 
 class HPipeline: public QObject
 {
@@ -20,8 +23,6 @@ class HPipeline: public QObject
 
 	int m_id;
 
-	static HPipeline *createPipelineSingle(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, bool bSound, bool bISS);
-	static HPipeline *createPipelineLeftRight(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, bool bSound, bool bISS);
 public:
 	HPipeline(int id, QObject *parent=NULL);
 
@@ -39,12 +40,21 @@ public:
 	virtual void pause() = 0;
 
 	virtual void detachWidgetsFromSinks();	// default is a no-op
-	virtual void attachWidgetsToSinks(QWidget *w0, QWidget *w1=NULL);		// default is a no-op
+	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL);		// default is a no-op
 
-	static HPipeline* createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound=false, bool bISS=false);
+	//static HPipeline* createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound=false, bool bISS=false);
 
+	// (static) utility functions
+	static QString makeElementName(const char *factoryName, const HPlayerPositionType& ppt, int number, const char *prefix=NULL);
+	static bool parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id, QString& prefix);
+	static GstElement *makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number, const char *prefix=NULL);
+	static const HPlayerPositionType& getPPTFromElementName(const QString& elementName);
+
+	// output
+	virtual void write(std::ostream&) const;
 };
 
+std::ostream& operator<<(std::ostream& os, const HPipeline& p);
 
 
 #endif /* LIBS_HABUTIL_HGST_HPIPELINE_H_ */
