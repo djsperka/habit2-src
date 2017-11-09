@@ -92,7 +92,7 @@ HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth,
 	}
 	else
 	{
-		qFatal(QString("Unknown stimulus layout type in createMediaManager: ").append(sdi.getStimulusLayoutType().name()).toStdString().c_str());
+		qFatal("Unknown stimulus layout type in createMediaManager");
 	}
 
 	return pmm;
