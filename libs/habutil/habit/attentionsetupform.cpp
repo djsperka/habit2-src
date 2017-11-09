@@ -55,7 +55,7 @@ void AttentionSetupForm::components()
 	QDir dir;
 	habutilGetStimulusRootDir(dir);
 
-	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, dir, this);
+	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, this);
 
 	QVBoxLayout* pMainLayout = new QVBoxLayout(this);
 	QVBoxLayout* pStimulusLayout = new QVBoxLayout();
