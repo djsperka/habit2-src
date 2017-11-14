@@ -133,6 +133,7 @@ HEADERS +=	HLook.h \
 			wizards/PhaseWizardPages.h \
 			hgst/HGMM.h \
 			hgst/HGMMPipeline.h \
+			hgst/HStimulusPipeline.h \
 			hgst/HPipeline.h \
 			hgst/HPipelineColor.h \
 			hgst/HStimulusWidget.h \
@@ -250,6 +251,7 @@ SOURCES +=	HLook.cpp \
 			wizards/PhaseWizardPages.cpp \
 			hgst/HGMM.cpp \
 			hgst/HGMMPipeline.cpp \
+			hgst/HStimulusPipeline.cpp \
 			hgst/HPipeline.cpp \
 			hgst/HPipelineColor.cpp \
 			hgst/HStimulusWidget.cpp \
