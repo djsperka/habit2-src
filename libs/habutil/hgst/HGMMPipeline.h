@@ -72,6 +72,7 @@ public:
 	virtual void pause();
 	virtual void preroll();
 	virtual void ready();
+	virtual void rewind();
 
 	virtual void detachWidgetsFromSinks();	// default is a no-op
 	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL);

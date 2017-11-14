@@ -38,6 +38,7 @@ public:
 
 	virtual void play() = 0;
 	virtual void pause() = 0;
+	virtual void rewind() = 0;
 
 	virtual void detachWidgetsFromSinks();	// default is a no-op
 	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL);		// default is a no-op

@@ -211,6 +211,11 @@ void HGMMPipeline::pause()
 	gst_element_set_state (m_pipeline, GST_STATE_PAUSED);
 }
 
+void HGMMPipeline::rewind()
+{
+	qDebug() << "HGMMPipeline::rewind(" << id() << ") - same as pause()";
+	pause();
+}
 void HGMMPipeline::detachWidgetsFromSinks()
 {
 	GValue v = G_VALUE_INIT;

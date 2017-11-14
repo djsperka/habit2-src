@@ -111,6 +111,7 @@ public:
 	void preroll(unsigned int id);
 	void ready(unsigned int id);
 	void pause(unsigned int id);
+	void rewind(unsigned int id);
 	virtual void clear();
 	virtual void stop();
 

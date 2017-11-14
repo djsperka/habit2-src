@@ -280,6 +280,18 @@ void HGMM::pause(unsigned int key)
 	}
 }
 
+void HGMM::rewind(unsigned int key)
+{
+	if (m_mapPipelines.contains(key))
+	{
+		m_mapPipelines.value(key)->rewind();
+	}
+	else
+	{
+		qWarning() << "HGMM::rewind(): key " << key << " not found!";
+	}
+}
+
 void HGMM::playStim(unsigned int key)
 {
 	qDebug() << "playstim " << key << " stim " << getStimulusSettings(key).getName();
@@ -296,10 +308,6 @@ void HGMM::playStim(unsigned int key)
 		qWarning() << "key " << key << " not found! Using default stim.";
 		pipeline = m_mapPipelines.value(m_defaultKey);
 	}
-
-	// if current stim is same as new stim, return
-	if (pipeline == m_pipelineCurrent) return;
-
 
 	if (pipeline != m_pipelineCurrent)
 	{
@@ -323,19 +331,16 @@ void HGMM::playStim(unsigned int key)
 		{
 			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget());
 		}
-		pipeline->play();
-		m_pipelineCurrent = pipeline;
-
-		// update widget geometry
-		updateGeometry();
-
-		// let everybody know we just switched to a new sink
-		Q_EMIT stimulusChanged();
 	}
-	else
-	{
-		qWarning() << "Calling stim() with currently playing stimulus.";
-	}
+
+	pipeline->play();
+	m_pipelineCurrent = pipeline;
+
+	// update widget geometry
+	updateGeometry();
+
+	// let everybody know we just switched to a new sink
+	Q_EMIT stimulusChanged();
 }
 
 void HGMM::stop()
