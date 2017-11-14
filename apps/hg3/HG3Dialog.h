@@ -16,6 +16,7 @@
 #include "HGMM.h"
 //#include "../../libs/habutil/HMediaManager.h"
 
+
 class HG3Dialog: public QDialog
 {
 	Q_OBJECT
@@ -24,10 +25,11 @@ public:
 	HG3Dialog(const QDir& stimRootDir, int screen = -1, const QString& flag = QString(""), QWidget *parent = NULL);
 	virtual ~HG3Dialog();
 protected Q_SLOTS:
-void readyClicked();
-void prerollClicked();
-void pauseClicked();
-void playClicked();
+	void readyClicked();
+	void prerollClicked();
+	void pauseClicked();
+	void playClicked();
+	void rewindClicked();
 	void started(int screenid, const QString& filename);
 	//void mediaChanged(libvlc_media_t *media);
 
@@ -40,6 +42,7 @@ private:
 	QPushButton *m_pbPreroll;
 	QPushButton *m_pbPause;
 	QPushButton *m_pbPlay;
+	QPushButton *m_pbRewind;
 	QSpinBox *m_sbWhich;
 	HStimulusWidget *m_pVideoWidgetLeft;
 	HStimulusWidget *m_pVideoWidgetRight;

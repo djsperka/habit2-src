@@ -13,6 +13,7 @@
 #include "stimulusdisplayinfo.h"
 #include "HG3Dialog.h"
 #include "HPipeline.h"
+#include "HStimulusPipeline.h"
 #include <gst/gst.h>
 #include <gst/videotestsrc/gstvideotestsrc.h>
 #include <gst/audiotestsrc/gstaudiotestsrc.h>
@@ -22,6 +23,7 @@ Habit::StimulusInfo f_vinfo[MAX_INFO];
 Habit::StimulusInfo f_ainfo[MAX_INFO];
 Habit::StimuliSettings f_stimuli;
 
+#if 0
 guint64 last_running_time=0;
 
 class HStimulusPipeline: public HPipeline
@@ -31,6 +33,7 @@ class HStimulusPipeline: public HPipeline
 	GstElement *m_pipeline;
 	GstElement *m_audioMixer;
 	GstElement *m_audioSink;
+	bool m_bAudioElementsAddedToPipeline;
 
 
 
@@ -54,7 +57,7 @@ class HStimulusPipeline: public HPipeline
 	// to the beginning of the segment. We do that every time the SEGMENT_DONE is found.
 	//
 	// When there are two or more streams in a pipeline, the seeking/prerolling is handled separately. The event probe, the callback that
-	// catches the SEGHMENTD_DONE event and re-issues the seek, is installed on the first sink pad downstreanm of the decodebin. It sends
+	// catches the SEGMENT_DONE event and re-issues the seek, is installed on the first sink pad downstreanm of the decodebin. It sends
 	// the seek to the decodebin element which feeds it. If a file is a container with video and audio, and it is to loop, then
 	// we favor the video stream - when the video stream has a SEGMENT_DONE, the seek is issued to the decodebin element which feeds both streams.
 	//
@@ -150,105 +153,6 @@ class HStimulusPipeline: public HPipeline
 		}
 	}
 
-#if 0
-	// just generate the elements required for sound - downstream of the decodebin, but before the adder element
-	void generateSoundElements(BinData *pdata, const Habit::StimulusInfo& info, const QDir& stimRoot, const HPlayerPositionType& ppt)
-	{
-		GstElement *convert = makeElement("audioconvert", ppt, id(), "audio");
-		Q_ASSERT(convert);
-		GstElement *volume = makeElement("volume", ppt, id(), "audio");
-		Q_ASSERT(volume);
-		g_object_set(G_OBJECT(volume), "volume", (double)info.getVolume()/100, NULL);
-		GstElement *identity = makeElement("identity", ppt, id(), "audio");
-		Q_ASSERT(identity);
-		gst_bin_add_many(GST_BIN(pipeline()), convert, volume, identity, NULL);
-
-		pdata->audioConvert = convert;
-		pdata->audioVolume = volume;
-		pdata->audioIdentity = identity;
-	}
-
-	void generatePipelineElements(BinData *pdata, const Habit::StimulusInfo& info, const QDir& stimRoot, const HPlayerPositionType& ppt)
-	{
-		qDebug() << "generatePipelineElements:";
-		qDebug() << info;
-		qDebug() << stimRoot;
-		qDebug() << ppt.name();
-
-		if (ppt == HPlayerPositionType::Sound)
-		{
-			// set up filesrc ! decodebin and padAdded callback
-			// create alternate bins to attach for video and image caps
-			GstElement *src = makeElement("filesrc", ppt, id());
-			g_object_set(G_OBJECT(src), "location", C_STR(info.getAbsoluteFileName(stimRoot)), NULL);
-			GstElement *decodebin = makeElement("decodebin", ppt, id());
-			gst_bin_add_many(GST_BIN(pipeline()), src, decodebin, NULL);
-			gst_element_link(src, decodebin);
-
-			pdata->decodebin = decodebin;
-			pdata->isLooping = info.isLoopPlayBack();
-			pdata->ignoreVideo = true;
-
-			generateSoundElements(pdata, info, stimRoot, ppt);
-
-			m_mapBinData.insert(ppt, pdata);	// NOTE: this map now owns the storage associated with pdata -see destructor
-
-			g_signal_connect(decodebin, "pad-added", G_CALLBACK(&HStimulusPipeline::padAdded), pdata);
-			g_signal_connect(decodebin, "no-more-pads", G_CALLBACK(&HStimulusPipeline::noMorePads), pdata);
-		}
-		if (info.isColor() || info.isBackground())
-		{
-			GstElement *src = makeElement("videotestsrc", ppt, id());
-			Q_ASSERT(src);
-			g_object_set(G_OBJECT(src), "pattern", GST_VIDEO_TEST_SRC_SOLID, "foreground-color", info.getColor().rgba(), NULL);
-
-			GstElement *sink = makeElement("qwidget5videosink", ppt, id());
-			Q_ASSERT(sink);
-
-			gst_bin_add_many (GST_BIN (pipeline()), src, sink, NULL);
-			gst_element_link (src, sink);
-
-			// save data
-			pdata->sinkPad = NULL;	// not used for this type of stim
-			pdata->videoSink = sink;
-			pdata->isLooping = false;
-		}
-		else
-		{
-			// set up filesrc ! decodebin and padAdded callback
-			// create alternate bins to attach for video and image caps
-			GstElement *src = makeElement("filesrc", ppt, id());
-			g_object_set(G_OBJECT(src), "location", C_STR(info.getAbsoluteFileName(stimRoot)), NULL);
-			GstElement *decodebin = makeElement("decodebin", ppt, id());
-			gst_bin_add_many(GST_BIN(pipeline()), src, decodebin, NULL);
-			gst_element_link(src, decodebin);
-
-			GstElement *videoconvert = makeElement("autovideoconvert", ppt, id());
-			GstElement *freeze = makeElement("imagefreeze", ppt, id());
-			GstElement *identity = makeElement("identity", ppt, id());
-			g_object_set(G_OBJECT(identity), "single-segment", TRUE, NULL);
-			GstElement *sink = makeElement("qwidget5videosink", ppt, id());
-			gst_bin_add_many(GST_BIN(pipeline()), identity, videoconvert, freeze, sink, NULL);
-
-			pdata->sinkPad = NULL;
-			pdata->decodebin = decodebin;
-			pdata->videoSink = sink;
-			pdata->identity = identity;
-			pdata->videoConvert = videoconvert;
-			pdata->freeze = freeze;
-			pdata->isLooping = info.isLoopPlayBack();
-
-			generateSoundElements(pdata, info, stimRoot, ppt);
-
-			m_mapBinData.insert(ppt, pdata);	// NOTE: this map now owns the storage associated with pdata -see destructor
-
-			g_signal_connect(decodebin, "pad-added", G_CALLBACK(&HStimulusPipeline::padAdded), pdata);
-			g_signal_connect(decodebin, "no-more-pads", G_CALLBACK(&HStimulusPipeline::noMorePads), pdata);
-		}
-	}
-#endif
-
-
 	void setSizeOnWidget(HVideoWidget *w, const HPlayerPositionType& ppt)
 	{
 		if (m_mapBinData.contains(ppt))
@@ -280,26 +184,40 @@ class HStimulusPipeline: public HPipeline
 		}
 	}
 
+	void lazyAudioInitializeAndAddToPipeline()
+	{
+		if (!m_bAudioElementsAddedToPipeline)
+		{
+
+			//GstElement *src = makeElement("audiotestsrc", HPlayerPositionType::Control, this->id());
+			//Q_ASSERT(src);
+			//g_object_set(G_OBJECT(src), "wave", GST_AUDIO_TEST_SRC_WAVE_SILENCE, NULL);
+			m_audioSink = makeElement("osxaudiosink", HPlayerPositionType::Control, this->id());
+			Q_ASSERT(m_audioSink);
+			m_audioMixer = makeElement("audiomixer", HPlayerPositionType::Control, this->id());
+			Q_ASSERT(m_audioMixer);
+
+			gst_bin_add_many(GST_BIN(pipeline()), m_audioMixer, m_audioSink, NULL);
+			gst_element_link(m_audioMixer, m_audioSink);
+			if (!gst_element_sync_state_with_parent(m_audioMixer))
+				qCritical() << "Cannot sync audiomixer with pipeline state";
+			if (!gst_element_sync_state_with_parent(m_audioSink))
+				qCritical() << "Cannot sync audiosink with pipeline state";
+
+			m_bAudioElementsAddedToPipeline = true;
+		}
+	}
 public:
 	HStimulusPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent)
 	: HPipeline(id, parent)
 	, m_stimulusLayoutType(layoutType)
 	, m_bISS(bISS)
+	, m_pipeline(NULL)
+	, m_audioMixer(NULL)
+	, m_audioSink(NULL)
+	, m_bAudioElementsAddedToPipeline(false)
 	{
 		m_pipeline = gst_pipeline_new(C_STR(makeElementName("pipeline", HPlayerPositionType::Control, this->id())));
-
-		// Generate sound stuff.
-		// In padAdded, any audio pads will be linked (through other elements) to the adder/mixer.
-		GstElement *src = makeElement("audiotestsrc", HPlayerPositionType::Control, this->id());
-		Q_ASSERT(src);
-		g_object_set(G_OBJECT(src), "wave", GST_AUDIO_TEST_SRC_WAVE_SILENCE, NULL);
-		m_audioSink = makeElement("osxaudiosink", HPlayerPositionType::Control, this->id());
-		Q_ASSERT(m_audioSink);
-		m_audioMixer = makeElement("audiomixer", HPlayerPositionType::Control, this->id());
-		Q_ASSERT(m_audioMixer);
-		gst_bin_add_many(GST_BIN(pipeline()), m_audioMixer, m_audioSink, src);
-		gst_element_link(src, m_audioMixer);
-		gst_element_link(m_audioMixer, m_audioSink);
 
 		// now depending on the layout type, and whether ISS/sound is to be used, create sub-pipelines for each
 		// position Left/Right/Center/Sound as needed
@@ -396,6 +314,29 @@ public:
 		// TODO - prepare for prerolling
 		qDebug() << "HStimulusPipeline::preroll(" << id() << ")";
 		gst_element_set_state(pipeline(), GST_STATE_PAUSED);
+	}
+
+	void rewind()
+	{
+		// flushing seek on each of the decodebin elements (if any).
+		QMapIterator<HPlayerPositionType, BinData* > it(m_mapBinData);
+		while (it.hasNext())
+		{
+			it.next();
+			if (it.value()->decodebin)
+			{
+				qDebug() << "Send flushing seek to " << GST_ELEMENT_NAME(it.value()->decodebin);
+				if (!gst_element_seek(it.value()->decodebin, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+				{
+					qCritical() << "rewind() - SEEK FAILED";
+				}
+				else
+				{
+					qDebug() << "rewind() - flush seek done " << GST_ELEMENT_NAME(it.value()->decodebin);
+					it.value()->isPrerolled = true;
+				}
+			}
+		}
 	}
 
 	void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
@@ -610,6 +551,7 @@ public:
 				gst_element_link(resample, volume);
 
 				// link to audiomixer element -- need reference up to owning object.
+				pdata->stimulusPipeline->lazyAudioInitializeAndAddToPipeline();
 				gst_element_link(volume, pdata->stimulusPipeline->m_audioMixer);
 
 				if (pdata->isLooping)
@@ -751,7 +693,7 @@ HPipeline* myFactory(int id, const Habit::StimulusSettings& stimulusSettings, co
 	return p;
 }
 
-
+#endif
 
 
 HG3Dialog::HG3Dialog(const QDir& dirStimRoot, int screen, const QString& flag, QWidget *parent)
@@ -767,14 +709,17 @@ HG3Dialog::HG3Dialog(const QDir& dirStimRoot, int screen, const QString& flag, Q
 	m_pbReady = new QPushButton("Ready");
 	m_pbPreroll = new QPushButton("Preroll");
 	m_pbPause = new QPushButton("Pause");
+	m_pbRewind = new QPushButton("Rewind");
 	m_pbPlay = new QPushButton("PLay");
 	vbox = new QVBoxLayout;
 	buttonBox->addButton(m_pbReady, QDialogButtonBox::ActionRole);
 	buttonBox->addButton(m_pbPreroll, QDialogButtonBox::ActionRole);
 	buttonBox->addButton(m_pbPause, QDialogButtonBox::ActionRole);
+	buttonBox->addButton(m_pbRewind, QDialogButtonBox::ActionRole);
 	buttonBox->addButton(m_pbPlay, QDialogButtonBox::ActionRole);
 	connect(m_pbReady, SIGNAL(clicked()), this, SLOT(readyClicked()));
 	connect(m_pbPreroll, SIGNAL(clicked()), this, SLOT(prerollClicked()));
+	connect(m_pbRewind, SIGNAL(clicked()), this, SLOT(rewindClicked()));
 	connect(m_pbPause, SIGNAL(clicked()), this, SLOT(pauseClicked()));
 	connect(m_pbPlay, SIGNAL(clicked()), this, SLOT(playClicked()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(accept()));
@@ -844,7 +789,7 @@ QHBoxLayout *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, 
 	//m_pVideoWidgetCenter->setMinimumSize(320, 240);
 	hbox->addWidget(m_pVideoWidgetCenter);
 
-	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), myFactory);
+	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), HStimulusPipelineFactory);
 	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
 	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
@@ -944,14 +889,12 @@ QHBoxLayout *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, 
 QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot, const QString& flag)
 {
 	QHBoxLayout *hbox = new QHBoxLayout;
-	m_pVideoWidgetLeft = new HStimulusWidget(sdi, 320, 240);
-	m_pVideoWidgetLeft->setMinimumSize(320, 240);
-	m_pVideoWidgetRight = new HStimulusWidget(sdi, 320, 240);
-	m_pVideoWidgetRight->setMinimumSize(320, 240);
+	m_pVideoWidgetLeft = new HStimulusWidget(sdi, 800, 600);
+	m_pVideoWidgetRight = new HStimulusWidget(sdi, 800, 600);
 	hbox->addWidget(m_pVideoWidgetLeft);
 	hbox->addWidget(m_pVideoWidgetRight);
 
-	m_pmm = new HGMM(m_pVideoWidgetLeft, m_pVideoWidgetRight, dirStimRoot);
+	m_pmm = new HGMM(m_pVideoWidgetLeft, m_pVideoWidgetRight, dirStimRoot, true, sdi.getBackGroundColor(), HStimulusPipelineFactory);
 	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
 	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
@@ -959,9 +902,89 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetLeft->getHVideoWidget(), SLOT(stimulusChanged()));
 	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetRight->getHVideoWidget(), SLOT(stimulusChanged()));
 
-	// create background
-	m_pmm->addBackground(QColor(Qt::green));
 
+	// l/r color b/g no sound
+	if (flag.contains("all") || flag.contains("2"))
+	{
+		Habit::StimulusSettings s;
+		s.setName("s1");
+		s.setLeftStimulusInfo(Habit::StimulusInfo(Qt::blue));
+		s.setRightStimulusInfo(Habit::StimulusInfo(Qt::green));
+		f_stimuli.addStimulus(s);
+	}
+
+	// l/r color b/g iss
+	if (flag.contains("all") || flag.contains("3"))
+	{
+		Habit::StimulusSettings s;
+		s.setName("s2");
+		s.setLeftStimulusInfo(Habit::StimulusInfo(Qt::red));
+		s.setRightStimulusInfo(Habit::StimulusInfo(Qt::yellow));
+		s.setIndependentSoundInfo(Habit::StimulusInfo(QString("sounds/ant-marching-band.mp3"), false, 50));
+		f_stimuli.addStimulus(s);
+	}
+
+	// l/r color b/g iss
+	if (flag.contains("all") || flag.contains("4"))
+	{
+		Habit::StimulusSettings s;
+		s.setName("s4");
+		s.setLeftStimulusInfo(Habit::StimulusInfo(Qt::cyan));
+		s.setRightStimulusInfo(Habit::StimulusInfo(QString("anchovy"), QString("images/fish/anchovy.jpg")));
+		f_stimuli.addStimulus(s);
+	}
+
+	// l/r color b/g iss
+	if (flag.contains("all") || flag.contains("5"))
+	{
+		Habit::StimulusSettings s;
+		s.setName("s5");
+		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("scad"), QString("images/fish/scad.jpg")));
+		s.setRightStimulusInfo(Habit::StimulusInfo(Qt::magenta));
+		s.setIndependentSoundInfo(Habit::StimulusInfo(QString("sounds/sad-trombone.wav"), true, 50));
+		f_stimuli.addStimulus(s);
+	}
+
+	//
+	if (flag.contains("all") || flag.contains("6"))
+	{
+		Habit::StimulusSettings s;
+		s.setName("s6");
+		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/KAMI2001_64kb.mp4"), false, 50));
+		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/SayChees2001_64kb.mp4"), false, 0));
+		f_stimuli.addStimulus(s);
+	}
+
+	if (flag.contains("all") || flag.contains("7"))
+	{
+		Habit::StimulusSettings s;
+		s.setName("s7");
+		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/KAMI2001_64kb.mp4"), false, 0));
+		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/SayChees2001_64kb.mp4"), false, 50));
+		f_stimuli.addStimulus(s);
+	}
+
+	if (flag.contains("all") || flag.contains("8"))
+	{
+		Habit::StimulusSettings s;
+		s.setName("s8");
+		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/KAMI2001_64kb.mp4"), false, 0));
+		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/SayChees2001_64kb.mp4"), false, 0));
+		s.setIndependentSoundInfo(Habit::StimulusInfo(QString("sounds/welcome-to-the-internet.mp3"), true, 50));
+		f_stimuli.addStimulus(s);
+	}
+
+//	//
+//	{
+//		Habit::StimulusSettings s;
+//		s.setName("s");
+//		s.setLeftStimulusInfo(Habit::StimulusInfo());
+//		s.setRightStimulusInfo(Habit::StimulusInfo());
+//		s.setIndependentSoundInfo(Habit::StimulusInfo());
+//		f_stimuli.addStimulus(s);
+//	}
+
+#if 0
 	// pic
 	Habit::StimulusSettings s1;
 	s1.setName("s1");
@@ -996,11 +1019,12 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 	Habit::StimulusInfo si4R(QString("excavator"), QString("images/tools/excavator.png"));
 	s4.setRightStimulusInfo(si4R);
 	f_stimuli.addStimulus(s4);
+#endif
 
 	m_pmm->addStimuli(f_stimuli, 1);
 
-	m_pmm->preroll(0);
-	m_pmm->preroll(1);
+//	m_pmm->preroll(0);
+//	m_pmm->preroll(1);
 	m_pmm->stim(0);
 	m_iCurrent = 0;
 
@@ -1035,6 +1059,13 @@ void HG3Dialog::prerollClicked()
 	int i = m_sbWhich->value();
 	qDebug() << "preroll " << i;
 	m_pmm->preroll(i);
+}
+
+void HG3Dialog::rewindClicked()
+{
+	int i = m_sbWhich->value();
+	qDebug() << "rewind " << i;
+	m_pmm->rewind(i);
 }
 
 void HG3Dialog::pauseClicked()
