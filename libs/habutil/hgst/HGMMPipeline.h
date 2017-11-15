@@ -128,9 +128,9 @@ private:
 	// png
 	void setPNGStimulus(const Habit::StimulusInfo& info, const HPlayerPositionType& ppt);
 
-
-	Q_SIGNALS:
-		void nowPlaying();
+//
+//	Q_SIGNALS:
+//		void nowPlaying();
 };
 
 

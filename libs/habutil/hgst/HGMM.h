@@ -14,7 +14,7 @@
 #include <QTimer>
 #include <glib.h>
 #include "HPipeline.h"
-#include "HGMMPipeline.h"
+#include "HStimulusPipeline.h"
 #include "HTypes.h"
 #include "stimulussettings.h"
 #include "stimulisettings.h"
@@ -79,8 +79,8 @@ protected:
 
 public:
 
-	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = &HGMMPipeline::createHGMMPipeline);
-	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = &HGMMPipeline::createHGMMPipeline);
+	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimulusPipelineFactory);
+	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimulusPipelineFactory);
 	virtual ~HGMM();
 
 

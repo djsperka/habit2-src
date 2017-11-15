@@ -350,22 +350,10 @@ gboolean HGMMPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdata)
 	int id;
 	const HPlayerPositionType* pppt;
 	HGMMPipeline *pPipeline = (HGMMPipeline *)pdata;
-	//QMap<HPlayerPositionType, PipelineData> *pmap = (QMap<HPlayerPositionType, PipelineData> *)pdata;
-	//QMapIterator<HPlayerPositionType, PipelineData> it(*pmap);
-
-//	PipelineData *pPipelineData = (PipelineData *)pdata;
-//    g_print("(MESSAGE, msg = %s from %s\n",
-//      gst_message_type_get_name(GST_MESSAGE_TYPE(msg)),
-//	  GST_MESSAGE_SRC_NAME(msg));
-
-    // we only care about certain messages here. For those of interest, parse the element name so
-    // we can fetch the PipelineData and act accordingly.
 
 	switch(GST_MESSAGE_TYPE(msg))
 	{
 	case GST_MESSAGE_ASYNC_DONE:
-		// just preroll everything
-#if 1
 		qDebug() << "Got ASYNC_DONE on " << GST_MESSAGE_SRC_NAME(msg);
 		if (!pPipeline->isPrerolled)
 		{
@@ -385,27 +373,6 @@ gboolean HGMMPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdata)
 		{
 			qDebug() << "already prerolled " << GST_MESSAGE_SRC_NAME(msg);
 		}
-#else
-		// Check if we have video and if it is slated to loop
-		// One quirk: looping is only implemented for single stimulus
-		if (pPipeline->getPipelineDataMap().count() == 1)
-		{
-			PipelineData& pPipelineData = pPipeline->getPipelineDataMap().first();
-			if (pPipelineData.isVideo && pPipelineData.isLoop && !pPipelineData.isPrerolled)
-			{
-		    		qDebug() << "Got ASYNC_DONE on " << GST_MESSAGE_SRC_NAME(msg) << " do flushing segment seek on pipeline";
-		    		// do flushing seek GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT
-				if (!gst_element_seek(pPipelineData.pipeline, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
-				{
-					qCritical() << "SEEK FAILED";
-				}
-				else
-				{
-					pPipelineData.isPrerolled = true;	// so we know we've done this already
-				}
-			}
-		}
-#endif
 		break;
 	case GST_MESSAGE_SEGMENT_DONE:
 		qDebug() << "Got SEGMENT_DONE on " << GST_MESSAGE_SRC_NAME(msg);
@@ -441,7 +408,7 @@ gboolean HGMMPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdata)
 				parseElementName(GST_MESSAGE_SRC_NAME(msg), factoryName, pppt, id) &&
 				factoryName == "pipeline")
 		{
-			qDebug() << GST_MESSAGE_SRC_NAME(msg) << " - " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(state);
+			qDebug() << "STATE CHANGED "<< GST_MESSAGE_SRC_NAME(msg) << factoryName << "/" << pppt->name() << "/" << id << " - " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(state);
 			pPipeline->emitNowPlaying();
 		}
 		break;

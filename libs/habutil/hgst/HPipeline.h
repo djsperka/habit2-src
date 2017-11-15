@@ -53,6 +53,11 @@ public:
 
 	// output
 	virtual void write(std::ostream&) const;
+
+
+	Q_SIGNALS:
+		void nowPlaying();
+
 };
 
 std::ostream& operator<<(std::ostream& os, const HPipeline& p);

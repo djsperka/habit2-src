@@ -10,7 +10,7 @@
 
 
 #include <QtDebug>
-
+#include <QMutex>
 #include "stimulussettings.h"
 #include "HPipeline.h"
 #include <gst/gst.h>
@@ -23,6 +23,7 @@ class HStimulusPipeline: public HPipeline
 	GstElement *m_audioMixer;
 	GstElement *m_audioSink;
 	bool m_bAudioElementsAddedToPipeline;
+	QMutex m_mutex;
 
 
 
@@ -70,6 +71,9 @@ class HStimulusPipeline: public HPipeline
 
 	QMap<HPlayerPositionType, BinData* > m_mapBinData;
 
+	// called from static busCallback to emit nowPlaying signal
+	void emitNowPlaying();
+
 	void setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt);
 	void addStimulusInfo(BinData *pdata, const Habit::StimulusInfo& info, const QDir& stimRoot, const HPlayerPositionType& ppt);
 	void setSizeOnWidget(HVideoWidget *w, const HPlayerPositionType& ppt);
@@ -92,6 +96,7 @@ public:
 	bool iss() const { return m_bISS; }
 	const HStimulusLayoutType& stimulusLayoutType() const { return m_stimulusLayoutType; }
 	QMap<HPlayerPositionType, BinData* >& getBinDataMap() { return m_mapBinData; }
+	QMutex *mutex() { return &m_mutex; };
 
 	//parse stream type and resolution from GstCaps
 	static void parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio);

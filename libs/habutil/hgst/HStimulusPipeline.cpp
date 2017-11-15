@@ -7,6 +7,7 @@
 
 #include "HStimulusPipeline.h"
 #include "HVideoWidget.h"
+#include <QMutexLocker>
 #include <gst/videotestsrc/gstvideotestsrc.h>
 #include <gst/audiotestsrc/gstaudiotestsrc.h>
 
@@ -35,9 +36,6 @@ void HStimulusPipeline::addStimulusInfo(BinData *pdata, const Habit::StimulusInf
 {
 	qDebug() << "addStimulusInfo:";
 	qDebug() << info;
-	qDebug() << stimRoot;
-	qDebug() << ppt.name();
-
 	if (ppt == HPlayerPositionType::Sound)
 	{
 		// set up filesrc ! decodebin and padAdded callback
@@ -172,17 +170,13 @@ HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stim
 		addStimulusInfo(pdata, stimulusSettings.getCenterStimulusInfo(), stimRoot, HPlayerPositionType::Center);
 		m_mapBinData.insert(HPlayerPositionType::Center, pdata);	// NOTE: this map now owns the storage associated with pdata -see destructor
 
-		// if this source is looping, set up a bus listener
-		// add bus listener. Handler for pad-added signal was added (if needed) in addMedia
-		if (pdata->isLooping)
-		{
-			qDebug() << "Install bus callback";
-			GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
-			gst_bus_add_watch(bus, &HStimulusPipeline::busCallback, this);
-			gst_object_unref(bus);
-		}
-		else
-			qDebug() << "Not looping, no bus callback.";
+		// set up bus callback for all sources.
+		// The calback will handle state changed messages (emitting appropriate SIGNALs), and ASYNC_DONE messages
+		// (will set up looping for sources that require it).
+		qDebug() << "Install bus callback";
+		GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
+		gst_bus_add_watch(bus, &HStimulusPipeline::busCallback, this);
+		gst_object_unref(bus);
 	}
 	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
@@ -196,12 +190,10 @@ HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stim
 		addStimulusInfo(pdataRight, stimulusSettings.getRightStimulusInfo(), stimRoot, HPlayerPositionType::Right);
 		m_mapBinData.insert(HPlayerPositionType::Right, pdataRight);	// NOTE: this map now owns the storage associated with pdata -see destructor
 
-		if (pdataLeft->isLooping || pdataRight->isLooping)
-		{
-			GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
-			gst_bus_add_watch(bus, &HStimulusPipeline::busCallback, this);
-			gst_object_unref(bus);
-		}
+		qDebug() << "Install bus callback";
+		GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
+		gst_bus_add_watch(bus, &HStimulusPipeline::busCallback, this);
+		gst_object_unref(bus);
 	}
 	if (iss() && !stimulusSettings.getIndependentSoundInfo().getFileName().trimmed().isEmpty())
 	{
@@ -312,6 +304,11 @@ void HStimulusPipeline::write(std::ostream& os) const
 	os << "Name: " << GST_ELEMENT_NAME(pipeline()) << std::endl;
 }
 
+void HStimulusPipeline::emitNowPlaying()
+{
+	emit nowPlaying();
+}
+
 void HStimulusPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio)
 {
 	GstStructure *new_pad_struct = NULL;
@@ -364,6 +361,9 @@ void HStimulusPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, i
 void HStimulusPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 {
 	BinData *pdata = (BinData *)p;
+
+	// get lock on the HStimulusPipeline object
+	QMutexLocker locker(pdata->stimulusPipeline->mutex());
 	qDebug() << "padAdded: Got new pad '" << GST_PAD_NAME(newPad) << " from " << GST_ELEMENT_NAME(src);
 
 
@@ -505,8 +505,6 @@ void HStimulusPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 gboolean HStimulusPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdata)
 {
-	GstState state, old_state;
-	QString factoryName;
 	HStimulusPipeline *pSP = (HStimulusPipeline *)pdata;
 
 	//qDebug() << "busCallback: " << GST_MESSAGE_TYPE_NAME(msg) << " from " << GST_MESSAGE_SRC_NAME(msg);
@@ -543,11 +541,17 @@ gboolean HStimulusPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdat
 	}
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_STATE_CHANGED)
 	{
-		gst_message_parse_state_changed(msg, &old_state, &state, NULL);
-		if (state == GST_STATE_PLAYING && old_state == GST_STATE_PAUSED)
+		GstState old_state, new_state;
+		QString factoryName, prefix;
+		int id;
+		const HPlayerPositionType* pppt;
+		gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
+		if (new_state == GST_STATE_PLAYING &&
+				parseElementName(GST_MESSAGE_SRC_NAME(msg), factoryName, pppt, id, prefix) &&
+				factoryName == "pipeline")
 		{
-			qDebug() << GST_MESSAGE_SRC_NAME(msg) << " - " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(state);
-			//pPipeline->emitNowPlaying();
+			qDebug() << "STATE CHANGED "<< GST_MESSAGE_SRC_NAME(msg) << factoryName << "/" << pppt->name() << "/" << id << " - " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state);
+			pSP->emitNowPlaying();
 		}
 	}
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ERROR)
@@ -575,14 +579,11 @@ GstPadProbeReturn HStimulusPipeline::eventProbeCB (GstPad * pad, GstPadProbeInfo
 	if (event)
 	{
 		GstElement* parent = GST_PAD_PARENT(pad);
-		gchar *parentName = gst_element_get_name(parent);
-		qDebug() << "Got event from " << parentName << " type: " << GST_EVENT_TYPE_NAME(event);
-		g_free(parentName);
 		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
 		{
-//				g_print("element base time is %" G_GUINT64_FORMAT "\n", gst_element_get_base_time(parent));
-//				g_print("clock time is        %" G_GUINT64_FORMAT "\n", gst_clock_get_time(gst_element_get_clock(parent)));
-//				g_print("running time is      %" G_GUINT64_FORMAT "\n", gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+			gchar *parentName = gst_element_get_name(parent);
+			qDebug() << "Got SEGMENT event from " << parentName;
+			g_free(parentName);
 			qDebug() << "Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
 			qDebug() << "diff " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent))-last_running_time;
 			last_running_time = (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
@@ -595,6 +596,9 @@ GstPadProbeReturn HStimulusPipeline::eventProbeCB (GstPad * pad, GstPadProbeInfo
 		}
 		else if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
 		{
+			gchar *parentName = gst_element_get_name(parent);
+			qDebug() << "Got SEGMENT_DONE event from " << parentName;
+			g_free(parentName);
 			// do segment seek
 			qDebug() << "Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
 			qDebug() << "diff " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent))-last_running_time;

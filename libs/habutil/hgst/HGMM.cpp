@@ -129,7 +129,7 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 {
 	HPipeline *pipeline;
 
-	qDebug() << "Adding stimulus (key " << key << "): " << stimulus << " context " << context;
+	qDebug() << "Adding stimulus (key " << key << "): " << stimulus.getName() << " context " << context;
 
 	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, this);
 //	// Create a helper.
@@ -221,12 +221,15 @@ void HGMM::ag()
 
 void HGMM::nowPlaying()
 {
+	qDebug() << "HGMM::nowPlaying";
 	if (m_bPendingAG)
 	{
+		qDebug() << "Q_EMIT(agStarted(m_iPendingStimKey))";
 		Q_EMIT(agStarted(m_iPendingStimKey));
 	}
 	else if (m_bPendingStim)
 	{
+		qDebug() << "Q_EMIT(stimStarted(m_iPendingStimKey))";
 		Q_EMIT(stimStarted(m_iPendingStimKey));
 	}
 }
