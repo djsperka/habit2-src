@@ -98,7 +98,7 @@ void HStimuliSettingsWidget::clearStimulus()
 void HStimuliSettingsWidget::previewStimulus(int row)
 {
 	//qDebug() << "HStimuliSettingsWidget::previewStimulus " << m_stimuli.stimuli().at(row).getName();
-	m_pStimulusPreviewWidget->preview(m_stimuli.stimuli().at(row));
+	m_pStimulusPreviewWidget->preview(m_stimuli.stimuli().at(row), true);
 }
 
 void HStimuliSettingsWidget::previewOrder(int row)
