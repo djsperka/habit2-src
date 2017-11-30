@@ -26,6 +26,10 @@ void HPipeline::attachWidgetsToSinks(HVideoWidget *, HVideoWidget *)
 	// no-op
 }
 
+void HPipeline::dump()
+{
+	qDebug() << "HPipeline::dump not implemented!";
+}
 
 //HPipeline *HPipeline::createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& stimulusLayoutType, bool bSound, bool bISS)
 //{

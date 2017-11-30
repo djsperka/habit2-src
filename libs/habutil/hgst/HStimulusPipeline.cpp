@@ -8,6 +8,7 @@
 #include "HStimulusPipeline.h"
 #include "HVideoWidget.h"
 #include <QMutexLocker>
+#include <gst/gst.h>
 #include <gst/videotestsrc/gstvideotestsrc.h>
 #include <gst/audiotestsrc/gstaudiotestsrc.h>
 
@@ -22,6 +23,8 @@ HStimulusPipeline::BinData::BinData(HStimulusPipeline *pipeline, const HPlayerPo
 , ignoreVideo(false)
 , isPrerolled(false)
 , isLooping(false)
+, probeID(0)
+, probeElement(NULL)
 , volume(0)
 {
 	if (ppt != HPlayerPositionType::Sound)
@@ -34,7 +37,7 @@ HStimulusPipeline::BinData::BinData(HStimulusPipeline *pipeline, const HPlayerPo
 
 void HStimulusPipeline::addStimulusInfo(BinData *pdata, const Habit::StimulusInfo& info, const QDir& stimRoot, const HPlayerPositionType& ppt)
 {
-	qDebug() << "addStimulusInfo:";
+	qDebug() << "addStimulusInfo: id " << id() << " - " << ppt.name();
 	qDebug() << info;
 	if (ppt == HPlayerPositionType::Sound)
 	{
@@ -150,6 +153,9 @@ void HStimulusPipeline::lazyAudioInitializeAndAddToPipeline()
 
 HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent)
 : HPipeline(id, parent)
+, m_bInitialized(false)
+, m_stimulusSettings(stimulusSettings)
+, m_dirStimRoot(stimRoot)
 , m_stimulusLayoutType(layoutType)
 , m_bISS(bISS)
 , m_pipeline(NULL)
@@ -157,6 +163,12 @@ HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stim
 , m_audioSink(NULL)
 , m_bAudioElementsAddedToPipeline(false)
 {
+}
+
+void HStimulusPipeline::initialize()
+{
+	if (m_bInitialized) return;
+
 	m_pipeline = gst_pipeline_new(C_STR(makeElementName("pipeline", HPlayerPositionType::Control, this->id())));
 
 	// now depending on the layout type, and whether ISS/sound is to be used, create sub-pipelines for each
@@ -167,7 +179,7 @@ HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stim
 		qDebug() << "Generate pipeline elements for single layout.";
 		BinData *pdata = new BinData(this, HPlayerPositionType::Center);
 		pdata->stimulusPipeline = this;
-		addStimulusInfo(pdata, stimulusSettings.getCenterStimulusInfo(), stimRoot, HPlayerPositionType::Center);
+		addStimulusInfo(pdata, m_stimulusSettings.getCenterStimulusInfo(), m_dirStimRoot, HPlayerPositionType::Center);
 		m_mapBinData.insert(HPlayerPositionType::Center, pdata);	// NOTE: this map now owns the storage associated with pdata -see destructor
 
 		// set up bus callback for all sources.
@@ -183,11 +195,11 @@ HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stim
 		qDebug() << "Generate pipeline elements for l/r layout.";
 
 		BinData *pdataLeft = new BinData(this, HPlayerPositionType::Left);
-		addStimulusInfo(pdataLeft, stimulusSettings.getLeftStimulusInfo(), stimRoot, HPlayerPositionType::Left);
+		addStimulusInfo(pdataLeft, m_stimulusSettings.getLeftStimulusInfo(), m_dirStimRoot, HPlayerPositionType::Left);
 		m_mapBinData.insert(HPlayerPositionType::Left, pdataLeft);	// NOTE: this map now owns the storage associated with pdata -see destructor
 
 		BinData *pdataRight = new BinData(this, HPlayerPositionType::Right);
-		addStimulusInfo(pdataRight, stimulusSettings.getRightStimulusInfo(), stimRoot, HPlayerPositionType::Right);
+		addStimulusInfo(pdataRight, m_stimulusSettings.getRightStimulusInfo(), m_dirStimRoot, HPlayerPositionType::Right);
 		m_mapBinData.insert(HPlayerPositionType::Right, pdataRight);	// NOTE: this map now owns the storage associated with pdata -see destructor
 
 		qDebug() << "Install bus callback";
@@ -195,10 +207,10 @@ HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stim
 		gst_bus_add_watch(bus, &HStimulusPipeline::busCallback, this);
 		gst_object_unref(bus);
 	}
-	if (iss() && !stimulusSettings.getIndependentSoundInfo().getFileName().trimmed().isEmpty())
+	if (iss() && !m_stimulusSettings.getIndependentSoundInfo().getFileName().trimmed().isEmpty())
 	{
 		BinData *pdataAudio = new BinData(this, HPlayerPositionType::Sound);
-		addStimulusInfo(pdataAudio, stimulusSettings.getIndependentSoundInfo(), stimRoot, HPlayerPositionType::Sound);
+		addStimulusInfo(pdataAudio, m_stimulusSettings.getIndependentSoundInfo(), m_dirStimRoot, HPlayerPositionType::Sound);
 		m_mapBinData.insert(HPlayerPositionType::Sound, pdataAudio);	// NOTE: this map now owns the storage associated with pdata -see destructor
 
 
@@ -206,7 +218,7 @@ HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stim
 		// add bus listener. Handler for pad-added signal was added (if needed) in addMedia
 		if (pdataAudio->isLooping)
 		{
-			qDebug() << "Install bus callback";
+			qDebug() << "Install bus callback for sound";
 			GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
 			gst_bus_add_watch(bus, &HStimulusPipeline::busCallback, this);
 			gst_object_unref(bus);
@@ -216,30 +228,71 @@ HStimulusPipeline::HStimulusPipeline(int id, const Habit::StimulusSettings& stim
 
 
 	}
+	m_bInitialized = true;
 }
 
 HStimulusPipeline::~HStimulusPipeline()
 {
-	// clean up all gstreamer stuff we've accumulated
-	qDeleteAll(m_mapBinData);
-	m_mapBinData.clear();
+	cleanup();
 }
 
+void HStimulusPipeline::cleanup()
+{
+	if (!m_bInitialized) return;
+
+	// drop bus watch
+	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
+	gst_bus_remove_watch(bus);
+	gst_object_unref(bus);
+
+	// if any of the sources were looped, remove their probes
+	QMapIterator<HPlayerPositionType, BinData* > it(m_mapBinData);
+	while (it.hasNext())
+	{
+		it.next();
+		if (it.value()->isLooping)
+		{
+			qDebug() << "Remove probe ID " << it.value()->probeID << " from element " << GST_ELEMENT_NAME(it.value()->probeElement);
+			GstPad *sinkPad = gst_element_get_static_pad(it.value()->probeElement, "sink");
+			Q_ASSERT(sinkPad);
+			gst_pad_remove_probe(sinkPad, it.value()->probeID);
+			gst_object_unref(sinkPad);
+		}
+	}
+
+
+	gst_element_set_state(pipeline(), GST_STATE_NULL);
+	qDeleteAll(m_mapBinData);
+	m_mapBinData.clear();
+	gst_object_unref(m_pipeline);
+	m_bInitialized = false;
+	m_bAudioElementsAddedToPipeline = false;
+}
+
+//void HStimulusPipeline::null()
+//{
+//	qDebug() << "HStimulusPipeline::null(" << id() << ")";
+//	gst_element_set_state(pipeline(), GST_STATE_NULL);
+//}
+//
 void HStimulusPipeline::ready()
 {
 	qDebug() << "HStimulusPipeline::ready(" << id() << ")";
+	initialize();
 	gst_element_set_state(pipeline(), GST_STATE_READY);
 }
 
 void HStimulusPipeline::pause()
 {
 	qDebug() << "HStimulusPipeline::pause(" << id() << ")";
+	initialize();
 	gst_element_set_state(pipeline(), GST_STATE_PAUSED);
 }
 
 void HStimulusPipeline::play()
 {
 	qDebug() << "HStimulusPipeline::play(" << id() << ")";
+	initialize();
 	gst_element_set_state(pipeline(), GST_STATE_PLAYING);
 }
 
@@ -247,11 +300,18 @@ void HStimulusPipeline::preroll()
 {
 	// TODO - prepare for prerolling
 	qDebug() << "HStimulusPipeline::preroll(" << id() << ")";
+	initialize();
 	gst_element_set_state(pipeline(), GST_STATE_PAUSED);
 }
 
 void HStimulusPipeline::rewind()
 {
+	if (!m_bInitialized)
+	{
+		qCritical() << "Cannot rewind - initialize() first!";
+		return;
+	}
+
 	// flushing seek on each of the decodebin elements (if any).
 	QMapIterator<HPlayerPositionType, BinData* > it(m_mapBinData);
 	while (it.hasNext())
@@ -271,6 +331,19 @@ void HStimulusPipeline::rewind()
 			}
 		}
 	}
+}
+
+void HStimulusPipeline::dump()
+{
+	if (!m_bInitialized)
+	{
+		qCritical() << "Cannot dump - initialize() first!";
+		return;
+	}
+
+	qDebug() << "Dump dot file base name " << GST_ELEMENT_NAME(pipeline());
+	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline()));
+
 }
 
 void HStimulusPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
@@ -380,9 +453,8 @@ void HStimulusPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 	if (isImage)
 	{
-		qDebug() << "padAdded: image - start";
-		qDebug() << "padAdded: image - link into pipeline";
-		GstElement *videoConvert = makeElement("autovideoconvert", pdata->ppt, pdata->stimulusPipeline->id());
+		qDebug() << "padAdded: image - " << GST_ELEMENT_NAME(src) << " - link into pipeline";
+		GstElement *videoConvert = makeElement("videoconvert", pdata->ppt, pdata->stimulusPipeline->id());
 		GstElement *freeze = makeElement("imagefreeze", pdata->ppt, pdata->stimulusPipeline->id());
 		gst_bin_add_many(GST_BIN(pdata->stimulusPipeline->pipeline()), videoConvert, freeze, NULL);
 
@@ -402,25 +474,31 @@ void HStimulusPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 		pdata->size.setHeight(height);
 		pdata->size.setWidth(width);
-		qDebug() << "padAdded: image - done.";
+		qDebug() << "padAdded: image - " << GST_ELEMENT_NAME(src) << " - done.";
 	}
 	else if (isVideo)
 	{
-		qDebug() << "padAdded: video - start";
+		//qDebug() << "padAdded: video - start";
 		if (pdata->ignoreVideo)
 		{
-			qDebug() << "padAdded: video - ignoring";
+			qDebug() << "padAdded: video - " << GST_ELEMENT_NAME(src) << " -  ignoring";
+#ifdef LINK_IGNORED_SRC_PADS
 			GstElement *sink = makeElement("fakesink", pdata->ppt, pdata->stimulusPipeline->id());
+			gst_bin_add(GST_BIN(pdata->stimulusPipeline->pipeline()), sink);
 			GstPad *sinkPad = gst_element_get_static_pad(sink, "sink");
 			gst_pad_link(newPad, sinkPad);
 			gst_object_unref(sinkPad);
+			qDebug() << "padAdded: video - ignored src pad is linked to a fake sink";
 			if (!gst_element_sync_state_with_parent(sink))
 				qCritical() << "Cannot sync fakesink with pipeline state";
+#else
+			qDebug() << "padAdded: video - ignored src pad is unlinked";
+#endif
 		}
 		else
 		{
-			qDebug() << "padAdded: video - link into pipeline";
-			GstElement *videoConvert = makeElement("autovideoconvert", pdata->ppt, pdata->stimulusPipeline->id());
+			qDebug() << "padAdded: video - " << GST_ELEMENT_NAME(src) << " - link into pipeline";
+			GstElement *videoConvert = makeElement("videoconvert", pdata->ppt, pdata->stimulusPipeline->id());
 			gst_bin_add_many(GST_BIN(pdata->stimulusPipeline->pipeline()), videoConvert, NULL);
 
 			GstPad *sinkPad = gst_element_get_static_pad(videoConvert, "sink");
@@ -439,29 +517,36 @@ void HStimulusPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			// if the BinData canLoop and isLooping, install an event probe on the sink pad coming out of the decodebin
 			if (pdata->isLooping)
 			{
-				qDebug() << "Install event probe on sink pad";
-				gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimulusPipeline::eventProbeCB, (gpointer)pdata, NULL);
+				qDebug() << "padAdded: video will loop, install event probe on sink pad of " << GST_ELEMENT_NAME(videoConvert);
+				pdata->probeID = gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimulusPipeline::eventProbeCB, (gpointer)pdata, NULL);
+				pdata->probeElement = videoConvert;	// the element that sinkPad came from
 			}
 			gst_object_unref(sinkPad);
 		}
-		qDebug() << "padAdded: video - done";
+		qDebug() << "padAdded: video - " << GST_ELEMENT_NAME(src) << " -  done";
 	}
 	else if (isAudio)
 	{
-		qDebug() << "padAdded: audio - start";
+		//qDebug() << "padAdded: audio - start";
 		if (pdata->ignoreAudio)
 		{
-			qDebug() << "padAdded: audio - ignoring";
+			qDebug() << "padAdded: audio - " << GST_ELEMENT_NAME(src) << " - ignoring";
+#ifdef LINK_IGNORED_SRC_PADS
 			GstElement *sink = makeElement("fakesink", pdata->ppt, pdata->stimulusPipeline->id());
+			gst_bin_add(GST_BIN(pdata->stimulusPipeline->pipeline()), sink);
 			GstPad *sinkPad = gst_element_get_static_pad(sink, "sink");
 			gst_pad_link(newPad, sinkPad);
 			gst_object_unref(sinkPad);
+			qDebug() << "padAdded: audio - ignored src pad is linked to a fake sink";
 			if (!gst_element_sync_state_with_parent(sink))
 							qCritical() << "Cannot sync sink with pipeline state";
+#else
+			qDebug() << "padAdded: audio - ignored src pad is unlinked";
+#endif
 		}
 		else
 		{
-			qDebug() << "padAdded: audio - link into pipeline";
+			qDebug() << "padAdded: audio - " << GST_ELEMENT_NAME(src) << " - link into pipeline";
 			GstElement *convert = makeElement("audioconvert", pdata->ppt, pdata->stimulusPipeline->id());
 			Q_ASSERT(convert);
 			GstElement *resample = makeElement("audioresample", pdata->ppt, pdata->stimulusPipeline->id());
@@ -469,24 +554,37 @@ void HStimulusPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			GstElement *volume = makeElement("volume", pdata->ppt, pdata->stimulusPipeline->id());
 			Q_ASSERT(volume);
 			g_object_set(G_OBJECT(volume), "volume", (double)pdata->volume/100.0, NULL);
-			qDebug() << "set volume " << pdata->volume;
+			qDebug() << "padAdded: set audio volume to [0-1] " << pdata->volume;
 			gst_bin_add_many(GST_BIN(pdata->stimulusPipeline->pipeline()), convert, resample, volume, NULL);
 
 			// link srcPad to audioconvert ! volume
 			GstPad *sinkPad = gst_element_get_static_pad(convert, "sink");
-			gst_pad_link(newPad, sinkPad);
-			gst_element_link(convert, resample);
-			gst_element_link(resample, volume);
+			GstPadLinkReturn padLinkReturn = gst_pad_link(newPad, sinkPad);
+			if (GST_PAD_LINK_FAILED(padLinkReturn))
+			{
+				qCritical() << "Cannot link new pad to audioconvert sink pad, GstPadLinkReturn=" << padLinkReturn;
+			}
+			if (!gst_element_link(convert, resample))
+			{
+				qCritical() << "Cannot link audioconvert to resample element.";
+			}
+			if (!gst_element_link(resample, volume))
+			{
+				qCritical() << "Cannot link resample to volume element.";
+			}
 
 			// link to audiomixer element -- need reference up to owning object.
 			pdata->stimulusPipeline->lazyAudioInitializeAndAddToPipeline();
-			gst_element_link(volume, pdata->stimulusPipeline->m_audioMixer);
+			if (!gst_element_link(volume, pdata->stimulusPipeline->m_audioMixer))
+			{
+				qCritical() << "Cannot link volume to audiomixer element.";
+			}
 
 			if (pdata->isLooping)
 			{
-				gulong i;
-				i = gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimulusPipeline::eventProbeCB, (gpointer)pdata, NULL);
-				qDebug() << "Install event probe on (audio) sink pad: " << i;
+				pdata->probeID = gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimulusPipeline::eventProbeCB, (gpointer)pdata, NULL);
+				pdata->probeElement = convert;
+				qDebug() << "padAdded: audio will loop, install event probe on sink pad of " << GST_ELEMENT_NAME(convert);
 			}
 			gst_object_unref(sinkPad);
 
@@ -499,7 +597,7 @@ void HStimulusPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 				qCritical() << "Cannot sync volume with pipeline state";
 
 		}
-		qDebug() << "padAdded: audio - done";
+		qDebug() << "padAdded: audio - " << GST_ELEMENT_NAME(src) << " -  done";
 	}
 }
 
@@ -514,7 +612,9 @@ gboolean HStimulusPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdat
 		// Note that the ASYNC_DONE is sent from the pipeline and is received on the bus.
 		// We send the flushing seek to the decodebin element for the portion(s) of the pipeline
 		// that require looping
-		qDebug() << "Got ASYNC_DONE from " << GST_MESSAGE_SRC_NAME(msg);
+		GstClockTime runningTime;
+		gst_message_parse_async_done(msg, &runningTime);
+		qDebug() << "busCallback(" << GST_MESSAGE_SRC_NAME(msg) << "): Got ASYNC_DONE, running time " << runningTime;
 		QMapIterator<HPlayerPositionType, BinData* > it(pSP->getBinDataMap());
 		while (it.hasNext())
 		{
@@ -523,19 +623,19 @@ gboolean HStimulusPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdat
 			{
 				if (!it.value()->isPrerolled)
 				{
-					qDebug() << "Src for " << it.key().name() << " requires looping. Send flushing seek.";
+					qDebug() << "busCallback(" << GST_MESSAGE_SRC_NAME(msg) << "): Src for " << it.key().name() << " requires looping. Send flushing seek.";
 					if (!gst_element_seek(it.value()->decodebin, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 					{
 						qCritical() << "SEEK FAILED";
 					}
 					else
 					{
-						qDebug() << "flush seek done " << GST_MESSAGE_SRC_NAME(msg);
+						qDebug() << "busCallback(" << GST_MESSAGE_SRC_NAME(msg) << "): flush seek done";
 						it.value()->isPrerolled = true;
 					}
 				}
 				else
-					qDebug() << "Src for " << it.key().name() << " already prerolled";
+					qDebug() << "busCallback(" << GST_MESSAGE_SRC_NAME(msg) << "): Src for " << it.key().name() << " already prerolled";
 			}
 		}
 	}
@@ -546,12 +646,19 @@ gboolean HStimulusPipeline::busCallback(GstBus *, GstMessage *msg, gpointer pdat
 		int id;
 		const HPlayerPositionType* pppt;
 		gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
-		if (new_state == GST_STATE_PLAYING &&
-				parseElementName(GST_MESSAGE_SRC_NAME(msg), factoryName, pppt, id, prefix) &&
-				factoryName == "pipeline")
+		//qDebug() << "STATE CHANGED "<< GST_MESSAGE_SRC_NAME(msg) << " - " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state);
+		if (	parseElementName(GST_MESSAGE_SRC_NAME(msg), factoryName, pppt, id, prefix) &&
+			factoryName == "pipeline")
 		{
-			qDebug() << "STATE CHANGED "<< GST_MESSAGE_SRC_NAME(msg) << factoryName << "/" << pppt->name() << "/" << id << " - " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state);
-			pSP->emitNowPlaying();
+			if (new_state == GST_STATE_PLAYING)
+			{
+				qDebug() << "busCallback(" << GST_MESSAGE_SRC_NAME(msg) << "): got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state);
+				pSP->emitNowPlaying();
+			}
+			else if (new_state == GST_STATE_PAUSED && old_state == GST_STATE_PLAYING)
+			{
+				qDebug() << "busCallback(" << GST_MESSAGE_SRC_NAME(msg) << "): got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state);
+			}
 		}
 	}
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ERROR)
@@ -582,38 +689,34 @@ GstPadProbeReturn HStimulusPipeline::eventProbeCB (GstPad * pad, GstPadProbeInfo
 		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
 		{
 			gchar *parentName = gst_element_get_name(parent);
-			qDebug() << "Got SEGMENT event from " << parentName;
-			g_free(parentName);
-			qDebug() << "Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-			qDebug() << "diff " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent))-last_running_time;
-			last_running_time = (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-
+			qDebug() << "eventProbeCB(" << parentName << "): got SEGMENT event";
 			// segment info
 			const GstSegment* segment;
 			gst_event_parse_segment(event, &segment);
-			qDebug() << "Segment: base: " << segment->base << " offset: " << segment->offset << " start: " << segment->start << " stop: " << segment->stop << " time: " << segment->time << " position: " << segment->position << " duration: " << segment->duration;
+			qDebug() << "eventProbeCB(" << parentName << "): segment base: " << segment->base << " offset: " << segment->offset << " start: " << segment->start << " stop: " << segment->stop << " time: " << segment->time << " position: " << segment->position << " duration: " << segment->duration;
+			g_free(parentName);
 
 		}
 		else if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
 		{
 			gchar *parentName = gst_element_get_name(parent);
-			qDebug() << "Got SEGMENT_DONE event from " << parentName;
-			g_free(parentName);
+			qDebug() << "eventProbeCB(" << parentName << ") got SEGMENT_DONE event";
 			// do segment seek
-			qDebug() << "Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-			qDebug() << "diff " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent))-last_running_time;
+			qDebug() << "eventProbeCB(" << parentName << "): Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+			qDebug() << "eventProbeCB(" << parentName << "): diff " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent))-last_running_time;
 			last_running_time = (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-			qDebug() << "do segment seek";
+			qDebug() << "eventProbeCB(" << parentName << "): do segment seek";
 			if (!gst_element_seek(pdata->decodebin, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
 				qCritical() << "SEEK FAILED";
 			}
+			g_free(parentName);
 		}
 	}
 	return GST_PAD_PROBE_OK;
 }
 
-HPipeline* HStimulusPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, QObject *parent)
+HPipeline* HStimulusPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool, bool bISS, QObject *parent)
 {
 	HStimulusPipeline *p = new HStimulusPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
 	return p;

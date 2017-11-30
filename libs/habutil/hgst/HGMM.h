@@ -108,10 +108,17 @@ public:
 	unsigned int nStimuli() const { return m_mapPipelines.size(); };
 
 	// pipeline control
+	void initialize(unsigned int id);
 	void preroll(unsigned int id);
-	void ready(unsigned int id);
+	void cleanup(unsigned int id);
 	void pause(unsigned int id);
 	void rewind(unsigned int id);
+
+	// pipeline info dump
+	void dump(unsigned int id);
+
+	virtual void defaultStim() { stim(m_defaultKey); };
+	virtual void background() { stim(m_backgroundKey); };
 	virtual void clear();
 	virtual void stop();
 

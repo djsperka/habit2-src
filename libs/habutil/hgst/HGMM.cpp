@@ -129,7 +129,7 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 {
 	HPipeline *pipeline;
 
-	qDebug() << "Adding stimulus (key " << key << "): " << stimulus.getName() << " context " << context;
+	qDebug() << "HGMM::addStimulus(" << key << "): " << stimulus.getName() << " context " << context;
 
 	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, this);
 //	// Create a helper.
@@ -157,7 +157,7 @@ unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QCol
 	HPipeline *pipeline;
 	Habit::StimulusSettings stimulus(name, color);
 
-	qDebug() << "Adding solid color stimulus (key " << key << "): " << color << " context " << context;
+	qDebug() << "HGMM::addStimulus(" << key << "): solid color stimulus - " << color << " context " << context;
 
 	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, this);
 //	// Create a helper.
@@ -199,7 +199,7 @@ unsigned int HGMM::addAG(const Habit::StimulusSettings& ssAG)
 
 unsigned int HGMM::addBackground(const QColor& color)
 {
-	qWarning() << "TODO: ensure addBackground is called only once";
+	qWarning() << "HGMM::addBackground TODO: ensure addBackground is called only once";
 	m_backgroundKey = addStimulus(QString("background"), color, -2);
 	preroll(m_backgroundKey);
 	return(m_backgroundKey);
@@ -224,45 +224,62 @@ void HGMM::nowPlaying()
 	qDebug() << "HGMM::nowPlaying";
 	if (m_bPendingAG)
 	{
-		qDebug() << "Q_EMIT(agStarted(m_iPendingStimKey))";
+		qDebug() << "HGMM::nowPlaying: Q_EMIT(agStarted(" << m_iPendingStimKey << "))";
 		Q_EMIT(agStarted(m_iPendingStimKey));
 	}
 	else if (m_bPendingStim)
 	{
-		qDebug() << "Q_EMIT(stimStarted(m_iPendingStimKey))";
+		qDebug() << "HGMM::nowPlaying: Q_EMIT(stimStarted(" << m_iPendingStimKey << "))";
 		Q_EMIT(stimStarted(m_iPendingStimKey));
+	}
+	else
+	{
+		qCritical() << "HGMM::nowPlaying: No stim or ag pending!";
 	}
 }
 
 void HGMM::stim(unsigned int key)
 {
-	//qDebug() << "HGMM::stim(" << key << ")";
+	qDebug() << "HGMM::stim(" << key << ")";
 	m_bPendingStim = true;
 	m_bPendingAG = false;
 	m_iPendingStimKey = key;
 	playStim(key);
 }
 
-void HGMM::ready(unsigned int key)
+void HGMM::initialize(unsigned int key)
 {
-	qDebug() << "ready " << key << " stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM::initialize(" << key << ") stim " << getStimulusSettings(key).getName();
 
 	if (m_mapPipelines.contains(key))
 	{
-		m_mapPipelines.value(key)->ready();
+		m_mapPipelines.value(key)->initialize();
 	}
 	else
 	{
-		qWarning() << "HGMM::ready(): key " << key << " not found!";
+		qWarning() << "HGMM::initialize(): key " << key << " not found!";
+	}
+}
+
+void HGMM::cleanup(unsigned int key)
+{
+	qDebug() << "HGMM::cleanup(" << key << ") stim " << getStimulusSettings(key).getName();
+
+	if (m_mapPipelines.contains(key))
+	{
+		m_mapPipelines.value(key)->cleanup();
+	}
+	else
+	{
+		qWarning() << "HGMM::cleanup(): key " << key << " not found!";
 	}
 }
 
 void HGMM::preroll(unsigned int key)
 {
-	qDebug() << "preroll " << key << " stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM::preroll(" << key << ") stim " << getStimulusSettings(key).getName();
 	if (m_mapPipelines.contains(key))
 	{
-		std::cout << "pipeline: " << *m_mapPipelines.value(key);
 		m_mapPipelines.value(key)->preroll();
 	}
 	else
@@ -273,6 +290,7 @@ void HGMM::preroll(unsigned int key)
 
 void HGMM::pause(unsigned int key)
 {
+	qDebug() << "HGMM::pause(" << key << ") stim " << getStimulusSettings(key).getName();
 	if (m_mapPipelines.contains(key))
 	{
 		m_mapPipelines.value(key)->pause();
@@ -285,6 +303,7 @@ void HGMM::pause(unsigned int key)
 
 void HGMM::rewind(unsigned int key)
 {
+	qDebug() << "HGMM::rewind(" << key << ") stim " << getStimulusSettings(key).getName();
 	if (m_mapPipelines.contains(key))
 	{
 		m_mapPipelines.value(key)->rewind();
@@ -295,9 +314,24 @@ void HGMM::rewind(unsigned int key)
 	}
 }
 
+void HGMM::dump(unsigned int key)
+{
+	qDebug() << "HGMM::dump(" << key << " stim " << getStimulusSettings(key).getName();
+
+	if (m_mapPipelines.contains(key))
+	{
+		m_mapPipelines.value(key)->dump();
+	}
+	else
+	{
+		qWarning() << "HGMM::dump(): key " << key << " not found!";
+	}
+}
+
+
 void HGMM::playStim(unsigned int key)
 {
-	qDebug() << "playstim " << key << " stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM::playstim(" << key << ") stim " << getStimulusSettings(key).getName();
 	HPipeline *pipeline = NULL;		// the pipeline that will be played
 
 	// get pipeline that will be displayed/played.
@@ -305,6 +339,7 @@ void HGMM::playStim(unsigned int key)
 	if (m_mapPipelines.contains(key))
 	{
 		pipeline = m_mapPipelines.value(key);
+		pipeline->initialize();
 	}
 	else
 	{

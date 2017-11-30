@@ -17,6 +17,9 @@
 
 class HStimulusPipeline: public HPipeline
 {
+	bool m_bInitialized;
+	Habit::StimulusSettings m_stimulusSettings;
+	QDir m_dirStimRoot;
 	const HStimulusLayoutType& m_stimulusLayoutType;
 	bool m_bISS;
 	GstElement *m_pipeline;
@@ -63,6 +66,8 @@ class HStimulusPipeline: public HPipeline
 		bool ignoreVideo;					// advice to padAdded to ignore any video streams. If any are found, they are connected to a fakesink
 		bool isPrerolled;					// set after the stimulus is prerolled (TODO - exactly where should this be done?)
 		bool isLooping;						// if the StimulusInfo specified for this stim to loop.
+		unsigned long probeID;				// when looping, this is the id of the event probe that handles it
+		GstElement *probeElement;			// when looping, this is the element where the probe is installed
 		int volume;							// volume level, 0-100.
 		QSize size;							// resolution of video, if any. Can be undefined -- will take any shape of target screen (i.e.full screen)
 
@@ -70,6 +75,8 @@ class HStimulusPipeline: public HPipeline
 	};
 
 	QMap<HPlayerPositionType, BinData* > m_mapBinData;
+
+
 
 	// called from static busCallback to emit nowPlaying signal
 	void emitNowPlaying();
@@ -79,15 +86,22 @@ class HStimulusPipeline: public HPipeline
 	void setSizeOnWidget(HVideoWidget *w, const HPlayerPositionType& ppt);
 	void lazyAudioInitializeAndAddToPipeline();
 
+	Q_DISABLE_COPY(HStimulusPipeline);
 
 public:
 	HStimulusPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent);
 	virtual ~HStimulusPipeline();
+
+	void initialize();
+	void cleanup();
+
+//	void null();
 	void ready();
 	void pause();
 	void play();
 	void preroll();
 	void rewind();
+	void dump();
 	void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1);
 	void detachWidgetsFromSinks();
 	virtual void write(std::ostream& os) const;
