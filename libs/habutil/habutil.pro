@@ -19,7 +19,8 @@ PKGCONFIG += gstreamer-1.0
 QT += widgets
 
 # videotestsrc include files
-INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
+#INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
+INCLUDEPATH += /Users/dan/git/gst-plugins-base /Users/dan/git/gst-plugins-good
 
 HEADERS +=	HLook.h \
 			HLooker.h \
@@ -132,7 +133,7 @@ HEADERS +=	HLook.h \
 			habit/HExperimentNameDialog.h \
 			wizards/PhaseWizardPages.h \
 			hgst/HGMM.h \
-			hgst/HGMMPipeline.h \
+#			hgst/HGMMPipeline.h \
 			hgst/HStimulusPipeline.h \
 			hgst/HPipeline.h \
 			hgst/HPipelineColor.h \
@@ -250,7 +251,7 @@ SOURCES +=	HLook.cpp \
 			habit/HExperimentNameDialog.cpp \
 			wizards/PhaseWizardPages.cpp \
 			hgst/HGMM.cpp \
-			hgst/HGMMPipeline.cpp \
+#			hgst/HGMMPipeline.cpp \
 			hgst/HStimulusPipeline.cpp \
 			hgst/HPipeline.cpp \
 			hgst/HPipelineColor.cpp \
