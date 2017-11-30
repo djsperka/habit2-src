@@ -3,6 +3,9 @@
 TEMPLATE = app
 TARGET = habit
 
+target.path = $$_PRO_FILE_PWD_/../../distribution/pkgroot
+INSTALLS += target
+
 # need this for boost?
 INCLUDEPATH += 	"/usr/local/include" 
 
@@ -18,7 +21,8 @@ QT += sql printsupport
 #QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
 
 # Now tell qmake to link to gstreamer and also use its include path and Cflags.
-PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-bad-1.0
+PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
+# gstreamer-plugins-bad-1.0
 QT += widgets
 
 # Recommended if you are using g++ 4.5 or later. Must be removed for other compilers.

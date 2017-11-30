@@ -136,6 +136,7 @@ int main(int argc, char *argv[])
 	bool bShowTestingIcon = false;
 	bool bEditTemplates = false;
 	bool bStimInDialog = false;
+	bool bNotInstalled = false;		// use -n to set. If unset, use system plugin path relative to exe in ../GStreamerPlugins
 
 	// by default add debugging output goes to the screen unless we install
 	// a handler for logging msgs. Until Habit is at a good release state
@@ -192,6 +193,16 @@ int main(int argc, char *argv[])
 		{
 			bStimInDialog = true;
 		}
+		else if (!strcmp(argv[i], "-n"))
+		{
+			bNotInstalled = false;
+		}
+	}
+
+
+	if (!bNotInstalled)
+	{
+		qDebug() << "Installed, argv[0] " << argv[0];
 	}
 
 	// Initialize gstreamer
