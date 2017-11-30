@@ -38,7 +38,7 @@ public:
 	{
 		Q_UNUSED(e);
 		// on exiting experiment, tell Media Manager to put up blank screen.
-		getMediaManager().stim(-1);
+		getMediaManager().defaultStim();
 	};
 	
 signals:

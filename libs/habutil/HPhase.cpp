@@ -91,8 +91,8 @@ void HPhase::checkPrerollStatus(int trialnumber, int repeat)
 		}
 		if (m_itrial > 0)
 		{
-			qDebug() << "Set ready state for stimulus " << m_stimuli[m_itrial-1];
-			experiment().getMediaManager().ready(m_stimuli[m_itrial-1].first);
+			qDebug() << "Cleanup stimulus " << m_stimuli[m_itrial-1];
+			experiment().getMediaManager().cleanup(m_stimuli[m_itrial-1].first);
 		}
 	}
 }
@@ -165,7 +165,7 @@ void HPhase::requestCurrentStim()
 	else 
 	{
 		eventLog().append(new HStimLabelRequestEvent(-1, QString("ERROR"), HElapsedTimer::elapsed()));
-		experiment().getMediaManager().stim(-1);
+		experiment().getMediaManager().defaultStim();
 		qDebug() << "Bad trial index (" << m_itrial << ")for phase " << m_name << " max " << m_stimuli.size();
 	}
 
