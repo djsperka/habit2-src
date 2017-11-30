@@ -25,11 +25,12 @@ public:
 	HG3Dialog(const QDir& stimRootDir, int screen = -1, const QString& flag = QString(""), QWidget *parent = NULL);
 	virtual ~HG3Dialog();
 protected Q_SLOTS:
-	void readyClicked();
+	void initializeClicked();
 	void prerollClicked();
 	void pauseClicked();
 	void playClicked();
 	void rewindClicked();
+	void cleanupClicked();
 	void started(int screenid, const QString& filename);
 	//void mediaChanged(libvlc_media_t *media);
 
@@ -38,11 +39,12 @@ private:
 	//HGstPlayer *m_paudioHGstPlayer;
 	//HGstPlayer *m_pvideoHGstPlayer;
 	HGMM *m_pmm;
-	QPushButton *m_pbReady;
 	QPushButton *m_pbPreroll;
 	QPushButton *m_pbPause;
 	QPushButton *m_pbPlay;
 	QPushButton *m_pbRewind;
+	QPushButton *m_pbCleanup;
+	QPushButton *m_pbInitialize;
 	QSpinBox *m_sbWhich;
 	HStimulusWidget *m_pVideoWidgetLeft;
 	HStimulusWidget *m_pVideoWidgetRight;

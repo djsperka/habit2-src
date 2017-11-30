@@ -39,7 +39,8 @@ CONFIG(debug, debug|release) {
 INCLUDEPATH += ../../libs/habutil 
 INCLUDEPATH += ../../libs/habutil/habit ../../libs/habutil/hgst
 # use of enum for videotestsrc
-INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
+#INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
+INCLUDEPATH += /Users/dan/git/gst-plugins-base /Users/dan/git/gst-plugins-good
 
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
 
