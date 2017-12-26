@@ -44,8 +44,10 @@ INCLUDEPATH += /Users/dan/git/gst-plugins-base /Users/dan/git/gst-plugins-good
 
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
 
+INCLUDEPATH += ../fdhunt
+DEPENDPATH += ../fdhunt
 
 # Input
-HEADERS += HG3Dialog.h
-SOURCES += hg3.cpp HG3Dialog.cpp
+HEADERS += HG3Dialog.h ../fdhunt/HStimPipeline.h
+SOURCES += hg3.cpp HG3Dialog.cpp ../fdhunt/HStimPipeline.cpp
 

@@ -31,6 +31,7 @@ protected Q_SLOTS:
 	void playClicked();
 	void rewindClicked();
 	void cleanupClicked();
+	void dumpClicked();
 	void started(int screenid, const QString& filename);
 	//void mediaChanged(libvlc_media_t *media);
 
@@ -44,6 +45,7 @@ private:
 	QPushButton *m_pbPlay;
 	QPushButton *m_pbRewind;
 	QPushButton *m_pbCleanup;
+	QPushButton *m_pbDump;
 	QPushButton *m_pbInitialize;
 	QSpinBox *m_sbWhich;
 	HStimulusWidget *m_pVideoWidgetLeft;

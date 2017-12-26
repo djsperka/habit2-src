@@ -13,6 +13,7 @@
 #include "stimulusdisplayinfo.h"
 #include "HG3Dialog.h"
 #include "HPipeline.h"
+#include "HStimPipeline.h"
 #include "HStimulusPipeline.h"
 #include <gst/gst.h>
 #include <gst/videotestsrc/gstvideotestsrc.h>
@@ -40,21 +41,26 @@ HG3Dialog::HG3Dialog(const QDir& dirStimRoot, int screen, const QString& flag, Q
 	m_pbPause = new QPushButton("Pause");
 	m_pbRewind = new QPushButton("Rewind");
 	m_pbPlay = new QPushButton("PLay");
+	m_pbDump = new QPushButton("Dump");
 	vbox = new QVBoxLayout;
-	buttonBox->addButton(m_pbInitialize, QDialogButtonBox::ActionRole);
+	//buttonBox->addButton(m_pbInitialize, QDialogButtonBox::ActionRole);
 	buttonBox->addButton(m_pbCleanup, QDialogButtonBox::ActionRole);
-	buttonBox->addButton(m_pbPreroll, QDialogButtonBox::ActionRole);
+	//buttonBox->addButton(m_pbPreroll, QDialogButtonBox::ActionRole);
 	buttonBox->addButton(m_pbPause, QDialogButtonBox::ActionRole);
-	buttonBox->addButton(m_pbRewind, QDialogButtonBox::ActionRole);
+	//buttonBox->addButton(m_pbRewind, QDialogButtonBox::ActionRole);
 	buttonBox->addButton(m_pbPlay, QDialogButtonBox::ActionRole);
-	connect(m_pbInitialize, SIGNAL(clicked()), this, SLOT(initializeClicked()));
-	connect(m_pbPreroll, SIGNAL(clicked()), this, SLOT(prerollClicked()));
-	connect(m_pbRewind, SIGNAL(clicked()), this, SLOT(rewindClicked()));
+	buttonBox->addButton(m_pbDump, QDialogButtonBox::ActionRole);
+	//connect(m_pbInitialize, SIGNAL(clicked()), this, SLOT(initializeClicked()));
+	//connect(m_pbPreroll, SIGNAL(clicked()), this, SLOT(prerollClicked()));
+	//connect(m_pbRewind, SIGNAL(clicked()), this, SLOT(rewindClicked()));
 	connect(m_pbPause, SIGNAL(clicked()), this, SLOT(pauseClicked()));
 	connect(m_pbPlay, SIGNAL(clicked()), this, SLOT(playClicked()));
 	connect(m_pbCleanup, SIGNAL(clicked()), this, SLOT(cleanupClicked()));
+	connect(m_pbDump, SIGNAL(clicked()), this, SLOT(dumpClicked()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(accept()));
 
+	m_pbPreroll->setEnabled(false);
+	m_pbRewind->setEnabled(false);
 	if (screen < 1)
 	{
 		vbox->addWidget(new QLabel("HELLO"));
@@ -101,6 +107,7 @@ HG3Dialog::~HG3Dialog()
 	//delete m_paudioHGstPlayer;
 	//m_pvideoHGstPlayer->stop();
 	//delete m_pvideoHGstPlayer;
+	delete m_pmm;
 }
 
 void HG3Dialog::stimStarted(int key)
@@ -120,7 +127,7 @@ QHBoxLayout *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, 
 	//m_pVideoWidgetCenter->setMinimumSize(320, 240);
 	hbox->addWidget(m_pVideoWidgetCenter);
 
-	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), HStimulusPipelineFactory);
+	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), fdhunt::HStimPipelineFactory);
 	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
 	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
@@ -175,7 +182,7 @@ QHBoxLayout *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, 
 		s6.setName("s6-tire-whistle");
 		Habit::StimulusInfo si6(QString("tire"), QString("images/tools/tire.png"));
 		s6.setCenterStimulusInfo(si6);
-		Habit::StimulusInfo sis6("wav/slide_whistle_x.wav", true, 50);
+		Habit::StimulusInfo sis6("wav/slide_whistle_x.wav", false, 50);
 		s6.setIndependentSoundInfo(sis6);
 		f_stimuli.addStimulus(s6);
 	}
@@ -204,12 +211,46 @@ QHBoxLayout *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, 
 		f_stimuli.addStimulus(s8);
 	}
 
+	if (flag.contains("all") || flag.contains("9"))
+	{
+		// taxi + sound BOTH loop
+		Habit::StimulusSettings s9;
+		s9.setName("s9-taxi-whistle-loop");
+		Habit::StimulusInfo si9(QString("taxi"), QString("mov/taxi-480p.mov"), true);
+		s9.setCenterStimulusInfo(si9);
+		Habit::StimulusInfo sis9("wav/fanfare_x.wav", true, 30);
+		s9.setIndependentSoundInfo(sis9);
+		f_stimuli.addStimulus(s9);
+	}
+
+	if (flag.contains("all") || flag.contains("10"))
+	{
+		// taxi + sound BOTH loop
+		Habit::StimulusSettings s9;
+		s9.setName("s9-taxi-whistle-loop");
+		Habit::StimulusInfo si9(QString("taxi"), QString("mov/taxi-480p.mov"), true);
+		s9.setCenterStimulusInfo(si9);
+		Habit::StimulusInfo sis9("wav/fanfare_x.wav", false, 30);
+		s9.setIndependentSoundInfo(sis9);
+		f_stimuli.addStimulus(s9);
+	}
+
+	if (flag.contains("all") || flag.contains("11"))
+	{
+		// taxi + sound BOTH loop
+		Habit::StimulusSettings s10;
+		s10.setName("s10-pdreams-sound-loop");
+		Habit::StimulusInfo si10(QString("taxi"), QString("mp4/pdreams-clip.mp4"), true, 50);
+		s10.setCenterStimulusInfo(si10);
+		f_stimuli.addStimulus(s10);
+	}
+
 	m_pmm->addStimuli(f_stimuli, 1);
 
 	//m_pmm->getReady(5000);
 
-	m_pmm->preroll(0);
-	m_pmm->preroll(1);
+	//m_pmm->preroll(0);
+	//m_pmm->preroll(1);
 	//m_pmm->stim(0);
 	m_iCurrent = 0;
 
@@ -225,7 +266,8 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 	hbox->addWidget(m_pVideoWidgetLeft);
 	hbox->addWidget(m_pVideoWidgetRight);
 
-	m_pmm = new HGMM(m_pVideoWidgetLeft, m_pVideoWidgetRight, dirStimRoot, true, sdi.getBackGroundColor(), HStimulusPipelineFactory);
+	// NOTE: skipping ISS below.
+	m_pmm = new HGMM(m_pVideoWidgetLeft, m_pVideoWidgetRight, dirStimRoot, true, sdi.getBackGroundColor(), fdhunt::HStimPipelineFactory);
 	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
 	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
@@ -241,6 +283,8 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 		s.setName("s1");
 		s.setLeftStimulusInfo(Habit::StimulusInfo(Qt::blue));
 		s.setRightStimulusInfo(Habit::StimulusInfo(Qt::green));
+		Habit::StimulusInfo sis("mov/Loop.mov", true, 50);
+		s.setIndependentSoundInfo(sis);
 		f_stimuli.addStimulus(s);
 	}
 
@@ -281,8 +325,8 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 	{
 		Habit::StimulusSettings s;
 		s.setName("s6");
-		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/KAMI2001_64kb.mp4"), false, 50));
-		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/SayChees2001_64kb.mp4"), false, 0));
+		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/pdreams-clip.mp4"), false, 50));
+		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/chees-clip.mp4"), false, 0));
 		f_stimuli.addStimulus(s);
 	}
 
@@ -290,8 +334,8 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 	{
 		Habit::StimulusSettings s;
 		s.setName("s7");
-		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/KAMI2001_64kb.mp4"), false, 0));
-		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/SayChees2001_64kb.mp4"), false, 50));
+		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/pdreams-clip.mp4"), false, 0));
+		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/pdreams-clip.mp4"), false, 50));
 		f_stimuli.addStimulus(s);
 	}
 
@@ -299,9 +343,18 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 	{
 		Habit::StimulusSettings s;
 		s.setName("s8");
-		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/KAMI2001_64kb.mp4"), false, 0));
-		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/SayChees2001_64kb.mp4"), false, 0));
+		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("kami"), QString("mp4/pdreams-clip.mp4"), false, 0));
+		s.setRightStimulusInfo(Habit::StimulusInfo(QString("SahyCheese"), QString("mp4/chees-clip.mp4"), false, 0));
 		s.setIndependentSoundInfo(Habit::StimulusInfo(QString("sounds/welcome-to-the-internet.mp3"), true, 50));
+		f_stimuli.addStimulus(s);
+	}
+
+	if (flag.contains("all") || flag.contains("9"))
+	{
+		Habit::StimulusSettings s;
+		s.setName("s9");
+		s.setLeftStimulusInfo(Habit::StimulusInfo(QString("chees-clip"), QString("mp4/chees-clip.mp4"), true, 50));
+		s.setRightStimulusInfo(Habit::StimulusInfo(QString("pdreams-clip"), QString("mp4/pdreams-clip.mp4"), true, 50));
 		f_stimuli.addStimulus(s);
 	}
 
@@ -420,6 +473,13 @@ void HG3Dialog::playClicked()
 	int i = m_sbWhich->value();
 	qDebug() << "play " << i;
 	m_pmm->stim(i);
+}
+
+void HG3Dialog::dumpClicked()
+{
+	int i = m_sbWhich->value();
+	qDebug() << "dump " << i;
+	m_pmm->dump(i);
 }
 
 void HG3Dialog::mmReady()

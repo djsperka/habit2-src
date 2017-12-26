@@ -43,8 +43,12 @@ int main(int argc, char **argv)
 		flag = argv[2];
 	}
 
-	HG3Dialog dialog(QDir("/Users/dan/Desktop/habit22/stim/examples"), screen, flag);
-	dialog.exec();
+	while (QMessageBox::Yes == QMessageBox::question(NULL, "Continue?", "Continue?"))
+	{
+
+		HG3Dialog dialog(QDir("/Users/dan/Desktop/habit22/stim/examples"), screen, flag);
+		dialog.exec();
+	}
 	//dialog.show();
 	return 0;
 }
