@@ -52,7 +52,7 @@ public:
 	static bool parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id, QString& prefix);
 	static GstElement *makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number, const char *prefix=NULL);
 	static const HPlayerPositionType& getPPTFromElementName(const QString& elementName);
-
+	static void parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio);
 	// output
 	virtual void write(std::ostream&) const;
 

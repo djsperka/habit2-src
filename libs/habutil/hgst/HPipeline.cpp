@@ -31,6 +31,8 @@ void HPipeline::dump()
 	qDebug() << "HPipeline::dump not implemented!";
 }
 
+
+
 //HPipeline *HPipeline::createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& stimulusLayoutType, bool bSound, bool bISS)
 //{
 //	if (stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
@@ -104,6 +106,8 @@ bool HPipeline::parseElementName(const QString& elementName, QString& factoryNam
 		pppt = &HPlayerPositionType::Right;
 	else if (l[1 + iPrefix] == QString("center"))
 		pppt = &HPlayerPositionType::Center;
+	else if (l[1 + iPrefix] == QString("sound"))
+		pppt = &HPlayerPositionType::Sound;
 	else if (l[1 + iPrefix] == QString("control"))
 		pppt = &HPlayerPositionType::Control;
 	else
@@ -111,6 +115,55 @@ bool HPipeline::parseElementName(const QString& elementName, QString& factoryNam
 
 	id = l[2 + iPrefix].toInt(&b);
 	return b;
+}
+
+void HPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio)
+{
+	GstStructure *new_pad_struct = NULL;
+	const gchar *new_pad_type = NULL;
+	gchar *s_new_pad_caps = NULL;
+	const GValue *v = NULL;
+	new_pad_struct = gst_caps_get_structure(caps, 0);
+	new_pad_type = gst_structure_get_name(new_pad_struct);
+	s_new_pad_caps = gst_caps_to_string(caps);
+	qDebug() << "parseCaps: " << s_new_pad_caps;
+
+	isAudio = g_str_has_prefix(s_new_pad_caps, "audio/x-raw");
+	if (g_str_has_prefix(s_new_pad_caps, "video/x-raw"))
+	{
+		// get width/height
+		v = gst_structure_get_value(new_pad_struct, "width");
+		if (v && G_VALUE_HOLDS_INT(v))
+			width = g_value_get_int(v);
+		else
+			qCritical() << "Width is not an int!?!";
+
+		v = gst_structure_get_value(new_pad_struct, "height");
+		if (v && G_VALUE_HOLDS_INT(v))
+			height = g_value_get_int(v);
+		else
+			qCritical() << "Height is not an int!?!";
+
+		// check framerate
+		v = gst_structure_get_value(new_pad_struct, "framerate");
+		if (v && GST_VALUE_HOLDS_FRACTION(v))
+		{
+			gint num = gst_value_get_fraction_numerator(v);
+			if (num == 0)
+			{
+				isImage = true;
+				isVideo = false;
+			}
+			else if (num > 0)
+			{
+				isImage = false;
+				isVideo = true;
+			}
+			else qCritical() << "negative numerator?";
+		}
+		else qCritical() << "framerate not in caps or unexpected value type";
+	}
+	qDebug() << "parseCaps: Video? " << isVideo << " Image? " << isImage << " Audio? :" << isAudio << " Resolution: " << width << "x" << height;
 }
 
 
