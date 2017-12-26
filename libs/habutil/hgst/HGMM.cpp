@@ -30,17 +30,14 @@ HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& 
 , m_bReady(false)
 , m_pipelineFactory(factory)
 {
-//	m_readyTimeout = new QTimer(this);
-//	m_readyTimeout->setSingleShot(true);
-//	m_readyCheck = new QTimer(this);
-//	connect(m_readyTimeout, SIGNAL(timeout()), this, SLOT	(readyFail()));
-//	connect(m_readyCheck, SIGNAL(timeout()), this, SLOT(readyCheck()));
-	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
-	addBackground(bkgdColor);
-
 	// launch main loop thread
 	m_pgml = g_main_loop_new(NULL, FALSE);
 	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
+
+	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
+	preroll(m_defaultKey);
+	addBackground(bkgdColor);
+
 }
 
 HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
@@ -56,17 +53,13 @@ HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool 
 , m_bReady(false)
 , m_pipelineFactory(factory)
 {
-//	m_readyTimeout = new QTimer(this);
-//	m_readyTimeout->setSingleShot(true);
-//	m_readyCheck = new QTimer(this);
-//	connect(m_readyTimeout, SIGNAL(timeout()), this, SIGNAL(readyFail()));
-//	connect(m_readyCheck, SIGNAL(timeout()), this, SLOT(readyCheck()));
-	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
-	addBackground(bkgdColor);
-
 	// launch main loop thread
 	m_pgml = g_main_loop_new(NULL, FALSE);
 	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
+
+	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
+	preroll(m_defaultKey);
+	addBackground(bkgdColor);
 }
 
 gpointer HGMM::threadFunc(gpointer user_data)
@@ -90,6 +83,8 @@ HGMM::~HGMM()
 	g_thread_join(m_gthread);
 	qDebug() << "g_thread_join done\n";
 
+	g_main_loop_unref(m_pgml);
+	g_thread_unref(m_gthread);
 	qDeleteAll(m_mapPipelines);
 	m_mapPipelines.clear();
 	qDebug() << "~HGMM() - done";
