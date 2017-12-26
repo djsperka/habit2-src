@@ -6,7 +6,7 @@
  */
 
 
-#include "HDButil.h"
+#include "HDBUtil.h"
 #include "HTypes.h"
 #include "maindao.h"
 #include <QtSql/QSqlDatabase>
@@ -41,34 +41,58 @@ bool openDB(const QDir& dir)
 {
 	bool bval = false;
 	QString filename;
-	QFileInfo fileinfo;
+	QFileInfo fileinfoHabit;
+	QFileInfo fileinfoHabit22;
 
 
 	// close database if one is open
 	closeDB();
 
 	// check file attributes
-	fileinfo.setFile(dir, "habit.sqlite");
+	fileinfoHabit.setFile(dir, "habit.sqlite");
+	fileinfoHabit22.setFile(dir, "habit22.sqlite");
+
+
+	// First time using Habit2.2 against this workspace?
+	// If that is the case, we will find habit.sql, and not habit22.sql.
+	// Copy the old habit.sqlite to habit22.sqlite, then update it.
+	// This will leave habigt.sqlite alone, and will allow existing habit-2.1.25 to use old database.
+	qDebug() << "Checking for habit database (>=2.2) " << fileinfoHabit22.absoluteFilePath();
+	if (!fileinfoHabit22.exists() && fileinfoHabit.exists())
+	{
+		qDebug() << "This workspace does not have an updated habit22 database. Creating it from existing habit.sqlite file.";
+		QString copyname(QString("%1/saved-%2-%3").arg(fileinfoHabit22.dir().absolutePath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfoHabit22.fileName()));
+		if (!QFile::copy(fileinfoHabit.absoluteFilePath(), fileinfoHabit22.absoluteFilePath()))
+		{
+			qCritical() << "Cannot make copy of database in " << fileinfoHabit22.absoluteFilePath();
+			return false;
+		}
+		else
+		{
+			qDebug() << "Made copy of habit database from Habit versions prior to Habit2.2. The new database is " << fileinfoHabit22.absoluteFilePath();
+		}
+	}
 
 	// Does file exist and can we write to it? If not, then get filename
-	if (!fileinfo.exists() || !fileinfo.isWritable())
+	if (!fileinfoHabit22.exists() || !fileinfoHabit22.isWritable())
 	{
 		QMessageBox msgBox;
-		QString msg("The database file \"habit.sqlite\" exists, but you do not have write permission. Please fix permissions or select another workspace.");
+		QString msg = QString("The database file %1 exists, but you do not have write permission. Please fix permissions or select another workspace.").arg(fileinfoHabit22.fileName());
 		msgBox.setText(msg);
 		msgBox.exec();
+		return false;
 	}
 	else
 	{
 		QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-		db.setDatabaseName(fileinfo.absoluteFilePath());
-		qDebug() << "Opening database: " << fileinfo.absoluteFilePath();
+		db.setDatabaseName(fileinfoHabit22.absoluteFilePath());
+		qDebug() << "Opening database: " << fileinfoHabit22.absoluteFilePath();
 		if(db.open())
 		{
 			bval = true;
 
 			// Now update database if necessary. Do NOT change the database name!
-			if (!updateDBVersion(db, fileinfo))
+			if (!updateDBVersion(db, fileinfoHabit22))
 			{
 				bval = false;
 				qDebug() << "Database update failed.";
@@ -324,8 +348,8 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 		qDebug() << "Updating database version...";
 		db.close();
 
-		QString copyname(QString("%1/saved-%2-%3").arg(fileinfo.dir().canonicalPath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
-		if (!QFile::copy(fileinfo.canonicalFilePath(), copyname))
+		QString copyname(QString("%1/saved-%2-%3").arg(fileinfo.dir().absolutePath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
+		if (!QFile::copy(fileinfo.absoluteFilePath(), copyname))
 		{
 			qCritical() << "Cannot make copy of database in " << copyname;
 			result = false;
@@ -847,14 +871,14 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 					closeDB();
 
 					// rename the current database - it has a partial update only!
-					QString partialname(QString("%1/error-%2-%3").arg(fileinfo.dir().canonicalPath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
-					if (!QFile::rename(fileinfo.canonicalFilePath(), partialname))
+					QString partialname(QString("%1/error-%2-%3").arg(fileinfo.dir().absolutePath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
+					if (!QFile::rename(fileinfo.absoluteFilePath(), partialname))
 					{
 						qCritical() << "Cannot rename existing habit.sqlite. This database may be partially updated and may not work. Must revert to database " << copyname << " manually.";
 					}
 					else
 					{
-						if (!QFile::copy(copyname, fileinfo.canonicalFilePath()))
+						if (!QFile::copy(copyname, fileinfo.absoluteFilePath()))
 						{
 							qCritical() << "Cannot revert to to original database in " << copyname;
 						}
