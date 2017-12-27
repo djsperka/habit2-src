@@ -6,7 +6,6 @@
  */
 
 #include "HGMM.h"
-#include "HGMMPipeline.h"
 #include <QMapIterator>
 #include <QEventLoop>
 #include <gst/gst.h>
@@ -36,7 +35,8 @@ HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& 
 
 	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
 	preroll(m_defaultKey);
-	addBackground(bkgdColor);
+	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
+	preroll(m_backgroundKey);
 
 }
 
@@ -59,7 +59,9 @@ HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool 
 
 	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
 	preroll(m_defaultKey);
-	addBackground(bkgdColor);
+
+	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
+	preroll(m_backgroundKey);
 }
 
 gpointer HGMM::threadFunc(gpointer user_data)
@@ -75,6 +77,44 @@ gpointer HGMM::threadFunc(gpointer user_data)
 HGMM::~HGMM()
 {
 	qDebug() << "~HGMM()";
+
+	// just call cleanup on all pipelines
+	QMapIterator<unsigned int, HPipeline *> it(m_mapPipelines);
+	while (it.hasNext())
+	{
+	    it.next();
+	    it.value()->cleanup();
+	}
+
+	// cleanup static pipelines
+	HStaticStimPipeline *p;
+	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_backgroundKey]);
+	if (!p)
+	{
+		qCritical() << "~HGMM - cannot cast background stim to static.";
+	}
+	else
+	{
+		p->forceCleanup();
+	}
+	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_defaultKey]);
+	if (!p)
+	{
+		qCritical() << "~HGMM - cannot cast default stim to static.";
+	}
+	else
+	{
+		p->forceCleanup();
+	}
+	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_agKey]);
+	if (!p)
+	{
+		qCritical() << "~HGMM - cannot cast AG stim to static.";
+	}
+	else
+	{
+		p->forceCleanup();
+	}
 
 	// exit main loop
 	qDebug() << "quit main loop";
@@ -126,8 +166,9 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 
 	qDebug() << "HGMM::addStimulus(" << key << "): " << stimulus.getName() << " context " << context;
 
-	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, this);
-//	// Create a helper.
+	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, (context < 0), this);
+
+	//	// Create a helper.
 //	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 //	{
 //		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pCenter->getHVideoWidget(), m_bUseISS, this);
@@ -154,7 +195,7 @@ unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QCol
 
 	qDebug() << "HGMM::addStimulus(" << key << "): solid color stimulus - " << color << " context " << context;
 
-	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, this);
+	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, (context < 0), this);
 //	// Create a helper.
 //	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 //	{
@@ -190,14 +231,6 @@ unsigned int HGMM::addAG(const Habit::StimulusSettings& ssAG)
 	m_agKey = addStimulus(ssAG, -1);
 	preroll(m_agKey);
 	return m_agKey;
-}
-
-unsigned int HGMM::addBackground(const QColor& color)
-{
-	qWarning() << "HGMM::addBackground TODO: ensure addBackground is called only once";
-	m_backgroundKey = addStimulus(QString("background"), color, -2);
-	preroll(m_backgroundKey);
-	return(m_backgroundKey);
 }
 
 void HGMM::clear()
@@ -345,16 +378,18 @@ void HGMM::playStim(unsigned int key)
 	if (pipeline != m_pipelineCurrent)
 	{
 
-		// deal with current pipeline
+		// deal with current pipeline. After this 'm_pipelineCurrent' is no longer connected to the display.
+		// 	Its also been "cleaned", whatever that means.
 		if (m_pipelineCurrent)
 		{
 			//qDebug() << "pause current stim";
 			disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 			m_pipelineCurrent->pause();
 			m_pipelineCurrent->detachWidgetsFromSinks();
+			m_pipelineCurrent->cleanup();	// might not cleanup
 		}
 
-		// set things up for new pipeline
+		// set things up for new pipeline 'pipeline'
 		connect(pipeline, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 		if (m_stimulusLayoutType==HStimulusLayoutType::HStimulusLayoutSingle)
 		{
@@ -364,6 +399,7 @@ void HGMM::playStim(unsigned int key)
 		{
 			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget());
 		}
+
 	}
 
 	pipeline->play();

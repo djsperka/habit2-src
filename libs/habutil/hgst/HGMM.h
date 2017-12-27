@@ -14,14 +14,15 @@
 #include <QTimer>
 #include <glib.h>
 #include "HPipeline.h"
-#include "HStimulusPipeline.h"
+#include "HStimPipeline.h"
+#include "HStaticStimPipeline.h"
 #include "HTypes.h"
 #include "stimulussettings.h"
 #include "stimulisettings.h"
 #include "HStimulusWidget.h"
 
 
-typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, QObject *parent);
+typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, bool bStatic, QObject *parent);
 
 // Media manager for Habit.
 // This media manager is entirely new for Habit 2.2+. It uses GStreamer, a media library available
@@ -52,6 +53,9 @@ class HGMM: public QObject
 	// context. The context is a logical grouping of stimuli. Each phase has its own context, as does
 	// the "attention getters", which has a fixed context.
 	//
+	// Note about context - context < 0 treated as "static" -- are not cleaned up. Have to remember which these are and
+	// call forceCleanup() on each in d'tor.
+	//
 	// getContextStimList fetches a list of keys for the stimuli keys added for a given context.
 	QMultiMap<int, unsigned int> m_mapContext;
 	unsigned int m_backgroundKey;
@@ -79,13 +83,12 @@ protected:
 
 public:
 
-	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimulusPipelineFactory);
-	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimulusPipelineFactory);
+	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
+	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
 	virtual ~HGMM();
 
 
 	virtual unsigned int addAG(const Habit::StimulusSettings& ags);
-	virtual unsigned int addBackground(const QColor& color);
 	virtual void addStimuli(const Habit::StimuliSettings& ss, int context);
 	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context);
 	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context);
