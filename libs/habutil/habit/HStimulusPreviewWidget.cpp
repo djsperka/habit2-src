@@ -21,7 +21,6 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 {
 	qDebug() << "HStimulusPreviewWidget::HStimulusPreviewWidget(" << (parent ? "parent" : "NULL") << ")";
 	m_pmm = createMediaManager(info, 320, 240);
-	m_pmm->addBackground(info.getBackGroundColor());
 
 	// make an hbox to hold the widgets
 	QHBoxLayout *hbox = new QHBoxLayout;
