@@ -5,12 +5,13 @@
  *      Author: dan
  */
 
-#include "HStimPipeline.h"
 #include "HVideoWidget.h"
 #include <QMutexLocker>
 #include <gst/videotestsrc/gstvideotestsrc.h>
+#include <hgst/HStimPipeline.h>
+#include <hgst/HStaticStimPipeline.h>
 
-fdhunt::HStimPipelineSource::HStimPipelineSource(HStimPipeline *pipe)
+HStimPipelineSource::HStimPipelineSource(HStimPipeline *pipe)
 : m_pStimPipeline(pipe)
 , bWaitingForPreroll(false)
 , bPrerolled(false)
@@ -20,12 +21,12 @@ fdhunt::HStimPipelineSource::HStimPipelineSource(HStimPipeline *pipe)
 {
 }
 
-fdhunt::HStimPipelineSource::~HStimPipelineSource()
+HStimPipelineSource::~HStimPipelineSource()
 {
 
 }
 
-fdhunt::HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent)
+HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent)
 : HPipeline(id, parent)
 , m_bInitialized(false)
 , m_stimulusSettings(ss)
@@ -38,36 +39,36 @@ fdhunt::HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, 
 {
 }
 
-fdhunt::HStimPipeline::~HStimPipeline()
+HStimPipeline::~HStimPipeline()
 {
 	// TODO Auto-generated destructor stub
 }
 
-GstElement *fdhunt::HStimPipelineSource::pipeline()
+GstElement *HStimPipelineSource::pipeline()
 {
 	return stimPipeline()->pipeline();
 }
 
-void fdhunt::HStimPipeline::emitNowPlaying()
+void HStimPipeline::emitNowPlaying()
 {
 	Q_EMIT nowPlaying();
 }
 
-void fdhunt::HStimPipeline::pause()
+void HStimPipeline::pause()
 {
 	qDebug() << "HStimPipeline::pause(" << id() << ")";
 	initialize();
 	gst_element_set_state(pipeline(), GST_STATE_PAUSED);
 }
 
-void fdhunt::HStimPipeline::play()
+void HStimPipeline::play()
 {
 	qDebug() << "HStimPipeline::play(" << id() << ")";
 	initialize();
 	gst_element_set_state(pipeline(), GST_STATE_PLAYING);
 }
 
-void fdhunt::HStimPipeline::setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt)
+void HStimPipeline::setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt)
 {
 	GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline()), C_STR(makeElementName("qwidget5videosink", ppt, id())));
 	Q_ASSERT(sink);
@@ -79,7 +80,7 @@ void fdhunt::HStimPipeline::setWidgetPropertyOnSink(HVideoWidget *w, const HPlay
 	g_object_set_property(G_OBJECT(sink), "widget", &v);
 }
 
-void fdhunt::HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
+void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
 {
 	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
@@ -98,28 +99,34 @@ void fdhunt::HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget 
 	}
 }
 
-void fdhunt::HStimPipeline::detachWidgetsFromSinks()
+void HStimPipeline::detachWidgetsFromSinks()
 {
 	attachWidgetsToSinks(NULL, NULL);
 }
 
 
-void fdhunt::HStimPipeline::cleanup()
+void HStimPipeline::cleanup()
 {
 	// cleanup
-	qDebug() << "Cleaning up pipeline id " << id();
-	GstBus *	bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
-	gst_bus_remove_watch(bus);
-	gst_object_unref(bus);
-	gst_element_set_state(m_pipeline, GST_STATE_NULL);
-	gst_object_unref(m_pipeline);
-	qDeleteAll(m_mapPipelineSources);
-	m_mapPipelineSources.clear();
-	m_bInitialized = false;
-	qDebug() << "Cleanup done.";
+	if (m_bInitialized)
+	{
+		qDebug() << "HStimPipeline::cleanup id " << id();
+		GstBus *	bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
+		gst_bus_remove_watch(bus);
+		gst_object_unref(bus);
+		gst_element_set_state(m_pipeline, GST_STATE_NULL);
+		gst_object_unref(m_pipeline);
+		qDeleteAll(m_mapPipelineSources);
+		m_mapPipelineSources.clear();
+		m_bInitialized = false;
+	}
+	else
+	{
+		qDebug() << "HStimPipeline::cleanup id " << id() << " not intialized.";
+	}
 }
 
-void fdhunt::HStimPipeline::initialize()
+void HStimPipeline::initialize()
 {
 	if (m_bInitialized) return;
 
@@ -151,11 +158,11 @@ void fdhunt::HStimPipeline::initialize()
 	m_bInitialized = true;
 }
 
-fdhunt::HStimPipelineSource *fdhunt::HStimPipeline::addStimulusInfo(const HPlayerPositionType& ppt, const Habit::StimulusInfo& info, bool bAudio)
+HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& ppt, const Habit::StimulusInfo& info, bool bAudio)
 {
 	QMutexLocker locker(mutex());
 
-	fdhunt::HStimPipelineSource *pStimPipelineSource = new fdhunt::HStimPipelineSource(this);
+	HStimPipelineSource *pStimPipelineSource = new HStimPipelineSource(this);
 
 	if (ppt == HPlayerPositionType::Sound)
 	{
@@ -285,7 +292,7 @@ fdhunt::HStimPipelineSource *fdhunt::HStimPipeline::addStimulusInfo(const HPlaye
 }
 
 
-void fdhunt::HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
+void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 {
 	GstElement *audioMixer=NULL, *audioSink=NULL;
 	HStimPipelineSource *pSource = (HStimPipelineSource *)p;
@@ -296,8 +303,8 @@ void fdhunt::HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p
 	QMutexLocker(pSource->stimPipeline()->mutex());
 
 	qDebug() << "padAdded: Got new pad " << GST_PAD_NAME(newPad) << " from " << GST_ELEMENT_NAME(src) << " accept video? " << pSource->bVideo << " accept audio? " << pSource->bAudio;
-
-	Q_ASSERT(parseElementName(QString(GST_ELEMENT_NAME(src)), factory, pppt, id, prefix));
+	bool b = parseElementName(QString(GST_ELEMENT_NAME(src)), factory, pppt, id, prefix);
+	Q_ASSERT(b);
 	qDebug() << "padAdded: parsed element name, factory " << factory << " ppt " << pppt->name() << " id " << id;
 
 	// get the caps and parse them. That will tell us whether its audio or video. If its video, then
@@ -331,8 +338,8 @@ void fdhunt::HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p
 			gst_bin_add_many(GST_BIN(pSource->pipeline()), videoConvert, freeze, NULL);
 
 			GstPad *sinkPad = gst_element_get_static_pad(videoConvert, "sink");
-			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &fdhunt::HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
-			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &fdhunt::HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
 			gst_pad_link(newPad, sinkPad);
 			gst_object_unref(sinkPad);
 			gst_element_link (videoConvert, freeze);
@@ -366,8 +373,8 @@ void fdhunt::HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p
 			gst_bin_add_many(GST_BIN(pSource->pipeline()), videoConvert, NULL);
 
 			GstPad *sinkPad = gst_element_get_static_pad(videoConvert, "sink");
-			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &fdhunt::HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
-			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &fdhunt::HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
 			gst_pad_link(newPad, sinkPad);
 			gst_object_unref(sinkPad);
 
@@ -437,8 +444,8 @@ void fdhunt::HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p
 
 			GstPad *pad = gst_element_get_static_pad(audioconvert, "sink");
 			Q_ASSERT(pad);
-			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &fdhunt::HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
-			//gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &fdhunt::HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			//gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
 			//gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &FDDialog::eventProbeAudioDoNothingCB, (gpointer)pdata, NULL);
 			gst_pad_link(newPad, pad);
 			gst_object_unref(pad);
@@ -471,10 +478,10 @@ void fdhunt::HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p
 
 }
 
-gboolean fdhunt::HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
+gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 {
 
-	fdhunt::HStimPipeline *pStimPipeline = (fdhunt::HStimPipeline *)p;
+	HStimPipeline *pStimPipeline = (HStimPipeline *)p;
 
 	//qDebug() << "busCallback: " << GST_MESSAGE_TYPE_NAME(msg) << " from " << GST_MESSAGE_SRC_NAME(msg);
 	if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ASYNC_DONE)
@@ -622,9 +629,9 @@ gboolean fdhunt::HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer 
 	return TRUE;
 }
 
-GstPadProbeReturn fdhunt::HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbeInfo * info, gpointer p)
+GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbeInfo * info, gpointer p)
 {
-	fdhunt::HStimPipelineSource *pSource = (fdhunt::HStimPipelineSource *)p;
+	HStimPipelineSource *pSource = (HStimPipelineSource *)p;
 
 	// Note: GST_PAD_PROBE_INFO_EVENT(d) returns a GstEvent* or NULL if info->data does not have an event.
 	// In this routine, because its an event probe, it should always contain an event?
@@ -703,7 +710,7 @@ GstPadProbeReturn fdhunt::HStimPipeline::eventProbeDoNothingCB(GstPad * pad, Gst
 	return GST_PAD_PROBE_OK;
 }
 
-void fdhunt::HStimPipeline::dump()
+void HStimPipeline::dump()
 {
 	if (!m_bInitialized)
 	{
@@ -715,8 +722,13 @@ void fdhunt::HStimPipeline::dump()
 	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline()));
 
 }
-HPipeline* fdhunt::HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool, bool bISS, QObject *parent)
+
+HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool, bool bISS, bool bStatic, QObject *parent)
 {
-	fdhunt::HStimPipeline *p = new fdhunt::HStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
+	HPipeline *p;
+	if (bStatic)
+		p = new HStaticStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
+	else
+		p = new HStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
 	return p;
 }

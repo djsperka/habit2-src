@@ -44,6 +44,6 @@ DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit ../../libs/habutil/hgs
 
 
 # Input
-HEADERS += FDHuntDialog.h FDDialog.h HStimPipeline.h
-SOURCES += fdhunt.cpp FDHuntDialog.cpp FDDialog.cpp HStimPipeline.cpp
+HEADERS += FDHuntDialog.h FDDialog.h
+SOURCES += fdhunt.cpp FDHuntDialog.cpp FDDialog.cpp
 

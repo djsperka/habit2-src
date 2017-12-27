@@ -5,8 +5,8 @@
  *      Author: dan
  */
 
-#ifndef APPS_FDHUNT_HSTIMPIPELINE_H_
-#define APPS_FDHUNT_HSTIMPIPELINE_H_
+#ifndef LIBS_HABUTIL_HGST_HSTIMPIPELINE_H_
+#define LIBS_HABUTIL_HGST_HSTIMPIPELINE_H_
 
 #include <hgst/HPipeline.h>
 #include <QMutex>
@@ -15,9 +15,6 @@
 #include "stimulussettings.h"
 #include "HTypes.h"
 #include <gst/gst.h>
-
-namespace fdhunt
-{
 
 class HStimPipeline;
 
@@ -83,7 +80,7 @@ public:
 	// a pair of descriptors are left open (and later re-used -- so there doesn't appear to be a growing list of
 	// open descriptors)
 	virtual void cleanup();
-	virtual void preroll() {};
+	virtual void preroll() { pause(); };
 
 	// set to pipeline to playing state. The bus callback function will emit 'nowPlaying' signal
 	// when state change is complete.
@@ -120,7 +117,6 @@ public:
 
 };
 
-HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool, bool bISS, QObject *parent);
+HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, bool bStatic, QObject *parent);
 
-}
-#endif /* APPS_FDHUNT_HSTIMPIPELINE_H_ */
+#endif /* LIBS_HABUTIL_HGST_HSTIMPIPELINE_H_ */
