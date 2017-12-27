@@ -82,17 +82,12 @@ void HPhase::checkPrerollStatus(int trialnumber, int repeat)
 		qDebug() << "Check preroll status for trial " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial];
 		if (prerollID < m_stimuli.size())
 		{
-			qDebug() << "Initiate preroll for stim id " << m_stimuli[prerollID];
+			qDebug() << "HPhase::checkPrerollStatus() - preroll(" << m_stimuli[prerollID].first << ")";
 			experiment().getMediaManager().preroll(m_stimuli[prerollID].first);
 		}
 		else
 		{
 			qDebug() << "At last stim in phase; nothing to preroll.";
-		}
-		if (m_itrial > 0)
-		{
-			qDebug() << "Cleanup stimulus " << m_stimuli[m_itrial-1];
-			experiment().getMediaManager().cleanup(m_stimuli[m_itrial-1].first);
 		}
 	}
 }
