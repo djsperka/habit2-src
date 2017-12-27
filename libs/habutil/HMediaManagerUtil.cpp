@@ -9,7 +9,7 @@
 
 #include <hgst/HStimulusWidget.h>
 #include "HMediaManagerUtil.h"
-#include "HStimulusPipeline.h"
+#include "HStimPipeline.h"
 #include <QtGlobal>
 
 #if QT_VERSION >= 0x050000
@@ -37,7 +37,7 @@ HGMM* createMediaManager(const Habit::ExperimentSettings& es)
 	{
 		QRect rect = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
 		HStimulusWidget *pSingle = new HStimulusWidget(es.getStimulusDisplayInfo(), rect.width(), rect.height());
-		pmm = new HGMM(pSingle, rootDir, es.getStimulusDisplayInfo().getUseISS(), es.getStimulusDisplayInfo().getBackGroundColor(), HStimulusPipelineFactory);
+		pmm = new HGMM(pSingle, rootDir, es.getStimulusDisplayInfo().getUseISS(), es.getStimulusDisplayInfo().getBackGroundColor(), HStimPipelineFactory);
 
 		pSingle->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pSingle->move(rect.x(), rect.y());
@@ -60,7 +60,7 @@ HGMM* createMediaManager(const Habit::ExperimentSettings& es)
 		pRight->showFullScreen();
 		qDebug() << "Right player index " << habutilGetMonitorID(HPlayerPositionType::Right) << " moved to rect " << rectRight;
 
-		pmm = new HGMM(pLeft, pRight, rootDir, es.getStimulusDisplayInfo().getUseISS(), es.getStimulusDisplayInfo().getBackGroundColor(), HStimulusPipelineFactory);
+		pmm = new HGMM(pLeft, pRight, rootDir, es.getStimulusDisplayInfo().getUseISS(), es.getStimulusDisplayInfo().getBackGroundColor(), HStimPipelineFactory);
 	}
 	Q_ASSERT(pmm);
 	return pmm;
@@ -83,13 +83,13 @@ HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth,
 	if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		HStimulusWidget *pSingle = new HStimulusWidget(sdi, screenWidth, screenHeight);
-		pmm = new HGMM(pSingle, rootDir, sdi.getUseISS(), sdi.getBackGroundColor(), HStimulusPipelineFactory);
+		pmm = new HGMM(pSingle, rootDir, sdi.getUseISS(), sdi.getBackGroundColor(), HStimPipelineFactory);
 	}
 	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
 		HStimulusWidget *pLeft = new HStimulusWidget(sdi, screenWidth, screenHeight);
 		HStimulusWidget *pRight = new HStimulusWidget(sdi, screenWidth, screenHeight);
-		pmm = new HGMM(pLeft, pRight, rootDir, sdi.getUseISS(), sdi.getBackGroundColor(), HStimulusPipelineFactory);
+		pmm = new HGMM(pLeft, pRight, rootDir, sdi.getUseISS(), sdi.getBackGroundColor(), HStimPipelineFactory);
 	}
 	else
 	{
