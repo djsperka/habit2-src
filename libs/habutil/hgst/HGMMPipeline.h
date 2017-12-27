@@ -82,7 +82,7 @@ public:
 
 	// (static) utility functions
 	static QString makeElementName(const char *factoryName, const HPlayerPositionType& ppt, int number);
-	static bool parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id);
+	//static bool parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id);
 	static GstElement *makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number);
 	static QString stateName(GstState s);
 	static const HPlayerPositionType& getPPTFromElementName(const QString& elementName);

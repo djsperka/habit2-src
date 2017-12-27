@@ -315,28 +315,28 @@ QString HGMMPipeline::stateName(GstState s)
 	return name;
 }
 
-bool HGMMPipeline::parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id)
-{
-	bool b = false;
-	QStringList l = elementName.toLower().split('-');
-	if (l.size() != 3) return false;
-
-	factoryName = l[0];
-
-	if (l[1] == QString("left"))
-		pppt = &HPlayerPositionType::Left;
-	else if (l[1] == QString("right"))
-		pppt = &HPlayerPositionType::Right;
-	else if (l[1] == QString("center"))
-		pppt = &HPlayerPositionType::Center;
-	else if (l[1] == QString("control"))
-		pppt = &HPlayerPositionType::Control;
-	else
-		return false;
-
-	id = l[2].toInt(&b);
-	return b;
-}
+//bool HGMMPipeline::parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id)
+//{
+//	bool b = false;
+//	QStringList l = elementName.toLower().split('-');
+//	if (l.size() != 3) return false;
+//
+//	factoryName = l[0];
+//
+//	if (l[1] == QString("left"))
+//		pppt = &HPlayerPositionType::Left;
+//	else if (l[1] == QString("right"))
+//		pppt = &HPlayerPositionType::Right;
+//	else if (l[1] == QString("center"))
+//		pppt = &HPlayerPositionType::Center;
+//	else if (l[1] == QString("control"))
+//		pppt = &HPlayerPositionType::Control;
+//	else
+//		return false;
+//
+//	id = l[2].toInt(&b);
+//	return b;
+//}
 
 void HGMMPipeline::emitNowPlaying()
 {
