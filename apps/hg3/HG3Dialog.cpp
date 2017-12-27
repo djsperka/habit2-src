@@ -12,12 +12,11 @@
 #include "stimulisettings.h"
 #include "stimulusdisplayinfo.h"
 #include "HG3Dialog.h"
-#include "HPipeline.h"
-#include "HStimPipeline.h"
-#include "HStimulusPipeline.h"
+#include <hgst/HPipeline.h>
 #include <gst/gst.h>
 #include <gst/videotestsrc/gstvideotestsrc.h>
 #include <gst/audiotestsrc/gstaudiotestsrc.h>
+#include <hgst/HStimPipeline.h>
 
 #define MAX_INFO 5
 Habit::StimulusInfo f_vinfo[MAX_INFO];
@@ -127,7 +126,7 @@ QHBoxLayout *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, 
 	//m_pVideoWidgetCenter->setMinimumSize(320, 240);
 	hbox->addWidget(m_pVideoWidgetCenter);
 
-	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), fdhunt::HStimPipelineFactory);
+	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), HStimPipelineFactory);
 	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
 	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
@@ -267,7 +266,7 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 	hbox->addWidget(m_pVideoWidgetRight);
 
 	// NOTE: skipping ISS below.
-	m_pmm = new HGMM(m_pVideoWidgetLeft, m_pVideoWidgetRight, dirStimRoot, true, sdi.getBackGroundColor(), fdhunt::HStimPipelineFactory);
+	m_pmm = new HGMM(m_pVideoWidgetLeft, m_pVideoWidgetRight, dirStimRoot, true, sdi.getBackGroundColor(), HStimPipelineFactory);
 	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
 	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));

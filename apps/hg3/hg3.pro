@@ -48,6 +48,6 @@ INCLUDEPATH += ../fdhunt
 DEPENDPATH += ../fdhunt
 
 # Input
-HEADERS += HG3Dialog.h ../fdhunt/HStimPipeline.h
-SOURCES += hg3.cpp HG3Dialog.cpp ../fdhunt/HStimPipeline.cpp
+HEADERS += HG3Dialog.h
+SOURCES += hg3.cpp HG3Dialog.cpp
 
