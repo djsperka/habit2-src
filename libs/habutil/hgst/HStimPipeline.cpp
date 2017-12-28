@@ -27,9 +27,8 @@ HStimPipelineSource::~HStimPipelineSource()
 }
 
 HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent)
-: HPipeline(id, parent)
+: HPipeline(id, ss, parent)
 , m_bInitialized(false)
-, m_stimulusSettings(ss)
 , m_dirStimRoot(stimRoot)
 , m_stimulusLayoutType(layoutType)
 , m_bISS(bISS)
@@ -143,17 +142,17 @@ void HStimPipeline::initialize()
 	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		qDebug() << "Generate pipeline elements for single screen layout.";
-		m_mapPipelineSources.insert(HPlayerPositionType::Center, addStimulusInfo(HPlayerPositionType::Center, m_stimulusSettings.getCenterStimulusInfo(), !m_bISS));
+		m_mapPipelineSources.insert(HPlayerPositionType::Center, addStimulusInfo(HPlayerPositionType::Center, stimulusSettings().getCenterStimulusInfo(), !m_bISS));
 	}
 	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
 		qDebug() << "Generate pipeline elements for l/r layout.";
-		m_mapPipelineSources.insert(HPlayerPositionType::Left, addStimulusInfo(HPlayerPositionType::Left, m_stimulusSettings.getLeftStimulusInfo(), !m_bISS));
-		m_mapPipelineSources.insert(HPlayerPositionType::Right, addStimulusInfo(HPlayerPositionType::Right, m_stimulusSettings.getRightStimulusInfo(), !m_bISS));
+		m_mapPipelineSources.insert(HPlayerPositionType::Left, addStimulusInfo(HPlayerPositionType::Left, stimulusSettings().getLeftStimulusInfo(), !m_bISS));
+		m_mapPipelineSources.insert(HPlayerPositionType::Right, addStimulusInfo(HPlayerPositionType::Right, stimulusSettings().getRightStimulusInfo(), !m_bISS));
 	}
-	if (iss() && !m_stimulusSettings.getIndependentSoundInfo().getFileName().trimmed().isEmpty())
+	if (iss() && !stimulusSettings().getIndependentSoundInfo().getFileName().trimmed().isEmpty())
 	{
-		m_mapPipelineSources.insert(HPlayerPositionType::Sound, addStimulusInfo(HPlayerPositionType::Sound, m_stimulusSettings.getIndependentSoundInfo(), true));
+		m_mapPipelineSources.insert(HPlayerPositionType::Sound, addStimulusInfo(HPlayerPositionType::Sound, stimulusSettings().getIndependentSoundInfo(), true));
 	}
 	m_bInitialized = true;
 }

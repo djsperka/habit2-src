@@ -97,7 +97,8 @@ public:
 
 	HStimulusWidget *getHStimulusWidget(const HPlayerPositionType& type);
 	const HStimulusLayoutType& getStimulusLayoutType() const { return m_stimulusLayoutType; };
-	const Habit::StimulusSettings getStimulusSettings(unsigned int key) const;
+	const Habit::StimulusSettings& getStimulusSettings(unsigned int key) const;
+
 	QList<unsigned int> getContextStimList(int context);
 
 	QDialog* createStimulusWidget();
@@ -110,7 +111,8 @@ public:
 	bool waitForStimuliReady(int maxMS, int checkInterval = 200);
 
 	// each pipeline represents a single stimulus (single or dual screen, i.e. Habit::StimulusSettings)
-	const QMap<unsigned int, HPipeline *>& pipelineMap() { return m_mapPipelines; };
+	const QMap<unsigned int, HPipeline *>& pipelineMap() const { return m_mapPipelines; };
+
 	unsigned int nStimuli() const { return m_mapPipelines.size(); };
 
 	// pipeline control

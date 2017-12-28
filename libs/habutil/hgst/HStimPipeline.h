@@ -45,7 +45,6 @@ class HStimPipeline: public HPipeline
 	Q_OBJECT
 
 	bool m_bInitialized;
-	Habit::StimulusSettings m_stimulusSettings;
 	QDir m_dirStimRoot;
 	const HStimulusLayoutType& m_stimulusLayoutType;
 	bool m_bISS;

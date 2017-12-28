@@ -21,13 +21,15 @@ class HPipeline: public QObject
 	Q_OBJECT
 
 	int m_id;
+	Habit::StimulusSettings m_ss;
 
 	Q_DISABLE_COPY(HPipeline);
 
 public:
-	HPipeline(int id, QObject *parent=NULL);
+	HPipeline(int id, const Habit::StimulusSettings& ss, QObject *parent=NULL);
 
 	int id() const { return m_id; };
+	const Habit::StimulusSettings& stimulusSettings() const { return m_ss; };
 
 	// pipeline control
 

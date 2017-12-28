@@ -505,11 +505,11 @@ void HGMM::readyCheck()
 }
 #endif
 
-const Habit::StimulusSettings HGMM::getStimulusSettings(unsigned int key) const
+const Habit::StimulusSettings& HGMM::getStimulusSettings(unsigned int key) const
 {
 	static Habit::StimulusSettings dummy;
-	if (m_mapStimulusSettings.contains(key))
-		return m_mapStimulusSettings.value(key);
+	if (pipelineMap().contains(key))
+		return pipelineMap().value(key)->stimulusSettings();
 	else
 		return dummy;
 }
