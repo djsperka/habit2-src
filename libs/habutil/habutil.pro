@@ -136,8 +136,6 @@ HEADERS +=	HLook.h \
 			hgst/HStimPipeline.h \
 			hgst/HStaticStimPipeline.h \
 			hgst/HPipeline.h \
-			hgst/HStimPipeline.h \
-			hgst/HPipelineColor.h \
 			hgst/HStimulusWidget.h \
 			hgst/HVideoWidget.h \
 			hgst/HStimulusLayout.h \
@@ -251,11 +249,9 @@ SOURCES +=	HLook.cpp \
 			habit/HExperimentNameDialog.cpp \
 			wizards/PhaseWizardPages.cpp \
 			hgst/HGMM.cpp \
-#			hgst/HGMMPipeline.cpp \
 			hgst/HStimPipeline.cpp \
 			hgst/HStaticStimPipeline.cpp \
 			hgst/HPipeline.cpp \
-			hgst/HPipelineColor.cpp \
 			hgst/HStimulusWidget.cpp \
 			hgst/HVideoWidget.cpp \
 			hgst/HStimulusLayout.cpp \
