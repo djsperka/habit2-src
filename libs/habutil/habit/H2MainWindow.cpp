@@ -570,7 +570,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				QDialog *pStimulusDisplayDialog  = NULL;
 				if (m_bStimInDialog)
 				{
-					pStimulusDisplayDialog = createStimulusWidget(pMediaManager);
+					pStimulusDisplayDialog = pMediaManager->createStimulusWidget();
 					qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
 					//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
 					pStimulusDisplayDialog->show();
@@ -649,35 +649,36 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	}
 }
 
-
-QDialog* GUILib::H2MainWindow::createStimulusWidget(HGMM *pmm)
-{
-	QDialog *pDialog = new QDialog;
-	QHBoxLayout *hbox = new QHBoxLayout;
-	qDebug() << "createStimulusWidget";
-	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		qDebug() << "createStimulusWidget - single";
-		HStimulusWidget *video = pmm->getHStimulusWidget(HPlayerPositionType::Center);
-		connect(pmm, SIGNAL(stimulusChanged()), video->getHVideoWidget(), SLOT(stimulusChanged()));
-		hbox->addWidget(video);
-		pDialog->setLayout(hbox);
-		pDialog->setMinimumSize(320, 240);
-	}
-	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		HStimulusWidget *videoLeft = pmm->getHStimulusWidget(HPlayerPositionType::Left);
-		HStimulusWidget *videoRight = pmm->getHStimulusWidget(HPlayerPositionType::Right);
-		connect(pmm, SIGNAL(stimulusChanged()), videoLeft->getHVideoWidget(), SLOT(stimulusChanged()));
-		connect(pmm, SIGNAL(stimulusChanged()), videoRight->getHVideoWidget(), SLOT(stimulusChanged()));
-		hbox->addWidget(videoLeft);
-		hbox->addWidget(videoRight);
-		pDialog->setLayout(hbox);
-		qDebug() << "createStimulusWidget - L/R";
-		//pDialog->setMinimumSize(640, 240);	// double wide - can do better than this
-	}
-	return pDialog;
-}
+// moved to HGMM
+//
+//QDialog* GUILib::H2MainWindow::createStimulusWidget(HGMM *pmm)
+//{
+//	QDialog *pDialog = new QDialog;
+//	QHBoxLayout *hbox = new QHBoxLayout;
+//	qDebug() << "createStimulusWidget";
+//	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+//	{
+//		qDebug() << "createStimulusWidget - single";
+//		HStimulusWidget *video = pmm->getHStimulusWidget(HPlayerPositionType::Center);
+//		connect(pmm, SIGNAL(stimulusChanged()), video->getHVideoWidget(), SLOT(stimulusChanged()));
+//		hbox->addWidget(video);
+//		pDialog->setLayout(hbox);
+//		pDialog->setMinimumSize(320, 240);
+//	}
+//	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+//	{
+//		HStimulusWidget *videoLeft = pmm->getHStimulusWidget(HPlayerPositionType::Left);
+//		HStimulusWidget *videoRight = pmm->getHStimulusWidget(HPlayerPositionType::Right);
+//		connect(pmm, SIGNAL(stimulusChanged()), videoLeft->getHVideoWidget(), SLOT(stimulusChanged()));
+//		connect(pmm, SIGNAL(stimulusChanged()), videoRight->getHVideoWidget(), SLOT(stimulusChanged()));
+//		hbox->addWidget(videoLeft);
+//		hbox->addWidget(videoRight);
+//		pDialog->setLayout(hbox);
+//		qDebug() << "createStimulusWidget - L/R";
+//		//pDialog->setMinimumSize(640, 240);	// double wide - can do better than this
+//	}
+//	return pDialog;
+//}
 
 
 void GUILib::H2MainWindow::adaptVideoWidgets(HGMM *pmm)

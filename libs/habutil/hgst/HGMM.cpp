@@ -513,3 +513,31 @@ const Habit::StimulusSettings HGMM::getStimulusSettings(unsigned int key) const
 	else
 		return dummy;
 }
+
+QDialog* HGMM::createStimulusWidget()
+{
+	QDialog *pDialog = new QDialog;
+	QHBoxLayout *hbox = new QHBoxLayout;
+	qDebug() << "createStimulusWidget";
+	if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	{
+		qDebug() << "createStimulusWidget - single";
+		HStimulusWidget *video = getHStimulusWidget(HPlayerPositionType::Center);
+		connect(this, SIGNAL(stimulusChanged()), video->getHVideoWidget(), SLOT(stimulusChanged()));
+		hbox->addWidget(video);
+		pDialog->setLayout(hbox);
+		pDialog->setMinimumSize(320, 240);
+	}
+	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		HStimulusWidget *videoLeft = getHStimulusWidget(HPlayerPositionType::Left);
+		HStimulusWidget *videoRight = getHStimulusWidget(HPlayerPositionType::Right);
+		connect(this, SIGNAL(stimulusChanged()), videoLeft->getHVideoWidget(), SLOT(stimulusChanged()));
+		connect(this, SIGNAL(stimulusChanged()), videoRight->getHVideoWidget(), SLOT(stimulusChanged()));
+		hbox->addWidget(videoLeft);
+		hbox->addWidget(videoRight);
+		pDialog->setLayout(hbox);
+		qDebug() << "createStimulusWidget - L/R";
+	}
+	return pDialog;
+}

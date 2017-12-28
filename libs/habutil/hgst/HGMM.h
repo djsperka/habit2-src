@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QMultiMap>
 #include <QTimer>
+#include <QDialog>
 #include <glib.h>
 #include "HPipeline.h"
 #include "HStimPipeline.h"
@@ -98,6 +99,8 @@ public:
 	const HStimulusLayoutType& getStimulusLayoutType() const { return m_stimulusLayoutType; };
 	const Habit::StimulusSettings getStimulusSettings(unsigned int key) const;
 	QList<unsigned int> getContextStimList(int context);
+
+	QDialog* createStimulusWidget();
 
 	// set all pipelines to paused state, then monitor and wait for all pads to be assigned.
 	// emit mmReady() if all are ready; emit mmFail() if not ready before timeout ms.
