@@ -2,16 +2,10 @@ TARGET = testmm
 TEMPLATE = app
 QMAKE_CXXFLAGS += -fvisibility=hidden
 
-QT += sql
-lessThan(QT_MAJOR_VERSION, 5) {
-    QT += phonon
-}
-else {
-	QT += widgets multimedia printsupport
-}
+QT += sql widgets multimedia printsupport
 CONFIG += qt debug_and_release link_pkgconfig c++11
 
-PKGCONFIG += gstreamer-1.0
+PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
 
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
@@ -23,10 +17,11 @@ CONFIG(debug, debug|release) {
 	PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
 }
 
-INCLUDEPATH += 	"/usr/local/include" 
-INCLUDEPATH += ../../libs/habutil
-INCLUDEPATH += ../../libs/habutil/habit ../../libs/habutil/hgst
+INCLUDEPATH += 	"/usr/local/include" \ 
+				../../libs/habutil \
+				../../libs/habutil/habit \
+				../../libs/habutil/hgst
 
-DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
+DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit ../../libs/habutil/hgst 
 SOURCES			=	main.cpp TestMMDialog.cpp TestMMController.cpp
 HEADERS			=	TestMMDialog.h TestMMController.h

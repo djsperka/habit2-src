@@ -80,10 +80,10 @@ void TestMMDialog::experimentActivated(QString expt)
 		return;
 	}
 
+	QMessageBox::information(this, "Cool", "Cool");
 
 	// Create media manager for this experiment
-	// TODO memory leak here if open multiple times?
-	m_pmm = createMediaManager(settings);
+	m_pmm = createMediaManager(settings, 320, 240);
 
 	// connect to media manager signals
 	connect(this, SIGNAL(stim(unsigned int)), m_pmm, SLOT(stim(unsigned int)));
@@ -115,8 +115,6 @@ void TestMMDialog::experimentActivated(QString expt)
 			qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno() << " DONE";
 		}
 	}
-	//m_pmm->getReady(5000);
-
 
 	QListIterator<unsigned int> itIndices(m_stimIndices);
 	QListIterator<QString> itNames(m_stimNames);
@@ -126,34 +124,12 @@ void TestMMDialog::experimentActivated(QString expt)
 		qDebug() << itIndices.next() << " " << itNames.next();
 	}
 
-	// Create widgets....
-	QWidget *w = new QWidget();
-	QHBoxLayout *hbox = new QHBoxLayout;
-	if (m_pFullScreen->isChecked())
-	{
-		// TODO: Create full screen widgets
-		qFatal("Not ready for full screen");
-	}
-	else
-	{
-		// create a widget with videowidgets inside it
-		if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
-		{
-			hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Center));
-		}
-		else if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
-		{
-			hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Left));
-			hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Right));
-		}
-		else
-			qFatal("TestMMDialog: cannot handle stimulus display type");
-		w->setLayout(hbox);
 
-	}
+	// get display widget(s)
+	QDialog *d = m_pmm->createStimulusWidget();
 
 	// Now create a controller and exec() it
-	TestMMController controller(m_stimNames, w);
+	TestMMController controller(m_stimNames, d);
 	connect(&controller, SIGNAL(playItem(unsigned int)), this, SLOT(playItem(unsigned int)));
 	connect(&controller, SIGNAL(stopItem()), this, SLOT(stopItem()));
 	controller.exec();
@@ -163,7 +139,7 @@ void TestMMDialog::experimentActivated(QString expt)
 	m_stimIndices.clear();
 	m_stimNames.clear();
 	delete m_pmm;
-
+	m_pmm = NULL;
 }
 
 

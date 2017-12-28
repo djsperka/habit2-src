@@ -20,14 +20,13 @@ class TestMMController: public QDialog
 {
 	Q_OBJECT
 
-	QStringListModel *m_pmodel;
 	QPushButton *m_playButton;
 	QPushButton *m_stopButton;
 	QListView *m_list;
 
 public:
 	TestMMController(const QStringList& names, QWidget *screens=0, QWidget *parent=0);
-	~TestMMController() {};
+	virtual ~TestMMController() {};
 
 signals:
 	void playItem(unsigned int);

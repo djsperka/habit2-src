@@ -18,7 +18,6 @@ TestMMController::TestMMController(const QStringList& names, QWidget *screens, Q
 : QDialog(parent)
 {
 	QVBoxLayout *vbox = new QVBoxLayout;
-
 	QStringListModel *pmodel = new QStringListModel(names);
 	m_list = new QListView;
 	m_list->setModel(pmodel);
