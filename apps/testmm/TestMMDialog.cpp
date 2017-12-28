@@ -9,11 +9,13 @@
 #include "TestMMController.h"
 #include "HExperimentListWidget.h"
 #include "experimentsettings.h"
+#include "HRunSettingsDialog.h"
 #include "HPhaseSettings.h"
 #include "H2MainWindow.h"
 #include "HGMM.h"
 #include "HDBException.h"
 #include "HMediaManagerUtil.h"
+#include "HExperimentUtil.h"
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QDebug>
@@ -80,7 +82,11 @@ void TestMMDialog::experimentActivated(QString expt)
 		return;
 	}
 
-	QMessageBox::information(this, "Cool", "Cool");
+	GUILib::HRunSettingsDialog *pRunSettingsDialog = new GUILib::HRunSettingsDialog(settings, true, NULL);
+	int i = pRunSettingsDialog->exec();
+	if (i != QDialog::Accepted) return;
+
+	//QMessageBox::information(this, "Cool", "Cool");
 
 	// Create media manager for this experiment
 	m_pmm = createMediaManager(settings, 320, 240);
@@ -90,40 +96,37 @@ void TestMMDialog::experimentActivated(QString expt)
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	connect(m_pmm, SIGNAL(screen(int, QString)), this, SLOT(screen(int, QString)));
 
+	// Now populate the media manager
+	bool bAGUsed = false;
+	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
+	{
+		m_pmm->addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus());
+		bAGUsed = true;
+	}
+
+
 	QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
 	while (phaseIterator.hasNext())
 	{
 		const Habit::HPhaseSettings& ps = phaseIterator.next();
-		QList<unsigned int> stimidListInitial;
+		QList< QPair<int, QString> > stimidListOrdered;
 
 		if (ps.getIsEnabled())
 		{
-			m_pmm->addStimuli(ps.stimuli(), ps.getSeqno());
-
-			QList<unsigned int> stimidListInitial = m_pmm->getContextStimList(ps.getSeqno());
+			populateMediaManager(m_pmm, ps, pRunSettingsDialog->getRunSettings(), stimidListOrdered);
 
 			qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno();
-			QListIterator<unsigned int> it(stimidListInitial);
-			unsigned int uistim;
+			QListIterator< QPair<int, QString> > it(stimidListOrdered);
 			while (it.hasNext())
 			{
-				uistim = it.next();
-				qDebug() << "phase " << ps.getName() << " stim " << uistim << " name " << m_pmm->getStimulusSettings(uistim).getName();
-				m_stimIndices.append(uistim);
-				m_stimNames.append(QString("%1:%2").arg(ps.getName()).arg(m_pmm->getStimulusSettings(uistim).getName()));
+				QPair<int, QString> p = it.next();
+				qDebug() << "phase " << ps.getName() << " stim " << p.first << " name " << m_pmm->getStimulusSettings(p.first).getName();
+				m_stimIndices.append(p.first);
+				m_stimNames.append(QString("%1:%2").arg(ps.getName()).arg(m_pmm->getStimulusSettings(p.first).getName()));
 			}
 			qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno() << " DONE";
 		}
 	}
-
-	QListIterator<unsigned int> itIndices(m_stimIndices);
-	QListIterator<QString> itNames(m_stimNames);
-
-	while (itIndices.hasNext())
-	{
-		qDebug() << itIndices.next() << " " << itNames.next();
-	}
-
 
 	// get display widget(s)
 	QDialog *d = m_pmm->createStimulusWidget();
