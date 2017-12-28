@@ -50,39 +50,39 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 		HPhaseCriteria* pcrit = (HPhaseCriteria *)NULL;
 		HPhase* pHPhase = (HPhase *)NULL;
 		const HPhaseSettings& ps = phaseIterator.next();
-		QList< QPair<int, QString> > list;
-		QList<unsigned int> stimidListInitial;
 		QList< QPair<int, QString> > stimidListOrdered;
 
 		if (ps.getIsEnabled())
 		{
-			pmm->addStimuli(ps.stimuli(), ps.getSeqno());
-
-			// Get the list of ALL stim keys for the PreTest stimuli.
-			// These are in the order that they were added to the stim list, which is the same as the
-			// order they are pulled from the DB.
-			// Any randomization or other ordering will come later.
-			stimidListInitial = pmm->getContextStimList(ps.getSeqno());
-
-			// Now get the order list from HRunSettings.
-			// This order list should consist of numbers from 0...n-1, where
-			// n is the number of stimuli configured for this phase.
-			Q_ASSERT(runSettings.map().contains(ps.getSeqno()));
-
-			PhaseRunSettings prs(runSettings.map().value(ps.getSeqno()));
-			list = prs.getOrderList();
-			HTrialGenerator htg(list.size(), prs.isOrderRandomized(), prs.getRandomizeMethod()==1);
-			for (int i=0; i<ps.habituationSettings().getNTrials(); i++)
-			{
-				// Note: prior to version 2.1.0, the line below (with the "-1") was used.
-				// That was because the way orders were specified had used 1-based indexing.
-				// With the addition of configured orders I've done away with 1-based in lieu
-				// of regular old 0-based indices to eliminate a LOT of confusion in
-				// manipulating the orders.
-				//stimidListOrdered.append(stimidListInitial.at(list.at(htg.next()) - 1));
-				int itmp = htg.next();
-				stimidListOrdered.append(QPair<int, QString>(stimidListInitial.at(list.at(itmp).first), list.at(itmp).second));
-			}
+			stimidListOrdered.clear();
+			populateMediaManager(pmm, ps, runSettings, stimidListOrdered);
+//			pmm->addStimuli(ps.stimuli(), ps.getSeqno());
+//
+//			// Get the list of ALL stim keys for the PreTest stimuli.
+//			// These are in the order that they were added to the stim list, which is the same as the
+//			// order they are pulled from the DB.
+//			// Any randomization or other ordering will come later.
+//			stimidListInitial = pmm->getContextStimList(ps.getSeqno());
+//
+//			// Now get the order list from HRunSettings.
+//			// This order list should consist of numbers from 0...n-1, where
+//			// n is the number of stimuli configured for this phase.
+//			Q_ASSERT(runSettings.map().contains(ps.getSeqno()));
+//
+//			PhaseRunSettings prs(runSettings.map().value(ps.getSeqno()));
+//			list = prs.getOrderList();
+//			HTrialGenerator htg(list.size(), prs.isOrderRandomized(), prs.getRandomizeMethod()==1);
+//			for (int i=0; i<ps.habituationSettings().getNTrials(); i++)
+//			{
+//				// Note: prior to version 2.1.0, the line below (with the "-1") was used.
+//				// That was because the way orders were specified had used 1-based indexing.
+//				// With the addition of configured orders I've done away with 1-based in lieu
+//				// of regular old 0-based indices to eliminate a LOT of confusion in
+//				// manipulating the orders.
+//				//stimidListOrdered.append(stimidListInitial.at(list.at(htg.next()) - 1));
+//				int itmp = htg.next();
+//				stimidListOrdered.append(QPair<int, QString>(stimidListInitial.at(list.at(itmp).first), list.at(itmp).second));
+//			}
 			pcrit = createPhaseCriteria(ps.habituationSettings());
 			pHPhase = new HPhase(*sExperiment, pcrit, log, stimidListOrdered, ps, experimentSettings.getHLookSettings(), experimentSettings.getAttentionGetterSettings(), bTestingInput);
 
@@ -125,4 +125,44 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	}
 #endif
 	return psm;
+}
+
+
+void populateMediaManager(HGMM* pmm, const HPhaseSettings& ps, const Habit::RunSettings& runSettings, QList< QPair<int, QString> >& stimidListOrdered)
+{
+	QList<unsigned int> stimidListInitial;
+	QList< QPair<int, QString> > list;
+
+	// Add stimuli for this phase to the media manager. The MM will keep an ordered list using the seqno (which
+	// distinguishes the phase) as the 'contextStimList'.
+	pmm->addStimuli(ps.stimuli(), ps.getSeqno());
+
+	// Get the context stim list. It is a list of keys (used to call pmm->stim(key), e.g.)
+	// in the order that they were added to the stim list, which is the same as the
+	// order they are pulled from the DB.
+	// When the actual order of presentation is generated (stimidListOrdered), the algorithm
+	// need only generate a 0-based list -- the elements of that list are used to fetch the actual
+	// MM keys to use in the experiment.
+	stimidListInitial = pmm->getContextStimList(ps.getSeqno());
+
+	// Now get the order list from HRunSettings.
+	// This order list should consist of numbers from 0...n-1, where
+	// n is the number of stimuli configured for this phase.
+	Q_ASSERT(runSettings.map().contains(ps.getSeqno()));
+
+	PhaseRunSettings prs(runSettings.map().value(ps.getSeqno()));
+	list = prs.getOrderList();
+	HTrialGenerator htg(list.size(), prs.isOrderRandomized(), prs.getRandomizeMethod()==1);
+	for (int i=0; i<ps.habituationSettings().getNTrials(); i++)
+	{
+		// Note: prior to version 2.1.0, the line below (with the "-1") was used.
+		// That was because the way orders were specified had used 1-based indexing.
+		// With the addition of configured orders I've done away with 1-based in lieu
+		// of regular old 0-based indices to eliminate a LOT of confusion in
+		// manipulating the orders.
+		//stimidListOrdered.append(stimidListInitial.at(list.at(htg.next()) - 1));
+		int itmp = htg.next();
+		stimidListOrdered.append(QPair<int, QString>(stimidListInitial.at(list.at(itmp).first), list.at(itmp).second));
+	}
+
 }
