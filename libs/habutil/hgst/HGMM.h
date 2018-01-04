@@ -36,7 +36,7 @@ class HGMM: public QObject
 {
 	Q_OBJECT
 
-	const HStimulusLayoutType& m_stimulusLayoutType;
+	const HStimulusLayoutType* m_pStimulusLayoutType;
 	QDir m_root;
 	bool m_bUseISS;
 	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
@@ -94,11 +94,16 @@ public:
 	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context);
 	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context);
 
+	unsigned int getAGKey() const { return m_agKey; };
+	unsigned int getBackgroundKey() const { return m_backgroundKey; };
+	unsigned int getDefaultKey() const { return m_defaultKey; };
 
 	HStimulusWidget *getHStimulusWidget(const HPlayerPositionType& type);
-	const HStimulusLayoutType& getStimulusLayoutType() const { return m_stimulusLayoutType; };
+	const HStimulusLayoutType& getStimulusLayoutType() const { return *m_pStimulusLayoutType; };
 	const Habit::StimulusSettings& getStimulusSettings(unsigned int key) const;
 
+	// Change layout type and widgets. Must supply correct # of pointers.
+	void setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1);
 	QList<unsigned int> getContextStimList(int context);
 
 	QDialog* createStimulusWidget();

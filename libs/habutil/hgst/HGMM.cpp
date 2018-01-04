@@ -17,7 +17,7 @@
 //const Habit::StimulusSettings HGMM::dummyStimulusSettings;
 
 HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
-: m_stimulusLayoutType(HStimulusLayoutType::HStimulusLayoutSingle)
+: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutSingle)
 , m_root(dir)
 , m_bUseISS(useISS)
 , m_pCenter(center)
@@ -41,7 +41,7 @@ HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& 
 }
 
 HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
-: m_stimulusLayoutType(HStimulusLayoutType::HStimulusLayoutLeftRight)
+: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutLeftRight)
 , m_root(dir)
 , m_bUseISS(useISS)
 , m_pCenter(NULL)
@@ -130,6 +130,11 @@ HGMM::~HGMM()
 	qDebug() << "~HGMM() - done";
 }
 
+void HGMM::setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1)
+{
+	m_pStimulusLayoutType = &layoutType;
+}
+
 HStimulusWidget *HGMM::getHStimulusWidget(const HPlayerPositionType& type)
 {
 	if (type == HPlayerPositionType::Left)
@@ -166,20 +171,10 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 
 	qDebug() << "HGMM::addStimulus(" << key << "): " << stimulus.getName() << " context " << context;
 
-	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, (context < 0), this);
+	// create pipeline
+	pipeline = m_pipelineFactory(key, stimulus, m_root, getStimulusLayoutType(), true, m_bUseISS, (context < 0), this);
 
-	//	// Create a helper.
-//	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
-//	{
-//		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pCenter->getHVideoWidget(), m_bUseISS, this);
-//
-//	}
-//	else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-//	{
-//		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget(), m_bUseISS, this);
-//	}
-//
-//	// Add helper to map
+	// Add helper to map
 	m_mapPipelines.insert(key, pipeline);
 
 	// add key to context map
@@ -195,18 +190,9 @@ unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QCol
 
 	qDebug() << "HGMM::addStimulus(" << key << "): solid color stimulus - " << color << " context " << context;
 
-	pipeline = m_pipelineFactory(key, stimulus, m_root, m_stimulusLayoutType, true, m_bUseISS, (context < 0), this);
-//	// Create a helper.
-//	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
-//	{
-//		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pCenter->getHVideoWidget(), m_bUseISS, this);
-//	}
-//	else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-//	{
-//		pipeline = new HGMMPipeline(key, stimulus, m_root, m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget(), m_bUseISS, this);
-//	}
-//
-//	// Add helper to map
+	pipeline = m_pipelineFactory(key, stimulus, m_root, getStimulusLayoutType(), true, m_bUseISS, (context < 0), this);
+
+	// Add helper to map
 	m_mapPipelines.insert(key, pipeline);
 
 	// add key to context map
@@ -214,7 +200,6 @@ unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QCol
 
 	return key;
 }
-
 
 unsigned int HGMM::addStimulus(const Habit::StimulusSettings& ss, int context)
 {
@@ -391,11 +376,11 @@ void HGMM::playStim(unsigned int key)
 
 		// set things up for new pipeline 'pipeline'
 		connect(pipeline, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
-		if (m_stimulusLayoutType==HStimulusLayoutType::HStimulusLayoutSingle)
+		if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutSingle)
 		{
 			pipeline->attachWidgetsToSinks(m_pCenter->getHVideoWidget());
 		}
-		else if (m_stimulusLayoutType==HStimulusLayoutType::HStimulusLayoutLeftRight)
+		else if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutLeftRight)
 		{
 			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget());
 		}
@@ -425,11 +410,11 @@ void HGMM::stop()
 void HGMM::updateGeometry()
 {
 	// Create a helper.
-	if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutSingle)
+	if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		m_pCenter->getHVideoWidget()->updateGeometry();
 	}
-	else if (m_stimulusLayoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
 		m_pLeft->getHVideoWidget()->updateGeometry();
 		m_pRight->getHVideoWidget()->updateGeometry();
