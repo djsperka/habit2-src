@@ -57,6 +57,9 @@ namespace GUILib
 		void rewind();
 		void setStimulusLayoutType(const HStimulusLayoutType& type);
 
+	protected:
+		void hideEvent(QHideEvent *event);
+		void showEvent(QShowEvent *event);
 	protected slots:
 		void nextClicked();
 		void prevClicked();

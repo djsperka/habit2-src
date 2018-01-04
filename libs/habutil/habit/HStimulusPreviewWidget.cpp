@@ -243,6 +243,15 @@ void GUILib::HStimulusPreviewWidget::clear()
 	m_pmm->background();
 }
 
+void GUILib::HStimulusPreviewWidget::hideEvent(QHideEvent *event)
+{
+	qDebug() << "hide event";
+}
+
+void GUILib::HStimulusPreviewWidget::showEvent(QShowEvent *event)
+{
+	qDebug() << "show event";
+}
 
 void GUILib::HStimulusPreviewWidget::setStimulusLayoutType(const HStimulusLayoutType& type)
 {
