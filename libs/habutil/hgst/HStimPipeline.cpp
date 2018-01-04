@@ -420,6 +420,8 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 				GstElement *audioSink = makeElement("osxaudiosink", HPlayerPositionType::Control, id);
 				Q_ASSERT(audioSink);
 
+				g_object_set(G_OBJECT(audioSink), "provide-clock", false, NULL);
+
 				audioMixer = makeElement("audiomixer", HPlayerPositionType::Control, id);
 				Q_ASSERT(audioMixer);
 				gst_bin_add_many(GST_BIN(pSource->pipeline()), audioMixer, audioSink, NULL);
