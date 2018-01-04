@@ -22,7 +22,11 @@ class TestMMController: public QDialog
 
 	QPushButton *m_playButton;
 	QPushButton *m_stopButton;
+	QPushButton *m_nextButton;
+	QPushButton *m_replayButton;
 	QListView *m_list;
+	QStringList m_stringList;
+	unsigned int m_index;
 
 public:
 	TestMMController(const QStringList& names, QWidget *screens=0, QWidget *parent=0);
@@ -36,6 +40,8 @@ public slots:
 
 	void playClicked();
 	void stopClicked();
+	void nextClicked();
+	void replayClicked();
 
 };
 

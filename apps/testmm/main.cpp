@@ -20,6 +20,7 @@
 
 int main(int argc, char **argv)
 {
+	QString script;
 	QApplication app(argc, argv);
 	gst_init(&argc, &argv);
 	app.setApplicationName("habit2");
@@ -47,6 +48,11 @@ int main(int argc, char **argv)
 			habutilSetStimulusRootDir(QString(argv[i+1]));
 			i++;
 		}
+		else if (!strcmp(argv[i], "-b"))
+		{
+			script = argv[i+1];
+			i++;
+		}
 		else
 		{
 			qDebug() << "Unrecognized command line arg " << QString(argv[i]);
@@ -63,7 +69,7 @@ int main(int argc, char **argv)
 	//w->show();
 	//dialog->show();
 
-	TestMMDialog *dialog = new TestMMDialog;
+	TestMMDialog *dialog = new TestMMDialog(script);
 	dialog->exec();
 
 	return 0;

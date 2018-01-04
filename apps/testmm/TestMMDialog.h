@@ -20,12 +20,15 @@ class TestMMDialog: public QDialog
 	Q_OBJECT
 
 private:
+	QString m_script;
 	HGMM *m_pmm;
 	QStringList m_stimNames;
 	QList<unsigned int> m_stimIndices;
 	QCheckBox *m_pFullScreen;
+	QCheckBox *m_pSSWidget;	// use stimuli settings widget
+
 public:
-	TestMMDialog(QWidget *parent=0);
+	TestMMDialog(const QString& script = QString(), QWidget *parent=0);
 	~TestMMDialog();
 	void components();
 
