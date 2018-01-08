@@ -555,86 +555,73 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				}
 			}
 
-			if (!pMediaManager->waitForStimuliReady(5000))
+			QDialog *pStimulusDisplayDialog  = NULL;
+			if (m_bStimInDialog)
 			{
-				QMessageBox msgBox;
-				msgBox.setText("This experiment cannot be run.");
-				msgBox.setInformativeText("Trouble queueing stimuli for this experiment.");
-				msgBox.setStandardButtons(QMessageBox::Ok);
-				msgBox.setDefaultButton(QMessageBox::Ok);
-				msgBox.exec();
-
+				pStimulusDisplayDialog = pMediaManager->createStimulusWidget();
+				qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
+				//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
+				pStimulusDisplayDialog->show();
 			}
 			else
 			{
-				QDialog *pStimulusDisplayDialog  = NULL;
-				if (m_bStimInDialog)
+				adaptVideoWidgets(pMediaManager);
+			}
+
+			// This is where the experiment is actually run.
+			int cpStatus = m_pControlPanel->exec();
+
+			// delete the video widgets.
+			// TODO: This should be guarded against cases where the widgets are owned by something else -
+			// like when they are contained in another widget -
+			// in which case they will be deleted when that thing is deleted.
+
+			qDebug() << "pMediaManager->stop()";
+			pMediaManager->stop();
+			if (pStimulusDisplayDialog)
+				delete pStimulusDisplayDialog;
+			else
+			{
+				qDebug() << " delete widgets";
+				// must explicitly delete the stim widgets
+				HStimulusWidget *w;
+				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Center);
+				if (w) delete w;
+				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Left);
+				if (w) delete w;
+				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Right);
+				if (w) delete w;
+				qDebug() << " delete widgets done";
+			}
+
+
+			if (cpStatus == QDialog::Accepted)
+			{
+				HResults* results = new HResults(experimentSettings, m_pRunSettingsDialog->getRunSettings(),
+						m_pRunSettingsDialog->getSubjectSettings(), eventLog,
+						m_pRunSettingsDialog->getRunLabel(),
+						QCoreApplication::instance()->applicationVersion());
+
+				// Always save results. No option here.
+				qDebug() << "save results";
+				QDir dir (habutilGetResultsDir(m_pExperimentListWidget->selectedExperiment()));
+				QString filename(dir.absoluteFilePath(QString("%1.hab").arg(m_pRunSettingsDialog->getRunLabel())));
+				qDebug() << "Saving results to " << filename;
+				if (!results->save(filename))
 				{
-					pStimulusDisplayDialog = pMediaManager->createStimulusWidget();
-					qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
-					//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
-					pStimulusDisplayDialog->show();
+					qCritical() << "Error - cannot save data to file " << filename;
 				}
-				else
+				QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(m_pRunSettingsDialog->getRunLabel())));
+				if (!results->saveToCSV(filenameCSV))
 				{
-					adaptVideoWidgets(pMediaManager);
+					qCritical() << "Error - cannot save data to csv file " << filenameCSV;
 				}
 
-				// This is where the experiment is actually run.
-				int cpStatus = m_pControlPanel->exec();
+				// display results
+				HResultsDialog dialog(*results, this);
+				dialog.exec();
 
-				// delete the video widgets.
-				// TODO: This should be guarded against cases where the widgets are owned by something else -
-				// like when they are contained in another widget -
-				// in which case they will be deleted when that thing is deleted.
-
-				qDebug() << "pMediaManager->stop()";
-				pMediaManager->stop();
-				if (pStimulusDisplayDialog)
-					delete pStimulusDisplayDialog;
-				else
-				{
-					qDebug() << " delete widgets";
-					// must explicitly delete the stim widgets
-					HStimulusWidget *w;
-					w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Center);
-					if (w) delete w;
-					w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Left);
-					if (w) delete w;
-					w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Right);
-					if (w) delete w;
-					qDebug() << " delete widgets done";
-				}
-
-
-				if (cpStatus == QDialog::Accepted)
-				{
-					HResults* results = new HResults(experimentSettings, m_pRunSettingsDialog->getRunSettings(),
-							m_pRunSettingsDialog->getSubjectSettings(), eventLog,
-							m_pRunSettingsDialog->getRunLabel(),
-							QCoreApplication::instance()->applicationVersion());
-
-					// Always save results. No option here.
-					qDebug() << "save results";
-					QDir dir (habutilGetResultsDir(m_pExperimentListWidget->selectedExperiment()));
-					QString filename(dir.absoluteFilePath(QString("%1.hab").arg(m_pRunSettingsDialog->getRunLabel())));
-					qDebug() << "Saving results to " << filename;
-					if (!results->save(filename))
-					{
-						qCritical() << "Error - cannot save data to file " << filename;
-					}
-					QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(m_pRunSettingsDialog->getRunLabel())));
-					if (!results->saveToCSV(filenameCSV))
-					{
-						qCritical() << "Error - cannot save data to csv file " << filenameCSV;
-					}
-
-					// display results
-					HResultsDialog dialog(*results, this);
-					dialog.exec();
-
-					delete results;
-				}
+				delete results;
 
 				// clean up stuff
 				qDebug() << "Cleaning up...";

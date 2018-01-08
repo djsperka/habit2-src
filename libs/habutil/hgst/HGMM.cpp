@@ -26,7 +26,6 @@ HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& 
 , m_pipelineCurrent(NULL)
 , m_gthread(NULL)
 , m_pgml(NULL)
-, m_bReady(false)
 , m_pipelineFactory(factory)
 {
 	// launch main loop thread
@@ -50,7 +49,6 @@ HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool 
 , m_pipelineCurrent(NULL)
 , m_gthread(NULL)
 , m_pgml(NULL)
-, m_bReady(false)
 , m_pipelineFactory(factory)
 {
 	// launch main loop thread
@@ -421,74 +419,6 @@ void HGMM::updateGeometry()
 	}
 }
 
-//void HGMM::getReady(int ms)
-//{
-//	m_readyTimeout->start(ms);
-//	m_readyCheck->start(500);
-//
-//	connect(m_readyCheck,  SIGNAL(timeout()), this, SLOT(readyCheck()) );
-//	connect(m_readyTimeout, SIGNAL(timeout()), this, SLOT(readyFail()));
-//	m_readyTimeout->start(ms);
-//	m_readyCheck->start(500);
-//
-//	return;
-//}
-
-bool HGMM::waitForStimuliReady(int maxMS, int checkIntervalMS)
-{
-#if 1
-	Q_UNUSED(maxMS);
-	Q_UNUSED(checkIntervalMS);
-	return true;
-#else
-	QTimer maxTimer;
-	maxTimer.setSingleShot(true);
-	maxTimer.setInterval(maxMS);
-	QTimer checkTimer;
-	checkTimer.setInterval(checkIntervalMS);
-	QEventLoop loop;
-
-	// when maxTimer fires, quit the loop and stop the check timer
-	connect(&maxTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
-	connect(&maxTimer, SIGNAL(timeout()), &checkTimer, SLOT(stop()));
-
-	// when check timer fires, call readyCheck, which checks all pipelines, and if all are ready it
-	// will emit mmReady() and set m_bReady to true.
-	connect(&checkTimer, SIGNAL(timeout()), this, SLOT(readyCheck()));
-
-	// when mmReady() is emitted, stop loop and both timers
-	connect(this, SIGNAL(mmReady()), &loop, SLOT(quit()));
-	connect(this, SIGNAL(mmReady()), &maxTimer, SLOT(stop()));
-	connect(this, SIGNAL(mmReady()), &checkTimer, SLOT(stop()));
-
-	m_bReady = false;
-	maxTimer.start();
-	checkTimer.start();
-	loop.exec();
-	return m_bReady;
-#endif
-}
-
-#if 0
-void HGMM::readyCheck()
-{
-	qDebug() << "readyCheck():";
-	//if (m_bReady) return;
-
-	// iterate through helpers, check whether each has needed pads connected (and hence is prerolled)
-	QMapIterator<unsigned int, HPipeline *> it(m_mapPipelines);
-	while (it.hasNext())
-	{
-	    it.next();
-	    if (!it.value()->hasPads()) return;
-	}
-
-	// only get here if all pipleines are ready
-	m_bReady = true;
-	qDebug() << "emit mmReady()";
-	Q_EMIT mmReady();
-}
-#endif
 
 const Habit::StimulusSettings& HGMM::getStimulusSettings(unsigned int key) const
 {

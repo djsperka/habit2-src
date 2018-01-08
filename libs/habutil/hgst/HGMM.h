@@ -40,11 +40,9 @@ class HGMM: public QObject
 	QDir m_root;
 	bool m_bUseISS;
 	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
-	QTimer *m_readyTimeout, *m_readyCheck;
 	HPipeline *m_pipelineCurrent;
 	GThread *m_gthread;
 	GMainLoop *m_pgml;
-	bool m_bReady;
 	PipelineFactory m_pipelineFactory;
 
 	QMap<unsigned int, Habit::StimulusSettings> m_mapStimulusSettings;
@@ -112,9 +110,6 @@ public:
 	// emit mmReady() if all are ready; emit mmFail() if not ready before timeout ms.
 	// DO NOT USE void getReady(int ms);
 
-	// currently a no-op, that may change djs 11-1-17
-	bool waitForStimuliReady(int maxMS, int checkInterval = 200);
-
 	// each pipeline represents a single stimulus (single or dual screen, i.e. Habit::StimulusSettings)
 	const QMap<unsigned int, HPipeline *>& pipelineMap() const { return m_mapPipelines; };
 
@@ -139,8 +134,6 @@ public Q_SLOTS:
 
 	void stim(unsigned int);
 	void ag();
-//	void readyCheck();
-//	void readyFail();
 	void nowPlaying();
 //	void playerStarted(int i, const QString& filename);
 //	void playerCleared(int i);
