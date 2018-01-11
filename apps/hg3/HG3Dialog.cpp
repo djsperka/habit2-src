@@ -56,7 +56,7 @@ HG3Dialog::HG3Dialog(const QDir& dirStimRoot, int screen, const QString& flag, Q
 	connect(m_pbPlay, SIGNAL(clicked()), this, SLOT(playClicked()));
 	connect(m_pbCleanup, SIGNAL(clicked()), this, SLOT(cleanupClicked()));
 	connect(m_pbDump, SIGNAL(clicked()), this, SLOT(dumpClicked()));
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(accept()));
+	connect(buttonBox, SIGNAL(rejected()), this, SLOT(rejected()));
 
 	m_pbPreroll->setEnabled(false);
 	m_pbRewind->setEnabled(false);
@@ -73,7 +73,8 @@ HG3Dialog::HG3Dialog(const QDir& dirStimRoot, int screen, const QString& flag, Q
 		sdi.setPresentationStyle(HPresentationStyle::HPresentationStyleMonitorDefined);
 		sdi.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutSingle);
 		sdi.setUseISS(true);
-		vbox->addLayout(initSingleScreen(sdi, dirStimRoot, flag));
+		vbox->addWidget(initSingleScreen(sdi, dirStimRoot, flag));
+		//vbox->addLayout(initSingleScreen(sdi, dirStimRoot, flag));
 	}
 	else
 	{
@@ -84,7 +85,7 @@ HG3Dialog::HG3Dialog(const QDir& dirStimRoot, int screen, const QString& flag, Q
 		sdi.setPresentationStyle(HPresentationStyle::HPresentationStyleMonitorDefined);
 		sdi.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutLeftRight); // not used?
 		sdi.setUseISS(true);
-		vbox->addLayout(initLRScreen(sdi, dirStimRoot, flag));
+		vbox->addWidget(initLRScreen(sdi, dirStimRoot, flag));
 	}
 
 	m_sbWhich = new QSpinBox(this);
@@ -101,12 +102,17 @@ HG3Dialog::HG3Dialog(const QDir& dirStimRoot, int screen, const QString& flag, Q
 
 }
 
+void HG3Dialog::rejected()
+{
+	m_pmm->reset();
+	accept();
+}
 HG3Dialog::~HG3Dialog()
 {
 	//delete m_paudioHGstPlayer;
 	//m_pvideoHGstPlayer->stop();
 	//delete m_pvideoHGstPlayer;
-	delete m_pmm;
+	//delete m_pmm;
 }
 
 void HG3Dialog::stimStarted(int key)
@@ -119,14 +125,16 @@ void HG3Dialog::agStarted()
 	qDebug() << "HG3Dialog::agStarted";
 }
 
-QHBoxLayout *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot, const QString& flag)
+QWidget *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot, const QString& flag)
 {
-	QHBoxLayout *hbox = new QHBoxLayout;
+//	QHBoxLayout *hbox = new QHBoxLayout;
 	m_pVideoWidgetCenter = new HStimulusWidget(sdi, 1024, 768);
-	//m_pVideoWidgetCenter->setMinimumSize(320, 240);
-	hbox->addWidget(m_pVideoWidgetCenter);
+	m_pVideoWidgetCenter->setMinimumSize(320, 240);
+//	hbox->addWidget(m_pVideoWidgetCenter);
 
-	m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), HStimPipelineFactory);
+	//m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), HStimPipelineFactory);
+	m_pmm = &HGMM::instance();
+	m_pmm->reset(m_pVideoWidgetCenter, true, sdi.getBackGroundColor(), dirStimRoot);
 	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
 	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
@@ -253,22 +261,20 @@ QHBoxLayout *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, 
 	//m_pmm->stim(0);
 	m_iCurrent = 0;
 
-	return hbox;
+	return m_pmm->createStimulusWidget();
 }
 
 
-QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot, const QString& flag)
+QWidget *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot, const QString& flag)
 {
-	QHBoxLayout *hbox = new QHBoxLayout;
-	m_pVideoWidgetLeft = new HStimulusWidget(sdi, 800, 600);
-	m_pVideoWidgetRight = new HStimulusWidget(sdi, 800, 600);
-	hbox->addWidget(m_pVideoWidgetLeft);
-	hbox->addWidget(m_pVideoWidgetRight);
+	m_pVideoWidgetLeft = new HStimulusWidget(sdi, 1024, 768);
+	m_pVideoWidgetLeft->setMinimumSize(320, 240);
+	m_pVideoWidgetRight = new HStimulusWidget(sdi, 1024, 768);
+	m_pVideoWidgetRight->setMinimumSize(320, 240);
 
 	// NOTE: skipping ISS below.
-	m_pmm = new HGMM(m_pVideoWidgetLeft, m_pVideoWidgetRight, dirStimRoot, true, sdi.getBackGroundColor(), HStimPipelineFactory);
-	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
-	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
+	m_pmm = &HGMM::instance();
+	m_pmm->reset(m_pVideoWidgetLeft, m_pVideoWidgetRight, true, sdi.getBackGroundColor(), dirStimRoot);
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetLeft->getHVideoWidget(), SLOT(stimulusChanged()));
@@ -357,16 +363,6 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 		f_stimuli.addStimulus(s);
 	}
 
-//	//
-//	{
-//		Habit::StimulusSettings s;
-//		s.setName("s");
-//		s.setLeftStimulusInfo(Habit::StimulusInfo());
-//		s.setRightStimulusInfo(Habit::StimulusInfo());
-//		s.setIndependentSoundInfo(Habit::StimulusInfo());
-//		f_stimuli.addStimulus(s);
-//	}
-
 #if 0
 	// pic
 	Habit::StimulusSettings s1;
@@ -408,11 +404,11 @@ QHBoxLayout *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, cons
 
 //	m_pmm->preroll(0);
 //	m_pmm->preroll(1);
-	m_pmm->stim(0);
+//	m_pmm->stim(0);
 	m_iCurrent = 0;
 
 	//m_pmm->getReady(5000);
-	return hbox;
+	return m_pmm->createStimulusWidget();
 }
 
 

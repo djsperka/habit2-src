@@ -176,9 +176,10 @@ void TestMMDialog::experimentActivated(QString expt)
 
 
 		// clean up
-		m_stimIndices.clear();
-		m_stimNames.clear();
-		delete m_pmm;
+		//		m_stimIndices.clear();
+		//		m_stimNames.clear();
+		//		delete m_pmm;
+		m_pmm->reset();
 		m_pmm = NULL;
 	}
 }

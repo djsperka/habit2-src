@@ -18,6 +18,7 @@
 #include "HStimPipeline.h"
 #include "HStaticStimPipeline.h"
 #include "HTypes.h"
+#include "experimentsettings.h"
 #include "stimulussettings.h"
 #include "stimulisettings.h"
 #include "HStimulusWidget.h"
@@ -45,8 +46,6 @@ class HGMM: public QObject
 	GMainLoop *m_pgml;
 	PipelineFactory m_pipelineFactory;
 
-	QMap<unsigned int, Habit::StimulusSettings> m_mapStimulusSettings;
-
 	// A map containing lists of stimulus keys (which can be played with stim(key), and whose
 	// StimulusSettings can be fetched with getStimulusSettings(key)), saved according to their
 	// context. The context is a logical grouping of stimuli. Each phase has its own context, as does
@@ -61,6 +60,9 @@ class HGMM: public QObject
 	unsigned int m_agKey;
 	unsigned int m_defaultKey;	// this key will always work
 
+
+	HGMM(PipelineFactory factory = HStimPipelineFactory);
+	HGMM(HGMM& mm);	// not defined.
 	void playStim(unsigned int key);
 	static gpointer threadFunc(gpointer user_data);
 	void updateGeometry();
@@ -82,10 +84,33 @@ protected:
 
 public:
 
-	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
-	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
+//	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
+//	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
 	virtual ~HGMM();
 
+	// clear everything and restore HGMM to its initial state.
+	void reset();
+
+	// Re-initializes the mm, creates pipelines for default, background, ag (if configured),
+	// and all configured stimuli. No widgets are set - call setWidgets() for that. Otherwise,
+	// the mm will be ready to play all stimuli. Context stim lists are also avaiable.
+	void reset(const Habit::ExperimentSettings& settings, const QDir& dir = QDir::rootPath());
+
+	// Re-initialize mm, create pipelines for default, background. No widgets set, and no other stimuli or ag
+	// are configured.
+	void reset(const HStimulusLayoutType& layout, bool useISS, const QColor& bkgdColor = Qt::gray, const QDir& dir = QDir::rootPath());
+
+
+	// Re-initialize mm, create pipelines for default, background. Widgets ARE set, but no other stimuli or ag
+	// are configured.
+	void reset(HStimulusWidget *pCenter, bool useISS, const QColor& bkgdColor = Qt::gray, const QDir& dir = QDir::rootPath());
+	void reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, bool useISS, const QColor& bkgdColor = Qt::gray, const QDir& dir = QDir::rootPath());
+
+	// assign widget(s) to hgmm
+	void setWidgets(HStimulusWidget *p0, HStimulusWidget *p1=NULL);
+
+	// Get reference to singleton instance of HGMM.
+	static HGMM& instance();
 
 	virtual unsigned int addAG(const Habit::StimulusSettings& ags);
 	virtual void addStimuli(const Habit::StimuliSettings& ss, int context);
@@ -104,7 +129,7 @@ public:
 	void setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1);
 	QList<unsigned int> getContextStimList(int context);
 
-	QDialog* createStimulusWidget();
+	QDialog *createStimulusWidget();
 
 	// set all pipelines to paused state, then monitor and wait for all pads to be assigned.
 	// emit mmReady() if all are ready; emit mmFail() if not ready before timeout ms.

@@ -53,8 +53,8 @@ private:
 	HStimulusWidget *m_pVideoWidgetCenter;
 	unsigned int m_iCurrent;
 
-	QHBoxLayout *initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d, const QString& flag);
-	QHBoxLayout *initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d, const QString& flag);
+	QWidget *initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d, const QString& flag);
+	QWidget *initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& d, const QString& flag);
 
 	//HGstPlayer *createMediaPlayerAndPopulate(const QDir& dirStimRoot, bool isAudio);
 //	HGstMediaManager *createMM(QGst::Ui::VideoWidget *v);
@@ -65,6 +65,7 @@ private:
 		void mmFail();
 		void agStarted();
 		void stimStarted(int);
+		void rejected();
 };
 
 #endif /* APPS_Q5PLAYER_Q5PLAYERTESTDIALOG_H_ */

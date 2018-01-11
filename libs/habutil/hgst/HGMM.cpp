@@ -6,61 +6,203 @@
  */
 
 #include "HGMM.h"
+#include "HPhaseSettings.h"
 #include <QMapIterator>
 #include <QEventLoop>
+#include <QDialog>
 #include <gst/gst.h>
 #include <iostream>
 
 
-#define SPECIALPLAYHACK 1
+HGMM& HGMM::instance()
+{
+	static HGMM mm;
+	qDebug() << "HGMM::instance()";
+	return mm;
+}
 
-//const Habit::StimulusSettings HGMM::dummyStimulusSettings;
-
-HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
-: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutSingle)
-, m_root(dir)
-, m_bUseISS(useISS)
-, m_pCenter(center)
+HGMM::HGMM(PipelineFactory factory)
+: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutUnknown)
+, m_bUseISS(false)
+, m_pCenter(NULL)
 , m_pLeft(NULL)
 , m_pRight(NULL)
 , m_pipelineCurrent(NULL)
 , m_gthread(NULL)
 , m_pgml(NULL)
 , m_pipelineFactory(factory)
+, m_backgroundKey(0)
+, m_agKey(0)
+, m_defaultKey(0)
+, m_bPendingAG(false)
+, m_bPendingStim(false)
+, m_iPendingStimKey(0)
 {
+	qDebug() << "HGMM::HGMM()";
+
 	// launch main loop thread
 	m_pgml = g_main_loop_new(NULL, FALSE);
 	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
+}
 
+void HGMM::reset()
+{
+	qDebug() << "HGMM::reset()";
+	// just call cleanup on all pipelines
+	QMapIterator<unsigned int, HPipeline *> it(m_mapPipelines);
+	while (it.hasNext())
+	{
+	    it.next();
+	    it.value()->cleanup();
+	}
+
+	// cleanup static pipelines
+	HStaticStimPipeline *p;
+	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_backgroundKey]);
+	if (!p)
+	{
+		qCritical() << "~HGMM - cannot cast background stim to static.";
+	}
+	else
+	{
+		p->forceCleanup();
+	}
+	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_defaultKey]);
+	if (!p)
+	{
+		qCritical() << "~HGMM - cannot cast default stim to static.";
+	}
+	else
+	{
+		p->forceCleanup();
+	}
+	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_agKey]);
+	if (!p)
+	{
+		qCritical() << "~HGMM - cannot cast AG stim to static.";
+	}
+	else
+	{
+		p->forceCleanup();
+	}
+
+	qDeleteAll(m_mapPipelines);
+	m_mapPipelines.clear();
+	m_mapContext.clear();
+	m_pCenter = m_pLeft = m_pRight = NULL;
+	m_pipelineCurrent = NULL;
+	m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutUnknown;
+}
+
+void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
+{
+	reset(settings.getStimulusDisplayInfo().getStimulusLayoutType(), settings.getStimulusDisplayInfo().getUseISS(), settings.getStimulusDisplayInfo().getBackGroundColor(), dir);
+	// Need to know if AG is used. If it is, add attention getter settings to media manager
+	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
+	{
+		addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus());
+	}
+
+	QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
+	while (phaseIterator.hasNext())
+	{
+		const Habit::HPhaseSettings& ps = phaseIterator.next();
+		if (ps.getIsEnabled())
+		{
+			addStimuli(ps.stimuli(), ps.getSeqno());
+		}
+	}
+}
+
+void HGMM::reset(const HStimulusLayoutType& layout, bool useISS, const QColor& bkgdColor, const QDir& dir)
+{
+	qDebug() << "HGMM::reset(" << layout.name() << ", " << useISS << ", " << bkgdColor << ", " << dir << " )";
+	reset();
+	m_pStimulusLayoutType = &layout;
+	m_root = dir;
+	m_bUseISS = useISS;
 	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
 	preroll(m_defaultKey);
 	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
 	preroll(m_backgroundKey);
-
 }
 
-HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
-: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutLeftRight)
-, m_root(dir)
-, m_bUseISS(useISS)
-, m_pCenter(NULL)
-, m_pLeft(left)
-, m_pRight(right)
-, m_pipelineCurrent(NULL)
-, m_gthread(NULL)
-, m_pgml(NULL)
-, m_pipelineFactory(factory)
+void HGMM::reset(HStimulusWidget *pCenter, bool useISS, const QColor& bkgdColor, const QDir& dir)
 {
-	// launch main loop thread
-	m_pgml = g_main_loop_new(NULL, FALSE);
-	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
-
-	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
-	preroll(m_defaultKey);
-
-	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
-	preroll(m_backgroundKey);
+	reset(HStimulusLayoutType::HStimulusLayoutSingle, useISS, bkgdColor, dir);
+	setWidgets(pCenter);
 }
+
+void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, bool useISS, const QColor& bkgdColor, const QDir& dir)
+{
+	reset(HStimulusLayoutType::HStimulusLayoutLeftRight, useISS, bkgdColor, dir);
+	setWidgets(pLeft, pRight);
+}
+
+void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1)
+{
+	qWarning() << "HGMM::setWidgets - must check if static stim must be rebuilt";
+	if (p1)
+	{
+		// have left and right
+		m_pCenter = NULL;
+		m_pLeft = p0;
+		m_pRight = p1;
+		m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutLeftRight;
+	}
+	else
+	{
+		m_pCenter = p0;
+		m_pLeft = m_pRight = NULL;
+		m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutSingle;
+	}
+}
+
+//HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
+//: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutSingle)
+//, m_root(dir)
+//, m_bUseISS(useISS)
+//, m_pCenter(center)
+//, m_pLeft(NULL)
+//, m_pRight(NULL)
+//, m_pipelineCurrent(NULL)
+//, m_gthread(NULL)
+//, m_pgml(NULL)
+//, m_pipelineFactory(factory)
+//{
+//	// launch main loop thread
+//	m_pgml = g_main_loop_new(NULL, FALSE);
+//	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
+//
+//	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
+//	preroll(m_defaultKey);
+//	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
+//	preroll(m_backgroundKey);
+//
+//}
+//
+//HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
+//: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutLeftRight)
+//, m_root(dir)
+//, m_bUseISS(useISS)
+//, m_pCenter(NULL)
+//, m_pLeft(left)
+//, m_pRight(right)
+//, m_pipelineCurrent(NULL)
+//, m_gthread(NULL)
+//, m_pgml(NULL)
+//, m_pipelineFactory(factory)
+//{
+//	// launch main loop thread
+//	m_pgml = g_main_loop_new(NULL, FALSE);
+//	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
+//
+//	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
+//	preroll(m_defaultKey);
+//
+//	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
+//	preroll(m_backgroundKey);
+//}
 
 gpointer HGMM::threadFunc(gpointer user_data)
 {
@@ -128,10 +270,10 @@ HGMM::~HGMM()
 	qDebug() << "~HGMM() - done";
 }
 
-void HGMM::setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1)
-{
-	m_pStimulusLayoutType = &layoutType;
-}
+//void HGMM::setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1)
+//{
+//	m_pStimulusLayoutType = &layoutType;
+//}
 
 HStimulusWidget *HGMM::getHStimulusWidget(const HPlayerPositionType& type)
 {
@@ -433,7 +575,7 @@ QDialog* HGMM::createStimulusWidget()
 {
 	QDialog *pDialog = new QDialog;
 	QHBoxLayout *hbox = new QHBoxLayout;
-	qDebug() << "createStimulusWidget";
+	qDebug() << "createStimulusWidget - layout type " << getStimulusLayoutType().name();
 	if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		qDebug() << "createStimulusWidget - single";

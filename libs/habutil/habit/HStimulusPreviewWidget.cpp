@@ -28,16 +28,20 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 	if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		hbox->addStretch(1);
-		hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Center));
+		//hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Center));
+		hbox->addWidget(m_pmm->createStimulusWidget());
 		hbox->addStretch(1);
 	}
 	else if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		hbox->addStretch(2);
-		hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Left));
 		hbox->addStretch(1);
-		hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Right));
-		hbox->addStretch(2);
+		hbox->addWidget(m_pmm->createStimulusWidget());
+		hbox->addStretch(1);
+//		hbox->addStretch(2);
+//		hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Left));
+//		hbox->addStretch(1);
+//		hbox->addWidget(m_pmm->getHStimulusWidget(HPlayerPositionType::Right));
+//		hbox->addStretch(2);
 	}
 
 	// set up label for stim name and buttons for advancing stim through orders.
