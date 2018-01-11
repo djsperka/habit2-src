@@ -4,6 +4,7 @@
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595" moduleId="org.eclipse.cdt.core.settings" name="Default">
 				<macros>
+					<stringMacro name="GST_ROOT" type="VALUE_PATH_ANY" value="/Library/Frameworks/GStreamer.framework/"/>
 					<stringMacro name="QT_ROOT" type="VALUE_TEXT" value="/Users/dan/Qt/5.9.1/clang_64"/>
 				</macros>
 				<externalSettings/>
@@ -43,6 +44,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/hgst}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
@@ -50,7 +52,10 @@
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/indexer-includes}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0/include&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1758584700" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -77,6 +82,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/hgst}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
@@ -84,7 +90,10 @@
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/indexer-includes}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0/include&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2075612271" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -103,6 +112,7 @@
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994" moduleId="org.eclipse.cdt.core.settings" name="release">
 				<macros>
+					<stringMacro name="GST_ROOT" type="VALUE_PATH_ANY" value="/Library/Frameworks/GStreamer.framework/"/>
 					<stringMacro name="QT_ROOT" type="VALUE_TEXT" value="/Users/dan/Qt/5.9.1/clang_64"/>
 				</macros>
 				<externalSettings/>
@@ -138,6 +148,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/hgst}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
@@ -145,8 +156,10 @@
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer/QGst/Utils"/>
-									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/indexer-includes}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0/include&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1636335141" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -163,6 +176,7 @@
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058" moduleId="org.eclipse.cdt.core.settings" name="debug">
 				<macros>
+					<stringMacro name="GST_ROOT" type="VALUE_PATH_ANY" value="/Library/Frameworks/GStreamer.framework/"/>
 					<stringMacro name="QT_ROOT" type="VALUE_TEXT" value="/Users/dan/Qt/5.9.1/clang_64"/>
 				</macros>
 				<externalSettings/>
@@ -197,6 +211,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/hgst}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
@@ -204,7 +219,10 @@
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/dan/install/include/Qt5GStreamer"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/indexer-includes}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0/include&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1587015315" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -255,7 +273,13 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1329786685;cdt.managedbuild.tool.gnu.c.compiler.input.1188537221">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.2094829403;cdt.managedbuild.tool.gnu.cpp.compiler.input.1587015315">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1706754614;cdt.managedbuild.tool.gnu.c.compiler.input.319113949">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.570710164;cdt.managedbuild.tool.gnu.c.compiler.input.1151481527">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.93897259;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1909747358;cdt.managedbuild.tool.gnu.c.compiler.input.620655973">
