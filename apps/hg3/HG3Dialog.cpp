@@ -107,6 +107,7 @@ void HG3Dialog::rejected()
 	m_pmm->reset();
 	accept();
 }
+
 HG3Dialog::~HG3Dialog()
 {
 	//delete m_paudioHGstPlayer;
