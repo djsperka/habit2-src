@@ -48,11 +48,6 @@ int main(int argc, char **argv)
 			habutilSetStimulusRootDir(QString(argv[i+1]));
 			i++;
 		}
-		else if (!strcmp(argv[i], "-b"))
-		{
-			script = argv[i+1];
-			i++;
-		}
 		else
 		{
 			qDebug() << "Unrecognized command line arg " << QString(argv[i]);
@@ -69,7 +64,7 @@ int main(int argc, char **argv)
 	//w->show();
 	//dialog->show();
 
-	TestMMDialog *dialog = new TestMMDialog(script);
+	TestMMDialog *dialog = new TestMMDialog();
 	dialog->exec();
 
 	return 0;

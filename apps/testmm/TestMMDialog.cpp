@@ -16,6 +16,7 @@
 #include "HDBException.h"
 #include "HMediaManagerUtil.h"
 #include "HExperimentUtil.h"
+#include "HWorkspaceUtil.h"
 #include "HStimuliSettingsWidget.h"
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
@@ -27,9 +28,8 @@
 #include <QProcess>
 
 
-TestMMDialog::TestMMDialog(const QString& script, QWidget *parent)
+TestMMDialog::TestMMDialog(QWidget *parent)
 : QDialog(parent)
-, m_script(script)
 {
 	components();
 }
@@ -109,27 +109,28 @@ void TestMMDialog::experimentActivated(QString expt)
 		int i = pRunSettingsDialog->exec();
 		if (i != QDialog::Accepted) return;
 
-		//QMessageBox::information(this, "Cool", "Cool");
+		// initialize mm, populate with stimuli and ag
+		QDir rootDir;
+		habutilGetStimulusRootDir(rootDir);
+		m_pmm = &HGMM::instance();
+		m_pmm->reset(settings, rootDir);
 
-		// Create media manager for this experiment
-		m_pmm = createMediaManager(settings, 320, 240);
-
+		//
 		// connect to media manager signals
 		connect(this, SIGNAL(stim(unsigned int)), m_pmm, SLOT(stim(unsigned int)));
 		connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 		connect(m_pmm, SIGNAL(screen(int, QString)), this, SLOT(screen(int, QString)));
+
+		// clear indices and names
+		m_stimIndices.clear();
+		m_stimNames.clear();
 
 		// Now populate the media manager with default stim
 		m_stimIndices.append(m_pmm->getDefaultKey());
 		m_stimNames.append(QString("default"));
 
 		// save ag key if needed
-		bool bAGUsed = false;
-		if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
-		{
-			m_pmm->addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus());
-			bAGUsed = true;
-		}
+		bool bAGUsed = (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI());
 
 
 		QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
@@ -143,7 +144,7 @@ void TestMMDialog::experimentActivated(QString expt)
 			m_stimNames.append("Background");
 			if (ps.getIsEnabled())
 			{
-				populateMediaManager(m_pmm, ps, pRunSettingsDialog->getRunSettings(), stimidListOrdered);
+				getOrderedStimidList(m_pmm, ps, pRunSettingsDialog->getRunSettings(), stimidListOrdered);
 
 				qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno();
 				QListIterator< QPair<int, QString> > it(stimidListOrdered);
@@ -166,6 +167,11 @@ void TestMMDialog::experimentActivated(QString expt)
 		}
 
 		// get display widget(s)
+		if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 1024, 768));
+		else
+			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 1024, 768), new HStimulusWidget(settings.getStimulusDisplayInfo(), 1024, 768));
+
 		QDialog *d = m_pmm->createStimulusWidget();
 
 		// Now create a controller and exec() it
@@ -200,11 +206,7 @@ void TestMMDialog::stopItem()
 
 void TestMMDialog::stimStarted(int index)
 {
-	qDebug() << "started index " << index << " script " << m_script;
-//	QProcess anafh;
-//	connect(&anafh, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
-//	anafh.start(m_script);
-	//qDebug() << "pmap " << m_pmm->pmap()[index]->getName();
+	qDebug() << "started index " << index;
 }
 
 void TestMMDialog::screen(int screenid, QString filename)
