@@ -1,7 +1,7 @@
 # This is a qmake project file, provided as an example on how to use qmake with QtGStreamer.
 
 TEMPLATE = app
-TARGET = habit
+TARGET = habit22
 
 target.path = $$_PRO_FILE_PWD_/../../distribution/pkgroot
 INSTALLS += target
@@ -17,8 +17,6 @@ CONFIG += debug_and_release link_pkgconfig c++11
 
 # need sql libs and print support
 QT += sql printsupport
-
-#QMAKE_FLAGS += "-Wl,-rpath,\'/Users/dan/install/lib' -Wl,-rpath,\'\$$ORIGIN\'"
 
 # Now tell qmake to link to gstreamer and also use its include path and Cflags.
 PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
