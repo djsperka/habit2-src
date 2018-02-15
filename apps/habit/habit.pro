@@ -31,7 +31,8 @@ QT += widgets
 DEFINES += QT_NO_KEYWORDS
 
 
-
+# NO - this pulls in gstreamer in /usr/local 
+# LIBS += -L/usr/local/lib -lboost_filesystem -lboost_system
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
 	LIBS += -L../../libs/habutil/debug -lhabutil
@@ -52,4 +53,51 @@ INCLUDEPATH += ../../libs/habutil/habit
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit
 SOURCES			=	main.cpp 
 HEADERS			=	version.h
-					
+
+
+# set env variable to the 	
+DEFINES += $(HABIT_DEFINES)
+message(Define value $$DEFINES)
+PKGROOT = $$(PWD)/../../distribution/pkgroot
+message(pkg root value $$PKGROOT)
+TOOLS = $$(PWD)/../../tools
+message(tools value $$TOOLS)
+HABIT_PLUGIN = $$(PWD)/../../libs/gstqt/release/libgstqt.dylib
+message(HABIT_PLUGIN $$HABIT_PLUGIN)
+message(QT bins $$[QT_INSTALL_BINS])
+
+# call this one to generate a full release .pkg
+build_release_pkg.target = .build_release_pkg
+build_release_pkg.commands = touch .build_release_pkg && echo "Built release package"
+build_release_pkg.depends = relocate_app
+
+# perform relocation tricks on distribution app
+relocate_app.target = .relocate_app
+relocate_app.commands = PATH=$$[QT_INSTALL_BINS]:/usr/local/bin:$(PATH) $$TOOLS/relocate_habit_for_distribution $$PKGROOT/habit22.app && touch .relocate_app
+relocate_app.depends = copy_gstreamer copy_plugin
+
+# copy gstreamer to dist app folder
+copy_gstreamer.target = .copy_gstreamer
+copy_gstreamer.commands = echo "Copying GStreamer framework to $$PKGROOT/habit22.app/Contents/Frameworks" && $$TOOLS/copy_gstreamer_framework $$PKGROOT/habit22.app/Contents/Frameworks && touch .copy_gstreamer && echo "Copying GStreamer framework to $$PKGROOT/habit22.app/Contents/Frameworks - Done."
+copy_gstreamer.depends = copy_app
+
+# copy qt plugin to dist app folder
+copy_plugin.target = .copy_plugin
+copy_plugin.commands = cp $$HABIT_PLUGIN $$PKGROOT/habit22.app/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0 && touch .copy_plugin
+copy_plugin.depends = copy_app
+
+# make .copy_app will copy current "release" build to pkgroot dir
+copy_app.target = .copy_app
+copy_app.commands = echo "Copy app to $$PKGROOT..." && (tar -C release -cf - habit22.app | tar -C $$PKGROOT -xf -) && touch .copy_app && echo "Copy app to $$PKGROOT...Done."
+copy_app.depends = build_for_dist clean_pkgroot
+
+# builds habit with RELEASE_FOR_DISTRIBUTION #defined
+build_for_dist.target = .build_for_dist
+build_for_dist.commands = make HABIT_DEFINES=HABIT_DISTRIBUTION release && touch .build_for_dist
+build_for_dist.depends = clean
+
+# clean pkgroot of any previously used app. 
+clean_pkgroot.target = .clean_pkgroot
+clean_pkgroot.commands = echo "Cleaning pkgroot $$PKGROOT..." && rm -rf $$PKGROOT/habit22.app && touch .clean_pkgroot && echo "Cleaning pkgroot $$PKGROOT...Done."
+clean_pkgroot.depends = FORCE
+QMAKE_EXTRA_TARGETS += build_release_pkg copy_app build_for_dist clean_pkgroot copy_plugin copy_gstreamer relocate_app
