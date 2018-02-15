@@ -20,13 +20,13 @@
 #include <iostream>
 #include <gst/gst.h>
 
-
 using namespace std;
 QFile *f_pFileLog = NULL;
 QTextStream f_streamFileLog;
 bool f_bScreenLog = false;
 bool f_bFileLog = false;
 QMutex f_mutex;
+
 
 #if QT_VERSION < 0x050000
 void fileLoggingHandler(QtMsgType type, const char *msg)
@@ -202,7 +202,39 @@ int main(int argc, char *argv[])
 
 	if (!bNotInstalled)
 	{
-		qDebug() << "Installed, argv[0] " << argv[0];
+		qDebug() << "Run as installed, argv[0] " << argv[0];
+
+#ifdef HABIT_DISTRIBUTION
+		QFileInfo fiExe(argv[0]);
+		qDebug() << "exePath " << fiExe.path();
+		QDir dirScanner(fiExe.path());
+		if (dirScanner.cd("../Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0"))
+		{
+			qputenv("GST_PLUGIN_SCANNER", dirScanner.filePath("gst-plugin-scanner").toLocal8Bit());
+		}
+		else
+		{
+			qFatal("Cannot navigate to ../Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0");
+		}
+		QDir dirPlugins(fiExe.path());
+		if (dirPlugins.cd("../Frameworks/GStreamer.framework/Versions/1.0/lib/gstreamer-1.0"))
+		{
+			qputenv("GST_PLUGIN_SYSTEM_PATH", dirPlugins.path().toLocal8Bit());
+		}
+		else
+		{
+			qFatal("Cannot navigate to ../Frameworks/GStreamer.framework/Versions/1.0/lib/gstreamer-1.0");
+		}
+		QDir dirGio(fiExe.path());
+		if (dirGio.cd("../Frameworks/GStreamer.framework/Versions/1.0/lib/gio/modules"))
+		{
+			qputenv("GIO_EXTRA_MODULES", dirGio.path().toLocal8Bit());
+		}
+		else
+		{
+			qFatal("Cannot navigate to ../Frameworks/GStreamer.framework/Versions/1.0/lib/gio/modules");
+		}
+#endif
 	}
 
 	// Initialize gstreamer
