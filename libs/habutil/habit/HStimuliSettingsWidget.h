@@ -24,6 +24,7 @@ namespace GUILib
 		Q_OBJECT
 	private:
 		Habit::StimuliSettings m_stimuli;
+		int m_context;
 		const Habit::StimulusDisplayInfo& m_stimulusDisplayInfo;
 		HStimulusSettingsListWidget *m_pStimulusSettingsListWidget;
 		HStimulusOrderListWidget *m_pStimulusOrderListWidget;
@@ -31,8 +32,9 @@ namespace GUILib
 		QPushButton *m_pbImport;
 		void create(const QString& labelName, const Habit::StimulusDisplayInfo& info);
 		void connections();
+		void populate();
 	public:
-		HStimuliSettingsWidget(const QString& labelName, const Habit::StimuliSettings& stimuli, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent=0);
+		HStimuliSettingsWidget(const QString& labelName, const Habit::StimuliSettings& stimuli, int context, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent=0);
 		virtual ~HStimuliSettingsWidget() {};
 
 		// Get stimulisettings as currently defined in the widget (including changes)

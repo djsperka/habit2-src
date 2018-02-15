@@ -55,14 +55,14 @@ void HStimPipeline::emitNowPlaying()
 
 void HStimPipeline::pause()
 {
-	qDebug() << "HStimPipeline::pause(" << id() << ")";
+	//qDebug() << "HStimPipeline::pause(" << id() << ")";
 	initialize();
 	gst_element_set_state(pipeline(), GST_STATE_PAUSED);
 }
 
 void HStimPipeline::play()
 {
-	qDebug() << "HStimPipeline::play(" << id() << ")";
+	//qDebug() << "HStimPipeline::play(" << id() << ")";
 	initialize();
 	gst_element_set_state(pipeline(), GST_STATE_PLAYING);
 }
@@ -119,10 +119,10 @@ void HStimPipeline::cleanup()
 		m_mapPipelineSources.clear();
 		m_bInitialized = false;
 	}
-	else
-	{
-		qDebug() << "HStimPipeline::cleanup id " << id() << " not intialized.";
-	}
+//	else
+//	{
+//		qDebug() << "HStimPipeline::cleanup id " << id() << " not intialized.";
+//	}
 }
 
 void HStimPipeline::initialize()
@@ -141,12 +141,10 @@ void HStimPipeline::initialize()
 
 	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		qDebug() << "Generate pipeline elements for single screen layout.";
 		m_mapPipelineSources.insert(HPlayerPositionType::Center, addStimulusInfo(HPlayerPositionType::Center, stimulusSettings().getCenterStimulusInfo(), !m_bISS));
 	}
 	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		qDebug() << "Generate pipeline elements for l/r layout.";
 		m_mapPipelineSources.insert(HPlayerPositionType::Left, addStimulusInfo(HPlayerPositionType::Left, stimulusSettings().getLeftStimulusInfo(), !m_bISS));
 		m_mapPipelineSources.insert(HPlayerPositionType::Right, addStimulusInfo(HPlayerPositionType::Right, stimulusSettings().getRightStimulusInfo(), !m_bISS));
 	}
@@ -581,7 +579,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		{
 			GstState old_state, new_state;
 			gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
-			qDebug() << "busCallback: got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
+			//qDebug() << "busCallback: got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
 			if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
 			{
 				pStimPipeline->emitNowPlaying();
@@ -590,7 +588,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 	}
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_SEGMENT_DONE)
 	{
-		qDebug() << "busCallback: SEGMENT_DONE  Running time is " << (gst_clock_get_time(gst_element_get_clock(pStimPipeline->pipeline())) - gst_element_get_base_time(pStimPipeline->pipeline()));
+		//qDebug() << "busCallback: SEGMENT_DONE  Running time is " << (gst_clock_get_time(gst_element_get_clock(pStimPipeline->pipeline())) - gst_element_get_base_time(pStimPipeline->pipeline()));
 
 /*
 		QMutexLocker(&pdata->mutex);
@@ -619,10 +617,10 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			{
 				qCritical() << "busCallback: non-flushing segment seek on element " << elementName << " FAILED";
 			}
-			else
-			{
-				qDebug() << "busCallback: non-flushing segment seek on element " << elementName << " SUCCESS";
-			}
+//			else
+//			{
+//				qDebug() << "busCallback: non-flushing segment seek on element " << elementName << " SUCCESS";
+//			}
 			gst_object_unref(element);
 		}
 	}
@@ -648,16 +646,16 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 			QMutexLocker(pSource->stimPipeline()->mutex());
 			if (pSource->bLoop)
 			{
-				qDebug() << "eventProbeDoNothingCB: Looping source, got segment-done event on pad " << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment-done event on pad " << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
 				if (pSource->bWaitingForSegment)
 				{
-					qDebug() << "eventProbeDoNothingCB: Looping source, waiting for segment. No seek issued.";
+					//qDebug() << "eventProbeDoNothingCB: Looping source, waiting for segment. No seek issued.";
 				}
 				else
 				{
 //					qDebug() << "NOT DOING SEGMENT SEEK FOR LOOPING!";
 					// post message on bus
-				    qDebug() << "eventProbeDoNothingCB: Looping source, post bus message.";
+				    //qDebug() << "eventProbeDoNothingCB: Looping source, post bus message.";
 					GstBus *	bus = gst_pipeline_get_bus(GST_PIPELINE(pSource->stimPipeline()->pipeline()));
 					GstStructure *structure = gst_structure_new("DoSegmentSeek", "element", G_TYPE_STRING, GST_ELEMENT_NAME(parent), NULL);
 				    gst_bus_post (bus, gst_message_new_application (
@@ -688,22 +686,22 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 			{
 				const GstSegment *segment;
 				gst_event_parse_segment(event, &segment);
-				qDebug() << "eventProbeDoNothingCB: Looping source, got segment event on pad "  << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-				qDebug() << "eventProbeDoNothingCB: base " << segment->base << " offset " << segment->offset << " start " << segment->start << " stop " << segment->stop << " time " << segment->time << " position " << segment->position << " duration " << segment->duration;
+				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment event on pad "  << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+				//qDebug() << "eventProbeDoNothingCB: base " << segment->base << " offset " << segment->offset << " start " << segment->start << " stop " << segment->stop << " time " << segment->time << " position " << segment->position << " duration " << segment->duration;
 				if (pSource->bWaitingForPreroll)
 				{
-					qDebug() << "eventProbeDoNothingCB: Waiting for looping source to preroll after initial flushing seek, expected segment. This source is prerolled and ready to loop.";
+					//qDebug() << "eventProbeDoNothingCB: Waiting for looping source to preroll after initial flushing seek, expected segment. This source is prerolled and ready to loop.";
 					pSource->bWaitingForPreroll = false;
 					pSource->bPrerolled = true;
 				}
 				else if (pSource->bWaitingForSegment)
 				{
-					qDebug() << "eventProbeDoNothingCB: Looping source, expected segment. Cool.";
+					//qDebug() << "eventProbeDoNothingCB: Looping source, expected segment. Cool.";
 					pSource->bWaitingForSegment = false;
 				}
 				else
 				{
-					qDebug() << "eventProbeDoNothingCB: Looping source, unexpected segment.";
+					//qDebug() << "eventProbeDoNothingCB: Looping source, unexpected segment.";
 				}
 			}
 		}

@@ -37,7 +37,7 @@ HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& ph
 	m_pTabWidget->addTab(m_pHabituationSettingsWidget, "Phase Settings");
 	m_pPhaseSettingsWidget = new HPhaseSettingsWidget(phaseSettings);
 	m_pTabWidget->addTab(m_pPhaseSettingsWidget, QString("Trial Settings"));
-	m_pStimuliWidget = new HStimuliSettingsWidget(labelName, phaseSettings.stimuli(), stimulusDisplayInfo);
+	m_pStimuliWidget = new HStimuliSettingsWidget(labelName, phaseSettings.stimuli(), phaseSettings.getSeqno(), stimulusDisplayInfo);
 	m_pTabWidget->addTab(m_pStimuliWidget, QString("Stimuli"));
 
 	QVBoxLayout *vbox = new QVBoxLayout;

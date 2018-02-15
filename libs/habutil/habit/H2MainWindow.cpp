@@ -617,6 +617,9 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 					qCritical() << "Error - cannot save data to csv file " << filenameCSV;
 				}
 
+				// reset the mm
+				HGMM::instance().reset();
+
 				// display results
 				HResultsDialog dialog(*results, this);
 				dialog.exec();
@@ -628,7 +631,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				delete m_psm;
 				delete m_pld;
 				delete m_pControlPanel;
-				delete pMediaManager;
+				//delete pMediaManager;
 				delete m_pRunSettingsDialog;
 				qDebug() << "Cleaning up...done";
 			}

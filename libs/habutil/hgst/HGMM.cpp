@@ -17,7 +17,6 @@
 HGMM& HGMM::instance()
 {
 	static HGMM mm;
-	qDebug() << "HGMM::instance()";
 	return mm;
 }
 
@@ -38,8 +37,6 @@ HGMM::HGMM(PipelineFactory factory)
 , m_bPendingStim(false)
 , m_iPendingStimKey(0)
 {
-	qDebug() << "HGMM::HGMM()";
-
 	// launch main loop thread
 	m_pgml = g_main_loop_new(NULL, FALSE);
 	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
@@ -59,29 +56,17 @@ void HGMM::reset()
 	// cleanup static pipelines
 	HStaticStimPipeline *p;
 	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_backgroundKey]);
-	if (!p)
-	{
-		qCritical() << "~HGMM - cannot cast background stim to static.";
-	}
-	else
+	if (p)
 	{
 		p->forceCleanup();
 	}
 	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_defaultKey]);
-	if (!p)
-	{
-		qCritical() << "~HGMM - cannot cast default stim to static.";
-	}
-	else
+	if (p)
 	{
 		p->forceCleanup();
 	}
 	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_agKey]);
-	if (!p)
-	{
-		qCritical() << "~HGMM - cannot cast AG stim to static.";
-	}
-	else
+	if (p)
 	{
 		p->forceCleanup();
 	}
@@ -96,6 +81,7 @@ void HGMM::reset()
 
 void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 {
+	qDebug() << "HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)";
 	reset(settings.getStimulusDisplayInfo().getStimulusLayoutType(), settings.getStimulusDisplayInfo().getUseISS(), settings.getStimulusDisplayInfo().getBackGroundColor(), dir);
 	// Need to know if AG is used. If it is, add attention getter settings to media manager
 	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
@@ -129,12 +115,14 @@ void HGMM::reset(const HStimulusLayoutType& layout, bool useISS, const QColor& b
 
 void HGMM::reset(HStimulusWidget *pCenter, bool useISS, const QColor& bkgdColor, const QDir& dir)
 {
+	qDebug() << "HGMM::reset(HStimulusWidget *pCenter, bool useISS,...";
 	reset(HStimulusLayoutType::HStimulusLayoutSingle, useISS, bkgdColor, dir);
 	setWidgets(pCenter);
 }
 
 void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, bool useISS, const QColor& bkgdColor, const QDir& dir)
 {
+	qDebug() << "HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, bool useISS, co";
 	reset(HStimulusLayoutType::HStimulusLayoutLeftRight, useISS, bkgdColor, dir);
 	setWidgets(pLeft, pRight);
 }

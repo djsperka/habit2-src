@@ -16,8 +16,7 @@
 #include <QStackedWidget>
 #include "stimulisettings.h"
 #include "stimulusdisplayinfo.h"
-//#include "HPreviewMediaManager.h"
-#include "HGMM.h"
+#include "HStimulusWidget.h"
 
 namespace GUILib
 {
@@ -27,11 +26,9 @@ namespace GUILib
 		Q_OBJECT
 		bool m_bSingleStimulus;
 		bool m_bListStimulus;
-		unsigned int m_iCurrentStimulusIndex;
+		unsigned int m_currentStimKey;
 		bool m_bPlaying;
-		const Habit::HStimulusSettingsList m_stimlist;
-		//HPreviewMediaManager *m_pmm;
-		HGMM *m_pmm;
+		HStimulusWidget *m_w0, *m_w1;
 		QList<unsigned int> m_idList;	// list of indices into media manager, m_pmm->play(m_idList[m_idListCurrent])
 		unsigned int m_idListCurrent;
 		QPushButton *m_pbDown;
@@ -45,21 +42,28 @@ namespace GUILib
 
 		void updateNavigation();
 		void updateNavigation(QString stimName);
-
+		QWidget* createStimulusWidget(const Habit::StimulusDisplayInfo& info);
 	public:
 		HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, QWidget *parent = NULL);
 		~HStimulusPreviewWidget();
 
-		// preview a single stimulus. Will add stimulus to media manager and optionally start it.
-		void preview(const Habit::StimulusSettings& stimulus, bool bPlay = true);
-		void preview(const Habit::HStimulusSettingsList& stimuli, QList< QPair<int, QString> > list);
+		// preview a single stimulus with given key
+		void preview(unsigned int key, bool bPlayNow = true);
+
+		// preview the order list consisting of the given keys (and stimulus names)
+		void preview(QList< QPair<unsigned int, QString> > list, bool bPlayNow = true);
+
 		void clear();
 		void rewind();
 		void setStimulusLayoutType(const HStimulusLayoutType& type);
 
 	protected:
+		// stop hgmm, detach widgets.
 		void hideEvent(QHideEvent *event);
+
+		// assign widgets to HGMM, play default stim
 		void showEvent(QShowEvent *event);
+
 	protected slots:
 		void nextClicked();
 		void prevClicked();

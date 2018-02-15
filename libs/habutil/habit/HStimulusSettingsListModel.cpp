@@ -54,7 +54,7 @@ void HStimulusSettingsListModel::changed(const QModelIndex & topLeft, const QMod
 
 void HStimulusSettingsListModel::append(const Habit::StimulusSettings& newStim)
 {
-	beginInsertRows(QModelIndex(), m_list.size(), m_list.size()+1);
+	beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
 	m_list.append(newStim);
 	endInsertRows();
 }
@@ -72,7 +72,7 @@ void HStimulusSettingsListModel::clobber(const Habit::StimulusSettings& stim)
 
 void HStimulusSettingsListModel::append(const QList<Habit::StimulusSettings>& list)
 {
-	beginInsertRows(QModelIndex(), m_list.size(), m_list.size()+1);
+	beginInsertRows(QModelIndex(), m_list.size(), m_list.size()+list.size()-1);
 	m_list.append(list);
 	endInsertRows();
 }

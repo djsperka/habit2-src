@@ -43,13 +43,13 @@ namespace GUILib
 		void clearSelection();
 		void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 
-	signals:
+	Q_SIGNALS:
 		void previewStimulus(int);
 		void clearStimulus();
 		void currentChanged(const QModelIndex& current, const QModelIndex& previous);
 		void stimulusSelectionChanged();
 
-	protected slots:
+	protected Q_SLOTS:
 		void editClicked();
 		void itemActivated(const QModelIndex& index);
 		void newClicked();
@@ -57,6 +57,9 @@ namespace GUILib
 		void removeClicked();
 		void currentSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 		void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+		void rowsInserted(const QModelIndex &parent, int first, int last);
+		void rowsRemoved(const QModelIndex &parent, int first, int last);
+		void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 	};
 
 };

@@ -1,6 +1,7 @@
 #include "attentionsetupform.h"
 #include "HWorkspaceUtil.h"
 #include "HStimulusSettingsEditor.h"
+#include "HGMM.h"
 #include <QStringList>
 #include <QDir>
 #include <QtGui>
@@ -41,9 +42,9 @@ void AttentionSetupForm::stimulusLayoutTypeChanged(int i)
 void AttentionSetupForm::stimulusSettingsChanged()
 {
 	// Update previewer
-	qDebug() << "stimulus settings changed " << m_pStimulusSettingsWidget->getStimulusSettings();
-	m_pStimulusPreviewWidget->clear();
-	m_pStimulusPreviewWidget->preview(m_pStimulusSettingsWidget->getStimulusSettings(), true);
+	qDebug() << "AG stimulus settings changed ";
+	m_pStimulusPreviewWidget->clear();	// play background
+	m_pStimulusPreviewWidget->preview(HGMM::instance().getAGKey(), true);
 }
 
 void AttentionSetupForm::components()
@@ -96,7 +97,7 @@ void AttentionSetupForm::components()
 void AttentionSetupForm::initialize()
 {
 	stimulusLayoutTypeChanged(m_stimulusDisplayInfo.getStimulusLayoutType().number());
-	m_pStimulusPreviewWidget->preview(m_pStimulusSettingsWidget->getStimulusSettings(), false);
+	//m_pStimulusPreviewWidget->preview(HGMM::instance().getAGKey());
 	m_plineeditISI->setText(QString("%1").arg(m_agSettings.getFixedISIMS()));
 	m_plineeditISI->setEnabled(false);
 	if (m_agSettings.isAttentionGetterUsed())

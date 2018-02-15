@@ -31,6 +31,9 @@ public:
 	int id() const { return m_id; };
 	const Habit::StimulusSettings& stimulusSettings() const { return m_ss; };
 
+	// must cleanup and initialize again after calling this
+	void setStimulusSettings(const Habit::StimulusSettings& ss) { m_ss = ss; }
+
 	// pipeline control
 
 	virtual void initialize() = 0;

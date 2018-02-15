@@ -23,7 +23,7 @@ namespace GUILib
 	public:
 		HStimulusSettingsListModel(Habit::HStimulusSettingsList& list, const HStimulusLayoutType& layoutType): m_list(list), m_pLayoutType(&layoutType) {};
 		virtual ~HStimulusSettingsListModel() {};
-		int rowCount(const QModelIndex& index) const;
+		int rowCount(const QModelIndex& index = QModelIndex()) const;
 		QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 		void setLayoutType(const HStimulusLayoutType& layoutType) { m_pLayoutType = &layoutType; };

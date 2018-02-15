@@ -18,6 +18,9 @@
 #include "HExperimentTreeWidgetItem.h"
 #include "HDBException.h"
 #include "PhaseWizardPages.h"
+#include "HGMM.h"
+#include "HWorkspaceUtil.h"
+
 using namespace Habit;
 
 #include <QtGlobal>
@@ -36,6 +39,12 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 : QDialog(parent)
 , m_settings(experimentSettings)
 {
+	// reset media manager. Preview widgets will fetch their respective stimuli via the context stim list.
+	QDir dir;
+	habutilGetStimulusRootDir(dir);
+	HGMM::instance().reset(experimentSettings, dir);
+
+	// set up gui
 	components();
 	connections();
 	setWindowTitle(QString("Edit Experiment Settings: %1").arg(m_settings.getName()));
@@ -47,6 +56,7 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 HExperimentMain::~HExperimentMain()
 {
 	qDebug() << "HExperimentMain::~HExperimentMain()";
+	HGMM::instance().reset();
 }
 
 void HExperimentMain::components()

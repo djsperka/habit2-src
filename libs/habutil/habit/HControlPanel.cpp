@@ -73,8 +73,6 @@ void HControlPanel::components()
 	m_pMediaStatusWidget = new HMediaStatusWidget(m_experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType(), m_experimentSettings.getControlBarOptions().isCurrentStimulusDisplayed(), this);
 	m_pExperimentStatusWidget = new HExperimentStatusWidget(m_experimentSettings.getName(), m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(), this);
 
-	qDebug() << "current stim? " << m_experimentSettings.getControlBarOptions().isCurrentStimulusDisplayed() << " current phase? " << m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed();
-
 	m_pbStartTrials = new QPushButton(tr("Start Trials"));
 	m_pbNextTrial = new QPushButton(tr("Next Trial"));
 	m_pbStopTrials = new QPushButton(tr("Stop Trials"));

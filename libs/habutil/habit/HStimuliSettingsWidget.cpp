@@ -8,6 +8,7 @@
 #include "HStimuliSettingsWidget.h"
 #include "HStimulusSettingsWidget.h"
 #include "HStimulusSettingsOrderImportUtil.h"
+#include "HGMM.h"
 #include "HWorkspaceUtil.h"
 #include <QVBoxLayout>
 #include <QGroupBox>
@@ -25,14 +26,21 @@
 using namespace Habit;
 using namespace GUILib;
 
-HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const StimuliSettings& stimuli, const StimulusDisplayInfo& info, QWidget* parent)
+HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const StimuliSettings& stimuli, int context, const StimulusDisplayInfo& info, QWidget* parent)
 : QWidget(parent)
 , m_stimuli(stimuli)
+, m_context(context)
 , m_stimulusDisplayInfo(info)
 {
 	create(labelName, info);
 	connections();
+	populate();
 	stimulusLayoutTypeChanged(info.getStimulusLayoutType().number());
+}
+
+void HStimuliSettingsWidget::populate()
+{
+	HGMM::instance().addStimuli(m_stimuli, m_context);
 }
 
 void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisplayInfo& info)
@@ -97,32 +105,34 @@ void HStimuliSettingsWidget::clearStimulus()
 
 void HStimuliSettingsWidget::previewStimulus(int row)
 {
-	//qDebug() << "HStimuliSettingsWidget::previewStimulus " << m_stimuli.stimuli().at(row).getName();
-	m_pStimulusPreviewWidget->preview(m_stimuli.stimuli().at(row), true);
+	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
+	qDebug() << "HStimuliSettingsWidget::previewStimulus at row " << row << " key " << list.at(row);
+	m_pStimulusPreviewWidget->preview(list.at(row), true);
 }
 
 void HStimuliSettingsWidget::previewOrder(int row)
 {
-	QList< QPair<int, QString> > list;
-	QString orderName;
-	orderName = m_stimuli.orders().at(row).getName();
-
-	if (!m_stimuli.getIndexedOrderList(orderName, list))
-	{
-		qDebug() << "Cannot get order list for order \"" << orderName << "\"";
-		qDebug() << m_stimuli;
-	}
-	else
-	{
-#if 0
-		QPair<int, QString> p;
-		foreach(p, list)
-		{
-			qDebug() << "index " << p.first << " label " << p.second;
-		}
-#endif
-		m_pStimulusPreviewWidget->preview(m_stimuli.stimuli(), list);
-	}
+	qDebug() << "HStimuliSettingsWidget::previewOrder at row " << row;
+//	QList< QPair<int, QString> > list;
+//	QString orderName;
+//	orderName = m_stimuli.orders().at(row).getName();
+//
+//	if (!m_stimuli.getIndexedOrderList(orderName, list))
+//	{
+//		qDebug() << "Cannot get order list for order \"" << orderName << "\"";
+//		qDebug() << m_stimuli;
+//	}
+//	else
+//	{
+//#if 0
+//		QPair<int, QString> p;
+//		foreach(p, list)
+//		{
+//			qDebug() << "index " << p.first << " label " << p.second;
+//		}
+//#endif
+//		m_pStimulusPreviewWidget->preview(m_stimuli.stimuli(), list);
+//	}
 }
 
 void HStimuliSettingsWidget::importClicked()
