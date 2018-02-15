@@ -1,0 +1,15 @@
+#!/bin/sh
+
+#export DYLD_PRINT_LIBRARIES=1 
+#APP="/Users/dan/eclipse-workspace/habit2/distribution/pkgroot/habit22.app"
+
+APP="/Applications/habit22.app"
+
+export GST_PLUGIN_PATH=
+export GST_PLUGIN_SYSTEM_PATH=${APP}/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0
+export GST_PLUGIN_SCANNER=${APP}/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
+export GTK_PATH=${APP}/Contents/Frameworks/GStreamer.framework/Versions/Current/
+export GIO_EXTRA_MODULES=${APP}/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gio/modules
+#export GST_DEBUG=3
+#export LIBDIR=${APP}/Contents/Frameworks/GStreamer.framework/Versions/Current/lib
+${APP}/Contents/MacOS/habit22 -s -t -T -z
