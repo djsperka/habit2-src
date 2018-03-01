@@ -10,6 +10,7 @@
 #include "HGMM.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QStyle>
 
 const int f_previewContext = 0;
 
@@ -20,7 +21,21 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 , m_bPlaying(false)
 {
 	//qDebug() << "HStimulusPreviewWidget::HStimulusPreviewWidget(" << (parent ? "parent" : "NULL") << ")";
+	initialize(info);
+}
 
+GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, unsigned int key, QWidget *parent)
+: QWidget(parent)
+, m_bSingleStimulus(true)
+, m_bListStimulus(false)
+, m_currentStimKey(key)
+, m_bPlaying(false)
+{
+	initialize(info);
+}
+
+void GUILib::HStimulusPreviewWidget::initialize(const Habit::StimulusDisplayInfo& info)
+{
 	// and the stimulus widget(s)
 	m_w0 = new HStimulusWidget(info, 320, 240);
 	m_w1 = new HStimulusWidget(info, 320, 240);
@@ -28,9 +43,14 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 	// set up label for stim name and buttons for advancing stim through orders.
 	m_pbNext = new QPushButton(">");
 	m_pbPrev = new QPushButton("<");
-	m_pbStop = new QPushButton("Stop");
-	m_pbPlay = new QPushButton("Play");
-	m_pbRewind = new QPushButton("Rewind");
+	m_pbPause = new QPushButton();
+	m_pbPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+	m_pbPlay = new QPushButton();
+	m_pbPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+	m_pbStop = new QPushButton();
+	m_pbStop->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+	m_pbRewind = new QPushButton();
+	m_pbRewind->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
 	m_labelStimName = new QLabel("Stimulus: ");
 	QHBoxLayout *hlb = new QHBoxLayout;
 	hlb->addWidget(m_labelStimName, 1, Qt::AlignCenter);
@@ -38,14 +58,16 @@ GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisp
 	hlb->addWidget(m_pbPrev);
 	hlb->addWidget(m_pbRewind);
 	hlb->addWidget(m_pbPlay);
+	hlb->addWidget(m_pbPause);
 	hlb->addWidget(m_pbStop);
 	hlb->addWidget(m_pbNext);
 
 	// connect up all the buttons
 	connect(m_pbPrev, SIGNAL(clicked()), this, SLOT(prevClicked()));
 	connect(m_pbNext, SIGNAL(clicked()), this, SLOT(nextClicked()));
-	connect(m_pbStop, SIGNAL(clicked()), this, SLOT(stopClicked()));
+	connect(m_pbPause, SIGNAL(clicked()), this, SLOT(stopClicked()));
 	connect(m_pbPlay, SIGNAL(clicked()), this, SLOT(playClicked()));
+	connect(m_pbStop, SIGNAL(clicked()), this, SLOT(stopClicked()));
 	connect(m_pbRewind, SIGNAL(clicked()), this, SLOT(rewindClicked()));
 
 	// Now do the layout for the entire thing
@@ -100,7 +122,7 @@ void GUILib::HStimulusPreviewWidget::nextClicked()
 	HGMM::instance().stim(m_idList[m_idListCurrent]);
 }
 
-void GUILib::HStimulusPreviewWidget::stopClicked()
+void GUILib::HStimulusPreviewWidget::pauseClicked()
 {
 	if (m_bSingleStimulus)
 	{
@@ -114,6 +136,18 @@ void GUILib::HStimulusPreviewWidget::stopClicked()
 	}
 	updateNavigation();
 }
+
+void GUILib::HStimulusPreviewWidget::stopClicked()
+{
+	m_bSingleStimulus = true;
+	m_currentStimKey = HGMM::instance().getBackgroundKey();
+	m_bListStimulus = false;
+	HGMM::instance().background();
+	m_bPlaying = true;
+	updateNavigation();
+	emit stopped();
+}
+
 
 void GUILib::HStimulusPreviewWidget::playClicked()
 {
@@ -168,19 +202,23 @@ void GUILib::HStimulusPreviewWidget::updateNavigation()
 {
 	if (m_bSingleStimulus)
 	{
+		QString stimName = HGMM::instance().getStimulusSettings(m_currentStimKey).getName();
+		m_labelStimName->setText(QString("Stimulus: %1").arg(stimName));
 		m_pbPrev->setEnabled(false);
 		m_pbNext->setEnabled(false);
 		if (m_bPlaying)
 		{
 			m_pbPlay->setEnabled(false);
-			m_pbStop->setEnabled(true);
+			m_pbPause->setEnabled(true);
 			m_pbRewind->setEnabled(true);
+			m_pbStop->setEnabled(true);
 		}
 		else
 		{
 			m_pbPlay->setEnabled(true);
-			m_pbStop->setEnabled(false);
+			m_pbPause->setEnabled(false);
 			m_pbRewind->setEnabled(false);
+			m_pbStop->setEnabled(false);
 		}
 	}
 	else if (m_bListStimulus)
@@ -198,14 +236,16 @@ void GUILib::HStimulusPreviewWidget::updateNavigation()
 		if (m_bPlaying)
 		{
 			m_pbPlay->setEnabled(false);
-			m_pbStop->setEnabled(true);
+			m_pbPause->setEnabled(true);
 			m_pbRewind->setEnabled(true);
+			m_pbStop->setEnabled(true);
 		}
 		else
 		{
 			m_pbPlay->setEnabled(true);
-			m_pbStop->setEnabled(false);
+			m_pbPause->setEnabled(false);
 			m_pbRewind->setEnabled(false);
+			m_pbStop->setEnabled(false);
 		}
 	}
 	else
@@ -213,7 +253,7 @@ void GUILib::HStimulusPreviewWidget::updateNavigation()
 		m_pbPrev->setEnabled(false);
 		m_pbNext->setEnabled(false);
 		m_pbPlay->setEnabled(false);
-		m_pbStop->setEnabled(false);
+		m_pbPause->setEnabled(false);
 		m_pbRewind->setEnabled(false);
 		m_labelStimName->setText(QString("None"));
 	}
@@ -221,16 +261,40 @@ void GUILib::HStimulusPreviewWidget::updateNavigation()
 
 void GUILib::HStimulusPreviewWidget::preview(unsigned int key, bool bPlayNow)
 {
+	m_bSingleStimulus = true;
+	m_currentStimKey = key;
+	m_bListStimulus = false;
 	if (bPlayNow)
+	{
 		HGMM::instance().stim(key);
+		m_bPlaying = true;
+	}
 	else
+	{
 		HGMM::instance().pause(key);
+		m_bPlaying = false;
+	}
+	updateNavigation();
 }
 
 
-void GUILib::HStimulusPreviewWidget::preview(QList< QPair<unsigned int, QString> > listOfPairs, bool bPlayNow)
+void GUILib::HStimulusPreviewWidget::preview(const QList<unsigned int>& list, bool bPlayNow)
 {
-
+	m_bSingleStimulus = false;
+	m_bListStimulus = true;
+	m_idList = list;
+	m_idListCurrent = 0;
+	if (bPlayNow)
+	{
+		HGMM::instance().stim(m_idList[m_idListCurrent]);
+		m_bPlaying = true;
+	}
+	else
+	{
+		HGMM::instance().pause(m_idList[m_idListCurrent]);
+		m_bPlaying = false;
+	}
+	updateNavigation();
 }
 
 //void GUILib::HStimulusPreviewWidget::preview(const Habit::HStimulusSettingsList& stimuli, QList< QPair<int, QString> > list)
@@ -257,20 +321,51 @@ void GUILib::HStimulusPreviewWidget::clear()
 {
 //	m_pmm->clear();
 	HGMM::instance().background();
+	m_bPlaying = true;
+	m_bSingleStimulus = true;
+	m_bListStimulus = false;
+	m_currentStimKey = HGMM::instance().getBackgroundKey();
 }
 
 void GUILib::HStimulusPreviewWidget::hideEvent(QHideEvent *event)
 {
-	//qDebug() << "hide event";
-	HGMM::instance().defaultStim();
+	qDebug() << "hide event";
+	// current state of the widget is held in the vars
+	// m_bSingleStimulus, m_currentStimKey - when a single stim is playing
+	// m_bListStimulus, m_idList, m_idListCurrent - when an order is playing
+	HGMM::instance().defaultStim();	// this forces cleanup on the stim that's playing
 	HGMM::instance().setWidgets(NULL, NULL);
 }
 
 void GUILib::HStimulusPreviewWidget::showEvent(QShowEvent *event)
 {
-	//qDebug() << "show event";
+	qDebug() << "show event";
 	HGMM::instance().setWidgets(m_w0, m_w1);
-	HGMM::instance().background();
+	if (m_bSingleStimulus)
+	{
+		if (m_bPlaying)
+		{
+			HGMM::instance().stim(m_currentStimKey);
+		}
+		else
+		{
+			HGMM::instance().pause(m_currentStimKey);
+		}
+	}
+	else if (m_bListStimulus)
+	{
+		if (m_bPlaying)
+		{
+			HGMM::instance().stim(m_idList[m_idListCurrent]);
+		}
+		else
+		{
+			HGMM::instance().pause(m_idList[m_idListCurrent]);
+		}
+	}
+	else
+		HGMM::instance().background();
+	updateNavigation();
 }
 
 void GUILib::HStimulusPreviewWidget::setStimulusLayoutType(const HStimulusLayoutType& type)

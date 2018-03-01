@@ -147,6 +147,9 @@ public:
 	void pause(unsigned int id);
 	void rewind(unsigned int id);
 
+	// remove stimulus, delete pipeline, make lists consistent
+	void remove(unsigned int id);
+
 	// pipeline info dump
 	void dump(unsigned int id);
 

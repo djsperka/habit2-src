@@ -49,6 +49,9 @@ namespace GUILib
 		void currentOrderSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 		void stimulusSelectionChanged();
 		void orderSelectionChanged();
+		void stimulusAdded(int row);
+		void stimulusAboutToBeRemoved(int row);
+		void previewStopButtonHit();
 	};
 }
 

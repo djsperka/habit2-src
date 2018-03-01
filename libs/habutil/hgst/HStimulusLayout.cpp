@@ -98,6 +98,8 @@ void HStimulusLayout::setGeometry(const QRect& r)
 		{
 			QSize s = w->getStimulusSize().scaled(r.size(), m_bMaintainAspectRatio ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
 
+			qDebug() << "setGeometry() rect " << r.size() << " maintain? " << m_bMaintainAspectRatio;
+			qDebug() << "scaled " << s;
 			// the geometry that we assign to the widget has its position as well as the size.
 			// If the scaled size doesn't match that of the given rect 'r', then figure out which side
 			// has the extra and split the difference

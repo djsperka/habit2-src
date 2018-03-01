@@ -34,14 +34,16 @@ HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const S
 {
 	create(labelName, info);
 	connections();
-	populate();
+	//populate();
 	stimulusLayoutTypeChanged(info.getStimulusLayoutType().number());
 }
 
+#if 0
 void HStimuliSettingsWidget::populate()
 {
 	HGMM::instance().addStimuli(m_stimuli, m_context);
 }
+#endif
 
 void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisplayInfo& info)
 {
@@ -96,7 +98,36 @@ void HStimuliSettingsWidget::connections()
 	//connect(m_pStimulusOrderListWidget, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentOrderSelectionChanged(const QModelIndex&, const QModelIndex&)));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusSelectionChanged()), this, SLOT(stimulusSelectionChanged()));
 	connect(m_pStimulusOrderListWidget, SIGNAL(orderSelectionChanged()), this, SLOT(orderSelectionChanged()));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusAdded(int)), this, SLOT(stimulusAdded(int)));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusAboutToBeRemoved(int)), this, SLOT(stimulusAboutToBeRemoved(int)));
+
+	// when preview widget "stop" button is hit, the current playing stim is stopped and it switches to bkgd.
+	connect(m_pStimulusPreviewWidget, SIGNAL(stopped()), this, SLOT(previewStopButtonHit()));
 }
+
+
+void HStimuliSettingsWidget::stimulusAdded(int row)
+{
+	// in the stimulusSettingsLIst widget a new stim was added. WE find the stim at row 'row'.
+	qDebug() << "stimulus added at row " << row;
+	qDebug() << m_stimuli.stimuli().at(row);
+
+	// add this stimulus to the media manager.
+	HGMM::instance().addStimulus(m_stimuli.stimuli().at(row), m_context);
+}
+
+
+// Called before the StimulusSettingsListModel removes a row (a stimulus) from its list.
+// Since that list is a reference to the master list held here, this is the place to
+// make sure that HGMM is in sync with the stimuli remaining.
+void HStimuliSettingsWidget::stimulusAboutToBeRemoved(int row)
+{
+	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
+	// in the stimulusSettingsLIst widget a stim was selected and "Remove" was clicked.
+	// We have to remove the stimulus from the media manager.
+	HGMM::instance().remove(list.at(row));
+}
+
 
 void HStimuliSettingsWidget::clearStimulus()
 {
@@ -112,27 +143,30 @@ void HStimuliSettingsWidget::previewStimulus(int row)
 
 void HStimuliSettingsWidget::previewOrder(int row)
 {
+	QList<unsigned int> contextStimList = HGMM::instance().getContextStimList(m_context);
 	qDebug() << "HStimuliSettingsWidget::previewOrder at row " << row;
-//	QList< QPair<int, QString> > list;
-//	QString orderName;
-//	orderName = m_stimuli.orders().at(row).getName();
-//
-//	if (!m_stimuli.getIndexedOrderList(orderName, list))
-//	{
-//		qDebug() << "Cannot get order list for order \"" << orderName << "\"";
-//		qDebug() << m_stimuli;
-//	}
-//	else
-//	{
-//#if 0
-//		QPair<int, QString> p;
-//		foreach(p, list)
-//		{
-//			qDebug() << "index " << p.first << " label " << p.second;
-//		}
-//#endif
-//		m_pStimulusPreviewWidget->preview(m_stimuli.stimuli(), list);
-//	}
+	QList< QPair<int, QString> > indexedOrderList;
+	QString orderName;
+	orderName = m_stimuli.orders().at(row).getName();
+
+	qDebug() << "HStimuliSettingsWidget::previewOrder at row " << row << " name " << orderName;
+
+	if (!m_stimuli.getIndexedOrderList(orderName, indexedOrderList))
+	{
+		qDebug() << "Cannot get order list for order \"" << orderName << "\"";
+		qDebug() << m_stimuli;
+	}
+	else
+	{
+		QList<unsigned int> orderKeyList;
+		QPair<int, QString> p;
+		foreach(p, indexedOrderList)
+		{
+			//qDebug() << "index " << p.first << " label " << p.second << " key " << contextStimList[p.first];
+			orderKeyList.push_back(contextStimList[p.first]);
+		}
+		m_pStimulusPreviewWidget->preview(orderKeyList);
+	}
 }
 
 void HStimuliSettingsWidget::importClicked()
@@ -287,4 +321,14 @@ void HStimuliSettingsWidget::orderSelectionChanged()
 {
 	//qDebug() << "HStimuliSettingsWidget::orderSelectionChanged()";
 	m_pStimulusSettingsListWidget->clearSelection();
+}
+
+
+// When "stop" button is hit in preview widget, it stops currently playing
+// stim and swiutches to background. In this case we should de-select anything
+// that's selected in either of the list views.
+void HStimuliSettingsWidget::previewStopButtonHit()
+{
+	stimulusSelectionChanged();
+	orderSelectionChanged();
 }

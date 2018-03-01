@@ -28,11 +28,14 @@ public:
 	bool bPrerolled;
 	bool bWaitingForPrerollSegment;	// true when flushing segment seek issued, but segment not received. Used in event probe.
 	bool bWaitingForSegment;		// true when non-flushing segment seek issued, but segment not received. Used in event probe.
+	bool bWaitingForSegment2;
+	QString sWaitingForSegment2Pad;
 	bool bAudio;
 	bool bVideo;
 	bool bLoop;
 	float volume;
 	QSize size;		// stim size for video/image streams
+	unsigned int nPadsLinked;
 
 	HStimPipelineSource(HStimPipeline *pipe);
 	~HStimPipelineSource();
@@ -48,9 +51,8 @@ class HStimPipeline: public HPipeline
 	QDir m_dirStimRoot;
 	const HStimulusLayoutType& m_stimulusLayoutType;
 	bool m_bISS;
+	bool m_bRewindPending;	// true when expecting ASYNC_DONE due to rewind() call
 	GstElement *m_pipeline;
-#if !PREROLL_SOME_SOURCES
-#endif
 	QMutex m_mutex;
 	QMap<HPlayerPositionType, HStimPipelineSource* > m_mapPipelineSources;
 
@@ -90,8 +92,9 @@ public:
 	// during the preroll process.
 	virtual void pause();
 
-	// set the stimulus to play from the beginning.
-	virtual void rewind() {};
+	// set the stimulus to play from the beginning, first set it to paused, issue flushing seek, wait for ASYNC)
+	// _DONE in bus handler.
+	virtual void rewind();
 
 	// set GST_DEBUG_DUMP_DOT_DIR and call this for dot file of current pipeline
 	virtual void dump();

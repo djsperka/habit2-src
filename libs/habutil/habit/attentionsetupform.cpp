@@ -56,7 +56,7 @@ void AttentionSetupForm::components()
 	QDir dir;
 	habutilGetStimulusRootDir(dir);
 
-	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, this);
+	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, HGMM::instance().getAGKey(), this);
 
 	QVBoxLayout* pMainLayout = new QVBoxLayout(this);
 	QVBoxLayout* pStimulusLayout = new QVBoxLayout();
@@ -138,12 +138,6 @@ void AttentionSetupForm::connections()
 	connect(m_prbSoundOnlyAG, SIGNAL(toggled(bool)), this, SLOT(toggleSoundOnlyAG(bool)));
 }
 
-void AttentionSetupForm::setConfigurationObject(const Habit::AttentionGetterSettings& settings)
-{
-	m_agSettings = settings;
-	initialize();
-}
-
 void AttentionSetupForm::toggleNoISI(bool checked)
 {
 	qDebug() << "NoISI " << (checked ? "checked" : "not checked");
@@ -151,6 +145,7 @@ void AttentionSetupForm::toggleNoISI(bool checked)
 	{
 		m_pStimulusGroup->setEnabled(false);
 	}
+	updatePreviewWidget();
 }
 
 void AttentionSetupForm::toggleUseAG(bool checked)
@@ -160,6 +155,7 @@ void AttentionSetupForm::toggleUseAG(bool checked)
 	{
 		m_pStimulusGroup->setEnabled(true);
 	}
+	updatePreviewWidget();
 }
 
 void AttentionSetupForm::toggleUseISI(bool checked)
@@ -169,6 +165,7 @@ void AttentionSetupForm::toggleUseISI(bool checked)
 	{
 		m_pStimulusGroup->setEnabled(true);
 	}
+	updatePreviewWidget();
 }
 
 void AttentionSetupForm::toggleSoundOnlyAG(bool checked)
@@ -178,8 +175,27 @@ void AttentionSetupForm::toggleSoundOnlyAG(bool checked)
 	{
 		m_pStimulusGroup->setEnabled(true);
 	}
+	updatePreviewWidget();
 }
 
+void AttentionSetupForm::updatePreviewWidget()
+{
+	// HACK
+	if (this->isHidden()) return;
+
+	if (m_prbUseAG->isChecked() || m_prbUseISI->isChecked())
+	{
+		m_pStimulusPreviewWidget->preview(HGMM::instance().getAGKey(), true);
+	}
+	else if (m_prbNoISI->isChecked())
+	{
+		m_pStimulusPreviewWidget->clear();
+	}
+	else if (m_prbSoundOnlyAG->isChecked())
+	{
+		m_pStimulusPreviewWidget->preview(HGMM::instance().getAGKey(), true);
+	}
+}
 
 
 }

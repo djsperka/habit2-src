@@ -29,11 +29,10 @@ public:
 private:
 	void components();
 	void connections();
-
+	void initialize();
+	void updatePreviewWidget();
 public:
 	Habit::AttentionGetterSettings getConfigurationObject();
-	void setConfigurationObject(const Habit::AttentionGetterSettings&);
-	void initialize();
 	//void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 
 private slots:

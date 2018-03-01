@@ -16,8 +16,11 @@ HStimPipelineSource::HStimPipelineSource(HStimPipeline *pipe)
 , bWaitingForPreroll(false)
 , bPrerolled(false)
 , bWaitingForSegment(false)
+, bWaitingForSegment2(false)
+, sWaitingForSegment2Pad("")
 , bAudio(false)
 , bVideo(false)
+, nPadsLinked(0)
 {
 }
 
@@ -32,9 +35,7 @@ HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const QD
 , m_dirStimRoot(stimRoot)
 , m_stimulusLayoutType(layoutType)
 , m_bISS(bISS)
-#if !PREROLL_SOME_SOURCES
 , bInitialFlushingSeekDone(false)
-#endif
 {
 }
 
@@ -51,6 +52,22 @@ GstElement *HStimPipelineSource::pipeline()
 void HStimPipeline::emitNowPlaying()
 {
 	Q_EMIT nowPlaying();
+}
+
+void HStimPipeline::rewind()
+{
+	// flushing seek. gsgtreamer will handle state, as long as we're paused or playing, which
+	// we always are in habit, this will flush the pipeline and preoll, and original state is resumed.
+	qDebug() << "HStimPipeleine::rewind(), flushing seek...";
+	if (!gst_element_seek(pipeline(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+	{
+		qCritical() << "SEEK FAILED";
+	}
+	else
+	{
+		qDebug() << "HStimPipeline::rewind(), seek issued, waiting for async_done";
+		m_bRewindPending = true;
+	}
 }
 
 void HStimPipeline::pause()
@@ -354,6 +371,7 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 				qCritical() << "Cannot sync sink with pipeline state";
 
 			qDebug() << "padAdded: image - " << GST_ELEMENT_NAME(src) << " - done.";
+			pSource->nPadsLinked++;
 		}
 	}
 	else if (isVideo)
@@ -388,6 +406,8 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			gst_object_unref(sink);
 
 			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &FDDialog::eventProbeDoNothingCB, (gpointer)pdata, NULL);
+
+			pSource->nPadsLinked++;
 
 		}
 		qDebug() << "padAdded: video - " << GST_ELEMENT_NAME(src) << " - done.";
@@ -472,6 +492,9 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 			gst_object_unref(audioMixer);
 			gst_object_unref(audioSink);
+
+			pSource->nPadsLinked++;
+
 		}
 	}
 
@@ -492,6 +515,279 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		// If any of the sources are looping sources, and if they are not already prerolled, then we
 		// must issue a flushing seek here on that portion of the pipeline.
 		QMutexLocker locker(pStimPipeline->mutex());
+		// issue flushing seek to entire pipeline. Catch segment events for each source
+		if (!pStimPipeline->bInitialFlushingSeekDone)
+		{
+			qDebug() << "busCallback: Issue initial flushing seek to pipeline.";
+			if (!gst_element_seek(pStimPipeline->pipeline(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+			{
+				qCritical() << "busCallback: SEEK FAILED";
+			}
+			else
+			{
+				qDebug() << "busCallback: initial pipeline flush seek done";
+				pStimPipeline->bInitialFlushingSeekDone = true;
+				QMapIterator<HPlayerPositionType, HStimPipelineSource* >it(pStimPipeline->getPipelineSourceMap());
+				while (it.hasNext())
+				{
+					it.next();
+					HPlayerPositionType ppt = it.key();
+					HStimPipelineSource* pSource = it.value();
+					qDebug() << "busCallback: Source " << ppt.name() << " is now waiting for preroll...";
+					pSource->bWaitingForPreroll = true;
+				}
+			}
+		}
+		else
+		{
+			qDebug() << "busCallback: entire pipeline is now prerolled.";
+		}
+		//#endif here see bottom
+	}
+	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_STATE_CHANGED)
+	{
+		if (GST_ELEMENT(msg->src) == pStimPipeline->pipeline())
+		{
+			GstState old_state, new_state;
+			gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
+			//qDebug() << "busCallback: got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
+			if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
+			{
+				pStimPipeline->emitNowPlaying();
+			}
+		}
+	}
+	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_SEGMENT_DONE)
+	{
+		qDebug() << "busCallback: SEGMENT_DONE";
+		//qDebug() << "busCallback: SEGMENT_DONE  Running time is " << (gst_clock_get_time(gst_element_get_clock(pStimPipeline->pipeline())) - gst_element_get_base_time(pStimPipeline->pipeline()));
+
+/*
+		QMutexLocker(&pdata->mutex);
+		qDebug() << "busCallback: SEGMENT DONE from "<< GST_MESSAGE_SRC_NAME(msg);
+		GstElement *decodebin = gst_bin_get_by_name(GST_BIN(pdata->pipeline), "decodebin");
+		Q_ASSERT(decodebin);
+		if (!gst_element_seek(decodebin, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+		{
+			qCritical() << "busCallback: SEEK FAILED";
+		}
+		else
+			qCritical() << "busCallback: SEEK OK";
+		gst_object_unref(decodebin);
+		*/
+	}
+	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_APPLICATION)
+	{
+		if (gst_message_has_name (msg, "DoSegmentSeek"))
+		{
+			const gchar *elementName = gst_structure_get_string(gst_message_get_structure(msg), "element");
+			qDebug() << "busCallback: DoSegmentSeek on element  " << (elementName ? elementName : "???");
+			GstElement *element = gst_bin_get_by_name(GST_BIN(pStimPipeline->pipeline()), elementName);
+			Q_ASSERT(element);
+			if (!gst_element_seek(element, 1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_SEGMENT, GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+			{
+				qCritical() << "busCallback: non-flushing segment seek on element " << elementName << " FAILED";
+			}
+//			else
+//			{
+//				qDebug() << "busCallback: non-flushing segment seek on element " << elementName << " SUCCESS";
+//			}
+			gst_object_unref(element);
+		}
+		else if (gst_message_has_name (msg, "DoFlushingSegmentSeek"))
+		{
+			const gchar *elementName = gst_structure_get_string(gst_message_get_structure(msg), "element");
+			qDebug() << "busCallback: DoFlushingSegmentSeek on element  " << (elementName ? elementName : "???");
+			GstElement *element = gst_bin_get_by_name(GST_BIN(pStimPipeline->pipeline()), elementName);
+			Q_ASSERT(element);
+			if (!gst_element_seek(element, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+			{
+				qCritical() << "busCallback: flushing segment seek on element " << elementName << " FAILED";
+			}
+//			else
+//			{
+//				qDebug() << "busCallback: non-flushing segment seek on element " << elementName << " SUCCESS";
+//			}
+			gst_object_unref(element);
+		}
+	}
+	return TRUE;
+}
+
+GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbeInfo * info, gpointer p)
+{
+	HStimPipelineSource *pSource = (HStimPipelineSource *)p;
+
+	// Note: GST_PAD_PROBE_INFO_EVENT(d) returns a GstEvent* or NULL if info->data does not have an event.
+	// In this routine, because its an event probe, it should always contain an event?
+
+	GstEvent* event = GST_PAD_PROBE_INFO_EVENT(info);
+	if (event)
+	{
+		GstElement* parent = GST_PAD_PARENT(pad);
+		//qDebug() << "eventProbeDoNothingCB: Event type " << GST_EVENT_TYPE_NAME(event) << " from " << GST_ELEMENT_NAME(parent);
+
+		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
+		{
+			QMutexLocker(pSource->stimPipeline()->mutex());
+			if (pSource->bLoop)
+			{
+				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment-done event on pad " << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+				if (!pSource->sWaitingForSegment2Pad.isEmpty() && QString(GST_PAD_NAME(pad)) != pSource->sWaitingForSegment2Pad)
+				{
+					qDebug() << "eventProbeDoNothingCB: Looping source, n=2 case. pad=" << GST_PAD_NAME(pad) << " expecting" << pSource->sWaitingForSegment2Pad << "No seek issued.";
+				}
+				else
+				{
+					// post message on bus - tell the bus handler (in correct thread, apparently) to issue the seek
+					// IIRc there was an issue getting it to work in all cases when issuing the FLUSHING seek from this thread,
+					// hence the 'send message to the bus handler' trick employed here.
+				    //qDebug() << "eventProbeDoNothingCB: Looping source, post bus message.";
+
+					// We always do 'segment seek' pipelines, which means for any source we play its full length, after which
+					// a SEGMENT_DONE event comes, and later (??) the bus message hits.
+					// It seems to work better to do the seeks in the bus callback, so do that via an application message.
+
+
+
+
+					// I've found that when the pipeline uses a container file  with a&v, the
+					//    AFter initialization, each source is prerolled so its ready to go immediately (or so).
+					//    I wait for the ASYNC_DONE in the bus handler, which tells me the pipeline is paused (prerolled).
+					//    Looping is easier (supposedly) when you do it with segment seeks. So, a flushing seek is issued from
+					//    the bus handler. Why? We want to get the pipeline to play the entire video/audio file once thru in
+					//    its entirety, and to treat that as a single "segment". When the
+					//    decoder gets to the end of the video/audio stream it sends a SEGMENT_DONE event. We catch that event and
+					//    rather than issuing the seek from here (can't recall why, but that didn't work out), send application
+					//    message to bus.
+
+
+					// When there's just a single stream in the source, do a segment seek and you're done.
+					// (I don't think the tracking of the seek is important except for logging)
+					// When there are two streams in the source, do a segment seek, but make sure to only do it for one
+					// of the two streams, otherwise the source will play a short piece of the segment from the start, but
+					// then will start over again, a little hitch, when the second seek hits.
+
+					if (pSource->nPadsLinked == 1)
+					{
+						GstElement *parent = gst_pad_get_parent_element(pad);
+						qDebug() << "eventProbeDoNothingCB: segment_done from " << GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo << " waiting for segment " << pSource->bWaitingForSegment;
+						gst_object_unref(parent);
+
+						//if (!strcmp(GST_PAD_NAME(pad), "src_0")) return GST_PAD_PROBE_OK;
+						GstBus *	bus = gst_pipeline_get_bus(GST_PIPELINE(pSource->stimPipeline()->pipeline()));
+						GstStructure *structure = gst_structure_new("DoSegmentSeek", "element", G_TYPE_STRING, GST_ELEMENT_NAME(parent), NULL);
+						gst_bus_post (bus, gst_message_new_application (
+							  GST_OBJECT_CAST (pSource->stimPipeline()->pipeline()),
+							  structure));
+						gst_object_unref(bus);
+
+						//
+						pSource->bWaitingForSegment = true;
+						pSource->bWaitingForSegment2 = false;
+						pSource->sWaitingForSegment2Pad = "NONE"; //GST_PAD_NAME(pad);
+					}
+					else if (pSource->nPadsLinked == 2)
+					{
+						// in this case, we make the following assumption: the source will play two streams, and they
+						// may not be exactly the same length. One of them hits the end of the segment, and the other
+						// does a short time later.
+						// My thinking is that by catching the segment_done events we find out at the head of the
+						// pipeline, and we can reload the pipeline with no glitches by doing the seek then, rather than
+						// waiting in the bus handler for the SEGMENT_DONE, which doesn't come until both segment events
+						// have been issued.
+						//
+						GstElement *parent = gst_pad_get_parent_element(pad);
+						qDebug() << "eventProbeDoNothingCB: segment_done from " << GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo;
+						gst_object_unref(parent);
+
+
+						// If the first of the two segments finishes, we issue the seek message.
+						// We don't issue any more seeks from here until we see a segment_done from the
+						// same pad.
+						if (!strcmp(GST_PAD_NAME(pad), "src_0")) return GST_PAD_PROBE_OK;
+						GstBus *	bus = gst_pipeline_get_bus(GST_PIPELINE(pSource->stimPipeline()->pipeline()));
+						GstStructure *structure = gst_structure_new("DoSegmentSeek", "element", G_TYPE_STRING, GST_ELEMENT_NAME(parent), NULL);
+						gst_bus_post (bus, gst_message_new_application (
+							  GST_OBJECT_CAST (pSource->stimPipeline()->pipeline()),
+							  structure));
+						gst_object_unref(bus);
+
+						pSource->bWaitingForSegment = false;
+						pSource->bWaitingForSegment2 = true;
+						pSource->sWaitingForSegment2Pad = GST_PAD_NAME(pad);
+
+					}
+				}
+			}
+		}
+		else if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
+		{
+			qDebug() << "eventProbeDoNothingCB: segment on pad "  << GST_PAD_NAME(pad);// << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+			QMutexLocker(pSource->stimPipeline()->mutex());
+			if (pSource->bLoop)
+			{
+				const GstSegment *segment;
+				gst_event_parse_segment(event, &segment);
+				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment event on pad "  << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+				//qDebug() << "eventProbeDoNothingCB: base " << segment->base << " offset " << segment->offset << " start " << segment->start << " stop " << segment->stop << " time " << segment->time << " position " << segment->position << " duration " << segment->duration;
+				if (pSource->bWaitingForPreroll)
+				{
+					//qDebug() << "eventProbeDoNothingCB: Waiting for looping source to preroll after initial flushing seek, expected segment. This source is prerolled and ready to loop.";
+					pSource->bWaitingForPreroll = false;
+					pSource->bPrerolled = true;
+				}
+				else if (pSource->bWaitingForSegment)
+				{
+					if (pSource->sWaitingForSegment2Pad == QString(GST_PAD_NAME(pad)))
+					{
+						pSource->bWaitingForSegment = false;
+						qDebug() << "eventProbeDoNothingCB: Looping source, got expected segment on pad " << pSource->sWaitingForSegment2Pad;
+					}
+					else
+					{
+						qDebug() << "eventProbeDoNothingCB: Looping source, expected segment on pad " << pSource->sWaitingForSegment2Pad << ", continue waiting...";
+					}
+				}
+				else
+				{
+					//qDebug() << "eventProbeDoNothingCB: Looping source, unexpected segment.";
+				}
+			}
+		}
+	}
+	return GST_PAD_PROBE_OK;
+}
+
+void HStimPipeline::dump()
+{
+	if (!m_bInitialized)
+	{
+		qCritical() << "Cannot dump - initialize() first!";
+		return;
+	}
+
+	qDebug() << "Dump dot file base name " << GST_ELEMENT_NAME(pipeline());
+	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline()));
+
+}
+
+HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool, bool bISS, bool bStatic, QObject *parent)
+{
+	HPipeline *p;
+	if (bStatic)
+		p = new HStaticStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
+	else
+		p = new HStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
+	return p;
+}
+
+
+
+
+
+#if 0
+
 #if PREROLL_SOME_SOURCES
 		QMapIterator<HPlayerPositionType, HStimPipelineSource* >it(pStimPipeline->getPipelineSourceMap());
 		while (it.hasNext())
@@ -544,190 +840,6 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			}
 		}
 #else
-		// issue flushing seek to entire pipeline. Catch segment events for each source
-		if (!pStimPipeline->bInitialFlushingSeekDone)
-		{
-			qDebug() << "busCallback: Issue initial flushing seek to pipeline.";
-			if (!gst_element_seek(pStimPipeline->pipeline(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
-			{
-				qCritical() << "busCallback: SEEK FAILED";
-			}
-			else
-			{
-				qDebug() << "busCallback: initial pipeline flush seek done";
-				pStimPipeline->bInitialFlushingSeekDone = true;
-				QMapIterator<HPlayerPositionType, HStimPipelineSource* >it(pStimPipeline->getPipelineSourceMap());
-				while (it.hasNext())
-				{
-					it.next();
-					HPlayerPositionType ppt = it.key();
-					HStimPipelineSource* pSource = it.value();
-					qDebug() << "busCallback: Source " << ppt.name() << " is now waiting for preroll...";
-					pSource->bWaitingForPreroll = true;
-				}
-			}
-		}
-		else
-		{
-			qDebug() << "busCallback: entire pipeline is now prerolled.";
-		}
+
 #endif
-	}
-	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_STATE_CHANGED)
-	{
-		if (GST_ELEMENT(msg->src) == pStimPipeline->pipeline())
-		{
-			GstState old_state, new_state;
-			gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
-			//qDebug() << "busCallback: got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
-			if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
-			{
-				pStimPipeline->emitNowPlaying();
-			}
-		}
-	}
-	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_SEGMENT_DONE)
-	{
-		//qDebug() << "busCallback: SEGMENT_DONE  Running time is " << (gst_clock_get_time(gst_element_get_clock(pStimPipeline->pipeline())) - gst_element_get_base_time(pStimPipeline->pipeline()));
-
-/*
-		QMutexLocker(&pdata->mutex);
-		qDebug() << "busCallback: SEGMENT DONE from "<< GST_MESSAGE_SRC_NAME(msg);
-		GstElement *decodebin = gst_bin_get_by_name(GST_BIN(pdata->pipeline), "decodebin");
-		Q_ASSERT(decodebin);
-		if (!gst_element_seek(decodebin, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
-		{
-			qCritical() << "busCallback: SEEK FAILED";
-		}
-		else
-			qCritical() << "busCallback: SEEK OK";
-		gst_object_unref(decodebin);
-		*/
-	}
-#if !NON_FLUSHING_SEEK_IN_EVENT_PROBE
-	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_APPLICATION)
-	{
-		if (gst_message_has_name (msg, "DoSegmentSeek"))
-		{
-			const gchar *elementName = gst_structure_get_string(gst_message_get_structure(msg), "element");
-			qDebug() << "busCallback: DoSegmentSeek on element  " << (elementName ? elementName : "???");
-			GstElement *element = gst_bin_get_by_name(GST_BIN(pStimPipeline->pipeline()), elementName);
-			Q_ASSERT(element);
-			if (!gst_element_seek(element, 1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_SEGMENT, GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
-			{
-				qCritical() << "busCallback: non-flushing segment seek on element " << elementName << " FAILED";
-			}
-//			else
-//			{
-//				qDebug() << "busCallback: non-flushing segment seek on element " << elementName << " SUCCESS";
-//			}
-			gst_object_unref(element);
-		}
-	}
 #endif
-	return TRUE;
-}
-
-GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbeInfo * info, gpointer p)
-{
-	HStimPipelineSource *pSource = (HStimPipelineSource *)p;
-
-	// Note: GST_PAD_PROBE_INFO_EVENT(d) returns a GstEvent* or NULL if info->data does not have an event.
-	// In this routine, because its an event probe, it should always contain an event?
-
-	GstEvent* event = GST_PAD_PROBE_INFO_EVENT(info);
-	if (event)
-	{
-		GstElement* parent = GST_PAD_PARENT(pad);
-		//qDebug() << "eventProbeDoNothingCB: Event type " << GST_EVENT_TYPE_NAME(event) << " from " << GST_ELEMENT_NAME(parent);
-
-		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
-		{
-			QMutexLocker(pSource->stimPipeline()->mutex());
-			if (pSource->bLoop)
-			{
-				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment-done event on pad " << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-				if (pSource->bWaitingForSegment)
-				{
-					//qDebug() << "eventProbeDoNothingCB: Looping source, waiting for segment. No seek issued.";
-				}
-				else
-				{
-//					qDebug() << "NOT DOING SEGMENT SEEK FOR LOOPING!";
-					// post message on bus
-				    //qDebug() << "eventProbeDoNothingCB: Looping source, post bus message.";
-					GstBus *	bus = gst_pipeline_get_bus(GST_PIPELINE(pSource->stimPipeline()->pipeline()));
-					GstStructure *structure = gst_structure_new("DoSegmentSeek", "element", G_TYPE_STRING, GST_ELEMENT_NAME(parent), NULL);
-				    gst_bus_post (bus, gst_message_new_application (
-				          GST_OBJECT_CAST (pSource->stimPipeline()->pipeline()),
-				          structure));
-				    gst_object_unref(bus);
-#if NON_FLUSHING_SEEK_IN_EVENT_PROBE
-				    qDebug() << "eventProbeDoNothingCB: Looping source, issue non-flushing segment seek.";
-					if (!gst_element_seek(parent, 1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_SEGMENT, GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
-					{
-						qCritical() << "eventProbeDoNothingCB: non-flushing segment seek FAILED";
-					}
-					else
-					{
-						qDebug() << "eventProbeDoNothingCB: non-flushing segment seek done";
-						pSource->bWaitingForSegment = true;
-					}
-#else
-					pSource->bWaitingForSegment = true;
-#endif
-				}
-			}
-		}
-		else if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
-		{
-			QMutexLocker(pSource->stimPipeline()->mutex());
-			if (pSource->bLoop)
-			{
-				const GstSegment *segment;
-				gst_event_parse_segment(event, &segment);
-				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment event on pad "  << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-				//qDebug() << "eventProbeDoNothingCB: base " << segment->base << " offset " << segment->offset << " start " << segment->start << " stop " << segment->stop << " time " << segment->time << " position " << segment->position << " duration " << segment->duration;
-				if (pSource->bWaitingForPreroll)
-				{
-					//qDebug() << "eventProbeDoNothingCB: Waiting for looping source to preroll after initial flushing seek, expected segment. This source is prerolled and ready to loop.";
-					pSource->bWaitingForPreroll = false;
-					pSource->bPrerolled = true;
-				}
-				else if (pSource->bWaitingForSegment)
-				{
-					//qDebug() << "eventProbeDoNothingCB: Looping source, expected segment. Cool.";
-					pSource->bWaitingForSegment = false;
-				}
-				else
-				{
-					//qDebug() << "eventProbeDoNothingCB: Looping source, unexpected segment.";
-				}
-			}
-		}
-	}
-	return GST_PAD_PROBE_OK;
-}
-
-void HStimPipeline::dump()
-{
-	if (!m_bInitialized)
-	{
-		qCritical() << "Cannot dump - initialize() first!";
-		return;
-	}
-
-	qDebug() << "Dump dot file base name " << GST_ELEMENT_NAME(pipeline());
-	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline()));
-
-}
-
-HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool, bool bISS, bool bStatic, QObject *parent)
-{
-	HPipeline *p;
-	if (bStatic)
-		p = new HStaticStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
-	else
-		p = new HStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
-	return p;
-}

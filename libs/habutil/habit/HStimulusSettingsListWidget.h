@@ -33,7 +33,7 @@ namespace GUILib
 		void create();
 		void connections();
 		void editItem(const QModelIndex& index);
-		const Habit::StimulusDisplayInfo& getStimulusDisplayInfo() const { return m_sdi; };
+		const Habit::StimulusDisplayInfo& getStimulusDisplayInfo() const { return	 m_sdi; };
 	public:
 		HStimulusSettingsListWidget(Habit::HStimulusSettingsList& list, const Habit::StimulusDisplayInfo& sdi, QWidget *parent=NULL);
 		virtual ~HStimulusSettingsListWidget() { delete m_pmodel;};
@@ -48,6 +48,8 @@ namespace GUILib
 		void clearStimulus();
 		void currentChanged(const QModelIndex& current, const QModelIndex& previous);
 		void stimulusSelectionChanged();
+		void stimulusAdded(int row);
+		void stimulusAboutToBeRemoved(int row);
 
 	protected Q_SLOTS:
 		void editClicked();
@@ -58,7 +60,7 @@ namespace GUILib
 		void currentSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 		void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 		void rowsInserted(const QModelIndex &parent, int first, int last);
-		void rowsRemoved(const QModelIndex &parent, int first, int last);
+		void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 		void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 	};
 

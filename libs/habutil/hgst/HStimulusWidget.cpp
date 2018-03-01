@@ -29,13 +29,6 @@ HStimulusWidget::HStimulusWidget(const Habit::StimulusDisplayInfo& sdi, float sc
 	// create video widget
 	m_videoWidget = new HVideoWidget(this);
 
-
-#if 0
-	// layout
-	QHBoxLayout *layout = new QHBoxLayout;
-	layout->addWidget(m_videoWidget);
-    setLayout(layout);
-#endif
     HStimulusLayout *layout = new HStimulusLayout(m_videoWidget, sdi.getDisplayType(), sdi.isOriginalAspectRatioMaintained(), m_sizeTargetScreen);
     setLayout(layout);
 }

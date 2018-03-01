@@ -12,6 +12,7 @@
 #include <QDialog>
 #include <gst/gst.h>
 #include <iostream>
+#include <algorithm>
 
 
 HGMM& HGMM::instance()
@@ -81,7 +82,7 @@ void HGMM::reset()
 
 void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 {
-	qDebug() << "HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)";
+	qDebug() << "HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir) - layout type " << settings.getStimulusDisplayInfo().getStimulusLayoutType().name();
 	reset(settings.getStimulusDisplayInfo().getStimulusLayoutType(), settings.getStimulusDisplayInfo().getUseISS(), settings.getStimulusDisplayInfo().getBackGroundColor(), dir);
 	// Need to know if AG is used. If it is, add attention getter settings to media manager
 	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
@@ -133,64 +134,20 @@ void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1)
 	if (p1)
 	{
 		// have left and right
-		m_pCenter = NULL;
+		m_pCenter = p0;
 		m_pLeft = p0;
 		m_pRight = p1;
-		m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutLeftRight;
+		// DON'T DO THIS HERE!
+		//m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutLeftRight;
 	}
 	else
 	{
 		m_pCenter = p0;
 		m_pLeft = m_pRight = NULL;
-		m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutSingle;
+		//m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutSingle;
 	}
 }
 
-//HGMM::HGMM(HStimulusWidget *center, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
-//: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutSingle)
-//, m_root(dir)
-//, m_bUseISS(useISS)
-//, m_pCenter(center)
-//, m_pLeft(NULL)
-//, m_pRight(NULL)
-//, m_pipelineCurrent(NULL)
-//, m_gthread(NULL)
-//, m_pgml(NULL)
-//, m_pipelineFactory(factory)
-//{
-//	// launch main loop thread
-//	m_pgml = g_main_loop_new(NULL, FALSE);
-//	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
-//
-//	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
-//	preroll(m_defaultKey);
-//	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
-//	preroll(m_backgroundKey);
-//
-//}
-//
-//HGMM::HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir, bool useISS, const QColor& bkgdColor, PipelineFactory factory)
-//: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutLeftRight)
-//, m_root(dir)
-//, m_bUseISS(useISS)
-//, m_pCenter(NULL)
-//, m_pLeft(left)
-//, m_pRight(right)
-//, m_pipelineCurrent(NULL)
-//, m_gthread(NULL)
-//, m_pgml(NULL)
-//, m_pipelineFactory(factory)
-//{
-//	// launch main loop thread
-//	m_pgml = g_main_loop_new(NULL, FALSE);
-//	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
-//
-//	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
-//	preroll(m_defaultKey);
-//
-//	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
-//	preroll(m_backgroundKey);
-//}
 
 gpointer HGMM::threadFunc(gpointer user_data)
 {
@@ -282,7 +239,9 @@ unsigned int HGMM::nextKey()
 
 QList<unsigned int> HGMM::getContextStimList(int context)
 {
-	return m_mapContext.values(context);
+	QList<unsigned int> csl = m_mapContext.values(context);
+	std::reverse(csl.begin(), csl.end());
+	return csl;
 }
 
 void HGMM::addStimuli(const Habit::StimuliSettings& ss, int context)
@@ -297,7 +256,7 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 {
 	HPipeline *pipeline;
 
-	qDebug() << "HGMM::addStimulus(" << key << "): " << stimulus.getName() << " context " << context;
+	qDebug() << "HGMM::addStimulus(" << key << "): " << stimulus.getName() << " context " << context << " layout type " << getStimulusLayoutType().name();
 
 	// create pipeline
 	pipeline = m_pipelineFactory(key, stimulus, m_root, getStimulusLayoutType(), true, m_bUseISS, (context < 0), this);
@@ -416,6 +375,40 @@ void HGMM::cleanup(unsigned int key)
 	}
 }
 
+// Don't get confused here - the input parameter is the stim key. Below, in the context multi map, the
+// 'key' is the context, and the 'value' is the stim id (input parake.
+void HGMM::remove(unsigned int stimkey)
+{
+	qDebug() << "HGMM::remove(" << stimkey << ") stim " << getStimulusSettings(stimkey).getName();
+
+	if (m_mapPipelines.contains(stimkey))
+	{
+		m_mapPipelines.value(stimkey)->cleanup();
+		HPipeline *p = m_mapPipelines.take(stimkey);
+		if (p) delete p;
+
+		// fix context list. Have to iterate over list to find the stim key.
+		QMapIterator<int, unsigned int> it(m_mapContext);
+		int context = -999;
+		while (it.hasNext())
+		{
+			it.next();
+			if (it.value() == stimkey)
+			{
+				context = it.key();
+				break;
+			}
+		}
+		Q_ASSERT(context != -999);
+		m_mapContext.remove(context, stimkey);
+	}
+	else
+	{
+		qWarning() << "HGMM::remove(): stimkey " << stimkey << " not found!";
+	}
+}
+
+
 void HGMM::preroll(unsigned int key)
 {
 	qDebug() << "HGMM::preroll(" << key << ") stim " << getStimulusSettings(key).getName();
@@ -472,7 +465,7 @@ void HGMM::dump(unsigned int key)
 
 void HGMM::playStim(unsigned int key)
 {
-	qDebug() << "HGMM::playstim(" << key << ") stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM::playstim(" << key << ") stim " << getStimulusSettings(key).getName() << " layout " << getStimulusLayoutType().name();
 	HPipeline *pipeline = NULL;		// the pipeline that will be played
 
 	// get pipeline that will be displayed/played.

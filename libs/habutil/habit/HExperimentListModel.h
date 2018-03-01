@@ -10,13 +10,17 @@
 
 
 #include <QStringListModel>
+#include <QVector>
+#include <QPair>
+#include <QColor>
 
 namespace GUILib
 {
 	class HExperimentListModel: public QStringListModel
 	{
 		Q_OBJECT
-
+		typedef QPair<QColor, QStringList> CSLPair;
+		QList<CSLPair> m_colorProblemPairList;
 	public:
 		HExperimentListModel(bool bExperiments = true, bool bTemplates = false);
 		virtual ~HExperimentListModel() {};

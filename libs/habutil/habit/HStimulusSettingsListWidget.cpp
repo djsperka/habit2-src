@@ -69,13 +69,17 @@ void HStimulusSettingsListWidget::connections()
 	qDebug() << "HStimulusSettingsListWidget::connections()";
 	connect(m_pmodel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(dataChanged(const QModelIndex &, const QModelIndex &)));
 	connect(m_pmodel, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(rowsInserted(const QModelIndex &, int, int)));
-	connect(m_pmodel, SIGNAL(rowsRemoved(const QModelIndex &, int, int)), this, SLOT(rowsRemoved(const QModelIndex &, int, int)));
+	connect(m_pmodel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex &, int, int)));
 	qDebug() << "HStimulusSettingsListWidget::connections() - done";
 }
 
 void HStimulusSettingsListWidget::removeClicked()
 {
 	QModelIndexList selected = m_pListView->selectionModel()->selectedIndexes();
+
+	// deselect, otherwise a new selection will be made automatically.
+	m_pListView->clearSelection();
+
 	QListIterator<QModelIndex> it(selected);
 	while (it.hasNext())
 		m_pmodel->remove(it.next());
@@ -101,7 +105,7 @@ void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & select
 		m_pbRemove->setEnabled(true);
 
 		emit stimulusSelectionChanged();	// StimulusOrderListWidget will get this
-		emit clearStimulus();			// unnecesary - REMOVE THIS SIGNAL
+		//emit clearStimulus();			// unnecesary - REMOVE THIS SIGNAL
 		emit previewStimulus(selected.at(0).indexes().at(0).row());
 	}
 	else
@@ -217,11 +221,13 @@ void HStimulusSettingsListWidget::clearSelection()
 void HStimulusSettingsListWidget::rowsInserted(const QModelIndex &parent, int first, int last)
 {
 	qDebug() << "rowsInserted: " << first << "-" << last << " there are " << m_pmodel->rowCount();
+	emit stimulusAdded(first);
 }
 
-void HStimulusSettingsListWidget::rowsRemoved(const QModelIndex &parent, int first, int last)
+void HStimulusSettingsListWidget::rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
 {
-	qDebug() << "rowsRemoved: " << first << "-" << last << " there are " << m_pmodel->rowCount();
+	qDebug() << "rowsAboutToBeRemoved: " << first << "-" << last << " there are " << m_pmodel->rowCount();
+	emit stimulusAboutToBeRemoved(first);
 }
 
 void HStimulusSettingsListWidget::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
