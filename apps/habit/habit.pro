@@ -3,14 +3,8 @@
 TEMPLATE = app
 TARGET = habit22
 
-target.path = $$_PRO_FILE_PWD_/../../distribution/pkgroot
-INSTALLS += target
-
 # need this for boost?
 INCLUDEPATH += 	"/usr/local/include" 
-
-# produce nice compilation output
-#CONFIG += silent
 
 # Tell qmake to use pkg-config to find gstreamer.
 CONFIG += debug_and_release link_pkgconfig c++11
@@ -23,9 +17,6 @@ PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
 # gstreamer-plugins-bad-1.0
 QT += widgets
 
-# Recommended if you are using g++ 4.5 or later. Must be removed for other compilers.
-#QMAKE_CXXFLAGS += -std=c++0x
-
 # Recommended, to avoid possible issues with the "emit" keyword
 # You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.
 DEFINES += QT_NO_KEYWORDS
@@ -37,12 +28,12 @@ CONFIG(debug, debug|release) {
 	DESTDIR = debug
 	LIBS += -L../../libs/habutil/debug -lhabutil
 	PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
-#	QMAKE_POST_LINK = ./uip.sh debug
+	DEFINES += HABIT_DEBUG
 } else {
 	DESTDIR = release
 	LIBS += -L../../libs/habutil/release -lhabutil
 	PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
-#	QMAKE_POST_LINK = ./uip.sh release
+	DEFINES += HABIT_RELEASE
 }
 
 ICON = ./habiticon.icns
@@ -55,9 +46,6 @@ SOURCES			=	main.cpp
 HEADERS			=	version.h
 
 
-# set env variable to the 	
-DEFINES += $(HABIT_DEFINES)
-message(Define value $$DEFINES)
 PKGROOT = $$(PWD)/../../distribution/pkgroot
 message(pkg root value $$PKGROOT)
 TOOLS = $$(PWD)/../../tools
@@ -89,15 +77,10 @@ copy_plugin.depends = copy_app
 # make .copy_app will copy current "release" build to pkgroot dir
 copy_app.target = .copy_app
 copy_app.commands = echo "Copy app to $$PKGROOT..." && (tar -C release -cf - habit22.app | tar -C $$PKGROOT -xf -) && touch .copy_app && echo "Copy app to $$PKGROOT...Done."
-copy_app.depends = build_for_dist clean_pkgroot
-
-# builds habit with RELEASE_FOR_DISTRIBUTION #defined
-build_for_dist.target = .build_for_dist
-build_for_dist.commands = make HABIT_DEFINES=HABIT_DISTRIBUTION release && touch .build_for_dist
-build_for_dist.depends = clean
+copy_app.depends = clean release clean_pkgroot
 
 # clean pkgroot of any previously used app. 
 clean_pkgroot.target = .clean_pkgroot
 clean_pkgroot.commands = echo "Cleaning pkgroot $$PKGROOT..." && rm -rf $$PKGROOT/habit22.app && touch .clean_pkgroot && echo "Cleaning pkgroot $$PKGROOT...Done."
 clean_pkgroot.depends = FORCE
-QMAKE_EXTRA_TARGETS += build_release_pkg copy_app build_for_dist clean_pkgroot copy_plugin copy_gstreamer relocate_app
+QMAKE_EXTRA_TARGETS += build_release_pkg copy_app clean_pkgroot copy_plugin copy_gstreamer relocate_app
