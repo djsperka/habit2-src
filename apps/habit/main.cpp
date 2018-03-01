@@ -17,8 +17,10 @@
 #include <QDesktopWidget>
 #include <QMutexLocker>
 #include <QMutex>
+#include <QCommandLineParser>
 #include <iostream>
 #include <gst/gst.h>
+
 
 using namespace std;
 QFile *f_pFileLog = NULL;
@@ -146,7 +148,56 @@ int main(int argc, char *argv[])
 	// 1. No file logging, screen logging only.
 	// 2. We will not install a logging msg handler at all (Qt's default is screen)
 
+
 	bool bFileLogPending = true;
+#define TRY_PARSER
+#ifdef TRY_PARSER
+	// create application
+    HApplication h(argc, &argv);
+	h.setApplicationVersion(HABIT_VERSION);
+	h.setApplicationName("habit2");
+	h.setOrganizationName("Infant Cognition Lab");
+	h.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
+
+	QCommandLineParser parser;
+    parser.setApplicationDescription("Habit - Infant cognition stimulus presentation and DAQ application");
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    parser.addOptions({
+             {"s", "write log to screen"},
+			 {"f", "write log to file" },
+			 {"x", "clear workspace value in preferences."},
+			 {"w", "set workspace folder", "workspace"},
+			 {"D", "check (and update if necessary) database version for current workspace"},
+			 {"T", "\"Test run\" is default when running an experiment"},
+			 {"t", "Show testing icon on toolbar"},
+			 {"e", "edit templates"},
+			 {"z", "Show stimuli in a dialog - for developing experiments."},
+			 {"n", "Run habit as if it is NOT installed - developers only!"},
+         });
+    parser.process(h);
+
+	f_bScreenLog = parser.isSet("s");
+	bFileLogPending = parser.isSet("f");
+    	if (parser.isSet("x"))
+    	{
+    		habutilClearWorkspace();
+    	}
+    if (parser.isSet("w"))
+    	{
+    		bPendingWorkspace = true;
+    		sPendingWorkspace = parser.value("w");
+    	}
+    bDBUpdateOnly = parser.isSet("D");
+    bTestRunIsDefault = parser.isSet("T");
+    bShowTestingIcon = parser.isSet("t");
+    bEditTemplates = parser.isSet("e");
+	bStimInDialog = parser.isSet("z");
+	bNotInstalled = parser.isSet("n");
+
+#else
+    	qDebug() << "not trying parser";
 
 	// Default is to always have log file.
 	for (i=0; i<argc; i++)
@@ -195,16 +246,31 @@ int main(int argc, char *argv[])
 		}
 		else if (!strcmp(argv[i], "-n"))
 		{
-			bNotInstalled = false;
+			bNotInstalled = true;
 		}
 	}
+#endif
 
 
-	if (!bNotInstalled)
+	// Debug  builds (HABIT_DEBUG) use system-defined gstreamer libs.
+	// Release builds (HABIT_RELEASE) _can_ use the system-installed (whatever we link against) gstreamer libs,
+	// but the -n flag tells us to run as NOT installed.
+	//
+	// When running "installed", we assume that the gstreamer framework is embedded in the bundle, and we set two
+	// env variables to point that direction:
+	// GST_PLUGIN_SYSTEM_PATH - where gstreamer finds plugins. Note that I stick the gst-qt plugin there.
+	// GIO_EXTRA_MODULES - some glib thing
+	// GST_PLUGIN_SCANNER - scanner checks local plugin cache??
+
+	if (bNotInstalled)
 	{
-		qDebug() << "Run as installed, argv[0] " << argv[0];
+		qDebug() << "Run as NOT installed, exe file is " << argv[0];
+	}
+	else
+	{
+		qDebug() << "Run installed, exe file is " << argv[0];
 
-#ifdef HABIT_DISTRIBUTION
+#ifdef HABIT_RELEASE
 		QFileInfo fiExe(argv[0]);
 		qDebug() << "exePath " << fiExe.path();
 		QDir dirScanner(fiExe.path());
@@ -234,18 +300,23 @@ int main(int argc, char *argv[])
 		{
 			qFatal("Cannot navigate to ../Frameworks/GStreamer.framework/Versions/1.0/lib/gio/modules");
 		}
+#else
+		qDebug() << "DEBUG build will not run installed. TODO.";
 #endif
 	}
 
 	// Initialize gstreamer
 	gst_init (&argc, &argv);
 
+#ifndef TRY_PARSER
 	// create application
-    HApplication h(argc, argv);
+    HApplication h(argc, &argv);
 	h.setApplicationVersion(HABIT_VERSION);
 	h.setApplicationName("habit2");
 	h.setOrganizationName("Infant Cognition Lab");
 	h.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
+	qDebug() << "args " << h.arguments();
+#endif
 
 	// Open a workspace. The workspace is a folder containing "habit.sqlite" and three folders:
 	// "results", "log" and "stim". This MUST be called AFTER the organization name is set in the QApplication
