@@ -290,4 +290,5 @@ FORMS =		\
 			wizards/PhaseWPTrial.ui \
 			wizards/PhaseWPHabituation.ui \
 			wizards/PhaseWPHabit1.ui \
-			wizards/PhaseWPHabit2.ui
+			wizards/PhaseWPHabit2.ui \
+			habit/GlobalPreferencesDialog.ui

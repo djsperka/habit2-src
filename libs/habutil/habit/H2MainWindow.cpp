@@ -792,6 +792,7 @@ void GUILib::H2MainWindow::deleteExperiment()
 void GUILib::H2MainWindow::workspaceChanged()
 {
 	m_pLabelStatusBar->setText(QString("Current workspace: %1").arg(habutilGetWorkspaceDir()));
+	habutilInitWorkspace();
 	m_pExperimentListWidget->reload();
 }
 

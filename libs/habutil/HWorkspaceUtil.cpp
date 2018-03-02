@@ -33,7 +33,7 @@
 
 bool habutilIsValidWorkspace(QDir dir)
 {
-	return (dir.exists() && dir.exists("habit.sqlite") && dir.exists("results") && dir.exists("log") && dir.exists("stim"));
+	return (dir.exists() && (dir.exists("habit.sqlite") || dir.exists("habit22.sqlite")) && dir.exists("results") && dir.exists("log") && dir.exists("stim"));
 }
 
 
@@ -151,7 +151,6 @@ bool habutilCreateWorkspace(QDir& dir)
 bool habutilInitWorkspace()
 {
 	bool b = false;
-	QSettings settings;
 	QDir workspaceDir;
 	b = habutilGetWorkspaceDir(workspaceDir);
 	qDebug() << "Habit is opening workspace directory \"" << workspaceDir.absolutePath() << "\"";
@@ -326,23 +325,18 @@ QString habutilGetStimulusRootDir()
 	return dir.absolutePath();
 }
 
-// Prompt user to select a stimulus root folder.
-bool habutilSelectStimulusRootDir()
+bool habutilSelectStimulusRootDir(QString& sDir)
 {
 	bool b = false;
-	QDir dir;
 	QString selectedDir;
-
-	habutilGetStimulusRootDir(dir);
-
-	selectedDir = QFileDialog::getExistingDirectory(0, "Select Habit Stimulus Root Folder", dir.absolutePath());
+	selectedDir = QFileDialog::getExistingDirectory(0, "Select Habit Stimulus Root Folder", sDir);
 	if (selectedDir.isEmpty() || selectedDir.isNull())
 	{
 		b = false;
 	}
 	else
 	{
-		habutilSetStimulusRootDir(selectedDir);
+		sDir = selectedDir;
 		b = true;
 	}
 	return b;

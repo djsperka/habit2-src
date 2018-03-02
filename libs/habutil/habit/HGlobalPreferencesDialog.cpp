@@ -5,11 +5,225 @@
  *      Author: Oakeslab
  */
 
+
+// 3/1/18 replace pref dialog
+
+
+//#include "HHabituationSetupWidget.h"
+//#include "ui_HHabituationSetupForm.h"
+#include "HGlobalPreferencesDialog.h"
+#include "ui_GlobalPreferencesDialog.h"
+#include "HWorkspaceUtil.h"
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QMessageBox>
+#include <QDir>
+
+
+using namespace GUILib;
+//using namespace Habit;
+
+HGlobalPreferencesDialog::HGlobalPreferencesDialog(QWidget *parent)
+: QDialog(parent)
+, ui(new Ui::GlobalPreferencesDialog)
+{
+	ui->setupUi(this);
+	m_sWorkspaceSelected = habutilGetWorkspaceDir();
+	m_sStimulusRootDirSelected = habutilGetStimulusRootDir();
+
+	initialize(); // moved this from _after_ connections. populate combos here.
+	connections();
+}
+
+
+//void GUILib::HGlobalPreferencesDialog::defaultStimRootClicked()
+//{
+//	if (m_pcheckDefaultStimRoot->isChecked())
+//	{
+//		m_plineeditRoot->setText("<workspace_dir>/stim");
+//		m_plbStimulusRootDir->setText("<workspace_dir>/stim");
+//		m_plineeditRoot->setEnabled(false);
+//	}
+//	else
+//	{
+//		m_plineeditRoot->setText(habutilGetStimulusRootDir());
+//		m_plbStimulusRootDir->setText(habutilGetStimulusRootDir());
+//		m_plineeditRoot->setEnabled(true);
+//	}
+//}
+
+void GUILib::HGlobalPreferencesDialog::initialize()
+{
+	ui->lbCurrentWorkspace->setText(m_sWorkspaceSelected);
+	ui->lbCurrentStimDir->setText(m_sStimulusRootDirSelected);
+
+	ui->cbControl->addItem(QString("None"), QVariant(-1));
+	ui->cbLeft->addItem(QString("None"), QVariant(-1));
+	ui->cbCenter->addItem(QString("None"), QVariant(-1));
+	ui->cbRight->addItem(QString("None"), QVariant(-1));
+	for (int i=0; i<getNumberOfMonitors(); i++)
+	{
+		ui->cbControl->addItem(QString("Monitor %1").arg(i), QVariant(i));
+		ui->cbLeft->addItem(QString("Monitor %1").arg(i), QVariant(i));
+		ui->cbCenter->addItem(QString("Monitor %1").arg(i), QVariant(i));
+		ui->cbRight->addItem(QString("Monitor %1").arg(i), QVariant(i));
+	}
+
+
+//	m_plineeditWorkspace->setText(habutilGetWorkspaceDir());
+//	m_pcbControl->setCurrentIndex(m_pcbControl->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Control))));
+//	m_pcbLeft->setCurrentIndex(m_pcbLeft->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Left))));
+//	m_pcbCenter->setCurrentIndex(m_pcbCenter->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Center))));
+//	m_pcbRight->setCurrentIndex(m_pcbRight->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Right))));
+//
+//	if (habutilGetUseDefaultStimRoot())
+//	{
+//		m_pcheckDefaultStimRoot->setChecked(true);
+//	}
+//	else
+//	{
+//		m_pcheckDefaultStimRoot->setChecked(false);
+//	}
+//	defaultStimRootClicked();
+}
+
+void GUILib::HGlobalPreferencesDialog::accepted()
+{
+	// if workspace is changed, do that now.
+	if (QDir(ui->lbCurrentWorkspace->text()) != QDir(habutilGetWorkspaceDir()))
+	{
+		habutilSetWorkspace(ui->lbCurrentWorkspace->text());
+		Q_EMIT workspaceChanged();
+	}
+
+	// set preferences
+	habutilSetStimulusRootDir(ui->lbCurrentStimDir->text());
+	habutilSetMonitorID(HPlayerPositionType::Control, ui->cbControl->itemData(ui->cbControl->currentIndex()).toInt());
+	habutilSetMonitorID(HPlayerPositionType::Left, ui->cbLeft->itemData(ui->cbLeft->currentIndex()).toInt());
+	habutilSetMonitorID(HPlayerPositionType::Center, ui->cbCenter->itemData(ui->cbCenter->currentIndex()).toInt());
+	habutilSetMonitorID(HPlayerPositionType::Right, ui->cbRight->itemData(ui->cbRight->currentIndex()).toInt());
+//	habutilSetUseDefaultStimRoot(m_pcheckDefaultStimRoot->isChecked());
+	accept();
+}
+
+void GUILib::HGlobalPreferencesDialog::chooseStimulusRootDirClicked()
+{
+	QString selectedDir;
+	selectedDir = QFileDialog::getExistingDirectory(0, "Select Habit Stimulus Root Folder", ui->lbCurrentStimDir->text());
+
+	// check whether user cancelled or not.
+	if (!selectedDir.isEmpty())
+	{
+		// store the dir in the label
+		ui->lbCurrentStimDir->setText(selectedDir);
+	}
+}
+
+int GUILib::HGlobalPreferencesDialog::getNumberOfMonitors()
+{
+	return QApplication::desktop()->screenCount();
+}
+
+void GUILib::HGlobalPreferencesDialog::connections()
+{
+	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &HGlobalPreferencesDialog::accepted);
+	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+	connect(ui->pbChooseWorkspace, &QPushButton::clicked, this, &HGlobalPreferencesDialog::chooseWorkspaceClicked);
+	connect(ui->pbChooseStimulusDir, &QPushButton::clicked, this, &HGlobalPreferencesDialog::chooseStimulusRootDirClicked);
+	connect(ui->pbStimulusDirDefault, &QPushButton::clicked, this, &HGlobalPreferencesDialog::defaultStimRootClicked);
+}
+
+void GUILib::HGlobalPreferencesDialog::defaultStimRootClicked()
+{
+	ui->lbCurrentStimDir->setText(ui->lbCurrentWorkspace->text().append("/stim"));
+}
+
+void GUILib::HGlobalPreferencesDialog::chooseWorkspaceClicked()
+{
+	//
+	QString selectedDir;
+	selectedDir = QFileDialog::getExistingDirectory(0, "Select Workspace Folder", ui->lbCurrentWorkspace->text());
+
+	// check whether user cancelled or not.
+	if (!selectedDir.isEmpty())
+	{
+		QDir d(selectedDir);
+
+		// is the selected dir a workspace dir?
+		if (habutilIsValidWorkspace(d))
+		{
+			ui->lbCurrentWorkspace->setText(selectedDir);
+		}
+		else
+		{
+			// TODO: not a workspace - want a new one? First check if its INSIDE a workspace. or if it contains a workspace
+
+//			QDir parent(d);
+//			d.cdUp();
+//			if (habutilIsValidWorkspace(d))
+//			{
+//				QMessageBox::information("Cannots")
+//			}
+
+			QMessageBox::StandardButton btn;
+			btn = QMessageBox::question(this, "Create new workspace", "The selected folder is not a workspace, do you want to create a new one?");
+			if (btn == QMessageBox::Yes)
+			{
+				if (!habutilCreateWorkspace(d))
+				{
+					// TODO link to log file in dialog box
+					QMessageBox::warning(this, "Create new workspace", "Could not create new workspace. See log.");
+
+					// don't save selected in label -- nothing is changed
+				}
+				else
+				{
+					ui->lbCurrentWorkspace->setText(selectedDir);
+				}
+			}
+		}
+	}
+}
+
+
+void GUILib::HGlobalPreferencesDialog::identifyClicked()
+{
+	for (int i = 0; i < getNumberOfMonitors(); i++)
+	{
+		QMessageBox box(QMessageBox::Information, "Information", QString("This monitor is identified as 'Monitor %1'").arg(i));
+		QSize size = box.sizeHint();
+		QRect screen = QApplication::desktop()->screenGeometry(i);
+		QRect wind(screen.x() + (screen.width()-size.width())/2, screen.y() + (screen.height()-size.height())/2, size.width(), size.height());
+		box.setGeometry(wind);
+		box.setModal(true);
+		box.exec();
+	}
+}
+
+
+#if 0
+HHabituationSetupWidget::HHabituationSetupWidget(QWidget* w)
+: QWidget(w)
+, ui(new Ui::HHabituationSetupForm)
+, m_settings()
+{
+	ui->setupUi(this);
+	initializeComponents();
+	connections();
+	initialize();
+}
+
+#endif
+
+
+#if 0
 #include "HGlobalPreferencesDialog.h"
 #include "HWorkspaceUtil.h"
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMessageBox>
+#include <QDir>
+
 
 GUILib::HGlobalPreferencesDialog::HGlobalPreferencesDialog(QWidget *parent)
 : QDialog(parent)
@@ -22,15 +236,19 @@ GUILib::HGlobalPreferencesDialog::HGlobalPreferencesDialog(QWidget *parent)
 
 void GUILib::HGlobalPreferencesDialog::create()
 {
-	QGroupBox *pgbWorkspace = new QGroupBox("Current workspace");
+	QGroupBox *pgbWorkspace = new QGroupBox("Folde assignments");
 	QGroupBox *pgbMonitors = new QGroupBox("Monitor assignments");
 	QGroupBox *pgbRoot = new QGroupBox("Stimulus root folder");
+
+	// create labels
+	m_plbWorkspaceDir = new QLabel(habutilGetWorkspaceDir());
+	m_plbStimulusRootDir = new QLabel(habutilGetStimulusRootDir());
 
 	// create pushbuttons
 	m_pbDone = new QPushButton("Done");
 	m_pbCancel = new QPushButton("Cancel");
 	m_pbSelect = new QPushButton("Select");
-	m_pbSelectWorkspace = new QPushButton("Select");
+	m_pbSelectWorkspace = new QPushButton("Choose...");
 	m_pbIdentify = new QPushButton("Identify Monitors");
 
 	m_pcbControl = new QComboBox();
@@ -85,24 +303,27 @@ void GUILib::HGlobalPreferencesDialog::create()
 	pgbMonitors->setLayout(v);
 
 	m_plineeditRoot = new QLineEdit();
-	QHBoxLayout *hroot = new QHBoxLayout;
-	hroot->addWidget(new QLabel("Stimulus root folder:"));
-	hroot->addWidget(m_plineeditRoot, 1);
-	hroot->addWidget(m_pbSelect);
+	//QHBoxLayout *hroot = new QHBoxLayout;
 	QVBoxLayout *vroot = new QVBoxLayout;
-	vroot->addLayout(hroot);
-	vroot->addWidget(m_pcheckDefaultStimRoot);
+	vroot->addWidget(new QLabel("Stimulus root folder:"));
+	vroot->addWidget(m_plineeditRoot, 1);
+	vroot->addWidget(m_plbStimulusRootDir);
+	vroot->addWidget(m_pbSelect);
+	QVBoxLayout *vvroot = new QVBoxLayout;
+	vvroot->addLayout(vroot);
+	vvroot->addWidget(m_pcheckDefaultStimRoot);
 
-	pgbRoot->setLayout(vroot);
+	pgbRoot->setLayout(vvroot);
 
 
 	m_plineeditWorkspace = new QLineEdit();
-	QHBoxLayout *hworkspace = new QHBoxLayout;
-	hworkspace->addWidget(new QLabel("Workspace folder:"));
-	hworkspace->addWidget(m_plineeditWorkspace, 1);
-	hworkspace->addWidget(m_pbSelectWorkspace);
+	QVBoxLayout *vworkspace = new QVBoxLayout;
+	vworkspace->addWidget(new QLabel("Workspace folder:"));
+	vworkspace->addWidget(m_plineeditWorkspace, 1);
+	vworkspace->addWidget(m_plbWorkspaceDir);
+	vworkspace->addWidget(m_pbSelectWorkspace);
 
-	pgbWorkspace->setLayout(hworkspace);
+	pgbWorkspace->setLayout(vworkspace);
 
 
 
@@ -141,11 +362,13 @@ void GUILib::HGlobalPreferencesDialog::defaultStimRootClicked()
 	if (m_pcheckDefaultStimRoot->isChecked())
 	{
 		m_plineeditRoot->setText("<workspace_dir>/stim");
+		m_plbStimulusRootDir->setText("<workspace_dir>/stim");
 		m_plineeditRoot->setEnabled(false);
 	}
 	else
 	{
 		m_plineeditRoot->setText(habutilGetStimulusRootDir());
+		m_plbStimulusRootDir->setText(habutilGetStimulusRootDir());
 		m_plineeditRoot->setEnabled(true);
 	}
 }
@@ -172,7 +395,7 @@ void GUILib::HGlobalPreferencesDialog::initialize()
 void GUILib::HGlobalPreferencesDialog::doneClicked()
 {
 	// set preferences
-	habutilSetStimulusRootDir(m_plineeditRoot->text());
+	habutilSetStimulusRootDir(m_plbStimulusRootDir->text());
 	habutilSetMonitorID(HPlayerPositionType::Control, m_pcbControl->itemData(m_pcbControl->currentIndex()).toInt());
 	habutilSetMonitorID(HPlayerPositionType::Left, m_pcbLeft->itemData(m_pcbLeft->currentIndex()).toInt());
 	habutilSetMonitorID(HPlayerPositionType::Center, m_pcbCenter->itemData(m_pcbCenter->currentIndex()).toInt());
@@ -186,17 +409,19 @@ void GUILib::HGlobalPreferencesDialog::selectClicked()
 	if (habutilSelectStimulusRootDir())
 	{
 		m_plineeditRoot->setText(habutilGetStimulusRootDir());
+		m_plbStimulusRootDir->setText(habutilGetStimulusRootDir());
 	}
 }
 
+
+// TODO WORKSPACE SELECTIUON APPLIED IMMEDIATELY, BUT STIM ROOT IS NOT. MAKE WORKSPACE EFFECTIVE IN DONE.
 
 void GUILib::HGlobalPreferencesDialog::selectWorkspaceClicked()
 {
 	if (habutilSelectWorkspace())
 	{
 		m_plineeditWorkspace->setText(habutilGetWorkspaceDir());
-		habutilInitWorkspace();
-		emit workspaceChanged();
+		m_plbWorkspaceDir->setText(habutilGetWorkspaceDir());
 	}
 }
 
@@ -243,3 +468,5 @@ QString GUILib::HGlobalPreferencesDialog::getRootFolder() const
 {
 	return m_plineeditRoot->text();
 }
+
+#endif
