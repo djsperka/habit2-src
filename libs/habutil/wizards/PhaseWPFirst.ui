@@ -49,7 +49,7 @@
          <string>Subject must accumulate a specified amount of looking during each trial.</string>
         </property>
         <property name="text">
-         <string>Familiarization/Preference</string>
+         <string>Fixed number of trials</string>
         </property>
         <property name="checked">
          <bool>true</bool>

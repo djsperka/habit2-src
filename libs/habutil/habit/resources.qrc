@@ -8,7 +8,7 @@
     <file>resources/rims.png</file>
     <file>resources/gear_wheel.png</file>
     <file>resources/analysis.png</file>
-    <file>resources/habit.sqlite</file>
+    <file>resources/habit22.sqlite</file>
     <file>resources/plus.png</file>
     <file>resources/copy.png</file>
     <file>resources/delete.png</file>
@@ -25,17 +25,6 @@
     <file>resources/expt-main/p-up.png</file>
     <file>resources/expt-main/p-down.png</file>
     <file>resources/expt-main/p-edit.png</file>
-    <file>resources/stim/AG7_5.avi</file>
-    <file>resources/stim/FourCirclesColor1config6.jpg</file>
-    <file>resources/stim/FourCirclesColor4config1.jpg</file>
-    <file>resources/stim/FourCirclesColor4config2.jpg</file>
-    <file>resources/stim/FourCirclesColor4config3.jpg</file>
-    <file>resources/stim/FourCirclesColor4config4.jpg</file>
-    <file>resources/stim/FourCirclesColor4config5.jpg</file>
-    <file>resources/stim/FourCirclesColor4config6.jpg</file>
-    <file>resources/stim/TenCirclesColor4config1.jpg</file>
-    <file>resources/stim/TenCirclesColor6config1.jpg</file>
-    <file>resources/stim/TwoCirclesColor4config4.jpg</file>
     <file>resources/logo/habit-large.png</file>
     <file>resources/logo/habit-small.png</file>
   </qresource>
