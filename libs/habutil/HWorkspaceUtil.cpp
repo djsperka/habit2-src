@@ -60,17 +60,17 @@ bool habutilCreateWorkspace(QDir& dir)
 	}
 
 	// see if dir already contains db
-	if (!dir.exists("habit.sqlite"))
+	if (!dir.exists("habit22.sqlite"))
 	{
 		// copy database from resources
-		if (!QFile::copy(":/resources/habit.sqlite", dir.absoluteFilePath("habit.sqlite")))
+		if (!QFile::copy(":/resources/habit22.sqlite", dir.absoluteFilePath("habit22.sqlite")))
 		{
-			qCritical() << "Cannot create database file " << dir.absoluteFilePath("habit.sqlite");
+			qCritical() << "Cannot create database file " << dir.absoluteFilePath("habit22.sqlite");
 			return false;
 		}
 		else
 		{
-			QFile newfile(dir.absoluteFilePath("habit.sqlite"));
+			QFile newfile(dir.absoluteFilePath("habit22.sqlite"));
 			newfile.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadGroup | QFile::WriteGroup);
 			qDebug() << "Created database " << newfile.fileName();
 		}
@@ -116,26 +116,26 @@ bool habutilCreateWorkspace(QDir& dir)
 		{
 			qDebug() << "Created stim directory " << dir.absoluteFilePath("stim");
 
-			// move sample stim files into stim folder
-			QDir resourceStimDir(":/resources/stim");
-			QDir stimDir(dir);
-			stimDir.cd(QString("stim"));
-
-			QFileInfoList list = resourceStimDir.entryInfoList();
-			for (int i = 0; i < list.size(); ++i)
-			{
-				QFileInfo fileInfo = list.at(i);
-				if (!QFile::copy(fileInfo.absoluteFilePath(), stimDir.absoluteFilePath(fileInfo.fileName())))
-				{
-					qCritical() << "Cannot copy image file " << fileInfo.absoluteFilePath();
-					return false;
-				}
-				else
-				{
-					qDebug() << "Copied " << fileInfo.absoluteFilePath() << " to " << stimDir.absoluteFilePath(fileInfo.fileName());
-				}
-			}
-
+//			// move sample stim files into stim folder
+//			QDir resourceStimDir(":/resources/stim");
+//			QDir stimDir(dir);
+//			stimDir.cd(QString("stim"));
+//
+//			QFileInfoList list = resourceStimDir.entryInfoList();
+//			for (int i = 0; i < list.size(); ++i)
+//			{
+//				QFileInfo fileInfo = list.at(i);
+//				if (!QFile::copy(fileInfo.absoluteFilePath(), stimDir.absoluteFilePath(fileInfo.fileName())))
+//				{
+//					qCritical() << "Cannot copy image file " << fileInfo.absoluteFilePath();
+//					return false;
+//				}
+//				else
+//				{
+//					qDebug() << "Copied " << fileInfo.absoluteFilePath() << " to " << stimDir.absoluteFilePath(fileInfo.fileName());
+//				}
+//			}
+//
 		}
 	}
 
