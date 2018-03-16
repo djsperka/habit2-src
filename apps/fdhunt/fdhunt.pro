@@ -4,21 +4,18 @@ TEMPLATE = app
 TARGET = fdhunt
 
 # need this for boost?
-INCLUDEPATH += 	"/usr/local/include" 
+#INCLUDEPATH += 	"/usr/local/include" 
+CONFIG += debug_and_release c++11
 
-# produce nice compilation output
-#CONFIG += silent
-
-# Tell qmake to use pkg-config
-CONFIG += debug_and_release link_pkgconfig c++11
-
-PKGCONFIG += gstreamer-1.0
+#PKGCONFIG += gstreamer-1.0
 QT += widgets
 
 # Recommended, to avoid possible issues with the "emit" keyword
 # You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.
 DEFINES += QT_NO_KEYWORDS
 
+# Get gstreamer stuff from this file.
+include(../../habit.pri)
 
 
 CONFIG(debug, debug|release) {
