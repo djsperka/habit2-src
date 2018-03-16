@@ -1,6 +1,9 @@
 TEMPLATE = lib
-CONFIG += qt debug_and_release link_pkgconfig plugin
-PKGCONFIG += gstreamer-1.0
+CONFIG += qt debug_and_release plugin
+
+# Get gstreamer stuff from this file.
+include(../../habit.pri)
+
 QT += widgets
 INCLUDEPATH += .
 LIBS += -lgstvideo-1.0 -lgstbase-1.0

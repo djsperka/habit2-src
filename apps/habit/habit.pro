@@ -4,16 +4,19 @@ TEMPLATE = app
 TARGET = habit22
 
 # need this for boost?
-INCLUDEPATH += 	"/usr/local/include" 
+#INCLUDEPATH += 	"/usr/local/include" 
 
 # Tell qmake to use pkg-config to find gstreamer.
-CONFIG += debug_and_release link_pkgconfig c++11
+CONFIG += debug_and_release c++11
 
 # need sql libs and print support
 QT += sql printsupport
 
+# Get gstreamer stuff from this file.
+include(../../habit.pri)
+
 # Now tell qmake to link to gstreamer and also use its include path and Cflags.
-PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
+#PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
 # gstreamer-plugins-bad-1.0
 QT += widgets
 

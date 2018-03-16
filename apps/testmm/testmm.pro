@@ -3,9 +3,12 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -fvisibility=hidden
 
 QT += sql widgets multimedia printsupport
-CONFIG += qt debug_and_release link_pkgconfig c++11
+CONFIG += qt debug_and_release c++11
 
-PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
+#PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
+
+# Get gstreamer stuff from this file.
+include(../../habit.pri)
 
 CONFIG(debug, debug|release) {
 	DESTDIR = debug

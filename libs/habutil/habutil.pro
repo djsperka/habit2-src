@@ -12,15 +12,10 @@ CONFIG(debug, debug|release) {
 	DESTDIR = release
 }
 
-# Tell qmake to use pkg-config to find gstreamer.
-CONFIG += link_pkgconfig c++11
+# Get gstreamer stuff from this file.
+include(../../habit2.pri)
 
-PKGCONFIG += gstreamer-1.0
 QT += widgets
-
-# videotestsrc include files
-#INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
-INCLUDEPATH += /Users/dan/git/gst-plugins-base /Users/dan/git/gst-plugins-good
 
 HEADERS +=	HLook.h \
 			HLooker.h \
@@ -258,7 +253,6 @@ SOURCES +=	HLook.cpp \
 			hgst/HGMMException.cpp
 			
 			
-INCLUDEPATH += "/usr/local/include"
 
 RESOURCES = habit/resources.qrc
 

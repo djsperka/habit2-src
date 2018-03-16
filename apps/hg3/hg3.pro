@@ -4,19 +4,14 @@ TEMPLATE = app
 TARGET = hg3
 
 # need this for boost?
-INCLUDEPATH += 	"/usr/local/include" 
+#INCLUDEPATH += 	"/usr/local/include" 
 
-# produce nice compilation output
-#CONFIG += silent
+CONFIG += debug_and_release c++11
 
-# Tell qmake to use pkg-config to find QtGStreamer.
-CONFIG += debug_and_release link_pkgconfig c++11
+QT += sql widgets
 
-# need sql libs
-QT += sql
-
-PKGCONFIG += gstreamer-1.0
-QT += widgets
+# Get gstreamer stuff from this file.
+include(../../habit.pri)
 
 # Recommended, to avoid possible issues with the "emit" keyword
 # You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.
