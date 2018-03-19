@@ -7,7 +7,6 @@
 
 #include "HVideoWidget.h"
 #include <QMutexLocker>
-#include <gst/videotestsrc/gstvideotestsrc.h>
 #include <hgst/HStimPipeline.h>
 #include <hgst/HStaticStimPipeline.h>
 
@@ -220,11 +219,23 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 			GstElement *src, *sink, *convert;
 
 			/* Create the elements */
+
+#if 0
 			src = makeElement("videotestsrc", ppt, id());
 			Q_ASSERT(src);
 
 			g_object_set(G_OBJECT(src), "pattern", GST_VIDEO_TEST_SRC_SOLID, "foreground-color", info.getColor().rgba(), NULL);
-
+#else
+			GError *gerror = NULL;
+			QString s = QString("videotestsrc pattern=solid-color foreground-color=%1").arg(info.getColor().rgba());
+			src = gst_parse_bin_from_description(s.toStdString().c_str(), true, &gerror);
+			if (src == NULL || gerror != NULL)
+			{
+				qCritical() << "cannot create videotestsrc!";
+				return NULL;
+			}
+			Q_ASSERT(src);
+#endif
 			sink = makeElement("qwidget5videosink", ppt, id());
 			Q_ASSERT(sink);
 			convert = makeElement("videoconvert", ppt, id());

@@ -14,8 +14,6 @@
 #include "HG3Dialog.h"
 #include <hgst/HPipeline.h>
 #include <gst/gst.h>
-#include <gst/videotestsrc/gstvideotestsrc.h>
-#include <gst/audiotestsrc/gstaudiotestsrc.h>
 #include <hgst/HStimPipeline.h>
 
 #define MAX_INFO 5

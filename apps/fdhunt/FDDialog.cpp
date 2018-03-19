@@ -9,7 +9,6 @@
 #include "FDDialog.h"
 #include "FDHuntDialog.h"
 #include <gst/gst.h>
-#include <gst/videotestsrc/gstvideotestsrc.h>
 #include <QMutexLocker>
 #include <boost/bind.hpp>
 
@@ -312,10 +311,15 @@ PipelineData *FDDialog::createTestSrcSolidColorPipeline()
 	PipelineData *pdata = new PipelineData;
 
 	/* Create the elements */
-	src = gst_element_factory_make ("videotestsrc", "source");
+	GError *gerror = NULL;
+	QString s = QString("videotestsrc pattern=solid-color foreground-color=0xff808080");
+	src = gst_parse_bin_from_description(s.toStdString().c_str(), true, &gerror);
+	if (src == NULL || gerror != NULL)
+	{
+		qCritical() << "cannot create videotestsrc!";
+		return NULL;
+	}
 	Q_ASSERT(src);
-
-	g_object_set(G_OBJECT(src), "pattern", GST_VIDEO_TEST_SRC_SOLID, "foreground-color", QColor(Qt::magenta).rgba(), NULL);
 
 	sink = gst_element_factory_make ("qwidget5videosink", "sink");
 	Q_ASSERT(sink);

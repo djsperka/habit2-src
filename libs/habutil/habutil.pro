@@ -17,6 +17,10 @@ include(../../habit2.pri)
 
 QT += widgets
 
+# videotestsrc include files
+#INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
+#INCLUDEPATH += /Users/dan/git/gst-plugins-base /Users/dan/git/gst-plugins-good
+
 HEADERS +=	HLook.h \
 			HLooker.h \
 			HLookerReprocessor.h \
