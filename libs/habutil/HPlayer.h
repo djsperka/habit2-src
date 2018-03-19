@@ -12,7 +12,6 @@
 
 #include <QMap>
 #include <QDir>
-#include "HStimulusSource.h"
 #include "stimulusinfo.h"
 
 
