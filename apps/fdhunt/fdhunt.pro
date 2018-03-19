@@ -15,7 +15,7 @@ QT += widgets
 DEFINES += QT_NO_KEYWORDS
 
 # Get gstreamer stuff from this file.
-include(../../habit.pri)
+include(../../habit2.pri)
 
 
 CONFIG(debug, debug|release) {

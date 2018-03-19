@@ -2,7 +2,7 @@ TEMPLATE = lib
 CONFIG += qt debug_and_release plugin
 
 # Get gstreamer stuff from this file.
-include(../../habit.pri)
+include(../../habit2.pri)
 
 QT += widgets
 INCLUDEPATH += .

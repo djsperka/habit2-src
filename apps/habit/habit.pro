@@ -13,7 +13,7 @@ CONFIG += debug_and_release c++11
 QT += sql printsupport
 
 # Get gstreamer stuff from this file.
-include(../../habit.pri)
+include(../../habit2.pri)
 
 # Now tell qmake to link to gstreamer and also use its include path and Cflags.
 #PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0

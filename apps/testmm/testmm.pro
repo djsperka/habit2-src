@@ -8,7 +8,7 @@ CONFIG += qt debug_and_release c++11
 #PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
 
 # Get gstreamer stuff from this file.
-include(../../habit.pri)
+include(../../habit2.pri)
 
 CONFIG(debug, debug|release) {
 	DESTDIR = debug

@@ -11,7 +11,7 @@ CONFIG += debug_and_release c++11
 QT += sql widgets
 
 # Get gstreamer stuff from this file.
-include(../../habit.pri)
+include(../../habit2.pri)
 
 # Recommended, to avoid possible issues with the "emit" keyword
 # You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.
@@ -35,7 +35,7 @@ INCLUDEPATH += ../../libs/habutil
 INCLUDEPATH += ../../libs/habutil/habit ../../libs/habutil/hgst
 # use of enum for videotestsrc
 #INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
-#INCLUDEPATH += /Users/dan/git/gst-plugins-base /Users/dan/git/gst-plugins-good
+INCLUDEPATH += /Users/dan/git/gst-plugins-base /Users/dan/git/gst-plugins-good
 
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit 
 
