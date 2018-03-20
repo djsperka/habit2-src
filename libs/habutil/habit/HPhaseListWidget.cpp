@@ -129,7 +129,6 @@ int HPhaseListWidget::phaseCount()
 
 void HPhaseListWidget::phaseClicked()
 {
-	Q_UNUSED(index);
 	int i = selectedPhaseIndex();
 	int count = phaseCount();
 
