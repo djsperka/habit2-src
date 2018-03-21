@@ -15,7 +15,8 @@
                     /Users/dan/git/gst-plugins-good
 } else {
     CONFIG += c++11
-    LIBS += -Lc:/gstreamer/1.0/x86_64/lib -lglib-2.0 -lintl -Lc:/gstreamer/1.0/x86_64/lib -lgstreamer-1.0
+    LIBS += -Lc:/gstreamer/1.0/x86_64/lib -lgstreamer-1.0 -lglib-2.0 -lgobject-2.0 -lintl 
+#    LIBS += -lgstreamer-1.0 -lglib-2.0 -lintl 
     INCLUDEPATH +=  \
                     c:/gstreamer/1.0/x86_64/include/glib-2.0 \
                     c:/gstreamer/1.0/x86_64/lib/glib-2.0/include \
