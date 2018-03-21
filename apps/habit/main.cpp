@@ -364,6 +364,11 @@ int main(int argc, char *argv[])
 		qInfo() << "screen " << i << ": availableGeometry: " << QApplication::desktop()->availableGeometry(i);
 	}
 
+	// dump misc dirs
+	qInfo() << "DocumentsLocation: " << QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+	qInfo() << "GenericCache: " << QStandardPaths::standardLocations(QStandardPaths::GenericCacheLocation);
+	qInfo() << "GenericData: " << QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+
 	// Now show dialog and start event loop.
     w.show();
     int ii = h.exec();
