@@ -24,18 +24,25 @@ QT += widgets
 # You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.
 DEFINES += QT_NO_KEYWORDS
 
-
-# NO - this pulls in gstreamer in /usr/local 
-# LIBS += -L/usr/local/lib -lboost_filesystem -lboost_system
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
-	LIBS += -L../../libs/habutil/debug -lhabutil
-	PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
+	!win32 {
+		LIBS += -L../../libs/habutil/debug -lhabutil
+		PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
+	} else {
+		LIBS += -L../../libs/habutil/debug -lhabutil
+		PRE_TARGETDEPS += ../../libs/habutil/debug/habutil.lib
+	}
 	DEFINES += HABIT_DEBUG
 } else {
 	DESTDIR = release
-	LIBS += -L../../libs/habutil/release -lhabutil
-	PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
+	!win32 {
+		LIBS += -L../../libs/habutil/release -lhabutil
+		PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
+	} else {
+		LIBS += -L../../libs/habutil/release -lhabutil
+		PRE_TARGETDEPS += ../../libs/habutil/release/habutil.lib
+	}
 	DEFINES += HABIT_RELEASE
 }
 
