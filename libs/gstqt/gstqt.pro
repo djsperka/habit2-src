@@ -1,17 +1,17 @@
 TEMPLATE = lib
 CONFIG += qt debug_and_release plugin
 
-# Get gstreamer stuff from this file.
-include(../../habit2.pri)
-
 QT += widgets
 INCLUDEPATH += .
-LIBS += -lgstvideo-1.0 -lgstbase-1.0
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
 } else {
 	DESTDIR = release
 }
+
+# Get gstreamer stuff from this file.
+include(../../habit2.pri)
+LIBS += -lgstvideo-1.0 -lgstbase-1.0
 
 DEFINES += \
 			PACKAGE=\\\"qt-gstreamer\\\" \
