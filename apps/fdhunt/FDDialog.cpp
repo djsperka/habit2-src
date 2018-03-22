@@ -10,7 +10,6 @@
 #include "FDHuntDialog.h"
 #include <gst/gst.h>
 #include <QMutexLocker>
-#include <boost/bind.hpp>
 
 
 #define IMAGE_PNG_TIRE "/Users/dan/Desktop/habit22/stim/examples/images/tools/tire.png"
