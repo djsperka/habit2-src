@@ -235,6 +235,118 @@
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.688123796">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.688123796" moduleId="org.eclipse.cdt.core.settings" name="debug-windows">
+				<macros>
+					<stringMacro name="GST_ROOT" type="VALUE_PATH_ANY" value="/Library/Frameworks/GStreamer.framework/"/>
+					<stringMacro name="QT_ROOT" type="VALUE_TEXT" value="/Users/dan/Qt/5.9.1/clang_64"/>
+				</macros>
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildProperties="" description="" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.688123796" name="debug-windows" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.688123796." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.msvc.toolchain.dll.debug.157808730" name="Microsoft Visual C++" superClass="org.eclipse.cdt.msvc.toolchain.dll.debug">
+							<targetPlatform id="org.eclipse.cdt.msvc.targetPlatform.dll.debug.179557367" superClass="org.eclipse.cdt.msvc.targetPlatform.dll.debug"/>
+							<builder command="nmake" enabledIncrementalBuild="true" id="cdt.managedbuild.builder.gnu.cross.901909045" incrementalBuildTarget="debug" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<tool id="org.eclipse.cdt.msvc.cl.c.dll.debug.506669218" name="C Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.c.dll.debug">
+								<inputType id="org.eclipse.cdt.msvc.cl.inputType.c.1088539996" superClass="org.eclipse.cdt.msvc.cl.inputType.c"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.cl.dll.debug.818693376" name="C++ Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.dll.debug">
+								<option id="org.eclipse.cdt.msvc.cl.option.includes.137473752" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/hgst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtNetwork.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/indexer-includes}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0/include&quot;"/>
+								</option>
+								<inputType id="org.eclipse.cdt.msvc.cl.inputType.664643779" superClass="org.eclipse.cdt.msvc.cl.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.rc.dll.debug.747844771" name="Resource Compiler (rc)" superClass="org.eclipse.cdt.msvc.rc.dll.debug">
+								<inputType id="org.eclipse.cdt.msvc.rc.inputType.1667021540" superClass="org.eclipse.cdt.msvc.rc.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.link.dll.debug.1636487961" name="Linker (link)" superClass="org.eclipse.cdt.msvc.link.dll.debug">
+								<inputType id="org.eclipse.cdt.msvc.link.inputType.980394374" superClass="org.eclipse.cdt.msvc.link.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.lib.1698195707" name="Library Manager (lib)" superClass="org.eclipse.cdt.msvc.lib"/>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.688123796.1618149685">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.688123796.1618149685" moduleId="org.eclipse.cdt.core.settings" name="release-windows">
+				<macros>
+					<stringMacro name="GST_ROOT" type="VALUE_PATH_ANY" value="/Library/Frameworks/GStreamer.framework/"/>
+					<stringMacro name="QT_ROOT" type="VALUE_TEXT" value="/Users/dan/Qt/5.9.1/clang_64"/>
+				</macros>
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildProperties="" description="" id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.688123796.1618149685" name="release-windows" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.688123796.1618149685." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.msvc.toolchain.dll.debug.1279841650" name="Microsoft Visual C++" superClass="org.eclipse.cdt.msvc.toolchain.dll.debug">
+							<targetPlatform id="org.eclipse.cdt.msvc.targetPlatform.dll.debug.782175630" superClass="org.eclipse.cdt.msvc.targetPlatform.dll.debug"/>
+							<builder command="nmake" id="cdt.managedbuild.builder.gnu.cross.388634276" incrementalBuildTarget="release" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<tool id="org.eclipse.cdt.msvc.cl.c.dll.debug.779247750" name="C Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.c.dll.debug">
+								<inputType id="org.eclipse.cdt.msvc.cl.inputType.c.590300983" superClass="org.eclipse.cdt.msvc.cl.inputType.c"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.cl.dll.debug.1941345899" name="C++ Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.dll.debug">
+								<option id="org.eclipse.cdt.msvc.cl.option.includes.478013060" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/habit}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/wizards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/libs/habutil/hgst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtCore.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtGui.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtMacExtras.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtNetwork.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtPrintSupport.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtSql.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${QT_ROOT}/lib/QtWidgets.framework/Versions/Current/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/habit2/indexer-includes}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${GST_ROOT}/Versions/1.0/lib/glib-2.0/include&quot;"/>
+								</option>
+								<inputType id="org.eclipse.cdt.msvc.cl.inputType.789086913" superClass="org.eclipse.cdt.msvc.cl.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.rc.dll.debug.1587606514" name="Resource Compiler (rc)" superClass="org.eclipse.cdt.msvc.rc.dll.debug">
+								<inputType id="org.eclipse.cdt.msvc.rc.inputType.795610666" superClass="org.eclipse.cdt.msvc.rc.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.link.dll.debug.988327467" name="Linker (link)" superClass="org.eclipse.cdt.msvc.link.dll.debug">
+								<inputType id="org.eclipse.cdt.msvc.link.inputType.644791746" superClass="org.eclipse.cdt.msvc.link.inputType"/>
+							</tool>
+							<tool id="org.eclipse.cdt.msvc.lib.1606034285" name="Library Manager (lib)" superClass="org.eclipse.cdt.msvc.lib"/>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="habit2.null.805754341" name="habit2"/>
@@ -245,6 +357,7 @@
 		<configuration configurationName="release">
 			<resource resourceType="PROJECT" workspacePath="/habit2"/>
 		</configuration>
+		<configuration configurationName="debug-windows"/>
 		<configuration configurationName="Default">
 			<resource resourceType="PROJECT" workspacePath="/habit2"/>
 		</configuration>
