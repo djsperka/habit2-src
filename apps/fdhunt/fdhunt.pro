@@ -20,18 +20,27 @@ include(../../habit2.pri)
 
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
-	LIBS += -L../../libs/habutil/debug -lhabutil
-	PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
-	#QMAKE_POST_LINK = ./uip.sh debug
+	!win32 {
+		LIBS += -L../../libs/habutil/debug -lhabutil
+		PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
+	} else {
+		LIBS += -L../../libs/habutil/debug -lhabutil
+		PRE_TARGETDEPS += ../../libs/habutil/debug/habutil.lib
+	}
+	DEFINES += HABIT_DEBUG
 } else {
 	DESTDIR = release
-	LIBS += -L../../libs/habutil/release -lhabutil
-	PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
-	#QMAKE_POST_LINK = ./uip.sh release
+	!win32 {
+		LIBS += -L../../libs/habutil/release -lhabutil
+		PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
+	} else {
+		LIBS += -L../../libs/habutil/release -lhabutil
+		PRE_TARGETDEPS += ../../libs/habutil/release/habutil.lib
+	}
+	DEFINES += HABIT_RELEASE
 }
 
-INCLUDEPATH += 	../../libs/habutil \
-				../../libs/habutil/habit \
+INCLUDEPATH += 	../../libs/habutil/habit \
 				../../libs/habutil/hgst
 # use of enum for videotestsrc
 #INCLUDEPATH += /Users/dan/install/include/gst-plugins-base-1.12.1
