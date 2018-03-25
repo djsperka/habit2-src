@@ -150,8 +150,7 @@ int main(int argc, char *argv[])
 
 
 	bool bFileLogPending = true;
-#define TRY_PARSER
-#ifdef TRY_PARSER
+
 	// create application
     HApplication h(argc, &argv);
 	h.setApplicationVersion(HABIT_VERSION);
@@ -196,60 +195,6 @@ int main(int argc, char *argv[])
 	bStimInDialog = parser.isSet("z");
 	bNotInstalled = parser.isSet("n");
 
-#else
-    	qDebug() << "not trying parser";
-
-	// Default is to always have log file.
-	for (i=0; i<argc; i++)
-	{
-		if (!strcmp(argv[i], "-s"))
-		{
-			f_bScreenLog = true;
-		}
-		else if (!strcmp(argv[i], "-f"))
-		{
-			bFileLogPending = true;
-		}
-		else if (!strcmp(argv[i], "-x"))
-		{
-			habutilClearWorkspace();
-		}
-		else if (!strcmp(argv[i], "-w"))
-		{
-			// TODO - maybe tell user they need to supply a directory?
-			if (i < (argc-1))
-			{
-				bPendingWorkspace = true;
-				sPendingWorkspace = argv[i+1];
-				i++;
-			}
-		}
-		else if (!strcmp(argv[i], "-D"))
-		{
-			bDBUpdateOnly = true;
-		}
-		else if (!strcmp(argv[i], "-T"))
-		{
-			bTestRunIsDefault = true;
-		}
-		else if (!strcmp(argv[i], "-t"))
-		{
-			bShowTestingIcon = true;
-		}
-		else if (!strcmp(argv[i], "-e"))
-		{
-			bEditTemplates = true;
-		}
-		else if (!strcmp(argv[i], "-z"))
-		{
-			bStimInDialog = true;
-		}
-		else if (!strcmp(argv[i], "-n"))
-		{
-			bNotInstalled = true;
-		}
-	}
-#endif
 
 
 	// Debug  builds (HABIT_DEBUG) use system-defined gstreamer libs.
