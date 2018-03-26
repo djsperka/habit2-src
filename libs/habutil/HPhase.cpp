@@ -168,8 +168,7 @@ void HPhase::requestCurrentStim()
 
 void HPhase::requestAG()
 {
-	// TODO: createMediaManager should ensure that position 0 is always ag or a blank screen. 
-	// config should ensure that trials with no ag configured will not request stim(0). 
+	// TODO config should ensure that trials with no ag configured will not request stim(0).
 	
 	eventLog().append(new HAGRequestEvent(HElapsedTimer::elapsed()));
 	experiment().getMediaManager().ag();
