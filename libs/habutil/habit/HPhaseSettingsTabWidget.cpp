@@ -60,7 +60,6 @@ HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& ph
 
 HPhaseSettingsTabWidget::~HPhaseSettingsTabWidget()
 {
-	// TODO Auto-generated destructor stub
 }
 
 Habit::HPhaseSettings HPhaseSettingsTabWidget::getPhaseSettings()

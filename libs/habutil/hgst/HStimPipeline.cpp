@@ -40,7 +40,6 @@ HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const QD
 
 HStimPipeline::~HStimPipeline()
 {
-	// TODO Auto-generated destructor stub
 }
 
 GstElement *HStimPipelineSource::pipeline()

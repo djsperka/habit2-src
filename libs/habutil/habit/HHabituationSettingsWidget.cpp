@@ -26,8 +26,8 @@ HHabituationSettingsWidget::HHabituationSettingsWidget(const Habit::HabituationS
 	connect(m_pTypeWidget, SIGNAL(currentIndexChanged(int)), m_pCriteriaWidget, SLOT(setCurrentIndex(int)));
 }
 
-HHabituationSettingsWidget::~HHabituationSettingsWidget() {
-	// TODO Auto-generated destructor stub
+HHabituationSettingsWidget::~HHabituationSettingsWidget()
+{
 }
 
 Habit::HabituationSettings HHabituationSettingsWidget::getHabituationSettings()

@@ -16,7 +16,6 @@ HGMMException::HGMMException(const std::string& reason)
 
 HGMMException::~HGMMException()
 {
-	// TODO Auto-generated destructor stub
 }
 
 
