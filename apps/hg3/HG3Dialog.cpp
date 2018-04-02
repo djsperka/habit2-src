@@ -133,7 +133,7 @@ QWidget *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, cons
 
 	//m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), HStimPipelineFactory);
 	m_pmm = &HGMM::instance();
-	m_pmm->reset(m_pVideoWidgetCenter, true, sdi.getBackGroundColor(), dirStimRoot);
+	m_pmm->reset(m_pVideoWidgetCenter, sdi, dirStimRoot);
 	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
 	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
@@ -273,7 +273,7 @@ QWidget *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QD
 
 	// NOTE: skipping ISS below.
 	m_pmm = &HGMM::instance();
-	m_pmm->reset(m_pVideoWidgetLeft, m_pVideoWidgetRight, true, sdi.getBackGroundColor(), dirStimRoot);
+	m_pmm->reset(m_pVideoWidgetLeft, m_pVideoWidgetRight, sdi, dirStimRoot);
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetLeft->getHVideoWidget(), SLOT(stimulusChanged()));
