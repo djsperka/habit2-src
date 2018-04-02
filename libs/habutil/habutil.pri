@@ -26,7 +26,6 @@ HEADERS +=	HLook.h \
 			HPhase.h \
 			HElapsedTimer.h \
 			HPlayer.h \
-			HNonPlayer.h \
 			HStimulusSource.h \
 			HImageWidget.h \
 			HMediaManager.h \
@@ -72,7 +71,6 @@ SOURCES +=	HLook.cpp \
 			HPhase.cpp \
 			HElapsedTimer.cpp \
 			HPlayer.cpp \
-			HNonPlayer.cpp \
 			HStimulusSource.cpp \
 			HImageWidget.cpp \
 			HMediaManager.cpp \
