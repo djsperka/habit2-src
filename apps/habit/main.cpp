@@ -253,16 +253,6 @@ int main(int argc, char *argv[])
 	// Initialize gstreamer
 	gst_init (&argc, &argv);
 
-#ifndef TRY_PARSER
-	// create application
-    HApplication h(argc, &argv);
-	h.setApplicationVersion(HABIT_VERSION);
-	h.setApplicationName("habit2");
-	h.setOrganizationName("Infant Cognition Lab");
-	h.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
-	qDebug() << "args " << h.arguments();
-#endif
-
 	// Open a workspace. The workspace is a folder containing "habit.sqlite" and three folders:
 	// "results", "log" and "stim". This MUST be called AFTER the organization name is set in the QApplication
 	// object, otherwise the settings file is not found.
