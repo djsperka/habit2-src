@@ -86,7 +86,13 @@ namespace GUILib
 
 		if (field("FamPref").toBool())
 		{
-			ps.setHabituationSettings(wpHabit0->getHabituationSettings());
+			// IN this case, the only setting needed is the ntrials spin box from PhaseWPTrials
+			Habit::HabituationSettings hs;
+			hs.setHabituationType(HHabituationType::HHabituationTypeFixedN);
+			hs.setNTrials(field("famNTrials").toInt());
+			ps.setHabituationSettings(hs);
+			qDebug() << "FamPref habituation settings";
+			qDebug() << ps.habituationSettings();
 		}
 		else
 		{
@@ -109,6 +115,8 @@ namespace GUILib
 	, ui(new Ui::PhaseWPFirst)
 	, m_phaseNames(phaseNames)
 	{
+		qDebug() << "PhaseWPFirst()";
+
 		ui->setupUi(this);
 
 		// default selection is familiarization/preference
@@ -175,11 +183,14 @@ namespace GUILib
 	: QWizardPage(parent)
 	, ui(new Ui::PhaseWPTrial)
 	{
+		qDebug() << "PhaseWPTrial()";
+
 		ui->setupUi(this);
 		ui->leMaxStimulusTime->setValidator(new QIntValidator(1, 1000000));
 		ui->leMaxAccumulatedLookTime->setValidator(new QIntValidator(1, 1000000));
 
 		// register fields
+		registerField("famNTrials", ui->spinBoxNTrials);
 		registerField("isMaxAccumulatedLookTime", ui->cbMaxAccumulatedLookTime);
 		registerField("MaxAccumulatedLookTime", ui->leMaxAccumulatedLookTime);
 		registerField("isMaxStimulusTime", ui->cbMaxStimulusTime);
@@ -230,79 +241,7 @@ namespace GUILib
 		return b;
 	}
 
-
 #if 0
-	//dddddd
-	PhaseWPTrialSettings::PhaseWPTrialSettings(QWidget* parent)
-	: QWizardPage(parent)
-	, ui(new Ui::PhaseWPTrialSettings)
-	{
-		ui->setupUi(this);
-		ui->leMaxStimulusTime->setValidator(new QIntValidator(1, 1000000));
-		ui->leMinLookingTime->setValidator(new QIntValidator(1, 1000000));
-
-		// register fields
-
-	}
-
-	int PhaseWPTrialSettings::nextId() const
-	{
-		if (field("FamPref").toBool()) return pageHabit0;
-		else
-		{
-			if (field("HabReduction").toBool())
-				return pageHabit1;
-			else
-				return pageHabit2;
-		}
-	}
-	bool PhaseWPTrialSettings::validatePage()
-	{
-		bool b = true;
-		if (!ui->gbMaxStimulusTime->isChecked() && !ui->gbMinLookingTime->isChecked()) b = false;
-		else
-		{
-			// One of the two is checked.
-			if (ui->gbMinLookingTime->isChecked() && !ui->gbMaxStimulusTime->isChecked())
-			{
-				b = (QMessageBox::Yes == QMessageBox::warning(this, "Are you sure?", "You have specified minimum looking time, but you have not specified a maximum stimulus time. If your subject does not look at the stimulus, your trial(s) may never end! Are you sure you want to create a new phase without specifying a maximum stimulus time?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No));
-			}
-		}
-		return b;
-	}
-
-
-	bool PhaseWPTrialSettings::isMaxAccumulatedLookTime()
-	{
-		return ui->gbMinLookingTime->isChecked();
-	}
-
-	int PhaseWPTrialSettings::getMaxAccumulatedLookTime()
-	{
-		return ui->leMinLookingTime->text().toInt();
-	}
-
-	bool PhaseWPTrialSettings::isMaxStimulusTime()
-	{
-		return ui->gbMaxStimulusTime->isChecked();
-	}
-
-	int PhaseWPTrialSettings::getMaxStimulusTime()
-	{
-		return ui->leMaxStimulusTime->text().toInt();
-	}
-
-	bool PhaseWPTrialSettings::getMeasureStimulusTimeFromOnset()
-	{
-		return ui->rbMeasuredFromStimulusOnset->isChecked();
-	}
-
-	bool PhaseWPTrialSettings::getMeasureStimulusTimeFromLooking()
-	{
-		return ui->rbMeasuredFromInitialLooking->isChecked();
-	}
-#endif
-
 	PhaseWPHabituation::PhaseWPHabituation(QWidget *parent)
 	: QWizardPage(parent)
 	, ui(new Ui::PhaseWPHabituation)
@@ -318,14 +257,16 @@ namespace GUILib
 		else
 			return pageHabit2;
 	}
-
+#endif
 
 	PhaseWPHabit0::PhaseWPHabit0(QWidget *p)
 	: QWizardPage(p)
 	{
+		qDebug() << "PhaseWPHabit0()";
 		setTitle("Familiarization/Preference type phase");
 		setSubTitle("Specify the number of trials for this phase.");
-		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget();
+		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget(5);
+		m_pCriteriaWidget->setCurrentIndex(1);
 		m_pCriteriaWidget->setCurrentIndex(0);
 		QVBoxLayout *vbox = new QVBoxLayout;
 		vbox->addWidget(m_pCriteriaWidget);
@@ -336,6 +277,7 @@ namespace GUILib
 	{
 		Habit::HabituationSettings hs(HHabituationType::HHabituationTypeFixedN);
 		hs.setNTrials(m_pCriteriaWidget->getNTrials());
+		qDebug() << "PhaseWPHabit0::getHabituationSettings() - m_pCriteriaWidget->getNTrials() " << m_pCriteriaWidget->getNTrials();
 		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
 		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
 		return hs;
@@ -344,6 +286,7 @@ namespace GUILib
 	PhaseWPHabit1::PhaseWPHabit1(QWidget *p)
 	: QWizardPage(p)
 	{
+		qDebug() << "PhaseWPHabit1()";
 		setTitle("Habituation by looking time reduction");
 		setSubTitle("Specify the maximum number of trials, window type, percentage, and window size.");
 		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget();
@@ -357,6 +300,7 @@ namespace GUILib
 	{
 		Habit::HabituationSettings hs(HHabituationType::HHabituationTypeCriterion);
 		hs.setNTrials(m_pCriteriaWidget->getNTrials());
+		qDebug() << "PhaseWPHabit1::getHabituationSettings() - m_pCriteriaWidget->getNTrials() " << m_pCriteriaWidget->getNTrials();
 		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
 		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
 		return hs;
@@ -365,6 +309,7 @@ namespace GUILib
 	PhaseWPHabit2::PhaseWPHabit2(QWidget *p)
 	: QWizardPage(p)
 	{
+		qDebug() << "PhaseWPHabit2()";
 		setTitle("Habituation by cumulative looking time");
 		setSubTitle("Specify the maximum number of trials, and total looking time required for habituation.");
 		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget();
@@ -378,6 +323,7 @@ namespace GUILib
 	{
 		Habit::HabituationSettings hs(HHabituationType::HHabituationTypeTotalLookingTime);
 		hs.setNTrials(m_pCriteriaWidget->getNTrials());
+		qDebug() << "PhaseWPHabit2::getHabituationSettings() - m_pCriteriaWidget->getNTrials() " << m_pCriteriaWidget->getNTrials();
 		hs.setTotalLookLengthToEnd(m_pCriteriaWidget->getTotalLookLength());
 		hs.setCriterionSettings(m_pCriteriaWidget->getCriterionSettings());
 		return hs;

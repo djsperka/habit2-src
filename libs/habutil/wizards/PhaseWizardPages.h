@@ -80,49 +80,6 @@ namespace GUILib
 
 	};
 
-#if 0
-	class PhaseWPFamPref : public QWizardPage
-	{
-		Q_OBJECT
-
-	public:
-		PhaseWPFamPref(QWidget* w = 0);
-		~PhaseWPFamPref() {};
-		int nextId() const { return -1; } // final button activated
-		bool validatePage();
-		bool isMaxAccumulatedLookTime();
-		int getMaxAccumulatedLookTime();
-		bool isMaxStimulusTime();
-		int getMaxStimulusTime();
-		bool getMeasureStimulusTimeFromOnset();
-		bool getMeasureStimulusTimeFromLooking();
-		int getNTrials();
-
-	private:
-		Ui::PhaseWPFamPref *ui;
-
-	};
-
-	class PhaseWPTrialSettings : public QWizardPage
-	{
-		Q_OBJECT
-
-	public:
-		PhaseWPTrialSettings(QWidget* w = 0);
-		~PhaseWPTrialSettings() {};
-		int nextId() const;
-		bool validatePage();
-		bool isMaxAccumulatedLookTime();
-		int getMaxAccumulatedLookTime();
-		bool isMaxStimulusTime();
-		int getMaxStimulusTime();
-		bool getMeasureStimulusTimeFromOnset();
-		bool getMeasureStimulusTimeFromLooking();
-	private:
-		Ui::PhaseWPTrialSettings *ui;
-
-	};
-#endif
 
 	class PhaseWPTrial : public QWizardPage
 	{
@@ -139,7 +96,7 @@ namespace GUILib
 
 	};
 
-
+#if 0
 	class PhaseWPHabituation : public QWizardPage
 	{
 		Q_OBJECT
@@ -153,6 +110,7 @@ namespace GUILib
 		Ui::PhaseWPHabituation *ui;
 
 	};
+#endif
 
 	class PhaseWPHabit0 : public QWizardPage
 	{

@@ -52,7 +52,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="spinNTrials">
+         <widget class="QSpinBox" name="spinBoxNTrials">
           <property name="minimum">
            <number>1</number>
           </property>
