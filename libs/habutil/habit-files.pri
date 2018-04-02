@@ -152,6 +152,6 @@ SOURCES += \
  	habit/HPhaseSettingsForm.ui \
  	habit/HHabituationSetupForm.ui \
  	habit/HHabituationTypeWidget.ui \
- 	habit/HHabituationCriteriaWidget.ui \
+ 	habit/HHabituationCriteriaForm.ui \
  	habit/GlobalPreferencesDialog.ui
  
