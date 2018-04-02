@@ -62,6 +62,13 @@ QDataStream & Habit::operator<< (QDataStream& stream, Habit::StimulusDisplayInfo
 	return stream;
 }
 
+QDebug Habit::operator<<(QDebug dbg, const Habit::StimulusDisplayInfo& info)
+{
+	dbg.space() << "LayoutType:" << info.getStimulusLayoutType().name() << " ISS: " << info.getUseISS() << " DisplayType: " << info.getDisplayType().name() << " preserve aspect:" << info.isOriginalAspectRatioMaintained() << " Background: " << info.getBackGroundColor() << " style(unused): " << info.getPresentationStyle().name();
+	return dbg.space();
+}
+
+
 QDataStream & Habit::operator>> (QDataStream& stream, Habit::StimulusDisplayInfo& d)
 {
 	int id, istyle, itype, ilayout;

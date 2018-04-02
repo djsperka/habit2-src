@@ -5,8 +5,9 @@
 /// \file stimulusdisplayinfo.h
 /// \brief Declaraction of class Habit::StimulusDisplayInfo
 
-#include <QtGui/QColor>
 #include "HTypes.h"
+#include <QColor>
+#include <QMetaType>
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -50,11 +51,15 @@ private:
 	bool useISS_;
 };
 
+
 QDataStream & operator<< (QDataStream& stream, Habit::StimulusDisplayInfo d);
 QDataStream & operator>> (QDataStream& stream, Habit::StimulusDisplayInfo& d);
+QDebug operator<<(QDebug dbg, const Habit::StimulusDisplayInfo& info);
 bool operator==(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs);
 
 
 } //namespace Habit
+
+Q_DECLARE_METATYPE(Habit::StimulusDisplayInfo);
 
 #endif // HABIT_STIMULUS_DISPLAY_INFO_H
