@@ -9,7 +9,6 @@
 #include "HWorkspaceUtil.h"
 #include "ui_HStimulusInfoForm.h"
 #include <QtDebug>
-#include <QSettings>
 #include <QFileDialog>
 #include <QColorDialog>
 
@@ -64,6 +63,7 @@ void GUILib::HStimulusInfoWidget::initialize()
 Habit::StimulusInfo GUILib::HStimulusInfoWidget::getStimulusInfo()
 {
 	Habit::StimulusInfo info;
+	info.setId(m_info.getId());
 	info.setFileName(ui->lineeditFileBase->text());
 	info.setVolume(ui->sliderVolume->value());
 	info.setLoopPlayBack(ui->checkboxLoop->isChecked());
