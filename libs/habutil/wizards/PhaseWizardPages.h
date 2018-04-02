@@ -71,8 +71,6 @@ namespace GUILib
 		int nextId() const;
 		bool validatePage();
 		QString getName();
-		bool getIsFamPrefType();	// this will set habituation type to FixedN
-		bool getIsHabType();		// this means habituation type is criterion or totalLookTime
 
 	private:
 		Ui::PhaseWPFirst *ui;

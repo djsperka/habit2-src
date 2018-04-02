@@ -84,7 +84,7 @@ namespace GUILib
 			ps.setIsMaxStimulusTime(false);
 		}
 
-		if (field("FamPref").toBool())
+		if (field("FixedNumber").toBool())
 		{
 			// IN this case, the only setting needed is the ntrials spin box from PhaseWPTrials
 			Habit::HabituationSettings hs;
@@ -94,16 +94,15 @@ namespace GUILib
 			qDebug() << "FamPref habituation settings";
 			qDebug() << ps.habituationSettings();
 		}
-		else
+
+		if (field("CriterionToEnd").toBool())
 		{
-			if (field("HabReduction").toBool())
-			{
-				ps.setHabituationSettings(wpHabit1->getHabituationSettings());
-			}
-			else
-			{
-				ps.setHabituationSettings(wpHabit2->getHabituationSettings());
-			}
+			ps.setHabituationSettings(wpHabit1->getHabituationSettings());
+		}
+
+		if (field("TotalLookingTime").toBool())
+		{
+			ps.setHabituationSettings(wpHabit2->getHabituationSettings());
 		}
 		return ps;
 	}
@@ -119,25 +118,19 @@ namespace GUILib
 
 		ui->setupUi(this);
 
-		// default selection is familiarization/preference
-		ui->rbFamiliarizationPreference->setChecked(true);
-
 		// validator for phase name
 		ui->lePhaseName->setValidator(new HNameValidator());
 
-		// connect rbHabituation with gbHabituation enabled state
-		connect(ui->rbHabituation, SIGNAL(toggled(bool)), ui->gbHabituationType, SLOT(setEnabled(bool)));
-
 		// register field for completeness
 		registerField("PhaseName*", ui->lePhaseName);
-		registerField("FamPref", ui->rbFamiliarizationPreference);
-		registerField("Habituation", ui->rbHabituation);
-		registerField("HabReduction", ui->rbHabReduction);
-		registerField("HabAccum", ui->rbHabAccum);
+		registerField("FixedNumber", ui->rbFixedNumber);
+		registerField("CriterionToEnd", ui->rbCriterionToEnd);
+		registerField("TotalLookingTime", ui->rbTotalLookingTime);
 
-		ui->rbFamiliarizationPreference->setChecked(true);
-		ui->rbHabReduction->setChecked(true);
-		ui->gbHabituationType->setEnabled(false);
+		// default selection is fixed number
+		ui->rbFixedNumber->setChecked(true);
+		ui->rbCriterionToEnd->setChecked(false);
+		ui->rbTotalLookingTime->setChecked(false);
 
 	}
 
@@ -169,16 +162,6 @@ namespace GUILib
 		return ui->lePhaseName->text().trimmed();
 	}
 
-	bool PhaseWPFirst::getIsFamPrefType()
-	{
-		return ui->rbFamiliarizationPreference->isChecked();
-	}
-
-	bool PhaseWPFirst::getIsHabType()
-	{
-		return ui->rbHabituation->isChecked();
-	}
-
 	PhaseWPTrial::PhaseWPTrial(QWidget* parent)
 	: QWizardPage(parent)
 	, ui(new Ui::PhaseWPTrial)
@@ -201,26 +184,30 @@ namespace GUILib
 
 	int PhaseWPTrial::nextId() const
 	{
-		if (field("FamPref").toBool()) return -1;
+		if (field("FixedNumber").toBool())
+		{
+			return -1;
+		}
+		else if (field("CriterionToEnd").toBool())
+		{
+			return pageHabit1;
+		}
 		else
 		{
-			if (field("HabReduction").toBool())
-				return pageHabit1;
-			else
-				return pageHabit2;
+			return pageHabit2;
 		}
 	}
 
 	void PhaseWPTrial::initializePage()
 	{
 		// In habituation type trials, hide the "Number of Trials" spinbox
-		if (field("Habituation").toBool())
+		if (field("FixedNumber").toBool())
 		{
-			ui->frameNTrials->hide();
+			ui->frameNTrials->show();
 		}
 		else
 		{
-			ui->frameNTrials->show();
+			ui->frameNTrials->hide();
 		}
 	}
 
@@ -266,7 +253,7 @@ namespace GUILib
 		setTitle("Familiarization/Preference type phase");
 		setSubTitle("Specify the number of trials for this phase.");
 		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget(5);
-		m_pCriteriaWidget->setCurrentIndex(1);
+		//m_pCriteriaWidget->setCurrentIndex(1);
 		m_pCriteriaWidget->setCurrentIndex(0);
 		QVBoxLayout *vbox = new QVBoxLayout;
 		vbox->addWidget(m_pCriteriaWidget);
