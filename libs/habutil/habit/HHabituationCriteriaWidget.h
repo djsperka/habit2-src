@@ -8,13 +8,13 @@
 #ifndef HHABITUATIONCRITERIAWIDGET_H_
 #define HHABITUATIONCRITERIAWIDGET_H_
 
-#include "ui_HHabituationCriteriaWidget.h"
 #include "HTypes.h"
 #include "criterionsettings.h"
+#include <QStackedWidget>
 
 namespace Ui
 {
-	class HHabituationCriteriaWidget;
+	class HHabituationCriteriaForm;
 };
 
 
@@ -31,7 +31,12 @@ namespace GUILib
 		int getTotalLookLength();
 		const Habit::CriterionSettings getCriterionSettings();
 	private:
-		Ui::HHabituationCriteriaWidget *ui;
+		Ui::HHabituationCriteriaForm *ui;
+
+	public Q_SLOTS:
+		void spinBoxHabValueChanged(int n);
+		void spinBoxNTrialsValueChanged(int n);
+		void spinBoxLookValueChanged(int n);
 	};
 };
 
