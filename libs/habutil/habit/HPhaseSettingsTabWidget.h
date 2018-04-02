@@ -40,8 +40,10 @@ signals:
 	void phaseEnabledClicked(bool);
 	void stimulusLayoutTypeChanged(int);
 
-private slots:
+public slots:
 	void phaseNameTextChanged(const QString& s);
+	void stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo& info);
+
 
 };
 

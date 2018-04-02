@@ -87,4 +87,10 @@ void HPhaseSettingsTabWidget::phaseNameTextChanged(const QString& text)
     m_plineeditPhaseName->adjustSize();
 }
 
+void HPhaseSettingsTabWidget::stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo& info)
+{
+	qDebug() << "HPhaseSettingsTabWidget::stimulusDisplayInfoChanged:";
+	qDebug() << info;
+}
+
 } /* namespace Habit */

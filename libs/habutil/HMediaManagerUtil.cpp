@@ -91,7 +91,7 @@ HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth,
 		HStimulusWidget *pSingle = new HStimulusWidget(sdi, screenWidth, screenHeight);
 		//pmm = new HGMM(pSingle, rootDir, sdi.getUseISS(), sdi.getBackGroundColor(), HStimPipelineFactory);
 		pmm = &HGMM::instance();
-		pmm->reset(pSingle, sdi.getUseISS(), sdi.getBackGroundColor(), rootDir);
+		pmm->reset(pSingle, sdi, rootDir);
 	}
 	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
@@ -99,7 +99,7 @@ HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth,
 		HStimulusWidget *pRight = new HStimulusWidget(sdi, screenWidth, screenHeight);
 		//pmm = new HGMM(pLeft, pRight, rootDir, sdi.getUseISS(), sdi.getBackGroundColor(), HStimPipelineFactory);
 		pmm = &HGMM::instance();
-		pmm->reset(pLeft, pRight, sdi.getUseISS(), sdi.getBackGroundColor(), rootDir);
+		pmm->reset(pLeft, pRight, sdi, rootDir);
 	}
 	else
 	{

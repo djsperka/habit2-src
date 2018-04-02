@@ -28,12 +28,10 @@ HStimPipelineSource::~HStimPipelineSource()
 
 }
 
-HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent)
-: HPipeline(id, ss, parent)
+HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, QObject *parent)
+: HPipeline(id, ss, info, parent)
 , m_bInitialized(false)
 , m_dirStimRoot(stimRoot)
-, m_stimulusLayoutType(layoutType)
-, m_bISS(bISS)
 , bInitialFlushingSeekDone(false)
 {
 }
@@ -118,7 +116,6 @@ void HStimPipeline::detachWidgetsFromSinks()
 	attachWidgetsToSinks(NULL, NULL);
 }
 
-
 void HStimPipeline::cleanup()
 {
 	// cleanup
@@ -156,12 +153,12 @@ void HStimPipeline::initialize()
 
 	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		m_mapPipelineSources.insert(HPlayerPositionType::Center, addStimulusInfo(HPlayerPositionType::Center, stimulusSettings().getCenterStimulusInfo(), !m_bISS));
+		m_mapPipelineSources.insert(HPlayerPositionType::Center, addStimulusInfo(HPlayerPositionType::Center, stimulusSettings().getCenterStimulusInfo(), !iss()));
 	}
 	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		m_mapPipelineSources.insert(HPlayerPositionType::Left, addStimulusInfo(HPlayerPositionType::Left, stimulusSettings().getLeftStimulusInfo(), !m_bISS));
-		m_mapPipelineSources.insert(HPlayerPositionType::Right, addStimulusInfo(HPlayerPositionType::Right, stimulusSettings().getRightStimulusInfo(), !m_bISS));
+		m_mapPipelineSources.insert(HPlayerPositionType::Left, addStimulusInfo(HPlayerPositionType::Left, stimulusSettings().getLeftStimulusInfo(), !iss()));
+		m_mapPipelineSources.insert(HPlayerPositionType::Right, addStimulusInfo(HPlayerPositionType::Right, stimulusSettings().getRightStimulusInfo(), !iss()));
 	}
 	if (iss() && !stimulusSettings().getIndependentSoundInfo().getFileName().trimmed().isEmpty())
 	{
@@ -175,6 +172,8 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 	QMutexLocker locker(mutex());
 
 	HStimPipelineSource *pStimPipelineSource = new HStimPipelineSource(this);
+
+	qDebug() << "addStimulusInfo ppt " << ppt.name() << " info " << info;
 
 	if (ppt == HPlayerPositionType::Sound)
 	{
@@ -782,13 +781,13 @@ void HStimPipeline::dump()
 
 }
 
-HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool, bool bISS, bool bStatic, QObject *parent)
+HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, bool bStatic, QObject *parent)
 {
 	HPipeline *p;
 	if (bStatic)
-		p = new HStaticStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
+		p = new HStaticStimPipeline(id, stimulusSettings, info, stimRoot, parent);
 	else
-		p = new HStimPipeline(id, stimulusSettings, stimRoot, layoutType, bISS, parent);
+		p = new HStimPipeline(id, stimulusSettings, info, stimRoot, parent);
 	return p;
 }
 

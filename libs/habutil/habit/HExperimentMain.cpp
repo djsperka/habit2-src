@@ -49,6 +49,9 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 	connections();
 	setWindowTitle(QString("Edit Experiment Settings: %1").arg(m_settings.getName()));
 
+	// save sdi stuff
+	m_oldStimulusDisplayInfo = m_settings.getStimulusDisplayInfo();
+
 	// this dialog is read-only when used to view results, e.g.
 	m_pbSave->setDisabled(bReadOnly);
 }
@@ -74,7 +77,7 @@ void HExperimentMain::components()
 
 	// Stimulus display info
 	m_pStimulusDisplayInfoWidget = new HStimulusDisplayInfoWidget(m_settings.getStimulusDisplayInfo());
-	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pStimulusDisplayInfoWidget));
+	m_vecStackPages.append(m_sdiPageIndex = m_pPagesWidget->addWidget(m_pStimulusDisplayInfoWidget));
 
 	// control bar options
 	m_pControlBarOptionsForm = new ControlBarOptionsForm(m_settings.getControlBarOptions());
@@ -101,7 +104,7 @@ void HExperimentMain::components()
 		m_pPagesWidget->addWidget(pTabWidget);
 		connect(pTabWidget, SIGNAL(phaseNameChanged(const QString&)), m_pPhaseListWidget, SLOT(phaseNameChanged(const QString&)));
 		connect(pTabWidget, SIGNAL(phaseEnabledClicked(bool)), m_pPhaseListWidget, SLOT(phaseEnabledClicked(bool)));
-		connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), pTabWidget, SIGNAL(stimulusLayoutTypeChanged(int)));
+		//connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), pTabWidget, SIGNAL(stimulusLayoutTypeChanged(int)));
 	}
 
 	QVBoxLayout *vboxContents = new QVBoxLayout;
@@ -134,7 +137,6 @@ void HExperimentMain::components()
     setWindowTitle(QString("Experiment Settings"));
 }
 
-
 void HExperimentMain::connections()
 {
 	connect(m_pGeneralListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(generalListViewItemClicked(const QModelIndex&)));
@@ -148,7 +150,37 @@ void HExperimentMain::connections()
 	connect(m_pPhaseListWidget, SIGNAL(upPhase()), this, SLOT(upPhase()));
 	connect(m_pPhaseListWidget, SIGNAL(downPhase()), this, SLOT(downPhase()));
 
-	connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pAttentionSetupForm, SLOT(stimulusLayoutTypeChanged(int)));
+	//connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pAttentionSetupForm, SLOT(stimulusLayoutTypeChanged(int)));
+	//connect(this, SIGNAL(stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo&)), m_pAttentionSetupForm, SLOT(stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo&)));
+
+	// connect stack widget's currentCjhanged to a slot to look for changes on previous page
+	// used for checking changes in stimulus displauy info
+	//connect(m_pPagesWidget, SIGNAL(currentChanged(int)), this, SLOT(currentStackPageChanged(int)));
+}
+
+
+void HExperimentMain::checkStimulusDisplayInfo()
+{
+	// TODO do i have to define != as well as ==?
+	if (m_oldStimulusDisplayInfo == m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo())
+	{
+		qDebug() << "No change in sdi.";
+	}
+	else
+	{
+		qDebug() << "stimulusDisplayInfoChanged - reset HGMM";
+		m_oldStimulusDisplayInfo = m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo();
+//		HGMM::instance().
+
+		m_pAttentionSetupForm->stimulusDisplayInfoChanged(m_oldStimulusDisplayInfo);
+		// Now tell each of the phase widgets.
+		for (int i=0; i<m_pPagesWidget->count()-4; i++)
+		{
+			QWidget *w = m_pPagesWidget->widget(4+i);
+			HPhaseSettingsTabWidget *ptw = dynamic_cast<HPhaseSettingsTabWidget *>(w);
+			ptw->stimulusDisplayInfoChanged(m_oldStimulusDisplayInfo);
+		}
+	}
 }
 
 void HExperimentMain::cancelButtonClicked()
@@ -200,12 +232,19 @@ void HExperimentMain::exportButtonClicked()
 void HExperimentMain::generalListViewItemClicked(const QModelIndex& index)
 {
 //	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
+	// check stimulus display info page.
+	// TODO - ONLY CHECK THIS when sdi page is the one we are leaving
+	qDebug() << "Current index " << m_pPagesWidget->currentIndex() << " new index " << index.row() << " sdi page index " << m_sdiPageIndex;
+	checkStimulusDisplayInfo();
 	m_pPhaseListWidget->clearSelection();
 	m_pPagesWidget->setCurrentIndex(m_vecStackPages.at(index.row()));
 }
 
-void HExperimentMain::phaseListViewItemClicked(const QModelIndex&)
+void HExperimentMain::phaseListViewItemClicked(const QModelIndex& index)
 {
+	qDebug() << "Current index " << m_pPagesWidget->currentIndex() << " new index " << index.row() << " sdi page index " << m_sdiPageIndex;
+	checkStimulusDisplayInfo();
+
 	m_pGeneralListView->selectionModel()->select(m_pGeneralListView->selectionModel()->selection(), QItemSelectionModel::Deselect);
 	m_pPagesWidget->setCurrentIndex(4 + m_pPhaseListWidget->selectedPhaseIndex());
 }
@@ -319,6 +358,8 @@ Habit::ExperimentSettings HExperimentMain::getSettings()
 	settings.setId(m_settings.getId());
 	settings.setName(m_settings.getName());
 	settings.setAttentionGetterSettings(m_pAttentionSetupForm->getConfigurationObject());
+	qDebug() << "HExperimentMain::getSettings - agsettings";
+	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
 	settings.setControlBarOptions(m_pControlBarOptionsForm->getConfigurationObject());
 	settings.setHLookSettings(m_pLookSettingsWidget->getHLookSettings());
 	settings.setStimulusDisplayInfo(m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo());

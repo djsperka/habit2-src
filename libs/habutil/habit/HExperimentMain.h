@@ -53,17 +53,22 @@ namespace GUILib
 		void upPhase();
 		void downPhase();
 
+	signals:
+		void stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo&);
+
 	private:
 		void components();
 		void connections();
 		bool isModified();
 		Habit::ExperimentSettings getSettings();	// get settings from current state of all forms
 		Habit::StimulusSettings getTestSS();
-
+		void checkStimulusDisplayInfo();			// check if sdi has changed, and if so notify preview widgets or their owners
 		Habit::ExperimentSettings m_settings;
 		QListView *m_pGeneralListView;
 		QTreeWidget *m_pContentsWidget;
 		QStackedWidget *m_pPagesWidget;
+		int m_sdiPageIndex;
+		Habit::StimulusDisplayInfo m_oldStimulusDisplayInfo;	// keep latest value each time page changes
 
 		GUILib::HStimulusDisplayInfoWidget* m_pStimulusDisplayInfoWidget;
 		GUILib::ControlBarOptionsForm* m_pControlBarOptionsForm;

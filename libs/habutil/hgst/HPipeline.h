@@ -11,6 +11,7 @@
 
 #include <gst/gst.h>
 #include "stimulussettings.h"
+#include "stimulusdisplayinfo.h"
 #include <ostream>
 
 #define C_STR(x) x.toStdString().c_str()
@@ -22,26 +23,28 @@ class HPipeline: public QObject
 
 	int m_id;
 	Habit::StimulusSettings m_ss;
+	Habit::StimulusDisplayInfo m_sdinfo;
 
 	Q_DISABLE_COPY(HPipeline);
 
 public:
-	HPipeline(int id, const Habit::StimulusSettings& ss, QObject *parent=NULL);
+	HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, QObject *parent=NULL);
 
 	int id() const { return m_id; };
 	const Habit::StimulusSettings& stimulusSettings() const { return m_ss; };
-
+	bool iss() const { return m_sdinfo.getUseISS(); }
+	const HStimulusLayoutType& stimulusLayoutType() const { return m_sdinfo.getStimulusLayoutType(); }
 	// must cleanup and initialize again after calling this
 	void setStimulusSettings(const Habit::StimulusSettings& ss) { m_ss = ss; }
 
-	// pipeline control
+	void reconfigure(const Habit::StimulusDisplayInfo& info);
 
+	// pipeline control
 	virtual void initialize() = 0;
 	virtual void cleanup() = 0;
 
 	// open files (if needed), begin parse, etc, pipleline will be ready to play immediately
 	virtual void preroll() = 0;
-
 	virtual void play() = 0;
 	virtual void pause() = 0;
 	virtual void rewind() = 0;

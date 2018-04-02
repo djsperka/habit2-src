@@ -22,7 +22,7 @@ HGMM& HGMM::instance()
 }
 
 HGMM::HGMM(PipelineFactory factory)
-: m_pStimulusLayoutType(&HStimulusLayoutType::HStimulusLayoutUnknown)
+: m_sdinfo()
 , m_bUseISS(false)
 , m_pCenter(NULL)
 , m_pLeft(NULL)
@@ -46,7 +46,19 @@ HGMM::HGMM(PipelineFactory factory)
 void HGMM::reset()
 {
 	qDebug() << "HGMM::reset()";
-	// just call cleanup on all pipelines
+	cleanupAll();
+	qDeleteAll(m_mapPipelines);
+	m_mapPipelines.clear();
+	m_mapContext.clear();
+
+	qDebug() << "map has " << m_mapPipelines.count() << "keys";
+	m_pCenter = m_pLeft = m_pRight = NULL;
+	m_pipelineCurrent = NULL;
+	m_sdinfo = Habit::StimulusDisplayInfo();
+}
+
+void HGMM::cleanupAll()
+{
 	QMapIterator<unsigned int, HPipeline *> it(m_mapPipelines);
 	while (it.hasNext())
 	{
@@ -54,7 +66,7 @@ void HGMM::reset()
 	    it.value()->cleanup();
 	}
 
-	// cleanup static pipelines
+	// cleanup static pipelines. These are not reconfigured here.
 	HStaticStimPipeline *p;
 	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_backgroundKey]);
 	if (p)
@@ -71,19 +83,14 @@ void HGMM::reset()
 	{
 		p->forceCleanup();
 	}
-
-	qDeleteAll(m_mapPipelines);
-	m_mapPipelines.clear();
-	m_mapContext.clear();
-	m_pCenter = m_pLeft = m_pRight = NULL;
-	m_pipelineCurrent = NULL;
-	m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutUnknown;
+	return;
 }
-
 void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 {
 	qDebug() << "HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir) - layout type " << settings.getStimulusDisplayInfo().getStimulusLayoutType().name();
-	reset(settings.getStimulusDisplayInfo().getStimulusLayoutType(), settings.getStimulusDisplayInfo().getUseISS(), settings.getStimulusDisplayInfo().getBackGroundColor(), dir);
+	reset();
+	reset(settings.getStimulusDisplayInfo(), dir);
+
 	// Need to know if AG is used. If it is, add attention getter settings to media manager
 	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
 	{
@@ -101,30 +108,55 @@ void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 	}
 }
 
-void HGMM::reset(const HStimulusLayoutType& layout, bool useISS, const QColor& bkgdColor, const QDir& dir)
+void HGMM::reset(const Habit::StimulusDisplayInfo& info, const QDir& dir)
 {
-	qDebug() << "HGMM::reset(" << layout.name() << ", " << useISS << ", " << bkgdColor << ", " << dir << " )";
-	reset();
-	m_pStimulusLayoutType = &layout;
+	qDebug() << "HGMM::reset(" << info << ", " << dir << " )";
+	m_sdinfo = info;
 	m_root = dir;
-	m_bUseISS = useISS;
-	m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
+
+	// if default key doesn't exist yet, create that pipleline. If it exists, then reconfigure it.
+	qDebug() << "m_mapPipelines has " << m_mapPipelines.count() << " def " << m_defaultKey << "?" << m_mapPipelines.contains(m_defaultKey);
+	if (m_mapPipelines.contains(m_defaultKey))
+	{
+		m_mapPipelines.value(m_defaultKey)->cleanup();
+		m_mapPipelines.value(m_defaultKey)->reconfigure(m_sdinfo);
+	}
+	else
+	{
+		m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
+	}
 	preroll(m_defaultKey);
-	m_backgroundKey = addStimulus(QString("background"), bkgdColor, -2);
-	preroll(m_backgroundKey);
+
+	if (m_mapPipelines.contains(m_backgroundKey))
+	{
+		m_mapPipelines.value(m_backgroundKey)->reconfigure(m_sdinfo);
+	}
+	else
+	{
+		m_backgroundKey = addStimulus(QString("background"), m_sdinfo.getBackGroundColor(), -2);
+	}
+	preroll(m_defaultKey);
+
+	// just reconfigure ag if it already exists, don't create here
+	if (m_mapPipelines.contains(m_agKey))
+	{
+		m_mapPipelines.value(m_agKey)->reconfigure(m_sdinfo);
+		preroll(m_agKey);
+	}
+
 }
 
-void HGMM::reset(HStimulusWidget *pCenter, bool useISS, const QColor& bkgdColor, const QDir& dir)
+void HGMM::reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir)
 {
-	qDebug() << "HGMM::reset(HStimulusWidget *pCenter, bool useISS,...";
-	reset(HStimulusLayoutType::HStimulusLayoutSingle, useISS, bkgdColor, dir);
+	qDebug() << "HGMM::reset(HStimulusWidget *pCenter, info, dir)";
+	reset(info, dir);
 	setWidgets(pCenter);
 }
 
-void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, bool useISS, const QColor& bkgdColor, const QDir& dir)
+void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, const Habit::StimulusDisplayInfo& info, const QDir& dir)
 {
-	qDebug() << "HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, bool useISS, co";
-	reset(HStimulusLayoutType::HStimulusLayoutLeftRight, useISS, bkgdColor, dir);
+	qDebug() << "HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, info, dir)";
+	reset(info, dir);
 	setWidgets(pLeft, pRight);
 }
 
@@ -259,7 +291,7 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 	qDebug() << "HGMM::addStimulus(" << key << "): " << stimulus.getName() << " context " << context << " layout type " << getStimulusLayoutType().name();
 
 	// create pipeline
-	pipeline = m_pipelineFactory(key, stimulus, m_root, getStimulusLayoutType(), true, m_bUseISS, (context < 0), this);
+	pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_root, (context < 0), this);
 
 	// Add helper to map
 	m_mapPipelines.insert(key, pipeline);
@@ -277,7 +309,7 @@ unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QCol
 
 	qDebug() << "HGMM::addStimulus(" << key << "): solid color stimulus - " << color << " context " << context;
 
-	pipeline = m_pipelineFactory(key, stimulus, m_root, getStimulusLayoutType(), true, m_bUseISS, (context < 0), this);
+	pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_root, (context < 0), this);
 
 	// Add helper to map
 	m_mapPipelines.insert(key, pipeline);

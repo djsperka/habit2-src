@@ -16,6 +16,7 @@ const int f_previewContext = 0;
 
 GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, QWidget *parent)
 : QWidget(parent)
+, m_pCurrentStimulusWidget(NULL)
 , m_bSingleStimulus(false)
 , m_bListStimulus(false)
 , m_bPlaying(false)
@@ -72,7 +73,7 @@ void GUILib::HStimulusPreviewWidget::initialize(const Habit::StimulusDisplayInfo
 
 	// Now do the layout for the entire thing
     QVBoxLayout* vbox = new QVBoxLayout;
-    vbox->addWidget(createStimulusWidget(info));
+    vbox->addWidget(m_pCurrentStimulusWidget = createStimulusWidget(info));
     vbox->addLayout(hlb);
     setLayout(vbox);
 

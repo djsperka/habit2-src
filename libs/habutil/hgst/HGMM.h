@@ -24,7 +24,7 @@
 #include "HStimulusWidget.h"
 
 
-typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, bool bStatic, QObject *parent);
+typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, bool bStatic, QObject *parent);
 
 // Media manager for Habit.
 // This media manager is entirely new for Habit 2.2+. It uses GStreamer, a media library available
@@ -37,7 +37,7 @@ class HGMM: public QObject
 {
 	Q_OBJECT
 
-	const HStimulusLayoutType* m_pStimulusLayoutType;
+	Habit::StimulusDisplayInfo m_sdinfo;
 	QDir m_root;
 	bool m_bUseISS;
 	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
@@ -67,6 +67,9 @@ class HGMM: public QObject
 	static gpointer threadFunc(gpointer user_data);
 	void updateGeometry();
 
+	// cleanup all pipelines, including static.
+	void cleanupAll();
+
 	// Get the next key for m_mapStim. The values are doled out sequentially. Nothing special,
 	// this is a convenience.
 	unsigned int nextKey();
@@ -88,23 +91,26 @@ public:
 //	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
 	virtual ~HGMM();
 
-	// clear everything and restore HGMM to its initial state.
+	// Perform a FULL RESET: clear everything and restore HGMM to its initial state, with no pipelines, not even static ones.
 	void reset();
 
-	// Re-initializes the mm, creates pipelines for default, background, ag (if configured),
-	// and all configured stimuli. No widgets are set - call setWidgets() for that. Otherwise,
-	// the mm will be ready to play all stimuli. Context stim lists are also avaiable.
+	// Re-initializes the mm, creates pipelines for default, background, and attention-getter (if configured),
+	// and all configured stimuli. The default, background, and attention-getter are prerolled.
+	// No widgets are set - call setWidgets() for that. Otherwise,
+	// the mm will be ready to play all stimuli. Context stim lists are also available.
 	void reset(const Habit::ExperimentSettings& settings, const QDir& dir = QDir::rootPath());
 
-	// Re-initialize mm, create pipelines for default, background. No widgets set, and no other stimuli or ag
-	// are configured.
-	void reset(const HStimulusLayoutType& layout, bool useISS, const QColor& bkgdColor = Qt::gray, const QDir& dir = QDir::rootPath());
+	// Reconfigure all existing pipelines using the supplied StimulusDisplayInfo. The stimuli themselves remain, but they get
+	// all-new pipelines reconfigured using the new Info.
+	// Intended for use when in ExperimentEditor - this must be called when no widgets are
+	// displayed or even playing (not really sure what happens, but its easy to ensure so this is cautionary).
+	void reset(const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
 
 
 	// Re-initialize mm, create pipelines for default, background. Widgets ARE set, but no other stimuli or ag
 	// are configured.
-	void reset(HStimulusWidget *pCenter, bool useISS, const QColor& bkgdColor = Qt::gray, const QDir& dir = QDir::rootPath());
-	void reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, bool useISS, const QColor& bkgdColor = Qt::gray, const QDir& dir = QDir::rootPath());
+	void reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
+	void reset(HStimulusWidget *pLeft, HStimulusWidget *pRight,  const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
 
 	// assign widget(s) to hgmm
 	void setWidgets(HStimulusWidget *p0, HStimulusWidget *p1=NULL);
@@ -122,7 +128,7 @@ public:
 	unsigned int getDefaultKey() const { return m_defaultKey; };
 
 	HStimulusWidget *getHStimulusWidget(const HPlayerPositionType& type);
-	const HStimulusLayoutType& getStimulusLayoutType() const { return *m_pStimulusLayoutType; };
+	const HStimulusLayoutType& getStimulusLayoutType() const { return m_sdinfo.getStimulusLayoutType(); };
 	const Habit::StimulusSettings& getStimulusSettings(unsigned int key) const;
 
 	// Change layout type and widgets. Must supply correct # of pointers.

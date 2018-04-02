@@ -15,7 +15,7 @@ class HStaticStimPipeline: public HStimPipeline
 	Q_OBJECT
 
 public:
-	HStaticStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent);
+	HStaticStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, QObject *parent);
 	virtual ~HStaticStimPipeline();
 
 	// The only reason for this class is to have a no-op cleanup() function. That way HGMM::playStim can safely call cleanup() on every stim

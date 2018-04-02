@@ -23,6 +23,8 @@
 
 
 
+// TODO - use workspace as key, store stim root per-workspace on each machine where habit runs.
+
 
 // A dir is a valid workspace if all of the following are true
 // 1. dir exists
@@ -38,7 +40,7 @@ bool habutilIsValidWorkspace(QDir dir)
 
 
 // Create a new workspace in the dir 'dir'.
-
+// TODO - make most things here static, expose only habutilInitWorkspace?
 bool habutilCreateWorkspace(QDir& dir)
 {
 	// dir must exist!
@@ -115,29 +117,55 @@ bool habutilCreateWorkspace(QDir& dir)
 		else
 		{
 			qDebug() << "Created stim directory " << dir.absoluteFilePath("stim");
-
-//			// move sample stim files into stim folder
-//			QDir resourceStimDir(":/resources/stim");
-//			QDir stimDir(dir);
-//			stimDir.cd(QString("stim"));
-//
-//			QFileInfoList list = resourceStimDir.entryInfoList();
-//			for (int i = 0; i < list.size(); ++i)
-//			{
-//				QFileInfo fileInfo = list.at(i);
-//				if (!QFile::copy(fileInfo.absoluteFilePath(), stimDir.absoluteFilePath(fileInfo.fileName())))
-//				{
-//					qCritical() << "Cannot copy image file " << fileInfo.absoluteFilePath();
-//					return false;
-//				}
-//				else
-//				{
-//					qDebug() << "Copied " << fileInfo.absoluteFilePath() << " to " << stimDir.absoluteFilePath(fileInfo.fileName());
-//				}
-//			}
-//
 		}
 	}
+
+	// stim dir exists, so create a link to the stock images etc.
+	qDebug() << "Check link to example stimuli...";
+#ifdef Q_OS_MACOS
+	QFile appSupport("/Library/Application Support/Habit22/stim/examples");
+	QFile examples(dir.absoluteFilePath("stim/examples"));
+	if (!appSupport.exists())
+	{
+		qWarning() << "Application Support folder " << appSupport.fileName() << " not found.";
+	}
+	else
+	{
+		if (examples.exists())
+		{
+			qWarning() << "Examples folder already exists in this workspace.";
+		}
+		else
+		{
+			if (appSupport.link(examples.fileName()))
+			{
+				qDebug() << "Created link " << examples.fileName() << " --> " << appSupport.fileName();
+			}
+			else
+			{
+				qWarning() << "Cannot create link " << examples.fileName() << " --> " << appSupport.fileName();
+			}
+		}
+	}
+#elif Q_OS_WIN
+    QProcess process;
+    process.start("mklink /D");
+
+    // Wait for it to start
+    if(!process.waitForStarted())
+        return 0;
+
+    bool retval = false;
+    QByteArray buffer;
+    while ((retval = process.waitForFinished()));
+        buffer.append(process.readAll());
+
+    if (!retval) {
+        qDebug() << "Process error:" << process.errorString();
+        qDebug() << "Output:" << buffer;
+        return 1;
+    }
+#endif
 
 	return true;
 }
@@ -217,7 +245,8 @@ bool habutilGetWorkspaceDir(QDir& dir)
 	}
 
 	//qDebug() << "getWorkspaceDir: " << dir << ":" << habutilIsValidWorkspace(dir);
-
+	qDebug() << "workspace dir: " << dir;
+	qDebug() << "converted: " << QDir::toNativeSeparators(dir.canonicalPath()).replace(QDir::separator(), '%');
 	return habutilIsValidWorkspace(dir);
 }
 

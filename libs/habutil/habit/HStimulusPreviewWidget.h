@@ -25,6 +25,10 @@ namespace GUILib
 	{
 		Q_OBJECT
 
+		// Widget (may have one or two sub-0widgets depending on sdi) currently in layout
+		// Replaced in slot(sdiChanged())
+		QWidget *m_pCurrentStimulusWidget;
+
 		// These two bools tell us whether a single stim preview, or a order preview, is current
 		bool m_bSingleStimulus;
 		bool m_bListStimulus;
@@ -79,6 +83,7 @@ namespace GUILib
 		void pauseClicked();
 		void playClicked();
 		void rewindClicked();
+		//void stimulusDisplayInfoChanged();
 	};
 
 };

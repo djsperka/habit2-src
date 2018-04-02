@@ -13,6 +13,7 @@
 #include <QDir>
 #include <QMap>
 #include "stimulussettings.h"
+#include "stimulusdisplayinfo.h"
 #include "HTypes.h"
 #include <gst/gst.h>
 
@@ -49,8 +50,9 @@ class HStimPipeline: public HPipeline
 
 	bool m_bInitialized;
 	QDir m_dirStimRoot;
-	const HStimulusLayoutType& m_stimulusLayoutType;
-	bool m_bISS;
+	//Habit::StimulusDisplayInfo m_stimulusDisplayInfo;
+	//const HStimulusLayoutType& m_stimulusLayoutType;
+	//bool m_bISS;
 	bool m_bRewindPending;	// true when expecting ASYNC_DONE due to rewind() call
 	GstElement *m_pipeline;
 	QMutex m_mutex;
@@ -69,7 +71,7 @@ class HStimPipeline: public HPipeline
 
 public:
 	bool bInitialFlushingSeekDone;
-	HStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bISS, QObject *parent);
+	HStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, QObject *parent);
 	virtual ~HStimPipeline();
 
 	// create pipeline (each of its partial pipelines for single/dual screen and/or audio created and linked).
@@ -105,8 +107,6 @@ public:
 	void setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt);
 
 	GstElement *pipeline() const { return m_pipeline; }
-	bool iss() const { return m_bISS; }
-	const HStimulusLayoutType& stimulusLayoutType() const { return m_stimulusLayoutType; }
 	QMap<HPlayerPositionType, HStimPipelineSource* >& getPipelineSourceMap() { return m_mapPipelineSources; }
 	QMutex *mutex() { return &m_mutex; };
 
@@ -119,6 +119,6 @@ public:
 
 };
 
-HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound, bool bISS, bool bStatic, QObject *parent);
+HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, bool bStatic, QObject *parent);
 
 #endif /* LIBS_HABUTIL_HGST_HSTIMPIPELINE_H_ */

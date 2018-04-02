@@ -8,11 +8,18 @@
 #include "HPipeline.h"
 #include "HGMMException.h"
 
-HPipeline::HPipeline(int id, const Habit::StimulusSettings& ss, QObject *parent)
+HPipeline::HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, QObject *parent)
 : QObject(parent)
 , m_id(id)
 , m_ss(ss)
+, m_sdinfo(info)
 {
+}
+
+void HPipeline::reconfigure(const Habit::StimulusDisplayInfo& info)
+{
+	//cleanup();
+	m_sdinfo = info;
 }
 
 
