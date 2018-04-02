@@ -253,8 +253,6 @@ bool HResults::scanTrials(const HTrialScanner& scanner) const
 			{
 				HScreenStartEvent* psse = static_cast<HScreenStartEvent*>(e);
 
-				// TODO - must have a way to map monitor id numbers to left/center/right/iss!
-
 				// Do not keep filename unless stim request has been seen. Otherwise we will
 				// record attention getter file(s).
 				if (bHaveStimRequest)
