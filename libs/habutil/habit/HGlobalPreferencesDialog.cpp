@@ -65,12 +65,12 @@ void GUILib::HGlobalPreferencesDialog::initialize()
 
 void GUILib::HGlobalPreferencesDialog::accepted()
 {
-	// if workspace is changed, do that now.
-	if (QDir(ui->lbCurrentWorkspace->text()) != QDir(habutilGetWorkspaceDir()))
-	{
-		habutilSetWorkspace(ui->lbCurrentWorkspace->text());
-		Q_EMIT workspaceChanged();
-	}
+//	// if workspace is changed, do that now.
+//	if (QDir(ui->lbCurrentWorkspace->text()) != QDir(habutilGetWorkspaceDir()))
+//	{
+//		habutilSetWorkspace(ui->lbCurrentWorkspace->text());
+//		Q_EMIT workspaceChanged();
+//	}
 
 	// set preferences
 	habutilSetStimulusRootDir(ui->lbCurrentStimDir->text());
@@ -126,11 +126,7 @@ void GUILib::HGlobalPreferencesDialog::chooseWorkspaceClicked()
 		QDir d(selectedDir);
 
 		// is the selected dir a workspace dir?
-		if (habutilIsValidWorkspace(d))
-		{
-			ui->lbCurrentWorkspace->setText(selectedDir);
-		}
-		else
+		if (!habutilIsValidWorkspace(d))
 		{
 			// TODO: not a workspace - want a new one? First check if its INSIDE a workspace. or if it contains a workspace
 
@@ -142,17 +138,59 @@ void GUILib::HGlobalPreferencesDialog::chooseWorkspaceClicked()
 				{
 					// TODO link to log file in dialog box
 					QMessageBox::warning(this, "Create new workspace", "Could not create new workspace. See log.");
-
-					// don't save selected in label -- nothing is changed
-				}
-				else
-				{
-					ui->lbCurrentWorkspace->setText(selectedDir);
+					return;
 				}
 			}
 		}
+
+		// If we're here, a new workspace has been selected (and created, if necessary).
+		habutilSetWorkspace(selectedDir);
+		Q_EMIT workspaceChanged();
+
+		// update this dialog
+		initialize();
 	}
 }
+
+//void GUILib::HGlobalPreferencesDialog::chooseWorkspaceClicked()
+//{
+//	//
+//	QString selectedDir;
+//	selectedDir = QFileDialog::getExistingDirectory(0, "Select Workspace Folder", ui->lbCurrentWorkspace->text());
+//
+//	// check whether user cancelled or not.
+//	if (!selectedDir.isEmpty())
+//	{
+//		QDir d(selectedDir);
+//
+//		// is the selected dir a workspace dir?
+//		if (habutilIsValidWorkspace(d))
+//		{
+//			ui->lbCurrentWorkspace->setText(selectedDir);
+//		}
+//		else
+//		{
+//			// TODO: not a workspace - want a new one? First check if its INSIDE a workspace. or if it contains a workspace
+//
+//			QMessageBox::StandardButton btn;
+//			btn = QMessageBox::question(this, "Create new workspace", "The selected folder is not a workspace, do you want to create a new one?");
+//			if (btn == QMessageBox::Yes)
+//			{
+//				if (!habutilCreateWorkspace(d))
+//				{
+//					// TODO link to log file in dialog box
+//					QMessageBox::warning(this, "Create new workspace", "Could not create new workspace. See log.");
+//
+//					// don't save selected in label -- nothing is changed
+//				}
+//				else
+//				{
+//					ui->lbCurrentWorkspace->setText(selectedDir);
+//				}
+//			}
+//		}
+//	}
+//}
 
 
 void GUILib::HGlobalPreferencesDialog::identifyClicked()
