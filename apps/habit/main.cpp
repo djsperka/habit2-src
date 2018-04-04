@@ -166,7 +166,6 @@ int main(int argc, char *argv[])
     parser.addOptions({
              {"s", "write log to screen"},
 			 {"f", "write log to file" },
-			 {"x", "clear workspace value in preferences."},
 			 {"w", "set workspace folder", "workspace"},
 			 {"D", "check (and update if necessary) database version for current workspace"},
 			 {"T", "\"Test run\" is default when running an experiment"},
@@ -179,10 +178,6 @@ int main(int argc, char *argv[])
 
 	f_bScreenLog = parser.isSet("s");
 	bFileLogPending = parser.isSet("f");
-    	if (parser.isSet("x"))
-    	{
-    		habutilClearWorkspace();
-    	}
     if (parser.isSet("w"))
     	{
     		bPendingWorkspace = true;

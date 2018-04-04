@@ -28,35 +28,8 @@ HGlobalPreferencesDialog::HGlobalPreferencesDialog(QWidget *parent)
 , ui(new Ui::GlobalPreferencesDialog)
 {
 	ui->setupUi(this);
-	m_sWorkspaceSelected = habutilGetWorkspaceDir();
-	m_sStimulusRootDirSelected = habutilGetStimulusRootDir();
 
-	initialize(); // moved this from _after_ connections. populate combos here.
-	connections();
-}
-
-
-//void GUILib::HGlobalPreferencesDialog::defaultStimRootClicked()
-//{
-//	if (m_pcheckDefaultStimRoot->isChecked())
-//	{
-//		m_plineeditRoot->setText("<workspace_dir>/stim");
-//		m_plbStimulusRootDir->setText("<workspace_dir>/stim");
-//		m_plineeditRoot->setEnabled(false);
-//	}
-//	else
-//	{
-//		m_plineeditRoot->setText(habutilGetStimulusRootDir());
-//		m_plbStimulusRootDir->setText(habutilGetStimulusRootDir());
-//		m_plineeditRoot->setEnabled(true);
-//	}
-//}
-
-void GUILib::HGlobalPreferencesDialog::initialize()
-{
-	ui->lbCurrentWorkspace->setText(m_sWorkspaceSelected);
-	ui->lbCurrentStimDir->setText(m_sStimulusRootDirSelected);
-
+	// populate combo boxes
 	ui->cbControl->addItem(QString("None"), QVariant(-1));
 	ui->cbLeft->addItem(QString("None"), QVariant(-1));
 	ui->cbCenter->addItem(QString("None"), QVariant(-1));
@@ -70,21 +43,24 @@ void GUILib::HGlobalPreferencesDialog::initialize()
 	}
 
 
-//	m_plineeditWorkspace->setText(habutilGetWorkspaceDir());
-//	m_pcbControl->setCurrentIndex(m_pcbControl->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Control))));
-//	m_pcbLeft->setCurrentIndex(m_pcbLeft->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Left))));
-//	m_pcbCenter->setCurrentIndex(m_pcbCenter->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Center))));
-//	m_pcbRight->setCurrentIndex(m_pcbRight->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Right))));
-//
-//	if (habutilGetUseDefaultStimRoot())
-//	{
-//		m_pcheckDefaultStimRoot->setChecked(true);
-//	}
-//	else
-//	{
-//		m_pcheckDefaultStimRoot->setChecked(false);
-//	}
-//	defaultStimRootClicked();
+	initialize();
+	connections();
+}
+
+void GUILib::HGlobalPreferencesDialog::initialize()
+{
+	m_sWorkspaceSelected = habutilGetWorkspaceDir().absolutePath();
+	m_sStimulusRootDirSelected = habutilGetStimulusRootDir().absolutePath();
+
+	ui->lbCurrentWorkspace->setText(m_sWorkspaceSelected);
+	ui->lbCurrentStimDir->setText(m_sStimulusRootDirSelected);
+
+
+	// set current index on combos
+	ui->cbControl->setCurrentIndex(ui->cbControl->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Control))));
+	ui->cbLeft->setCurrentIndex(ui->cbLeft->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Left))));
+	ui->cbCenter->setCurrentIndex(ui->cbCenter->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Center))));
+	ui->cbRight->setCurrentIndex(ui->cbRight->findData(QVariant(habutilGetMonitorID(HPlayerPositionType::Right))));
 }
 
 void GUILib::HGlobalPreferencesDialog::accepted()
@@ -102,7 +78,7 @@ void GUILib::HGlobalPreferencesDialog::accepted()
 	habutilSetMonitorID(HPlayerPositionType::Left, ui->cbLeft->itemData(ui->cbLeft->currentIndex()).toInt());
 	habutilSetMonitorID(HPlayerPositionType::Center, ui->cbCenter->itemData(ui->cbCenter->currentIndex()).toInt());
 	habutilSetMonitorID(HPlayerPositionType::Right, ui->cbRight->itemData(ui->cbRight->currentIndex()).toInt());
-//	habutilSetUseDefaultStimRoot(m_pcheckDefaultStimRoot->isChecked());
+	habutilSaveSettings();
 	accept();
 }
 
@@ -157,13 +133,6 @@ void GUILib::HGlobalPreferencesDialog::chooseWorkspaceClicked()
 		else
 		{
 			// TODO: not a workspace - want a new one? First check if its INSIDE a workspace. or if it contains a workspace
-
-//			QDir parent(d);
-//			d.cdUp();
-//			if (habutilIsValidWorkspace(d))
-//			{
-//				QMessageBox::information("Cannots")
-//			}
 
 			QMessageBox::StandardButton btn;
 			btn = QMessageBox::question(this, "Create new workspace", "The selected folder is not a workspace, do you want to create a new one?");

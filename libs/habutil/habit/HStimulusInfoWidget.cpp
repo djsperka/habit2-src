@@ -89,14 +89,12 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 	const QString filterAudio("All Audio (*.mp3 *.ogg *.wma *.wav *.aiff);;All Files (*.*)");
 	QString filter;
 	QString filename;
-	QDir stimroot;
-	habutilGetStimulusRootDir(stimroot);
+	QDir stimroot = habutilGetStimulusRootDir();
 
 	// Initial folder is the folder of the existing file (if any), otherwise the stim root dir.
 	if (stimulusInfo.getFileName().isEmpty())
 	{
-		QDir lastdir;
-		habutilGetLastDir(lastdir, m_bIsVideoImage);
+		QDir lastdir = habutilGetLastDir(m_bIsVideoImage);
 		path = lastdir.absolutePath();
 	}
 	else

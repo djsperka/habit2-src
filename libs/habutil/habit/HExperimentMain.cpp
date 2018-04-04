@@ -40,8 +40,7 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 , m_settings(experimentSettings)
 {
 	// reset media manager. Preview widgets will fetch their respective stimuli via the context stim list.
-	QDir dir;
-	habutilGetStimulusRootDir(dir);
+	QDir dir = habutilGetStimulusRootDir();
 	HGMM::instance().reset(experimentSettings, dir);
 
 	// set up gui

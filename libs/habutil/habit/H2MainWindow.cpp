@@ -57,7 +57,7 @@ GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon, 
     createActions();
     createToolBars();
 
-    m_pLabelStatusBar = new QLabel(QString("Current workspace: %1").arg(habutilGetWorkspaceDir()));
+    m_pLabelStatusBar = new QLabel(QString("Current workspace: %1").arg(habutilGetWorkspaceDir().absolutePath()));
     statusBar()->addWidget(m_pLabelStatusBar);
     setWindowTitle(QString("%1 (v%2)").arg("Habit2").arg(QCoreApplication::instance()->applicationVersion()));
 
@@ -306,7 +306,7 @@ void GUILib::H2MainWindow::editExperiment()
 
 void GUILib::H2MainWindow::importExperiment()
 {
-	QString filename = QFileDialog::getOpenFileName(NULL, "Import experiment file", habutilGetResultsDir().absolutePath(), "Habit Export Files (*.hbx)");
+	QString filename = QFileDialog::getOpenFileName(NULL, "Import experiment file", habutilGetWorkspaceDir().absolutePath(), "Habit Export Files (*.hbx)");
 	qDebug() << "Got filename for import: " << filename;
 
 	// Open and read the file
@@ -791,7 +791,7 @@ void GUILib::H2MainWindow::deleteExperiment()
 
 void GUILib::H2MainWindow::workspaceChanged()
 {
-	m_pLabelStatusBar->setText(QString("Current workspace: %1").arg(habutilGetWorkspaceDir()));
+	m_pLabelStatusBar->setText(QString("Current workspace: %1").arg(habutilGetWorkspaceDir().absolutePath()));
 	habutilInitWorkspace();
 	m_pExperimentListWidget->reload();
 }

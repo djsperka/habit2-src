@@ -30,11 +30,7 @@ int main(int argc, char **argv)
 	// Default is to always have log file.
 	for (int i=1; i<argc; i++)
 	{
-		if (!strcmp(argv[i], "-x"))
-		{
-			habutilClearWorkspace();
-		}
-		else if (!strcmp(argv[i], "-w"))
+		if (!strcmp(argv[i], "-w"))
 		{
 			// TODO - maybe tell user they need to supply a directory?
 			if (i < (argc-1))

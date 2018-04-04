@@ -30,8 +30,7 @@
 HGMM* createMediaManager(const Habit::ExperimentSettings& es)
 {
 	HGMM *pmm = NULL;
-	QDir rootDir;
-	habutilGetStimulusRootDir(rootDir);
+	QDir rootDir = habutilGetStimulusRootDir();
 
 	if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
@@ -81,8 +80,7 @@ HGMM* createMediaManager(const Habit::ExperimentSettings& es, int screenWidth, i
 HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth, int screenHeight)
 {
 	HGMM* pmm;
-	QDir rootDir;
-	habutilGetStimulusRootDir(rootDir);
+	QDir rootDir = habutilGetStimulusRootDir();
 
 	//	    HVideoWidget(QGst::Ui::VideoWidget *widget, float screenWidth, float screenHeight, const HDisplayType& dType = HDisplayType::HDisplayTypeOriginalSize, bool bMaintainAspectRatio = true, QWidget *parent = 0);
 

@@ -110,8 +110,7 @@ void TestMMDialog::experimentActivated(QString expt)
 		if (i != QDialog::Accepted) return;
 
 		// initialize mm, populate with stimuli and ag
-		QDir rootDir;
-		habutilGetStimulusRootDir(rootDir);
+		QDir rootDir = habutilGetStimulusRootDir();
 		m_pmm = &HGMM::instance();
 		m_pmm->reset(settings, rootDir);
 
