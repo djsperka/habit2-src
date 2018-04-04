@@ -472,6 +472,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	Habit::ExperimentSettings experimentSettings;
 	HEventLog eventLog;
 	HGMM *pMediaManager = NULL;
+	bool bStimInDialog = false;	// can be set on command line, or in RunSettingsDialog
 	QString expt = m_pExperimentListWidget->selectedExperiment();	// the experiment to run
 	if (expt.isEmpty())
 	{
@@ -513,7 +514,8 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 		int i = m_pRunSettingsDialog->exec();
 		if (i == QDialog::Accepted)
 		{
-			if (m_bStimInDialog)
+			bStimInDialog = m_bStimInDialog || m_pRunSettingsDialog->isDisplayStimInWindow();
+			if (bStimInDialog)
 				pMediaManager = createMediaManager(experimentSettings, 320, 240);
 			else
 				pMediaManager = createMediaManager(experimentSettings);
@@ -556,7 +558,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			}
 
 			QDialog *pStimulusDisplayDialog  = NULL;
-			if (m_bStimInDialog)
+			if (bStimInDialog)
 			{
 				pStimulusDisplayDialog = pMediaManager->createStimulusWidget();
 				qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
@@ -583,14 +585,15 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			else
 			{
 				qDebug() << " delete widgets";
-				// must explicitly delete the stim widgets
-				HStimulusWidget *w;
-				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Center);
-				if (w) delete w;
-				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Left);
-				if (w) delete w;
-				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Right);
-				if (w) delete w;
+				qDebug() << " ok don't";
+//				// must explicitly delete the stim widgets
+//				HStimulusWidget *w;
+//				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Center);
+//				if (w) delete w;
+//				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Left);
+//				if (w) delete w;
+//				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Right);
+//				if (w) delete w;
 				qDebug() << " delete widgets done";
 			}
 

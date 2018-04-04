@@ -9,11 +9,13 @@
 #include "HStimulusOrderSelectionWidget.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QString>
 
 GUILib::HRunSettingsDialog::HRunSettingsDialog(const Habit::ExperimentSettings& s, bool bTestRun, QWidget* parent)
 : QDialog(parent)
 , m_exptSettings(s)
 {
+	setWindowTitle(QString("Run Settings for Experiment: %1").arg(s.getName()));
 	components(bTestRun);
 	connections();
 }
@@ -25,9 +27,8 @@ GUILib::HRunSettingsDialog::~HRunSettingsDialog()
 
 QString GUILib::HRunSettingsDialog::getRunLabel() const
 {
-	QString subjectName("TEST");
-	if (!m_pSubjectSettingsWidget->isTestRun())
-		subjectName = m_pSubjectSettingsWidget->getSubjectID();
+	QString subjectName(m_pSubjectSettingsWidget->getSubjectID());
+	if (subjectName.isEmpty()) subjectName = "TEST";
 	return QString("%1_%2_%3").arg(m_exptSettings.getName()).arg(subjectName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd-hhmm"));
 }
 
@@ -84,10 +85,18 @@ Habit::RunSettings GUILib::HRunSettingsDialog::getRunSettings() const
 	return settings;
 }
 
+bool GUILib::HRunSettingsDialog::isDisplayStimInWindow() const
+{
+	return m_pRunSettingsTestingWidget->isDisplayStimInWindow();
+}
 
 void GUILib::HRunSettingsDialog::components(bool bTestRun)
 {
 	QVBoxLayout *v = new QVBoxLayout;
+
+	// testing options
+	m_pRunSettingsTestingWidget = new GUILib::HRunSettingsTestingWidget(this);
+	v->addWidget(m_pRunSettingsTestingWidget);
 
 	// subject setting widget
 	m_pSubjectSettingsWidget = new HSubjectSettingsWidget(bTestRun, this);

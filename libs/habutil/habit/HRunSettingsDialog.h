@@ -16,6 +16,7 @@
 #include "runsettings.h"
 #include "subjectsettings.h"
 #include "HSubjectSettingsWidget.h"
+#include "HRunSettingsTestingWidget.h"
 
 namespace GUILib
 {
@@ -26,6 +27,7 @@ namespace GUILib
 		const Habit::ExperimentSettings& m_exptSettings;
 		QMap<int, QPair<GUILib::HStimulusOrderSelectionWidget*, bool> > m_map;
 		GUILib::HSubjectSettingsWidget* m_pSubjectSettingsWidget;
+		GUILib::HRunSettingsTestingWidget *m_pRunSettingsTestingWidget;
 		QPushButton *m_pbRun;
 		QPushButton *m_pbCancel;
 		QMap<int, bool> m_mapSeqnoOrderChosen;	// initialize to false for each enabled phase, set to true if chosen
@@ -40,6 +42,7 @@ namespace GUILib
 		Habit::RunSettings getRunSettings() const;
 		Habit::SubjectSettings getSubjectSettings() const;
 		QString getRunLabel() const;
+		bool isDisplayStimInWindow() const;
 
 	private slots:
 		void orderChosen(int seqno);
