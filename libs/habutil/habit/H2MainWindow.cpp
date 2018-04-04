@@ -585,15 +585,14 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			else
 			{
 				qDebug() << " delete widgets";
-				qDebug() << " ok don't";
-//				// must explicitly delete the stim widgets
-//				HStimulusWidget *w;
-//				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Center);
-//				if (w) delete w;
-//				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Left);
-//				if (w) delete w;
-//				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Right);
-//				if (w) delete w;
+				// must explicitly delete the stim widgets
+				HStimulusWidget *w;
+				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Center);
+				if (w) delete w;
+				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Left);
+				if (w) delete w;
+				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Right);
+				if (w) delete w;
 				qDebug() << " delete widgets done";
 			}
 
