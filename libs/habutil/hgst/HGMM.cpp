@@ -166,7 +166,7 @@ void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1)
 	if (p1)
 	{
 		// have left and right
-		m_pCenter = p0;
+		m_pCenter = NULL;
 		m_pLeft = p0;
 		m_pRight = p1;
 		// DON'T DO THIS HERE!
