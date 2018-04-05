@@ -69,7 +69,7 @@ QLayoutItem *HStimulusLayout::takeAt(int idx)
 
 QSize HStimulusLayout::sizeHint() const
 {
-	return QSize(320, 240);
+	return m_targetDisplaySize;
 }
 
 QSize HStimulusLayout::minimumSize() const
@@ -141,12 +141,4 @@ void HStimulusLayout::setGeometry(const QRect& r)
 			qCritical() << "HStimulusLayout - Unknown display type!";
 		}
 	}
-//	// get size of stimulus from video widget
-//	//QSize stimActualSize = m_pVideoWidget->getStimulusSize();
-//
-//	// stick it in the upper left corner
-//	qDebug() << "setGeometry - rect " << r;
-//
-//	// hack - hard code 320x240
-//	m_pVideoWidget->setGeometry(QRect(0, 0, 320, 240));
 }
