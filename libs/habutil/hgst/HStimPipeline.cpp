@@ -322,13 +322,16 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 	QString factory, prefix;
 	const HPlayerPositionType *pppt=&HPlayerPositionType::UnknownPlayerPositionType;
 	int id=0;
+	QString sDebugPrefix;
+	sDebugPrefix = QString("padAdded(%1): ").arg(GST_ELEMENT_NAME(src));
 
-	QMutexLocker(pSource->stimPipeline()->mutex());
+	// lock the entire HStimPipeline object
+	QMutexLocker locker(pSource->stimPipeline()->mutex());
 
-	qDebug() << "padAdded: Got new pad " << GST_PAD_NAME(newPad) << " from " << GST_ELEMENT_NAME(src) << " accept video? " << pSource->bVideo << " accept audio? " << pSource->bAudio;
+	qDebug() << sDebugPrefix << "got pad " << GST_PAD_NAME(newPad) << " accept video? " << pSource->bVideo << " accept audio? " << pSource->bAudio;
 	bool b = parseElementName(QString(GST_ELEMENT_NAME(src)), factory, pppt, id, prefix);
 	Q_ASSERT(b);
-	qDebug() << "padAdded: parsed element name, factory " << factory << " ppt " << pppt->name() << " id " << id;
+	qDebug() << sDebugPrefix << "parsed element name, factory " << factory << " ppt " << pppt->name() << " id " << id << " prefix " << prefix;
 
 	// get the caps and parse them. That will tell us whether its audio or video. If its video, then
 	// we get the frame rate - that tells us whether its an image (rate=0) or video. We also get the
@@ -344,14 +347,14 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 	if (isImage)
 	{
-		qDebug() << "padAdded - got image stream";
+		qDebug() << sDebugPrefix << "got image stream";
 		if (!pSource->bVideo)
 		{
-			qDebug() << "padAdded - ignoring video for this source";
+			qDebug() << sDebugPrefix << "ignoring video for this source";
 		}
 		else
 		{
-			qDebug() << "padAdded - link image into pipeline";
+			qDebug() << sDebugPrefix << "link image into pipeline";
 			GstElement *videoConvert = makeElement("videoconvert", *pppt, id);
 			Q_ASSERT(videoConvert);
 
@@ -379,20 +382,20 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			if (!gst_element_sync_state_with_parent(sink))
 				qCritical() << "Cannot sync sink with pipeline state";
 
-			qDebug() << "padAdded: image - " << GST_ELEMENT_NAME(src) << " - done.";
+			qDebug() << sDebugPrefix << "image - " << GST_ELEMENT_NAME(src) << " - done.";
 			pSource->nPadsLinked++;
 		}
 	}
 	else if (isVideo)
 	{
-		qDebug() << "padAdded - got video stream";
+		qDebug() << sDebugPrefix << "got video stream";
 		if (!pSource->bVideo)
 		{
-			qDebug() << "padAdded - ignoring video for this source";
+			qDebug() << sDebugPrefix << "ignoring video for this source";
 		}
 		else
 		{
-			qDebug() << "padAdded - link video into pipeline. Loop? " << pSource->bLoop;
+			qDebug() << sDebugPrefix << "link video into pipeline. Loop? " << pSource->bLoop;
 			GstElement *videoConvert = makeElement("videoconvert", *pppt, id);
 			gst_bin_add_many(GST_BIN(pSource->pipeline()), videoConvert, NULL);
 
@@ -408,9 +411,9 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 			// set states of all newly-added elements.
 			if (!gst_element_sync_state_with_parent(videoConvert))
-				qCritical() << "Cannot sync videoConvert with pipeline state";
+				qCritical() << sDebugPrefix << "Cannot sync videoConvert with pipeline state";
 			if (!gst_element_sync_state_with_parent(sink))
-				qCritical() << "Cannot sync sink with pipeline state";
+				qCritical() << sDebugPrefix << "Cannot sync sink with pipeline state";
 
 			gst_object_unref(sink);
 
@@ -419,31 +422,39 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			pSource->nPadsLinked++;
 
 		}
-		qDebug() << "padAdded: video - " << GST_ELEMENT_NAME(src) << " - done.";
+		qDebug() << sDebugPrefix << "video - " << GST_ELEMENT_NAME(src) << " - done.";
 	}
 	else if (isAudio)
 	{
 		if (!pSource->bAudio)
 		{
-			qDebug() << "padAdded - ignoring audio for this source";
+			qDebug() << sDebugPrefix << "ignoring audio for this source";
 			return;
 		}
 		else if (pSource->volume == 0)
 		{
-			qDebug() << "padAdded - audio is muted for this source";
+			qDebug() << sDebugPrefix << "audio is muted for this source";
 			return;
 		}
 		else
 		{
-			qDebug() << "padAdded - link audio into pipeline. Loop? " << pSource->bLoop;
+
+			// When linking audio, put a prefix ("source=Left", use pppt->name()) on all element names,
+			// except the mixer and downstream. So its really just the resample, convert, volume
+			// to denote that the source is Center/Left/Right
+			// If dual screen and both stim have audio, will get name clashes otherwise.
+
+			qDebug() << sDebugPrefix << "link audio into pipeline. Loop? " << pSource->bLoop;
 
 			// check for existing audio sink
 			// If not found, then create it and the audiomixer->audioconvert
 			// After this block is done, we will have a reference to the audiomixer which will be linked
 			// to the end of the audio elements created below. We MUST RELEASE the reference!
+			QString sAudioMixerName = makeElementName("audiomixer", HPlayerPositionType::Control, id);
 			audioMixer = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("audiomixer", HPlayerPositionType::Control, id)));
 			if (!audioMixer)
 			{
+				qDebug() << sDebugPrefix << "audiomixer not found: " << sAudioMixerName;
 				GstElement *audioSink = makeElement("osxaudiosink", HPlayerPositionType::Control, id);
 				Q_ASSERT(audioSink);
 
@@ -451,11 +462,15 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 				audioMixer = makeElement("audiomixer", HPlayerPositionType::Control, id);
 				Q_ASSERT(audioMixer);
+				qDebug() << sDebugPrefix << "Add new mixer, sink";
 				gst_bin_add_many(GST_BIN(pSource->pipeline()), audioMixer, audioSink, NULL);
 				gst_element_link(audioMixer, audioSink);
 			}
 			else
+			{
+				qDebug() << sDebugPrefix << "found existing mixer, don't add new";
 				gst_object_unref(audioMixer);
+			}
 
 
 			// create elements for audio stream
@@ -465,7 +480,7 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			Q_ASSERT(audioconvert);
 			GstElement *volume = makeElement("volume", *pppt, id);
 			Q_ASSERT(volume);
-			qDebug() << "padAdded - audio volume level [0.0-1.0]: " << pSource->volume;
+			qDebug() << sDebugPrefix << "padAdded - audio volume level [0.0-1.0]: " << pSource->volume;
 			g_object_set(G_OBJECT(volume), "volume", pSource->volume, NULL);
 
 			gst_bin_add_many(GST_BIN(pSource->pipeline()), audioresample, audioconvert, volume, NULL);
@@ -485,19 +500,19 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			Q_ASSERT(audioMixer);
 			gst_element_link(volume, audioMixer);	// audioMixer already linked with audioSink
 			if (!gst_element_sync_state_with_parent(audioMixer))
-				qCritical() << "Cannot sync audioMixer with pipeline state";
+				qCritical() << sDebugPrefix << "Cannot sync audioMixer with pipeline state";
 
 			audioSink = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("osxaudiosink", HPlayerPositionType::Control, id)));
 			Q_ASSERT(audioSink);
 			if (!gst_element_sync_state_with_parent(audioSink))
-				qCritical() << "Cannot sync audioSink with pipeline state";
+				qCritical() << sDebugPrefix << "Cannot sync audioSink with pipeline state";
 
 			if (!gst_element_sync_state_with_parent(audioresample))
-				qCritical() << "Cannot sync audioresample with pipeline state";
+				qCritical() << sDebugPrefix << "Cannot sync audioresample with pipeline state";
 			if (!gst_element_sync_state_with_parent(audioconvert))
-				qCritical() << "Cannot sync audioconvert with pipeline state";
+				qCritical() << sDebugPrefix << "Cannot sync audioconvert with pipeline state";
 			if (!gst_element_sync_state_with_parent(volume))
-				qCritical() << "Cannot sync volume with pipeline state";
+				qCritical() << sDebugPrefix << "Cannot sync volume with pipeline state";
 
 			gst_object_unref(audioMixer);
 			gst_object_unref(audioSink);
@@ -569,21 +584,6 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_SEGMENT_DONE)
 	{
 		qDebug() << "busCallback: SEGMENT_DONE";
-		//qDebug() << "busCallback: SEGMENT_DONE  Running time is " << (gst_clock_get_time(gst_element_get_clock(pStimPipeline->pipeline())) - gst_element_get_base_time(pStimPipeline->pipeline()));
-
-/*
-		QMutexLocker(&pdata->mutex);
-		qDebug() << "busCallback: SEGMENT DONE from "<< GST_MESSAGE_SRC_NAME(msg);
-		GstElement *decodebin = gst_bin_get_by_name(GST_BIN(pdata->pipeline), "decodebin");
-		Q_ASSERT(decodebin);
-		if (!gst_element_seek(decodebin, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
-		{
-			qCritical() << "busCallback: SEEK FAILED";
-		}
-		else
-			qCritical() << "busCallback: SEEK OK";
-		gst_object_unref(decodebin);
-		*/
 	}
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_APPLICATION)
 	{
@@ -597,10 +597,6 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			{
 				qCritical() << "busCallback: non-flushing segment seek on element " << elementName << " FAILED";
 			}
-//			else
-//			{
-//				qDebug() << "busCallback: non-flushing segment seek on element " << elementName << " SUCCESS";
-//			}
 			gst_object_unref(element);
 		}
 		else if (gst_message_has_name (msg, "DoFlushingSegmentSeek"))
@@ -613,10 +609,6 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			{
 				qCritical() << "busCallback: flushing segment seek on element " << elementName << " FAILED";
 			}
-//			else
-//			{
-//				qDebug() << "busCallback: non-flushing segment seek on element " << elementName << " SUCCESS";
-//			}
 			gst_object_unref(element);
 		}
 	}
@@ -638,7 +630,7 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 
 		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
 		{
-			QMutexLocker(pSource->stimPipeline()->mutex());
+			QMutexLocker locker(pSource->stimPipeline()->mutex());
 			if (pSource->bLoop)
 			{
 				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment-done event on pad " << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
@@ -733,7 +725,7 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 		else if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
 		{
 			qDebug() << "eventProbeDoNothingCB: segment on pad "  << GST_PAD_NAME(pad);// << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-			QMutexLocker(pSource->stimPipeline()->mutex());
+			QMutexLocker locker(pSource->stimPipeline()->mutex());
 			if (pSource->bLoop)
 			{
 				const GstSegment *segment;
