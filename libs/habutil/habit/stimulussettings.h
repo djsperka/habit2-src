@@ -48,6 +48,7 @@ namespace Habit {
 
 
 		friend bool operator==(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
+		friend bool operator!=(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
 
 	private:
 		int id_;
@@ -61,7 +62,8 @@ namespace Habit {
 	QDataStream & operator>> (QDataStream& stream, StimulusSettings& settings);
 	QTextStream & operator<< (QTextStream& stream, StimulusSettings settings);
 	QTextStream & operator>> (QTextStream& stream, StimulusSettings& settings);
-	bool operator==(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
+	bool operator==(const Habit::StimulusSettings& lhs, const Habit::StimulusSettings& rhs);
+	bool operator!=(const Habit::StimulusSettings& lhs, const Habit::StimulusSettings& rhs);
 
 
 //	typedef QList<StimulusSettings> StimulusSettingsList;

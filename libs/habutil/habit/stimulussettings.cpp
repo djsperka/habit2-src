@@ -245,6 +245,9 @@ bool Habit::operator==(const Habit::StimulusSettings& lhs, const Habit::Stimulus
 	return bleft && bcenter && bright && bsound && bother;
 }
 
-
+bool Habit::operator!=(const Habit::StimulusSettings& lhs, const Habit::StimulusSettings& rhs)
+{
+	return !(lhs == rhs);
+}
 
 
