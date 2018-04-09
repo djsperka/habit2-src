@@ -23,7 +23,7 @@ HGMM& HGMM::instance()
 
 HGMM::HGMM(PipelineFactory factory)
 : m_sdinfo()
-, m_bUseISS(false)
+//, m_bUseISS(false)
 , m_pCenter(NULL)
 , m_pLeft(NULL)
 , m_pRight(NULL)
@@ -91,11 +91,11 @@ void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 	reset();
 	reset(settings.getStimulusDisplayInfo(), dir);
 
-	// Need to know if AG is used. If it is, add attention getter settings to media manager
-	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
-	{
-		addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus());
-	}
+//	// Need to know if AG is used. If it is, add attention getter settings to media manager
+//	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
+//	{
+		addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getAttentionGetterSettings().isSoundOnly());
+//	}
 
 	QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
 	while (phaseIterator.hasNext())
@@ -166,7 +166,7 @@ void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1)
 	if (p1)
 	{
 		// have left and right
-		m_pCenter = NULL;
+		m_pCenter = p0;
 		m_pLeft = p0;
 		m_pRight = p1;
 		// DON'T DO THIS HERE!
@@ -276,22 +276,32 @@ QList<unsigned int> HGMM::getContextStimList(int context)
 	return csl;
 }
 
-void HGMM::addStimuli(const Habit::StimuliSettings& ss, int context)
+void HGMM::addStimuli(const Habit::StimuliSettings& ss, int context, bool bForceSound)
 {
 	QListIterator<Habit::StimulusSettings> it(ss.stimuli());	// note: getting const HStimulusSettingsList&, it.next() will be const StimulusSettings&
 	while (it.hasNext())
-		addStimulus(it.next(), context);
+		addStimulus(it.next(), context, bForceSound);
 	return;
 }
 
-unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& stimulus, int context)
+unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& stimulus, int context, bool bForceSound)
 {
 	HPipeline *pipeline;
 
 	qDebug() << "HGMM::addStimulus(" << key << "): " << stimulus.getName() << " context " << context << " layout type " << getStimulusLayoutType().name();
 
 	// create pipeline
-	pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_root, (context < 0), this);
+	if (!bForceSound)
+	{
+		pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_root, (context < 0), this);
+	}
+	else
+	{
+		// Modify a copy of StimulusDisplayInfo to ensure sound is used.
+		Habit::StimulusDisplayInfo info(m_sdinfo);
+		info.setUseISS(true);
+		pipeline = m_pipelineFactory(key, stimulus, info, m_root, (context < 0), this);
+	}
 
 	// Add helper to map
 	m_mapPipelines.insert(key, pipeline);
@@ -302,37 +312,114 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 	return key;
 }
 
-unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QColor& color, int context)
+unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QColor& color, int context, bool bForceSound)
 {
-	HPipeline *pipeline;
-	Habit::StimulusSettings stimulus(name, color);
+	Habit::StimulusSettings ss(name, color);
+	return addStimulus(key, ss, context, bForceSound);
+//	HPipeline *pipeline;
+//	Habit::StimulusSettings stimulus(name, color);
+//
+//	qDebug() << "HGMM::addStimulus(" << key << "): solid color stimulus - " << color << " context " << context;
+//zzzzzzzzzz
+//	pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_root, (context < 0), this);
+//
+//	// Add helper to map
+//	m_mapPipelines.insert(key, pipeline);
+//
+//	// add key to context map
+//	m_mapContext.insert(context, key);
+//
+//	return key;
+}
 
-	qDebug() << "HGMM::addStimulus(" << key << "): solid color stimulus - " << color << " context " << context;
+unsigned int HGMM::addStimulus(const Habit::StimulusSettings& ss, int context, bool bForceSound)
+{
+	return addStimulus(nextKey(), ss, context, bForceSound);
+}
 
-	pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_root, (context < 0), this);
+unsigned int HGMM::addStimulus(const QString& name, const QColor& color, int context, bool bForceSound)
+{
+	return addStimulus(nextKey(), name, color, context, bForceSound);
+}
 
-	// Add helper to map
-	m_mapPipelines.insert(key, pipeline);
+bool HGMM::getContext(unsigned int key, int& context)
+{
+	bool bFound = false;
+	// iterate through all pairs in m_mapContext
+	QMapIterator<int, unsigned int> i(m_mapContext);
+	while (i.hasNext() && !bFound)
+	{
+		i.next();
+		if (i.value() == key)
+		{
+		  bFound = true;
+		  context = i.key();
+		}
+	}
+	return bFound;
+}
 
-	// add key to context map
-	m_mapContext.insert(context, key);
+bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stimulus, bool bForceSound)
+{
+	HPipeline *pipelineToBeReplaced = NULL;
+	HPipeline *pipelineTheNewOne = NULL;
+	int context;
+	bool bOK = false;
+
+	qDebug() << "HGMM::replaceStimulus(" << key << "): " << stimulus.getName();
+
+	// first, make sure there is already a pipeline with that key.
+	if (m_mapPipelines.contains(key))
+	{
+		pipelineToBeReplaced = m_mapPipelines.value(key);
+
+		// Now get the context. If this fails, something is wrong, because every stim should have one.
+		if (!getContext(key, context))
+		{
+			qCritical() << "Key is not found in context map!";
+			Q_ASSERT(true);
+		}
+		else
+		{
+			// create pipeline. Use sdi from original -- it may have a modified sdi (if sound-only ag)
+			Habit::StimulusDisplayInfo info(pipelineToBeReplaced->getStimulusDisplayInfo());
+			info.setUseISS(bForceSound);
+			pipelineTheNewOne = m_pipelineFactory(key, stimulus, info, m_root, (context < 0), this);
+
+			// replace pipeline in map
+			// don't add key to context map, its already there
+			m_mapPipelines[key] = pipelineTheNewOne;
+
+			// clean up and destroy old one
+			if (key == m_backgroundKey || key == m_defaultKey || key == m_agKey)
+			{
+				HStaticStimPipeline *p;
+				p = dynamic_cast<HStaticStimPipeline *>(pipelineToBeReplaced);
+				if (p)
+				{
+					p->forceCleanup();
+				}
+			}
+			else
+			{
+				pipelineToBeReplaced->cleanup();
+			}
+			delete pipelineToBeReplaced;
+
+			bOK = true;
+		}
+	}
+	else
+	{
+		qCritical() << "HGMM::initialize(): key " << key << " not found!";
+	}
 
 	return key;
 }
 
-unsigned int HGMM::addStimulus(const Habit::StimulusSettings& ss, int context)
+unsigned int HGMM::addAG(const Habit::StimulusSettings& ssAG, bool bForceSound)
 {
-	return addStimulus(nextKey(), ss, context);
-}
-
-unsigned int HGMM::addStimulus(const QString& name, const QColor& color, int context)
-{
-	return addStimulus(nextKey(), name, color, context);
-}
-
-unsigned int HGMM::addAG(const Habit::StimulusSettings& ssAG)
-{
-	m_agKey = addStimulus(ssAG, -1);
+	m_agKey = addStimulus(ssAG, -1, bForceSound);
 	preroll(m_agKey);
 	return m_agKey;
 }

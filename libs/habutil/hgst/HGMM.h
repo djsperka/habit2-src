@@ -39,7 +39,7 @@ class HGMM: public QObject
 
 	Habit::StimulusDisplayInfo m_sdinfo;
 	QDir m_root;
-	bool m_bUseISS;
+	//bool m_bUseISS;
 	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
 	HPipeline *m_pipelineCurrent;
 	GThread *m_gthread;
@@ -73,9 +73,9 @@ class HGMM: public QObject
 	// Get the next key for m_mapStim. The values are doled out sequentially. Nothing special,
 	// this is a convenience.
 	unsigned int nextKey();
-	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss, int context);
-	unsigned int addStimulus(unsigned int key, const QString& name, const QColor& color, int context);
-
+	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss, int context, bool bForceSound = false);
+	unsigned int addStimulus(unsigned int key, const QString& name, const QColor& color, int context, bool bForceSound = false);
+	bool getContext(unsigned int key, int& context);
 	bool m_bPendingAG;
 	bool m_bPendingStim;
 	unsigned int m_iPendingStimKey;
@@ -118,10 +118,11 @@ public:
 	// Get reference to singleton instance of HGMM.
 	static HGMM& instance();
 
-	virtual unsigned int addAG(const Habit::StimulusSettings& ags);
-	virtual void addStimuli(const Habit::StimuliSettings& ss, int context);
-	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context);
-	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context);
+	virtual unsigned int addAG(const Habit::StimulusSettings& ags, bool bForceSound = false);
+	virtual void addStimuli(const Habit::StimuliSettings& ss, int context, bool bForceSound = false);
+	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context, bool bForceSound = false);
+	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context, bool bForceSound = false);
+	virtual bool replaceStimulus(unsigned int key, const Habit::StimulusSettings& stimulus, bool bForceSound = false);
 
 	unsigned int getAGKey() const { return m_agKey; };
 	unsigned int getBackgroundKey() const { return m_backgroundKey; };
