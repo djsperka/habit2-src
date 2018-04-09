@@ -6,18 +6,10 @@
  */
 
 #include "HDBException.h"
-
-ostringstream Habit::HDBException::m_cnvt;
+#include <iostream>
 
 Habit::HDBException::HDBException(const string& reason, const string& sql, const string& sqlerror)
-: exception()
+: runtime_error(reason + '\n' + sql + '\n' + sqlerror)
 {
-	m_cnvt.str("");
-	m_cnvt << reason << ":" << endl << "SQL=" << sql << endl << "SQL-error=" << sqlerror;
-}
-
-const char *Habit::HDBException::what() const throw()
-{
-	return m_cnvt.str().c_str();
 }
 
