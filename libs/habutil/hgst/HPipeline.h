@@ -34,6 +34,7 @@ public:
 	const Habit::StimulusSettings& stimulusSettings() const { return m_ss; };
 	bool iss() const { return m_sdinfo.getUseISS(); }
 	const HStimulusLayoutType& stimulusLayoutType() const { return m_sdinfo.getStimulusLayoutType(); }
+	const Habit::StimulusDisplayInfo& getStimulusDisplayInfo() const { return m_sdinfo; }
 	// must cleanup and initialize again after calling this
 	void setStimulusSettings(const Habit::StimulusSettings& ss) { m_ss = ss; }
 
