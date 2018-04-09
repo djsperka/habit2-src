@@ -334,7 +334,8 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 	const int iAddColumnToControlBarOptions						= 2000019;
 	const int iAddFixedISIAttentionGetter						= 2000020;
 	const int iPhaseReOrg										= 2000021;
-	const int iLatestVersion									= 2000021;
+	const int iAGSColumns										= 2000022;
+	const int iLatestVersion									= 2000022;
 	int iVersion = getDBVersion();
 
 	// Will any updates be required? If so, close db, make a copy, then reopen.
@@ -778,7 +779,6 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 				}
 
 
-
 				if (result && iVersion < iPhaseReOrg)
 				{
 					QSqlQuery qq;
@@ -862,6 +862,31 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 					}
 				}
 
+				if (result && iVersion < iAGSColumns)
+				{
+					// Add columns to attention_setup 'use_background' and 'use_none'
+					db.transaction();
+					QSqlQuery q0("alter table attention_setup add column use_sound_only BOOL DEFAULT false");
+					QSqlQuery q1("alter table attention_setup add column use_none BOOL DEFAULT false");
+					QSqlQuery q2("insert into habit_version (version) values(?)");
+					q2.bindValue(0, iAGSColumns);
+					q2.exec();
+					if (!q0.lastError().isValid() && !q1.lastError().isValid() && !q2.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAGSColumns;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddStimulusDisplayColumns;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
 
 
 
