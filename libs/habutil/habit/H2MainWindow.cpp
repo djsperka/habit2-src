@@ -15,6 +15,8 @@
 #include <QRegExp>
 #include <QListIterator>
 #include <QtGlobal>
+#include <QList>
+#include <QListIterator>
 #if QT_VERSION < 0x050000
 #include <QDesktopServices>
 #else
@@ -472,6 +474,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	Habit::ExperimentSettings experimentSettings;
 	HEventLog eventLog;
 	HGMM *pMediaManager = NULL;
+	QList<QWidget *> deleteList;	// list of things to be cleaned up after expt run
 	bool bStimInDialog = false;	// can be set on command line, or in RunSettingsDialog
 	QString expt = m_pExperimentListWidget->selectedExperiment();	// the experiment to run
 	if (expt.isEmpty())
@@ -515,11 +518,25 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 		if (i == QDialog::Accepted)
 		{
 			bStimInDialog = m_bStimInDialog || m_pRunSettingsDialog->isDisplayStimInWindow();
+#define ORIGINAL_WAY_OF_DOING_IT
+#ifdef ORIGINAL_WAY_OF_DOING_IT
 			if (bStimInDialog)
 				pMediaManager = createMediaManager(experimentSettings, 320, 240);
 			else
 				pMediaManager = createMediaManager(experimentSettings);
+#else
+			// new way of doing it
 
+			// Two things have to happen, not necessarily in this order.
+			// First, HGMM::reset - this prepares gst pipelines (only default, background, AG, and first stim of each phase are prerolled.
+			// Second, widget(s) must be created and passed to the HGMM.
+			//    The widgets come on two varieties: embedded in a dialog, and not owned top-level.
+			//    When embedded in a dialog, the dialog itself must be deleted when experiment is done, as it is not owned by anything else. (???)
+			// If widgets are in a dialog, then they will be deleted when the dialog is deleted, so don't delete then separately
+
+			// if stim in dialog:
+			//    create
+#endif
 			// m_ControlPanel has no parent -- DELETE
 			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, NULL);
 
@@ -561,6 +578,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			if (bStimInDialog)
 			{
 				pStimulusDisplayDialog = pMediaManager->createStimulusWidget();
+				deleteList.append(pStimulusDisplayDialog);
 				qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
 				//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
 				pStimulusDisplayDialog->show();
@@ -568,6 +586,15 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			else
 			{
 				adaptVideoWidgets(pMediaManager);
+				if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+				{
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Center));
+				}
+				else if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+				{
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Left));
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Right));
+				}
 			}
 
 			// This is where the experiment is actually run.
@@ -580,6 +607,9 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 			qDebug() << "pMediaManager->stop()";
 			pMediaManager->stop();
+			qDeleteAll(deleteList.begin(), deleteList.end());
+			deleteList.clear();
+#if 0
 			if (pStimulusDisplayDialog)
 				delete pStimulusDisplayDialog;
 			else
@@ -595,6 +625,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				if (w) delete w;
 				qDebug() << " delete widgets done";
 			}
+#endif
 
 
 			if (cpStatus == QDialog::Accepted)
