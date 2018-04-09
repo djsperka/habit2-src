@@ -16,12 +16,9 @@ using namespace GUILib;
 HStimulusSettingsEditor::HStimulusSettingsEditor(const Habit::StimulusSettings& settings, const Habit::StimulusDisplayInfo& sdi, const QStringList& names, const QString& title, QWidget *parent)
 : QDialog(parent)
 , m_originalSettings(settings)
-, m_sdi(sdi)
 , m_names(names)
 {
 	m_pStimulusSettingsWidget = new HStimulusSettingsWidget(settings, sdi, parent);
-	m_pPreviewWidget = new QWidget;
-
 	setWindowTitle(title);
 
 	m_pbDone = new QPushButton("Done");
@@ -33,7 +30,31 @@ HStimulusSettingsEditor::HStimulusSettingsEditor(const Habit::StimulusSettings& 
 
 	QVBoxLayout* v = new QVBoxLayout();
 	v->addWidget(m_pStimulusSettingsWidget);
-	v->addWidget(m_pPreviewWidget);
+	v->addLayout(hButtons);
+	setLayout(v);
+
+	connect(m_pbCancel, SIGNAL(clicked()), this, SLOT(reject()));
+	connect(m_pbDone, SIGNAL(clicked()), this, SLOT(doneClicked()));
+}
+
+
+HStimulusSettingsEditor::HStimulusSettingsEditor(const Habit::StimulusSettings& settings, const HPlayerPositionType& ppt, const QStringList& names, const QString& title, QWidget *parent)
+: QDialog(parent)
+, m_originalSettings(settings)
+, m_names(names)
+{
+	m_pStimulusSettingsWidget = new HStimulusSettingsWidget(settings, ppt, parent);
+	setWindowTitle(title);
+
+	m_pbDone = new QPushButton("Done");
+	m_pbCancel = new QPushButton("Cancel");
+	QHBoxLayout *hButtons = new QHBoxLayout;
+	hButtons->addStretch(1);
+	hButtons->addWidget(m_pbCancel);
+	hButtons->addWidget(m_pbDone);
+
+	QVBoxLayout* v = new QVBoxLayout();
+	v->addWidget(m_pStimulusSettingsWidget);
 	v->addLayout(hButtons);
 	setLayout(v);
 

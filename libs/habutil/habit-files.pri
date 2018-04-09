@@ -66,7 +66,8 @@
 	habit/HHabituationCriteriaWidget.h \
 	habit/HHabituationSettingsWidget.h \
 	habit/HExperimentNameDialog.h \
-	habit/HRunSettingsTestingWidget.h
+	habit/HRunSettingsTestingWidget.h \
+	habit/HIntertrialIntervalSettingsWidget.h
 	
 
 SOURCES += \
@@ -132,7 +133,9 @@ SOURCES += \
 	habit/HHabituationCriteriaWidget.cpp \
 	habit/HHabituationSettingsWidget.cpp \
 	habit/HExperimentNameDialog.cpp \
-	habit/HRunSettingsTestingWidget.cpp
+	habit/HRunSettingsTestingWidget.cpp \
+	habit/HIntertrialIntervalSettingsWidget.cpp
+	
 
  FORMS =		\
  	habit/controlbaroptionsform.ui \
@@ -157,5 +160,6 @@ SOURCES += \
  	habit/HHabituationTypeWidget.ui \
  	habit/HHabituationCriteriaForm.ui \
  	habit/GlobalPreferencesDialog.ui \
- 	habit/HRunSettingsTestingForm.ui
+ 	habit/HRunSettingsTestingForm.ui \
+ 	habit/HIntertrialIntervalSettingsForm.ui
  

@@ -158,13 +158,16 @@ void HStimulusSettingsListWidget::editItem(const QModelIndex& index)
 	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(m_list.at(index.row()), m_sdi, names, QString("Modify Stimulus"), this);
 	if (pEditor->exec() == QDialog::Accepted)
 	{
-		// update the stimulus settings in the saved list
-		m_list[index.row()] = pEditor->getStimulusSettings();
+		Habit::StimulusSettings ss = pEditor->getStimulusSettings();
+		if (m_list[index.row()] != ss)
+		{
+			// update the stimulus settings in the saved list
+			m_list[index.row()] = ss;
 
-		// Notify ListView that something has changed
-		m_pmodel->changed(index, index);
+			// Notify ListView that something has changed
+			m_pmodel->changed(index, index);
+		}
 	}
-
 }
 
 void HStimulusSettingsListWidget::newClicked()
@@ -218,17 +221,15 @@ void HStimulusSettingsListWidget::clearSelection()
 
 void HStimulusSettingsListWidget::rowsInserted(const QModelIndex &parent, int first, int last)
 {
-	qDebug() << "rowsInserted: " << first << "-" << last << " there are " << m_pmodel->rowCount();
 	emit stimulusAdded(first);
 }
 
 void HStimulusSettingsListWidget::rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
 {
-	qDebug() << "rowsAboutToBeRemoved: " << first << "-" << last << " there are " << m_pmodel->rowCount();
 	emit stimulusAboutToBeRemoved(first);
 }
 
 void HStimulusSettingsListWidget::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
-	qDebug() << "dataChanged: " << topLeft << "-" << bottomRight;
+	emit stimulusSettingsChanged(topLeft.row());
 }

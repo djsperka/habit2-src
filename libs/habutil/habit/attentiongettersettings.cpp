@@ -3,6 +3,7 @@
 
 // version string for input/output. See operator<<, operator>>
 static const QString f_sVersion2("AGS2");
+static const QString f_sVersion2a("AGS2a");
 
 Habit::AttentionGetterSettings::AttentionGetterSettings()
 : id_(-1)
@@ -11,6 +12,8 @@ Habit::AttentionGetterSettings::AttentionGetterSettings()
 , backGroundColor_(0, 0, 0, 0)
 , isFixedISI_(false)
 , isiMS_(0)
+, isSoundOnly_(false)
+, isNoISI_(false)
 {
 }
 
@@ -22,6 +25,8 @@ Habit::AttentionGetterSettings::AttentionGetterSettings(const AttentionGetterSet
 , backGroundColor_(ags.getBackGroundColor())
 , isFixedISI_(ags.isFixedISI())
 , isiMS_(ags.getFixedISIMS())
+, isSoundOnly_(ags.isSoundOnly())
+, isNoISI_(ags.isNoISI())
 {
 }
 
@@ -35,6 +40,8 @@ Habit::AttentionGetterSettings& Habit::AttentionGetterSettings::operator=(const 
 		setBackGroundColor(rhs.getBackGroundColor());
 		setIsFixedISI(rhs.isFixedISI());
 		setFixedISIMS(rhs.getFixedISIMS());
+		setIsSoundOnly(rhs.isSoundOnly());
+		setIsNoISI(rhs.isNoISI());
 	}
 	return *this;
 }
@@ -67,9 +74,30 @@ void Habit::AttentionGetterSettings::setFixedISIMS(int ms)
 	isiMS_ = ms;
 }
 
+bool Habit::AttentionGetterSettings::isSoundOnly() const
+{
+	return isSoundOnly_;
+}
+
+void Habit::AttentionGetterSettings::setIsSoundOnly(bool b)
+{
+	isSoundOnly_ = b;
+}
+
+bool Habit::AttentionGetterSettings::isNoISI() const
+{
+	return isNoISI_;
+}
+
+void Habit::AttentionGetterSettings::setIsNoISI(bool b)
+{
+	isNoISI_ = b;
+}
+
 QDataStream & Habit::operator<< (QDataStream& stream, const AttentionGetterSettings& settings)
 {
-	stream << f_sVersion2 << settings.getId() << settings.isAttentionGetterUsed() << settings.getAttentionGetterStimulus() << settings.getBackGroundColor() << settings.isFixedISI() << settings.getFixedISIMS();
+	//stream << f_sVersion2 << settings.getId() << settings.isAttentionGetterUsed() << settings.getAttentionGetterStimulus() << settings.getBackGroundColor() << settings.isFixedISI() << settings.getFixedISIMS();
+	stream << f_sVersion2a << settings.getId() << settings.isAttentionGetterUsed() << settings.getAttentionGetterStimulus() << settings.getBackGroundColor() << settings.isFixedISI() << settings.getFixedISIMS() << settings.isSoundOnly() << settings.isNoISI();
 	return stream;
 }
 
@@ -82,6 +110,8 @@ QDataStream & Habit::operator>> (QDataStream& stream, AttentionGetterSettings& s
 	QString sVersion;
 	bool bFixedISI;
 	int isiMS;
+	bool bSoundOnly = false;
+	bool bNoISI = false;
 
 	// Save position in stream in case this is an old
 	qint64 pos = stream.device()->pos();
@@ -95,6 +125,20 @@ QDataStream & Habit::operator>> (QDataStream& stream, AttentionGetterSettings& s
 		settings.setBackGroundColor(color);
 		settings.setIsFixedISI(bFixedISI);
 		settings.setFixedISIMS(isiMS);
+		settings.setIsSoundOnly(false);
+		settings.setIsNoISI(false);
+	}
+	else if (sVersion == f_sVersion2a)
+	{
+		stream >> id >> b >> ss >> color >> bFixedISI >> isiMS >> bSoundOnly >> bNoISI;
+		settings.setId(id);
+		settings.setUseAttentionGetter(b);
+		settings.setAttentionGetterStimulus(ss);
+		settings.setBackGroundColor(color);
+		settings.setIsFixedISI(bFixedISI);
+		settings.setFixedISIMS(isiMS);
+		settings.setIsSoundOnly(bSoundOnly);
+		settings.setIsNoISI(bNoISI);
 	}
 	else
 	{
@@ -109,6 +153,8 @@ QDataStream & Habit::operator>> (QDataStream& stream, AttentionGetterSettings& s
 		settings.setBackGroundColor(color);
 		settings.setIsFixedISI(false);
 		settings.setFixedISIMS(0);
+		settings.setIsSoundOnly(false);
+		settings.setIsNoISI(false);
 	}
 	return stream;
 }
@@ -120,7 +166,9 @@ bool Habit::operator==(const Habit::AttentionGetterSettings& lhs, const Habit::A
 			lhs.getBackGroundColor() == rhs.getBackGroundColor() &&
 			lhs.getAttentionGetterStimulus() == rhs.getAttentionGetterStimulus() &&
 			lhs.isFixedISI() == rhs.isFixedISI() &&
-			lhs.getFixedISIMS() == rhs.getFixedISIMS());
+			lhs.getFixedISIMS() == rhs.getFixedISIMS() &&
+			lhs.isSoundOnly() == rhs.isSoundOnly() &&
+			lhs.isNoISI() == rhs.isNoISI());
 }
 
 

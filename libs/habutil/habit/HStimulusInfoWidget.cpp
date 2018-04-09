@@ -68,6 +68,8 @@ Habit::StimulusInfo GUILib::HStimulusInfoWidget::getStimulusInfo()
 	info.setVolume(ui->sliderVolume->value());
 	info.setLoopPlayBack(ui->checkboxLoop->isChecked());
 	info.setIsBackground(ui->cbUseBackgroundColor->isChecked());
+	// We do not do anything with color, but we should set it same as the original so it won't appear to have changed.
+	info.setColor(m_info.getColor());
 	return info;
 }
 

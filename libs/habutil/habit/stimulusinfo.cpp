@@ -43,8 +43,8 @@ StimulusInfo::StimulusInfo(const QColor& color)
 , fileName_(QString())
 , isLoopPlayBack_(false)
 , audioBalance_(0)
-, isBackground_(false)
-, isColor_(true)
+, isBackground_(true)
+, isColor_(false)
 , color_(color)
 {}
 

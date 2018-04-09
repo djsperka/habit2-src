@@ -26,15 +26,14 @@ namespace GUILib
 		void create();
 		void connections();
 
-		const Habit::StimulusSettings& m_originalSettings;
-		const Habit::StimulusDisplayInfo& m_sdi;
-		const QStringList& m_names;
+		const Habit::StimulusSettings m_originalSettings;
+		const QStringList m_names;
 		HStimulusSettingsWidget* m_pStimulusSettingsWidget;
-		QWidget* m_pPreviewWidget;	// placeholder for now
 		QPushButton *m_pbDone;
 		QPushButton *m_pbCancel;
 	public:
-		HStimulusSettingsEditor(const Habit::StimulusSettings& settings, const Habit::StimulusDisplayInfo& sdi, const QStringList& names, const QString& title = QString("Edit Stimulus Settings"), QWidget *parent=NULL);
+		HStimulusSettingsEditor(const Habit::StimulusSettings& settings, const Habit::StimulusDisplayInfo& sdi, const QStringList& names = QStringList(), const QString& title = QString("Edit Stimulus Settings"), QWidget *parent=NULL);
+		HStimulusSettingsEditor(const Habit::StimulusSettings& settings, const HPlayerPositionType& ppt, const QStringList& names = QStringList(), const QString& title = QString("Edit Stimulus Settings"), QWidget *parent=NULL);
 		virtual ~HStimulusSettingsEditor() {};
 		Habit::StimulusSettings getStimulusSettings();
 	protected slots:

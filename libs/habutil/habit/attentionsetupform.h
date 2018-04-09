@@ -6,6 +6,7 @@
 #include "stimulusdisplayinfo.h"
 #include "HStimulusSettingsWidget.h"
 #include "HStimulusPreviewWidget.h"
+#include "HIntertrialIntervalSettingsWidget.h"
 #include <QtGlobal>
 #if QT_VERSION >= 0x050000
 #include <QtWidgets>
@@ -32,28 +33,18 @@ private:
 	void initialize();
 	void updatePreviewWidget();
 public:
-	Habit::AttentionGetterSettings getConfigurationObject();
-	//void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
+	Habit::AttentionGetterSettings getAttentionGetterSettings();
 
-private slots:
-	void stimulusLayoutTypeChanged(int);
+public slots:
+	void stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo& info);
 	void stimulusSettingsChanged();
-	void toggleNoISI(bool checked);
-	void toggleUseAG(bool checked);
-	void toggleUseISI(bool checked);
-	void toggleSoundOnlyAG(bool checked);
 
 private:
 	Habit::AttentionGetterSettings m_agSettings;
+	Habit::StimulusSettings m_ssCurrent;	// as they are modified during usage of this form, the latest is kept here. Used in getAttentionGetterSettings
 	Habit::StimulusDisplayInfo m_stimulusDisplayInfo;
-	QGroupBox *m_pStimulusGroup;
-	HStimulusSettingsWidget* m_pStimulusSettingsWidget;
+	HIntertrialIntervalSettingsWidget *m_pIntertrialIntervalSettingsWidget;
 	HStimulusPreviewWidget* m_pStimulusPreviewWidget;
-	QRadioButton *m_prbNoISI;
-	QRadioButton *m_prbUseAG;
-	QRadioButton *m_prbUseISI;
-	QRadioButton *m_prbSoundOnlyAG;
-	QLineEdit *m_plineeditISI;
 };
 }
 #endif // ATTENTIONSETUPFORM_H

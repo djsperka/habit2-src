@@ -94,12 +94,11 @@ void HStimuliSettingsWidget::connections()
 	connect(m_pStimulusOrderListWidget, SIGNAL(previewOrder(int)), this, SLOT(previewOrder(int)));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(clearStimulus()), this, SLOT(clearStimulus()));
 	connect(m_pStimulusOrderListWidget, SIGNAL(clearStimulus()), this, SLOT(clearStimulus()));
-	//connect(m_pStimulusSettingsListWidget, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentStimulusSelectionChanged(const QModelIndex&, const QModelIndex&)));
-	//connect(m_pStimulusOrderListWidget, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentOrderSelectionChanged(const QModelIndex&, const QModelIndex&)));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusSelectionChanged()), this, SLOT(stimulusSelectionChanged()));
 	connect(m_pStimulusOrderListWidget, SIGNAL(orderSelectionChanged()), this, SLOT(orderSelectionChanged()));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusAdded(int)), this, SLOT(stimulusAdded(int)));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusAboutToBeRemoved(int)), this, SLOT(stimulusAboutToBeRemoved(int)));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusSettingsChanged(int)), this, SLOT(stimulusSettingsChanged(int)));
 
 	// when preview widget "stop" button is hit, the current playing stim is stopped and it switches to bkgd.
 	connect(m_pStimulusPreviewWidget, SIGNAL(stopped()), this, SLOT(previewStopButtonHit()));
@@ -116,6 +115,17 @@ void HStimuliSettingsWidget::stimulusAdded(int row)
 	HGMM::instance().addStimulus(m_stimuli.stimuli().at(row), m_context);
 }
 
+void HStimuliSettingsWidget::stimulusSettingsChanged(int row)
+{
+	// When this happens, force preview to the background
+	clearStimulus();
+
+	// replace stimulus in media manager
+	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
+	HGMM::instance().replaceStimulus(list.at(row), m_stimuli.stimuli().at(row));
+	m_pStimulusPreviewWidget->preview(list.at(row), true);
+
+}
 
 // Called before the StimulusSettingsListModel removes a row (a stimulus) from its list.
 // Since that list is a reference to the master list held here, this is the place to

@@ -48,8 +48,8 @@ void GUILib::HStimulusPreviewWidget::initialize(const Habit::StimulusDisplayInfo
 	m_pbPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
 	m_pbPlay = new QPushButton();
 	m_pbPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-	m_pbStop = new QPushButton();
-	m_pbStop->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+//	m_pbStop = new QPushButton();
+//	m_pbStop->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
 	m_pbRewind = new QPushButton();
 	m_pbRewind->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
 	m_labelStimName = new QLabel("Stimulus: ");
@@ -60,15 +60,15 @@ void GUILib::HStimulusPreviewWidget::initialize(const Habit::StimulusDisplayInfo
 	hlb->addWidget(m_pbRewind);
 	hlb->addWidget(m_pbPlay);
 	hlb->addWidget(m_pbPause);
-	hlb->addWidget(m_pbStop);
+	//hlb->addWidget(m_pbStop);
 	hlb->addWidget(m_pbNext);
 
 	// connect up all the buttons
 	connect(m_pbPrev, SIGNAL(clicked()), this, SLOT(prevClicked()));
 	connect(m_pbNext, SIGNAL(clicked()), this, SLOT(nextClicked()));
-	connect(m_pbPause, SIGNAL(clicked()), this, SLOT(stopClicked()));
+	connect(m_pbPause, SIGNAL(clicked()), this, SLOT(pauseClicked()));
 	connect(m_pbPlay, SIGNAL(clicked()), this, SLOT(playClicked()));
-	connect(m_pbStop, SIGNAL(clicked()), this, SLOT(stopClicked()));
+	//connect(m_pbStop, SIGNAL(clicked()), this, SLOT(stopClicked()));
 	connect(m_pbRewind, SIGNAL(clicked()), this, SLOT(rewindClicked()));
 
 	// Now do the layout for the entire thing
@@ -212,14 +212,14 @@ void GUILib::HStimulusPreviewWidget::updateNavigation()
 			m_pbPlay->setEnabled(false);
 			m_pbPause->setEnabled(true);
 			m_pbRewind->setEnabled(true);
-			m_pbStop->setEnabled(true);
+			//m_pbStop->setEnabled(true);
 		}
 		else
 		{
 			m_pbPlay->setEnabled(true);
 			m_pbPause->setEnabled(false);
 			m_pbRewind->setEnabled(false);
-			m_pbStop->setEnabled(false);
+			//m_pbStop->setEnabled(false);
 		}
 	}
 	else if (m_bListStimulus)
@@ -239,14 +239,14 @@ void GUILib::HStimulusPreviewWidget::updateNavigation()
 			m_pbPlay->setEnabled(false);
 			m_pbPause->setEnabled(true);
 			m_pbRewind->setEnabled(true);
-			m_pbStop->setEnabled(true);
+			//m_pbStop->setEnabled(true);
 		}
 		else
 		{
 			m_pbPlay->setEnabled(true);
 			m_pbPause->setEnabled(false);
 			m_pbRewind->setEnabled(false);
-			m_pbStop->setEnabled(false);
+			//m_pbStop->setEnabled(false);
 		}
 	}
 	else

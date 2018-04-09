@@ -356,7 +356,7 @@ Habit::ExperimentSettings HExperimentMain::getSettings()
 	Habit::ExperimentSettings settings;
 	settings.setId(m_settings.getId());
 	settings.setName(m_settings.getName());
-	settings.setAttentionGetterSettings(m_pAttentionSetupForm->getConfigurationObject());
+	settings.setAttentionGetterSettings(m_pAttentionSetupForm->getAttentionGetterSettings());
 	qDebug() << "HExperimentMain::getSettings - agsettings";
 	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
 	settings.setControlBarOptions(m_pControlBarOptionsForm->getConfigurationObject());

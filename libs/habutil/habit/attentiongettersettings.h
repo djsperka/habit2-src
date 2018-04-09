@@ -35,6 +35,10 @@ public:
     void setIsFixedISI(bool b);
     int getFixedISIMS() const;
     void setFixedISIMS(int ms);
+    bool isSoundOnly() const;
+    void setIsSoundOnly(bool b);
+    bool isNoISI() const;
+    void setIsNoISI(bool b);
     int getStimulusID() const;
     void setStimulusID(int stimulusID);
 	void loadFromDB(int experimentID);	// can throw HDBException
@@ -47,6 +51,8 @@ private:
 	QColor backGroundColor_;
 	bool isFixedISI_;
 	int isiMS_;
+	bool isSoundOnly_;
+	bool isNoISI_;
 	int stimulusID_;
 };
 

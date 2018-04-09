@@ -52,6 +52,7 @@ namespace GUILib
 		void stimulusAdded(int row);
 		void stimulusAboutToBeRemoved(int row);
 		void previewStopButtonHit();
+		void stimulusSettingsChanged(int rowid);
 	};
 }
 

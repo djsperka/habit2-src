@@ -50,6 +50,7 @@ namespace GUILib
 		void stimulusSelectionChanged();
 		void stimulusAdded(int row);
 		void stimulusAboutToBeRemoved(int row);
+		void stimulusSettingsChanged(int);
 
 	protected Q_SLOTS:
 		void editClicked();
