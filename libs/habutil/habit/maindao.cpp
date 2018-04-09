@@ -126,13 +126,13 @@ void MainDao::addOrUpdateAttentionGetterSettings(int experimentID, Habit::Attent
 	attentionGetterSettings.setStimulusID(attentionGetterSettings.getAttentionGetterStimulus().getId());
 	if(attentionGetterSettings.getId() > 0)
 	{
-		sql = "update attention_setup set use_attention_stimulus=?, stimulus_name=?, background_color=?, use_fixed_isi=?, isi_ms=?, stimulus_id=?"
+		sql = "update attention_setup set use_attention_stimulus=?, stimulus_name=?, background_color=?, use_fixed_isi=?, isi_ms=?, stimulus_id=?, use_sound_only=?, use_none=?"
 			" where id=? and experiment_id=?";
 	}
 	else
 	{
-		sql = "insert into attention_setup (use_attention_stimulus, stimulus_name, background_color, use_fixed_isi, isi_ms, stimulus_id, experiment_id)"
-			" values(?, ?, ?, ?, ?, ?, ?)";
+		sql = "insert into attention_setup (use_attention_stimulus, stimulus_name, background_color, use_fixed_isi, isi_ms, stimulus_id, use_sound_only, use_none, experiment_id)"
+			" values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 	QSqlQuery q;
 	q.prepare(sql);
@@ -142,6 +142,8 @@ void MainDao::addOrUpdateAttentionGetterSettings(int experimentID, Habit::Attent
 	q.addBindValue(attentionGetterSettings.isFixedISI());
 	q.addBindValue(attentionGetterSettings.getFixedISIMS());
 	q.addBindValue(attentionGetterSettings.getStimulusID());
+	q.addBindValue(attentionGetterSettings.isSoundOnly());
+	q.addBindValue(attentionGetterSettings.isNoISI());
 	if(attentionGetterSettings.getId() > 0)
 	{
 		q.addBindValue(attentionGetterSettings.getId());
@@ -689,12 +691,16 @@ void MainDao::getAttentionGetterSettings(int experimentID, AttentionGetterSettin
 		bool bFixedISI = q.value(q.record().indexOf("use_fixed_isi")).toBool();
 		int isiMS = q.value(q.record().indexOf("isi_ms")).toInt();
 		int stimulusID = q.value(q.record().indexOf("stimulus_id")).toInt();
+		bool bSoundOnly = q.value(q.record().indexOf("use_sound_only")).toBool();
+		bool bNoISI = q.value(q.record().indexOf("use_none")).toBool();
 		attentionGetterSettings.setId(id);
 		attentionGetterSettings.setUseAttentionGetter(useAttentionStimulus);
 		attentionGetterSettings.setBackGroundColor(QColor(backgroundColor));
 		attentionGetterSettings.setIsFixedISI(bFixedISI);
 		attentionGetterSettings.setFixedISIMS(isiMS);
 		attentionGetterSettings.setStimulusID(stimulusID);
+		attentionGetterSettings.setIsSoundOnly(bSoundOnly);
+		attentionGetterSettings.setIsNoISI(bNoISI);
 		StimulusSettings ss;
 		getStimulusSettings(stimulusID, ss);
 		attentionGetterSettings.setAttentionGetterStimulus(ss);
