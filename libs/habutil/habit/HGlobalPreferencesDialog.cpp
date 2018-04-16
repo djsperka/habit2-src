@@ -42,7 +42,6 @@ HGlobalPreferencesDialog::HGlobalPreferencesDialog(QWidget *parent)
 		ui->cbRight->addItem(QString("Monitor %1").arg(i), QVariant(i));
 	}
 
-
 	initialize();
 	connections();
 }
@@ -107,6 +106,7 @@ void GUILib::HGlobalPreferencesDialog::connections()
 	connect(ui->pbChooseWorkspace, &QPushButton::clicked, this, &HGlobalPreferencesDialog::chooseWorkspaceClicked);
 	connect(ui->pbChooseStimulusDir, &QPushButton::clicked, this, &HGlobalPreferencesDialog::chooseStimulusRootDirClicked);
 	connect(ui->pbStimulusDirDefault, &QPushButton::clicked, this, &HGlobalPreferencesDialog::defaultStimRootClicked);
+	connect(ui->pbIdentify, &QPushButton::clicked, this, &HGlobalPreferencesDialog::identifyClicked);
 }
 
 void GUILib::HGlobalPreferencesDialog::defaultStimRootClicked()
