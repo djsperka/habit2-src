@@ -23,7 +23,7 @@ class HTestingInputWrangler: public QObject
 	Q_OBJECT
 
 	typedef QMap< QPair<int,int>, HEventLog *> TrialEventLogMap;
-	typedef QMap<HPhaseType, TrialEventLogMap> PhaseTrialEventLogMapMap;
+	typedef QMap<QString, TrialEventLogMap> PhaseTrialEventLogMapMap;
 
 	QTimer* m_ptimer;
 	PhaseTrialEventLogMapMap m_map;
