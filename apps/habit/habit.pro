@@ -1,7 +1,7 @@
 # This is a qmake project file, provided as an example on how to use qmake with QtGStreamer.
 
 TEMPLATE = app
-TARGET = habit22
+TARGET = habit2
 
 # need this for boost?
 #INCLUDEPATH += 	"/usr/local/include" 
@@ -56,7 +56,8 @@ SOURCES			=	main.cpp
 HEADERS			=	version.h
 
 
-PKGROOT = $$(PWD)/../../distribution/pkgroot
+#PKGROOT = $$(PWD)/../../distribution/pkgroot
+PKGROOT = $$(PWD)/../../distribution/root/Applications
 message(pkg root value $$PKGROOT)
 TOOLS = $$(PWD)/../../tools
 message(tools value $$TOOLS)
