@@ -686,7 +686,7 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 						//
 						pSource->bWaitingForSegment = true;
 						pSource->bWaitingForSegment2 = false;
-						pSource->sWaitingForSegment2Pad = "NONE"; //GST_PAD_NAME(pad);
+						pSource->sWaitingForSegment2Pad = ""; //GST_PAD_NAME(pad);
 					}
 					else if (pSource->nPadsLinked == 2)
 					{
