@@ -1,0 +1,16 @@
+# commen t
+! comme t
+# phase, trial, repeat, trans, ms
+# 800 left, 650 right
+streams, 0, 0, NoneLeft, 150
+streams, 0, 0, LeftNone, 950
+streams, 0, 0, NoneRight, 1150
+streams, 0, 0, RightNone, 1800
+# here the subject just stares at it. 1500ms looking
+streams, 1, 0, NoneRight, 500
+# 300 + 300 + 300 = 900ms
+streams, 2, 0, NoneRight, 200
+streams, 2, 0, RightNone, 500
+streams, 2, 0, NoneRight, 800
+streams, 2, 0, RightNone, 1100
+streams, 2, 0, NoneRight, 1700
