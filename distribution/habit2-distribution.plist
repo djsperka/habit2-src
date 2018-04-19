@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <pkg-ref id="edu.ucdavis.infantcognitionlab.habit2"/><background>files/h2.png</background>
+	<license>files/habit-copyright.rtf</license>
+	<welcome>files/welcome.rtf</welcome>
+	<options customize="never" require-scripts="false"/>
+    <volume-check>
+        <allowed-os-versions>
+            <os-version min="10.10"/>
+        </allowed-os-versions>
+    </volume-check>
+    <choices-outline>
+        <line choice="default">
+            <line choice="edu.ucdavis.infantcognitionlab.habit2"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="edu.ucdavis.infantcognitionlab.habit2" visible="false">
+        <pkg-ref id="edu.ucdavis.infantcognitionlab.habit2"/>
+    </choice>
+    <pkg-ref id="edu.ucdavis.infantcognitionlab.habit2" version="0" onConclusion="none">habit2.pkg</pkg-ref>
+</installer-gui-script>
