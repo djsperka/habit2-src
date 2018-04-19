@@ -23,19 +23,25 @@ pkgbuild --analyze --root root $COMPONENT_PLIST
 echo "created component plist file $COMPONENT_PLIST"
 
 # Now make the package
-PACKAGE_FILE=habit2-${VERSION_FULL}.pkg
+PACKAGE_FILE=habit2.pkg
+rm -f $PACKAGE_FILE
 pkgbuild --root root --component-plist $COMPONENT_PLIST --version $VERSION_FULL $PACKAGE_FILE
 
 # The package name is embedded in the distribution file, so you either re-generate it 
 # or do substitution here. TODO test re-generate, I think it puts a version in?
+# Update - go bak to fixed file. Must change the generated package filename to be the same. 
 
-DISTRIBUTION_PLIST=habit2-distribution-${REV}.plist
-productbuild --synthesize --product requirements.plist --package $PACKAGE_FILE $DISTRIBUTION_PLIST
+DISTRIBUTION_PLIST=habit2-distribution.plist
+#productbuild --synthesize --product habit2-requirements.plist --package $PACKAGE_FILE $DISTRIBUTION_PLIST
 
 # create installer package
+mkdir -p dist
+rm -f dist/*
 INSTALLER_PACKAGE_FILE=Habit2-$VERSION_FULL-mac-x64.pkg
-productbuild --distribution $DISTRIBUTION_PLIST --resources . --package-path $PACKAGE_FILE  --sign "$SIGNER" INSTALLER_PACKAGE_FILE
+productbuild --distribution $DISTRIBUTION_PLIST --resources . --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" dist/$INSTALLER_PACKAGE_FILE
 
+# create dmg installer
+hdiutil create -volname "Habit2 Installer" -fs HFSX -srcfolder ./dist -ov Habit2-$VERSION_FULL-mac-x64.dmg
 
 
 
