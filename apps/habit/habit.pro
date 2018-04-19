@@ -56,13 +56,13 @@ SOURCES			=	main.cpp
 HEADERS			=	version.h
 
 
-#PKGROOT = $$(_PRO_FILE_PWD)/../../distribution/pkgroot
-PKGROOT = $$(_PRO_FILE_PWD)/../../distribution/root/Applications
+#PKGROOT = $$_PRO_FILE_PWD_/../../distribution/pkgroot
+PKGROOT = $$_PRO_FILE_PWD_/../../distribution/root/Applications
 message(pkg root value $$PKGROOT)
 message(TARGET value $$TARGET)
-TOOLS = $$(_PRO_FILE_PWD)/../../tools
+TOOLS = $$_PRO_FILE_PWD_/../../tools
 message(tools value $$TOOLS)
-HABIT_PLUGIN = $$(_PRO_FILE_PWD)/../../libs/gstqt/release/libgstqt.dylib
+HABIT_PLUGIN = $$_PRO_FILE_PWD_/../../libs/gstqt/release/libgstqt.dylib
 message(HABIT_PLUGIN $$HABIT_PLUGIN)
 message(QT bins $$[QT_INSTALL_BINS])
 
