@@ -38,7 +38,7 @@ DISTRIBUTION_PLIST=habit2-distribution.plist
 mkdir -p dist
 rm -f dist/*
 INSTALLER_PACKAGE_FILE=Habit2-$VERSION_FULL-mac-x64.pkg
-productbuild --distribution $DISTRIBUTION_PLIST --resources . --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" dist/$INSTALLER_PACKAGE_FILE
+productbuild --distribution $DISTRIBUTION_PLIST --version $VERSION_FULL --resources . --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" dist/$INSTALLER_PACKAGE_FILE
 
 # create dmg installer
 hdiutil create -volname "Habit2 Installer" -fs HFSX -srcfolder ./dist -ov Habit2-$VERSION_FULL-mac-x64.dmg
