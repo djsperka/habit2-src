@@ -114,8 +114,6 @@ namespace GUILib
 	, ui(new Ui::PhaseWPFirst)
 	, m_phaseNames(phaseNames)
 	{
-		qDebug() << "PhaseWPFirst()";
-
 		ui->setupUi(this);
 
 		// validator for phase name
@@ -166,8 +164,6 @@ namespace GUILib
 	: QWizardPage(parent)
 	, ui(new Ui::PhaseWPTrial)
 	{
-		qDebug() << "PhaseWPTrial()";
-
 		ui->setupUi(this);
 		ui->leMaxStimulusTime->setValidator(new QIntValidator(1, 1000000));
 		ui->leMaxAccumulatedLookTime->setValidator(new QIntValidator(1, 1000000));
@@ -176,11 +172,38 @@ namespace GUILib
 		registerField("famNTrials", ui->spinBoxNTrials);
 		registerField("isMaxAccumulatedLookTime", ui->cbMaxAccumulatedLookTime);
 		registerField("MaxAccumulatedLookTime", ui->leMaxAccumulatedLookTime);
+		registerField("isSingleCompleteLook", ui->cbSingleCompleteLook);
 		registerField("isMaxStimulusTime", ui->cbMaxStimulusTime);
 		registerField("MaxStimulusTime", ui->leMaxStimulusTime);
 		registerField("isMeasuredFromStimulusOnset", ui->rbMeasuredFromStimulusOnset);
 		registerField("isMeasuredFromInitialLooking", ui->rbMeasuredFromInitialLooking);
+
+		connect(ui->cbSingleCompleteLook, SIGNAL(toggled(bool)), this, SLOT(cbSingleCompleteLookToggled(bool)));
+		connect(ui->cbMaxAccumulatedLookTime, SIGNAL(toggled(bool)), this, SLOT(cbMaxAccumulatedLookTimeToggled(bool)));
 	}
+
+	void PhaseWPTrial::cbSingleCompleteLookToggled(bool bChecked)
+	{
+		if (bChecked)
+		{
+			if (ui->cbMaxAccumulatedLookTime->isChecked())
+			{
+				ui->cbMaxAccumulatedLookTime->setChecked(false);
+			}
+		}
+	}
+
+	void PhaseWPTrial::cbMaxAccumulatedLookTimeToggled(bool bChecked)
+	{
+		if (bChecked)
+		{
+			if (ui->cbSingleCompleteLook->isChecked())
+			{
+				ui->cbSingleCompleteLook->setChecked(false);
+			}
+		}
+	}
+
 
 	int PhaseWPTrial::nextId() const
 	{
@@ -215,14 +238,23 @@ namespace GUILib
 	{
 		bool b = true;
 		//if (!ui->gbMaxStimulusTime->isChecked() && !ui->gbMinLookingTime->isChecked()) b = false;
-		if (!(field("isMaxStimulusTime").toBool()) && !(field("isMaxAccumulatedLookTime").toBool())) b = false;
+
+		if (	!(field("isMaxStimulusTime").toBool()) &&
+				!(field("isMaxAccumulatedLookTime").toBool()) &&
+				!(field("isSingleCompleteLook").toBool()))
+		{
+			b = false;
+		}
 		else
 		{
-			// One of the two is checked.
-			//if (ui->gbMinLookingTime->isChecked() && !ui->gbMaxStimulusTime->isChecked())
-			if ((field("isMaxAccumulatedLookTime").toBool()) && !(field("isMaxStimulusTime").toBool()))
+			// Test: if one of the looking criteria is set - make sure max stim time is set, or warn.
+			if ( (field("isMaxAccumulatedLookTime").toBool()) || field("isSingleCompleteLook").toBool())
 			{
-				b = (QMessageBox::Yes == QMessageBox::warning(this, "Are you sure?", "You have specified minimum looking time, but you have not specified a maximum stimulus time. If your subject does not look at the stimulus, your trial(s) may never end! Are you sure you want to create a new phase without specifying a maximum stimulus time?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No));
+				if (!(field("isMaxStimulusTime").toBool()))
+				{
+					b = (QMessageBox::Yes == QMessageBox::warning(this, "Are you sure?",
+							"You have specified that trials end on specific looking behavior, but you have not specified a maximum stimulus time. If your subject does not look at the stimulus, your trial(s) may never end! Are you sure you want to create a new phase without specifying a maximum stimulus time?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No));
+				}
 			}
 		}
 		return b;
@@ -249,7 +281,6 @@ namespace GUILib
 	PhaseWPHabit0::PhaseWPHabit0(QWidget *p)
 	: QWizardPage(p)
 	{
-		qDebug() << "PhaseWPHabit0()";
 		setTitle("Familiarization/Preference type phase");
 		setSubTitle("Specify the number of trials for this phase.");
 		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget(5);
@@ -273,7 +304,6 @@ namespace GUILib
 	PhaseWPHabit1::PhaseWPHabit1(QWidget *p)
 	: QWizardPage(p)
 	{
-		qDebug() << "PhaseWPHabit1()";
 		setTitle("Habituation by looking time reduction");
 		setSubTitle("Specify the maximum number of trials, window type, percentage, and window size.");
 		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget();
@@ -296,7 +326,6 @@ namespace GUILib
 	PhaseWPHabit2::PhaseWPHabit2(QWidget *p)
 	: QWizardPage(p)
 	{
-		qDebug() << "PhaseWPHabit2()";
 		setTitle("Habituation by cumulative looking time");
 		setSubTitle("Specify the maximum number of trials, and total looking time required for habituation.");
 		m_pCriteriaWidget = new GUILib::HHabituationCriteriaWidget();

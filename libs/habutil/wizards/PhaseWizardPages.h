@@ -92,6 +92,10 @@ namespace GUILib
 	private:
 		Ui::PhaseWPTrial *ui;
 
+	private slots:
+		void cbSingleCompleteLookToggled(bool);
+		void cbMaxAccumulatedLookTimeToggled(bool);
+
 	};
 
 #if 0

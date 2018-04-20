@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>362</width>
-    <height>331</height>
+    <width>388</width>
+    <height>443</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -89,11 +89,35 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QCheckBox" name="cbSingleCompleteLook">
+          <property name="text">
+           <string>End trials after a single, complete look</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QCheckBox" name="cbMaxAccumulatedLookTime">
           <property name="text">
-           <string>End trial after maximum looking time</string>
+           <string>End trials after maximum looking time</string>
           </property>
          </widget>
         </item>
