@@ -130,7 +130,6 @@ void habitLoggingHandler(QtMsgType type, const QMessageLogContext &, const QStri
 
 int main(int argc, char *argv[])
 {
-	int i;
 	bool bPendingWorkspace = false;
 	QString sPendingWorkspace;
 	bool bDBUpdateOnly = false;
