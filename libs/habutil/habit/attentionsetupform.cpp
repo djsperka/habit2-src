@@ -11,8 +11,8 @@ namespace GUILib {
 AttentionSetupForm::AttentionSetupForm(const Habit::AttentionGetterSettings& settings, const Habit::StimulusDisplayInfo& info, QWidget* w)
 : QWidget(w)
 , m_agSettings(settings)
-, m_stimulusDisplayInfo(info)
 , m_ssCurrent(settings.getAttentionGetterStimulus())
+, m_stimulusDisplayInfo(info)
 {
 	QVBoxLayout *vbox = new QVBoxLayout;
 	m_pIntertrialIntervalSettingsWidget = new HIntertrialIntervalSettingsWidget(m_agSettings, m_stimulusDisplayInfo, this);
