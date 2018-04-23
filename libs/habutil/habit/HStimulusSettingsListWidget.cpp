@@ -94,7 +94,7 @@ void HStimulusSettingsListWidget::previewClicked()
 }
 
 
-void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection &)
 {
 	if (selected.count() > 0)
 	{
@@ -113,7 +113,7 @@ void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & select
 	}
 }
 
-void HStimulusSettingsListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+void HStimulusSettingsListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex&)
 {
 	// If something is selected, enable the Edit and Remove push buttons
 	if (current.row() > -1)
@@ -219,17 +219,17 @@ void HStimulusSettingsListWidget::clearSelection()
 }
 
 
-void HStimulusSettingsListWidget::rowsInserted(const QModelIndex &parent, int first, int last)
+void HStimulusSettingsListWidget::rowsInserted(const QModelIndex &, int first, int)
 {
 	emit stimulusAdded(first);
 }
 
-void HStimulusSettingsListWidget::rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last)
+void HStimulusSettingsListWidget::rowsAboutToBeRemoved(const QModelIndex &, int first, int)
 {
 	emit stimulusAboutToBeRemoved(first);
 }
 
-void HStimulusSettingsListWidget::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+void HStimulusSettingsListWidget::dataChanged(const QModelIndex &topLeft, const QModelIndex &)
 {
 	emit stimulusSettingsChanged(topLeft.row());
 }
