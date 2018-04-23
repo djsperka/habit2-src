@@ -14,7 +14,6 @@
 #include <QDir>
 #include "HStimulusWidget.h"
 #include "HGMM.h"
-//#include "../../libs/habutil/HMediaManager.h"
 
 class HG2Dialog: public QDialog
 {

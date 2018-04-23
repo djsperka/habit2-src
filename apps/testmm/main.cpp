@@ -32,7 +32,6 @@ int main(int argc, char **argv)
 	{
 		if (!strcmp(argv[i], "-w"))
 		{
-			// TODO - maybe tell user they need to supply a directory?
 			if (i < (argc-1))
 			{
 				habutilSetWorkspace(argv[i+1]);
