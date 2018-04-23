@@ -39,10 +39,8 @@ void HPhaseSettingsWidget::setValidators()
 }
 
 
-//TODO: NTrials is now in habituation criteria!
 void HPhaseSettingsWidget::initialize()
 {
-	//TODO ui->gbxEnabled->setChecked(m_settings.getIsEnabled());
 	ui->cbxUseLookSettings->setChecked(m_settings.getUseLookingCriteria());
 	ui->rbSingleCompleteLook->setChecked(m_settings.getIsSingleLook());
 	ui->rbAccumulatedLookTime->setChecked(m_settings.getIsMaxAccumulatedLookTime());

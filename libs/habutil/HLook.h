@@ -47,10 +47,6 @@ public:
 	const QList<HLook>& sublooks() const { return m_sublooks; };
 	bool isComplete() { return m_sublooks.size() > 0; };
 
-	// TODO These do not need to be friends. Use member functions!
-	//friend QDataStream& operator<<(QDataStream& out, const HLook& l);
-	//friend QDataStream& operator>>(QDataStream& out, HLook& l);
-	//friend bool operator==(const HLook& lhs, const HLook& rhs);
 private:
 	const HLookDirection* m_pdirection;
 	int m_startMS;

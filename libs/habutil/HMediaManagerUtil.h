@@ -8,7 +8,6 @@
  */
 
 #include "HGMM.h"
-#include "HPreviewMediaManager.h"
 #include "experimentsettings.h"
 #include "stimulussettings.h"
 #include "stimulusdisplayinfo.h"

@@ -25,11 +25,8 @@ HEADERS +=	HLook.h \
 			HTrial.h \
 			HPhase.h \
 			HElapsedTimer.h \
-			HPlayer.h \
 			HStimulusSource.h \
 			HImageWidget.h \
-			HMediaManager.h \
-			HPreviewMediaManager.h \
 			HMediaManagerUtil.h \
 			HTrialGenerator.h \
 			HPhaseCriteria.h \
@@ -70,11 +67,8 @@ SOURCES +=	HLook.cpp \
 			HTrial.cpp \
 			HPhase.cpp \
 			HElapsedTimer.cpp \
-			HPlayer.cpp \
 			HStimulusSource.cpp \
 			HImageWidget.cpp \
-			HMediaManager.cpp \
-			HPreviewMediaManager.cpp \
 			HMediaManagerUtil.cpp \
 			HTrialGenerator.cpp \
 			HPhaseCriteria.cpp \

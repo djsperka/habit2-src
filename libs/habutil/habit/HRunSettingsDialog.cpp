@@ -146,7 +146,6 @@ void GUILib::HRunSettingsDialog::connections()
 
 void GUILib::HRunSettingsDialog::orderChosen(int seqno)
 {
-	// TODO: test this, and updateRunButton()
 	m_map.insert(seqno, qMakePair(m_map.value(seqno).first, true));
 	updateRunButton();
 }

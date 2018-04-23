@@ -689,7 +689,6 @@ HStimulusOrderEvent* HStimulusOrderEvent::getEventOldFormat(QDataStream& stream,
 
 HStimulusOrderEvent* HStimulusOrderEvent::getEvent(QDataStream& stream, int timestamp)
 {
-	int n;
 	QString name;
 	QList<unsigned int> list;
 	stream >> name >> list;

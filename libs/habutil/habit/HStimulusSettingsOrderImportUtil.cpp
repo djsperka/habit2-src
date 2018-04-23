@@ -194,7 +194,6 @@ Habit::HStimulusOrder parseOrder(const QStringList& tokens)
 	return order;
 }
 
-// TODO: Re-enable import function!
 bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSettingsList& stimList, Habit::HStimulusOrderList& orderList)
 {
 	bool b = false;

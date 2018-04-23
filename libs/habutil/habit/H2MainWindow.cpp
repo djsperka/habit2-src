@@ -22,8 +22,6 @@
 #else
 #include <QStandardPaths>
 #endif
-
-
 #include "H2MainWindow.h"
 #include "HExperimentListWidget.h"
 #include "experimentsettings.h"
@@ -41,7 +39,7 @@
 #include "HTestingInputWrangler.h"
 #include "HDBException.h"
 #include "HExperimentNameDialog.h"
-#include <hgst/HStimulusWidget.h>
+#include "HStimulusWidget.h"
 
 using namespace GUILib;
 using namespace Habit;
@@ -601,32 +599,9 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			int cpStatus = m_pControlPanel->exec();
 
 			// delete the video widgets.
-			// TODO: This should be guarded against cases where the widgets are owned by something else -
-			// like when they are contained in another widget -
-			// in which case they will be deleted when that thing is deleted.
-
-			qDebug() << "pMediaManager->stop()";
 			pMediaManager->stop();
 			qDeleteAll(deleteList.begin(), deleteList.end());
 			deleteList.clear();
-#if 0
-			if (pStimulusDisplayDialog)
-				delete pStimulusDisplayDialog;
-			else
-			{
-				qDebug() << " delete widgets";
-				// must explicitly delete the stim widgets
-				HStimulusWidget *w;
-				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Center);
-				if (w) delete w;
-				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Left);
-				if (w) delete w;
-				w = pMediaManager->getHStimulusWidget(HPlayerPositionType::Right);
-				if (w) delete w;
-				qDebug() << " delete widgets done";
-			}
-#endif
-
 
 			if (cpStatus == QDialog::Accepted)
 			{
@@ -672,72 +647,15 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	}
 }
 
-// moved to HGMM
-//
-//QDialog* GUILib::H2MainWindow::createStimulusWidget(HGMM *pmm)
-//{
-//	QDialog *pDialog = new QDialog;
-//	QHBoxLayout *hbox = new QHBoxLayout;
-//	qDebug() << "createStimulusWidget";
-//	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
-//	{
-//		qDebug() << "createStimulusWidget - single";
-//		HStimulusWidget *video = pmm->getHStimulusWidget(HPlayerPositionType::Center);
-//		connect(pmm, SIGNAL(stimulusChanged()), video->getHVideoWidget(), SLOT(stimulusChanged()));
-//		hbox->addWidget(video);
-//		pDialog->setLayout(hbox);
-//		pDialog->setMinimumSize(320, 240);
-//	}
-//	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
-//	{
-//		HStimulusWidget *videoLeft = pmm->getHStimulusWidget(HPlayerPositionType::Left);
-//		HStimulusWidget *videoRight = pmm->getHStimulusWidget(HPlayerPositionType::Right);
-//		connect(pmm, SIGNAL(stimulusChanged()), videoLeft->getHVideoWidget(), SLOT(stimulusChanged()));
-//		connect(pmm, SIGNAL(stimulusChanged()), videoRight->getHVideoWidget(), SLOT(stimulusChanged()));
-//		hbox->addWidget(videoLeft);
-//		hbox->addWidget(videoRight);
-//		pDialog->setLayout(hbox);
-//		qDebug() << "createStimulusWidget - L/R";
-//		//pDialog->setMinimumSize(640, 240);	// double wide - can do better than this
-//	}
-//	return pDialog;
-//}
-
 
 void GUILib::H2MainWindow::adaptVideoWidgets(HGMM *pmm)
 {
 	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-#if 0
-		HStimulusWidget *player = pmm->getHStimulusWidget(HPlayerPositionType::Center);
-		QRect rect = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
-		player->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-		player->move(rect.x(), rect.y());
-		player->setGeometry(rect);
-		player->showFullScreen();
-		qDebug() << "Player index " << habutilGetMonitorID(HPlayerPositionType::Center) << " moved to rect " << rect;
-#endif
 		pmm->getHStimulusWidget(HPlayerPositionType::Center)->showFullScreen();
 	}
 	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-#if 0
-		HStimulusWidget *playerLeft = pmm->getHStimulusWidget(HPlayerPositionType::Left);
-		QRect rectLeft = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Left));
-		playerLeft->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-		playerLeft->move(rectLeft.x(), rectLeft.y());
-		playerLeft->setGeometry(rectLeft);
-		playerLeft->showFullScreen();
-		qDebug() << "Player index " << habutilGetMonitorID(HPlayerPositionType::Left) << " moved to rect " << rectLeft;
-
-		HStimulusWidget *playerRight = pmm->getHStimulusWidget(HPlayerPositionType::Right);
-		QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
-		playerRight->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-		playerRight->move(rectRight.x(), rectRight.y());
-		playerRight->setGeometry(rectRight);
-		playerRight->showFullScreen();
-		qDebug() << "Player index " << habutilGetMonitorID(HPlayerPositionType::Right) << " moved to rect " << rectRight;
-#endif
 		pmm->getHStimulusWidget(HPlayerPositionType::Left)->showFullScreen();
 		pmm->getHStimulusWidget(HPlayerPositionType::Right)->showFullScreen();
 	}
@@ -815,7 +733,6 @@ void GUILib::H2MainWindow::deleteExperiment()
 		}
 		catch (const HDBException& e)
 		{
-			// TODO rollback()
 			QMessageBox::warning(this, "Delete Experiment", QString(e.what()));
 			qCritical() << e.what();
 		}

@@ -25,7 +25,6 @@
 #include "stimulisettings.h"
 #include "experimentsettings.h"
 
-#include "HMediaManager.h"
 #include "HLookDetector.h"
 #include "HStateMachine.h"
 #include "HExperiment.h"

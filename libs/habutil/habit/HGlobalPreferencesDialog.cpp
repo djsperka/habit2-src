@@ -124,12 +124,24 @@ void GUILib::HGlobalPreferencesDialog::chooseWorkspaceClicked()
 	if (!selectedDir.isEmpty())
 	{
 		QDir d(selectedDir);
+		qDebug() << " selectged dir " << d.absolutePath();
 
 		// is the selected dir a workspace dir?
 		if (!habutilIsValidWorkspace(d))
 		{
-			// TODO: not a workspace - want a new one? First check if its INSIDE a workspace. or if it contains a workspace
+			// First check if its INSIDE a workspace. If it is, issue a warning and return out of here.
+			QDir dup(d);
+			qDebug() << "Check parent folder: " << dup.absolutePath();
+			if (dup.cdUp())
+			{
+				if (habutilIsValidWorkspace(dup))
+				{
+					QMessageBox::critical(this, "Create new workspace", "The directory you chose appears to be INSIDE of another workspace. Please choose another folder.");
+					return;
+				}
+			}
 
+			// Now ask whether the user wants a new workspace created.
 			QMessageBox::StandardButton btn;
 			btn = QMessageBox::question(this, "Create new workspace", "The selected folder is not a workspace, do you want to create a new one?");
 			if (btn == QMessageBox::Yes)

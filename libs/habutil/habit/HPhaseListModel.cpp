@@ -28,8 +28,6 @@ QVariant HPhaseListModel::data(const QModelIndex & index, int role) const
     return v;
 }
 
-
-// TODO: probably get rid of header?
 QVariant HPhaseListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	Q_UNUSED(section);
