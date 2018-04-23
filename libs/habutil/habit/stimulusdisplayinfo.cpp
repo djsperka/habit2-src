@@ -119,6 +119,11 @@ bool Habit::operator==(const Habit::StimulusDisplayInfo& lhs, const Habit::Stimu
 			lhs.getUseISS() == rhs.getUseISS());
 }
 
+bool Habit::operator!=(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs)
+{
+	return !(lhs == rhs);
+}
+
 
 int Habit::StimulusDisplayInfo::getId() const {
 	return id_;

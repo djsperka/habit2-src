@@ -160,18 +160,12 @@ void HExperimentMain::connections()
 
 void HExperimentMain::checkStimulusDisplayInfo()
 {
-	// TODO do i have to define != as well as ==?
-	if (m_oldStimulusDisplayInfo == m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo())
-	{
-		qDebug() << "No change in sdi.";
-	}
-	else
+	if (m_oldStimulusDisplayInfo != m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo())
 	{
 		qDebug() << "stimulusDisplayInfoChanged - reset HGMM";
 		m_oldStimulusDisplayInfo = m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo();
-//		HGMM::instance().
-
 		m_pAttentionSetupForm->stimulusDisplayInfoChanged(m_oldStimulusDisplayInfo);
+
 		// Now tell each of the phase widgets.
 		for (int i=0; i<m_pPagesWidget->count()-4; i++)
 		{
@@ -231,8 +225,8 @@ void HExperimentMain::exportButtonClicked()
 void HExperimentMain::generalListViewItemClicked(const QModelIndex& index)
 {
 //	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
-	// check stimulus display info page.
-	// TODO - ONLY CHECK THIS when sdi page is the one we are leaving
+	// check stimulus display info page. We do this every time page changes, though it might be smarter to only do this when
+	// leaving sdi page.
 	qDebug() << "Current index " << m_pPagesWidget->currentIndex() << " new index " << index.row() << " sdi page index " << m_sdiPageIndex;
 	checkStimulusDisplayInfo();
 	m_pPhaseListWidget->clearSelection();

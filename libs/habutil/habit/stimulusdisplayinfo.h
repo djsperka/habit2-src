@@ -56,6 +56,8 @@ QDataStream & operator<< (QDataStream& stream, Habit::StimulusDisplayInfo d);
 QDataStream & operator>> (QDataStream& stream, Habit::StimulusDisplayInfo& d);
 QDebug operator<<(QDebug dbg, const Habit::StimulusDisplayInfo& info);
 bool operator==(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs);
+bool operator!=(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs);
+
 
 
 } //namespace Habit
