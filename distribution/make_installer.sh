@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# BUILD_DIR is the folder where we do the building. Generated files live there.
+BUILD_DIR=./
+mkdir -p $BUILD_DIR
+
+# set these for signing the app and installer
 APP_SIGNER="3rd Party Mac Developer Application: University of California- Davis (WWAFVH26T8)"
 INST_SIGNER="3rd Party Mac Developer Installer: University of California- Davis (WWAFVH26T8)"
 
@@ -18,12 +23,12 @@ VERSION_FULL=${VERSION}.${REV}
 codesign -v -f --deep --sign "$APP_SIGNER" root/Applications/habit2.app
 
 # pkgutil takes a look at the folder to get component property list for package
-COMPONENT_PLIST=habit2-component-${REV}.plist
-pkgbuild --analyze --root root $COMPONENT_PLIST
+COMPONENT_PLIST=${BUILD_DIR}/habit2-component-${REV}.plist
+pkgbuild --analyze --identifier edu.ucdavis.infantcognitionlab.habit2 --root root $COMPONENT_PLIST
 echo "created component plist file $COMPONENT_PLIST"
 
 # Now make the package
-PACKAGE_FILE=habit2.pkg
+PACKAGE_FILE=${BUILD_DIR}/habit2.pkg
 rm -f $PACKAGE_FILE
 pkgbuild --root root --component-plist $COMPONENT_PLIST --version $VERSION_FULL $PACKAGE_FILE
 
@@ -35,13 +40,15 @@ DISTRIBUTION_PLIST=habit2-distribution.plist
 #productbuild --synthesize --product habit2-requirements.plist --package $PACKAGE_FILE $DISTRIBUTION_PLIST
 
 # create installer package
-mkdir -p dist
-rm -f dist/*
-INSTALLER_PACKAGE_FILE=Habit2-$VERSION_FULL-mac-x64.pkg
-productbuild --distribution $DISTRIBUTION_PLIST --version $VERSION_FULL --resources . --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" dist/$INSTALLER_PACKAGE_FILE
+DMG_DIR=${BUILD_DIR}/dist
+mkdir -p $DMG_DIR
+rm -f ${DMG_DIR}/*.pkg
+INSTALLER_PACKAGE_FILE=${DMG_DIR}/Habit2-$VERSION_FULL-mac-x64.pkg
+productbuild --distribution $DISTRIBUTION_PLIST --version $VERSION_FULL --resources . --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" $INSTALLER_PACKAGE_FILE
 
 # create dmg installer
-hdiutil create -volname "Habit2 Installer" -fs HFSX -srcfolder ./dist -ov Habit2-$VERSION_FULL-mac-x64.dmg
+INSTALLER_DMG_FILE=${BUILD_DIR}/Habit2-${VERSION_FULL}-mac-x64.dmg
+hdiutil create -volname "Habit2 Installer" -fs HFSX -srcfolder $DMG_DIR -ov $INSTALLER_DMG_FILE
 
 
 
