@@ -30,7 +30,6 @@ void HStimulusOrderListWidget::setStimulusLayoutType(const HStimulusLayoutType& 
 	m_playoutType = &layoutType;
 }
 
-
 void HStimulusOrderListWidget::create()
 {
 	m_pmodel = new HStimulusOrderListModel(m_list, m_ssList);
@@ -77,7 +76,7 @@ void HStimulusOrderListWidget::removeClicked()
 		m_pmodel->remove(it.next());
 }
 
-void HStimulusOrderListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+void HStimulusOrderListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection&)
 {
 	//qDebug() << "HStimulusOrderListWidget::selectionChanged - selected: " << selected.count() << " deselected " << deselected.count();
 	if (selected.count() > 0)
@@ -98,7 +97,7 @@ void HStimulusOrderListWidget::selectionChanged(const QItemSelection & selected,
 	}
 }
 
-void HStimulusOrderListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+void HStimulusOrderListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex&)
 {
 	// If something is selected, enable the Edit and Remove push buttons
 	if (current.row() > -1)

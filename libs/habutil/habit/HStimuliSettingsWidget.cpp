@@ -194,6 +194,7 @@ void HStimuliSettingsWidget::importClicked()
 	bool bClobberAllStimuli = false;
 	bool bClobberAllOrders = false;
 
+
 	qDebug() << "Selected file " << filename;
 	if (!filename.isEmpty())
 	{
@@ -242,6 +243,11 @@ void HStimuliSettingsWidget::importClicked()
 			if (bAppend) m_pStimulusSettingsListWidget->append(ss);
 			if (bClobber) m_pStimulusSettingsListWidget->clobber(ss);
 		}
+
+		// get list of stim names and send it to the StimulusOrderListWidget to verify orders.
+		//m_stimuli.stimuli().names()
+		// set new names in
+		//m_pStimulusOrderListWidget->setStimulusNames(m_stimuli.stimuli().names());
 
 		QStringList orderNames = m_stimuli.getOrderNames();
 		QListIterator<Habit::HStimulusOrder> imported_orders(olist);

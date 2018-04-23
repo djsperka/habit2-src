@@ -13,6 +13,7 @@
 
 using namespace Habit;
 
+#if 0
 static const QString sreDELIM("(,|\t)");		// comma or tab delimited
 static const QString sreMAYBEDELIM("(,|\t)?");
 static const QString srePAD("[ ]*");			// spaces padding words are removed
@@ -108,15 +109,95 @@ bool parseStim(const QString& s, StimulusSettings& settings)
 	}
 	return b;
 }
+#endif
 
+Habit::StimulusSettings parseStim(const QStringList& tokens)
+{
+	Habit::StimulusSettings settings;
+	qDebug() << "parseStim: " << tokens;
+	qDebug() << tokens.size() << " tokens";
+	// expect tokens to come in pairs - position and filename.
+	if (tokens.size()>1)
+	{
+		settings.setName(tokens[1]);
+		for (int i=2; i+1 < tokens.size(); i+=2)
+		{
+			if (tokens[i].isEmpty() || tokens[i+1].isEmpty())
+			{
+				continue;
+			}
+			else
+			{
+				Habit::StimulusInfo info(tokens[i+1].trimmed());
+				QString sPos = tokens[i].trimmed().toLower();
+				if (sPos == "right")
+				{
+					settings.setRightStimulusInfo(info);
+				}
+				else if (sPos == "left")
+				{
+					settings.setLeftStimulusInfo(info);
+				}
+				else if (sPos == "center")
+				{
+					settings.setCenterStimulusInfo(info);
+				}
+				else if (sPos == "sound" || sPos == "audio")
+				{
+					settings.setIndependentSoundInfo(info);
+				}
+				else
+				{
+					qWarning() << "Unknown position: " << tokens[i];
+				}
+			}
+		}
+	}
+	else
+	{
+		qWarning() << "No stim files found! Empty stimulus.";
+	}
+	return settings;
+}
+
+Habit::HStimulusOrder parseOrder(const QStringList& tokens)
+{
+	Habit::HStimulusOrder order;
+
+	qDebug() << "parseOrder: " << tokens;
+	qDebug() << tokens.size() << " tokens";
+
+	if (tokens.size() > 1)
+	{
+		order.setName(tokens[1].trimmed());
+	}
+
+	QStringList l;
+	for (int i=2; i<tokens.size(); i++)
+	{
+		QString s = tokens[i].trimmed();
+		if (s.startsWith("\""))
+		{
+			s.remove(0, 1);
+		}
+		if (s.endsWith("\""))
+		{
+			s.truncate(s.length()-1);
+		}
+		if (!s.isEmpty())
+		{
+			l.append(s);
+		}
+		order.setList(l);
+		qDebug() << "Order " << order.getName() << " list " << order.getList();
+	}
+	return order;
+}
 
 // TODO: Re-enable import function!
-bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSettingsList& stimList, Habit::HStimulusOrderList& orderList, const HStimContext& context)
+bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSettingsList& stimList, Habit::HStimulusOrderList& orderList)
 {
 	bool b = false;
-	QMessageBox::warning(NULL, "Not implemented", "The import function is disabled.");
-
-#if 0
 	int skipped=0;
 	int comment=0;
 	//int nstim=0;
@@ -125,7 +206,7 @@ bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSet
 	if (file.exists() && file.open(QIODevice::ReadOnly)) // | QIODevice::Text))
 	{
 		QTextStream in(&file);
-		QRegExp reFULL(sreHEAD + srePAD + sreSTOR + srePAD + sreDELIM + srePAD + srePHASE + srePAD + sreDELIM + srePAD + sreNAME + srePAD + sreDELIM + sreTAIL);
+//		QRegExp reFULL(sreHEAD + srePAD + sreSTOR + srePAD + sreDELIM + srePAD + srePHASE + srePAD + sreDELIM + srePAD + sreNAME + srePAD + sreDELIM + sreTAIL);
 		//                0         0        1                   2                3                    4                   5                    6         7
 		while (!in.atEnd())
 		{
@@ -138,6 +219,33 @@ bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSet
 				comment++;
 			else
 			{
+				QStringList s = line.split(',');
+				if (s[0]=="stim")
+				{
+					// parse stim line
+					stimList.append(parseStim(s));
+				}
+				else if (s[0]=="order")
+				{
+					// parse order
+					orderList.append(parseOrder(s));
+				}
+				else
+				{
+					qWarning() << "Unknown type in first column: " << s;
+				}
+			}
+		}
+		qDebug() << "found " << stimList.size() << " stim, and " << orderList.size() << " orders. Skipped " << skipped << ", comment " << comment;
+	}
+	else
+	{
+		qWarning() << "Cannot open file";
+	}
+	return b;
+}
+
+#if 0
 				if (reFULL.indexIn(line) == 0)
 				{
 					// check phase vs context for this
@@ -182,6 +290,6 @@ bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSet
 		file.close();
 		b = true;	// return true if file was opened ok.
 	}
-#endif
 	return b;
 }
+#endif

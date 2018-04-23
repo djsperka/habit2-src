@@ -24,7 +24,7 @@ namespace GUILib
 
 		// note a non-const ref to the order list is supplied and uesd. It is modified here,
 		// so the caller should make sure to provide the correct ref to capture changes made.
-		HStimulusOrderListModel(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList): m_list(list), m_ssList(ssList) {};
+		HStimulusOrderListModel(Habit::HStimulusOrderList& list, const Habit::StimulusSettingsList& ssList): m_list(list), m_ssList(ssList) {};
 		virtual ~HStimulusOrderListModel() {};
 		int rowCount(const QModelIndex& index) const;
 		QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
@@ -36,6 +36,7 @@ namespace GUILib
 		void remove(const QModelIndex& index);
 		void replace(const QModelIndex& index, const Habit::HStimulusOrder& order);
 		QStringList names();
+		//void setNames(const QStringList& names) { m_names = names; };
 	};
 }
 
