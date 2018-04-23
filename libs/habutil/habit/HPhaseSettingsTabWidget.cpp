@@ -16,8 +16,6 @@
 namespace GUILib
 {
 
-
-// TODO: enabled checkbox is not connected to reality
 HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& phaseSettings, const QString& labelName, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent)
 : QWidget(parent)
 {
