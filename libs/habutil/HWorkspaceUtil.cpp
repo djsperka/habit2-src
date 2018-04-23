@@ -23,8 +23,6 @@
 
 
 
-// TODO - use workspace as key, store stim root per-workspace on each machine where habit runs.
-
 // These are all set when habutilInitWorkspace is called
 // You can call habutilSetWorkspace and habutilCreateWorkspace, then call this to set up.
 // Once this is called, you are "in" the workspace.

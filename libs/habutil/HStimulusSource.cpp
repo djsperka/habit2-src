@@ -135,13 +135,6 @@ HStimulusSource::~HStimulusSource()
 {
 //	if (m_pVideo) delete m_pVideo;
 //	if (m_pBuffer) delete m_pBuffer;
-
-	// TODO Having a lot of trouble getting this cleanup to work without crashing.
-	// In some cases Qt takes ownership of objects, and I think I keep running into double deletes.
-	// I'm just commenting out the delete(s) here, yes its a memory leak. Deal with it.
-	//if (m_pImage) delete m_pImage;
-	//if (m_pBuffer) delete m_pBuffer;
-	//if (m_pByteArray) delete m_pByteArray;
 }
 
 bool HStimulusSource::isImageFile(const QString& filename)

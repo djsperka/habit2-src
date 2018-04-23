@@ -162,7 +162,7 @@ public:
 	virtual HEvent* clone(int timestamp = 0) const = 0;
 
 	// We will have to read without an overloaded >>. I think this isn't possible with a pure virtual base class.
-	// Should return NULL on failure. May throw exception....TODO handle this
+	// Should return NULL on failure.
 	static HEvent* getEvent(QDataStream& stream);
 
 private:
@@ -536,7 +536,6 @@ private:
 	int m_playerid;
 };
 
-// TODO: how do you pass the settings arg as a ref? 
 class HStimulusSettingsEvent: public HEvent
 {
 public:

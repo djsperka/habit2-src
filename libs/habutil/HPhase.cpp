@@ -168,8 +168,6 @@ void HPhase::requestCurrentStim()
 
 void HPhase::requestAG()
 {
-	// TODO config should ensure that trials with no ag configured will not request stim(0).
-	
 	eventLog().append(new HAGRequestEvent(HElapsedTimer::elapsed()));
 	experiment().getMediaManager().ag();
 }

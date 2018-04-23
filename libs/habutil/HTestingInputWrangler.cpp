@@ -107,14 +107,7 @@ bool HTestingInputWrangler::processLine(const QString& line)
 	}
 	else if (line.startsWith('!'))
 	{
-		// TODO: Can have special handling for other input?
-#if 0
-		QString s = line.remove(0,1);
-		QTextStream in(s);
-		int i0, i1, i2, i3;
-		in >> i0 >> i1 >> i2 >> i3;
-		qDebug() << "Read parameters from input file line: " << i0 << " " i1 << " " << i2 << " " << i3;
-#endif
+		// This left as possible entry line for parameters. For now treated as a comment.
 	}
 	else
 	{
