@@ -392,7 +392,7 @@ void MainDao::addOrUpdateStimuliSettings(int phaseId, Habit::StimuliSettings& st
 }
 
 
-// TODO: Insert statement below puts "0" in for experiment_id. In a future release,
+// Insert statement below puts "0" in for experiment_id. In a future release,
 // that column should be dropped from stimulus table (it is NOT NULL). Its not used
 // any more, but it was a crucial link in getting attention stimulus connected....so keep
 // it around just in case. Similar for "context" column. Using phase_id eliminates need for
@@ -916,7 +916,6 @@ void MainDao::getStimulusSettings(int stimulus_id, StimulusSettings& settings)
 	{
 		while (qsf.next())
 		{
-			// TODO - this is dangerous! Fixme!
 			StimulusInfo info(qsf.value(2).toString(), qsf.value(3).toBool(), qsf.value(4).toInt(), qsf.value(5).toBool(), qsf.value(6).toBool(), qsf.value(7).toString());
 			info.setId(qsf.value(0).toInt());
 			settings.setStimulusInfo(info, getPlayerPositionType(qsf.value(1).toInt()));
@@ -1129,7 +1128,6 @@ void MainDao::addOrUpdateExperimentSettings(Habit::ExperimentSettings& experimen
 {
 	QString name = experimentSettings.getName();
 	int id = experimentSettings.getId();
-	int hidden = experimentSettings.isHidden() ? 1 : 0;
 	QSqlQuery q;
 	if(id > 0)
 	{
