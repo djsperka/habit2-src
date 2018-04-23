@@ -80,7 +80,7 @@ const HPhaseSettings& HPhaseSettingsWidget::getHPhaseSettings()
 
 	// Update m_settings with the current contents of all the little checkboxes etc.
 
-	// TODO m_settings.setIsEnabled(ui->gbxEnabled->isChecked());
+	// m_settings.setIsEnabled() is done in the calling routine.
 	m_settings.setUseLookingCriteria(ui->cbxUseLookSettings->isChecked());
 	m_settings.setIsSingleLook(ui->rbSingleCompleteLook->isChecked());
 	m_settings.setIsMaxAccumulatedLookTime(ui->rbAccumulatedLookTime->isChecked());
