@@ -67,7 +67,6 @@ QDataStream & Habit::operator>> (QDataStream& stream, StimuliSettings& settings)
 	Habit::StimulusSettingsList sList;
 	Habit::HStimulusOrderList oList;
 	int icontext;
-	int iphaseid;
 	QString sVersion;
 	qint64 pos = stream.device()->pos();
 
