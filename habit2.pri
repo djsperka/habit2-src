@@ -14,6 +14,8 @@
                     /Users/dan/git/gst-plugins-base \
                     /Users/dan/git/gst-plugins-good
 } else {
+	# MIN DEPLOYMENT TARGET is 10.9 - Mavericks
+	QMAKE_MACOSX_DEPLOYMENT_TARGET=10.9
     CONFIG += c++11
     LIBS += -Lc:/gstreamer/1.0/x86_64/lib -lgstreamer-1.0 -lglib-2.0 -lgobject-2.0 -lintl 
 #    LIBS += -lgstreamer-1.0 -lglib-2.0 -lintl 
