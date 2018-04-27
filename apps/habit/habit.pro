@@ -46,7 +46,7 @@ CONFIG(debug, debug|release) {
 	DEFINES += HABIT_RELEASE
 }
 
-ICON = ./habiticon.icns
+ICON = ./habit2.icns
 QMAKE_INFO_PLIST = habit.plist
 
 INCLUDEPATH += ../../libs/habutil
