@@ -40,6 +40,7 @@
 #include "HDBException.h"
 #include "HExperimentNameDialog.h"
 #include "HStimulusWidget.h"
+#include "HAboutHabitDialog.h"
 
 using namespace GUILib;
 using namespace Habit;
@@ -52,6 +53,8 @@ GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon, 
 , m_bEditTemplates(bEditTemplates)
 , m_bStimInDialog(bStimInDialog)
 {
+	createMenu();
+
 	m_pExperimentListWidget = new GUILib::HExperimentListWidget(this, true, m_bEditTemplates);
 	setCentralWidget(m_pExperimentListWidget);
     createActions();
@@ -70,6 +73,70 @@ GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon, 
 
     setUnifiedTitleAndToolBarOnMac(true);
  }
+
+
+void H2MainWindow::createMenu()
+{
+	QAction *exitAction = new QAction(tr("Exit"), this);
+	QAction *aboutAct = new QAction(tr("About"), this);
+	QAction *aboutQtAct = new QAction(tr("About Qt"), this);
+
+	connect(exitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+	connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+	QMenu* fileMenu = menuBar()->addMenu(tr("File"));
+	fileMenu->addAction(exitAction);
+
+	QMenu* helpMenu = menuBar()->addMenu(tr("About"));
+	helpMenu->addAction(aboutAct);
+	helpMenu->addAction(aboutQtAct);
+}
+
+
+void H2MainWindow::about()
+{
+	GUILib::HAboutHabitDialog dlg;
+	dlg.exec();
+
+//    QMessageBox::about(this, tr("About"), tr("This example demonstrates the "
+//        "different features of the QCompleter class."));
+}
+
+#if 0
+
+  QAbstractItemModel *MainWindow::modelFromFile(const QString& fileName)
+  {
+      QFile file(fileName);
+      if (!file.open(QFile::ReadOnly))
+          return new QStringListModel(completer);
+
+  #ifndef QT_NO_CURSOR
+      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  #endif
+      QStringList words;
+
+      while (!file.atEnd()) {
+          QByteArray line = file.readLine();
+          if (!line.isEmpty())
+              words << line.trimmed();
+      }
+
+  #ifndef QT_NO_CURSOR
+      QApplication::restoreOverrideCursor();
+  #endif
+      return new QStringListModel(words, completer);
+  }
+
+
+
+
+
+#endif
+
+
+
+
 
 
 void GUILib::H2MainWindow::experimentActivated(QString expt)

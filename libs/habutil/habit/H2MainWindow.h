@@ -66,8 +66,10 @@ class HStateMachine;
 		 void testExperiment();
 		 void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 		 void workspaceChanged();
+		 void about();
 
 	 private:
+		 void createMenu();
 		 void createActions();
 		 void createToolBars();
 		 void run(bool bInputTesting);

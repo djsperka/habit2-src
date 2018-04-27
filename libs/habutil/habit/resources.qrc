@@ -27,5 +27,6 @@
     <file>resources/expt-main/p-edit.png</file>
     <file>resources/logo/habit-large.png</file>
     <file>resources/logo/habit-small.png</file>
+    <file>resources/doc/about.html</file> 
   </qresource>
 </RCC>

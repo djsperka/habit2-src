@@ -235,7 +235,9 @@ bool habutilCreateWorkspace(const QDir& dir)
 	// stim dir exists, so create a link to the stock images etc.
 	qDebug() << "Check link to example stimuli...";
 #ifdef Q_OS_MACOS
-	QFile appSupport("/Library/Application Support/Habit22/stim/examples");
+	// Note that this folder is _named_ in the distribution folder - it is named there and deployed during install to the
+	// machine.
+	QFile appSupport("/Library/Application Support/habit2/stim/examples");
 	QFile examples(dir.absoluteFilePath("stim/examples"));
 	if (!appSupport.exists())
 	{

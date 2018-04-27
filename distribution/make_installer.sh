@@ -44,7 +44,7 @@ DMG_DIR=${BUILD_DIR}/dist
 mkdir -p $DMG_DIR
 rm -f ${DMG_DIR}/*.pkg
 INSTALLER_PACKAGE_FILE=${DMG_DIR}/Habit2-$VERSION_FULL-mac-x64.pkg
-productbuild --distribution $DISTRIBUTION_PLIST --version $VERSION_FULL --resources . --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" $INSTALLER_PACKAGE_FILE
+productbuild --version $VERSION_FULL --distribution $DISTRIBUTION_PLIST --resources files --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" $INSTALLER_PACKAGE_FILE
 
 # create dmg installer
 INSTALLER_DMG_FILE=${BUILD_DIR}/Habit2-${VERSION_FULL}-mac-x64.dmg
