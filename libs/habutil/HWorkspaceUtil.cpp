@@ -233,12 +233,14 @@ bool habutilCreateWorkspace(const QDir& dir)
 	}
 
 	// stim dir exists, so create a link to the stock images etc.
-	qDebug() << "Check link to example stimuli...";
+	qDebug() << "Check link to example stimuli and misc...";
 #ifdef Q_OS_MACOS
 	// Note that this folder is _named_ in the distribution folder - it is named there and deployed during install to the
 	// machine.
 	QFile appSupport("/Library/Application Support/habit2/stim/examples");
 	QFile examples(dir.absoluteFilePath("stim/examples"));
+	QFile appSupportMisc("/Library/Application Support/habit2/misc");
+	QFile misc(dir.absoluteFilePath("misc"));
 	if (!appSupport.exists())
 	{
 		qWarning() << "Application Support folder " << appSupport.fileName() << " not found.";
@@ -261,7 +263,33 @@ bool habutilCreateWorkspace(const QDir& dir)
 			}
 		}
 	}
-#elif Q_OS_WIN
+
+	if (!appSupportMisc.exists())
+	{
+		qWarning() << "Application Support folder " << appSupportMisc.fileName() << " not found.";
+	}
+	else
+	{
+		if (misc.exists())
+		{
+			qWarning() << "misc folder already exists in this workspace.";
+		}
+		else
+		{
+			if (appSupportMisc.link(misc.fileName()))
+			{
+				qDebug() << "Created link " << misc.fileName() << " --> " << appSupportMisc.fileName();
+			}
+			else
+			{
+				qWarning() << "Cannot create link " << misc.fileName() << " --> " << appSupportMisc.fileName();
+			}
+		}
+	}
+
+
+
+	#elif Q_OS_WIN
     QProcess process;
     process.start("mklink /D");
 
@@ -280,6 +308,7 @@ bool habutilCreateWorkspace(const QDir& dir)
         return 1;
     }
 #endif
+
 
 	return true;
 }
