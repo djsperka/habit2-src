@@ -559,6 +559,8 @@
 				<false/>
 				<key>PAYLOAD_SIZE</key>
 				<integer>-1</integer>
+				<key>REFERENCE_PATH</key>
+				<string></string>
 				<key>RELOCATABLE</key>
 				<false/>
 				<key>USE_HFS+_COMPRESSION</key>
@@ -783,6 +785,11 @@
 		</dict>
 		<key>PROJECT_SETTINGS</key>
 		<dict>
+			<key>ADVANCED_OPTIONS</key>
+			<dict>
+				<key>installer-script.product:version</key>
+				<string>2.2.1</string>
+			</dict>
 			<key>BUILD_FORMAT</key>
 			<integer>0</integer>
 			<key>BUILD_PATH</key>
@@ -961,7 +968,7 @@
 				</dict>
 			</array>
 			<key>NAME</key>
-			<string>habit2</string>
+			<string>habit2-2.2.1</string>
 			<key>PAYLOAD_ONLY</key>
 			<false/>
 			<key>TREAT_MISSING_PRESENTATION_DOCUMENTS_AS_WARNING</key>
