@@ -76,7 +76,7 @@ void HStimulusSettingsListWidget::removeClicked()
 	QModelIndexList selected = m_pListView->selectionModel()->selectedIndexes();
 
 	// deselect, otherwise a new selection will be made automatically.
-	m_pListView->clearSelection();
+	//m_pListView->clearSelection();
 
 	QListIterator<QModelIndex> it(selected);
 	while (it.hasNext())
@@ -110,6 +110,7 @@ void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & select
 	{
 		m_pbEdit->setEnabled(false);
 		m_pbRemove->setEnabled(false);
+		emit clearStimulus();
 	}
 }
 

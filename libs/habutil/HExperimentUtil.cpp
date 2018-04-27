@@ -22,9 +22,11 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	HStateMachine *psm;
 
 	// Need to know if AG is used. If it is, add attention getter settings to media manager
-	if (experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed() || experimentSettings.getAttentionGetterSettings().isFixedISI())
+	if (	experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed() ||
+			experimentSettings.getAttentionGetterSettings().isFixedISI() ||
+			experimentSettings.getAttentionGetterSettings().isSoundOnly())
 	{
-		pmm->addAG(experimentSettings.getAttentionGetterSettings().getAttentionGetterStimulus());
+		pmm->addAG(experimentSettings.getAttentionGetterSettings().getAttentionGetterStimulus(), experimentSettings.getAttentionGetterSettings().isSoundOnly());
 	}
 
 	// This is a single super-state that holds all the phases.

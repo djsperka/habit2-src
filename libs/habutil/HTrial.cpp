@@ -65,7 +65,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	m_ptimerFixedISI = new QTimer();
 	m_ptimerFixedISI->setSingleShot(true);
 
-	if (m_agSettings.isAttentionGetterUsed())
+	if (m_agSettings.isAttentionGetterUsed() || m_agSettings.isSoundOnly())
 	{
 		// When the look detector emits the attention() signal enter StimRequest state.
 		sAGRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(attention()), sStimRequest);
@@ -186,6 +186,10 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 		{
 			sInitial->addTransition(sAGRequest);
 		}
+		else if (m_agSettings.isSoundOnly())
+		{
+			sInitial->addTransition(sAGRequest);
+		}
 		else
 		{
 			sInitial->addTransition(sStimRequest);
@@ -243,7 +247,7 @@ void HTrial::onStimRunningExited()
 
 void HTrial::onAGRunningEntered()
 {
-	if (m_agSettings.isAttentionGetterUsed())
+	if (m_agSettings.isAttentionGetterUsed() || m_agSettings.isSoundOnly())
 	{
 		phase().experiment().getLookDetector().enableAGLook();
 	}
@@ -256,7 +260,7 @@ void HTrial::onAGRunningEntered()
 
 void HTrial::onAGRunningExited()
 {
-	if (m_agSettings.isAttentionGetterUsed())
+	if (m_agSettings.isAttentionGetterUsed() || m_agSettings.isSoundOnly())
 	{
 		phase().experiment().getLookDetector().disable();
 	}

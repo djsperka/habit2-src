@@ -135,6 +135,9 @@ void HStimuliSettingsWidget::stimulusAboutToBeRemoved(int row)
 	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
 	// in the stimulusSettingsLIst widget a stim was selected and "Remove" was clicked.
 	// We have to remove the stimulus from the media manager.
+
+	// play background before removing.
+	//HGMM::instance().background();
 	HGMM::instance().remove(list.at(row));
 }
 
