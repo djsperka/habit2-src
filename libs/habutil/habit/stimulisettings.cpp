@@ -5,17 +5,16 @@ using namespace Habit;
 
 // version string for input/output. See operator<<, operator>>
 static const QString f_sVersion2("SSV2");
+static const QString f_sVersion2a("PhaseReOrg");
 
-StimuliSettings::StimuliSettings(const HStimContext& context)
+StimuliSettings::StimuliSettings()
 : ssList_()
 , soList_()
-, pcontext_(&context)
 {}
 
 StimuliSettings::StimuliSettings(const StimuliSettings& settings)
 : ssList_(settings.stimuli())
 , soList_(settings.orders())
-, pcontext_(&settings.getStimContext())
 {
 }
 
@@ -29,14 +28,13 @@ StimuliSettings& StimuliSettings::operator=(const StimuliSettings& rhs)
 	{
 		setStimuli(rhs.stimuli());
 		setOrderList(rhs.orders());
-		setStimContext(rhs.getStimContext());
 	}
 	return *this;
 }
 
-StimuliSettings StimuliSettings::clone()
+StimuliSettings StimuliSettings::clone() const
 {
-	StimuliSettings settings(this->getStimContext());
+	StimuliSettings settings;
 	StimulusSettingsList list;
 	QListIterator<StimulusSettings> it(stimuli());
 	HStimulusOrderList olist;
@@ -59,7 +57,8 @@ QDataStream & Habit::operator<< (QDataStream& stream, StimuliSettings settings)
 {
 	// write version to stream
 	//stream.writeBytes(f_psVersion2, 4);
-	stream << f_sVersion2 << settings.stimuli() << settings.orders() << settings.getStimContext().number();
+	//stream << f_sVersion2 << settings.stimuli() << settings.orders() << settings.getStimContext().number();
+	stream << f_sVersion2a << settings.stimuli() << settings.orders();
 	return stream;
 }
 
@@ -72,29 +71,33 @@ QDataStream & Habit::operator>> (QDataStream& stream, StimuliSettings& settings)
 	qint64 pos = stream.device()->pos();
 
 	stream >> sVersion;
-	if (sVersion == f_sVersion2)
+	if (sVersion == f_sVersion2a)
+	{
+		// at version 2a we switched to phaseId, no more context
+		stream >> sList >> oList;
+		settings.setStimuli(sList);
+		settings.setOrderList(oList);
+	}
+	else if (sVersion == f_sVersion2)
 	{
 		// at version 2 the stimulus orders were added. Skip over the version string,
 		// then proceed.
 		stream >> sList >> oList >> icontext;
 		settings.setStimuli(sList);
 		settings.setOrderList(oList);
-		settings.setStimContext(getStimContext(icontext));
 	}
 	else
 	{
 		stream.device()->seek(pos);
 		stream >> sList >> icontext;
 		settings.setStimuli(sList);
-		settings.setStimContext(getStimContext(icontext));
 	}
 	return stream;
 }
 
 bool Habit::operator==(const Habit::StimuliSettings&lhs, const Habit::StimuliSettings& rhs)
 {
-	return (lhs.getStimContext() == rhs.getStimContext() &&
-			lhs.stimuli() == rhs.stimuli() &&
+	return (lhs.stimuli() == rhs.stimuli() &&
 			lhs.orders() == rhs.orders());
 }
 
@@ -108,16 +111,6 @@ const StimulusSettingsList& StimuliSettings::stimuli() const
     return ssList_;
 }
 
-const HStimContext& StimuliSettings::getStimContext() const
-{
-	return *pcontext_;
-}
-
-void StimuliSettings::setStimContext(const HStimContext& context)
-{
-	pcontext_ = &context;
-}
-
 void StimuliSettings::setStimuli(const StimulusSettingsList& stimuli)
 {
 	ssList_.clear();
@@ -127,10 +120,7 @@ void StimuliSettings::setStimuli(const StimulusSettingsList& stimuli)
 
 void StimuliSettings::addStimulus(const StimulusSettings& settings)
 {
-	// make sure that new stimuli have correct context set
-	StimulusSettings tmp(settings);
-	tmp.setContext(getStimContext());
-	ssList_.append(tmp);
+	ssList_.append(settings);
 }
 
 void StimuliSettings::setOrderList(const HStimulusOrderList& list)
@@ -179,21 +169,17 @@ bool StimuliSettings::getIndexedOrderList(const QString& orderName, QList< QPair
 	return b;
 }
 
-
-
-
-void StimuliSettings::loadFromDB(int experimentId) 
+void StimuliSettings::loadFromDB(int phaseId)
 {
 	MainDao dao;
-	*this = dao.getStimuliSettings(experimentId, this->getStimContext());
+	return dao.getStimuliSettings(phaseId, *this);
 }
 
-bool Habit::StimuliSettings::saveToDB(size_t id_)
+void Habit::StimuliSettings::saveToDB(int phaseId)
 {
 	Habit::MainDao dao;
-	return dao.addOrUpdateStimuliSettings(id_, *this);
+	return dao.addOrUpdateStimuliSettings(phaseId, *this);
 }
-
 
 QStringList Habit::StimuliSettings::getStimulusNames() const
 {
@@ -213,16 +199,11 @@ QStringList Habit::StimuliSettings::getOrderNames() const
 	return result;
 }
 
-
-
-
-
-
 QDebug Habit::operator<<(QDebug dbg, const StimuliSettings& ss)
 {
 	const StimulusSettingsList& c = ss.stimuli();
 	HStimulusOrderList o = ss.orders();
-	dbg.nospace() << "StimuliSettings: context " << ss.getStimContext().name() << endl;
+	dbg.nospace() << "StimuliSettings: "<< endl;
 	for (int i=0; i<c.size(); i++)
 	{
 		dbg.nospace() << "Stimulus " << i << endl;

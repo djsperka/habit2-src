@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PhaseWPFirst</class>
+ <widget class="QWizardPage" name="PhaseWPFirst">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>308</width>
+    <height>236</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>WizardPage</string>
+  </property>
+  <property name="title">
+   <string>Create a new phase</string>
+  </property>
+  <property name="subTitle">
+   <string>Enter a name for the new phase, and select the phase type.</string>
+  </property>
+  <attribute name="pageId">
+   <string notr="true">1</string>
+  </attribute>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Phase Name:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lePhaseName"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Phase Type:</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QRadioButton" name="rbFixedNumber">
+        <property name="toolTip">
+         <string>Phase will have a fixed number of trials.</string>
+        </property>
+        <property name="text">
+         <string>Fixed number of trials</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rbCriterionToEnd">
+        <property name="toolTip">
+         <string>Phase will end when a reduction of looking time criterion is met</string>
+        </property>
+        <property name="text">
+         <string>Criterion to end</string>
+        </property>
+        <property name="autoExclusive">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rbTotalLookingTime">
+        <property name="toolTip">
+         <string>Phase continues until subject accumulates enough looking time.</string>
+        </property>
+        <property name="text">
+         <string>Total looking time</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

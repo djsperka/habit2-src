@@ -22,9 +22,10 @@ HKeypadLookDetector::HKeypadLookDetector(HEventLog& log, QWidget* pdialog, bool 
 
 HKeypadLookDetector::~HKeypadLookDetector()
 {
+	// Make sure to delete this BERFORE deleting the dialog!!!
 	m_pdialog->releaseKeyboard();
 	m_pdialog->removeEventFilter(this);
-	qDebug() << "HKeypadLookDetector: Event filter removed.";
+	qDebug() << "HKeypadLookDetector::~HKeypadLookDetector(): Event filter removed.";
 };
 
 void HKeypadLookDetector::setDialog(QWidget *pdialog)

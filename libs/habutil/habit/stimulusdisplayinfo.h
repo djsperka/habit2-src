@@ -5,8 +5,9 @@
 /// \file stimulusdisplayinfo.h
 /// \brief Declaraction of class Habit::StimulusDisplayInfo
 
-#include <QtGui/QColor>
 #include "HTypes.h"
+#include <QColor>
+#include <QMetaType>
 
 /// Common namespace for all entities of the Habit
 namespace Habit
@@ -20,7 +21,7 @@ public:
     StimulusDisplayInfo(const StimulusDisplayInfo& info);
     ~StimulusDisplayInfo();
     StimulusDisplayInfo& operator=(const StimulusDisplayInfo& rhs);
-    StimulusDisplayInfo clone();
+    StimulusDisplayInfo clone() const;
 
 public:
 	int getId() const;
@@ -37,8 +38,8 @@ public:
     void setStimulusLayoutType(const HStimulusLayoutType& type);
     bool getUseISS() const;
     void setUseISS(bool use);
-	void loadFromDB(size_t id);
-	bool saveToDB(size_t id_);
+	void loadFromDB(int experimentID);	// can throw HDBException
+	void saveToDB(int experimentID);	// can throw HDBException
 
 private:
 	int id_;
@@ -50,11 +51,17 @@ private:
 	bool useISS_;
 };
 
+
 QDataStream & operator<< (QDataStream& stream, Habit::StimulusDisplayInfo d);
 QDataStream & operator>> (QDataStream& stream, Habit::StimulusDisplayInfo& d);
+QDebug operator<<(QDebug dbg, const Habit::StimulusDisplayInfo& info);
 bool operator==(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs);
+bool operator!=(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs);
+
 
 
 } //namespace Habit
+
+Q_DECLARE_METATYPE(Habit::StimulusDisplayInfo);
 
 #endif // HABIT_STIMULUS_DISPLAY_INFO_H

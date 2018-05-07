@@ -107,14 +107,7 @@ bool HTestingInputWrangler::processLine(const QString& line)
 	}
 	else if (line.startsWith('!'))
 	{
-		// TODO: Can have special handling for other input?
-#if 0
-		QString s = line.remove(0,1);
-		QTextStream in(s);
-		int i0, i1, i2, i3;
-		in >> i0 >> i1 >> i2 >> i3;
-		qDebug() << "Read parameters from input file line: " << i0 << " " i1 << " " << i2 << " " << i3;
-#endif
+		// This left as possible entry line for parameters. For now treated as a comment.
 	}
 	else
 	{
@@ -125,6 +118,8 @@ bool HTestingInputWrangler::processLine(const QString& line)
 			return false;
 		}
 
+
+#if WHEN_THERE_WERE_FIXED_PHASE_NAMES
 		// First token should be a phase name recognized by getPhaseType()
 		const HPhaseType& phaseType = getPhaseType(tokens.at(0));
 		if (phaseType == HPhaseType::UnknownPhase)
@@ -140,6 +135,18 @@ bool HTestingInputWrangler::processLine(const QString& line)
 			m_map.insert(phaseType, telm);
 		}
 		TrialEventLogMap* pTrialEventLogMap = &m_map[phaseType];
+#else
+
+		QString phaseName = tokens.at(0).trimmed();
+		if (!m_map.contains(phaseName))
+		{
+			TrialEventLogMap telm;
+			m_map.insert(phaseName, telm);
+		}
+		TrialEventLogMap* pTrialEventLogMap = &m_map[phaseName];
+#endif
+
+
 
 		bool bt, br, bm;
 		int itrial, irepeat, ims;
@@ -176,37 +183,38 @@ bool HTestingInputWrangler::processLine(const QString& line)
 
 
 		// no LookTransType - do this by hand
-		if (tokens.at(3) == HLookTrans::NoneLeft.name())
+		QString sTrans = tokens.at(3).trimmed();
+		if (sTrans == HLookTrans::NoneLeft.name())
 		{
 			pEventLog->append(new HLookTransEvent(HLookTrans::NoneLeft, ims));
 		}
-		else if (tokens.at(3) == HLookTrans::LeftNone.name())
+		else if (sTrans == HLookTrans::LeftNone.name())
 		{
 			pEventLog->append(new HLookTransEvent(HLookTrans::LeftNone, ims));
 		}
-		else if (tokens.at(3) == HLookTrans::NoneCenter.name())
+		else if (sTrans == HLookTrans::NoneCenter.name())
 		{
 			pEventLog->append(new HLookTransEvent(HLookTrans::NoneCenter, ims));
 		}
-		else if (tokens.at(3) == HLookTrans::CenterNone.name())
+		else if (sTrans == HLookTrans::CenterNone.name())
 		{
 			pEventLog->append(new HLookTransEvent(HLookTrans::CenterNone, ims));
 		}
-		else if (tokens.at(3) == HLookTrans::NoneRight.name())
+		else if (sTrans == HLookTrans::NoneRight.name())
 		{
 			pEventLog->append(new HLookTransEvent(HLookTrans::NoneRight, ims));
 		}
-		else if (tokens.at(3) == HLookTrans::RightNone.name())
+		else if (sTrans == HLookTrans::RightNone.name())
 		{
 			pEventLog->append(new HLookTransEvent(HLookTrans::RightNone, ims));
 		}
-		else if (tokens.at(3) == HLookTrans::NoneNone.name())
+		else if (sTrans == HLookTrans::NoneNone.name())
 		{
 			pEventLog->append(new HLookTransEvent(HLookTrans::NoneNone, tokens.at(1).toInt()));
 		}
 		else
 		{
-			qDebug() << "Unknown LookTransType: " << tokens.at(3);
+			qDebug() << "Unknown LookTransType: >>" << sTrans << "<<";
 			return false;
 		}
 
@@ -221,9 +229,9 @@ void HTestingInputWrangler::phaseStarted(QString sPhase)
 	Q_ASSERT(m_bIsEnabled);
 	// when phase starts, get
 	qDebug() << "HTestingInputWrangler::phaseStarted(\"" << sPhase << "\")";
-	if (m_map.contains(getPhaseType(sPhase)))
+	if (m_map.contains(sPhase))
 	{
-		m_pCurrentEventLogMap = &m_map[getPhaseType(sPhase)];
+		m_pCurrentEventLogMap = &m_map[sPhase];
 		qDebug() << "There are events for this phase.";
 	}
 	else
@@ -313,13 +321,13 @@ void HTestingInputWrangler::check()
 
 void HTestingInputWrangler::dump()
 {
-	QList< HPhaseType > keys = m_map.keys();
+	QList< QString > keys = m_map.keys();
 	qDebug() << "HTestingInputWrangler events loaded: ";
-	QListIterator< HPhaseType > itPhases(keys);
+	QListIterator< QString > itPhases(keys);
 	while (itPhases.hasNext())
 	{
-		HPhaseType type = itPhases.next();
-		qDebug() << type.name() << endl;
+		QString type = itPhases.next();
+		qDebug() << type << endl;
 
 		// Get the map for this phase.
 		TrialEventLogMap *pEventLogMap = &m_map[type];

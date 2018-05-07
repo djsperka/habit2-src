@@ -8,8 +8,18 @@
 #ifndef HGLOBALPREFERENCESDIALOG_H_
 #define HGLOBALPREFERENCESDIALOG_H_
 
+#include <QtGlobal>
+#if QT_VERSION < 0x050000
 #include <QtGui>
+#else
+#include <QtWidgets>
+#endif
 #include "HTypes.h"
+
+namespace Ui
+{
+	class GlobalPreferencesDialog;
+}
 
 namespace GUILib
 {
@@ -17,20 +27,9 @@ namespace GUILib
 	{
 		Q_OBJECT
 
-
-		QPushButton *m_pbDone;
-		QPushButton *m_pbCancel;
-		QPushButton *m_pbSelect;
-		QPushButton *m_pbSelectWorkspace;
-		QPushButton *m_pbIdentify;
-		QLineEdit *m_plineeditRoot;
-		QLineEdit *m_plineeditWorkspace;
-		QComboBox *m_pcbControl;
-		QComboBox *m_pcbLeft;
-		QComboBox *m_pcbCenter;
-		QComboBox *m_pcbRight;
-		QCheckBox *m_pcheckDefaultStimRoot;
-
+		Ui::GlobalPreferencesDialog *ui;
+		QString m_sWorkspaceSelected;	// this is what's displayed in the label; it is written to Settings when OK is clicked
+		QString m_sStimulusRootDirSelected; // ditto, but for stimulus root dir
 		void create();
 		void connections();
 		void initialize();
@@ -41,9 +40,9 @@ namespace GUILib
 
 	protected slots:
 
-		void doneClicked();
-		void selectClicked();
-		void selectWorkspaceClicked();
+		void accepted();
+		void chooseStimulusRootDirClicked();
+		void chooseWorkspaceClicked();
 		void identifyClicked();
 		void defaultStimRootClicked();
 

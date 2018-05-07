@@ -160,7 +160,6 @@ QDataStream& operator<<(QDataStream& stream, HEventLog log)
 
 QDataStream& operator>>(QDataStream& stream, HEventLog& log)
 {
-	// TODO: Should operator>> first clear() the log?
 	int n, i;
 	stream >> n;
 	for (i=0; i<n; i++)

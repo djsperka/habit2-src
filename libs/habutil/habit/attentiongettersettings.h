@@ -35,8 +35,14 @@ public:
     void setIsFixedISI(bool b);
     int getFixedISIMS() const;
     void setFixedISIMS(int ms);
-	void loadFromDB(size_t id);
-	bool saveToDB(size_t id_);
+    bool isSoundOnly() const;
+    void setIsSoundOnly(bool b);
+    bool isNoISI() const;
+    void setIsNoISI(bool b);
+    int getStimulusID() const;
+    void setStimulusID(int stimulusID);
+	void loadFromDB(int experimentID);	// can throw HDBException
+	void saveToDB(int experimentID);	// can throw HDBException
 
 private:
 	int id_;
@@ -45,6 +51,9 @@ private:
 	QColor backGroundColor_;
 	bool isFixedISI_;
 	int isiMS_;
+	bool isSoundOnly_;
+	bool isNoISI_;
+	int stimulusID_;
 };
 
 QDataStream & operator<< (QDataStream& stream, const AttentionGetterSettings& settings);

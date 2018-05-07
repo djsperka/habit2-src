@@ -7,20 +7,30 @@
 
 #include "HExperimentListValidator.h"
 
-QValidator::State GUILib::HExperimentListValidator::validate(QString& input, int& pos) const
+QValidator::State GUILib::HExperimentListValidator::validate(QString& input, int&) const
 {
 	QValidator::State state = QValidator::Invalid;
+
+	// if input is empty we're up in the air
 	if (input.isEmpty())
-	{
-		state = QValidator::Invalid;
-	}
-	else if (m_list.contains(input))
 	{
 		state = QValidator::Intermediate;
 	}
 	else
 	{
-		state = QValidator::Acceptable;
+		// check against re
+		if (m_re.exactMatch(input))
+		{
+			// check if its in the list of existing experiments
+			if (m_list.contains(input))
+			{
+				state = QValidator::Intermediate;
+			}
+			else
+			{
+				state = QValidator::Acceptable;
+			}
+		}
 	}
 	return state;
 };

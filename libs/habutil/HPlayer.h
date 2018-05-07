@@ -10,7 +10,6 @@
 #ifndef HABITPLAYER_H
 #define HABITPLAYER_H
 
-#include <QWidget>
 #include <QMap>
 #include <QDir>
 #include "HStimulusSource.h"
@@ -24,15 +23,17 @@
 // are at index>0. This is a convenience for Habit, which allows users
 // to number stimuli with positive integers. 
 
-class HPlayer : public QWidget
+class HPlayer : public QObject
 {
 
 	Q_OBJECT
 	
 public:
-	HPlayer(int ID = 0, QWidget* w = 0, const QDir& dir = QDir("/"));
+	HPlayer(int ID = 0, QObject* w = 0, const QDir& dir = QDir("/"));
 	virtual ~HPlayer();
 
+	/// get the id
+	int id() { return m_id; }
 	
 	/// Play the stim at index 'number'. Out of range index defaults to background.
 	virtual void play(unsigned int number) = 0;
@@ -86,13 +87,13 @@ protected:
 	//QMap<unsigned int, HStimulusSource *> m_sources;
 	
 	/// index of currently playing stim. An out of range index defaults to playing background.
-	int m_iCurrentStim;
+	//int m_iCurrentStim;
 
 	// Get the StimulusInfo object for given key.
 	const Habit::StimulusInfo& getStimulusInfo(unsigned int key);
 
 	// Get current stim info
-	const Habit::StimulusInfo& getCurrentStimulusInfo() { return getStimulusInfo(m_iCurrentStim); };
+	//const Habit::StimulusInfo& getCurrentStimulusInfo() { return getStimulusInfo(m_iCurrentStim); };
 
 	// returns the next key to be used. Equal to the largest current key + 1.
 	unsigned int nextKey() { return m_mapPStimulusInfo.count() - 1;};
@@ -115,7 +116,7 @@ private:
 	virtual unsigned int addStimulusPrivate(unsigned int id) = 0;
 
 
-signals:
+Q_SIGNALS:
 	void started(int i, const QString& filename);
 	void cleared(int i);
 

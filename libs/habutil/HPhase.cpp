@@ -10,12 +10,12 @@
 #include "HPhase.h"
 #include "HTrial.h"
 #include "HElapsedTimer.h"
-#include "HMediaManager.h"
+#include "HGMM.h"
 #include <QFinalState>
 #include <QtDebug>
 
 HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput)
-	: HExperimentChildState(exp, log, phaseSettings.getPhaseType().name())
+	: HExperimentChildState(exp, log, phaseSettings.getName())
 	, m_pcriteria(pcriteria)
 	, m_stimuli(stimuli)
 	, m_phaseSettings(phaseSettings)
@@ -41,10 +41,12 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
 
 	// Set object name - trick to allow updating status labels when this phase is entered.
-	setObjectName(QString(phaseSettings.getPhaseType().name()));
+	setObjectName(QString(phaseSettings.getName()));
 
 	connect(this, SIGNAL(phaseStarted(QString)), &exp, SIGNAL(phaseStarted(QString)));
 	connect(m_sTrial, SIGNAL(trialStarted(int, int)), &exp, SIGNAL(trialStarted(int, int)));
+
+	checkPrerollStatus();
 };
 
 
@@ -63,6 +65,33 @@ void HPhase::stimStarted(int stimid)
 	eventLog().append(new HStimStartEvent(stimid, HElapsedTimer::elapsed()));
 }
 
+void HPhase::checkPrerollStatus(int trialnumber, int repeat)
+{
+	// If trialnumber is negative, then preroll the first stim
+	if (trialnumber < 0)
+	{
+		if (m_stimuli.size() > 0)
+		{
+			qDebug() << "HPhase::checkPrerollStatus() - preroll first stimulus";
+			experiment().getMediaManager().preroll(m_stimuli[0].first);
+		}
+	}
+	else
+	{
+		int prerollID = m_itrial+1;
+		qDebug() << "Check preroll status for trial " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial];
+		if (prerollID < m_stimuli.size())
+		{
+			qDebug() << "HPhase::checkPrerollStatus() - preroll(" << m_stimuli[prerollID].first << ")";
+			experiment().getMediaManager().preroll(m_stimuli[prerollID].first);
+		}
+		else
+		{
+			qDebug() << "At last stim in phase; nothing to preroll.";
+		}
+	}
+}
+
 void HPhase::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
@@ -75,7 +104,7 @@ void HPhase::onEntry(QEvent* e)
 	m_sTrial->setTrialNumber(m_itrial);
 
 	// post 'phase start' event to event log.
-	eventLog().append(new HPhaseStartEvent(ptype(), HElapsedTimer::elapsed()));
+	eventLog().append(new HPhaseStartEvent(m_phaseSettings.getName(), m_phaseSettings.getSeqno(), HElapsedTimer::elapsed()));
 	
 
 	// connect media manager signal screen(int) to slot screenStarted(int)
@@ -97,7 +126,7 @@ void HPhase::onEntry(QEvent* e)
 	// djs 10-7-2015 Moved this to be the last statement in the function.
 	// NOTE: onEntry() is called first, then QAbstractState emits SIGNAL(entered()),
 	// so this signal comes before the state is "entered"?
-	emit phaseStarted(m_phaseSettings.getPhaseType().name());
+	emit phaseStarted(m_phaseSettings.getName());
 
 };
 
@@ -131,7 +160,7 @@ void HPhase::requestCurrentStim()
 	else 
 	{
 		eventLog().append(new HStimLabelRequestEvent(-1, QString("ERROR"), HElapsedTimer::elapsed()));
-		experiment().getMediaManager().stim(-1);
+		experiment().getMediaManager().defaultStim();
 		qDebug() << "Bad trial index (" << m_itrial << ")for phase " << m_name << " max " << m_stimuli.size();
 	}
 
@@ -139,9 +168,6 @@ void HPhase::requestCurrentStim()
 
 void HPhase::requestAG()
 {
-	// TODO: createMediaManager should ensure that position 0 is always ag or a blank screen. 
-	// config should ensure that trials with no ag configured will not request stim(0). 
-	
 	eventLog().append(new HAGRequestEvent(HElapsedTimer::elapsed()));
 	experiment().getMediaManager().ag();
 }
@@ -167,6 +193,9 @@ void HPhase::onTrialCompleteEntered()
 	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog(), isHabituated))
 	{
 		machine()->postEvent(new HAllTrialsDoneEvent());
+
+		qWarning() << "Habituation success/fail event not implemented!!!";
+/*
 		if (ptype() == HPhaseType::Habituation)
 		{
 			if (isHabituated)
@@ -174,6 +203,7 @@ void HPhase::onTrialCompleteEntered()
 			else 
 				eventLog().append(new HHabituationFailureEvent(HElapsedTimer::elapsed()));
 		}
+*/
 	}
 	else 
 	{

@@ -9,6 +9,13 @@
 #include "HWorkspaceUtil.h"
 #include "HExperimentMain.h"
 #include <QMessageBox>
+#include <QDialog>
+
+#if QT_VERSION >= 0x050000
+#include <QPrinter>
+#include <QPrintDialog>
+#endif
+
 //#include "experimentsettingsform.h"
 
 HResultsDialog::HResultsDialog(const HResults& results, QWidget* parent)

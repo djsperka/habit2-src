@@ -11,8 +11,13 @@
 #define HCONTROLPANEL_H
 
 
-
+#include <QtGlobal>
+#if QT_VERSION >= 0x050000
+#include <QtWidgets>
+#else
 #include <QtGui>
+#endif
+
 #include <QMap>
 
 #include "runsettings.h"
@@ -20,7 +25,6 @@
 #include "stimulisettings.h"
 #include "experimentsettings.h"
 
-#include "HMediaManager.h"
 #include "HLookDetector.h"
 #include "HStateMachine.h"
 #include "HExperiment.h"
@@ -37,7 +41,7 @@ namespace GUILib
 		Q_OBJECT
 
 	public:
-		HControlPanel(const Habit::ExperimentSettings& exptSettings, HEventLog& log, const Habit::RunSettings& runSettings, HMediaManager *pmm, QWidget* w);
+		HControlPanel(const Habit::ExperimentSettings& exptSettings, HEventLog& log, const Habit::RunSettings& runSettings, HGMM *pmm, QWidget* w);
 		~HControlPanel();
 
 		// must call this before onStartTrials() is called.
@@ -70,7 +74,7 @@ namespace GUILib
 		const Habit::ExperimentSettings& m_experimentSettings;
 		HEventLog& m_log;
 		Habit::RunSettings m_runSettings;
-		HMediaManager* m_pmm;
+		HGMM* m_pmm;
 		HStateMachine* m_psm;
 	
 		QPushButton* m_pbStartTrials;

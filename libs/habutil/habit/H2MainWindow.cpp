@@ -13,7 +13,15 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QRegExp>
-
+#include <QListIterator>
+#include <QtGlobal>
+#include <QList>
+#include <QListIterator>
+#if QT_VERSION < 0x050000
+#include <QDesktopServices>
+#else
+#include <QStandardPaths>
+#endif
 #include "H2MainWindow.h"
 #include "HExperimentListWidget.h"
 #include "experimentsettings.h"
@@ -29,22 +37,30 @@
 #include "HMediaManagerUtil.h"
 #include "HLookDetectorUtil.h"
 #include "HTestingInputWrangler.h"
+#include "HDBException.h"
+#include "HExperimentNameDialog.h"
+#include "HStimulusWidget.h"
+#include "HAboutHabitDialog.h"
 
 using namespace GUILib;
 using namespace Habit;
 
 
-GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon)
+GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon, bool bEditTemplates, bool bStimInDialog)
 : QMainWindow()
 , m_bTestRunIsDefault(bDefaultTestRun)
 , m_bShowTestingIcon(bShowTestingIcon)
+, m_bEditTemplates(bEditTemplates)
+, m_bStimInDialog(bStimInDialog)
 {
-	m_pExperimentListWidget = new GUILib::HExperimentListWidget();
+	createMenu();
+
+	m_pExperimentListWidget = new GUILib::HExperimentListWidget(this, true, m_bEditTemplates);
 	setCentralWidget(m_pExperimentListWidget);
     createActions();
     createToolBars();
 
-    m_pLabelStatusBar = new QLabel(QString("Current workspace: %1").arg(habutilGetWorkspaceDir()));
+    m_pLabelStatusBar = new QLabel(QString("Current workspace: %1").arg(habutilGetWorkspaceDir().absolutePath()));
     statusBar()->addWidget(m_pLabelStatusBar);
     setWindowTitle(QString("%1 (v%2)").arg("Habit2").arg(QCoreApplication::instance()->applicationVersion()));
 
@@ -59,14 +75,85 @@ GUILib::H2MainWindow::H2MainWindow(bool bDefaultTestRun, bool bShowTestingIcon)
  }
 
 
+void H2MainWindow::createMenu()
+{
+	QAction *exitAction = new QAction(tr("Exit"), this);
+	QAction *aboutAct = new QAction(tr("About"), this);
+	QAction *aboutQtAct = new QAction(tr("About Qt"), this);
+
+	connect(exitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+	connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+	QMenu* fileMenu = menuBar()->addMenu(tr("File"));
+	fileMenu->addAction(exitAction);
+
+	QMenu* helpMenu = menuBar()->addMenu(tr("About"));
+	helpMenu->addAction(aboutAct);
+	helpMenu->addAction(aboutQtAct);
+}
+
+
+void H2MainWindow::about()
+{
+	GUILib::HAboutHabitDialog dlg;
+	dlg.exec();
+
+//    QMessageBox::about(this, tr("About"), tr("This example demonstrates the "
+//        "different features of the QCompleter class."));
+}
+
+#if 0
+
+  QAbstractItemModel *MainWindow::modelFromFile(const QString& fileName)
+  {
+      QFile file(fileName);
+      if (!file.open(QFile::ReadOnly))
+          return new QStringListModel(completer);
+
+  #ifndef QT_NO_CURSOR
+      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  #endif
+      QStringList words;
+
+      while (!file.atEnd()) {
+          QByteArray line = file.readLine();
+          if (!line.isEmpty())
+              words << line.trimmed();
+      }
+
+  #ifndef QT_NO_CURSOR
+      QApplication::restoreOverrideCursor();
+  #endif
+      return new QStringListModel(words, completer);
+  }
+
+
+
+
+
+#endif
+
+
+
+
+
+
 void GUILib::H2MainWindow::experimentActivated(QString expt)
 {
 	// Get experiment settings
 	Habit::ExperimentSettings settings;
-	if (Habit::ExperimentSettings::load(settings, expt))
+	try
 	{
+		settings.loadFromDB(expt);
 		HExperimentMain *exptMain = new HExperimentMain(settings, this);
 		exptMain->exec();
+		delete exptMain;
+	}
+	catch (const Habit::HDBException& e)
+	{
+		QMessageBox::warning(this, "Habit database error", e.what());
+		qCritical() << e.what();
 	}
 }
 
@@ -201,7 +288,7 @@ QString GUILib::H2MainWindow::getExperimentNewName()
 }
 
 
-
+#if 0
 bool GUILib::H2MainWindow::inputExperimentName(QString& newName, const QString defaultName)
 {
 	bool bOK = false;
@@ -223,6 +310,7 @@ bool GUILib::H2MainWindow::inputExperimentName(QString& newName, const QString d
     }
 	return bOK;
 }
+#endif
 
 void GUILib::H2MainWindow::newExperiment()
 {
@@ -233,9 +321,22 @@ void GUILib::H2MainWindow::newExperiment()
 	// Create default experiment name for the lazy
 	sDefault = getExperimentNewName();
 
-	if (inputExperimentName(sName, sDefault))
+	HExperimentNameDialog dlg(m_pExperimentListWidget->experimentList(), sDefault, this);
+	if (dlg.exec() == QDialog::Accepted)
 	{
-		settings.setName(sName);
+		// Using a template?
+		if (dlg.isTemplateChosen())
+		{
+			Habit::ExperimentSettings templateSettings;
+			templateSettings.loadFromDB(dlg.getTemplateChosen());
+			settings = templateSettings.clone(dlg.getNewValue());
+		}
+		else
+		{
+			settings.setName(dlg.getNewValue());
+			// Make sure to have a decent stimulus layout
+			settings.getStimulusDisplayInfo();
+		}
 		HExperimentMain *exptMain = new HExperimentMain(settings, this);
 		exptMain->exec();
 
@@ -254,18 +355,25 @@ void GUILib::H2MainWindow::editExperiment()
 	else
 	{
 		Habit::ExperimentSettings settings;
-		if (Habit::ExperimentSettings::load(settings, expt))
+		try
 		{
+			settings.loadFromDB(expt);
 			// Show experiment main window
 			HExperimentMain *exptMain = new HExperimentMain(settings, this);
 			exptMain->exec();
+			delete exptMain;
+		}
+		catch (const Habit::HDBException& e)
+		{
+			QMessageBox::warning(this, "Habit database error", e.what());
+			qCritical() << e.what();
 		}
 	}
 }
 
 void GUILib::H2MainWindow::importExperiment()
 {
-	QString filename = QFileDialog::getOpenFileName(NULL, "Import experiment file", habutilGetResultsDir().absolutePath(), "Habit Export Files (*.hbx)");
+	QString filename = QFileDialog::getOpenFileName(NULL, "Import experiment file", habutilGetWorkspaceDir().absolutePath(), "Habit Export Files (*.hbx)");
 	qDebug() << "Got filename for import: " << filename;
 
 	// Open and read the file
@@ -325,7 +433,7 @@ void GUILib::H2MainWindow::showResultsFile(const QString filename)
 
 
 
-bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems)
+bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems, bool bCheckMonitors)
 {
 	bool b = true;
 	sProblems.clear();
@@ -335,110 +443,84 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 	int iRight = habutilGetMonitorID(HPlayerPositionType::Right);
 	const HStimulusLayoutType& layoutType = settings.getStimulusDisplayInfo().getStimulusLayoutType();
 
-	// Control monitor specified?
-	if (iControl < 0)
+	if (bCheckMonitors)
 	{
-		b = false;
-		sProblems.append("No control monitor specified. Check preferences.");
-	}
+		// Control monitor specified?
+		if (iControl < 0)
+		{
+			b = false;
+			sProblems.append("No control monitor specified. Check preferences.");
+		}
 
-	// Check stimulus layout type, then check preferences for monitor assignments.
-	if (layoutType == HStimulusLayoutType::HStimulusLayoutUnknown)
-	{
-		b = false;
-		sProblems.append("Stimulus layout not set. Check preferences.");
-	}
-	else if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		// Must have a setting for the center stim.
-		if (iCenter < 0)
+		// Check stimulus layout type, then check preferences for monitor assignments.
+		if (layoutType == HStimulusLayoutType::HStimulusLayoutUnknown)
 		{
 			b = false;
-			sProblems.append("Stimulus layout type is \"single\". Please specify \"Center Monitor\" in preferences.");
+			sProblems.append("Stimulus layout not set. Check preferences.");
 		}
-		else if (iCenter == iControl)
+		else if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 		{
-			b = false;
-			sProblems.append("Center and Control monitors are the same! Check preferences.");
-		}
-	}
-	else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		if (iLeft < 0)
-		{
-			b = false;
-			sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Left Monitor\" in preferences.");
-		}
-		else if (iLeft == iControl)
-		{
-			b = false;
-			sProblems.append("Left and Control monitors are the same! Check preferences.");
-		}
-		if (iRight < 0)
-		{
-			b = false;
-			sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Right Monitor\" in preferences.");
-		}
-		else if (iRight == iControl)
-		{
-			b = false;
-			sProblems.append("Right and Control monitors are the same! Check preferences.");
-		}
-		if (iRight == iLeft)
-		{
-			b = false;
-			sProblems.append("Left and Right monitors are the same. Check preferences.");
-		}
-	}
-
-	// check pretest stimuli
-	if (settings.getPreTestPhaseSettings().getIsEnabled())
-	{
-		Habit::StimuliSettings stimuli = settings.getPreTestStimuliSettings();
-		QListIterator<Habit::StimulusSettings> it(stimuli.stimuli());
-		while (it.hasNext())
-		{
-			Habit::StimulusSettings ss = it.next();
-			if (!habutilStimulusFilesFound(ss, layoutType))
+			// Must have a setting for the center stim.
+			if (iCenter < 0)
 			{
 				b = false;
-				sProblems.append(QString("PreTest stimulus \"%1\" file(s) not found.\n").arg(ss.getName()));
+				sProblems.append("Stimulus layout type is \"single\". Please specify \"Center Monitor\" in preferences.");
+			}
+			else if (iCenter == iControl)
+			{
+				b = false;
+				sProblems.append("Center and Control monitors are the same! Check preferences.");
+			}
+		}
+		else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
+		{
+			if (iLeft < 0)
+			{
+				b = false;
+				sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Left Monitor\" in preferences.");
+			}
+			else if (iLeft == iControl)
+			{
+				b = false;
+				sProblems.append("Left and Control monitors are the same! Check preferences.");
+			}
+			if (iRight < 0)
+			{
+				b = false;
+				sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Right Monitor\" in preferences.");
+			}
+			else if (iRight == iControl)
+			{
+				b = false;
+				sProblems.append("Right and Control monitors are the same! Check preferences.");
+			}
+			if (iRight == iLeft)
+			{
+				b = false;
+				sProblems.append("Left and Right monitors are the same. Check preferences.");
 			}
 		}
 	}
 
-	// check habituation stimuli
-	if (settings.getHabituationPhaseSettings().getIsEnabled())
+	// iterate over phases that are enabled
+	QListIterator<Habit::HPhaseSettings> iterator = settings.phaseIterator();
+	while (iterator.hasNext())
 	{
-		Habit::StimuliSettings stimuli = settings.getHabituationStimuliSettings();
-		QListIterator<Habit::StimulusSettings> it(stimuli.stimuli());
-		while (it.hasNext())
+		const Habit::HPhaseSettings& ps = iterator.next();
+		if (ps.getIsEnabled())
 		{
-			Habit::StimulusSettings ss = it.next();
-			if (!habutilStimulusFilesFound(ss, layoutType))
+			QListIterator<Habit::StimulusSettings> it(ps.stimuli().stimuli());
+			while (it.hasNext())
 			{
-				b = false;
-				sProblems.append(QString("Habituation stimulus \"%1\" file(s) not found.\n").arg(ss.getName()));
+				const StimulusSettings& ss = it.next();
+				if (!habutilStimulusFilesFound(ss, layoutType))
+				{
+					b = false;
+					sProblems.append(QString("%1 stimulus \"%2\" file(s) not found.\n").arg(ps.getName()).arg(ss.getName()));
+				}
 			}
 		}
 	}
-
-	// check test stimuli
-	if (settings.getTestPhaseSettings().getIsEnabled())
-	{
-		Habit::StimuliSettings stimuli = settings.getTestStimuliSettings();
-		QListIterator<Habit::StimulusSettings> it(stimuli.stimuli());
-		while (it.hasNext())
-		{
-			Habit::StimulusSettings ss = it.next();
-			if (!habutilStimulusFilesFound(ss, layoutType))
-			{
-				b = false;
-				sProblems.append(QString("Test stimulus \"%1\" file(s) not found.\n").arg(ss.getName()));
-			}
-		}
-	}
-
 	return b;
 }
 
@@ -454,6 +536,11 @@ void GUILib::H2MainWindow::runExperiment()
 
 void GUILib::H2MainWindow::run(bool bTestInput)
 {
+	Habit::ExperimentSettings experimentSettings;
+	HEventLog eventLog;
+	HGMM *pMediaManager = NULL;
+	QList<QWidget *> deleteList;	// list of things to be cleaned up after expt run
+	bool bStimInDialog = false;	// can be set on command line, or in RunSettingsDialog
 	QString expt = m_pExperimentListWidget->selectedExperiment();	// the experiment to run
 	if (expt.isEmpty())
 	{
@@ -461,17 +548,24 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	}
 	else
 	{
-		Habit::ExperimentSettings settings;
-		if (!Habit::ExperimentSettings::load(settings, expt))
+		try
+		{
+			experimentSettings.loadFromDB(m_pExperimentListWidget->selectedExperiment());
+		}
+		catch (const Habit::HDBException& e)
 		{
 			QMessageBox::critical(this, "Cannot load experiment", "Cannot load experiment from database!");
-			qCritical() << "Cannot load experiment \"" << expt << "\" from database.";
+			qCritical() << "Cannot load experiment \"" << m_pExperimentListWidget->selectedExperiment() << "\" from database.";
+			qCritical() << e.what();
 			return;
 		}
 
 		// pre-flight check. Verify that monitors have been configured, etc.
 		QStringList sProblems;
-		if (!H2MainWindow::checkExperimentSettings(settings, sProblems))
+
+		// HACK false here is 'checkMonitors' - so the check skips looking at monitor preferences.
+		// see OTHER HACK below
+		if (!H2MainWindow::checkExperimentSettings(experimentSettings, sProblems, false))
 		{
 			QMessageBox msgBox;
 			msgBox.setText("This experiment cannot be run.");
@@ -483,24 +577,59 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			return;
 		}
 
-		GUILib::HRunSettingsDialog dlg(settings, m_bTestRunIsDefault, this);
-		int i = dlg.exec();
+		// m_pRunSettingsDialog has no parent -- DELETE
+		m_pRunSettingsDialog = new GUILib::HRunSettingsDialog(experimentSettings, m_bTestRunIsDefault, NULL);
+		int i = m_pRunSettingsDialog->exec();
 		if (i == QDialog::Accepted)
 		{
-			HEventLog log;
-			HMediaManager *pmm = createMediaManager(settings);
+			bStimInDialog = m_bStimInDialog || m_pRunSettingsDialog->isDisplayStimInWindow();
+#define ORIGINAL_WAY_OF_DOING_IT
+#ifdef ORIGINAL_WAY_OF_DOING_IT
+			if (bStimInDialog)
+				pMediaManager = createMediaManager(experimentSettings, 320, 240);
+			else
+				pMediaManager = createMediaManager(experimentSettings);
+#else
+			// new way of doing it
 
-			HControlPanel habitControlPanel(settings, log, dlg.getRunSettings(), pmm, this);
-			HLookDetector* pld = createLookDetector(settings, log, &habitControlPanel);
-			HStateMachine *psm = createExperiment(this, dlg.getRunSettings(), settings, pld, pmm, log, bTestInput);
+			// Two things have to happen, not necessarily in this order.
+			// First, HGMM::reset - this prepares gst pipelines (only default, background, AG, and first stim of each phase are prerolled.
+			// Second, widget(s) must be created and passed to the HGMM.
+			//    The widgets come on two varieties: embedded in a dialog, and not owned top-level.
+			//    When embedded in a dialog, the dialog itself must be deleted when experiment is done, as it is not owned by anything else. (???)
+			// If widgets are in a dialog, then they will be deleted when the dialog is deleted, so don't delete then separately
+
+			// if stim in dialog:
+			//    create
+#endif
+			// m_ControlPanel has no parent -- DELETE
+			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, NULL);
+
+			// m_pld has no parent -- DELETE BEFORE m_pControlPanel
+			m_pld = createLookDetector(experimentSettings, eventLog, m_pControlPanel);
+
+			// state machine has no parent -- DELETE
+			m_psm = createExperiment(this, m_pRunSettingsDialog->getRunSettings(), experimentSettings, m_pld, pMediaManager, eventLog, bTestInput);
+
+			// set state machine and dialog title
+			m_pControlPanel->setStateMachine(m_psm);
+			m_pControlPanel->setWindowTitle(m_pRunSettingsDialog->getRunLabel());
+
+
+			// If there is a testing input file (which simulates mouse clicks for look/look away), load it now.
 			HTestingInputWrangler *pWrangler;
 			if (bTestInput)
 			{
 				pWrangler = new HTestingInputWrangler();
-				pWrangler->enable(pld, &psm->experiment());
+				pWrangler->enable(m_pld, &m_psm->experiment());
 				// Get input file
 
+#if QT_VERSION >= 0x050000
+				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QStandardPaths::standardLocations(QStandardPaths::DesktopLocation)[0], "(*.txt)");
+#else
 				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation), "(*.txt)");
+#endif
+
 				qDebug() << "Selected input file " << selectedFileName;
 				QFile file(selectedFileName);
 				if (!pWrangler->load(file))
@@ -509,42 +638,97 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 					return;
 				}
 			}
-			habitControlPanel.setStateMachine(psm);
 
-			// set dialog title
-			habitControlPanel.setWindowTitle(dlg.getRunLabel());
-			if (habitControlPanel.exec() != QDialog::Accepted)
-				return;
-
-			HResults* results = new HResults(settings, dlg.getRunSettings(),
-					dlg.getSubjectSettings(), log,
-					dlg.getRunLabel(),
-					QCoreApplication::instance()->applicationVersion());
-
-			// Always save results. No option here.
-			//QDir dir(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
-			QDir dir (habutilGetResultsDir(expt));
-			QString filename(dir.absoluteFilePath(QString("%1.hab").arg(dlg.getRunLabel())));
-			qDebug() << "Saving results to " << filename;
-			if (!results->save(filename))
+			QDialog *pStimulusDisplayDialog  = NULL;
+			if (bStimInDialog)
 			{
-				qCritical() << "Error - cannot save data to file " << filename;
+				pStimulusDisplayDialog = pMediaManager->createStimulusWidget();
+				deleteList.append(pStimulusDisplayDialog);
+				qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
+				//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
+				pStimulusDisplayDialog->show();
 			}
-			QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(dlg.getRunLabel())));
-			if (!results->saveToCSV(filenameCSV))
+			else
 			{
-				qCritical() << "Error - cannot save data to csv file " << filenameCSV;
+				adaptVideoWidgets(pMediaManager);
+				if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+				{
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Center));
+				}
+				else if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+				{
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Left));
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Right));
+				}
 			}
 
-			// display results
-			HResultsDialog dialog(*results, this);
-			dialog.exec();
+			// This is where the experiment is actually run.
+			int cpStatus = m_pControlPanel->exec();
 
+			// delete the video widgets.
+			pMediaManager->stop();
+			qDeleteAll(deleteList.begin(), deleteList.end());
+			deleteList.clear();
+
+			if (cpStatus == QDialog::Accepted)
+			{
+				HResults* results = new HResults(experimentSettings, m_pRunSettingsDialog->getRunSettings(),
+						m_pRunSettingsDialog->getSubjectSettings(), eventLog,
+						m_pRunSettingsDialog->getRunLabel(),
+						QCoreApplication::instance()->applicationVersion());
+
+				// Always save results. No option here.
+				qDebug() << "save results";
+				QDir dir (habutilGetResultsDir(m_pExperimentListWidget->selectedExperiment()));
+				QString filename(dir.absoluteFilePath(QString("%1.hab").arg(m_pRunSettingsDialog->getRunLabel())));
+				qDebug() << "Saving results to " << filename;
+				if (!results->save(filename))
+				{
+					qCritical() << "Error - cannot save data to file " << filename;
+				}
+				QString filenameCSV(dir.absoluteFilePath(QString("%1.csv").arg(m_pRunSettingsDialog->getRunLabel())));
+				if (!results->saveToCSV(filenameCSV))
+				{
+					qCritical() << "Error - cannot save data to csv file " << filenameCSV;
+				}
+
+				// reset the mm
+				HGMM::instance().reset();
+
+				// display results
+				HResultsDialog dialog(*results, this);
+				dialog.exec();
+
+				delete results;
+
+				// clean up stuff
+				qDebug() << "Cleaning up...";
+				delete m_psm;
+				delete m_pld;
+				delete m_pControlPanel;
+				//delete pMediaManager;
+				delete m_pRunSettingsDialog;
+				qDebug() << "Cleaning up...done";
+			}
 		}
 	}
 }
 
 
+void GUILib::H2MainWindow::adaptVideoWidgets(HGMM *pmm)
+{
+	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	{
+		pmm->getHStimulusWidget(HPlayerPositionType::Center)->showFullScreen();
+	}
+	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		pmm->getHStimulusWidget(HPlayerPositionType::Left)->showFullScreen();
+		pmm->getHStimulusWidget(HPlayerPositionType::Right)->showFullScreen();
+	}
+	return;
+
+}
 
 
 void GUILib::H2MainWindow::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
@@ -575,17 +759,26 @@ void GUILib::H2MainWindow::cloneExperiment()
 	// Create default experiment name for the lazy
 	sDefault = getExperimentCopyName(m_pExperimentListWidget->selectedExperiment());
 
-	if (inputExperimentName(sName, sDefault))
+	HExperimentNameDialog dlg(m_pExperimentListWidget->experimentList(), sDefault, this);
+	if (dlg.exec() == QDialog::Accepted)
 	{
 		Habit::ExperimentSettings settings;
-		if (Habit::ExperimentSettings::load(settings, m_pExperimentListWidget->selectedExperiment()))
+		try
 		{
-			Habit::ExperimentSettings cloned = settings.clone(sName);
+			settings.loadFromDB(m_pExperimentListWidget->selectedExperiment());
+			Habit::ExperimentSettings cloned = settings.clone(dlg.getNewValue());
 			HExperimentMain *exptMain = new HExperimentMain(cloned, this);
 			if (exptMain->exec() == QDialog::Accepted)
 			{
 				m_pExperimentListWidget->reload();
 			}
+		}
+		catch (const Habit::HDBException& e)
+		{
+			QMessageBox::critical(this, "Cannot load experiment", "Cannot load experiment from database!");
+			qCritical() << "Cannot load experiment \"" << m_pExperimentListWidget->selectedExperiment() << "\" from database.";
+			qCritical() << e.what();
+			return;
 		}
 	}
 }
@@ -597,24 +790,26 @@ void GUILib::H2MainWindow::deleteExperiment()
 			QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Yes)
 	{
 		Habit::ExperimentSettings settings;
-		if (Habit::ExperimentSettings::load(settings, expt))
+		try
 		{
-			if (settings.deleteFromDB())
-			{
-				qDebug() << "Experiment " << expt << " deleted from database. Results files were NOT deleted.";
-				m_pExperimentListWidget->reload();
-			}
-			else
-			{
-				QMessageBox::warning(this, "Delete Experiment", "There was an error deleting the experiment, check log file.");
-			}
+			settings.loadFromDB(expt);
+
+			settings.deleteFromDB();
+			qDebug() << "Experiment " << expt << " deleted from database. Results files were NOT deleted.";
+			m_pExperimentListWidget->reload();
+		}
+		catch (const HDBException& e)
+		{
+			QMessageBox::warning(this, "Delete Experiment", QString(e.what()));
+			qCritical() << e.what();
 		}
 	}
 }
 
 void GUILib::H2MainWindow::workspaceChanged()
 {
-	m_pLabelStatusBar->setText(QString("Current workspace: %1").arg(habutilGetWorkspaceDir()));
+	m_pLabelStatusBar->setText(QString("Current workspace: %1").arg(habutilGetWorkspaceDir().absolutePath()));
+	habutilInitWorkspace();
 	m_pExperimentListWidget->reload();
 }
 

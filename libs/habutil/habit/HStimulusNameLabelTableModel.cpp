@@ -40,7 +40,6 @@ QVariant HStimulusNameLabelTableModel::data(const QModelIndex & index, int role)
 
 Qt::ItemFlags GUILib::HStimulusNameLabelTableModel::flags(const QModelIndex & index) const
 {
-	// todo: does this depend on row and column?
 	return Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 

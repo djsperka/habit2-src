@@ -25,6 +25,7 @@ HMediaStatusWidget::HMediaStatusWidget(const HStimulusLayoutType& layout, bool b
 
 HMediaStatusWidget::~HMediaStatusWidget()
 {
+	qDebug() << "HMediaStatusWidget::~HMediaStatusWidget()";
 	delete ui;
 }
 
@@ -35,7 +36,7 @@ void HMediaStatusWidget::connections()
 	connect(m_pMediaManager, SIGNAL(cleared()), this, SLOT(onCleared()));
 }
 
-void HMediaStatusWidget::setMediaManager(const HMediaManager* pmm)
+void HMediaStatusWidget::setMediaManager(const HGMM* pmm)
 {
 	m_pMediaManager = pmm;
 	connections();
@@ -157,6 +158,7 @@ void HMediaStatusWidget::setStatusStim(const Habit::StimulusSettings& settings)
 	// display the resource icon for stim in the contained widget
 	ui->statusStack->setCurrentIndex(2);
 }
+
 
 void HMediaStatusWidget::onAGStarted(int key)
 {

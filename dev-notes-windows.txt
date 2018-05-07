@@ -1,0 +1,7 @@
+dev-notes-windows.txt
+ Created on: Mar 16, 2018
+     Author: dan
+
+     
+     
+qmake.exe -recursive -o Makefile habit2.pro -spec win32-msvc

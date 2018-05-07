@@ -7,32 +7,31 @@
  *
  */
 
-#include "stimulusdisplayinfo.h"
-#include "HExperimentSelectionDialog.h"
+//#include "stimulusdisplayinfo.h"
+//#include "HExperimentSelectionDialog.h"
+#include "HExperimentListWidget.h"
 #include "HWorkspaceUtil.h"
 #include <QApplication>
+#include <QtDebug>
+#include <gst/gst.h>
 
-using namespace Habit;
+
+#include "TestMMDialog.h"
 
 int main(int argc, char **argv)
 {
+	QString script;
 	QApplication app(argc, argv);
-
+	gst_init(&argc, &argv);
 	app.setApplicationName("habit2");
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
 
-
 	// Default is to always have log file.
 	for (int i=1; i<argc; i++)
 	{
-		if (!strcmp(argv[i], "-x"))
+		if (!strcmp(argv[i], "-w"))
 		{
-			habutilClearWorkspace();
-		}
-		else if (!strcmp(argv[i], "-w"))
-		{
-			// TODO - maybe tell user they need to supply a directory?
 			if (i < (argc-1))
 			{
 				habutilSetWorkspace(argv[i+1]);
@@ -55,10 +54,13 @@ int main(int argc, char **argv)
 		return 0;
 
 	// Select an experiment to test with
-	HExperimentSelectionDialog *dialog = new HExperimentSelectionDialog();
+	//HExperimentSelectionDialog *dialog = new HExperimentSelectionDialog();
+	//HExperimentListWidget *w = new HExperimentListWidget(0, true, true);
+	//w->show();
+	//dialog->show();
 
-	dialog->show();
+	TestMMDialog *dialog = new TestMMDialog();
+	dialog->exec();
 
-
-	return app.exec();
+	return 0;
 }

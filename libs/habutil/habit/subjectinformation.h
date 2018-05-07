@@ -3,8 +3,8 @@
 
 #include "subjectsettings.h"
 
-#include <QtGui/QDialog>
 
+#include <QDialog>
 class QLabel;
 class QLineEdit;
 class QTextEdit;

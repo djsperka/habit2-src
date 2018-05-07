@@ -9,9 +9,14 @@
 #define HEXPERIMENTMAIN_H_
 
 #include "experimentsettings.h"
+#include "HPhaseListWidget.h"
 #include <QDialog>
 #include <QTreeWidget>
+#include <QListView>
 #include <QStackedWidget>
+#include <QVector>
+#include <QToolBar>
+#include <QAction>
 
 namespace GUILib
 {
@@ -19,9 +24,10 @@ namespace GUILib
 	class ControlBarOptionsForm;
 	class HLookSettingsWidget;
 	class AttentionSetupForm;
-	class HPhaseSettingsWidget;
+	class HPhaseSettingsTabWidget;
+	//class HPhaseSettingsWidget;
 	//class HabituationSetupForm;
-	class HStimuliSettingsWidget;
+	//class HStimuliSettingsWidget;
 	class HHabituationSetupWidget;
 
 	class HExperimentMain : public QDialog
@@ -30,45 +36,48 @@ namespace GUILib
 
 	public:
 		HExperimentMain(const Habit::ExperimentSettings& experimentSettings, QWidget *parent = 0, bool bReadOnly = false);
-		virtual ~HExperimentMain() {};
+		virtual ~HExperimentMain();
 
 	protected:
 		void closeEvent(QCloseEvent *event);
 
 	private slots:
-		void currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+
+		void generalListViewItemClicked(const QModelIndex& index);
 		void cancelButtonClicked();
 		void saveButtonClicked();
 		void exportButtonClicked();
+		void phaseListViewItemClicked(const QModelIndex&);
+		void addPhase();
+		void delPhase();
+		void upPhase();
+		void downPhase();
+
+	signals:
+		void stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo&);
 
 	private:
-		void createComponents();
-		void makeConnections();
+		void components();
+		void connections();
 		bool isModified();
 		Habit::ExperimentSettings getSettings();	// get settings from current state of all forms
 		Habit::StimulusSettings getTestSS();
-
+		void checkStimulusDisplayInfo();			// check if sdi has changed, and if so notify preview widgets or their owners
 		Habit::ExperimentSettings m_settings;
-		int m_stackidPreTestStimuli;
-		int m_stackidHabituationStimuli;
-		int m_stackidTestStimuli;
+		QListView *m_pGeneralListView;
 		QTreeWidget *m_pContentsWidget;
 		QStackedWidget *m_pPagesWidget;
-		QWidget* m_pBlank;
-		//GUILib::MonitorSettingsForm* m_pMonitorSettingsForm;
-		//GUILib::HMonitorSettingsWidget* m_pMonitorSettingsWidget;
+		int m_sdiPageIndex;
+		Habit::StimulusDisplayInfo m_oldStimulusDisplayInfo;	// keep latest value each time page changes
+
 		GUILib::HStimulusDisplayInfoWidget* m_pStimulusDisplayInfoWidget;
 		GUILib::ControlBarOptionsForm* m_pControlBarOptionsForm;
 		GUILib::HLookSettingsWidget* m_pLookSettingsWidget;
 		GUILib::AttentionSetupForm* m_pAttentionSetupForm;
-		GUILib::HPhaseSettingsWidget* m_pPreTestPhaseWidget;
-		GUILib::HStimuliSettingsWidget* m_pPreTestStimuliWidget;
-		GUILib::HPhaseSettingsWidget* m_pHabituationPhaseWidget;
-		GUILib::HStimuliSettingsWidget*  m_pHabituationStimuliWidget;
-		//GUILib::HabituationSetupForm* m_pHabituationSetupForm;
-		GUILib::HHabituationSetupWidget* m_pHabituationSetupWidget;
-		GUILib::HPhaseSettingsWidget* m_pTestPhaseWidget;
-		GUILib::HStimuliSettingsWidget*  m_pTestStimuliWidget;
+
+		QVector<int> m_vecStackPages;
+		HPhaseListWidget *m_pPhaseListWidget;
+
 		QPushButton* m_pbCancel;
 		QPushButton* m_pbSave;
 		QPushButton* m_pbExport;

@@ -402,6 +402,37 @@ const HPlayerPositionType& getPlayerPositionType(int number_value);
 
 
 
+
+
+class HMediaContainerType
+{
+public:
+	static const HMediaContainerType UnknownContainerType;
+	static const HMediaContainerType Audio;
+	static const HMediaContainerType Video;
+	static const HMediaContainerType AudioVideo;
+	static const HMediaContainerType Image;
+
+	static const HMediaContainerType* A[4];
+
+	HMediaContainerType() : m_t(-1), m_s("") {};
+	HMediaContainerType(const HMediaContainerType& mct): m_t(mct.number()), m_s(mct.name()) {};
+	HMediaContainerType& operator=(const HMediaContainerType& rhs);
+
+	int number() const { return m_t; };
+	QString name() const { return m_s; };
+private:
+	explicit HMediaContainerType(int t, const char *name): m_t(t), m_s(name) {};
+	int m_t;
+	QString m_s;
+};
+
+bool operator==(const HMediaContainerType& lhs, const HMediaContainerType& rhs);
+bool operator!=(const HMediaContainerType& lhs, const HMediaContainerType& rhs);
+const HMediaContainerType& getMediaContainerType(int number_value);
+
+
+
 #endif
 
 

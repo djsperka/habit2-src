@@ -13,10 +13,10 @@
 #include "maindao.h"
 
 
-GUILib::HExperimentListWidget::HExperimentListWidget(QWidget *parent)
+GUILib::HExperimentListWidget::HExperimentListWidget(QWidget *parent, bool bExp, bool bTemp)
 : QListView(parent)
 {
-	setModel(m_pModel = new GUILib::HExperimentListModel());
+	setModel(m_pModel = new GUILib::HExperimentListModel(bExp, bTemp));
 	setEditTriggers(QAbstractItemView::SelectedClicked);
 	this->setItemDelegate(new HExperimentListDelegate());
 	connect(this, SIGNAL(activated(const QModelIndex&)), this, SLOT(itemActivated(const QModelIndex&)));

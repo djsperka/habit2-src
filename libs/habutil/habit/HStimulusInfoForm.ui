@@ -97,7 +97,7 @@
    <item>
     <widget class="QCheckBox" name="cbUseBackgroundColor">
      <property name="text">
-      <string>Bkgd only (no stim)</string>
+      <string>Background color only</string>
      </property>
     </widget>
    </item>

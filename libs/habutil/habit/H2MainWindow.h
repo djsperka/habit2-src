@@ -11,28 +11,31 @@
 
 #include <QMainWindow>
 #include <QMap>
+#include <QObject>
+#include "experimentsettings.h"
+#include "HEventLog.h"
+
 class QAction;
 class QMenu;
 class QPlainTextEdit;
 class QItemSelection;
 class QLabel;
 
-namespace Habit
-{
-	class ExperimentSettings;
-};
-
+class HGMM;
+class HLookDetector;
+class HStateMachine;
  namespace GUILib
  {
  	 class HExperimentListWidget;
-
+ 	 class HRunSettingsDialog;
+ 	 class HControlPanel;
 	 class H2MainWindow : public QMainWindow
 	 {
 		 Q_OBJECT
 
 	 public:
-		 H2MainWindow(bool bDefaultTestRun=true, bool bShowTestingIcon=false);
-		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems);
+		 H2MainWindow(bool bDefaultTestRun=true, bool bShowTestingIcon=false, bool bEditTemplates = false, bool bStimInDialog = false);
+		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems, bool bCheckMonitors = true);
 
 	 protected:
 		 void closeEvent(QCloseEvent *event);
@@ -47,9 +50,9 @@ namespace Habit
 		 QString getExperimentNewName();
 
 		 // Query user for a valid experiment name.
-		 bool inputExperimentName(QString& newName, const QString defaultName);
+//		 bool inputExperimentName(QString& newName, const QString defaultName);
 
-	 private slots:
+	 public Q_SLOTS:
 		 void newExperiment();
 		 void cloneExperiment();
 		 void deleteExperiment();
@@ -63,17 +66,29 @@ namespace Habit
 		 void testExperiment();
 		 void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 		 void workspaceChanged();
+		 void about();
 
 	 private:
+		 void createMenu();
 		 void createActions();
-	//     void createMenus();
 		 void createToolBars();
-	//     void createStatusBar();
 		 void run(bool bInputTesting);
+		 void adaptVideoWidgets(HGMM *pmm);
+		 QDialog *createStimulusWidget(HGMM *pmm);
 
 	//    QMap<QString, HExperimentMain> m_mapExperiments;
 		 bool m_bTestRunIsDefault;
 		 bool m_bShowTestingIcon;
+		 bool m_bEditTemplates;
+		 bool m_bStimInDialog;
+		 //Habit::ExperimentSettings m_experimentSettings;
+		 //HGMM *m_pmm;
+		 GUILib::HRunSettingsDialog *m_pRunSettingsDialog;
+		 HControlPanel *m_pControlPanel;
+		 HLookDetector* m_pld;
+		 HStateMachine *m_psm;
+		 //HEventLog m_eventLog;
+
 		 GUILib::HExperimentListWidget *m_pExperimentListWidget;
 		 QToolBar *m_pToolBar;
 		 QAction *m_actionEdit;

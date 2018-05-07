@@ -6,8 +6,9 @@
  */
 
 
-#include "HDButil.h"
+#include "HDBUtil.h"
 #include "HTypes.h"
+#include "maindao.h"
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
@@ -20,7 +21,8 @@
 
 bool populateStimulusTable(QSqlQuery& q, const HStimContext& context);
 bool populateStimulusTableSingle(QSqlQuery& q, const HStimContext& context, int& stimulus_id);
-
+static bool validateExperiment(int exptId);
+static bool validateStimulus(int stimulus_id);
 
 // Close database on default connection.
 
@@ -39,37 +41,65 @@ bool openDB(const QDir& dir)
 {
 	bool bval = false;
 	QString filename;
-	QFileInfo fileinfo;
+	QFileInfo fileinfoHabit;
+	QFileInfo fileinfoHabit22;
 
 
 	// close database if one is open
 	closeDB();
 
 	// check file attributes
-	fileinfo.setFile(dir, "habit.sqlite");
+	fileinfoHabit.setFile(dir, "habit.sqlite");
+	fileinfoHabit22.setFile(dir, "habit22.sqlite");
+
+
+	// First time using Habit2.2 against this workspace?
+	// If that is the case, we will find habit.sql, and not habit22.sql.
+	// Copy the old habit.sqlite to habit22.sqlite, then update it.
+	// This will leave habigt.sqlite alone, and will allow existing habit-2.1.25 to use old database.
+	qDebug() << "Checking for habit database (>=2.2) " << fileinfoHabit22.absoluteFilePath();
+	if (!fileinfoHabit22.exists() && fileinfoHabit.exists())
+	{
+		qDebug() << "This workspace does not have an updated habit22 database. Creating it from existing habit.sqlite file.";
+		QString copyname(QString("%1/saved-%2-%3").arg(fileinfoHabit22.dir().absolutePath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfoHabit22.fileName()));
+		if (!QFile::copy(fileinfoHabit.absoluteFilePath(), fileinfoHabit22.absoluteFilePath()))
+		{
+			qCritical() << "Cannot make copy of database in " << fileinfoHabit22.absoluteFilePath();
+			return false;
+		}
+		else
+		{
+			qDebug() << "Made copy of habit database from Habit versions prior to Habit2.2. The new database is " << fileinfoHabit22.absoluteFilePath();
+		}
+	}
 
 	// Does file exist and can we write to it? If not, then get filename
-	if (!fileinfo.exists() || !fileinfo.isWritable())
+	if (!fileinfoHabit22.exists() || !fileinfoHabit22.isWritable())
 	{
 		QMessageBox msgBox;
-		QString msg("The database file \"habit.sqlite\" exists, but you do not have write permission. Please fix permissions or select another workspace.");
+		QString msg = QString("The database file %1 exists, but you do not have write permission. Please fix permissions or select another workspace.").arg(fileinfoHabit22.fileName());
 		msgBox.setText(msg);
 		msgBox.exec();
+		return false;
 	}
 	else
 	{
 		QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-		db.setDatabaseName(fileinfo.absoluteFilePath());
-		qDebug() << "Opening database: " << fileinfo.absoluteFilePath();
+		db.setDatabaseName(fileinfoHabit22.absoluteFilePath());
+		qDebug() << "Opening database: " << fileinfoHabit22.absoluteFilePath();
 		if(db.open())
 		{
 			bval = true;
 
 			// Now update database if necessary. Do NOT change the database name!
-			if (!updateDBVersion(db, fileinfo))
+			if (!updateDBVersion(db, fileinfoHabit22))
 			{
 				bval = false;
 				qDebug() << "Database update failed.";
+			}
+			else
+			{
+				validateDB();
 			}
 		}
 		else
@@ -80,6 +110,169 @@ bool openDB(const QDir& dir)
 	return bval;
 }
 
+
+bool validateStimulus(int stimulus_id)
+{
+	Habit::MainDao dao;
+	bool bval = false;
+	QList<QVariant> list;
+	list = dao.getColumnValuesFromTable("stimulus", "id", "id", stimulus_id);
+	if (list.size() == 1)
+	{
+//		qDebug() << "  found 1 stimulus record...OK...check stimfiles...";
+		list = dao.getColumnValuesFromTable("stimfiles", "position", "stimulus_id", stimulus_id);
+		if (list.size() == 4)
+		{
+			if (list.contains(QVariant(1)) && list.contains(QVariant(2)) && list.contains(QVariant(3)) && list.contains(QVariant(4)))
+			{
+//				qDebug () << "    stimfiles OK";
+				bval = true;
+			}
+			else
+			{
+				qDebug() << "    stimfiles ERR (all positions not found)";
+				bval = false;
+			}
+
+		}
+		else
+		{
+			qDebug() << "    found " << list.size() << " stimfiles records (expect 4) for stimulus_id " << stimulus_id;
+			bval = false;
+		}
+	}
+	else
+	{
+		qDebug() << "  found " << list.size() << " stimulus records...ERR";
+		bval = false;
+	}
+	return bval;
+}
+
+bool validateExperiment(int experimentId)
+{
+	Habit::MainDao dao;
+	bool bval = true;
+	QString sExptName;
+	QList<QVariant> list;
+
+	dao.getExperimentName(experimentId, sExptName);
+	qDebug() << "expt id " << experimentId << " name: " << sExptName;
+
+	// check look_settings
+	list = dao.getColumnValuesFromTable("look_settings", "id", "experiment_id", QVariant(experimentId));
+	if (list.size() == 1)
+		qDebug() << " look_settings...OK";
+	else
+	{
+		qDebug() << " look_settings...ERR: found " << list.size() << " records (expect 1)";
+		bval = false;
+	}
+
+	// check stimulus_display
+	list = dao.getColumnValuesFromTable("stimulus_display", "id", "experiment_id", QVariant(experimentId));
+	if (list.size() == 1)
+		qDebug() << " stimulus_display...OK";
+	else
+	{
+		qDebug() << " stimulus_display...ERR: found " << list.size() << " records (expect 1)";
+		bval = false;
+	}
+
+	// check controlbar_options
+	list = dao.getColumnValuesFromTable("controlbar_options", "id", "experiment_id", QVariant(experimentId));
+	if (list.size() == 1)
+		qDebug() << " controlbar_options...OK";
+	else
+	{
+		qDebug() << " controlbar_options...ERR: found " << list.size() << " records (expect 1)";
+		bval = false;
+	}
+
+	// check attention_setup
+	list = dao.getColumnValuesFromTable("attention_setup", "stimulus_id", "experiment_id", QVariant(experimentId));
+	if (list.size() == 1)
+	{
+		qDebug() << " attention_setup...OK";
+		if (validateStimulus(list.at(0).toInt()))
+			qDebug() << "  attention stimulus...OK";
+		else
+		{
+			qDebug() << "  attention stimulus...ERR";
+			bval = false;
+		}
+	}
+	else
+	{
+		qDebug() << " attention_setup...ERR: found " << list.size() << " records (expect 1)";
+		bval = false;
+	}
+
+	// check phase_settings
+	list = dao.getColumnValuesFromTable("phase_settings", "id", "experiment_id", QVariant(experimentId));
+	qDebug() << " phase_settings: found " << list.size() << " phases...";
+	QListIterator<QVariant> itPhases(list);
+	while (itPhases.hasNext())
+	{
+		QList<QVariant> listHab;
+		QList<QVariant> listStim;
+		QVariant phaseId = itPhases.next();
+
+		// habituation_settings
+		listHab = dao.getColumnValuesFromTable("habituation_settings", "id", "phase_id", QVariant(phaseId));
+		if (listHab.size() == 1)
+			qDebug() << "  habituation_settings...OK";
+		else
+		{
+			qDebug() << "  habituation_settings...ERR: found " << listHab.size() << " records (expect 1): " << listHab;
+			bval = false;
+		}
+
+		// stimulus
+		listStim = dao.getColumnValuesFromTable("stimulus", "id", "phase_id", phaseId);
+		qDebug() << "  phase id " << phaseId.toInt() << " (" << dao.getHPhaseName(phaseId.toInt()) << ") has " << listStim.size() << " stimuli";
+		QListIterator<QVariant> itStimuli(listStim);
+		while (itStimuli.hasNext())
+		{
+			bool bval;
+			QVariant stimid = itStimuli.next();
+//			qDebug() << "     check stimulus id " << stimid.toInt();
+			if (validateStimulus(stimid.toInt()))
+			{
+				qDebug() << "   stimulus id " << stimid.toInt() << "...OK";
+			}
+			else
+			{
+				qDebug() << "   stimulus id " << stimid.toInt() << "...ERR";
+				bval = false;
+			}
+		}
+	}
+	return bval;
+}
+
+void validateDB()
+{
+	Habit::MainDao dao;
+	qDebug() << "Validating database...";
+
+	try
+	{
+		QList<QVariant> listExperimentIDs = dao.getColumnValuesFromTable("experiments", "id");
+		QListIterator<QVariant> itExptId(listExperimentIDs);
+		while (itExptId.hasNext())
+		{
+			// validate this experiment
+			validateExperiment(itExptId.next().toInt());
+		}
+
+	}
+	catch (const Habit::HDBException& e)
+	{
+		qCritical() << e.what();
+	}
+
+}
 
 int getDBVersion()
 {
@@ -140,7 +333,9 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 	const int iRepeatTrialOnMaxLookAway							= 2000018;
 	const int iAddColumnToControlBarOptions						= 2000019;
 	const int iAddFixedISIAttentionGetter						= 2000020;
-	const int iLatestVersion									= 2000020;
+	const int iPhaseReOrg										= 2000021;
+	const int iAGSColumns										= 2000022;
+	const int iLatestVersion									= 2000022;
 	int iVersion = getDBVersion();
 
 	// Will any updates be required? If so, close db, make a copy, then reopen.
@@ -154,8 +349,8 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 		qDebug() << "Updating database version...";
 		db.close();
 
-		QString copyname(QString("%1/saved-%2-%3").arg(fileinfo.dir().canonicalPath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
-		if (!QFile::copy(fileinfo.canonicalFilePath(), copyname))
+		QString copyname(QString("%1/saved-%2-%3").arg(fileinfo.dir().absolutePath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
+		if (!QFile::copy(fileinfo.absoluteFilePath(), copyname))
 		{
 			qCritical() << "Cannot make copy of database in " << copyname;
 			result = false;
@@ -583,20 +778,132 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 					}
 				}
 
+
+				if (result && iVersion < iPhaseReOrg)
+				{
+					QSqlQuery qq;
+					QStringList queries;
+
+					// phase_settings
+					QString q0("alter table phase_settings add column name VARCHAR NOT NULL DEFAULT unnamed");
+					QString q1("alter table phase_settings add column seqno INTEGER NOT NULL DEFAULT -1");
+					QString q2("update phase_settings set name=\"PreTest\" where phase_type=1");
+					QString q3("update phase_settings set name=\"Habituation\" where phase_type=2");
+					QString q4("update phase_settings set name=\"Test\" where phase_type=3");
+					QString q5("update phase_settings set seqno=phase_type");
+
+					// stimulus
+					QString q6("alter table stimulus add column phase_id INTEGER NOT NULL DEFAULT -1");
+					QString q7("UPDATE stimulus SET phase_id = "
+								"(SELECT phase_settings.id from phase_settings "
+									"WHERE stimulus.experiment_id = phase_settings.experiment_id AND stimulus.context = phase_settings.phase_type) "
+								" WHERE EXISTS (SELECT * from phase_settings "
+												"WHERE stimulus.experiment_id = phase_settings.experiment_id AND stimulus.context = phase_settings.phase_type)");
+
+					// stimulus_order
+					QString q8("alter table stimulus_order add column phase_id INTEGER NOT NULL DEFAULT -1");
+					QString q9("UPDATE stimulus_order SET phase_id = "
+								"(SELECT phase_settings.id from phase_settings "
+									"WHERE stimulus_order.experiment_id = phase_settings.experiment_id AND stimulus_order.context = phase_settings.phase_type) "
+								" WHERE EXISTS (SELECT * FROM phase_settings WHERE stimulus_order.experiment_id = phase_settings.experiment_id AND stimulus_order.context = phase_settings.phase_type)");
+
+					// habituation_settings
+					QString q10("alter table habituation_settings add column phase_id INTEGER NOT NULL DEFAULT -1");
+					QString q11("UPDATE habituation_settings SET phase_id = (SELECT phase_settings.id from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id and phase_settings.phase_type=2)");
+					//					QString q11("UPDATE habituation_settings SET phase_id = (SELECT phase_settings.id from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id) "
+					//									" WHERE EXISTS (SELECT * from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id AND phase_settings.phase_type = 2)");
+					QString q12("INSERT into habituation_settings (experiment_id, habituation_type, phase_id) SELECT experiment_id,0,id from phase_settings where phase_type=1 or phase_type=3");
+
+					// habituation_settings again
+					QString q13("ALTER TABLE habituation_settings ADD COLUMN ntrials INTEGER NOT NULL DEFAULT 0");
+					QString q14("UPDATE habituation_settings SET ntrials=(SELECT phase_settings.ntrials from phase_settings WHERE habituation_settings.phase_id = phase_settings.id)");
+
+					// attention_setup
+					QString q15("ALTER TABLE main.attention_setup ADD COLUMN stimulus_id INTEGER NOT NULL DEFAULT -1");
+					QString q16("UPDATE attention_setup SET stimulus_id = "
+								"(SELECT stimulus.id from stimulus WHERE stimulus.experiment_id = attention_setup.experiment_id AND stimulus.context = 4) "
+								"WHERE EXISTS ( SELECT * FROM stimulus WHERE stimulus.experiment_id = attention_setup.experiment_id	AND stimulus.context = 4)");
+
+					queries << q0 << q1 << q2 << q3 << q4 << q5 << q6 << q7 << q8 << q9 << q10 << q11 << q12 << q13 << q14 << q15 << q16;
+
+
+					db.transaction();
+					for (int i=0; i<queries.size(); i++)
+					{
+						result = qq.exec(queries.at(i));
+						if (!result)
+						{
+							qCritical() << "Error in updateDBVersion at version " << iPhaseReOrg;
+							qDebug() << qq.lastQuery() << " : " << qq.lastError();
+							break;
+						}
+					}
+
+					if (result)
+					{
+						QSqlQuery qv("insert into habit_version (version) values(?)");
+						qv.bindValue(0, iPhaseReOrg);
+						result = qv.exec();
+						if (!result)
+						{
+							qCritical() << "Error in updateDBVersion at version " << iPhaseReOrg;
+							qDebug() << qv.lastQuery() << " : " << qv.lastError();
+						}
+					}
+
+					if (result)
+					{
+						qDebug() << "Database updated to version " << iPhaseReOrg;
+						db.commit();
+					}
+					else
+					{
+						db.rollback();
+					}
+				}
+
+				if (result && iVersion < iAGSColumns)
+				{
+					// Add columns to attention_setup 'use_background' and 'use_none'
+					db.transaction();
+					QSqlQuery q0("alter table attention_setup add column use_sound_only BOOL DEFAULT false");
+					QSqlQuery q1("alter table attention_setup add column use_none BOOL DEFAULT false");
+					QSqlQuery q2("insert into habit_version (version) values(?)");
+					q2.bindValue(0, iAGSColumns);
+					q2.exec();
+					if (!q0.lastError().isValid() && !q1.lastError().isValid() && !q2.lastError().isValid())
+					{
+						result = true;
+						db.commit();
+						qDebug() << "Database updated to version " << iAGSColumns;
+					}
+					else
+					{
+						qCritical() << "Error in updateDBVersion at version " << iAddStimulusDisplayColumns;
+						qDebug() << q0.lastQuery() << " : " << q0.lastError();
+						qDebug() << q1.lastQuery() << " : " << q1.lastError();
+						qDebug() << q2.lastQuery() << " : " << q2.lastError();
+						result = false;
+						db.rollback();
+					}
+				}
+
+
+
 				// If failed, revert to to original database
 				if (!result)
 				{
 					closeDB();
 
 					// rename the current database - it has a partial update only!
-					QString partialname(QString("%1/error-%2-%3").arg(fileinfo.dir().canonicalPath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
-					if (!QFile::rename(fileinfo.canonicalFilePath(), partialname))
+					QString partialname(QString("%1/error-%2-%3").arg(fileinfo.dir().absolutePath()).arg(QDateTime::currentDateTime().toString("yyyyMMddhhmm")).arg(fileinfo.fileName()));
+					if (!QFile::rename(fileinfo.absoluteFilePath(), partialname))
 					{
 						qCritical() << "Cannot rename existing habit.sqlite. This database may be partially updated and may not work. Must revert to database " << copyname << " manually.";
 					}
 					else
 					{
-						if (!QFile::copy(copyname, fileinfo.canonicalFilePath()))
+						if (!QFile::copy(copyname, fileinfo.absoluteFilePath()))
 						{
 							qCritical() << "Cannot revert to to original database in " << copyname;
 						}
@@ -618,6 +925,14 @@ bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo)
 
 	return result;
 }
+
+
+
+
+
+
+
+
 
 bool populateStimulusTable(QSqlQuery& q, const HStimContext& context)
 {

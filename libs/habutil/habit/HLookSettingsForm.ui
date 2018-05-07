@@ -47,7 +47,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Minimum looking-away time</string>
+           <string>Maximum looking-away time</string>
           </property>
          </widget>
         </item>
@@ -68,7 +68,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Habit determines whether a &quot;complete look&quot; has occurred using these settings. The subject must look at a stimulus for at least the &quot;minimum looking time&quot;, and then look away from the stimulus for at least the &quot;minimum looking-away time&quot;.</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Habit determines whether a &amp;quot;complete look&amp;quot; has occurred using these settings. The subject must look at a stimulus for at least the &amp;quot;minimum looking time&amp;quot;. The subject can look away briefly, but if they look away for more than the &amp;quot;maximum looking-away time&amp;quot;, Habit will consider the &amp;quot;look&amp;quot; to be complete.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
@@ -94,7 +94,7 @@
          </font>
         </property>
         <property name="text">
-         <string>When the subject looks away from a stimulus for a short time (less than the &quot;minimum looking-away time&quot;) and then looks back to the same stimulus, should Habit count that brief time spent not looking as &quot;looking time&quot;? Habit 1.0 always used &quot;Inclusive look time&quot;.</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When the subject looks away from a stimulus for a short time (less than the &amp;quot;maximum looking-away time&amp;quot;) and then looks back to the same stimulus, should Habit count that brief time spent not looking as &amp;quot;looking time&amp;quot;? Habit 1.0 always used &amp;quot;Inclusive look time&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>

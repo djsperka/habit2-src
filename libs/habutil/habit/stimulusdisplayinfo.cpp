@@ -11,7 +11,7 @@ Habit::StimulusDisplayInfo::StimulusDisplayInfo()
 , pdtype_(&HDisplayType::HDisplayTypeFullScreen)
 , isOriginalAspectRatioMaintained_(true)
 , backGroundColor_(0, 0, 0, 255)
-, playouttype_(&HStimulusLayoutType::HStimulusLayoutUnknown)
+, playouttype_(&HStimulusLayoutType::HStimulusLayoutSingle)
 , useISS_(false)
 {
 }
@@ -42,7 +42,7 @@ Habit::StimulusDisplayInfo& Habit::StimulusDisplayInfo::operator=(const Habit::S
 	return *this;
 }
 
-Habit::StimulusDisplayInfo Habit::StimulusDisplayInfo::clone()
+Habit::StimulusDisplayInfo Habit::StimulusDisplayInfo::clone() const
 {
 	Habit::StimulusDisplayInfo info(*this);
 	info.setId(-1);
@@ -61,6 +61,13 @@ QDataStream & Habit::operator<< (QDataStream& stream, Habit::StimulusDisplayInfo
 	stream << f_sVersion2 << d.getId() << d.getPresentationStyle().number() << d.getDisplayType().number() << d.isOriginalAspectRatioMaintained() << d.getBackGroundColor() << d.getStimulusLayoutType().number() << d.getUseISS();
 	return stream;
 }
+
+QDebug Habit::operator<<(QDebug dbg, const Habit::StimulusDisplayInfo& info)
+{
+	dbg.space() << "LayoutType:" << info.getStimulusLayoutType().name() << " ISS: " << info.getUseISS() << " DisplayType: " << info.getDisplayType().name() << " preserve aspect:" << info.isOriginalAspectRatioMaintained() << " Background: " << info.getBackGroundColor() << " style(unused): " << info.getPresentationStyle().name();
+	return dbg.space();
+}
+
 
 QDataStream & Habit::operator>> (QDataStream& stream, Habit::StimulusDisplayInfo& d)
 {
@@ -110,6 +117,11 @@ bool Habit::operator==(const Habit::StimulusDisplayInfo& lhs, const Habit::Stimu
 			lhs.getBackGroundColor() == rhs.getBackGroundColor() &&
 			lhs.getStimulusLayoutType() == rhs.getStimulusLayoutType() &&
 			lhs.getUseISS() == rhs.getUseISS());
+}
+
+bool Habit::operator!=(const Habit::StimulusDisplayInfo& lhs, const Habit::StimulusDisplayInfo& rhs)
+{
+	return !(lhs == rhs);
 }
 
 
@@ -181,14 +193,14 @@ void Habit::StimulusDisplayInfo::setBackGroundColor(const QColor& backGroundColo
     backGroundColor_ = backGroundColor;
 }
 
-void Habit::StimulusDisplayInfo::loadFromDB( size_t id )
+void Habit::StimulusDisplayInfo::loadFromDB(int experimentID)
 {
 	Habit::MainDao dao;
-	dao.getStimulusDisplayInfoForExperiment(id, this);
+	dao.getStimulusDisplayInfoForExperiment(experimentID, *this);
 }
 
-bool Habit::StimulusDisplayInfo::saveToDB(size_t id_)
+void Habit::StimulusDisplayInfo::saveToDB(int experimentID)
 {
 	Habit::MainDao dao;
-	return dao.addOrUpdateStimulusDisplaySetting(id_, this);
+	dao.addOrUpdateStimulusDisplayInfo(experimentID, *this);
 }

@@ -17,7 +17,7 @@
 #include "HPhaseCriteria.h"
 #include "HPhaseSettings.h"
 #include "HLookSettings.h"
-#include "stimulusSettings.h"
+#include "stimulussettings.h"
 #include "attentiongettersettings.h"
 #include <QList>
 #include <QPair>
@@ -55,13 +55,7 @@ public:
 	
 	void requestCurrentStim();
 	void requestAG();
-
-	// These will trickle down and lead to HPlayer::loadBuffer()/freeBuffer() being called for
-	// the AG (if applicable) and the stimulus for the current trial.
-	void loadCurrentStimBuffers();
-	void freeCurrentStimBuffers();
-
-	const HPhaseType& ptype() const { return m_phaseSettings.getPhaseType(); };
+	// DJS const HPhaseType& ptype() const { return m_phaseSettings.getPhaseType(); };
 
 protected:
 	virtual void onEntry(QEvent* e);
@@ -76,6 +70,7 @@ public slots:
 	void screenStarted(int, const QString&);
 	void agStarted(int);
 	void stimStarted(int);
+	void checkPrerollStatus(int trialnumber=-1, int repeat=0);
 };
 
 class HAllTrialsDoneTransition: public QAbstractTransition

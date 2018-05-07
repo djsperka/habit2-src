@@ -15,11 +15,10 @@
 using namespace GUILib;
 using namespace Habit;
 
-HStimulusOrderListWidget::HStimulusOrderListWidget(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList, const HStimContext& context, const HStimulusLayoutType& layoutType, QWidget *parent)
+HStimulusOrderListWidget::HStimulusOrderListWidget(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList, const HStimulusLayoutType& layoutType, QWidget *parent)
 : QWidget(parent)
 , m_list(list)
 , m_ssList(ssList)
-, m_pcontext(&context)
 , m_playoutType(&layoutType)
 {
 	create();
@@ -30,7 +29,6 @@ void HStimulusOrderListWidget::setStimulusLayoutType(const HStimulusLayoutType& 
 {
 	m_playoutType = &layoutType;
 }
-
 
 void HStimulusOrderListWidget::create()
 {
@@ -78,7 +76,7 @@ void HStimulusOrderListWidget::removeClicked()
 		m_pmodel->remove(it.next());
 }
 
-void HStimulusOrderListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+void HStimulusOrderListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection&)
 {
 	//qDebug() << "HStimulusOrderListWidget::selectionChanged - selected: " << selected.count() << " deselected " << deselected.count();
 	if (selected.count() > 0)
@@ -99,7 +97,7 @@ void HStimulusOrderListWidget::selectionChanged(const QItemSelection & selected,
 	}
 }
 
-void HStimulusOrderListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+void HStimulusOrderListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex&)
 {
 	// If something is selected, enable the Edit and Remove push buttons
 	if (current.row() > -1)
@@ -146,7 +144,7 @@ void HStimulusOrderListWidget::editItem(const QModelIndex& index)
 
 void HStimulusOrderListWidget::newClicked()
 {
-	HStimulusOrder order(*m_pcontext);
+	HStimulusOrder order;
 	HStimulusOrderEditor* pEditor = new HStimulusOrderEditor(order, m_ssList, *m_playoutType, this);
 	int status = pEditor->exec();
 	if (status == QDialog::Accepted)

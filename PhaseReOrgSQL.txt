@@ -54,18 +54,40 @@ ALTER TABLE main.habituation_settings
 ADD COLUMN "phase_id" INTEGER NOT NULL DEFAULT -1
 
 -- this will update habituation_settings table phase_id value with that from phase_settings
--- Note that we currently only store habituation_settings for Habituation phase. 
+-- Note that we currently only store habituation_settings for Habituation phase, phase_type==2
 
-UPDATE habituation_settings
-SET phase_id = (SELECT phase_settings.id from phase_settings 
-                               WHERE habituation_settings.experiment_id = phase_settings.experiment_id)
-WHERE
-       EXISTS ( SELECT * FROM phase_settings
-                         WHERE habituation_settings.experiment_id = phase_settings.experiment_id
-                         AND phase_settings.phase_type = 2)
+UPDATE habituation_settings SET phase_id = 
+	(SELECT phase_settings.id from phase_settings WHERE habituation_settings.experiment_id = phase_settings.experiment_id and phase_settings.phase_type=2)
 
 
 -- now add rows for PreTest and Test phases
                           
 INSERT into habituation_settings (experiment_id,habituation_type, phase_id) 
 select experiment_id,0,id from phase_settings where phase_type = 1 or phase_type = 3
+
+
+---------------------------------------------------------
+---- add ntrials column to habituation_settings, populate with value from phase_settngs.ntrials
+
+ALTER TABLE main.habituation_settings
+ADD COLUMN "ntrials" INTEGER NOT NULL DEFAULT 0
+
+UPDATE habituation_settings
+SET ntrials = (SELECT phase_settings.ntrials from phase_settings
+							WHERE habituation_settings.phase_id = phase_settings.id)
+							
+---------------------------------------------------------
+---- add stimulus_id column to attention_setup, populate with value from stimulus table
+
+ALTER TABLE main.attention_setup
+ADD COLUMN "stimulus_id" INTEGER NOT NULL DEFAULT -1
+
+UPDATE attention_setup
+SET stimulus_id = (SELECT stimulus.id from stimulus 
+					WHERE stimulus.experiment_id = attention_setup.experiment_id 
+					AND stimulus.context = 4)
+WHERE 
+	EXISTS ( SELECT * FROM stimulus 
+				WHERE stimulus.experiment_id = attention_setup.experiment_id 
+					AND stimulus.context = 4)
+							

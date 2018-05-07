@@ -25,7 +25,7 @@
 using namespace GUILib;
 
 
-HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEventLog& log, const Habit::RunSettings& runSettings, HMediaManager *pmm, QWidget* w)
+HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEventLog& log, const Habit::RunSettings& runSettings, HGMM *pmm, QWidget* w)
 : QDialog(w)
 , m_experimentSettings(exptSettings)
 , m_log(log)
@@ -48,7 +48,7 @@ HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEve
 HControlPanel::~HControlPanel()
 {
 	qDebug() << "HControlPanel::~HControlPanel()";
-	delete m_pmm;
+	//delete m_pmm;
 }
 
 void HControlPanel::setStateMachine(HStateMachine *psm)
@@ -72,8 +72,6 @@ void HControlPanel::components()
 
 	m_pMediaStatusWidget = new HMediaStatusWidget(m_experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType(), m_experimentSettings.getControlBarOptions().isCurrentStimulusDisplayed(), this);
 	m_pExperimentStatusWidget = new HExperimentStatusWidget(m_experimentSettings.getName(), m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(), this);
-
-	qDebug() << "current stim? " << m_experimentSettings.getControlBarOptions().isCurrentStimulusDisplayed() << " current phase? " << m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed();
 
 	m_pbStartTrials = new QPushButton(tr("Start Trials"));
 	m_pbNextTrial = new QPushButton(tr("Next Trial"));
@@ -168,11 +166,11 @@ void HControlPanel::onStopTrials()
 void HControlPanel::onExperimentFinished()
 {
 	m_log.append(new HExperimentEndEvent(HElapsedTimer::elapsed()));
-	if (m_pmm)
-	{
-		delete m_pmm;
-		m_pmm = NULL;
-	}
+//	if (m_pmm)
+//	{
+//		delete m_pmm;
+//		m_pmm = NULL;
+//	}
 	accept();
 }
 

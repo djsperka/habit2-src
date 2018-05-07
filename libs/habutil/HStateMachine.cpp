@@ -9,3 +9,15 @@
 
 #include "HStateMachine.h"
 
+HStateMachine::HStateMachine(const HExperiment& expt)
+: QStateMachine()
+, m_expt(expt)
+{
+	//Q_ASSERT(expt);
+}
+
+HStateMachine::~HStateMachine()
+{
+	//delete m_pExpt;
+	qDebug() << "~HStateMachine()";
+};

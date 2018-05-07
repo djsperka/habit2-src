@@ -13,10 +13,10 @@
 #include <QStringList>
 using namespace GUILib;
 
-HStimulusSettingsListWidget::HStimulusSettingsListWidget(Habit::HStimulusSettingsList& list, const HStimulusLayoutType& layoutType, QWidget *parent)
+HStimulusSettingsListWidget::HStimulusSettingsListWidget(Habit::HStimulusSettingsList& list, const Habit::StimulusDisplayInfo& sdi, QWidget *parent)
 : QWidget(parent)
 , m_list(list)
-, m_pLayoutType(&layoutType)
+, m_sdi(sdi)
 {
 	create();
 	connections();
@@ -25,7 +25,7 @@ HStimulusSettingsListWidget::HStimulusSettingsListWidget(Habit::HStimulusSetting
 
 void HStimulusSettingsListWidget::create()
 {
-	m_pmodel = new HStimulusSettingsListModel(m_list, *m_pLayoutType);
+	m_pmodel = new HStimulusSettingsListModel(m_list, m_sdi.getStimulusLayoutType());
 	m_pListView = new QListView(this);
 	m_pListView->setModel(m_pmodel);
 
@@ -51,7 +51,7 @@ void HStimulusSettingsListWidget::create()
 
 void HStimulusSettingsListWidget::setStimulusLayoutType(const HStimulusLayoutType& layoutType)
 {
-	m_pLayoutType = &layoutType;
+	m_pmodel->setLayoutType(layoutType);
 }
 
 
@@ -65,11 +65,19 @@ void HStimulusSettingsListWidget::connections()
 	connect(m_pListView->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)));
 	//connect(m_pListView->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentSelectionChanged(const QModelIndex&, const QModelIndex&)));
 	connect(m_pListView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&, const QItemSelection&)));
+
+	connect(m_pmodel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(dataChanged(const QModelIndex &, const QModelIndex &)));
+	connect(m_pmodel, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(rowsInserted(const QModelIndex &, int, int)));
+	connect(m_pmodel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex &, int, int)));
 }
 
 void HStimulusSettingsListWidget::removeClicked()
 {
 	QModelIndexList selected = m_pListView->selectionModel()->selectedIndexes();
+
+	// deselect, otherwise a new selection will be made automatically.
+	//m_pListView->clearSelection();
+
 	QListIterator<QModelIndex> it(selected);
 	while (it.hasNext())
 		m_pmodel->remove(it.next());
@@ -86,7 +94,7 @@ void HStimulusSettingsListWidget::previewClicked()
 }
 
 
-void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & selected, const QItemSelection &)
 {
 	if (selected.count() > 0)
 	{
@@ -94,18 +102,19 @@ void HStimulusSettingsListWidget::selectionChanged(const QItemSelection & select
 		m_pbEdit->setEnabled(true);
 		m_pbRemove->setEnabled(true);
 
-		emit stimulusSelectionChanged();
-		emit clearStimulus();
+		emit stimulusSelectionChanged();	// StimulusOrderListWidget will get this
+		//emit clearStimulus();			// unnecesary - REMOVE THIS SIGNAL
 		emit previewStimulus(selected.at(0).indexes().at(0).row());
 	}
 	else
 	{
 		m_pbEdit->setEnabled(false);
 		m_pbRemove->setEnabled(false);
+		emit clearStimulus();
 	}
 }
 
-void HStimulusSettingsListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+void HStimulusSettingsListWidget::currentSelectionChanged(const QModelIndex& current, const QModelIndex&)
 {
 	// If something is selected, enable the Edit and Remove push buttons
 	if (current.row() > -1)
@@ -147,16 +156,19 @@ void HStimulusSettingsListWidget::editItem(const QModelIndex& index)
 		names.append(it.next().getName());
 
 	// Create a new HStimulusSettingsEditor, using the currently selected item
-	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(m_list.at(index.row()), *m_pLayoutType, names, QString("Modify Stimulus"), this);
+	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(m_list.at(index.row()), m_sdi, names, QString("Modify Stimulus"), this);
 	if (pEditor->exec() == QDialog::Accepted)
 	{
-		// update the stimulus settings in the saved list
-		m_list[index.row()] = pEditor->getStimulusSettings();
+		Habit::StimulusSettings ss = pEditor->getStimulusSettings();
+		if (m_list[index.row()] != ss)
+		{
+			// update the stimulus settings in the saved list
+			m_list[index.row()] = ss;
 
-		// Notify ListView that something has changed
-		m_pmodel->changed(index, index);
+			// Notify ListView that something has changed
+			m_pmodel->changed(index, index);
+		}
 	}
-
 }
 
 void HStimulusSettingsListWidget::newClicked()
@@ -168,7 +180,7 @@ void HStimulusSettingsListWidget::newClicked()
 		names.append(it.next().getName());
 
 	// Create a new HStimulusSettingsEditor, using the currently selected item
-	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(Habit::StimulusSettings(), *m_pLayoutType, names, QString("Create New Stimulus"), this);
+	HStimulusSettingsEditor *pEditor = new HStimulusSettingsEditor(Habit::StimulusSettings(), m_sdi, names, QString("Create New Stimulus"), this);
 	if (pEditor->exec() == QDialog::Accepted)
 	{
 		// append stimulus settings to the StimulusSettingsList
@@ -205,4 +217,20 @@ void HStimulusSettingsListWidget::clearSelection()
 //		m_pListView->selectionModel()->select(index, QItemSelectionModel::Toggle);
 //		qDebug() << "(de)Selected row " << index.row();
 //	}
+}
+
+
+void HStimulusSettingsListWidget::rowsInserted(const QModelIndex &, int first, int)
+{
+	emit stimulusAdded(first);
+}
+
+void HStimulusSettingsListWidget::rowsAboutToBeRemoved(const QModelIndex &, int first, int)
+{
+	emit stimulusAboutToBeRemoved(first);
+}
+
+void HStimulusSettingsListWidget::dataChanged(const QModelIndex &topLeft, const QModelIndex &)
+{
+	emit stimulusSettingsChanged(topLeft.row());
 }

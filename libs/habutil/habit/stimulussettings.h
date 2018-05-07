@@ -20,8 +20,9 @@ namespace Habit {
 	class StimulusSettings
 	{
 	public:
-		StimulusSettings(const QString& name = "", const HStimContext& context = HStimContext::UnknownContext);
+		StimulusSettings();
 		StimulusSettings(const StimulusSettings& s);
+		StimulusSettings(const QString& name, const QColor& color = Qt::gray);
 		~StimulusSettings();
 		StimulusSettings clone() const;
 		StimulusSettings& operator=(const StimulusSettings& rhs);
@@ -43,12 +44,11 @@ namespace Habit {
 		StimulusInfo& getIndependentSoundInfo();
 		const StimulusInfo& getIndependentSoundInfo() const;
 		void setIndependentSoundInfo(const StimulusInfo& independentSoundInfo);
-		const HStimContext* getContext() const;
-		void setContext(const HStimContext& context);
 		void setStimulusInfo(const StimulusInfo& info, const HPlayerPositionType& position);
 
 
 		friend bool operator==(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
+		friend bool operator!=(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
 
 	private:
 		int id_;
@@ -57,13 +57,13 @@ namespace Habit {
 		StimulusInfo centerStimulusInfo_;
 		StimulusInfo rightStimulusInfo_;
 		StimulusInfo independentSoundInfo_;
-		const HStimContext* pcontext_;
 	};
 	QDataStream & operator<< (QDataStream& stream, StimulusSettings settings);
 	QDataStream & operator>> (QDataStream& stream, StimulusSettings& settings);
 	QTextStream & operator<< (QTextStream& stream, StimulusSettings settings);
 	QTextStream & operator>> (QTextStream& stream, StimulusSettings& settings);
-	bool operator==(const Habit::StimulusSettings&lhs, const Habit::StimulusSettings& rhs);
+	bool operator==(const Habit::StimulusSettings& lhs, const Habit::StimulusSettings& rhs);
+	bool operator!=(const Habit::StimulusSettings& lhs, const Habit::StimulusSettings& rhs);
 
 
 //	typedef QList<StimulusSettings> StimulusSettingsList;

@@ -9,38 +9,42 @@
 #define HSTIMULUSSETTINGSWIDGET_H_
 
 #include <QWidget>
-#include <QStackedWidget>
 #include <QLabel>
 #include <QLineEdit>
 #include "HTypes.h"
 #include "stimulussettings.h"
+#include "stimulusdisplayinfo.h"
 #include "HStimulusInfoWidget.h"
 
 namespace GUILib
 {
+
+// Note: The layout type and USEiss at creation are used. NO changing, hassle.
 	class HStimulusSettingsWidget: public QWidget
 	{
 		Q_OBJECT
 	private:
 		Habit::StimulusSettings m_settings;
-		const HStimulusLayoutType* m_pStimulusLayout;
 		GUILib::HStimulusInfoWidget *m_pLeft;
 		GUILib::HStimulusInfoWidget *m_pCenter;
 		GUILib::HStimulusInfoWidget *m_pRight;
 		GUILib::HStimulusInfoWidget *m_pSound;
-		QStackedWidget *m_pStack;
 		QLineEdit *m_pName;		// make this editable?
-		int m_stackidSingle;
-		int m_stackidLR;
-		void initialize();
-		void connections();
+
+		// create components that are part of this class, do stuff to them that doesn't require sdi or ppt.
+		void components();
+
+		// get the editor widget that contains one or more StimulusInfoWidgets
+		QWidget *getEditorWidget(const Habit::StimulusDisplayInfo& sdi);
+		QWidget *getEditorWidget(const HPlayerPositionType& single);
+
+		// make the layout for this editor
+		QLayout *makeLayout(QWidget *pwidget);
 
 	public:
-		HStimulusSettingsWidget(const Habit::StimulusSettings& settings, const HStimulusLayoutType& stimLayout = HStimulusLayoutType::HStimulusLayoutSingle, QWidget *parent=0);
+		HStimulusSettingsWidget(const Habit::StimulusSettings& settings, const Habit::StimulusDisplayInfo& info, QWidget *parent=0);
+		HStimulusSettingsWidget(const Habit::StimulusSettings& settings, const HPlayerPositionType& ppt, QWidget *parent=0);
 		virtual ~HStimulusSettingsWidget();
-
-		// StimulusLayoutType denotes single screen, LR screens, sound/nosound.
-		void setStimulusLayoutType(const HStimulusLayoutType& type);
 
 		// Get the settings as currently defined in the widget (i.e. incorporating user changes)
 		Habit::StimulusSettings getStimulusSettings();

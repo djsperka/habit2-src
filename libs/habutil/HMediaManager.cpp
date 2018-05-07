@@ -20,11 +20,10 @@
 
 const unsigned int HMediaManager::backgroundKey = UINT_MAX;
 const unsigned int HMediaManager::agKey = 0;
-const Habit::StimulusSettings HMediaManager::dummyStimulusSettings(QString("dummySS"));
+const Habit::StimulusSettings HMediaManager::dummyStimulusSettings;
 
 HMediaManager::HMediaManager(bool bPlayersAreFullScreen)
-: QObject()
-, m_pendingStartSignal(false)
+: m_pendingStartSignal(false)
 , m_pendingAGStartSignal(false)
 , m_pendingClearSignal(false)
 , m_pendingStimNumber(-1)
@@ -57,6 +56,16 @@ unsigned int HMediaManager::nextKey()
 	return (unsigned int)(m_mapPStimulusSettings.size() - 1);
 }
 
+#if QT_VERSION >= 0x050000
+
+void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex)
+{
+	connect(player, SIGNAL(started(int, const QString&)), this, SLOT(playerStarted(int, const QString&)));
+	m_players[ppt] = player;
+}
+
+#else
+
 void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, int screenIndex)
 {
 	// TODO: This should be governed by fullscreen setting!
@@ -87,67 +96,61 @@ void HMediaManager::addPlayer(const HPlayerPositionType& ppt, HPlayer* player, i
 	//else if (player->windowModality() == Qt::NonModal) qDebug() << "NonModal";
 	//else qDebug() << "Modality???";
 }
+#endif
+
+
+HPlayer *HMediaManager::getPlayer(const HPlayerPositionType& ppt)
+{
+	HPlayer *p = (HPlayer *)NULL;
+	if (m_players.contains(ppt))
+		p = m_players[ppt];
+	return p;
+}
 
 
 unsigned int HMediaManager::addAG(const Habit::StimulusSettings& ssAG)
 {
 	m_mapPStimulusSettings.insert(agKey, &ssAG);
-
-	// Assume that if the player is here, then there is a stimulus configured for it.
-
-	if (m_players.contains(HPlayerPositionType::Left))
-	{
-		m_players.value(HPlayerPositionType::Left)->addStimulus(agKey, ssAG.getLeftStimulusInfo());
-	}
-	if (m_players.contains(HPlayerPositionType::Center))
-	{
-		m_players.value(HPlayerPositionType::Center)->addStimulus(agKey, ssAG.getCenterStimulusInfo());
-	}
-	if (m_players.contains(HPlayerPositionType::Right))
-	{
-		m_players.value(HPlayerPositionType::Right)->addStimulus(agKey, ssAG.getRightStimulusInfo());
-	}
-	if (m_players.contains(HPlayerPositionType::Sound))
-	{
-		m_players.value(HPlayerPositionType::Sound)->addStimulus(agKey, ssAG.getIndependentSoundInfo());
-	}
+	addStimulusPrivate(agKey, ssAG);
 
 	// Append to context list.
 	// This code allows more than one ag....nothing here prevents multiple ags to be added to the list.
 	QList<unsigned int> list;
 	list.append(agKey);
-	addOrAppendList(HStimContext::AttentionGetter, list);
+
+	// TODO Using -1 as context for attention getters!
+	addOrAppendList(-1, list);
 
 	return agKey;
 }
 
 
-void HMediaManager::addOrAppendList(const HStimContext& c, const QList<unsigned int>& list)
+void HMediaManager::addOrAppendList(int context, const QList<unsigned int>& list)
 {
-	if (m_mapContext.contains(c))
+	if (m_mapContext.contains(context))
 	{
-		m_mapContext[c].append(list);
+		m_mapContext[context].append(list);
 	}
 	else
 	{
-		m_mapContext.insert(c, list);
+		m_mapContext.insert(context, list);
 	}
 }
 
-unsigned int HMediaManager::getContextStimList(const HStimContext& c, QList<unsigned int>& list)
+unsigned int HMediaManager::getContextStimList(int context, QList<unsigned int>& list)
 {
 	unsigned int n=0;
-	if (m_mapContext.contains(c))
+	if (m_mapContext.contains(context))
 	{
-		n = m_mapContext.value(c).size();
-		list.append(m_mapContext.value(c));
+		n = m_mapContext.value(context).size();
+		list.append(m_mapContext.value(context));
 	}
 	return list.size();
 }
 
 
 //void HMediaManager::addStimuli(const Habit::StimuliSettings& ss, QList<unsigned int>& idList)
-void HMediaManager::addStimuli(const Habit::StimuliSettings& ss)
+void HMediaManager::addStimuli(const Habit::StimuliSettings& ss, int context)
 {
 	QList<unsigned int> idList;
 	QListIterator<Habit::StimulusSettings> it(ss.stimuli());	// note: getting const HStimulusSettingsList&, it.next() will be const StimulusSettings&
@@ -155,14 +158,18 @@ void HMediaManager::addStimuli(const Habit::StimuliSettings& ss)
 	{
 		idList.append(addStimulus(it.next()));
 	}
-	addOrAppendList(ss.getStimContext(), idList);
+	addOrAppendList(context, idList);
 	return;
 }
 
 unsigned int HMediaManager::addStimulus(unsigned int key, const Habit::StimulusSettings& settings)
 {
 	m_mapPStimulusSettings.insert(key, &settings);
+	return addStimulusPrivate(key, settings);
+}
 
+unsigned int HMediaManager::addStimulusPrivate(unsigned int key, const Habit::StimulusSettings& settings)
+{
 	if (m_players.contains(HPlayerPositionType::Left))
 	{
 		m_players.value(HPlayerPositionType::Left)->addStimulus(key, settings.getLeftStimulusInfo());

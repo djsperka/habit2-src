@@ -18,6 +18,7 @@ HHabituationSetupWidget::HHabituationSetupWidget(QWidget* w)
 {
 	ui->setupUi(this);
 	initializeComponents();
+	connections();
 	initialize();
 }
 
@@ -28,6 +29,7 @@ HHabituationSetupWidget::HHabituationSetupWidget(const Habit::HabituationSetting
 {
 	ui->setupUi(this);
 	initializeComponents();
+	connections();
 	initialize();
 }
 
@@ -46,6 +48,11 @@ void HHabituationSetupWidget::initializeComponents()
 	items.clear();
 	items << HCriterionWindowType::HCriterionWindowFixed.label() << HCriterionWindowType::HCriterionWindowSliding.label();
 	ui->comboWindowType->addItems(items);
+}
+
+void HHabituationSetupWidget::connections()
+{
+	connect(ui->comboHabituationType, SIGNAL(activated(int)), ui->stackHabituationSettings, SLOT(setCurrentIndex(int)));
 }
 
 void HHabituationSetupWidget::initialize()

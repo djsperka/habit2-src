@@ -82,7 +82,7 @@ void HStimRunningState::gotLookPending()
 	m_bGotLookPending = true;
 }
 
-void HStimRunningState::gotLookAborted(HLook l)
+void HStimRunningState::gotLookAborted(HLook)
 {
 	// Under certain conditions, this signal generates an HNoLookQEvent.
 	m_bGotLookStarted = false;

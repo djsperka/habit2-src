@@ -8,40 +8,54 @@
 #include "HStimuliSettingsWidget.h"
 #include "HStimulusSettingsWidget.h"
 #include "HStimulusSettingsOrderImportUtil.h"
+#include "HGMM.h"
 #include "HWorkspaceUtil.h"
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
-#include <QDesktopServices>
 #include <QFileDialog>
 #include <QMessageBox>
+
+#include <QtGlobal>
+#if QT_VERSION < 0x050000
+#include <QDesktopServices>
+#else
+#include <QStandardPaths>
+#endif
 
 using namespace Habit;
 using namespace GUILib;
 
-HStimuliSettingsWidget::HStimuliSettingsWidget(const StimuliSettings& stimuli, const StimulusDisplayInfo& info, QWidget* parent)
+HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const StimuliSettings& stimuli, int context, const StimulusDisplayInfo& info, QWidget* parent)
 : QWidget(parent)
 , m_stimuli(stimuli)
+, m_context(context)
 , m_stimulusDisplayInfo(info)
 {
-	create();
+	create(labelName, info);
 	connections();
+	//populate();
+	stimulusLayoutTypeChanged(info.getStimulusLayoutType().number());
 }
 
-void HStimuliSettingsWidget::create()
+#if 0
+void HStimuliSettingsWidget::populate()
 {
-	QDir root;
-	habutilGetStimulusRootDir(root);
+	HGMM::instance().addStimuli(m_stimuli, m_context);
+}
+#endif
 
-	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
-	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimuli.getStimContext(), m_stimulusDisplayInfo.getStimulusLayoutType());
-	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, root, this);
+void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisplayInfo& info)
+{
+	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_stimulusDisplayInfo);
+	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
+	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(info, this);
 
-	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(m_stimuli.getStimContext().name()));
+	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(labelName));
 	QVBoxLayout *v1 = new QVBoxLayout;
 	v1->addWidget(m_pStimulusSettingsListWidget);
 	g1->setLayout(v1);
-	QGroupBox *g2 = new QGroupBox(QString("%1 Orders").arg(m_stimuli.getStimContext().name()));
+	QGroupBox *g2 = new QGroupBox(QString("%1 Orders").arg(labelName));
 	QVBoxLayout *v2 = new QVBoxLayout;
 	v2->addWidget(m_pStimulusOrderListWidget);
 	g2->setLayout(v2);
@@ -80,11 +94,53 @@ void HStimuliSettingsWidget::connections()
 	connect(m_pStimulusOrderListWidget, SIGNAL(previewOrder(int)), this, SLOT(previewOrder(int)));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(clearStimulus()), this, SLOT(clearStimulus()));
 	connect(m_pStimulusOrderListWidget, SIGNAL(clearStimulus()), this, SLOT(clearStimulus()));
-	//connect(m_pStimulusSettingsListWidget, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentStimulusSelectionChanged(const QModelIndex&, const QModelIndex&)));
-	//connect(m_pStimulusOrderListWidget, SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(currentOrderSelectionChanged(const QModelIndex&, const QModelIndex&)));
 	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusSelectionChanged()), this, SLOT(stimulusSelectionChanged()));
 	connect(m_pStimulusOrderListWidget, SIGNAL(orderSelectionChanged()), this, SLOT(orderSelectionChanged()));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusAdded(int)), this, SLOT(stimulusAdded(int)));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusAboutToBeRemoved(int)), this, SLOT(stimulusAboutToBeRemoved(int)));
+	connect(m_pStimulusSettingsListWidget, SIGNAL(stimulusSettingsChanged(int)), this, SLOT(stimulusSettingsChanged(int)));
+
+	// when preview widget "stop" button is hit, the current playing stim is stopped and it switches to bkgd.
+	connect(m_pStimulusPreviewWidget, SIGNAL(stopped()), this, SLOT(previewStopButtonHit()));
 }
+
+
+void HStimuliSettingsWidget::stimulusAdded(int row)
+{
+	// in the stimulusSettingsLIst widget a new stim was added. WE find the stim at row 'row'.
+	qDebug() << "stimulus added at row " << row;
+	qDebug() << m_stimuli.stimuli().at(row);
+
+	// add this stimulus to the media manager.
+	HGMM::instance().addStimulus(m_stimuli.stimuli().at(row), m_context);
+}
+
+void HStimuliSettingsWidget::stimulusSettingsChanged(int row)
+{
+	// When this happens, force preview to the background
+	clearStimulus();
+
+	// replace stimulus in media manager
+	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
+	HGMM::instance().replaceStimulus(list.at(row), m_stimuli.stimuli().at(row));
+	m_pStimulusPreviewWidget->preview(list.at(row), true);
+
+}
+
+// Called before the StimulusSettingsListModel removes a row (a stimulus) from its list.
+// Since that list is a reference to the master list held here, this is the place to
+// make sure that HGMM is in sync with the stimuli remaining.
+void HStimuliSettingsWidget::stimulusAboutToBeRemoved(int row)
+{
+	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
+	// in the stimulusSettingsLIst widget a stim was selected and "Remove" was clicked.
+	// We have to remove the stimulus from the media manager.
+
+	// play background before removing.
+	//HGMM::instance().background();
+	HGMM::instance().remove(list.at(row));
+}
+
 
 void HStimuliSettingsWidget::clearStimulus()
 {
@@ -93,47 +149,59 @@ void HStimuliSettingsWidget::clearStimulus()
 
 void HStimuliSettingsWidget::previewStimulus(int row)
 {
-	//qDebug() << "HStimuliSettingsWidget::previewStimulus " << m_stimuli.stimuli().at(row).getName();
-	m_pStimulusPreviewWidget->preview(m_stimuli.stimuli().at(row));
+	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
+	qDebug() << "HStimuliSettingsWidget::previewStimulus at row " << row << " key " << list.at(row);
+	m_pStimulusPreviewWidget->preview(list.at(row), true);
 }
 
 void HStimuliSettingsWidget::previewOrder(int row)
 {
-	QList< QPair<int, QString> > list;
+	QList<unsigned int> contextStimList = HGMM::instance().getContextStimList(m_context);
+	qDebug() << "HStimuliSettingsWidget::previewOrder at row " << row;
+	QList< QPair<int, QString> > indexedOrderList;
 	QString orderName;
 	orderName = m_stimuli.orders().at(row).getName();
 
-	if (!m_stimuli.getIndexedOrderList(orderName, list))
+	qDebug() << "HStimuliSettingsWidget::previewOrder at row " << row << " name " << orderName;
+
+	if (!m_stimuli.getIndexedOrderList(orderName, indexedOrderList))
 	{
 		qDebug() << "Cannot get order list for order \"" << orderName << "\"";
 		qDebug() << m_stimuli;
 	}
 	else
 	{
-#if 0
+		QList<unsigned int> orderKeyList;
 		QPair<int, QString> p;
-		foreach(p, list)
+		foreach(p, indexedOrderList)
 		{
-			qDebug() << "index " << p.first << " label " << p.second;
+			//qDebug() << "index " << p.first << " label " << p.second << " key " << contextStimList[p.first];
+			orderKeyList.push_back(contextStimList[p.first]);
 		}
-#endif
-		m_pStimulusPreviewWidget->preview(m_stimuli.stimuli(), list);
+		m_pStimulusPreviewWidget->preview(orderKeyList);
 	}
 }
 
 void HStimuliSettingsWidget::importClicked()
 {
+#if QT_VERSION >= 0x050000
+	QString filename = QFileDialog::getOpenFileName(this, "", QStandardPaths::standardLocations(QStandardPaths::DesktopLocation)[0]);
+#else
 	QString filename = QFileDialog::getOpenFileName(this, "", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
+#endif
+
+
 	bool b;
 	Habit::StimulusSettingsList slist;
 	Habit::HStimulusOrderList olist;
 	bool bClobberAllStimuli = false;
 	bool bClobberAllOrders = false;
 
+
 	qDebug() << "Selected file " << filename;
 	if (!filename.isEmpty())
 	{
-		b = importStimulusSettingsAndOrders(filename, slist, olist, m_stimuli.getStimContext());
+		b = importStimulusSettingsAndOrders(filename, slist, olist);
 		qDebug() << slist.size() << "stim imported " << olist.size() << " orders imported";
 
 		// We append the stimuli and orders to the widgets so the display isupdated correctly.
@@ -179,6 +247,11 @@ void HStimuliSettingsWidget::importClicked()
 			if (bClobber) m_pStimulusSettingsListWidget->clobber(ss);
 		}
 
+		// get list of stim names and send it to the StimulusOrderListWidget to verify orders.
+		//m_stimuli.stimuli().names()
+		// set new names in
+		//m_pStimulusOrderListWidget->setStimulusNames(m_stimuli.stimuli().names());
+
 		QStringList orderNames = m_stimuli.getOrderNames();
 		QListIterator<Habit::HStimulusOrder> imported_orders(olist);
 		while (imported_orders.hasNext())
@@ -219,16 +292,16 @@ void HStimuliSettingsWidget::importClicked()
 	}
 }
 
-
 void HStimuliSettingsWidget::stimulusLayoutTypeChanged(int i)
 {
-	m_pStimulusSettingsListWidget->setStimulusLayoutType(m_stimulusDisplayInfo.getStimulusLayoutType());
-	m_pStimulusOrderListWidget->setStimulusLayoutType(m_stimulusDisplayInfo.getStimulusLayoutType());
+	m_pStimulusSettingsListWidget->setStimulusLayoutType(getStimulusLayoutType(i));
+	m_pStimulusOrderListWidget->setStimulusLayoutType(getStimulusLayoutType(i));
+	m_pStimulusPreviewWidget->setStimulusLayoutType(getStimulusLayoutType(i));
 }
 
 Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()
 {
-	Habit::StimuliSettings settings(m_stimuli.getStimContext());
+	Habit::StimuliSettings settings;
 	settings.setStimuli(m_stimuli.stimuli());
 	settings.setOrderList(m_stimuli.orders());
 	return settings;
@@ -236,6 +309,8 @@ Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()
 
 void HStimuliSettingsWidget::currentStimulusSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
+	Q_UNUSED(previous);
+
 	//qDebug() << "HStimuliSettingsWidget::currentStimulusSelectionChanged( " << current.row() << ", " << previous.row() << ")";
 
 	// look at current selection in order widget
@@ -247,6 +322,7 @@ void HStimuliSettingsWidget::currentStimulusSelectionChanged(const QModelIndex& 
 
 void HStimuliSettingsWidget::currentOrderSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
+	Q_UNUSED(previous);
 	//qDebug() << "HStimuliSettingsWidget::currentOrderSelectionChanged( " << current.row() << ", " << previous.row() << ")";
 	if (current.row() > -1)
 	{
@@ -264,4 +340,14 @@ void HStimuliSettingsWidget::orderSelectionChanged()
 {
 	//qDebug() << "HStimuliSettingsWidget::orderSelectionChanged()";
 	m_pStimulusSettingsListWidget->clearSelection();
+}
+
+
+// When "stop" button is hit in preview widget, it stops currently playing
+// stim and swiutches to background. In this case we should de-select anything
+// that's selected in either of the list views.
+void HStimuliSettingsWidget::previewStopButtonHit()
+{
+	stimulusSelectionChanged();
+	orderSelectionChanged();
 }

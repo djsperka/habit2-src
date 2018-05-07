@@ -14,7 +14,7 @@
 #include "configuration.h"
 #include "maindao.h"
 #include "trialsinfo.h"
-#include "HMediaManager.h"
+#include "HGMM.h"
 
 
 class TestMMDialog: public QDialog
@@ -31,7 +31,7 @@ signals:
 	
 private:
 	QSpinBox* m_psb;
-	HMediaManager* m_pmm;
+	HGMM* m_pmm;
 };
 
 class TestExptDialog: public QDialog

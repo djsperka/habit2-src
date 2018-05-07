@@ -12,12 +12,12 @@
 
 using namespace GUILib;
 
-HStimulusOrderSelectionWidget::HStimulusOrderSelectionWidget(const Habit::StimuliSettings& s, QWidget *parent)
+HStimulusOrderSelectionWidget::HStimulusOrderSelectionWidget(const Habit::StimuliSettings& s, const QString& phaseName, int seqno, QWidget *parent)
 : QWidget(parent)
 , ui(new Ui::HStimulusOrderSelectionForm)
-, m_stimContext(s.getStimContext())
 , m_ssList(s.stimuli())
 , m_orderList(s.orders())
+, m_seqno(seqno)
 {
 	ui->setupUi(this);
 	for (unsigned int i=0; i<sizeof(HRandomizationType::A)/sizeof(HRandomizationType*); i++)
@@ -27,7 +27,7 @@ HStimulusOrderSelectionWidget::HStimulusOrderSelectionWidget(const Habit::Stimul
 	connect(ui->cbxOrders, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStatusLabel()));
 	connect(ui->checkboxRandomize, SIGNAL(toggled(bool)), this, SLOT(updateStatusLabel()));
 	connect(ui->cbxRandomizationType, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStatusLabel()));
-	initialize();
+	initialize(phaseName);
 }
 
 HStimulusOrderSelectionWidget::~HStimulusOrderSelectionWidget()
@@ -64,21 +64,9 @@ QString HStimulusOrderSelectionWidget::getDefinedOrderName()
 	return QString();
 }
 
-void HStimulusOrderSelectionWidget::initialize()
+void HStimulusOrderSelectionWidget::initialize(const QString& phaseName)
 {
-	if (m_stimContext == HStimContext::PreTestPhase)
-	{
-		ui->labelMain->setText("PreTest Phase Stimulus Order");
-	}
-	else if (m_stimContext == HStimContext::HabituationPhase)
-	{
-		ui->labelMain->setText("Habituation Phase Stimulus Order");
-	}
-	else if (m_stimContext == HStimContext::TestPhase)
-	{
-		ui->labelMain->setText("Test Phase Stimulus Order");
-	}
-
+	ui->labelMain->setText(QString("%1 Phase Stimulus Order").arg(phaseName));
 	m_pmodel = new HStimulusOrderListModel(m_orderList, m_ssList);
 	ui->cbxOrders->setModel(m_pmodel);
 	ui->cbxOrders->setEnabled(false);
@@ -107,11 +95,13 @@ void HStimulusOrderSelectionWidget::updateStatusLabel()
 	{
 		s = QString("Default order selected, %1").arg(sRandom);
 		ui->labelStatus->setStyleSheet("QLabel { background-color : lightgreen; }");
+		emit orderChosen(m_seqno);
 	}
 	else if (ui->rbSelect->isChecked())
 	{
 		s = QString("Order \"%1\" selected, %2").arg(ui->cbxOrders->currentText()).arg(sRandom);
 		ui->labelStatus->setStyleSheet("QLabel { background-color : lightgreen; }");
+		emit orderChosen(m_seqno);
 	}
 	else
 	{
@@ -119,5 +109,4 @@ void HStimulusOrderSelectionWidget::updateStatusLabel()
 		ui->labelStatus->setStyleSheet("QLabel { background-color : lightpink; }");
 	}
 	ui->labelStatus->setText(s);
-	emit orderChosen();
 }

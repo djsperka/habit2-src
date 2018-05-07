@@ -1,0 +1,40 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]; then 
+	echo "usage: copy_gstreamer_framework dest"
+	exit -1
+fi
+
+# check that dest exists, if not, create it and the subdir "GStreamer.framework"
+DEST="$1/GStreamer.framework"
+PKG_DEST="$DEST/Versions/1.0"
+if [ ! -d $PKG_DEST ]; then
+	mkdir -p $PKG_DEST
+fi
+
+GSTQT_PLUGIN="/Users/dan/eclipse-workspace/habit2/libs/gstqt/release/libgstqt.dylib"
+SOURCE_DIR="/Library/Frameworks/GStreamer.framework"
+FIRST_PACKAGE="org.freedesktop.gstreamer.x86_64.GStreamer"
+PACKAGES="	org.freedesktop.gstreamer.x86_64.gstreamer-1.0-net \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-codecs-restricted \
+			org.freedesktop.gstreamer.x86_64.base-system-1.0 \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-codecs-gpl \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-system \
+			org.freedesktop.gstreamer.x86_64.base-crypto \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-dvd \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-core \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-codecs \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-playback \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-effects \
+			org.freedesktop.gstreamer.x86_64.gstreamer-1.0-libav"
+
+
+# FIRST_PACKAGE is moved first - it sets up the directory structure
+echo "Copying root package $FIRST_PACKAGE"
+tar -C $SOURCE_DIR -cnvf -  `pkgutil --files $FIRST_PACKAGE` | tar -C ${DEST} -xf -
+
+for PKG in $PACKAGES; do
+	echo "Copying package $PKG"
+	tar -C ${SOURCE_DIR}/Versions/1.0 -cnf -  `pkgutil --files ${PKG}` | tar -C ${DEST}/Versions/1.0 -xf -
+done
+

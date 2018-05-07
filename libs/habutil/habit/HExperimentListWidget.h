@@ -19,7 +19,7 @@ namespace GUILib
 		Q_OBJECT
 		HExperimentListModel *m_pModel;
 	public:
-		HExperimentListWidget(QWidget *parent=0);
+		HExperimentListWidget(QWidget *parent=0, bool bExp = true, bool bTemplates = false);
 		virtual ~HExperimentListWidget();
 		// get currently selected experiment; return empty string if no selection
 		QString selectedExperiment();
@@ -34,31 +34,6 @@ namespace GUILib
 		void reload();
 
 	};
-
-
-
-#if 0
-	class HExperimentListWidget: public QListWidget
-	{
-		Q_OBJECT
-	private:
-		QStringList m_list;
-
-	signals:
-		void experimentActivated(QString);
-
-	private slots:
-		void myItemActivated(QListWidgetItem* item);
-
-	public:
-		HExperimentListWidget(QWidget *parent=0);
-		virtual ~HExperimentListWidget() {};
-
-		// get currently selected experiment; return empty string if no selection
-		QString selectedExperiment();
-
-	};
-#endif
 
 };
 

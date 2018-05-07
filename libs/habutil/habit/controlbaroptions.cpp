@@ -146,16 +146,16 @@ void Habit::ControlBarOptions::setDisplayLookingDirection(bool display)
 }
 
 
-void Habit::ControlBarOptions::loadFromDB(size_t id)
+void Habit::ControlBarOptions::loadFromDB(int experimentID)
 {
 	Habit::MainDao mainDao;
-	mainDao.getControlBarOptionsForExperiment(id, this);
+	mainDao.getControlBarOptionsForExperiment(experimentID, *this);
 }
 
-bool Habit::ControlBarOptions::saveToDB( size_t id_ )
+void Habit::ControlBarOptions::saveToDB(int experimentID)
 {
 	Habit::MainDao dao;
-	return dao.addOrUpdateControlBarOption(id_, this);
+	dao.addOrUpdateControlBarOptions(experimentID, *this);
 }
 
 QDebug Habit::operator<<(QDebug dbg, ControlBarOptions& cbo)

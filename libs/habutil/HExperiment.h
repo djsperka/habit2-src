@@ -11,7 +11,7 @@
 #define _HEXPERIMENT_H_
 
 #include "HLogState.h"
-#include "HMediaManager.h"
+#include "HGMM.h"
 
 class HLookDetector;
 class HPhase;
@@ -21,7 +21,7 @@ class HExperiment: public HLogState
 	Q_OBJECT
 
 public:
-	HExperiment(HEventLog& log, HMediaManager& mm, HLookDetector& ld, QState* parent = 0);
+	HExperiment(HEventLog& log, HGMM& mm, HLookDetector& ld, QState* parent = 0);
 	virtual ~HExperiment() {};
 	
 	bool hasPreTestPhase() { return m_pPreTestPhase==(HPhase*)NULL; };
@@ -30,15 +30,15 @@ public:
 	HPhase* pretest() { return m_pPreTestPhase; };
 	HPhase* habituation() { return m_pHabituationPhase; };
 	HPhase* test() { return m_pTestPhase; };
-	HMediaManager& getMediaManager() { return m_mm; };
-	const HMediaManager& getMediaManager() const { return m_mm; };
+	HGMM& getMediaManager() { return m_mm; };
+	const HGMM& getMediaManager() const { return m_mm; };
 	HLookDetector& getLookDetector() { return m_ld; };
 	const HLookDetector& getLookDetector() const { return m_ld; };
 	void onExit(QEvent* e) 
 	{
 		Q_UNUSED(e);
 		// on exiting experiment, tell Media Manager to put up blank screen.
-		getMediaManager().stim(HMediaManager::backgroundKey);
+		getMediaManager().defaultStim();
 	};
 	
 signals:
@@ -51,7 +51,7 @@ private slots:
 	void onLookAborted(HLook l);
 
 private:
-	HMediaManager& m_mm;
+	HGMM& m_mm;
 	HLookDetector& m_ld;
 	HPhase* m_pPreTestPhase;
 	HPhase* m_pHabituationPhase;

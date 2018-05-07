@@ -24,4 +24,10 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>QT_ROOT</name>
+			<value>file:/Users/dan/Qt/5.9.1/clang_64</value>
+		</variable>
+	</variableList>
 </projectDescription>

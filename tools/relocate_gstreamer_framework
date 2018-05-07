@@ -1,0 +1,31 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]; then 
+	echo "usage: relocate_gstreamer_framework dest"
+	exit -1
+fi
+
+# check that dest exists, if not, exit with error
+DEST="$1/GStreamer.framework"
+PKG_DEST="$DEST/Versions/1.0"
+if [ ! -d $DEST -o ! -d $PKG_DEST ]; then
+	echo "GStreamer framework not found in $DEST"
+	exit 1
+fi
+
+# run osxrelocator on plugins
+#osxrelocator ${DEST}/Versions/1.0/lib/gstreamer-1.0 /Library/Frameworks/GStreamer.framework @executable_path/../Frameworks/GStreamer.framework
+
+# run osxrelocator on EVERYTHING
+# TODO - osxrelocator filters out anything with an extension in its name, so the gst-xxxx-1.0 executables don't get relocated
+
+#osxrelocator ${DEST}/Versions/Current/lib /Library/Frameworks/GStreamer.framework @executable_path/../Frameworks/GStreamer.framework -r
+#osxrelocator ${DEST}/Versions/Current/libexec /Library/Frameworks/GStreamer.framework @executable_path/../Frameworks/GStreamer.framework -r
+#osxrelocator ${DEST}/Versions/Current/bin /Library/Frameworks/GStreamer.framework @executable_path/../Frameworks/GStreamer.framework -r
+
+# Need this trick so gst-plugin-scanner works with relocated libs
+(cd ${DEST} && ln -sf ../../../../ Versions/Current/libexec/Frameworks)
+
+osxrelocator -r ${DEST} /Library/Frameworks/GStreamer.framework @executable_path/../Frameworks/GStreamer.framework
+
+install_name_tool -id @executable_path/../Frameworks/GStreamer.framework/GStreamer ${DEST}/Versions/Current/GStreamer

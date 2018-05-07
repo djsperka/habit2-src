@@ -21,7 +21,7 @@ public:
     HabituationSettings(const HabituationSettings& settings);
     HabituationSettings& operator=(const HabituationSettings& rhs);
     ~HabituationSettings();
-    HabituationSettings clone();
+    HabituationSettings clone() const;
 
 public:
 	int getId() const;
@@ -35,18 +35,22 @@ public:
     void setCriterionSettings(Habit::CriterionSettings criterionsettings);
 	int getTotalLookLengthToEnd() const;
 	void setTotalLookLengthToEnd(int length);
-	void loadFromDB(size_t id);
-	bool saveToDB(size_t id_);
+	void loadFromDB(int phaseId);	// can throw HDBException
+	void saveToDB(int phaseId);		// can throw HDBException
+	int getNTrials() const { return ntrials_; };
+	void setNTrials(int n) { ntrials_ = n; };
 
 private:
 	int id_;
 	int lookTime_;
 	const HHabituationType* phtype_;
+	int ntrials_;
 	CriterionSettings criterionsettings_;
 };
 
 QDataStream & operator<< (QDataStream& stream, Habit::HabituationSettings d);
 QDataStream & operator>> (QDataStream& stream, Habit::HabituationSettings& d);
+QDebug operator<<(QDebug dbg, const HabituationSettings& settings);
 bool operator==(const Habit::HabituationSettings& lhs, const Habit::HabituationSettings& rhs);
 
 } // namespace Habit

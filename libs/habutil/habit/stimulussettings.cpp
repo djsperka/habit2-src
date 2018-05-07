@@ -5,10 +5,9 @@ using namespace Habit;
 // version string for input/output. See operator<<, operator>>
 static const QString f_sVersion2("SIV2");
 
-StimulusSettings::StimulusSettings(const QString& name, const HStimContext& context) 
+StimulusSettings::StimulusSettings()
 : id_(-1)
-, name_(name)
-, pcontext_(&context)
+, name_("")
 {};
 
 StimulusSettings::StimulusSettings(const StimulusSettings& s)
@@ -18,8 +17,17 @@ StimulusSettings::StimulusSettings(const StimulusSettings& s)
 , centerStimulusInfo_(s.getCenterStimulusInfo())
 , rightStimulusInfo_(s.getRightStimulusInfo())
 , independentSoundInfo_(s.getIndependentSoundInfo())
-, pcontext_(s.getContext())
 {};
+
+StimulusSettings::StimulusSettings(const QString& name, const QColor& color)
+:id_(-1)
+, name_(name)
+{
+	leftStimulusInfo_ = Habit::StimulusInfo(color);
+	centerStimulusInfo_ = Habit::StimulusInfo(color);
+	rightStimulusInfo_ = Habit::StimulusInfo(color);
+}
+
 
 StimulusSettings& StimulusSettings::operator=(const StimulusSettings& rhs)
 {
@@ -31,7 +39,6 @@ StimulusSettings& StimulusSettings::operator=(const StimulusSettings& rhs)
 		setCenterStimulusInfo(rhs.getCenterStimulusInfo());
 		setRightStimulusInfo(rhs.getRightStimulusInfo());
 		setIndependentSoundInfo(rhs.getIndependentSoundInfo());
-		setContext(*rhs.getContext());
 	}
 	return *this;
 }
@@ -129,16 +136,6 @@ void Habit::StimulusSettings::setIndependentSoundInfo(const StimulusInfo& indepe
     independentSoundInfo_ = independentSoundInfo;
 }
 
-const HStimContext* StimulusSettings::getContext() const
-{
-	return pcontext_;
-}
-
-void StimulusSettings::setContext(const HStimContext& context)
-{
-	pcontext_ = &context;
-}
-
 void StimulusSettings::setStimulusInfo(const StimulusInfo& info, const HPlayerPositionType& position)
 {
 	if (position == HPlayerPositionType::Left)
@@ -161,12 +158,13 @@ QDataStream & Habit::operator<< (QDataStream& stream, StimulusSettings settings)
 	// 3-11-2015, write version number to stream. Layout of StimulusInfo has changed - this will
 	// keep the loading of old results from breaking.
 
+	// 4-19-2016, no longer using context, but write a dummy value anyways.
+
 	stream << f_sVersion2 << settings.getId() << settings.getName() <<
 			settings.getLeftStimulusInfo() <<
 			settings.getCenterStimulusInfo() <<
 			settings.getRightStimulusInfo() <<
-			settings.getIndependentSoundInfo() <<
-			settings.getContext()->number();
+			settings.getIndependentSoundInfo() << (int)0;
 	return stream;
 }
 
@@ -206,7 +204,7 @@ QDataStream & Habit::operator>> (QDataStream& stream, StimulusSettings& settings
 	settings.setCenterStimulusInfo(centerStimulusInfo);
 	settings.setRightStimulusInfo(rightStimulusInfo);
 	settings.setIndependentSoundInfo(independentSoundInfo);
-	settings.setContext(getStimContext(icontext));
+	//settings.setContext(getStimContext(icontext));
 	return stream;
 
 }
@@ -223,7 +221,7 @@ QTextStream & operator>> (QTextStream& stream, StimulusSettings& settings)
 
 QDebug Habit::operator<<(QDebug dbg, const StimulusSettings& ss)
 {
-	dbg.nospace() << "StimulusSettings: Name " << ss.getName() << " id " << ss.getId() << " type " << ss.getContext()->name();
+	dbg.nospace() << "StimulusSettings: Name " << ss.getName() << " id " << ss.getId() << endl;
 	dbg.nospace() << "Left " << ss.getLeftStimulusInfo();
 	dbg.nospace() << "Center " << ss.getCenterStimulusInfo();
 	dbg.nospace() << "Right " << ss.getRightStimulusInfo();
@@ -242,11 +240,14 @@ bool Habit::operator==(const Habit::StimulusSettings& lhs, const Habit::Stimulus
 	bright = (lhs.rightStimulusInfo_ == rhs.rightStimulusInfo_);
 	bsound = (lhs.independentSoundInfo_ == rhs.independentSoundInfo_);
 	
-	bother = (lhs.id_ == rhs.id_ &&	lhs.name_ == rhs.name_ && *lhs.getContext() == *rhs.getContext());
+	bother = (lhs.id_ == rhs.id_ &&	lhs.name_ == rhs.name_);
 
 	return bleft && bcenter && bright && bsound && bother;
 }
 
-
+bool Habit::operator!=(const Habit::StimulusSettings& lhs, const Habit::StimulusSettings& rhs)
+{
+	return !(lhs == rhs);
+}
 
 

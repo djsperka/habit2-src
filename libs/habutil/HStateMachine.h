@@ -11,6 +11,7 @@
 #define _HSTATE_MACHINE_H
 
 #include <QStateMachine>
+#include <QtDebug>
 #include "HExperiment.h"
 
 class HStateMachine: public QStateMachine
@@ -20,8 +21,8 @@ class HStateMachine: public QStateMachine
 	const HExperiment& m_expt;
 	public:
 
-	HStateMachine(const HExperiment& expt): QStateMachine(), m_expt(expt) {};
-	~HStateMachine() {}
+	HStateMachine(const HExperiment &expt);
+	~HStateMachine();
 	const HExperiment& experiment() const { return m_expt; };
 };
 

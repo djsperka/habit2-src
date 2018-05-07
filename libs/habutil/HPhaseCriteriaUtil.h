@@ -13,4 +13,4 @@
 #include <QtDebug>
 #include <QtGlobal>
 
-HPhaseCriteria* createPhaseCriteria(const Habit::HabituationSettings& habsettings, int ntrials);
+HPhaseCriteria* createPhaseCriteria(const Habit::HabituationSettings& habsettings);

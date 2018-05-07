@@ -16,6 +16,7 @@
 //#include "resultviewersettings.h"
 #include "HLookSettings.h"
 #include "HStimulusOrder.h"
+#include "HDBException.h"
 
 #include <QtCore/QVector>
 #include <QtCore/QStringList>
@@ -23,6 +24,7 @@
 class ExperimentSettings;
 class QString;
 class QSqlQuery;
+class QSqlRecord;
 
 namespace Habit {
 
@@ -31,8 +33,6 @@ class MainDao
 public:
 	MainDao();
 	~MainDao();
-	void getExperimentSettingsByName(ExperimentSettings*);
-	void getExperimentNameById(ExperimentSettings*);
 
 	// does experiment with name exist? If it does, set id to experiment id from db.
 	bool experimentExists(const QString& name, int& id);
@@ -40,23 +40,29 @@ public:
 	// does an experiment with id exist?
 	bool experimentExists(int id);
 
-	void insertExperiment(const QString& name);
-	int getExperimentId(const QString& name);
-	bool updateExperimentName(const QString& oldName, const QString& newName);
-	QString getExperimentNameById(int id);
-	ExperimentSettings getExperimentSettingsById(int id);
-	QVector<ExperimentSettings> getAllExperiments();
-	QStringList getAllExperimentNames(bool includeHidden = false);
+	void updateExperimentName(const QString& oldName, const QString& newName);
+	QStringList getExperimentNames(bool includeExperiments = true, bool includeTemplates = false);
 
-	void getMonitorSettingsForExperiment(size_t id, MonitorSettings* monitorSettings);
-	void getControlBarOptionsForExperiment(size_t id, ControlBarOptions* controlBarOptions);
-	void getHabituationSettingsForExperiment( size_t id, HabituationSettings* habituationSettings);
-	void getStimulusDisplayInfoForExperiment(size_t id, StimulusDisplayInfo* stimulusDisplayInfo);
-	void getAttentionGetterSettingsForExperiment( size_t id, AttentionGetterSettings* attentionGetter);
+
+	// djs Clean up interface for fetching experiments. These return false when the id/name not found.
+	void getExperimentName(int id, QString& name);			// can throw HDBException
+	void getExperimentID(const QString& name, int& id);		// can throw HDBException
+
+
+	void getControlBarOptionsForExperiment(int expID, ControlBarOptions& controlBarOptions);	// can throw HDBException
+	void getHabituationSettingsForPhase(int phaseId, HabituationSettings& habituationSettings);
+	void getStimulusDisplayInfoForExperiment(int experimentID, StimulusDisplayInfo& stimulusDisplayInfo);
 	Habit::StimulusSettings getAttentionGetterStimulusSettings(int attentionGetterId);
-	void getHLookSettingsForExperiment(int id, HLookSettings* lookSettings);
-	void getHPhaseSettingsForExperiment(int id, int type, HPhaseSettings* phaseSettings);
+	void getHLookSettingsForExperiment(int experimentID, HLookSettings& lookSettings);
+	void getHPhaseSettingsIDs(int experimentID, QList<int>& ids);
+	void getHPhaseSettings(int phaseId, HPhaseSettings& phaseSettings);
+	QString getHPhaseName(int phaseId);
 
+	/*
+	 * Get a bunch of ids
+	 */
+	QList<QVariant> getColumnValuesFromTable(const QString& tableName, const QString& column, const QString& key = QString(), const QVariant& keyValue = QVariant());
+	void getListFromTable(const QString& table, const QString& key, int id, const QString& column, QList<int>& list);
 
 	/*
 	 * These are OLD methods for handling StimuliSettings, StimulusSettings
@@ -71,64 +77,40 @@ public:
 	StimuliSettings getStimuliSettings(const QString& table_name, int experiment_id, const HStimContext& context);
 	StimuliSettings getStimuliSettings(const QString& table_name, const QString& experiment, const HStimContext& context);
 
-	StimulusSettings getStimulusSettings(const QSqlQuery& q);
-	bool deleteStimulus(const QString& table_name, int id);
-
-
 	/*
 	 * These are NEW methods for handling StimuliSettings, StimulusSettings
 	 */
 
-	StimuliSettings getStimuliSettings(int experiment_id, const HStimContext& context);
-	bool getStimulusSettings(StimulusSettings& settings, int stimulus_id);
-	bool deleteStimulus(int stimulus_id);
-	bool addOrUpdateStimuliSettings(int experimentId, Habit::StimuliSettings& settings);
-	bool addOrUpdateStimulusSettings(int experiment_id, Habit::StimulusSettings& ss);
-	bool addOrUpdateStimulusInfo(int stimulus_id, const HPlayerPositionType& position, StimulusInfo& info);
+	void getStimuliSettings(int phase_id, StimuliSettings& settings);
 
-	void getAttentionGetterSettings(int experimentId, AttentionGetterSettings* attentionGetter);
-	bool addOrUpdateAttentionGetterSetting(int experimentId, Habit::AttentionGetterSettings* settings);
+	// will set Id and Name in this method. Previous value(s) are overwritten.
+	void getStimulusSettings(int stimulus_id, StimulusSettings& settings);
+	void addOrUpdateStimuliSettings(int phase_id, Habit::StimuliSettings& settings);
+	void addOrUpdateStimulusSettings(int phaseID, Habit::StimulusSettings& ss);
+	void addOrUpdateStimulusInfo(int stimulus_id, const HPlayerPositionType& position, StimulusInfo& info);
 
-
-#if 0
-	bool addOrUpdateStimuliSetting(size_t experimentId, Habit::StimuliSettings* settings);
-	bool addOrUpdateStimulusSetting(int parentId, Habit::StimulusSettings& ss, const QString& tableName, const QString& parentKeyName);
-#endif
+	void getAttentionGetterSettings(int experimentId, AttentionGetterSettings& attentionGetterSettings);	// can throw HDBException
+	void addOrUpdateAttentionGetterSettings(int experimentId, Habit::AttentionGetterSettings& settings);		// can throw HDBException
 
 	/* Get HStimulusOrder from the results of a query */
 	HStimulusOrder getStimulusOrder(const QSqlQuery& q);
+	void getStimulusOrderFromRecord(const QSqlRecord& r, Habit::HStimulusOrder& order);
 
-	/* Delete the StimulusOrder with given id */
-	bool deleteOrder(int id);
+	/* Delete stuff */
+	void deleteStimulus(int stimulus_id);	// can throw HDBException
+	void deleteOrder(int id);	// can throw HDBException
+	void deleteExperiment(Habit::ExperimentSettings& experimentSettings);
+	void deletePhase(int id);
+	void deleteFromTable(const QString table, const QString key, int id);
+	void deleteFromTable(const QString table, const QString key, const QList<int>& ids);
 
-	bool insertOrUpdateExperimentSettings(Habit::ExperimentSettings* experimentSettings);
-	bool deleteExperimentSettings(Habit::ExperimentSettings* experimentSettings);
-	bool addOrUpdateHLookSettings(int experimentId, Habit::HLookSettings* settings);
-	bool addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings* settings);
-	bool addOrUpdateMonitorSetting(int experimentId, Habit::MonitorSettings* settings);
-	bool addOrUpdateControlBarOption(size_t experimentId, Habit::ControlBarOptions* settings);
-	bool addOrUpdateHabituationSetting(size_t experimentId, Habit::HabituationSettings* settings);
-
-
-	bool addOrUpdateStimulusOrder(int parentId, Habit::HStimulusOrder& order);
-	bool addOrUpdateStimulusDisplaySetting(size_t experimentId, Habit::StimulusDisplayInfo* settings);
-
-#ifdef USE_SUBJECT_TABLES
-	QStringList getAllSubjectsNames();
-	void insertSubject(Habit::SubjectSettings*  subjectSettings_);
-	void updateSubject(const Habit::SubjectSettings& subjectSettings);
-	bool isSubjectUnique(const Habit::SubjectSettings& subjectSettings_);
-	Habit::SubjectSettings getSubjectSettings(const QString& subj);
-	Habit::SubjectSettings getSubjectSettings(int id);
-	void insertRunSettings(Habit::RunSettings* runSettings);
-	void updateRunSettings(const Habit::RunSettings& runSettings);
-	Habit::RunSettings getRunSettingsBySubject(const Habit::SubjectSettings& subjectSettings);
-	void addOrUpdateConfigObject(const Habit::ResultViewerSettings& config);
-	Habit::ResultViewerSettings getResultViewerOptions();
-#endif
-
-private:
-	bool deleteFromTable(const QString table, const QString key, int id);
+	void addOrUpdateExperimentSettings(Habit::ExperimentSettings& experimentSettings);	// can throw HDBException
+	void addOrUpdateHLookSettings(int experimentID, Habit::HLookSettings& settings);
+	void addOrUpdateHPhaseSettings(int experimentId, Habit::HPhaseSettings& phaseSettings);
+	void addOrUpdateControlBarOptions(int experimentId, Habit::ControlBarOptions& controlBarOptions);	// can throw HDBException
+	void addOrUpdateHabituationSettings(int phaseID, Habit::HabituationSettings& habituationSettings);
+	void addOrUpdateStimulusOrder(int parentId, Habit::HStimulusOrder& order);
+	void addOrUpdateStimulusDisplayInfo(int experimentId, Habit::StimulusDisplayInfo& stimulusDisplayInfo);
 };
 
 } // namespace Habit 

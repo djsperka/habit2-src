@@ -1,0 +1,22 @@
+habit-deploy-fixup
+ Created on: Oct 30, 2017
+     Author: dan
+
+     
+     
+     compiled video sink widget from qt-gstreamer has hard-coded RPATH - fix it
+     
+     install_name_tool -rpath /Users/dan/Qt/5.9.1/clang_64/lib @loader_path/../Frameworks libgstqt5videosink.so 
+     
+     *** copy libgstqt5videosink.so to habit.app/Contents/Gstreamer before running macdeployqt -dmg
+     
+     This plugin also needs some qt frameworks that macdeployqt does not pull in. 
+     
+     cd habit.app/Contents/Frameworks
+     cp -R ~/Qt/5.9.1/clang_64/lib/QtNetwork.framework .
+     cp -R ~/Qt/5.9.1/clang_64/lib/QtOpenGL.framework .
+     cp -R ~/Qt/5.9.1/clang_64/lib/QtQml.framework .
+     cp -R ~/Qt/5.9.1/clang_64/lib/Qt.framework .
+     
+     
+     After these things done, then run macdeployqt -dmg

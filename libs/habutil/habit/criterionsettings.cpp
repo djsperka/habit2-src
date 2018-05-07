@@ -94,6 +94,13 @@ bool Habit::operator==(const Habit::CriterionSettings& lhs, const Habit::Criteri
 			(!lhs.getRequireMinBasisValue() || (lhs.getRequireMinBasisValue() && lhs.getMinBasisValue() == rhs.getMinBasisValue())));
 }
 
+QDebug Habit::operator<<(QDebug dbg, const CriterionSettings& settings)
+{
+	dbg.space() << "BasisType:" << settings.getBasis().name() << "Percent:" << settings.getPercent() << "WdwSize:" << settings.getWindowSize() << "WdwType:" << settings.getWindowType().name() << "ExcludeBasisWdw?" << settings.getExcludeBasisWindow() << "ReqMinBasis?(t)" << settings.getRequireMinBasisValue() << settings.getMinBasisValue();
+	return dbg.space();
+}
+
+
 
 const HCriterionBasisType& Habit::CriterionSettings::getBasis() const 
 { 

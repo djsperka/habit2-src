@@ -26,7 +26,7 @@ namespace GUILib
 		Q_OBJECT
 
 	public:
-		HStimulusOrderSelectionWidget(const Habit::StimuliSettings& s, QWidget *parent=0);
+		HStimulusOrderSelectionWidget(const Habit::StimuliSettings& s, const QString& phaseName, int seqno, QWidget *parent=0);
 		virtual ~HStimulusOrderSelectionWidget();
 
 		const HRandomizationType& getRandomizationType();
@@ -39,13 +39,12 @@ namespace GUILib
 
 		Ui::HStimulusOrderSelectionForm *ui;
 		GUILib::HStimulusOrderListModel* m_pmodel;
-		const HStimContext& m_stimContext;
 		Habit::HStimulusSettingsList m_ssList;
 		Habit::HStimulusOrderList m_orderList;
-
-		void initialize();
+		int m_seqno;							// this is used as key passed with orderChosen() signal
+		void initialize(const QString& phaseName);
 	signals:
-		void orderChosen();
+		void orderChosen(int);
 
 	private slots:
 		void updateStatusLabel();

@@ -1,4 +1,5 @@
 #include "stimulusinfo.h"
+#include <QFile>
 
 using namespace Habit;
 
@@ -36,6 +37,16 @@ StimulusInfo::StimulusInfo(const QString& filename, bool is_loop, float audio, b
 , color_(color)
 {}
 
+StimulusInfo::StimulusInfo(const QColor& color)
+: id_(-1)
+, name_(QString())
+, fileName_(QString())
+, isLoopPlayBack_(false)
+, audioBalance_(0)
+, isBackground_(true)
+, isColor_(false)
+, color_(color)
+{}
 
 StimulusInfo::StimulusInfo(const StimulusInfo& info)
 : id_(info.getId())
@@ -161,6 +172,27 @@ void StimulusInfo::setColor(const QColor& color)
 {
 	color_ = color;
 }
+
+bool StimulusInfo::isJPG() const
+{
+	if (isBackground() || isColor())
+		return false;
+	QString f = getFileName();
+	if (f.size() == 0)
+		return false;
+	return (f.endsWith("jpg", Qt::CaseInsensitive) || f.endsWith("jpeg", Qt::CaseInsensitive));
+}
+
+bool StimulusInfo::isPNG() const
+{
+	if (isBackground() || isColor())
+		return false;
+	QString f = getFileName();
+	if (f.size() == 0)
+		return false;
+	return f.endsWith("png", Qt::CaseInsensitive);
+}
+
 
 QDataStream & Habit::operator << (QDataStream& stream, const StimulusInfo& settings)
 {

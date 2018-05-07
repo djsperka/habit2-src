@@ -29,6 +29,7 @@
 class HEventType
 {
 public:
+	static const HEventType HEventPhaseStartOldFormat;
 	static const HEventType HEventPhaseStart;
 	static const HEventType HEventPhaseEnd;
 	static const HEventType HEventTrialStart;
@@ -41,6 +42,7 @@ public:
 	static const HEventType HEventStimStart;
 	static const HEventType HEventStimEnd;
 	static const HEventType HEventStimulusSettings;
+	static const HEventType HEventStimulusOrderOldFormat;
 	static const HEventType HEventStimulusOrder;
 	static const HEventType HEventStimulusInfo;
 	static const HEventType HEventAttention;
@@ -62,7 +64,7 @@ public:
 	static const HEventType HEventIncompleteLook;
 
 	// undefined event not in A[]
-	static const HEventType* A[30];
+	static const HEventType* A[32];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }
@@ -160,7 +162,7 @@ public:
 	virtual HEvent* clone(int timestamp = 0) const = 0;
 
 	// We will have to read without an overloaded >>. I think this isn't possible with a pure virtual base class.
-	// Should return NULL on failure. May throw exception....TODO handle this
+	// Should return NULL on failure.
 	static HEvent* getEvent(QDataStream& stream);
 
 private:
@@ -175,24 +177,27 @@ QDataStream& operator<<(QDataStream& out, const HEvent& e);
 class HPhaseStartEvent: public HEvent
 {
 public:
-	HPhaseStartEvent(const HPhaseType& type, int timestamp = 0) 
+	HPhaseStartEvent(const QString& name, int seqno, int timestamp = 0)
 	: HEvent(HEventType::HEventPhaseStart, timestamp)
-	, m_pphasetype(&type)
+	, m_phasename(name)
+	, m_seqno(seqno)
 	{};
 
 	HPhaseStartEvent()
 	: HEvent(HEventType::HEventPhaseStart)
-	, m_pphasetype(&HPhaseType::UnknownPhase)
+	, m_phasename(QString("Unknown"))
+	, m_seqno(-1)
 	{};
 	
 	HPhaseStartEvent(const HPhaseStartEvent& e)
 	: HEvent(e.type(), e.timestamp())
-	, m_pphasetype(&e.phasetype())
+	, m_phasename(e.phase())
+	, m_seqno(e.seqno())
 	{};
 	
 	virtual ~HPhaseStartEvent() {};
-	QString phase() const { return m_pphasetype->name(); };
-	const HPhaseType& phasetype() const { return *m_pphasetype; };
+	QString phase() const { return m_phasename; };
+	int seqno() const { return m_seqno; };
 	QString eventInfo() const;
 	
 	virtual QString eventCSVAdditional() const;		// override this to add more fields
@@ -200,15 +205,17 @@ public:
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 
 	static HPhaseStartEvent* getEvent(QDataStream& stream, int timestamp);
+	static HPhaseStartEvent* getEventOldFormat(QDataStream& stream, int timestamp);
 
 	HEvent* clone(int ts = 0) const
 	{
 		int t = (ts < 0 ? timestamp() : ts);
-		return new HPhaseStartEvent(phasetype(), t);
+		return new HPhaseStartEvent(m_phasename, t);
 	};
 
 private:
-	const HPhaseType* m_pphasetype;
+	QString m_phasename;
+	int m_seqno;
 };
 
 class HPhaseEndEvent: public HEvent
@@ -529,7 +536,6 @@ private:
 	int m_playerid;
 };
 
-// TODO: how do you pass the settings arg as a ref? 
 class HStimulusSettingsEvent: public HEvent
 {
 public:
@@ -568,27 +574,26 @@ private:
 class HStimulusOrderEvent: public HEvent
 {
 public:
-	HStimulusOrderEvent(const HPhaseType& type, const QList<unsigned int>& list, int timestamp = 0)
+	HStimulusOrderEvent(const QString& name, const QList<unsigned int>& list, int timestamp = 0)
 	: HEvent(HEventType::HEventStimulusOrder, timestamp)
-	, m_pphasetype(&type)
+	, m_phasename(name)
 	, m_list(list)
 	{};
 
 	HStimulusOrderEvent()
 	: HEvent(HEventType::HEventStimulusOrder)
-	, m_pphasetype(&HPhaseType::UnknownPhase)
+	, m_phasename(QString("Unknown"))
 	, m_list()
 	{};
 
 	HStimulusOrderEvent(const HStimulusOrderEvent& e)
 	: HEvent(e.type(), e.timestamp())
-	, m_pphasetype(&e.phasetype())
+	, m_phasename(e.phase())
 	, m_list(e.list())
 	{};
 
 	virtual ~HStimulusOrderEvent() {};
-	QString phase() const { return m_pphasetype->name(); };
-	const HPhaseType& phasetype() const { return *m_pphasetype; };
+	QString phase() const { return m_phasename; };
 	const QList<unsigned int>& list() const { return m_list; };
 	QString listToString() const;
 	QString eventInfo() const;
@@ -597,16 +602,17 @@ public:
 
 	virtual QDataStream& putAdditional(QDataStream& stream) const;
 
+	static HStimulusOrderEvent* getEventOldFormat(QDataStream& stream, int timestamp);
 	static HStimulusOrderEvent* getEvent(QDataStream& stream, int timestamp);
 
 	HEvent* clone(int ts = 0) const
 	{
 		int t = (ts < 0 ? timestamp() : ts);
-		return new HStimulusOrderEvent(phasetype(), list(), t);
+		return new HStimulusOrderEvent(phase(), list(), t);
 	};
 
 private:
-	const HPhaseType* m_pphasetype;
+	QString m_phasename;
 	QList<unsigned int> m_list;
 };
 

@@ -7,11 +7,12 @@
  *
  */
 
-#include "HMediaManager.h"
+#include "HGMM.h"
 #include "experimentsettings.h"
 #include "stimulussettings.h"
+#include "stimulusdisplayinfo.h"
 #include <QVector>
-
+#include <QWidget>
 
 // Will create players and add stimuli to them based on the experiment settings. It is assumed that the 
 // experiment settings have been fully loaded from the db - loadFromDB is NOT called in this function. 
@@ -21,4 +22,8 @@
 // Position 0 in the players is reserved for the attention getter (even if there is no attention getter
 // used this position is filled with a background stimulus). 
 
-HMediaManager* createMediaManager(const Habit::ExperimentSettings& es);
+HGMM* createMediaManager(const Habit::ExperimentSettings& es, int screenWidth, int screenHeight);
+HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth, int screenHeight);
+HGMM* createMediaManager(const Habit::ExperimentSettings& es);
+
+

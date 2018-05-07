@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# inkscape wants full paths to files. It uses its location as its CWD
+# output in current folder
+#
+# generate_icons /full/path/to/habit2.svg
+INFILE=`pwd`/habit2.svg
+mkdir -p icns
+OUTDIR=`pwd`/icns
+
+# 512 points
+inkscape -z --file=${INFILE}  --export-area-page --export-width=512 --export-height=512 --export-png=${OUTDIR}/icon_512x512.png
+inkscape -z --file=${INFILE}  --export-area-page --export-width=1024 --export-height=1024 --export-png=${OUTDIR}/icon_512x512@2x.png
+
+# 256 points
+inkscape -z --file=${INFILE}  --export-area-page --export-width=256 --export-height=256 --export-png=${OUTDIR}/icon_256x256.png
+inkscape -z --file=${INFILE}  --export-area-page --export-width=512 --export-height=512 --export-png=${OUTDIR}/icon_256x256@2x.png
+
+# 128 points
+inkscape -z --file=${INFILE}  --export-area-page --export-width=128 --export-height=128 --export-png=${OUTDIR}/icon_128x128.png
+inkscape -z --file=${INFILE}  --export-area-page --export-width=256 --export-height=256 --export-png=${OUTDIR}/icon_128x128@2x.png
+
+# 32 points
+inkscape -z --file=${INFILE}  --export-area-page --export-width=32 --export-height=32 --export-png=${OUTDIR}/icon_32x32.png
+inkscape -z --file=${INFILE}  --export-area-page --export-width=64 --export-height=64 --export-png=${OUTDIR}/icon_32x32@2x.png
+
+# 16 points
+inkscape -z --file=${INFILE}  --export-area-page --export-width=16 --export-height=16 --export-png=${OUTDIR}/icon_16x16.png
+inkscape -z --file=${INFILE}  --export-area-page --export-width=32 --export-height=32 --export-png=${OUTDIR}/icon_16x16@2x.png

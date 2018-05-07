@@ -22,7 +22,6 @@ namespace GUILib
 	private:
 		Habit::HStimulusOrderList& m_list;
 		const Habit::HStimulusSettingsList& m_ssList;
-		const HStimContext* m_pcontext;
 		const HStimulusLayoutType* m_playoutType;
 		HStimulusOrderListModel *m_pmodel;
 		QListView *m_pListView;
@@ -34,7 +33,7 @@ namespace GUILib
 		void connections();
 		void editItem(const QModelIndex& index);
 	public:
-		HStimulusOrderListWidget(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList, const HStimContext& context = HStimContext::UnknownContext, const HStimulusLayoutType& layoutType = HStimulusLayoutType::HStimulusLayoutSingle, QWidget *parent=NULL);
+		HStimulusOrderListWidget(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList, const HStimulusLayoutType& layoutType = HStimulusLayoutType::HStimulusLayoutSingle, QWidget *parent=NULL);
 		virtual ~HStimulusOrderListWidget() { delete m_pmodel;};
 		void append(const Habit::HStimulusOrderList& list);
 		void append(const Habit::HStimulusOrder& order);

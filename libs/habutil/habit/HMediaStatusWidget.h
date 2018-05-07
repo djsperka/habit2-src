@@ -9,7 +9,7 @@
 #define HMEDIASTATUSWIDGET_H_
 
 #include "HTypes.h"
-#include "HMediaManager.h"
+#include "HGMM.h"
 #include <QWidget>
 
 namespace Ui
@@ -28,7 +28,7 @@ namespace GUILib
 		HMediaStatusWidget(const HStimulusLayoutType& layout, bool bDisplayStimulusInfo=false, QWidget* parent = NULL);
 		virtual ~HMediaStatusWidget();
 
-		void setMediaManager(const HMediaManager* pmm);
+		void setMediaManager(const HGMM* pmm);
 
 	private:
 		// hide this?
@@ -50,7 +50,7 @@ namespace GUILib
 		// display stim image on status widget
 		void setStatusStim(const Habit::StimulusSettings& settings);
 
-		const HMediaManager* m_pMediaManager;
+		const HGMM* m_pMediaManager;
 		const HStimulusLayoutType& m_layout;
 		bool m_bDisplayStimulusInfo;
 		Ui::HMediaStatusForm *ui;

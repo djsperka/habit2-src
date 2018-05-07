@@ -14,23 +14,18 @@
 #include <QDebug>
 #include <QStringList>
 
-/// Common namespace for all entities of the Habit
 namespace Habit
 {
-   
-	/// Stores the list of the stimulus settings.
 	class StimuliSettings
 	{
 	public:
-		StimuliSettings(const HStimContext& context);
+		StimuliSettings();
 		StimuliSettings(const StimuliSettings& s);
 		~StimuliSettings();
 		StimuliSettings& operator=(const StimuliSettings& rhs);
-		StimuliSettings clone();
+		StimuliSettings clone() const;
 
 	public:
-		const HStimContext& getStimContext() const;
-		void setStimContext(const HStimContext& context);
 		HStimulusSettingsList& stimuli();
 		const HStimulusSettingsList& stimuli() const;
 		void setStimuli(const HStimulusSettingsList& basis);
@@ -39,8 +34,8 @@ namespace Habit
 		void addOrder(const HStimulusOrder& order);
 		HStimulusOrderList& orders();
 		const HStimulusOrderList& orders() const;
-		void loadFromDB(int experimentId);
-		bool saveToDB(size_t id_);
+		void loadFromDB(int phaseId);
+		void saveToDB(int phaseId);
 
 		QStringList getStimulusNames() const;
 		QStringList getOrderNames() const;
@@ -49,7 +44,6 @@ namespace Habit
 	private:
 		HStimulusSettingsList ssList_;
 		HStimulusOrderList soList_;
-		const HStimContext* pcontext_;
 	};
 
 	QDebug operator<<(QDebug dbg, const StimuliSettings& ss);

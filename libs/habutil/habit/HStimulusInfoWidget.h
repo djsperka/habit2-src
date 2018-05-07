@@ -11,6 +11,8 @@
 #include "stimulusinfo.h"
 #include <QWidget>
 #include <QDir>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 
 namespace Ui
 {
@@ -25,7 +27,7 @@ namespace GUILib
 		Q_OBJECT
 
 	public:
-		HStimulusInfoWidget(const Habit::StimulusInfo& info, const QString& label, QWidget *parent=0, QDir dir = QDir());
+		HStimulusInfoWidget(const Habit::StimulusInfo& info, const QString& label, QWidget *parent=0, bool isVideoImage = true);
 		virtual ~HStimulusInfoWidget();
 
 		// set m_info= info and initialize.
@@ -45,6 +47,11 @@ namespace GUILib
 		Habit::StimulusInfo m_info;
 		QString m_label;
 		QDir m_rootDir;
+		bool m_bIsVideoImage;
+
+	protected:
+//		void dragEnterEvent(QDragEnterEvent *event);
+//		void dropEvent(QDropEvent * event);
 
 	signals:
 		void stimulusInfoChanged();

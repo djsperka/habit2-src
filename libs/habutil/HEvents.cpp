@@ -15,7 +15,7 @@
  * Constants for event types and trial end types 
  */
  
-const HEventType HEventType::HEventPhaseStart(0, "PhaseStart");
+const HEventType HEventType::HEventPhaseStartOldFormat(0, "PhaseStart");
 const HEventType HEventType::HEventPhaseEnd(1, "PhaseEnd");
 const HEventType HEventType::HEventTrialStart(2, "TrialStart");
 const HEventType HEventType::HEventTrialEnd(3, "TrialEnd");
@@ -40,17 +40,19 @@ const HEventType HEventType::HEventLookEnabled(21, "LookEnabled");
 const HEventType HEventType::HEventAGLookEnabled(22, "AGLookEnabled");
 const HEventType HEventType::HEventLookDisabled(23, "LookDisabled");
 const HEventType HEventType::HEventScreenStart(24, "ScreenStart");
-const HEventType HEventType::HEventStimulusOrder(25, "StimulusOrder");
+const HEventType HEventType::HEventStimulusOrderOldFormat(25, "StimulusOrder");
 const HEventType HEventType::HEventTrialAbort(26, "TrialAborted");
 const HEventType HEventType::HEventExperimentQuit(27, "ExperimentQuit");
 const HEventType HEventType::HEventStimLabelRequest(28, "StimLabelRequest");
 const HEventType HEventType::HEventIncompleteLook(29, "IncompleteLook");
+const HEventType HEventType::HEventPhaseStart(30, "PhaseStart");
+const HEventType HEventType::HEventStimulusOrder(31, "StimulusOrder");
 const HEventType HEventType::HEventUndefined(-1, "Undefined");
 
 // Note undefined event not in search array.
-const HEventType* HEventType::A[30] =
+const HEventType* HEventType::A[32] =
 {
-	&HEventType::HEventPhaseStart,
+	&HEventType::HEventPhaseStartOldFormat,
 	&HEventType::HEventPhaseEnd,
 	&HEventType::HEventTrialStart,
 	&HEventType::HEventTrialEnd,
@@ -75,11 +77,14 @@ const HEventType* HEventType::A[30] =
 	&HEventType::HEventAGLookEnabled,
 	&HEventType::HEventLookDisabled,
 	&HEventType::HEventScreenStart,
-	&HEventType::HEventStimulusOrder,
+	&HEventType::HEventStimulusOrderOldFormat,
 	&HEventType::HEventTrialAbort,
 	&HEventType::HEventExperimentQuit,
 	&HEventType::HEventStimLabelRequest,
-	&HEventType::HEventIncompleteLook
+	&HEventType::HEventIncompleteLook,
+	&HEventType::HEventPhaseStart,
+	&HEventType::HEventStimulusOrder
+
 };
 	
 bool operator==(const HEventType& lhs, const HEventType& rhs)
@@ -229,6 +234,10 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	{
 		pevent = HPhaseStartEvent::getEvent(stream, ts);
 	}
+	else if (etype == HEventType::HEventPhaseStartOldFormat)
+	{
+		pevent = HPhaseStartEvent::getEventOldFormat(stream, ts);
+	}
 	else if (etype == HEventType::HEventPhaseEnd)
 	{
 		pevent = HPhaseEndEvent::getEvent(stream, ts);
@@ -325,6 +334,10 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	{
 		pevent = HScreenStartEvent::getEvent(stream, ts);
 	}
+	else if (etype == HEventType::HEventStimulusOrderOldFormat)
+	{
+		pevent = HStimulusOrderEvent::getEventOldFormat(stream, ts);
+	}
 	else if (etype == HEventType::HEventStimulusOrder)
 	{
 		pevent = HStimulusOrderEvent::getEvent(stream, ts);
@@ -344,36 +357,41 @@ HEvent* HEvent::getEvent(QDataStream& stream)
 	else
 	{
 		// this is an error.
-		qCritical() << "HEvent::getEvent(): §Unknown event type (" << etype.name() << ", " << etype.number() << ")" << " event code " << n;
+		qCritical() << "HEvent::getEvent(): Unknown event type (" << etype.name() << ", " << etype.number() << ")" << " event code " << n;
 	}
 	return pevent;
 }
 
 QDataStream& HPhaseStartEvent::putAdditional(QDataStream& stream) const
 {
-	stream << phasetype().number();
+	stream << phase() << seqno();
 	return stream;
 }
 
-HPhaseStartEvent* HPhaseStartEvent::getEvent(QDataStream& stream, int timestamp)
+HPhaseStartEvent* HPhaseStartEvent::getEventOldFormat(QDataStream& stream, int timestamp)
 {
 	int n;
 	stream >> n;
 	const HPhaseType& phasetype = getPhaseType(n);
-	return new HPhaseStartEvent(phasetype, timestamp);
+	return new HPhaseStartEvent(phasetype.name(), phasetype.number(), timestamp);
 }
 
-
-
+HPhaseStartEvent* HPhaseStartEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	QString name;
+	int seqno;
+	stream >> name >> seqno;
+	return new HPhaseStartEvent(name, seqno, timestamp);
+}
 
 QString HPhaseStartEvent::eventInfo() const 
 {
-	return phase();
+	return QString("%1 (seqno %2)").arg(phase()).arg(seqno());
 };
 
 QString HPhaseStartEvent::eventCSVAdditional() const
 {
-	return phase();
+	return QString("%1,%2").arg(phase()).arg(seqno());
 };
 
 QString HPhaseEndEvent::eventInfo() const 
@@ -656,18 +674,27 @@ QString HStimulusOrderEvent::eventCSVAdditional() const
 
 QDataStream& HStimulusOrderEvent::putAdditional(QDataStream& stream) const
 {
-	stream << phasetype().number() << m_list;
+	stream << phase() << m_list;
 	return stream;
 }
 
-HStimulusOrderEvent* HStimulusOrderEvent::getEvent(QDataStream& stream, int timestamp)
+HStimulusOrderEvent* HStimulusOrderEvent::getEventOldFormat(QDataStream& stream, int timestamp)
 {
 	int n;
 	QList<unsigned int> list;
 	stream >> n >> list;
 	const HPhaseType& phasetype = getPhaseType(n);
-	return new HStimulusOrderEvent(phasetype, list, timestamp);
+	return new HStimulusOrderEvent(phasetype.name(), list, timestamp);
 }
+
+HStimulusOrderEvent* HStimulusOrderEvent::getEvent(QDataStream& stream, int timestamp)
+{
+	QString name;
+	QList<unsigned int> list;
+	stream >> name >> list;
+	return new HStimulusOrderEvent(name, list, timestamp);
+}
+
 
 QString HStimulusInfoEvent::eventInfo() const
 {

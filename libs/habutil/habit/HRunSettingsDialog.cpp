@@ -9,24 +9,26 @@
 #include "HStimulusOrderSelectionWidget.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QString>
 
 GUILib::HRunSettingsDialog::HRunSettingsDialog(const Habit::ExperimentSettings& s, bool bTestRun, QWidget* parent)
 : QDialog(parent)
 , m_exptSettings(s)
-, m_bPreTestOrderChosen(false)
-, m_bHabituationOrderChosen(false)
-, m_bTestOrderChosen(false)
 {
+	setWindowTitle(QString("Run Settings for Experiment: %1").arg(s.getName()));
 	components(bTestRun);
 	connections();
 }
 
+GUILib::HRunSettingsDialog::~HRunSettingsDialog()
+{
+	qDebug() << "GUILib::HRunSettingsDialog::~HRunSettingsDialog()";
+}
 
 QString GUILib::HRunSettingsDialog::getRunLabel() const
 {
-	QString subjectName("TEST");
-	if (!m_pSubjectSettingsWidget->isTestRun())
-		subjectName = m_pSubjectSettingsWidget->getSubjectID();
+	QString subjectName(m_pSubjectSettingsWidget->getSubjectID());
+	if (subjectName.isEmpty()) subjectName = "TEST";
 	return QString("%1_%2_%3").arg(m_exptSettings.getName()).arg(subjectName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd-hhmm"));
 }
 
@@ -47,115 +49,71 @@ Habit::RunSettings GUILib::HRunSettingsDialog::getRunSettings() const
 	settings.setExperimentId(m_exptSettings.getId());
 	settings.setSubjectId(-1);	// unused
 
-	if (m_map.contains(HStimContext::PreTestPhase.number()))
-	{
-		settings.setPretestRandomized(m_map[HStimContext::PreTestPhase.number()]->isRandomized());
-		settings.setPretestRandomizeMethod(m_map[HStimContext::PreTestPhase.number()]->getRandomizationType().number());
+	QMapIterator<int, QPair<GUILib::HStimulusOrderSelectionWidget*, bool> > iterator(m_map);
+	int seqno;
+	GUILib::HStimulusOrderSelectionWidget* w;
+	Habit::PhaseRunSettings prs;
+	Habit::StimLabelList list;
 
-		// determine the order to use and generate a QList<int>
-		QList<QPair<int, QString> > list;
-		if (m_map[HStimContext::PreTestPhase.number()]->isDefaultOrder())
+	while (iterator.hasNext())
+	{
+		iterator.next();
+		seqno = iterator.key();
+		w = iterator.value().first;
+		prs.setOrderRandomized(w->isRandomized());
+		prs.setRandomizeMethod(w->getRandomizationType().number());
+		if (w->isDefaultOrder())
 		{
-			int nstim = m_exptSettings.getPreTestStimuliSettings().stimuli().size();
+			Q_ASSERT(m_exptSettings.phaseExists(seqno) >= 0);
+			int nstim = m_exptSettings.phaseAt(m_exptSettings.phaseExists(seqno)).stimuli().stimuli().size();
 			for (int i=0; i<nstim; i++)
 				list.append(QPair<int, QString>(i, QString()));
 		}
-		else if (m_map[HStimContext::PreTestPhase.number()]->isDefinedOrder())
+		else if (w->isDefinedOrder())
 		{
-			settings.setPretestOrderName(m_map[HStimContext::PreTestPhase.number()]->getDefinedOrderName());
-			if (!m_exptSettings.getPreTestStimuliSettings().getIndexedOrderList(m_map[HStimContext::PreTestPhase.number()]->getDefinedOrderName(), list))
+			Q_ASSERT(m_exptSettings.phaseExists(seqno) >= 0);
+			prs.setOrderName(w->getDefinedOrderName());
+			if (!m_exptSettings.phaseAt(m_exptSettings.phaseExists(seqno)).stimuli().getIndexedOrderList(w->getDefinedOrderName(), list))
 				qCritical() << 	"HRunSettingsDialog::getRunSettings(): Cannot find defined order \"" <<
-								m_map[HStimContext::PreTestPhase.number()]->getDefinedOrderName() <<
-								"\" in pretest stimuli settings!";
+								w->getDefinedOrderName() <<
+								"\" in stimuli settings for phase " << m_exptSettings.phaseAt(m_exptSettings.phaseExists(seqno)).getName() << "!";
 		}
-		settings.setPretestOrderList(list);
-	}
-
-	if (m_map.contains(HStimContext::HabituationPhase.number()))
-	{
-		settings.setHabituationRandomized(m_map[HStimContext::HabituationPhase.number()]->isRandomized());
-		settings.setHabituationRandomizeMethod(m_map[HStimContext::HabituationPhase.number()]->getRandomizationType().number());
-
-		// determine the order to use and generate a QList<int>
-		QList<QPair<int, QString> > list;
-		if (m_map[HStimContext::HabituationPhase.number()]->isDefaultOrder())
-		{
-			int nstim = m_exptSettings.getHabituationStimuliSettings().stimuli().size();
-			for (int i=0; i<nstim; i++)
-				list.append(QPair<int, QString>(i, QString()));
-		}
-		else if (m_map[HStimContext::HabituationPhase.number()]->isDefinedOrder())
-		{
-			settings.setHabituationOrderName(m_map[HStimContext::HabituationPhase.number()]->getDefinedOrderName());
-			if (!m_exptSettings.getHabituationStimuliSettings().getIndexedOrderList(m_map[HStimContext::HabituationPhase.number()]->getDefinedOrderName(), list))
-				qCritical() << 	"HRunSettingsDialog::getRunSettings(): Cannot find defined order \"" <<
-								m_map[HStimContext::HabituationPhase.number()]->getDefinedOrderName() <<
-								"\" in habituation stimuli settings!";
-		}
-		settings.setHabituationOrderList(list);
-	}
-
-	if (m_map.contains(HStimContext::TestPhase.number()))
-	{
-		settings.setTestRandomized(m_map[HStimContext::TestPhase.number()]->isRandomized());
-		settings.setTestRandomizeMethod(m_map[HStimContext::TestPhase.number()]->getRandomizationType().number());
-
-		// determine the order to use and generate a QList<int>
-		// Habit uses 1-based indexes!
-		QList<QPair<int, QString> > list;
-		if (m_map[HStimContext::TestPhase.number()]->isDefaultOrder())
-		{
-			int nstim = m_exptSettings.getTestStimuliSettings().stimuli().size();
-			for (int i=0; i<nstim; i++)
-				list.append(QPair<int, QString>(i, QString()));
-		}
-		else if (m_map[HStimContext::TestPhase.number()]->isDefinedOrder())
-		{
-			settings.setTestOrderName(m_map[HStimContext::TestPhase.number()]->getDefinedOrderName());
-			if (!m_exptSettings.getTestStimuliSettings().getIndexedOrderList(m_map[HStimContext::TestPhase.number()]->getDefinedOrderName(), list))
-				qCritical() << 	"HRunSettingsDialog::getRunSettings(): Cannot find defined order \"" <<
-								m_map[HStimContext::TestPhase.number()]->getDefinedOrderName() <<
-								"\" in test stimuli settings!";
-		}
-		settings.setTestOrderList(list);
+		prs.setOrderList(list);
+		settings.insert(seqno, prs);
 	}
 
 	return settings;
 }
 
+bool GUILib::HRunSettingsDialog::isDisplayStimInWindow() const
+{
+	return m_pRunSettingsTestingWidget->isDisplayStimInWindow();
+}
 
 void GUILib::HRunSettingsDialog::components(bool bTestRun)
 {
 	QVBoxLayout *v = new QVBoxLayout;
 
+	// testing options
+	m_pRunSettingsTestingWidget = new GUILib::HRunSettingsTestingWidget(this);
+	v->addWidget(m_pRunSettingsTestingWidget);
+
 	// subject setting widget
 	m_pSubjectSettingsWidget = new HSubjectSettingsWidget(bTestRun, this);
 	v->addWidget(m_pSubjectSettingsWidget);
 
-	// pretest?
-	if (m_exptSettings.getPreTestPhaseSettings().getIsEnabled())
+	// iterate over phases that are enabled
+	QListIterator<Habit::HPhaseSettings> iterator = m_exptSettings.phaseIterator();
+	while (iterator.hasNext())
 	{
-		GUILib::HStimulusOrderSelectionWidget* w = new HStimulusOrderSelectionWidget(m_exptSettings.getPreTestStimuliSettings(), this);
-		v->addWidget(w);
-		m_map.insert(HStimContext::PreTestPhase.number(), w);
+		const Habit::HPhaseSettings& ps = iterator.next();
+		if (ps.getIsEnabled())
+		{
+			GUILib::HStimulusOrderSelectionWidget* w = new HStimulusOrderSelectionWidget(ps.stimuli(), ps.getName(), ps.getSeqno(), this);
+			v->addWidget(w);
+			m_map.insert(ps.getSeqno(), QPair<GUILib::HStimulusOrderSelectionWidget*, bool>(w, false));
+		}
 	}
-
-	// habituation?
-	if (m_exptSettings.getHabituationPhaseSettings().getIsEnabled())
-	{
-		GUILib::HStimulusOrderSelectionWidget* w = new HStimulusOrderSelectionWidget(m_exptSettings.getHabituationStimuliSettings(), this);
-		v->addWidget(w);
-		m_map.insert(HStimContext::HabituationPhase.number(), w);
-	}
-
-	// test?
-	if (m_exptSettings.getTestPhaseSettings().getIsEnabled())
-	{
-		GUILib::HStimulusOrderSelectionWidget* w = new HStimulusOrderSelectionWidget(m_exptSettings.getTestStimuliSettings(), this);
-		v->addWidget(w);
-		m_map.insert(HStimContext::TestPhase.number(), w);
-	}
-
 
 	// buttons
 	QHBoxLayout *h = new QHBoxLayout;
@@ -178,62 +136,29 @@ void GUILib::HRunSettingsDialog::connections()
 {
 	connect(m_pbCancel, SIGNAL(clicked()), this, SLOT(reject()));
 	connect(m_pbRun, SIGNAL(clicked()), this, SLOT(accept()));
-	QMapIterator<int, GUILib::HStimulusOrderSelectionWidget*> it(m_map);
+	QMapIterator<int, QPair<GUILib::HStimulusOrderSelectionWidget*, bool> > it(m_map);
 	while (it.hasNext())
 	{
 		it.next();
-		if (it.key() == HStimContext::PreTestPhase.number())
-		{
-			connect(it.value(), SIGNAL(orderChosen()), this, SLOT(preTestOrderChosen()));
-		}
-		if (it.key() == HStimContext::HabituationPhase.number())
-		{
-			connect(it.value(), SIGNAL(orderChosen()), this, SLOT(habituationOrderChosen()));
-		}
-		if (it.key() == HStimContext::TestPhase.number())
-		{
-			connect(it.value(), SIGNAL(orderChosen()), this, SLOT(testOrderChosen()));
-		}
+		connect(it.value().first, SIGNAL(orderChosen(int)), this, SLOT(orderChosen(int)));
 	}
 }
 
-void GUILib::HRunSettingsDialog::preTestOrderChosen()
+void GUILib::HRunSettingsDialog::orderChosen(int seqno)
 {
-	m_bPreTestOrderChosen = true;
+	m_map.insert(seqno, qMakePair(m_map.value(seqno).first, true));
 	updateRunButton();
 }
 
-void GUILib::HRunSettingsDialog::habituationOrderChosen()
-{
-	m_bHabituationOrderChosen = true;
-	updateRunButton();
-}
-
-void GUILib::HRunSettingsDialog::testOrderChosen()
-{
-	m_bTestOrderChosen = true;
-	updateRunButton();
-}
 
 void GUILib::HRunSettingsDialog::updateRunButton()
 {
 	bool bEnable = true;	// enable unless we find a selection widget without an order chosen
-	QMapIterator<int, GUILib::HStimulusOrderSelectionWidget*> it(m_map);
+	QMapIterator<int, QPair<GUILib::HStimulusOrderSelectionWidget*, bool> > it(m_map);
 	while (it.hasNext())
 	{
 		it.next();
-		if (it.key() == HStimContext::PreTestPhase.number() && !m_bPreTestOrderChosen)
-		{
-			bEnable = false;
-		}
-		else if (it.key() == HStimContext::HabituationPhase.number() && !m_bHabituationOrderChosen)
-		{
-			bEnable = false;
-		}
-		else if (it.key() == HStimContext::TestPhase.number() && !m_bTestOrderChosen)
-		{
-			bEnable = false;
-		}
+		if (!it.value().second) bEnable = false;
 	}
 	m_pbRun->setEnabled(bEnable);
 }

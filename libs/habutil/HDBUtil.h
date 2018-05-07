@@ -19,5 +19,6 @@ bool openDB(const QDir& dir);
 int getDBVersion();
 bool getDBTableExists(QString name);
 bool updateDBVersion(QSqlDatabase& db, const QFileInfo& fileinfo);
+void validateDB();
 
 #endif /* HDBUTIL_H_ */

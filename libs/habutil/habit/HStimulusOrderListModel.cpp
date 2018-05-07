@@ -36,7 +36,7 @@ QVariant HStimulusOrderListModel::data(const QModelIndex & index, int role) cons
 		// Determine if the order at this index is valid (i.e. all stimuli in the
 		// order are in fact found in the stimulus settings list.
 		//qDebug() << "HStimulusOrderListModel::data(BackgroundRole) for order " << m_list[index.row()].getName();
-		QStringList allStimNames = m_ssList.names();
+		QStringList names = m_ssList.names();
 		QStringList stimNamesThisOrder(m_list[index.row()].getList());
 		//qDebug() << "allStimNames=" << allStimNames.join(" | ");
 		//qDebug() << "stimNamesThisOrder=" << stimNamesThisOrder.join(" | ");
@@ -45,8 +45,15 @@ QVariant HStimulusOrderListModel::data(const QModelIndex & index, int role) cons
 		while (b && it.hasNext())
 		{
 			QString stimLabel = it.next();
-			b = allStimNames.contains(HStimulusOrder::getStim(stimLabel));
+			b = names.contains(HStimulusOrder::getStim(stimLabel));
 			//qDebug() << "Look for " << stimLabel << " stim= " << HStimulusOrder::getStim(stimLabel) << " in stim list?  " << b;
+		}
+
+		if (!b)
+		{
+			qDebug() << "YELLOW";
+			qDebug() << "stimNames in order: " << stimNamesThisOrder;
+			qDebug() << "stim names in sslist: " << names;
 		}
 		if (!b) return QBrush(Qt::yellow);
 	}

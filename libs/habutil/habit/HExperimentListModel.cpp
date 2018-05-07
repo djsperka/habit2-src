@@ -13,7 +13,9 @@
 #include <QMessageBox>
 #include <QStringList>
 
-GUILib::HExperimentListModel::HExperimentListModel()
+GUILib::HExperimentListModel::HExperimentListModel(bool bExp, bool bTemp)
+: m_bExperiments(bExp)
+, m_bTemplates(bTemp)
 {
 	reload();
 }
@@ -21,7 +23,36 @@ GUILib::HExperimentListModel::HExperimentListModel()
 void GUILib::HExperimentListModel::reload()
 {
 	Habit::MainDao dao;
-	setStringList(dao.getAllExperimentNames());
+	setStringList(dao.getExperimentNames(m_bExperiments, m_bTemplates));
+
+	//QList<unsigned int> orderKeyList;
+	//QPair<int, QString> p;
+	QString exp;
+	int irow=0;
+	foreach(exp, stringList())
+	{
+		Habit::ExperimentSettings settings;
+		QStringList sProblems;
+		QColor color;
+		try
+		{
+			settings.loadFromDB(stringList().at(irow));
+			if (!H2MainWindow::checkExperimentSettings(settings, sProblems))
+			{
+				m_colorProblemPairList.append(CSLPair(QColor(255, 255, 224), sProblems));
+			}
+			else
+			{
+				m_colorProblemPairList.append(CSLPair(QColor(144, 238, 144), sProblems));
+			}
+		}
+		catch (const Habit::HDBException& e)
+		{
+			qCritical() << "Cannot load experiment " << stringList().at(irow) << endl << e.what();
+			m_colorProblemPairList.append(CSLPair(QColor(Qt::red), QStringList(e.what())));
+		}
+		irow++;
+	}
 }
 
 bool GUILib::HExperimentListModel::setData (const QModelIndex& index, const QVariant& value, int role)
@@ -32,7 +63,11 @@ bool GUILib::HExperimentListModel::setData (const QModelIndex& index, const QVar
 	QString exptOriginal = stringList().at(index.row());
 	QString exptNew = value.toString();
 
-	if (stringList().contains(exptNew))
+	if (exptNew == exptOriginal)
+	{
+		// do nothing, same name for same expt
+	}
+	else if (stringList().contains(exptNew))
 	{
 		QMessageBox::warning(NULL, "Change Experiment Name", "Duplicate experiment name!");
 		b = false;
@@ -40,16 +75,15 @@ bool GUILib::HExperimentListModel::setData (const QModelIndex& index, const QVar
 	else
 	{
 		// Update database
-		Habit::MainDao dao;
-		b = dao.updateExperimentName(exptOriginal, exptNew);
-		if (!b)
+		try
+		{
+			Habit::MainDao dao;
+			dao.updateExperimentName(exptOriginal, exptNew);
+			b = QStringListModel::setData(index, value, role);
+		}
+		catch (const Habit::HDBException& e)
 		{
 			QMessageBox::warning(NULL, "Change Experiment Name", QString("Cannot update experiment name: check log."));
-		}
-		else
-		{
-			// Assuming that this will emit dataChanged() signal.
-			b = QStringListModel::setData(index, value, role);
 		}
 	}
 	return b;
@@ -60,19 +94,27 @@ QVariant GUILib::HExperimentListModel::data(const QModelIndex & index, int role)
 	if (role != Qt::BackgroundRole) return QStringListModel::data(index, role);
 	else
 	{
-		// Check experiment settings and set color accordingly
-		Habit::ExperimentSettings settings;
-		QStringList sProblems;
-		if (!Habit::ExperimentSettings::load(settings, stringList().at(index.row())))
-		{
-			return QBrush(Qt::red);
-		}
-		else if (!H2MainWindow::checkExperimentSettings(settings, sProblems))
-		{
-			return QBrush(Qt::yellow);
-		}
+		return QBrush(m_colorProblemPairList.at(index.row()).first);
 	}
-	return QBrush(Qt::green);
+//		// Check experiment settings and set color accordingly
+//		Habit::ExperimentSettings settings;
+//		QStringList sProblems;
+//		try
+//		{
+//			settings.loadFromDB(stringList().at(index.row()));
+//		}
+//		catch (const Habit::HDBException& e)
+//		{
+//			qCritical() << "Cannot load experiment " << stringList().at(index.row()) << endl << e.what();
+//			return QBrush(Qt::red);
+//		}
+//
+//		if (!H2MainWindow::checkExperimentSettings(settings, sProblems))
+//		{
+//			return QBrush(Qt::yellow);
+//		}
+//	}
+//	return QBrush(Qt::green);
 }
 
 

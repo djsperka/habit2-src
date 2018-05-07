@@ -7,6 +7,9 @@
 #include <QString>
 #include <QDataStream>
 #include <QMap>
+#include <QList>
+#include <QListIterator>
+#include <QStringList>
 #include "monitorsettings.h"
 #include "controlbaroptions.h"
 #include "habituationsettings.h"
@@ -28,7 +31,7 @@ public:
     ~ExperimentSettings();
 
 public:
-	size_t getId() const;
+	int getId() const;
 	void setId(size_t id);
     QString getName() const;
     void setName(const QString& name);
@@ -42,59 +45,63 @@ public:
 
     ControlBarOptions getControlBarOptions() const;
     void setControlBarOptions(const ControlBarOptions& controlBarOptions);
-    HLookSettings getHLookSettings() const { return lookSettings_; };
-    void setHLookSettings(const HLookSettings& lookSettings) { lookSettings_ = lookSettings; };
-    HPhaseSettings getPreTestPhaseSettings() const { return pretestPhaseSettings_; };
-    void setPreTestPhaseSettings(const HPhaseSettings& settings) { pretestPhaseSettings_ = settings; };
-    HPhaseSettings getHabituationPhaseSettings() const { return habituationPhaseSettings_; };
-    void setHabituationPhaseSettings(const HPhaseSettings& settings) { habituationPhaseSettings_ = settings; };
-    HPhaseSettings getTestPhaseSettings() const { return testPhaseSettings_; };
-    void setTestPhaseSettings(const HPhaseSettings& settings) { testPhaseSettings_ = settings; };
+    HLookSettings getHLookSettings() const { return m_lookSettings; };
+    void setHLookSettings(const HLookSettings& lookSettings) { m_lookSettings = lookSettings; };
 
-    HabituationSettings getHabituationSettings() const;
-    void setHabituationSettings(const HabituationSettings& habituationSettings);
-    StimulusDisplayInfo getStimulusDisplayInfo() const;
+    const StimulusDisplayInfo& getStimulusDisplayInfo() const;
     void setStimulusDisplayInfo(const StimulusDisplayInfo& stimulusDisplayInfo);
 
     const AttentionGetterSettings& getAttentionGetterSettings() const;
     AttentionGetterSettings& getAttentionGetterSettings();
     void setAttentionGetterSettings(const AttentionGetterSettings& attentionGetterSettings);
 
-    const StimuliSettings& getPreTestStimuliSettings() const;
-    StimuliSettings& getPreTestStimuliSettings();
-    void setPreTestStimuliSettings(const StimuliSettings& preTestStimuliSettings);
+    void loadFromDB(int experimentID);		// can throw HDBException
+    void loadFromDB(const QString& name);	// can throw HDBException
 
-    const StimuliSettings& getHabituationStimuliSettings() const;
-    StimuliSettings& getHabituationStimuliSettings();
-    void setHabituationStimuliSettings(const StimuliSettings& habituationStimuliSettings);
+    void loadPhasesFromDB(int experimentID);	// can throw HDBException
 
-    const StimuliSettings& getTestStimuliSettings() const;
-    StimuliSettings& getTestStimuliSettings();
-    void setTestStimuliSettings(const StimuliSettings& testStimuliSettings);
-
-    void loadFromDB(bool byId = false);
-	bool saveToDB();
-	bool deleteFromDB();
+    void saveToDB();		// can throw HDBException
+	void deleteFromDB();
 
 	static bool load(ExperimentSettings& settings, int id);
 	static bool load(ExperimentSettings& settings, const QString& name);
 
+	// Add a phase to this experiment
+	void appendPhase(const HPhaseSettings& phase) { m_phases.append(phase); return; };
+
+	const QList<HPhaseSettings>& phases() const { return m_phases; };
+	QList<HPhaseSettings>& phases() { return m_phases; };
+	QStringList getPhaseNames() const;
+
+	void setPhases(const QList<HPhaseSettings>& phases) { m_phases = phases; };
+
+	// return true if phase with this name exists
+	int phaseExists(const QString& name) const;
+	int phaseExists(int seqno) const;
+
+	QListIterator<HPhaseSettings> phaseIterator() const { return QListIterator<HPhaseSettings>(m_phases); };
+
+	// just like QList.at(int)
+	const HPhaseSettings& phaseAt(int index) const;
+	const HPhaseSettings& phaseAt(const QString& name) const;
+
+	// just like QList::value(int)
+	HPhaseSettings phaseValue(int index);
+	HPhaseSettings phaseValue(const QString& name);
+
+	// number of phases
+	int getNumberOfPhases() const { return m_phases.size(); };
+
+
 private:
-	size_t id_;
+	int id_;
 	QString name_;
 	int hidden_;	// 0 = visible; 1=hidden; this value not saved on I/O (saved in db)
-// 11/10/2014 djs removed from experiment settings.	MonitorSettings monitorSettings_;
-	ControlBarOptions controlBarOptions_;
-	HabituationSettings habituationSettings_;
-	StimulusDisplayInfo stimulusDisplayInfo_;
-	AttentionGetterSettings attentionGetterSettings_;
-	StimuliSettings pretestStimuliSettings_;
-	StimuliSettings habituationStimuliSettings_;
-	StimuliSettings testStimuliSettings_;	
-	HLookSettings lookSettings_;
-	HPhaseSettings pretestPhaseSettings_;
-	HPhaseSettings habituationPhaseSettings_;
-	HPhaseSettings testPhaseSettings_;
+	ControlBarOptions m_controlBarOptions;
+	StimulusDisplayInfo m_stimulusDisplayInfo;
+	AttentionGetterSettings m_attentionGetterSettings;
+	HLookSettings m_lookSettings;
+	QList<HPhaseSettings> m_phases;
 };
 
 

@@ -16,23 +16,144 @@
 #include <QtDebug>
 #include <QMessageBox>
 #include <QRegExp>
+#include <QtGlobal>
+#if QT_VERSION < 0x050000
+#include <QDesktopServices>
+#endif
 
+
+
+// These are all set when habutilInitWorkspace is called
+// You can call habutilSetWorkspace and habutilCreateWorkspace, then call this to set up.
+// Once this is called, you are "in" the workspace.
+// The way this is done: We form a key using the workspace dir (with path separators replaced with % or something like that -
+// we won't use it to re-form the dir anyways.
+//
+// When this is unleashed, all existing installations will not have any of these settings. I will
+// leave the existing ones in place, and automatically create new ones for each workspace entered using those
+// values as the default.
+
+QDir f_workspaceDir;						//	"workspace"
+bool f_bWorkspaceDirOK = false;
+QDir f_stimulusRootDir;						//	"stimroot" saved value. Not used if default specified.
+bool f_stimulusRootUseDefault = false;		//	"stimroot_use_default"
+QDir f_lastVideoImageDir;					//	"lastdir/selectVideoImage"
+QDir f_lastAudioDir;						//	"lastdir/selectAudio"
+int f_iControlMonitor = -1;					//	"position/control"
+int f_iLeftMonitor = -1;					//	"position/left"
+int f_iCenterMonitor = -1;					//	"position/center"
+int f_iRightMonitor = -1;					//	"position/right"
+
+void _getWorkspaceDir()
+{
+	QSettings settings;
+	if (!settings.contains("workspace"))
+	{
+#if QT_VERSION >= 0x050000
+		QString defaultDir = QString("%1/habit").arg(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)[0]);
+#else
+		QString defaultDir = QString("%1/habit").arg(QDesktopServices::standardLocations(QDesktopServices::DocumentsLocation));
+#endif
+		f_workspaceDir.setPath(defaultDir);
+		settings.setValue("workspace", f_workspaceDir.absolutePath());
+	}
+	else
+	{
+		f_workspaceDir.setPath(settings.value("workspace").toString());
+	}
+}
+
+// Gets current workspace dir, then converts to QSettings-friendly key.
+QString _getWorkspaceKey()
+{
+	_getWorkspaceDir();
+	return QDir::toNativeSeparators(f_workspaceDir.canonicalPath()).replace(QDir::separator(), '%');
+}
+
+void _loadSettings()
+{
+	QString key = _getWorkspaceKey();	// this calls _getWorkspaceDir
+	QSettings settings;
+	if (settings.childGroups().contains(key))
+	{
+		settings.beginGroup(key);
+		qDebug() << "_loadSettings: " << key << " found";
+	}
+	else
+		qDebug() << "_loadSettings: " << key << " NOT found";
+
+	qDebug() << "All keys " << settings.allKeys();
+	qDebug() << "stimnroot " << settings.value("stimroot").toString();
+	// stim root
+	f_stimulusRootDir.setPath(settings.value("stimroot").toString());
+	f_stimulusRootUseDefault = settings.value("stimroot_use_default", false).toBool();
+	f_lastVideoImageDir.setPath(settings.value("lastdir/selectVideoImage").toString());
+	f_lastAudioDir.setPath(settings.value("lastdir/selectAudio").toString());
+	f_iControlMonitor = settings.value("position/control", -1).toInt();
+	f_iLeftMonitor = settings.value("position/left", -1).toInt();
+	f_iCenterMonitor = settings.value("position/center", -1).toInt();
+	f_iRightMonitor = settings.value("position/right", -1).toInt();
+
+	qDebug() << "_loadSettings: stimroot " << f_stimulusRootDir;
+	qDebug() << "_loadSettings: use defaiult " << f_stimulusRootUseDefault;
+	qDebug() << "_loadSettings: last vi " << f_lastVideoImageDir;
+	qDebug() << "_loadSettings: last audio " << f_lastAudioDir;
+	qDebug() << "_loadSettings: control/left/center/right " << f_iControlMonitor << "/" << f_iLeftMonitor << "/" << f_iCenterMonitor << "/" << f_iRightMonitor;
+
+	if (settings.contains(key))
+	{
+		settings.endGroup();
+	}
+}
+
+
+void _saveSettings()
+{
+	QString key = _getWorkspaceKey();
+	QSettings settings;
+	settings.beginGroup(key);
+	settings.setValue("stimroot", f_stimulusRootDir.absolutePath());
+	settings.setValue("stimroot_use_default", f_stimulusRootUseDefault);
+	settings.setValue("lastdir/selectVideoImage", f_lastVideoImageDir.absolutePath());
+	settings.setValue("lastdir/selectAudio", f_lastAudioDir.absolutePath());
+	settings.setValue("position/control", f_iControlMonitor);
+	settings.setValue("position/left", f_iLeftMonitor);
+	settings.setValue("position/center", f_iCenterMonitor);
+	settings.setValue("position/right", f_iRightMonitor);
+	settings.endGroup();
+}
+
+void _saveWorkspaceDir(const QDir& dir)
+{
+	QSettings settings;
+	settings.setValue("workspace", dir.absolutePath());
+}
+
+void habutilSaveSettings()
+{
+	_saveSettings();
+}
+
+// Test whether a directory is a valid workspace folder. Return true if it is, otherwise false.
 // A dir is a valid workspace if all of the following are true
 // 1. dir exists
-// 2. dir contains a file called "habit.sqlite"
+// 2. dir contains a file called "habit.sqlite" or "habit22.sqlite"
 // 3. dir contains a folder called "log"
 // 4. dir contains a folder called "results"
 // 5. dir contains a folder called "stim"
 
 bool habutilIsValidWorkspace(QDir dir)
 {
-	return (dir.exists() && dir.exists("habit.sqlite") && dir.exists("results") && dir.exists("log") && dir.exists("stim"));
+	qDebug() << "valid? " << dir;
+	qDebug() << dir.exists() << "/" << (dir.exists("habit.sqlite") || dir.exists("habit22.sqlite")) << "/" << dir.exists("results") << "/" << dir.exists("log") << "/" << dir.exists("stim");
+	return (dir.exists() && (dir.exists("habit.sqlite") || dir.exists("habit22.sqlite")) && dir.exists("results") && dir.exists("log") && dir.exists("stim"));
 }
 
 
 // Create a new workspace in the dir 'dir'.
-
-bool habutilCreateWorkspace(QDir& dir)
+// Returns false if a workspace already exists in this location, so better to call
+// habutilIsValidWorkspace first.
+bool habutilCreateWorkspace(const QDir& dir)
 {
 	// dir must exist!
 	if (!dir.exists())
@@ -53,17 +174,17 @@ bool habutilCreateWorkspace(QDir& dir)
 	}
 
 	// see if dir already contains db
-	if (!dir.exists("habit.sqlite"))
+	if (!dir.exists("habit22.sqlite"))
 	{
 		// copy database from resources
-		if (!QFile::copy(":/resources/habit.sqlite", dir.absoluteFilePath("habit.sqlite")))
+		if (!QFile::copy(":/resources/habit22.sqlite", dir.absoluteFilePath("habit22.sqlite")))
 		{
-			qCritical() << "Cannot create database file " << dir.absoluteFilePath("habit.sqlite");
+			qCritical() << "Cannot create database file " << dir.absoluteFilePath("habit22.sqlite");
 			return false;
 		}
 		else
 		{
-			QFile newfile(dir.absoluteFilePath("habit.sqlite"));
+			QFile newfile(dir.absoluteFilePath("habit22.sqlite"));
 			newfile.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ReadGroup | QFile::WriteGroup);
 			qDebug() << "Created database " << newfile.fileName();
 		}
@@ -108,29 +229,86 @@ bool habutilCreateWorkspace(QDir& dir)
 		else
 		{
 			qDebug() << "Created stim directory " << dir.absoluteFilePath("stim");
-
-			// move sample stim files into stim folder
-			QDir resourceStimDir(":/resources/stim");
-			QDir stimDir(dir);
-			stimDir.cd(QString("stim"));
-
-			QFileInfoList list = resourceStimDir.entryInfoList();
-			for (int i = 0; i < list.size(); ++i)
-			{
-				QFileInfo fileInfo = list.at(i);
-				if (!QFile::copy(fileInfo.absoluteFilePath(), stimDir.absoluteFilePath(fileInfo.fileName())))
-				{
-					qCritical() << "Cannot copy image file " << fileInfo.absoluteFilePath();
-					return false;
-				}
-				else
-				{
-					qDebug() << "Copied " << fileInfo.absoluteFilePath() << " to " << stimDir.absoluteFilePath(fileInfo.fileName());
-				}
-			}
-
 		}
 	}
+
+	// stim dir exists, so create a link to the stock images etc.
+	qDebug() << "Check link to example stimuli and misc...";
+#ifdef Q_OS_MACOS
+	// Note that this folder is _named_ in the distribution folder - it is named there and deployed during install to the
+	// machine.
+	QFile appSupport("/Library/Application Support/habit2/stim/examples");
+	QFile examples(dir.absoluteFilePath("stim/examples"));
+	QFile appSupportMisc("/Library/Application Support/habit2/misc");
+	QFile misc(dir.absoluteFilePath("misc"));
+	if (!appSupport.exists())
+	{
+		qWarning() << "Application Support folder " << appSupport.fileName() << " not found.";
+	}
+	else
+	{
+		if (examples.exists())
+		{
+			qWarning() << "Examples folder already exists in this workspace.";
+		}
+		else
+		{
+			if (appSupport.link(examples.fileName()))
+			{
+				qDebug() << "Created link " << examples.fileName() << " --> " << appSupport.fileName();
+			}
+			else
+			{
+				qWarning() << "Cannot create link " << examples.fileName() << " --> " << appSupport.fileName();
+			}
+		}
+	}
+
+	if (!appSupportMisc.exists())
+	{
+		qWarning() << "Application Support folder " << appSupportMisc.fileName() << " not found.";
+	}
+	else
+	{
+		if (misc.exists())
+		{
+			qWarning() << "misc folder already exists in this workspace.";
+		}
+		else
+		{
+			if (appSupportMisc.link(misc.fileName()))
+			{
+				qDebug() << "Created link " << misc.fileName() << " --> " << appSupportMisc.fileName();
+			}
+			else
+			{
+				qWarning() << "Cannot create link " << misc.fileName() << " --> " << appSupportMisc.fileName();
+			}
+		}
+	}
+
+
+
+	#elif Q_OS_WIN
+    QProcess process;
+    process.start("mklink /D");
+
+    // Wait for it to start
+    if(!process.waitForStarted())
+        return 0;
+
+    bool retval = false;
+    QByteArray buffer;
+    while ((retval = process.waitForFinished()));
+        buffer.append(process.readAll());
+
+    if (!retval) {
+        qDebug() << "Process error:" << process.errorString();
+        qDebug() << "Output:" << buffer;
+        return 1;
+    }
+#endif
+
 
 	return true;
 }
@@ -143,18 +321,19 @@ bool habutilCreateWorkspace(QDir& dir)
 
 bool habutilInitWorkspace()
 {
-	bool b = false;
-	QSettings settings;
-	QDir workspaceDir;
-	b = habutilGetWorkspaceDir(workspaceDir);
-	qDebug() << "Habit is opening workspace directory \"" << workspaceDir.absolutePath() << "\"";
-	if (!b)
-		b = habutilCreateWorkspace(workspaceDir);
+	bool b = true;
+	_loadSettings();
+	qDebug() << "Habit is opening workspace directory \"" << f_workspaceDir.absolutePath() << "\"";
+	if (!habutilIsValidWorkspace(f_workspaceDir))
+	{
+		qDebug() << "The workspace directory is not a valid Habit workspace. Creating ...";
+		b = habutilCreateWorkspace(f_workspaceDir);
+	}
 
 	// if all is well, open the database
 	if (b)
 	{
-		b = openDB(workspaceDir);
+		b = openDB(f_workspaceDir);
 	}
 
 	return b;
@@ -168,21 +347,24 @@ bool habutilInitWorkspace()
 bool habutilSelectWorkspace()
 {
 	bool b = false;
-	QDir dir;
 	QString selectedDir;
 
-	habutilGetWorkspaceDir(dir);
-
-	selectedDir = QFileDialog::getExistingDirectory(0, "Select Habit Workspace Folder", dir.absolutePath());
+	selectedDir = QFileDialog::getExistingDirectory(0, "Select Habit Workspace Folder", f_workspaceDir.absolutePath());
 	if (selectedDir.isEmpty() || selectedDir.isNull())
 		return false;
 	else
 	{
-		habutilSetWorkspace(selectedDir);
+		b = habutilCreateWorkspace(QDir(selectedDir));
 	}
 
-	dir.setPath(selectedDir);
-	b = habutilCreateWorkspace(dir);
+	if (b)
+	{
+		// save new workspace dir
+		_saveWorkspaceDir(selectedDir);
+
+		// load new workspace settings
+		_loadSettings();
+	}
 	return b;
 }
 
@@ -192,41 +374,19 @@ bool habutilSelectWorkspace()
 // If that setting is not set, use default location (and create setting).
 // Returns true if the folder is a valid workspace, false if not.
 
-bool habutilGetWorkspaceDir(QDir& dir)
+const QDir& habutilGetWorkspaceDir()
 {
-	QSettings settings;
-	if (!settings.contains("workspace"))
-	{
-		QString defaultDir = QString("%1/habit").arg(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation));
-		dir.setPath(defaultDir);
-		settings.setValue("workspace", dir.absolutePath());
-	}
-	else
-	{
-		dir.setPath(settings.value("workspace").toString());
-	}
-
-	//qDebug() << "getWorkspaceDir: " << dir << ":" << habutilIsValidWorkspace(dir);
-
-	return habutilIsValidWorkspace(dir);
+	return f_workspaceDir;
 }
 
 
-QString habutilGetWorkspaceDir()
-{
-	QDir dir;
-	habutilGetWorkspaceDir(dir);
-	return dir.absolutePath();
-}
-
-
-// get results dir. Assumes that the directory exists. As long as this is called on an open workspace that is a safe assumption.
-
+// Get "results" subfolder for the given experiment within the current workspace. It will be "results/expt" inside
+// current workspace.
 QDir habutilGetResultsDir(const QString expt)
 {
-	QDir dir;
-	habutilGetWorkspaceDir(dir);
-	dir.setPath(dir.filePath("results"));
+	QDir dir(f_workspaceDir);
+	bool b = dir.cd("results");
+	Q_ASSERT(b);
 	if (!expt.isEmpty())
 	{
 		if (!dir.exists(expt))
@@ -238,129 +398,76 @@ QDir habutilGetResultsDir(const QString expt)
 			else
 			{
 				qDebug() << "Created results directory for experiment \"" << expt << "\"";
-				dir.setPath(dir.filePath(expt));
+				dir.cd(expt);
 			}
 		}
 		else
 		{
-			dir.setPath(dir.filePath(expt));
+			dir.cd(expt);
 		}
 	}
 	return dir;
 }
 
+// Get the "log" folder for current workspace.
 QDir habutilGetLogDir()
 {
-	QDir dir;
-	habutilGetWorkspaceDir(dir);
-	dir.setPath(dir.filePath("log"));
+	QDir dir(f_workspaceDir);
+	bool b = dir.cd("log");
+	Q_ASSERT(b);
 	return dir;
 }
 
+// Get "stim" folder for current workspace.
 QDir habutilGetStimDir()
 {
-	QDir dir;
-	habutilGetWorkspaceDir(dir);
-	dir.setPath(dir.filePath("stim"));
+	QDir dir(f_workspaceDir);
+	bool b = dir.cd("stim");
+	Q_ASSERT(b);
 	return dir;
 }
 
-// Testing utility. Call to delete the "workspace" setting from settings.
-
-void habutilClearWorkspace()
-{
-	QSettings settings;
-	settings.remove("workspace");
-	return;
-}
-
-// Set workspace to supplied directory. No testing made to determine if its a directory.
+// Set "workspace" setting. The dir is not tested for validity.
 void habutilSetWorkspace(const QString& d)
 {
 	QSettings settings;
 	settings.setValue("workspace", d);
+	_loadSettings();
 	return;
 }
 
-
-
-bool habutilGetStimulusRootDir(QDir& stimRootDir)
+QDir habutilGetStimulusRootDir()
 {
-	QSettings settings;
-
-	if (!habutilGetUseDefaultStimRoot())
+	QDir dir(f_stimulusRootDir);
+	if (f_stimulusRootUseDefault)
 	{
-		stimRootDir = habutilGetStimDir();
-		if (!settings.contains("stimroot"))
-		{
-			settings.setValue("stimroot", stimRootDir.absolutePath());
-		}
-		else
-		{
-			stimRootDir.setPath(settings.value("stimroot").toString());
-		}
+		dir = f_workspaceDir;
+		dir.cd("stim");
 	}
-	else
-	{
-		stimRootDir = habutilGetStimDir();
-	}
-	return stimRootDir.exists();
+	return dir;
 }
 
-
-QString habutilGetStimulusRootDir()
-{
-	QDir dir;
-	habutilGetStimulusRootDir(dir);
-	return dir.absolutePath();
-}
-
-// Prompt user to select a stimulus root folder.
-bool habutilSelectStimulusRootDir()
+bool habutilSelectStimulusRootDir(QString& sDir)
 {
 	bool b = false;
-	QDir dir;
 	QString selectedDir;
-
-	habutilGetStimulusRootDir(dir);
-
-	selectedDir = QFileDialog::getExistingDirectory(0, "Select Habit Stimulus Root Folder", dir.absolutePath());
+	selectedDir = QFileDialog::getExistingDirectory(0, "Select Habit Stimulus Root Folder", sDir);
 	if (selectedDir.isEmpty() || selectedDir.isNull())
 	{
 		b = false;
 	}
 	else
 	{
-		habutilSetStimulusRootDir(selectedDir);
+		sDir = selectedDir;
 		b = true;
 	}
 	return b;
 }
 
-bool habutilGetUseDefaultStimRoot()
-{
-	QSettings settings;
-	if (!settings.contains("stimroot_use_default"))
-	{
-		settings.setValue("stimroot_use_default", false);
-	}
-	return settings.value("stimroot_use_default").toBool();
-}
-
 void habutilSetUseDefaultStimRoot(bool b)
 {
-	QSettings settings;
-	settings.setValue("stimroot_use_default", b);
-	return;
-}
-
-
-
-// Testing utility. Call to delete the "stimroot" setting from settings.
-void habutilClearStimulusRootDir()
-{
-	QSettings settings;
-	settings.remove("stimroot");
+	f_stimulusRootUseDefault = b;
+	_saveSettings();
 	return;
 }
 
@@ -368,34 +475,27 @@ void habutilClearStimulusRootDir()
 // Set stimroot to given dir
 void habutilSetStimulusRootDir(const QString& d)
 {
-	QSettings settings;
-	settings.setValue("stimroot", QDir(d).absolutePath());
+	f_stimulusRootDir.setPath(d);
+	_saveSettings();
 	return;
 }
 
 
 // get last dir that a stim was selected from
-bool habutilGetLastDir(QDir& dir)
+QDir habutilGetLastDir(bool isVideoImage)
 {
-	QSettings settings;
-	dir = QDir::root();
-	if (!settings.contains("lastdir"))
-	{
-		settings.setValue("lastdir", dir.absolutePath());
-	}
+	if (isVideoImage)
+		return f_lastVideoImageDir;
 	else
-	{
-		dir.setPath(settings.value("lastdir").toString());
-	}
-
-	return dir.exists();
+		return f_lastAudioDir;
 }
 
 // set last dir that a stim was selected from
-void habutilSetLastDir(const QString& d)
+void habutilSetLastDir(const QString& d, bool isVideoImage)
 {
-	QSettings settings;
-	settings.setValue("lastdir", QDir(d).absolutePath());
+	if (isVideoImage) f_lastVideoImageDir.setPath(d);
+	else f_lastAudioDir.setPath(d);
+	_saveSettings();
 	return;
 }
 
@@ -404,15 +504,14 @@ void habutilSetLastDir(const QString& d)
 int habutilGetMonitorID(const HPlayerPositionType& type)
 {
 	int num = -1;	// default is NO MONITOR
-	QSettings settings;
 	if (type == HPlayerPositionType::Control)
-		num = settings.value("position/control", QVariant(num)).toInt();
+		num = f_iControlMonitor;
 	else if (type == HPlayerPositionType::Left)
-		num = settings.value("position/left", QVariant(num)).toInt();
+		num = f_iLeftMonitor;
 	else if (type == HPlayerPositionType::Center)
-		num = settings.value("position/center", QVariant(num)).toInt();
+		num = f_iCenterMonitor;
 	else if (type == HPlayerPositionType::Right)
-		num = settings.value("position/right", QVariant(num)).toInt();
+		num = f_iRightMonitor;
 	return num;
 }
 
@@ -420,15 +519,15 @@ int habutilGetMonitorID(const HPlayerPositionType& type)
 // Set the local machine's monitor ID for given position.
 void habutilSetMonitorID(const HPlayerPositionType& type, int id)
 {
-	QSettings settings;
 	if (type == HPlayerPositionType::Control)
-		settings.setValue("position/control", QVariant(id));
+		f_iControlMonitor = id;
 	else if (type == HPlayerPositionType::Left)
-		settings.setValue("position/left", QVariant(id));
+		f_iLeftMonitor = id;
 	else if (type == HPlayerPositionType::Center)
-		settings.setValue("position/center", QVariant(id));
+		f_iCenterMonitor = id;
 	else if (type == HPlayerPositionType::Right)
-		settings.setValue("position/right", QVariant(id));
+		f_iRightMonitor = id;
+	_saveSettings();
 	return;
 }
 

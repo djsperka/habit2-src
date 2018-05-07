@@ -11,25 +11,29 @@
 #include <QDataStream>
 #include <QtDebug>
 #include "HTypes.h"
+#include "stimulisettings.h"
+#include "habituationsettings.h"
 
 namespace Habit
 {
 	class HPhaseSettings
 	{
 	public:
-		HPhaseSettings(const HPhaseType& type = HPhaseType::UnknownPhase);
+		HPhaseSettings(int phase_id = -1);
 		HPhaseSettings(const HPhaseSettings& ts);
 		HPhaseSettings& operator=(const HPhaseSettings& rhs);
-		HPhaseSettings clone();
+		HPhaseSettings clone() const;
 
 		int getId() const { return m_id; };
 		void setId(int id) { m_id = id; };
 		bool getIsEnabled() const { return m_bEnabled; };
 		void setIsEnabled(bool b) { m_bEnabled = b; };
-		const HPhaseType& getPhaseType() const { return *m_pPhaseType; };
-		void setPhaseType(const HPhaseType& ptype) { m_pPhaseType = &ptype; };
-		unsigned int getNTrials() const { return m_ntrials; };
-		void setNTrials(unsigned int n) { m_ntrials = n; };
+		//const HPhaseType& getPhaseType() const { return *m_pPhaseType; };
+		//void setPhaseType(const HPhaseType& ptype) { m_pPhaseType = &ptype; };
+		void setName(const QString& name) { m_name = name; };
+		const QString& getName() const { return m_name; };
+		void setSeqno(int seqno) { m_seqno = seqno; };
+		int getSeqno() const { return m_seqno; };
 		bool getUseLookingCriteria() const { return m_bUseLookingCriteria; };
 		void setUseLookingCriteria(bool b) { m_bUseLookingCriteria = b; };
 		bool getIsSingleLook() const { return m_bIsSingleLook; };
@@ -57,14 +61,21 @@ namespace Habit
 		unsigned int getMaxNoLookTime() const { return m_uiMaxNoLookTime; };
 		void setMaxNoLookTime(unsigned int ui) { m_uiMaxNoLookTime = ui; };
 
-		void loadFromDB(int id, int type);
-		bool saveToDB(int id);
+		const StimuliSettings& stimuli() const { return m_stimuli; };
+		StimuliSettings& stimuli() { return m_stimuli; };
+		void setStimuli(const StimuliSettings& stimuli) { m_stimuli = stimuli; };
+		const HabituationSettings& habituationSettings() const { return m_habituationSettings; };
+		HabituationSettings& habituationSettings() { return m_habituationSettings; };
+		void setHabituationSettings(const HabituationSettings& habituationSettings) { m_habituationSettings = habituationSettings; };
+
+		void loadFromDB(int phaseID);
+		void saveToDB(int experimentID);
 
 	private:
 		int m_id;
 		bool m_bEnabled;
-		const HPhaseType* m_pPhaseType;
-		unsigned int m_ntrials;
+		QString m_name;
+		int m_seqno;
 		bool m_bUseLookingCriteria;	// if true, then must select either single look or accum look time
 		bool m_bIsSingleLook;	// trials end on completion of a single look
 		bool m_bIsMaxAccumulatedLookTime; 	// trials end when max accumulated look time reached
@@ -78,10 +89,12 @@ namespace Habit
 		bool m_bMeasureStimulusTimeFromLooking;	// max stim time measured from initial looking
 		bool m_bIsMaxNoLookTime;		// trials can end if initial period of no looking
 		unsigned int m_uiMaxNoLookTime;
+		HabituationSettings m_habituationSettings;
+		StimuliSettings m_stimuli;
 	};
 
 
-	QDataStream & operator<< (QDataStream& stream, HPhaseSettings settings);
+	QDataStream & operator<< (QDataStream& stream, const HPhaseSettings& settings);
 	QDataStream & operator>> (QDataStream& stream, HPhaseSettings& settings);
 	QDebug operator<<(QDebug dbg, const HPhaseSettings& settings);
 	bool operator==(const HPhaseSettings& lhs, const HPhaseSettings& rhs);

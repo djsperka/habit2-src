@@ -22,8 +22,8 @@ HLooker::HLooker(const HLooker& looker)
 , m_bInclusiveLookTime(looker.m_bInclusiveLookTime)
 , m_bLookStarted(looker.m_bLookStarted)
 , m_pdirectionLookStarted(looker.m_pdirectionLookStarted)
-, m_iLookStartedIndex(m_iLookStartedIndex)
-, m_bLookAwayStarted(m_bLookAwayStarted)
+, m_iLookStartedIndex(looker.m_iLookStartedIndex)
+, m_bLookAwayStarted(looker.m_bLookAwayStarted)
 {
 	qDebug() << "HLooker(const HLooker&) -- ?????";
 }

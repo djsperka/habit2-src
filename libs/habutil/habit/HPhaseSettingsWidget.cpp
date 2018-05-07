@@ -41,8 +41,6 @@ void HPhaseSettingsWidget::setValidators()
 
 void HPhaseSettingsWidget::initialize()
 {
-	ui->gbxEnabled->setChecked(m_settings.getIsEnabled());
-	ui->spinboxNTrials->setValue(m_settings.getNTrials());
 	ui->cbxUseLookSettings->setChecked(m_settings.getUseLookingCriteria());
 	ui->rbSingleCompleteLook->setChecked(m_settings.getIsSingleLook());
 	ui->rbAccumulatedLookTime->setChecked(m_settings.getIsMaxAccumulatedLookTime());
@@ -80,8 +78,7 @@ const HPhaseSettings& HPhaseSettingsWidget::getHPhaseSettings()
 
 	// Update m_settings with the current contents of all the little checkboxes etc.
 
-	m_settings.setIsEnabled(ui->gbxEnabled->isChecked());
-	m_settings.setNTrials(ui->spinboxNTrials->value());
+	// m_settings.setIsEnabled() is done in the calling routine.
 	m_settings.setUseLookingCriteria(ui->cbxUseLookSettings->isChecked());
 	m_settings.setIsSingleLook(ui->rbSingleCompleteLook->isChecked());
 	m_settings.setIsMaxAccumulatedLookTime(ui->rbAccumulatedLookTime->isChecked());

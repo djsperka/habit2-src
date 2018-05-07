@@ -8,7 +8,12 @@
 #ifndef HPHASESETTINGSWIDGET_H_
 #define HPHASESETTINGSWIDGET_H_
 
+#include <QtGlobal>
+#if QT_VERSION >= 0x050000
+#include <QtWidgets>
+#else
 #include <QtGui>
+#endif
 #include "HPhaseSettings.h"
 
 namespace Ui

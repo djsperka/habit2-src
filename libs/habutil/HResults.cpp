@@ -201,11 +201,11 @@ bool HResults::scanTrials(const HTrialScanner& scanner) const
 			{
 				HPhaseStartEvent* pse = static_cast<HPhaseStartEvent*>(e);
 				sPhase = pse->phase();
-
-				if (pse->phasetype() == HPhaseType::PreTest) sOrderName = runSettings().getPretestOrderName();
-				else if (pse->phasetype() == HPhaseType::Habituation) sOrderName = runSettings().getHabituationOrderName();
-				else if (pse->phasetype() == HPhaseType::Test) sOrderName = runSettings().getTestOrderName();
-				else sOrderName="";
+				sOrderName = "";
+				if (runSettings().map().contains(pse->seqno()))
+				{
+					sOrderName = runSettings().map().value(pse->seqno()).getOrderName();
+				}
 
 				if (bInsidePhase) qCritical("Found phase start without preceding phase end event!");
 				bInsidePhase = true;
@@ -252,8 +252,6 @@ bool HResults::scanTrials(const HTrialScanner& scanner) const
 			else if (e->type() == HEventType::HEventScreenStart)
 			{
 				HScreenStartEvent* psse = static_cast<HScreenStartEvent*>(e);
-
-				// TODO - must have a way to map monitor id numbers to left/center/right/iss!
 
 				// Do not keep filename unless stim request has been seen. Otherwise we will
 				// record attention getter file(s).

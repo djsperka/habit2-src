@@ -1,0 +1,22 @@
+Habit command line options
+
+
+Habit startup
+
+	Open H2MainWindow
+		Edit Experiment
+			HExperimentMain(experimentSettings)
+		Run Experiment
+			experimentSettings.loadFromDB()
+			H2MainWindow::checkExperimentSettings(experimentSettings, sProblems, false)
+			HRunSettingsDialog(experimentSettings, m_bTestRunIsDefault, NULL);
+			createMediaManager
+			HControlPanel
+			createLookDetector
+			createExperiment
+			createStimulusWidget/adaptVideoWidgets
+			m_pControlPanel->exec();
+			pMediaManager->stop();
+			new HResults
+			results->save(filename)
+ 	

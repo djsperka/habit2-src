@@ -53,8 +53,7 @@ bool habutilStimulusColorOK(const QString& color)
 bool habutilStimulusFilesFound(const Habit::HStimulusSettings& settings, const HStimulusLayoutType& layoutType)
 {
 	bool b = true;
-	QDir stimRootDir;
-	habutilGetStimulusRootDir(stimRootDir);
+	QDir stimRootDir = habutilGetStimulusRootDir();
 	if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
 		b = (
 				(

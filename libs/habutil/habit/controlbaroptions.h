@@ -32,8 +32,8 @@ public:
     void setDisplayCurrentStimulus(bool display);
     bool isLookingDirectionDisplayed() const;
     void setDisplayLookingDirection(bool display);
-	void loadFromDB(size_t id);
-	bool saveToDB(size_t id_);
+	void loadFromDB(int experimentID);
+	void saveToDB(int experimentID);
 	ControlBarOptions clone();
 
 private:
