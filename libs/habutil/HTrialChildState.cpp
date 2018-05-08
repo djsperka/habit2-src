@@ -20,9 +20,6 @@ void HTrialInitialState::onEntry(QEvent* e)
 	// post TrialStart event to event log
 	eventLog().append(new HTrialStartEvent(trial().getTrialNumber(), trial().getRepeatNumber(), HElapsedTimer::elapsed()));
 
-	// buffer stimuli for this trial
-	trial().phase().loadCurrentStimBuffers();
-
 	// emit signal...
 	emit trialStarted(trial().getTrialNumber(), trial().getRepeatNumber());
 }
