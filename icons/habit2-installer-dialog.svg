@@ -7,6 +7,7 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="493"
@@ -20,7 +21,29 @@
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
   <defs
-     id="defs2" />
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient435">
+      <stop
+         style="stop-color:#5fd38d;stop-opacity:1;"
+         offset="0"
+         id="stop431" />
+      <stop
+         style="stop-color:#5fd38d;stop-opacity:0;"
+         offset="1"
+         id="stop433" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient435"
+       id="linearGradient437"
+       x1="1.308493"
+       y1="266.26013"
+       x2="95.706917"
+       y2="214.66814"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -60,7 +83,7 @@
      style="display:inline"
      transform="translate(0,-188.38333)">
     <rect
-       style="fill:#5fd38d;stroke-width:0.59592569"
+       style="fill:url(#linearGradient437);stroke-width:0.59592569;fill-opacity:1"
        id="rect285"
        width="130.85597"
        height="83.816139"
@@ -167,7 +190,7 @@
     </g>
     <g
        id="g283"
-       transform="translate(-76.674686,-23.926729)">
+       transform="matrix(1.7313202,0,0,1.7313202,-154.51483,-245.06706)">
       <g
          transform="matrix(0.05566179,0,0,0.05392936,89.512873,256.35894)"
          inkscape:label="#g5226"
@@ -343,7 +366,7 @@
          style="stroke-width:0.26458332" /></text>
     <g
        id="g252"
-       transform="translate(-18.525203,-6.9163199)">
+       transform="translate(-20.641871,-28.082991)">
       <text
          id="text238"
          y="263.79575"
