@@ -14,7 +14,7 @@
    viewBox="0 0 270.93333 270.93334"
    version="1.1"
    id="svg8"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="habit2.svg"
    inkscape:export-filename="/home/dan/src/icons/kids.png"
    inkscape:export-xdpi="24.006582"
@@ -29,16 +29,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.70771621"
-     inkscape:cx="783.22249"
+     inkscape:cx="523.23127"
      inkscape:cy="551.78659"
      inkscape:document-units="mm"
      inkscape:current-layer="layer17"
      showgrid="false"
      units="px"
-     inkscape:window-width="1855"
-     inkscape:window-height="1176"
-     inkscape:window-x="65"
-     inkscape:window-y="24"
+     inkscape:window-width="1680"
+     inkscape:window-height="949"
+     inkscape:window-x="0"
+     inkscape:window-y="1"
      inkscape:window-maximized="1"
      inkscape:snap-bbox="true" />
   <metadata
@@ -49,7 +49,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -182,7 +182,7 @@
          inkscape:connector-curvature="0" />
       <text
          xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.84674644px;line-height:1.25;font-family:'American Typewriter';-inkscape-font-specification:'American Typewriter, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.41186798"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'American Typewriter';-inkscape-font-specification:'American Typewriter, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.41186798"
          x="339.45743"
          y="278.79303"
          id="text4809"
@@ -191,7 +191,7 @@
            id="tspan4807"
            x="339.45743"
            y="278.79303"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.84674644px;font-family:'American Typewriter';-inkscape-font-specification:'American Typewriter, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.41186798">2</tspan></text>
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:25.84674644px;line-height:1.25;font-family:'American Typewriter';-inkscape-font-specification:'American Typewriter, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.41186798">2</tspan></text>
       <ellipse
          style="display:inline;fill:#e1bd6c;fill-opacity:0.98571424;stroke:#000000;stroke-width:2.50729132;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          id="ellipse4801"
