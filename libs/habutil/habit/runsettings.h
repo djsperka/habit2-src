@@ -24,6 +24,7 @@ namespace Habit
 		int m_randomizeMethod;
 	public:
 		PhaseRunSettings(): m_orderName(), m_isOrderRandomized(false), m_randomizeMethod(-1) {};
+		PhaseRunSettings(const PhaseRunSettings& prs): m_orderName(prs.getOrderName()), m_orderList(prs.getOrderList()), m_isOrderRandomized(prs.isOrderRandomized()), m_randomizeMethod(prs.getRandomizeMethod()) {};
 		virtual ~PhaseRunSettings() {};
 		const QString& getOrderName() const { return m_orderName; };
 		void setOrderName(const QString& name) { m_orderName = name; };
