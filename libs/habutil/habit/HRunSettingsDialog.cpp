@@ -50,18 +50,20 @@ Habit::RunSettings GUILib::HRunSettingsDialog::getRunSettings() const
 	settings.setSubjectId(-1);	// unused
 
 	QMapIterator<int, QPair<GUILib::HStimulusOrderSelectionWidget*, bool> > iterator(m_map);
-	int seqno;
-	GUILib::HStimulusOrderSelectionWidget* w;
 	Habit::PhaseRunSettings prs;
-	Habit::StimLabelList list;
 
 	while (iterator.hasNext())
 	{
+		Habit::StimLabelList list;
+		int seqno;
+		GUILib::HStimulusOrderSelectionWidget* w;
+
 		iterator.next();
 		seqno = iterator.key();
 		w = iterator.value().first;
 		prs.setOrderRandomized(w->isRandomized());
 		prs.setRandomizeMethod(w->getRandomizationType().number());
+		list.clear();
 		if (w->isDefaultOrder())
 		{
 			Q_ASSERT(m_exptSettings.phaseExists(seqno) >= 0);
