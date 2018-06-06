@@ -14,6 +14,7 @@
 #include <QApplication>
 #include <QtDebug>
 #include <gst/gst.h>
+#include "HLoggerObject.h"
 
 
 #include "TestMMDialog.h"
@@ -49,6 +50,7 @@ int main(int argc, char **argv)
 		}
 	}
 
+	qInstallMessageHandler(&HLoggerObject::loggingHandler);
 
 	if (!habutilInitWorkspace())
 		return 0;

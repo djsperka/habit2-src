@@ -18,6 +18,8 @@
 #include "HExperimentUtil.h"
 #include "HWorkspaceUtil.h"
 #include "HStimuliSettingsWidget.h"
+#include "HLoggerObject.h"
+#include "HLoggerWidget.h"
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QDebug>
@@ -53,6 +55,7 @@ void TestMMDialog::components()
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     vbox->addWidget(buttonBox);
+    vbox->addWidget(new HLoggerWidget(this));
 
     this->setLayout(vbox);
 }

@@ -68,7 +68,9 @@
 	habit/HExperimentNameDialog.h \
 	habit/HRunSettingsTestingWidget.h \
 	habit/HIntertrialIntervalSettingsWidget.h \
-	habit/HAboutHabitDialog.h
+	habit/HAboutHabitDialog.h \
+	habit/HLoggerObject.h  \
+	habit/HLoggerWidget.h
 	
 	
 
@@ -137,7 +139,9 @@ SOURCES += \
 	habit/HExperimentNameDialog.cpp \
 	habit/HRunSettingsTestingWidget.cpp \
 	habit/HIntertrialIntervalSettingsWidget.cpp \
-	habit/HAboutHabitDialog.cpp
+	habit/HAboutHabitDialog.cpp \
+	habit/HLoggerObject.cpp \
+	habit/HLoggerWidget.cpp
 	
 
  FORMS =		\
