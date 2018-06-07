@@ -538,7 +538,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		// The ASYNC_DONE message doesn't come until all sources have prerolled, or entered PAUSED state.
 		// If any of the sources are looping sources, and if they are not already prerolled, then we
 		// must issue a flushing seek here on that portion of the pipeline.
-		QMutexLocker locker(pStimPipeline->mutex());
+// move below?		QMutexLocker locker(pStimPipeline->mutex());
 		// issue flushing seek to entire pipeline. Catch segment events for each source
 		if (!pStimPipeline->bInitialFlushingSeekDone)
 		{
@@ -550,6 +550,9 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			else
 			{
 				qDebug() << "busCallback: initial pipeline flush seek done";
+
+				QMutexLocker locker(pStimPipeline->mutex());
+
 				pStimPipeline->bInitialFlushingSeekDone = true;
 				QMapIterator<HPlayerPositionType, HStimPipelineSource* >it(pStimPipeline->getPipelineSourceMap());
 				while (it.hasNext())
@@ -565,6 +568,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		else
 		{
 			qDebug() << "busCallback: entire pipeline is now prerolled.";
+			GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pStimPipeline->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pStimPipeline->pipeline()));
 		}
 		//#endif here see bottom
 	}
