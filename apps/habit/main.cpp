@@ -189,8 +189,68 @@ int main(int argc, char *argv[])
 	bStimInDialog = parser.isSet("z");
 	bNotInstalled = parser.isSet("n");
 
+	// TODO - moved gst_init and env vaer setup from here to below
+
+	// Open a workspace. The workspace is a folder containing "habit.sqlite" and three folders:
+	// "results", "log" and "stim". This MUST be called AFTER the organization name is set in the QApplication
+	// object, otherwise the settings file is not found.
+
+	if (bPendingWorkspace)
+		habutilSetWorkspace(sPendingWorkspace);
+
+	if (!habutilInitWorkspace() || bDBUpdateOnly)
+		return 0;
+
+	GUILib::H2MainWindow w(bTestRunIsDefault, bShowTestingIcon, bEditTemplates, bStimInDialog);
+	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
+	Q_INIT_RESOURCE(resources);
 
 
+	// Force file log creation on windows!
+	bool bForceFileLogOnWindows = false;
+#ifdef Q_OS_WIN
+	bForceFileLogOnWindows = true;
+#endif
+
+	if (bFileLogPending || bForceFileLogOnWindows)
+	{
+		// Generate filename after application object initialized -- this sets data location based on application/organization name.
+		QString file_name = habutilGetLogDir().absolutePath();
+#if defined(Q_OS_MAC)
+		file_name += QString("/habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));
+#else
+		file_name += QString("\\habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));
+#endif
+		f_pFileLog = new QFile(file_name);
+		f_pFileLog->open(QIODevice::Append | QIODevice::Text);
+		f_streamFileLog.setDevice(f_pFileLog);
+		f_streamFileLog.flush();
+		f_bFileLog = true;
+	}
+#if QT_VERSION < 0x050000
+	qInstallMsgHandler(habitLoggingHandler);
+#else
+	qInstallMessageHandler(habitLoggingHandler);
+#endif
+	qDebug() << "Starting Habit, version " << HABIT_VERSION;
+
+	// dump process environment
+	QStringList envVars = QProcessEnvironment::systemEnvironment().toStringList();
+	qDebug() << "Environment: " << envVars;
+	qInfo() << "Number of screens: " << QApplication::desktop()->screenCount();
+	for (int i=0; i<QApplication::desktop()->screenCount(); i++)
+	{
+		qInfo() << "screen " << i << ": screenGeometry: " << QApplication::desktop()->screenGeometry(i);
+		qInfo() << "screen " << i << ": availableGeometry: " << QApplication::desktop()->availableGeometry(i);
+	}
+
+	// dump misc dirs
+	qInfo() << "DocumentsLocation: " << QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
+	qInfo() << "GenericCache: " << QStandardPaths::standardLocations(QStandardPaths::GenericCacheLocation);
+	qInfo() << "GenericData: " << QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+
+
+	// Initialize gstreamer
 	// Debug  builds (HABIT_DEBUG) use system-defined gstreamer libs.
 	// Release builds (HABIT_RELEASE) _can_ use the system-installed (whatever we link against) gstreamer libs,
 	// but the -n flag tells us to run as NOT installed.
@@ -209,94 +269,74 @@ int main(int argc, char *argv[])
 	{
 		qDebug() << "Run installed, exe file is " << argv[0];
 
-#ifdef HABIT_RELEASE
-		QFileInfo fiExe(argv[0]);
-		qDebug() << "exePath " << fiExe.path();
-		QDir dirScanner(fiExe.path());
-		if (dirScanner.cd("../Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0"))
+//#ifdef HABIT_RELEASE
+		qDebug() << "exePath " << QCoreApplication::applicationDirPath();
+		QDir dirScanner(QCoreApplication::applicationDirPath());
+		QString sRelPathToScanner;
+		QString sRelPathToSystemPlugins;
+		QString sRelPathToGioModules;
+#if defined(Q_OS_MAC)
+		sRelPathToScanner = "../Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0");
+		sRelPathToSystemPlugins = "../Frameworks/GStreamer.framework/Versions/1.0/lib/gstreamer-1.0");
+		sRelPathToGioModules = "../Frameworks/GStreamer.framework/Versions/1.0/lib/gio/modules";
+#else
+		sRelPathToScanner = "gstreamer-1.0/libexec/gstreamer-1.0";
+		sRelPathToSystemPlugins = "gstreamer-1.0/lib/gstreamer-1.0";
+		sRelPathToGioModules = "gstreamer-1.0/lib/gio/modules";
+#endif
+		if (dirScanner.cd(sRelPathToScanner))
 		{
+			qDebug() << "Set GST_PLUGIN_SCANNER=" << dirScanner.filePath("gst-plugin-scanner");
 			qputenv("GST_PLUGIN_SCANNER", dirScanner.filePath("gst-plugin-scanner").toLocal8Bit());
 		}
 		else
 		{
-			qFatal("Cannot navigate to ../Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0");
+			qCritical() << "Cannot navigate to relative scanner path " << sRelPathToScanner << " from exePath ";
 		}
-		QDir dirPlugins(fiExe.path());
-		if (dirPlugins.cd("../Frameworks/GStreamer.framework/Versions/1.0/lib/gstreamer-1.0"))
+		QDir dirPlugins(QCoreApplication::applicationDirPath());
+		if (dirPlugins.cd(sRelPathToSystemPlugins))
 		{
+			qDebug() << "Set GST_PLUGIN_SYSTEM_PATH=" << dirPlugins.path();
 			qputenv("GST_PLUGIN_SYSTEM_PATH", dirPlugins.path().toLocal8Bit());
 		}
 		else
 		{
-			qFatal("Cannot navigate to ../Frameworks/GStreamer.framework/Versions/1.0/lib/gstreamer-1.0");
+			qCritical() << "Cannot navigate to relative system plugin path " << sRelPathToSystemPlugins;
 		}
-		QDir dirGio(fiExe.path());
-		if (dirGio.cd("../Frameworks/GStreamer.framework/Versions/1.0/lib/gio/modules"))
+		QDir dirGio(QCoreApplication::applicationDirPath());
+		if (dirGio.cd(sRelPathToGioModules))
 		{
+			qDebug() << "Set GIO_EXTRA_MODULES=" << dirGio.path();
 			qputenv("GIO_EXTRA_MODULES", dirGio.path().toLocal8Bit());
 		}
 		else
 		{
-			qFatal("Cannot navigate to ../Frameworks/GStreamer.framework/Versions/1.0/lib/gio/modules");
+			qCritical() << "Cannot navigate to relative gio module folder " << sRelPathToGioModules;
 		}
-#else
-		qDebug() << "DEBUG build will not run installed. TODO.";
+
+#ifdef Q_OS_WIN
+		QString sRelPathToHabitPlugins("gstreamer-plugins");
+		QDir dirHabitPlugins(QCoreApplication::applicationDirPath());
+		if (dirHabitPlugins.cd(sRelPathToHabitPlugins))
+		{
+			qDebug() << "Set GST_PLUGIN_PATH=" << dirHabitPlugins.path();
+			qputenv("GST_PLUGIN_PATH", dirHabitPlugins.path().toLocal8Bit());
+		}
+		else
+		{
+			qCritical() << "Cannot navigate to relative Habit plugin path " << sRelPathToHabitPlugins;
+		}
 #endif
+
+//#else
+//		qDebug() << "DEBUG build will not run installed. TODO.";
+//#endif
 	}
 
 	// Initialize gstreamer
-	gst_init (&argc, &argv);
-
-	// Open a workspace. The workspace is a folder containing "habit.sqlite" and three folders:
-	// "results", "log" and "stim". This MUST be called AFTER the organization name is set in the QApplication
-	// object, otherwise the settings file is not found.
-
-	if (bPendingWorkspace)
-		habutilSetWorkspace(sPendingWorkspace);
-
-	if (!habutilInitWorkspace() || bDBUpdateOnly)
-		return 0;
-
-	GUILib::H2MainWindow w(bTestRunIsDefault, bShowTestingIcon, bEditTemplates, bStimInDialog);
-	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
-	Q_INIT_RESOURCE(resources);
-
-	// Generate filename after application object initialized -- this sets data location based on application/organization name.
-	if (bFileLogPending)
-	{
-		QString file_name = habutilGetLogDir().absolutePath();
-#ifdef Q_OS_MAC
-		file_name += QString("/habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));
-#else
-		file_name += QString("\\habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));
-#endif
-		f_pFileLog = new QFile(file_name);
-		f_pFileLog->open(QIODevice::Append | QIODevice::Text);
-		f_streamFileLog.setDevice(f_pFileLog);
-		f_streamFileLog.flush();
-		f_bFileLog = true;
-#if QT_VERSION < 0x050000
-		qInstallMsgHandler(habitLoggingHandler);
-#else
-		qInstallMessageHandler(habitLoggingHandler);
-#endif
-	}
-	qDebug() << "Starting Habit, version " << HABIT_VERSION;
-
-	// dump process environment
-	QStringList envVars = QProcessEnvironment::systemEnvironment().toStringList();
-	qDebug() << "Environment: " << envVars;
-	qInfo() << "Number of screens: " << QApplication::desktop()->screenCount();
-	for (int i=0; i<QApplication::desktop()->screenCount(); i++)
-	{
-		qInfo() << "screen " << i << ": screenGeometry: " << QApplication::desktop()->screenGeometry(i);
-		qInfo() << "screen " << i << ": availableGeometry: " << QApplication::desktop()->availableGeometry(i);
-	}
-
-	// dump misc dirs
-	qInfo() << "DocumentsLocation: " << QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
-	qInfo() << "GenericCache: " << QStandardPaths::standardLocations(QStandardPaths::GenericCacheLocation);
-	qInfo() << "GenericData: " << QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+	qDebug() << "Initialize gstreamer...";
+	gst_init(&argc, &argv);
+	qDebug() << "Initialize gstreamer...Done.";
 
 	// Now show dialog and start event loop.
     w.show();
