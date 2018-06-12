@@ -17,6 +17,9 @@
 #include <QMessageBox>
 #include <QRegExp>
 #include <QtGlobal>
+#ifdef Q_OS_WIN
+#include <QProcess>
+#endif
 #if QT_VERSION < 0x050000
 #include <QDesktopServices>
 #endif
@@ -234,7 +237,7 @@ bool habutilCreateWorkspace(const QDir& dir)
 
 	// stim dir exists, so create a link to the stock images etc.
 	qDebug() << "Check link to example stimuli and misc...";
-#ifdef Q_OS_MACOS
+#if defined(Q_OS_MACOS)
 	// Note that this folder is _named_ in the distribution folder - it is named there and deployed during install to the
 	// machine.
 	QFile appSupport("/Library/Application Support/habit2/stim/examples");
@@ -286,27 +289,6 @@ bool habutilCreateWorkspace(const QDir& dir)
 			}
 		}
 	}
-
-
-
-	#elif Q_OS_WIN
-    QProcess process;
-    process.start("mklink /D");
-
-    // Wait for it to start
-    if(!process.waitForStarted())
-        return 0;
-
-    bool retval = false;
-    QByteArray buffer;
-    while ((retval = process.waitForFinished()));
-        buffer.append(process.readAll());
-
-    if (!retval) {
-        qDebug() << "Process error:" << process.errorString();
-        qDebug() << "Output:" << buffer;
-        return 1;
-    }
 #endif
 
 
