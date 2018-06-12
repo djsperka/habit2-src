@@ -16,6 +16,7 @@
 */
 #include "genericsurfacepainter.h"
 #include <QPainter>
+#include <QtDebug>
 
 GenericSurfacePainter::GenericSurfacePainter()
     : m_imageFormat(QImage::Format_Invalid)
@@ -47,6 +48,7 @@ void GenericSurfacePainter::init(const BufferFormat &format)
     case GST_VIDEO_FORMAT_ARGB:
 #else
     case GST_VIDEO_FORMAT_BGRA:
+    	qDebug() << "GenericSurfacePainter::init - " << "GST_VIDEO_FORMAT_BGRA";
 #endif
         m_imageFormat = QImage::Format_ARGB32;
         break;
@@ -54,6 +56,7 @@ void GenericSurfacePainter::init(const BufferFormat &format)
     case GST_VIDEO_FORMAT_xRGB:
 #else
     case GST_VIDEO_FORMAT_BGRx:
+    	qDebug() << "GenericSurfacePainter::init - " << "GST_VIDEO_FORMAT_BGRx";
 #endif
         m_imageFormat = QImage::Format_RGB32;
         break;
@@ -61,10 +64,12 @@ void GenericSurfacePainter::init(const BufferFormat &format)
     //FIXME-0.11 do endianness checks like above if semantics have changed
     case GST_VIDEO_FORMAT_RGB16:
         m_imageFormat = QImage::Format_RGB16;
+    	qDebug() << "GenericSurfacePainter::init - " << "GST_VIDEO_FORMAT_RGB16";
         break;
     //This is not affected by endianness
     case GST_VIDEO_FORMAT_RGB:
         m_imageFormat = QImage::Format_RGB888;
+    	qDebug() << "GenericSurfacePainter::init - " << "GST_VIDEO_FORMAT_RGB";
         break;
     default:
         throw QString("Unsupported format");
@@ -89,6 +94,12 @@ void GenericSurfacePainter::paint(quint8 *data,
         frameFormat.frameSize().height(),
         frameFormat.bytesPerLine(),
         m_imageFormat);
+//    if (image.reinterpretAsFormat(QImage::Format_RGB32)) qDebug() << "reinterpret OK";
+//    else qDebug() << "reinterpret FAIL";
+//    int i=5120*512+2560;
+//    int i=0;
+//    qDebug() << "paint: " << frameFormat.frameSize().width() << "x" << frameFormat.frameSize().height() << " bpl " <<
+//    		frameFormat.bytesPerLine() << " format " << m_imageFormat << " " << data[i] << "," << data[i+1] << "," << data[i+2] << "," <<  data[i+3];
 
     QRectF sourceRect = areas.sourceRect;
     sourceRect.setX(sourceRect.x() * frameFormat.frameSize().width());
