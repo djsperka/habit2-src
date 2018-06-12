@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>3.10</ProductVersion>
+    <ProjectGuid>5de3e207-fabd-4b67-b44e-d9a041f8aa26</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>windows_setup</OutputName>
+    <OutputType>Package</OutputType>
+    <HabitStagingFolder Condition=" '$(HabitStagingFolder)' == '' ">$(MSBuildProjectDirectory)\exe\</HabitStagingFolder>
+    <HabitStimFolder Condition=" '$(HabitStimFolder)' == '' ">$(MSBuildProjectDirectory)\..\distribution\stim</HabitStimFolder>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <LinkerAdditionalOptions>-b exe</LinkerAdditionalOptions>
+    <DefineConstants>StagingFolder=$(HabitStagingFolder);StimFolder=$(HabitStimFolder)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="StimComponents-generated.wxs" />
+    <Compile Include="HabitComponents-generated.wxs" />
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\apps\habit\habit2.vcxproj">
+      <Name>habit2</Name>
+      <Project>{dd8544a9-6125-3278-a970-63d0d640f68b}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="HabitConfiguration.wxi" />
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
+  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
+    <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
+  </Target>
+  <!--<PropertyGroup>
+    <PreBuildEvent>rmdir /S /Q $(ProjectDir)exe
+mkdir $(ProjectDir)exe\gstreamer-plugins
+mkdir $(ProjectDir)exe\gstreamer-1.0
+copy $(SolutionDir)apps\habit\release\habit2.exe $(ProjectDir)exe
+windeployqt $(ProjectDir)exe\habit2.exe
+copy $(SolutionDir)libs\gstqt\release\gstqt.dll $(ProjectDir)exe\gstreamer-plugins</PreBuildEvent>
+  </PropertyGroup>-->
+  <!--
+	To modify your build process, add your task inside one of the targets below and uncomment it.
+	Other similar extension points exist, see Wix.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
+  <Target Name="BeforeBuild">
+    <RemoveDir Directories="$(ProjectDir)exe" />
+    <MakeDir Directories="$(ProjectDir)exe/gstreamer-plugins;$(ProjectDir)exe\gstreamer-1.0" />
+    <Copy SourceFiles="$(SolutionDir)apps\habit\release\habit2.exe" DestinationFolder="$(ProjectDir)exe" />
+    <Exec Command="windeployqt $(ProjectDir)exe\habit2.exe" />
+    <Copy SourceFiles="$(SolutionDir)libs\gstqt\release\gstqt.dll" DestinationFolder="$(ProjectDir)exe\gstreamer-plugins" />
+    <HeatDirectory OutputFile="$(ProjectDir)\HabitComponents-generated.wxs" Directory="$(HabitStagingFolder)" ComponentGroupName="HabitComponents" DirectoryRefId="INSTALLDIR" AutogenerateGuids="true" PreprocessorVariable="var.StagingFolder" SuppressRegistry="true" SuppressRootDirectory="true" ToolPath="$(WixToolPath)" NoLogo="true" />
+    <HeatDirectory OutputFile="$(ProjectDir)\StimComponents-generated.wxs" Directory="$(HabitStimFolder)" ComponentGroupName="StimComponents" DirectoryRefId="STIMDIR" AutogenerateGuids="true" PreprocessorVariable="var.StimFolder" SuppressRegistry="true" SuppressRootDirectory="true" ToolPath="$(WixToolPath)" NoLogo="true" />
+    <!--
+	  No need to explicitly call HeatDirectory MSBuild Task.
+	  Instead follow documentation http://wixtoolset.org/documentation/manual/v3/msbuild/target_reference/harvestdirectory.html, which has sample and 
+	  important comment:
+	   This target is processed before compilation. Generated authoring is automatically added to the Compile item group to be compiled by the Candle task.
+	  So, *.wsx file created in the IntermediateOutputPath and included in Compile list (processed by Candle).
+
+	  The following ItemGroup with special name "HarvestDirectory" can be prepared, and later the "HarvestDirectory" target will process it, see
+	  C:\Program Files (x86)\MSBuild\Microsoft\WiX\v3.x\wix2010.targets
+	  -->
+    <!--<ItemGroup>
+      <HarvestDirectory Include="$(AppDistFolder)">
+        <DirectoryRefId>INSTALLDIR</DirectoryRefId>
+        <SuppressRootDirectory>true</SuppressRootDirectory>
+        <SuppressCom>true</SuppressCom>
+        <SuppressRegistry>true</SuppressRegistry>
+        <ComponentGroupName>HabitComponents</ComponentGroupName>
+        <PreprocessorVariable>var.DistFolder</PreprocessorVariable>
+      </HarvestDirectory>
+    </ItemGroup>-->
+  </Target>
+</Project>

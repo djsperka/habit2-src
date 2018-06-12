@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?include HabitConfiguration.wxi ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product 
+    Id="*"
+    Name="$(var.ProductName)" 
+    Language="1033" 
+    Version="$(var.ProductVersion)" 
+    Manufacturer="$(var.ProductManufacturer)" 
+    UpgradeCode="$(var.ProductUpgradeCode)">
+		
+    <Package 
+      Id="*" 
+      InstallerVersion="200" 
+      Compressed="yes" 
+      InstallScope="perMachine" 
+      Platform="x64"
+      />
+    
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate EmbedCab="yes"/>
+
+		<Feature Id="ProductFeature" Title="windows_setup" Level="1">
+			<ComponentGroupRef Id="HabitComponents" />
+      <ComponentGroupRef Id="StimComponents"/>
+			<ComponentRef Id="RegistryEntries"/>
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="ApplicationShortcutDesktop" />
+      <ComponentRef Id="RegistryEntryForStim"/>
+    </Feature>
+		<Feature Id="GStreamer" Title="GStreamer" AllowAdvertise="no" Display="hidden" Level="1">
+			<MergeRef Id="base_system"/>
+			<MergeRef Id="base_crypto"/>
+			<MergeRef Id="gstreamer_net"/>
+			<MergeRef Id="gstreamer_system"/>
+			<MergeRef Id="gstreamer_codecs"/>
+			<MergeRef Id="gstreamer_codecs_gpl"/>
+			<MergeRef Id="gstreamer_codecs_restricted"/>
+			<MergeRef Id="gstreamer_dvd"/>
+			<MergeRef Id="gstreamer_core"/>
+			<MergeRef Id="gstreamer_playback"/>
+			<MergeRef Id="gstreamer_effects"/>
+			<MergeRef Id="gstreamer_libav"/>
+		</Feature>
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    <UIRef Id="WixUI_Minimal" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <WixVariable Id="WixUILicenseRtf" Value="..\distribution\files\habit-copyright.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="..\icons\habit2-installer-banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="..\icons\habit2-installer-dialog.bmp" />
+    <Icon Id="win_baby_256.ico" SourceFile="..\icons\win-baby-256.ico" />
+    <Property Id="ARPPRODUCTICON" Value="win_baby_256.ico" />
+
+  </Product>
+
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="CommonAppDataFolder" Name="cmnAppDataFolder">
+        <Directory Id="STIMDIR" Name="habit2">
+          <Component Id="RegistryEntryForStim" Guid="{1C4DF153-7F38-4D63-80C1-BEEC9B7398C3}">
+            <RegistryValue Root="HKCU" Key="Software\habit2" Name="examples" Type="string" Value="[STIMDIR]" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+		  <Directory Id="ProgramFiles64Folder" Name="PFiles">
+			  <Directory Id="INSTALLDIR" Name="habit2">
+			    <Directory Id="GSTDIR" Name="gstreamer-1.0">
+				    <Merge Id="base_system" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\base-system-1.0-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="base_crypto" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\base-crypto-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_net" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-net-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_system" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-system-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_codecs" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-codecs-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_codecs_gpl" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-codecs-gpl-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_codecs_restricted" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-codecs-restricted-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_dvd" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-dvd-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_core" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-core-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_playback" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-playback-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_effects" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-effects-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+				    <Merge Id="gstreamer_libav" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-libav-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+			    </Directory>
+			  </Directory>
+		  </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="habit2" />
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop"/>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<DirectoryRef Id="TARGETDIR">
+			<Component Id="RegistryEntries" Guid="{EC64D56B-224B-4219-BF01-5F9B49FC6416}">
+				<RegistryKey
+					Root="HKLM"
+					Key="Software\Microsoft\Windows\CurrentVersion\App Paths\$(var.habit2.TargetFileName)">
+					<RegistryValue Type="string" Value="[INSTALLDIR]$(var.habit2.TargetFileName)" KeyPath="yes"/>
+					<RegistryValue Type="string" Name="Path" Value="[INSTALLDIR];[INSTALLDIR]gstreamer-1.0\bin"/>
+				</RegistryKey>
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="{541C9BFD-31D9-40F3-B401-F9A344A761CE}">
+        <Shortcut Id="ApplicationStartMenuShortcut" Name="habit2" Description="Run looking time experiments" Target="[INSTALLDIR]habit2.exe" WorkingDirectory="INSTALLDIR" />
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\habit2" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="ApplicationShortcutDesktop" Guid="{E4D08F48-9FFA-4B42-8747-8738B6FE7E45}">
+        <Shortcut Id="ApplicationDesktopShortcut" Name="habit2" Description="Run looking time experiments" Target="[INSTALLDIR]habit2.exe" WorkingDirectory="INSTALLDIR" />
+        <RemoveFolder Id="RemoveDesktopFolder" Directory="DesktopFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\habit2" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>
