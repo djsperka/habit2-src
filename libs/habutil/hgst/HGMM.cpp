@@ -610,7 +610,7 @@ void HGMM::playStim(unsigned int key)
 		// 	Its also been "cleaned", whatever that means.
 		if (m_pipelineCurrent)
 		{
-			//qDebug() << "pause current stim";
+			qDebug() << "HGMM::playstim: pause current stim";
 			disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 			m_pipelineCurrent->pause();
 			m_pipelineCurrent->detachWidgetsFromSinks();

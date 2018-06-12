@@ -96,6 +96,7 @@ void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
 {
 	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
+		qDebug() << "attach widget w0 " << (w0 ? QString("not null") : QString("NULL"));
 		setWidgetPropertyOnSink(w0, HPlayerPositionType::Center);
 		if (w0)
 			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Center]->size);
@@ -455,8 +456,19 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			if (!audioMixer)
 			{
 				qDebug() << sDebugPrefix << "audiomixer not found: " << sAudioMixerName;
-				GstElement *audioSink = makeElement("osxaudiosink", HPlayerPositionType::Control, id);
-				Q_ASSERT(audioSink);
+				GstElement *audioSink = NULL;
+
+#if defined(Q_OS_MAC)
+				qDebug() << "make osxaudiosink for mac";
+				audioSink = makeElement("osxaudiosink", HPlayerPositionType::Control, id);
+#elif defined(Q_OS_WIN)
+				qDebug() << "make directsoundsink for win";
+				audioSink = makeElement("directsoundsink", HPlayerPositionType::Control, id);
+#else
+				qDebug() << "Unsupported OS.";
+#endif
+
+//				Q_ASSERT(audioSink);
 
 				g_object_set(G_OBJECT(audioSink), "provide-clock", false, NULL);
 
@@ -502,7 +514,13 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			if (!gst_element_sync_state_with_parent(audioMixer))
 				qCritical() << sDebugPrefix << "Cannot sync audioMixer with pipeline state";
 
+#if defined(Q_OS_MAC)
 			audioSink = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("osxaudiosink", HPlayerPositionType::Control, id)));
+#elif defined(Q_OS_WIN)
+			audioSink = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("directsoundsink", HPlayerPositionType::Control, id)));
+#else
+			qWarning() << "Unsupported OS";
+#endif
 			Q_ASSERT(audioSink);
 			if (!gst_element_sync_state_with_parent(audioSink))
 				qCritical() << sDebugPrefix << "Cannot sync audioSink with pipeline state";
