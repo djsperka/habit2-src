@@ -46,8 +46,13 @@ CONFIG(debug, debug|release) {
 	DEFINES += HABIT_RELEASE
 }
 
-ICON = ./habit2.icns
-QMAKE_INFO_PLIST = habit.plist
+macx {
+	ICON = ./habit2.icns
+	QMAKE_INFO_PLIST = habit.plist
+}
+win32 {
+	RC_ICONS = ../../icons/kids-icon.ico
+}
 
 INCLUDEPATH += ../../libs/habutil
 INCLUDEPATH += ../../libs/habutil/habit
