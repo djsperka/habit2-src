@@ -76,6 +76,12 @@ class HStateMachine;
 		 void adaptVideoWidgets(HGMM *pmm);
 		 QDialog *createStimulusWidget(HGMM *pmm);
 
+#ifdef Q_OS_WIN
+		 bool fixStimfilesPathPrefix(Habit::ExperimentSettings& settings);	// settings are changed here
+		 bool fixStimulusSettingsPathPrefix(Habit::StimulusSettings& ss, const QDir& d);
+		 bool fixStimulusInfoPathPrefix(Habit::StimulusInfo& info, const QDir& d);
+#endif
+
 	//    QMap<QString, HExperimentMain> m_mapExperiments;
 		 bool m_bTestRunIsDefault;
 		 bool m_bShowTestingIcon;

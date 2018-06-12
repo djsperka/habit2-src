@@ -330,6 +330,21 @@ void GUILib::H2MainWindow::newExperiment()
 			Habit::ExperimentSettings templateSettings;
 			templateSettings.loadFromDB(dlg.getTemplateChosen());
 			settings = templateSettings.clone(dlg.getNewValue());
+#ifdef Q_OS_WIN
+			// On windows, update the paths to stimuli. 
+			// On mac, the relative path is used for the stim files. When a new workspace is 
+			// created, the relative path must be accompanied by the "Default Stim Root" setting. 
+			// The relative paths are set with a soft link created in the workspace folder "stim" 
+			// directory. On windows, however, while creating soft links is possible, the ability
+			// to do so is limited by user privs, and (effectively) is not useful for a distributed 
+			// program.
+			//
+			// What to do? I choose a crappy solution (perhaps the least crappy of several 
+			// crappy options) where I change the path to the stimuli to absolute paths - 
+			// in this case the default stim root doesn't matter. IN retrospect, this choice might
+			// be more useful on the mac as well.
+			fixStimfilesPathPrefix(settings);
+#endif
 		}
 		else
 		{
@@ -824,4 +839,67 @@ void GUILib::H2MainWindow::editPreferences()
 	}
 	disconnect(pPrefDialog, SIGNAL(workspaceChanged()), this, SLOT(workspaceChanged()));
 }
+
+
+#ifdef Q_OS_WIN
+bool GUILib::H2MainWindow::fixStimulusInfoPathPrefix(Habit::StimulusInfo& info, const QDir& d)
+{
+	bool b = true;
+	if (info.getFileName().startsWith("examples"))
+	{
+		qDebug() << "Fix " << info.getFileName();
+		info.setFileName(d.absoluteFilePath(info.getFileName()));
+		qDebug() << "Fixed " << info.getFileName();
+	}
+	return b;
+}
+
+bool GUILib::H2MainWindow::fixStimulusSettingsPathPrefix(Habit::StimulusSettings& ss, const QDir& d)
+{
+	qDebug() << "Fix path for stim " << ss.getName();
+	return	fixStimulusInfoPathPrefix(ss.getCenterStimulusInfo(), d) &&
+		fixStimulusInfoPathPrefix(ss.getLeftStimulusInfo(), d) &&
+		fixStimulusInfoPathPrefix(ss.getRightStimulusInfo(), d) &&
+		fixStimulusInfoPathPrefix(ss.getIndependentSoundInfo(), d);
+}
+
+bool GUILib::H2MainWindow::fixStimfilesPathPrefix(Habit::ExperimentSettings& settings)
+{
+	bool bResult = true;
+
+	// Get dir to use from registry
+	QSettings reg("HKEY_CURRENT_USER\\Software\\habit2", QSettings::NativeFormat);
+	if (!reg.contains("examples"))
+	{
+		qWarning() << "Cannot find  \"examples\" under \"HKEY_CURRENT_USER\\Software\\habit2\"";
+		return false;
+	}
+
+	QDir dir(reg.value("examples").toString());
+	if (!dir.exists())
+	{
+		qWarning() << "The examples dir saved in registry not found: " << reg.value("examples");
+		return false;
+	}
+
+	// check attention getter
+	bResult = fixStimulusSettingsPathPrefix(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), dir);
+	if (bResult)
+	{
+		QList<HPhaseSettings>& thePhases = settings.phases();
+		qDebug() << "There are " << thePhases.size() << " phases.";
+		for (int i = 0; i < thePhases.size(); i++)
+		{
+			HPhaseSettings& phaseSettings = thePhases[i];
+			qDebug() << "Phase " << i << " " << phaseSettings.getName() << " has " << phaseSettings.stimuli().stimuli().size() << " stimuli";
+			for (int j = 0;  bResult && j < phaseSettings.stimuli().stimuli().size(); j++)
+			{
+				bResult = fixStimulusSettingsPathPrefix((phaseSettings.stimuli().stimuli())[j], dir);
+			}
+		}
+	}
+
+	return bResult;
+}
+#endif
 
