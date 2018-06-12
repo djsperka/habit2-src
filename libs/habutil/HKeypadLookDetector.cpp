@@ -55,6 +55,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 		case QEvent::KeyPress:
 		{
 			keyEvent = static_cast<QKeyEvent*>(event);
+			qDebug() << "KeyPress(" << keyEvent->text() << ") repeat? " << keyEvent->isAutoRepeat();
 			if (keyEvent->isAutoRepeat())
 			{
 				bVal = true;
@@ -130,7 +131,8 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 		case QEvent::KeyRelease:
 		{
 			keyEvent = static_cast<QKeyEvent*>(event);
-			switch (keyEvent->key()) 
+			qDebug() << "KeyRelease(" << keyEvent->text() << ") repeat? " << keyEvent->isAutoRepeat();
+			switch (keyEvent->key())
 			{
 				case Qt::Key_Enter:
 				case Qt::Key_Space:
