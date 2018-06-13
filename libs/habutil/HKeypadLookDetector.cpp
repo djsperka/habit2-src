@@ -55,7 +55,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 		case QEvent::KeyPress:
 		{
 			keyEvent = static_cast<QKeyEvent*>(event);
-			qDebug() << "KeyPress(" << keyEvent->text() << ") repeat? " << keyEvent->isAutoRepeat();
+			//qDebug() << "KeyPress(" << keyEvent->text() << ") repeat? " << keyEvent->isAutoRepeat();
 			if (keyEvent->isAutoRepeat())
 			{
 				bVal = true;
@@ -131,9 +131,30 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 		case QEvent::KeyRelease:
 		{
 			keyEvent = static_cast<QKeyEvent*>(event);
-			qDebug() << "KeyRelease(" << keyEvent->text() << ") repeat? " << keyEvent->isAutoRepeat();
-			switch (keyEvent->key())
+			//qDebug() << "KeyRelease(" << keyEvent->text() << ") repeat? " << keyEvent->isAutoRepeat();
+
+			// On Windows, it seems that when holding the key down we get repeated events in this
+			// type of sequence (from log file on windows)
+			// 
+			//06 : 58 : 28 Debug : KeyPress("5") repeat ? false
+			//06 : 58 : 28 Debug : KeyRelease("5") repeat ? true
+			//06 : 58 : 28 Debug : KeyPress("5") repeat ? true
+			//06 : 58 : 28 Debug : KeyRelease("5") repeat ? true
+			// ===CUT===
+			//06 : 58 : 30 Debug : KeyRelease("5") repeat ? false
+			//
+			// The last one - with autorepeat=FALSE, appears to be the one. 
+			// On Mac, we get no "KeyRelease" events with AutoRepeat=true. 
+			// Apparently on Windows, the held-key-press is translated as a series
+			// of "KeyPress (repeat=true)"/"KeyRelease (repeat=true)" events. 
+			if (keyEvent->isAutoRepeat())
 			{
+				bVal = true;
+			}
+			else
+			{
+				switch (keyEvent->key())
+				{
 				case Qt::Key_Enter:
 				case Qt::Key_Space:
 				{
@@ -194,6 +215,7 @@ bool HKeypadLookDetector::eventFilter(QObject *obj, QEvent *event)
 				}
 				default:
 					break;
+				}
 			}
 			break;
 		}
