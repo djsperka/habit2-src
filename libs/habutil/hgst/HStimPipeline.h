@@ -68,9 +68,11 @@ class HStimPipeline: public HPipeline
 
 	HStimPipelineSource *addStimulusInfo(const HPlayerPositionType& ppt, const Habit::StimulusInfo& info, bool bAudio);
 	void emitNowPlaying();
+	void dumpGstStateChangeReturn(const QString& s, GstStateChangeReturn r);
 
 public:
 	bool bInitialFlushingSeekDone;
+	int m_iAsyncPause;
 	HStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, QObject *parent);
 	virtual ~HStimPipeline();
 
@@ -115,7 +117,7 @@ public:
 	// Callback function for 'pad-added' signal from decodebin elements
 	static void padAdded(GstElement *src, GstPad *newPad, gpointer p);
 
-	static GstPadProbeReturn eventProbeDoNothingCB(GstPad * pad, GstPadProbeInfo * info, gpointer p);
+	static GstPadProbeReturn eventProbeCB(GstPad * pad, GstPadProbeInfo * info, gpointer p);
 
 };
 

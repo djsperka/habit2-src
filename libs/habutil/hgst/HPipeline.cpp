@@ -97,7 +97,7 @@ void HPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& widt
 	new_pad_struct = gst_caps_get_structure(caps, 0);
 	new_pad_type = gst_structure_get_name(new_pad_struct);
 	s_new_pad_caps = gst_caps_to_string(caps);
-	qDebug() << "parseCaps: " << s_new_pad_caps;
+	qDebug() << "HPipeline::parseCaps: " << s_new_pad_caps;
 
 	isAudio = g_str_has_prefix(s_new_pad_caps, "audio/x-raw");
 	if (g_str_has_prefix(s_new_pad_caps, "video/x-raw"))
@@ -134,7 +134,7 @@ void HPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& widt
 		}
 		else qCritical() << "framerate not in caps or unexpected value type";
 	}
-	qDebug() << "parseCaps: Video? " << isVideo << " Image? " << isImage << " Audio? :" << isAudio << " Resolution: " << width << "x" << height;
+	qDebug() << "HPipeline::parseCaps: Video? " << isVideo << " Image? " << isImage << " Audio? :" << isAudio << " Resolution: " << width << "x" << height;
 }
 
 

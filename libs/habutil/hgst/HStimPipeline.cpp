@@ -32,7 +32,9 @@ HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const Ha
 : HPipeline(id, ss, info, parent)
 , m_bInitialized(false)
 , m_dirStimRoot(stimRoot)
+, m_bRewindPending(false)
 , bInitialFlushingSeekDone(false)
+, m_iAsyncPause(0)
 {
 }
 
@@ -53,7 +55,7 @@ void HStimPipeline::emitNowPlaying()
 void HStimPipeline::rewind()
 {
 	// flushing seek. gsgtreamer will handle state, as long as we're paused or playing, which
-	// we always are in habit, this will flush the pipeline and preoll, and original state is resumed.
+	// we always are in habit, this will flush the pipeline and preroll, and original state is resumed.
 	qDebug() << "HStimPipeleine::rewind(), flushing seek...";
 	if (!gst_element_seek(pipeline(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 	{
@@ -66,18 +68,47 @@ void HStimPipeline::rewind()
 	}
 }
 
+void HStimPipeline::dumpGstStateChangeReturn(const QString& s, GstStateChangeReturn r)
+{
+	switch(r)
+	{
+	case GST_STATE_CHANGE_FAILURE:
+		qDebug() << s << "( " << id() << " ) GST_STATE_CHANGE_FAILURE";
+		break;
+	case GST_STATE_CHANGE_SUCCESS:
+		qDebug() << s << "( " << id() << " ) GST_STATE_CHANGE_SUCCESS";
+		break;
+	case GST_STATE_CHANGE_ASYNC:
+		qDebug() << s << "( " << id() << " ) GST_STATE_CHANGE_ASYNC";
+		break;
+	case GST_STATE_CHANGE_NO_PREROLL:
+		qDebug() << s << "( " << id() << " ) GST_STATE_CHANGE_NO_PREROLL";
+		break;
+	default:
+		qDebug() << s << "( " << id() << " )  unknown return value from state change";
+		break;
+	}
+}
+
 void HStimPipeline::pause()
 {
 	//qDebug() << "HStimPipeline::pause(" << id() << ")";
 	initialize();
-	gst_element_set_state(pipeline(), GST_STATE_PAUSED);
+	GstStateChangeReturn r = gst_element_set_state(pipeline(), GST_STATE_PAUSED);
+	if (GST_STATE_CHANGE_ASYNC == r)
+	{
+		m_iAsyncPause++;
+		qDebug() << "HStimPipeline::pause( "  << id() << " ) - GST_STATE_CHANGE_ASYNC " << m_iAsyncPause;
+	}
+	dumpGstStateChangeReturn("HStimPipeline::pause()", r);
 }
 
 void HStimPipeline::play()
 {
 	//qDebug() << "HStimPipeline::play(" << id() << ")";
 	initialize();
-	gst_element_set_state(pipeline(), GST_STATE_PLAYING);
+	GstStateChangeReturn r = gst_element_set_state(pipeline(), GST_STATE_PLAYING);
+	dumpGstStateChangeReturn("HStimPipeline::play()", r);
 }
 
 void HStimPipeline::setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt)
@@ -96,7 +127,6 @@ void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
 {
 	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		qDebug() << "attach widget w0 " << (w0 ? QString("not null") : QString("NULL"));
 		setWidgetPropertyOnSink(w0, HPlayerPositionType::Center);
 		if (w0)
 			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Center]->size);
@@ -174,7 +204,7 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 
 	HStimPipelineSource *pStimPipelineSource = new HStimPipelineSource(this);
 
-	qDebug() << "addStimulusInfo ppt " << ppt.name() << " info " << info;
+	qDebug() << "HStimPipeline::addStimulusInfo ppt " << ppt.name() << " info " << info;
 
 	if (ppt == HPlayerPositionType::Sound)
 	{
@@ -365,8 +395,8 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			gst_bin_add_many(GST_BIN(pSource->pipeline()), videoConvert, freeze, NULL);
 
 			GstPad *sinkPad = gst_element_get_static_pad(videoConvert, "sink");
-			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
-			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeCB, (gpointer)pSource, NULL);
+			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeCB, (gpointer)pSource, NULL);
 			gst_pad_link(newPad, sinkPad);
 			gst_object_unref(sinkPad);
 			gst_element_link (videoConvert, freeze);
@@ -401,8 +431,8 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			gst_bin_add_many(GST_BIN(pSource->pipeline()), videoConvert, NULL);
 
 			GstPad *sinkPad = gst_element_get_static_pad(videoConvert, "sink");
-			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
-			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeCB, (gpointer)pSource, NULL);
+			//gst_pad_add_probe (sinkPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeCB, (gpointer)pSource, NULL);
 			gst_pad_link(newPad, sinkPad);
 			gst_object_unref(sinkPad);
 
@@ -499,7 +529,7 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 			GstPad *pad = gst_element_get_static_pad(audioconvert, "sink");
 			Q_ASSERT(pad);
-			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
+			gst_pad_add_probe (newPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeCB, (gpointer)pSource, NULL);
 			//gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HStimPipeline::eventProbeDoNothingCB, (gpointer)pSource, NULL);
 			//gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &FDDialog::eventProbeAudioDoNothingCB, (gpointer)pdata, NULL);
 			gst_pad_link(newPad, pad);
@@ -550,7 +580,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 	//qDebug() << "busCallback: " << GST_MESSAGE_TYPE_NAME(msg) << " from " << GST_MESSAGE_SRC_NAME(msg);
 	if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ASYNC_DONE)
 	{
-		qDebug() << "busCallback: Got ASYNC_DONE from " << GST_MESSAGE_SRC_NAME(msg);
+		qDebug() << "HStimPipeline:busCallback( " << pStimPipeline->id() << "): Got ASYNC_DONE from " << GST_MESSAGE_SRC_NAME(msg);
 
 		// Loop over each stim source on this bus.
 		// The ASYNC_DONE message doesn't come until all sources have prerolled, or entered PAUSED state.
@@ -560,14 +590,14 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		// issue flushing seek to entire pipeline. Catch segment events for each source
 		if (!pStimPipeline->bInitialFlushingSeekDone)
 		{
-			qDebug() << "busCallback: Issue initial flushing seek to pipeline.";
+			qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): Issue initial flushing seek to pipeline.";
 			if (!gst_element_seek(pStimPipeline->pipeline(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
-				qCritical() << "busCallback: SEEK FAILED";
+				qCritical() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): SEEK FAILED";
 			}
 			else
 			{
-				qDebug() << "busCallback: initial pipeline flush seek done";
+				qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): initial pipeline flush seek done";
 
 				QMutexLocker locker(pStimPipeline->mutex());
 
@@ -578,14 +608,15 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 					it.next();
 					HPlayerPositionType ppt = it.key();
 					HStimPipelineSource* pSource = it.value();
-					qDebug() << "busCallback: Source " << ppt.name() << " is now waiting for preroll...";
+					qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): Source " << ppt.name() << " is now waiting for preroll...";
 					pSource->bWaitingForPreroll = true;
 				}
 			}
 		}
 		else
 		{
-			qDebug() << "busCallback: entire pipeline is now prerolled.";
+			if (pStimPipeline->m_iAsyncPause) pStimPipeline->m_iAsyncPause--;
+			qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): pipeline is now prerolled. m_iAsyncPause=" << pStimPipeline->m_iAsyncPause;
 			GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pStimPipeline->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pStimPipeline->pipeline()));
 		}
 		//#endif here see bottom
@@ -596,7 +627,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		{
 			GstState old_state, new_state;
 			gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
-			//qDebug() << "busCallback: got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
+			qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
 			if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
 			{
 				pStimPipeline->emitNowPlaying();
@@ -605,31 +636,31 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 	}
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_SEGMENT_DONE)
 	{
-		qDebug() << "busCallback: SEGMENT_DONE";
+		qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): SEGMENT_DONE";
 	}
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_APPLICATION)
 	{
 		if (gst_message_has_name (msg, "DoSegmentSeek"))
 		{
 			const gchar *elementName = gst_structure_get_string(gst_message_get_structure(msg), "element");
-			qDebug() << "busCallback: DoSegmentSeek on element  " << (elementName ? elementName : "???");
+			qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): DoSegmentSeek on element  " << (elementName ? elementName : "???");
 			GstElement *element = gst_bin_get_by_name(GST_BIN(pStimPipeline->pipeline()), elementName);
 			Q_ASSERT(element);
 			if (!gst_element_seek(element, 1.0, GST_FORMAT_TIME, GST_SEEK_FLAG_SEGMENT, GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
-				qCritical() << "busCallback: non-flushing segment seek on element " << elementName << " FAILED";
+				qCritical() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): non-flushing segment seek on element " << elementName << " FAILED";
 			}
 			gst_object_unref(element);
 		}
 		else if (gst_message_has_name (msg, "DoFlushingSegmentSeek"))
 		{
 			const gchar *elementName = gst_structure_get_string(gst_message_get_structure(msg), "element");
-			qDebug() << "busCallback: DoFlushingSegmentSeek on element  " << (elementName ? elementName : "???");
+			qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): DoFlushingSegmentSeek on element  " << (elementName ? elementName : "???");
 			GstElement *element = gst_bin_get_by_name(GST_BIN(pStimPipeline->pipeline()), elementName);
 			Q_ASSERT(element);
 			if (!gst_element_seek(element, 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
-				qCritical() << "busCallback: flushing segment seek on element " << elementName << " FAILED";
+				qCritical() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): flushing segment seek on element " << elementName << " FAILED";
 			}
 			gst_object_unref(element);
 		}
@@ -637,7 +668,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 	return TRUE;
 }
 
-GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbeInfo * info, gpointer p)
+GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * info, gpointer p)
 {
 	HStimPipelineSource *pSource = (HStimPipelineSource *)p;
 
@@ -648,24 +679,24 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 	if (event)
 	{
 		GstElement* parent = GST_PAD_PARENT(pad);
-		//qDebug() << "eventProbeDoNothingCB: Event type " << GST_EVENT_TYPE_NAME(event) << " from " << GST_ELEMENT_NAME(parent);
+		//qDebug() << "eventProbeCB: Event type " << GST_EVENT_TYPE_NAME(event) << " from " << GST_ELEMENT_NAME(parent);
 
 		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
 		{
 			QMutexLocker locker(pSource->stimPipeline()->mutex());
 			if (pSource->bLoop)
 			{
-				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment-done event on pad " << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+				//qDebug() << "eventProbeCB: Looping source, got segment-done event on pad " << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
 				if (!pSource->sWaitingForSegment2Pad.isEmpty() && QString(GST_PAD_NAME(pad)) != pSource->sWaitingForSegment2Pad)
 				{
-					qDebug() << "eventProbeDoNothingCB: Looping source, n=2 case. pad=" << GST_PAD_NAME(pad) << " expecting" << pSource->sWaitingForSegment2Pad << "No seek issued.";
+					qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source, n=2 case. pad=" << GST_PAD_NAME(pad) << " expecting" << pSource->sWaitingForSegment2Pad << "No seek issued.";
 				}
 				else
 				{
 					// post message on bus - tell the bus handler (in correct thread, apparently) to issue the seek
 					// IIRc there was an issue getting it to work in all cases when issuing the FLUSHING seek from this thread,
 					// hence the 'send message to the bus handler' trick employed here.
-				    //qDebug() << "eventProbeDoNothingCB: Looping source, post bus message.";
+				    //qDebug() << "eventProbeCB: Looping source, post bus message.";
 
 					// We always do 'segment seek' pipelines, which means for any source we play its full length, after which
 					// a SEGMENT_DONE event comes, and later (??) the bus message hits.
@@ -694,7 +725,7 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 					if (pSource->nPadsLinked == 1)
 					{
 						GstElement *parent = gst_pad_get_parent_element(pad);
-						qDebug() << "eventProbeDoNothingCB: segment_done from " << GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo << " waiting for segment " << pSource->bWaitingForSegment;
+						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment_done from " << GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo << " waiting for segment " << pSource->bWaitingForSegment;
 						gst_object_unref(parent);
 
 						//if (!strcmp(GST_PAD_NAME(pad), "src_0")) return GST_PAD_PROBE_OK;
@@ -721,7 +752,7 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 						// have been issued.
 						//
 						GstElement *parent = gst_pad_get_parent_element(pad);
-						qDebug() << "eventProbeDoNothingCB: segment_done from " << GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo;
+						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment_done from " << GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo;
 						gst_object_unref(parent);
 
 
@@ -746,17 +777,17 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 		}
 		else if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
 		{
-			qDebug() << "eventProbeDoNothingCB: segment on pad "  << GST_PAD_NAME(pad);// << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+			qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment on pad "  << GST_PAD_NAME(pad);// << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
 			QMutexLocker locker(pSource->stimPipeline()->mutex());
 			if (pSource->bLoop)
 			{
 				const GstSegment *segment;
 				gst_event_parse_segment(event, &segment);
-				//qDebug() << "eventProbeDoNothingCB: Looping source, got segment event on pad "  << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-				//qDebug() << "eventProbeDoNothingCB: base " << segment->base << " offset " << segment->offset << " start " << segment->start << " stop " << segment->stop << " time " << segment->time << " position " << segment->position << " duration " << segment->duration;
+				//qDebug() << "eventProbeCB: Looping source, got segment event on pad "  << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+				//qDebug() << "eventProbeCB: base " << segment->base << " offset " << segment->offset << " start " << segment->start << " stop " << segment->stop << " time " << segment->time << " position " << segment->position << " duration " << segment->duration;
 				if (pSource->bWaitingForPreroll)
 				{
-					//qDebug() << "eventProbeDoNothingCB: Waiting for looping source to preroll after initial flushing seek, expected segment. This source is prerolled and ready to loop.";
+					//qDebug() << "eventProbeCB: Waiting for looping source to preroll after initial flushing seek, expected segment. This source is prerolled and ready to loop.";
 					pSource->bWaitingForPreroll = false;
 					pSource->bPrerolled = true;
 				}
@@ -765,16 +796,16 @@ GstPadProbeReturn HStimPipeline::eventProbeDoNothingCB(GstPad * pad, GstPadProbe
 					if (pSource->sWaitingForSegment2Pad == QString(GST_PAD_NAME(pad)))
 					{
 						pSource->bWaitingForSegment = false;
-						qDebug() << "eventProbeDoNothingCB: Looping source, got expected segment on pad " << pSource->sWaitingForSegment2Pad;
+						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source, got expected segment on pad " << pSource->sWaitingForSegment2Pad;
 					}
 					else
 					{
-						qDebug() << "eventProbeDoNothingCB: Looping source, expected segment on pad " << pSource->sWaitingForSegment2Pad << ", continue waiting...";
+						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source, expected segment on pad " << pSource->sWaitingForSegment2Pad << ", continue waiting...";
 					}
 				}
 				else
 				{
-					//qDebug() << "eventProbeDoNothingCB: Looping source, unexpected segment.";
+					//qDebug() << "eventProbeCB: Looping source, unexpected segment.";
 				}
 			}
 		}
