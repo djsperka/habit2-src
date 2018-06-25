@@ -97,6 +97,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	// The timer is controlled by HStimRunningState, and it will post an HNoLookQEvent()
 	// to the state machine. That triggers the HNoLookTransition to the HNoLookTimeoutState.
 	// That state automatically transitions back to sInitial to repeat the trial.
+	// TODO CAn this get triggered but have another transition end the trial before the event is received?
 
 	if (m_phaseSettings.getIsMaxNoLookTime())
 	{
