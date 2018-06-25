@@ -443,9 +443,9 @@ void HGMM::ag()
 
 void HGMM::nowPlaying()
 {
-	qDebug() << "HGMM::nowPlaying";
 	if (m_bPendingAG)
 	{
+		m_bRewindCurrentPipeline = true;
 		qDebug() << "HGMM::nowPlaying: Q_EMIT(agStarted(" << m_iPendingStimKey << "))";
 		Q_EMIT(agStarted(m_iPendingStimKey));
 	}
@@ -614,7 +614,14 @@ void HGMM::playStim(unsigned int key)
 			disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 			m_pipelineCurrent->pause();
 			m_pipelineCurrent->detachWidgetsFromSinks();
-			m_pipelineCurrent->cleanup();	// might not cleanup
+
+			// check disposition of the current pipeline. By default it will be cleaned up, but that can
+			// be overridden by calling rewindCurrentPipeline(). Such a call will only apply to m_pipelineCurrent,
+			// and will revert to the default after this call is done.
+			if (m_bRewindCurrentPipeline)
+				m_pipelineCurrent->rewind();
+			else
+				m_pipelineCurrent->cleanup();	// might not cleanup
 		}
 
 		// set things up for new pipeline 'pipeline'
@@ -629,7 +636,7 @@ void HGMM::playStim(unsigned int key)
 		}
 
 	}
-
+	m_bRewindCurrentPipeline = false;
 	pipeline->play();
 	m_pipelineCurrent = pipeline;
 

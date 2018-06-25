@@ -79,6 +79,7 @@ class HGMM: public QObject
 	bool m_bPendingAG;
 	bool m_bPendingStim;
 	unsigned int m_iPendingStimKey;
+	bool m_bRewindCurrentPipeline;
 
 protected:
 
@@ -147,6 +148,9 @@ public:
 
 	unsigned int nStimuli() const { return m_mapPipelines.size(); };
 
+	// tell hgmm that currently playing stim should be rewound, not cleaned up
+	void rewindCurrentPipeline() { m_bRewindCurrentPipeline = true; };
+
 	// pipeline control
 	void initialize(unsigned int id);
 	void preroll(unsigned int id);
@@ -170,8 +174,6 @@ public Q_SLOTS:
 	void stim(unsigned int);
 	void ag();
 	void nowPlaying();
-//	void playerStarted(int i, const QString& filename);
-//	void playerCleared(int i);
 
 Q_SIGNALS:
 	void agStarted(int);
