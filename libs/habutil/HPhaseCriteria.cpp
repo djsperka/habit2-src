@@ -8,15 +8,17 @@
  */
 
 #include "HPhaseCriteria.h"
+#include "HEvents.h"
 #include <algorithm>
 
 
 using namespace Habit;
 
-bool HPhaseFixedNCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated)
+bool HPhaseFixedNCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber)
 {
 	bool b = false;
 	isHabituated = false;
+	eventNumber = HEventType::HEventUndefined.number();	// no events
 	if (log.nCompleted() >= m_N)
 	{
 		b = true;
@@ -25,19 +27,23 @@ bool HPhaseFixedNCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabitua
 	return b;
 };
 
-bool HPhaseTotalLookingTimeCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated)
+bool HPhaseTotalLookingTimeCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber)
 {
 	bool b = false;
 	bool bdummy=false;	// will be ignored
+	int ignored=0;		// this too
 	isHabituated = false;
+	eventNumber = HEventType::HEventUndefined.number();	// no events, unless see below
 	if (log.totalLookingTime() >= m_msTotal)
 	{
 		b = true;
 		isHabituated = true;
+		eventNumber = HEventType::HHabituationSuccess.number();
 	}
-	else if (HPhaseFixedNCriteria::isPhaseComplete(log, bdummy))
+	else if (HPhaseFixedNCriteria::isPhaseComplete(log, bdummy, ignored))
 	{
 		b = true;
+		eventNumber = HEventType::HHabituationFailure.number();
 	}
 	return b;
 };
@@ -122,7 +128,7 @@ bool HPhaseHabituationCriteria::getWindowSum(const HPhaseLog& log, int& sum, int
 	return true;
 };
 
-bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated)
+bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber)
 {
 	bool b = false;
 	bool bdummy = false;	// will be ignored
@@ -132,6 +138,7 @@ bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHa
 	double threshold;
 	int iStep = 1;
 	isHabituated = false;
+	eventNumber = HEventType::HEventUndefined.number();
 	if (getBasisSum(log, basisSum, iWindowStart))
 	{
 		threshold = (double)basisSum * m_c.getPercent() / 100.0;
@@ -145,15 +152,18 @@ bool HPhaseHabituationCriteria::isPhaseComplete(const HPhaseLog& log, bool& isHa
 			{
 				b = true;
 				isHabituated = true;
+				eventNumber = HEventType::HHabituationSuccess.number();
 				break;
 			}
 		}
 	}
 	
 	// If phase is not complete, check if max number of trials reached.
-	if (!b && HPhaseFixedNCriteria::isPhaseComplete(log, bdummy))
+	int ignored;
+	if (!b && HPhaseFixedNCriteria::isPhaseComplete(log, bdummy, ignored))
 	{
 		b = true;
+		eventNumber = HEventType::HHabituationFailure.number();
 	}
 	return b;
 };

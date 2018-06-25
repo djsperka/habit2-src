@@ -23,7 +23,7 @@ class HPhaseCriteria
 public:
 	HPhaseCriteria() {};
 	virtual ~HPhaseCriteria() {};
-	virtual bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated) = 0;
+	virtual bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber) = 0;
 };
 
 
@@ -32,7 +32,7 @@ class HPhaseFixedNCriteria: public HPhaseCriteria
 public:
 	HPhaseFixedNCriteria(int N): HPhaseCriteria(), m_N(N) {};
 	virtual ~HPhaseFixedNCriteria() {};
-	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated);
+	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber);
 	int getN() { return m_N; };
 protected:
 	int m_N;
@@ -43,7 +43,7 @@ class HPhaseTotalLookingTimeCriteria: public HPhaseFixedNCriteria
 public:
 	HPhaseTotalLookingTimeCriteria(int msTotal, int N) : HPhaseFixedNCriteria(N), m_msTotal(msTotal) {};
 	virtual ~HPhaseTotalLookingTimeCriteria() {};
-	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated);
+	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber);
 private:
 	int m_msTotal;
 };
@@ -53,7 +53,7 @@ class HPhaseHabituationCriteria: public HPhaseFixedNCriteria
 public:
 	HPhaseHabituationCriteria(Habit::CriterionSettings c, int N) : HPhaseFixedNCriteria(N), m_c(c) {};
 	virtual ~HPhaseHabituationCriteria() {};
-	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated);
+	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber);
 	
 	// Get the sum used as basis for the habituation criteria. 
 	// Returns true when a basis sum is found (will return false if there are not enough

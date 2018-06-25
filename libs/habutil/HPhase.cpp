@@ -79,15 +79,14 @@ void HPhase::checkPrerollStatus(int trialnumber, int repeat)
 	else
 	{
 		int prerollID = m_itrial+1;
-		qDebug() << "Check preroll status for trial " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial];
 		if (prerollID < m_stimuli.size())
 		{
-			qDebug() << "HPhase::checkPrerollStatus() - preroll(" << m_stimuli[prerollID].first << ")";
+			qDebug() << "HPhase::checkPrerollStatus() - trial/repeat " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial].first << " will preroll(" << m_stimuli[prerollID].first << ")";
 			experiment().getMediaManager().preroll(m_stimuli[prerollID].first);
 		}
 		else
 		{
-			qDebug() << "At last stim in phase; nothing to preroll.";
+			qDebug() << "HPhase::checkPrerollStatus() - trial/repeat " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial].first << "At last stim in phase; nothing to preroll.";
 		}
 	}
 }
@@ -175,20 +174,24 @@ void HPhase::requestAG()
 void HPhase::onTrialCompleteEntered()
 {
 	bool isHabituated = false;
-	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog(), isHabituated))
+	int eventNumber = HEventType::HEventUndefined.number();
+	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog(), isHabituated, eventNumber))
 	{
 		machine()->postEvent(new HAllTrialsDoneEvent());
 
-		qWarning() << "Habituation success/fail event not implemented!!!";
-/*
-		if (ptype() == HPhaseType::Habituation)
+		// check event number
+		if (eventNumber == HEventType::HHabituationSuccess.number())
 		{
-			if (isHabituated)
-				eventLog().append(new HHabituationSuccessEvent(HElapsedTimer::elapsed()));
-			else 
-				eventLog().append(new HHabituationFailureEvent(HElapsedTimer::elapsed()));
+			eventLog().append(new HHabituationSuccessEvent(HElapsedTimer::elapsed()));
 		}
-*/
+		else if (eventNumber == HEventType::HHabituationFailure.number())
+		{
+			eventLog().append(new HHabituationFailureEvent(HElapsedTimer::elapsed()));
+		}
+		else if (eventNumber != HEventType::HEventUndefined.number())
+		{
+			qWarning() << "Unhandled event type from HPhaseCriteria::isPhaseComplete";
+		}
 	}
 	else 
 	{
