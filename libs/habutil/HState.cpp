@@ -36,7 +36,7 @@ void HState::onEntry( QEvent* e )
         state = parent->name() + ":" + state;
         parent = dynamic_cast<HState*>( parent->parentState() );
     }
-    qDebug() << "Enter state:" << state;
+    qDebug() << "HState::onEntry " << state;
 }
 
 void HState::onExit( QEvent* e )
@@ -52,6 +52,6 @@ void HState::onExit( QEvent* e )
         parent = dynamic_cast<HState*>( parent->parentState() );
     }
 	
-    qDebug() << "Exit  state:" << state;
+    qDebug() << "HState::onExit " << state;
 }
 
