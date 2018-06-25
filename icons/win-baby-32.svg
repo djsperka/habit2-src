@@ -7,7 +7,6 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="32"
@@ -22,29 +21,7 @@
    inkscape:export-ydpi="96"
    style="shape-rendering:crispEdges">
   <defs
-     id="defs928">
-    <linearGradient
-       inkscape:collect="always"
-       id="linearGradient10034">
-      <stop
-         style="stop-color:#0000ff;stop-opacity:1;"
-         offset="0"
-         id="stop10030" />
-      <stop
-         style="stop-color:#0000ff;stop-opacity:0;"
-         offset="1"
-         id="stop10032" />
-    </linearGradient>
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient10034"
-       id="linearGradient10036"
-       x1="8.2020836"
-       y1="0.26458332"
-       x2="0.26458332"
-       y2="8.2020836"
-       gradientUnits="userSpaceOnUse" />
-  </defs>
+     id="defs928" />
   <sodipodi:namedview
      id="base"
      pagecolor="#e4e4e4"
@@ -54,9 +31,9 @@
      inkscape:pageshadow="2"
      inkscape:zoom="22.4"
      inkscape:cx="11.902365"
-     inkscape:cy="34.190022"
+     inkscape:cy="16.332879"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer5"
+     inkscape:current-layer="layer3"
      showgrid="true"
      units="px"
      borderlayer="true"
@@ -65,7 +42,7 @@
      objecttolerance="10000"
      inkscape:snap-object-midpoints="false"
      inkscape:window-width="1680"
-     inkscape:window-height="949"
+     inkscape:window-height="1005"
      inkscape:window-x="0"
      inkscape:window-y="1"
      inkscape:window-maximized="1">
@@ -83,22 +60,14 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      inkscape:groupmode="layer"
      id="layer5"
-     inkscape:label="background">
-    <rect
-       style="fill:url(#linearGradient10036);fill-opacity:1;stroke-width:0.26458332"
-       id="rect8586"
-       width="8.4666662"
-       height="8.4666662"
-       x="0"
-       y="0" />
-  </g>
+     inkscape:label="background" />
   <g
      inkscape:groupmode="layer"
      id="layer4"
@@ -7451,85 +7420,15 @@
        id="rect7793"
        style="fill:#000000;fill-opacity:1;stroke-width:0.26458332" />
     <rect
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges"
-       id="rect8512"
-       width="0.79374999"
-       height="0.79374999"
-       x="2.3812499"
-       y="6.8791671" />
-    <rect
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges"
-       id="rect8514"
-       width="0.26458332"
-       height="0.26458332"
-       x="2.6458333"
-       y="6.6145835" />
-    <rect
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges"
-       id="rect8516"
-       width="0.26458332"
-       height="0.26458332"
-       x="3.175"
-       y="7.1437502" />
-    <rect
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges"
-       id="rect8518"
-       width="0.26458332"
-       height="0.26458332"
-       x="2.6458333"
-       y="7.6729169" />
-    <rect
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges"
-       id="rect8520"
-       width="0.26458332"
-       height="0.26458332"
-       x="2.1166666"
-       y="7.1437502" />
-    <rect
        style="fill:#000000;fill-opacity:1;stroke-width:0.26458332"
        id="rect8527"
        width="0.26458332"
        height="0.26458332"
-       x="2.6458333"
-       y="7.1437502" />
+       x="3.175"
+       y="6.8791671" />
     <rect
-       y="6.8791671"
-       x="5.2916665"
-       height="0.79374999"
-       width="0.79374999"
-       id="rect8529"
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges" />
-    <rect
-       y="6.6145835"
-       x="5.5562501"
-       height="0.26458332"
-       width="0.26458332"
-       id="rect8531"
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges" />
-    <rect
-       y="7.1437502"
-       x="6.0854168"
-       height="0.26458332"
-       width="0.26458332"
-       id="rect8533"
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges" />
-    <rect
-       y="7.6729169"
-       x="5.5562501"
-       height="0.26458332"
-       width="0.26458332"
-       id="rect8535"
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges" />
-    <rect
-       y="7.1437502"
+       y="6.8791666"
        x="5.0270834"
-       height="0.26458332"
-       width="0.26458332"
-       id="rect8537"
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:0.26458332;shape-rendering:crispEdges" />
-    <rect
-       y="7.1437502"
-       x="5.5562501"
        height="0.26458332"
        width="0.26458332"
        id="rect8539"
@@ -7565,37 +7464,37 @@
     <rect
        style="fill:#000000;fill-opacity:1;stroke-width:0.23665051"
        id="rect8563"
-       width="1.0583333"
+       width="1.0583334"
        height="0.26458332"
        x="3.7041667"
-       y="8.7312498" />
+       y="8.2020826" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke-width:0.26458332"
        id="rect8565"
        width="0.26458332"
        height="0.26458332"
-       x="4.7624998"
-       y="8.4666662" />
+       x="4.7625003"
+       y="7.9375" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke-width:0.26458332"
        id="rect8567"
        width="0.26458332"
        height="0.26458332"
-       x="5.0270834"
-       y="8.2020826" />
+       x="4.7625003"
+       y="7.6729164" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke-width:0.26458332"
        id="rect8569"
        width="0.26458332"
        height="0.26458332"
        x="3.4395833"
-       y="8.4666662" />
+       y="7.9375" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke-width:0.26458332"
        id="rect8571"
        width="0.26458332"
        height="0.26458332"
-       x="3.175"
-       y="8.2020826" />
+       x="3.4395833"
+       y="7.6729164" />
   </g>
 </svg>
