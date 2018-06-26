@@ -72,7 +72,7 @@ copy $(SolutionDir)libs\gstqt\release\gstqt.dll $(ProjectDir)exe\gstreamer-plugi
 	-->
   <Target Name="BeforeBuild">
     <RemoveDir Directories="$(ProjectDir)exe" />
-    <MakeDir Directories="$(ProjectDir)exe/gstreamer-plugins;$(ProjectDir)exe\gstreamer-1.0" />
+    <MakeDir Directories="$(ProjectDir)exe\gstreamer-plugins;$(ProjectDir)exe\gstreamer-1.0" />
     <Copy SourceFiles="$(SolutionDir)apps\habit\release\habit2.exe" DestinationFolder="$(ProjectDir)exe" />
     <Exec Command="windeployqt $(ProjectDir)exe\habit2.exe" />
     <Copy SourceFiles="$(SolutionDir)libs\gstqt\release\gstqt.dll" DestinationFolder="$(ProjectDir)exe\gstreamer-plugins" />
