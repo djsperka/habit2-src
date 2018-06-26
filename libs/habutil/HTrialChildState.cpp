@@ -164,6 +164,8 @@ void HMaxLookAwayTimeState::onEntry(QEvent* e)
 	if (m_bRepeatTrialOnMaxLookAwayTime)
 	{
 		trial().incrementRepeatNumber();
+		HGMM::instance().rewindCurrentPipeline();
+		qDebug() << "HMaxLookAwayTimeState::onEntry: current stimulus pipeline will repeat, so rewind, do not clean up";
 		eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxLookAwayTimeRepeat, HElapsedTimer::elapsed()));
 	}
 	else
@@ -178,6 +180,8 @@ void HNoLookTimeoutState::onEntry(QEvent* e)
 	Q_UNUSED(e);
 	HState::onEntry(e);
 	trial().incrementRepeatNumber();
+	HGMM::instance().rewindCurrentPipeline();
+	qDebug() << "HNoLookTimeoutState::onEntry: current stimulus pipeline will repeat, so rewind, do not clean up";
 	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndNoLookTimeout, HElapsedTimer::elapsed()));
 };
 
