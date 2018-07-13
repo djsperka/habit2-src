@@ -40,6 +40,9 @@ void HResultsExplorerDialog::initialize()
 	ui->treeViewFolders->setModel(m_pFolderModel);
 	ui->treeViewFolders->setRootIndex(m_pFolderModel->setRootPath(m_rootDir.absolutePath()));
 
+	// select entire rows
+	ui->treeViewFolders->setSelectionBehavior(QAbstractItemView::SelectRows);
+
 	// hide all columns except for first, and hide the header itself
 	ui->treeViewFolders->header()->hide();
 	for (int i=1; i<4; i++)
@@ -75,18 +78,40 @@ void HResultsExplorerDialog::connections()
 {
 	connect(ui->pbCancel, SIGNAL(clicked()), this, SLOT(reject()));
 	connect(ui->pbOpen, SIGNAL(clicked()), this, SLOT(openClicked()));
-//	connect(ui->treeViewFolders, SIGNAL(clicked(QModelIndex)), this, SLOT(folderClicked(QModelIndex)));
+	connect(ui->treeViewFolders, SIGNAL(clicked(QModelIndex)), this, SLOT(itemClicked(QModelIndex)));
 	connect(ui->treeViewFolders, SIGNAL(activated(QModelIndex)), this, SLOT(itemActivated(QModelIndex)));
+	connect(ui->treeViewFolders->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&,const QItemSelection&)));
 //	connect(ui->tableViewFiles, SIGNAL(clicked(QModelIndex)), this, SLOT(resultsFileClicked(QModelIndex)));
 //	connect(ui->tableViewFiles, SIGNAL(activated(QModelIndex)), this, SLOT(resultsFileActivated(QModelIndex)));
 }
 
-//void HResultsExplorerDialog::folderClicked(QModelIndex index)
-//{
-//	QString sPath = m_pFolderModel->fileInfo(index).absoluteFilePath();
-//	ui->tableViewFiles->setRootIndex(m_pFilesProxyModel->mapFromSource(m_pFilesModel->setRootPath(sPath)));
-//}
-//
+void HResultsExplorerDialog::itemClicked(QModelIndex index)
+{
+//	if (m_pFolderModel->fileInfo(index).isFile())
+//		ui->pbOpen->setEnabled(true);
+//	else
+//		ui->pbOpen->setEnabled(false);
+}
+
+void HResultsExplorerDialog::selectionChanged(const QItemSelection& selected,const QItemSelection&)
+{
+	QModelIndexList indexes = selected.indexes();
+	qDebug() << "selectionChanged size " << indexes.size();
+	QModelIndex index;
+	foreach (index, indexes)
+	{
+		qDebug() << "index " << index;
+	}
+	if (indexes.size() > 0 && m_pFolderModel->fileInfo(indexes.first()).isFile())
+	{
+		ui->pbOpen->setEnabled(true);
+	}
+	else
+	{
+		ui->pbOpen->setEnabled(false);
+	}
+}
+
 //void HResultsExplorerDialog::resultsFileClicked(QModelIndex index)
 //{
 //	Q_UNUSED(index);
@@ -127,7 +152,7 @@ void HResultsExplorerDialog::itemActivated(QModelIndex index)
 
 void HResultsExplorerDialog::openCSVFile(const QFileInfo& info)
 {
-	#ifdef Q_WS_MAC
+	#ifdef Q_OS_MACOS
 	QStringList args;
 	args << "-e";
 	args << "tell application \"Microsoft Excel\"";
@@ -135,12 +160,16 @@ void HResultsExplorerDialog::openCSVFile(const QFileInfo& info)
 	args << "activate";
 	args << "-e";
 	args << "open \"" + info.canonicalFilePath() +"\"";
+//	args << "-e";
+//	args << "set myfile to POSIX file \"" + info.canonicalFilePath() + "\"";
+//	args << "-e";
+//	args << "open myfile";
 	args << "-e";
 	args << "end tell";
 	QProcess::startDetached("osascript", args);
 	#endif
 
-	#ifdef Q_WS_WIN
+	#ifdef Q_OS_WIN
 	QStringList args;
 	args << "/select," << QDir::toNativeSeparators(info.canonicalFilePath());
 	QProcess::startDetached("explorer", args);

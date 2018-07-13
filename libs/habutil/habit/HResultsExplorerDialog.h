@@ -12,11 +12,14 @@
 #include <QFileSystemModel>
 #include <QDir>
 #include <QFileInfo>
+#include <QItemSelection>
 
 namespace Ui
 {
 	class HResultsExplorerForm;
 };
+
+
 
 namespace GUILib
 {
@@ -47,10 +50,11 @@ namespace GUILib
 		void openCSVFile(const QFileInfo& info);
 	private slots:
 //		void folderClicked(QModelIndex index);
-//		void resultsFileClicked(QModelIndex index);
+		void itemClicked(QModelIndex index);
 //		void resultsFileActivated(QModelIndex index);
 		void itemActivated(QModelIndex index);
 		void openClicked();
+		void selectionChanged(const QItemSelection&,const QItemSelection&);
 
 	public:
 		HResultsExplorerDialog(const QDir& rootDir, QWidget *parent=NULL);
