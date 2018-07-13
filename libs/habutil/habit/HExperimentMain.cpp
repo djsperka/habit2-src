@@ -178,7 +178,48 @@ void HExperimentMain::checkStimulusDisplayInfo()
 
 void HExperimentMain::cancelButtonClicked()
 {
-	reject();
+//	reject();
+
+	if (isModified())
+	{
+		QMessageBox msgBox;
+		msgBox.setText("The settings for this experiment have been modified.");
+		msgBox.setInformativeText("Do you want to save your changes?");
+		msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+		msgBox.setDefaultButton(QMessageBox::Save);
+		int ret = msgBox.exec();
+
+
+		switch (ret)
+		{
+			case QMessageBox::Save:
+				m_settings = getSettings();
+				try
+				{
+					m_settings.saveToDB();
+					accept();
+				}
+				catch (const HDBException& e)
+				{
+					QMessageBox::warning(this, "Save failed", e.what());
+					reject();
+				}
+				break;
+			case QMessageBox::Discard:
+				accept();
+				break;
+			case QMessageBox::Cancel:
+				reject();
+				break;
+			default:
+				// should never be reached
+				break;
+		}
+	}
+	else
+	{
+		accept();
+	}
 }
 
 void HExperimentMain::saveButtonClicked()
@@ -351,8 +392,8 @@ Habit::ExperimentSettings HExperimentMain::getSettings()
 	settings.setId(m_settings.getId());
 	settings.setName(m_settings.getName());
 	settings.setAttentionGetterSettings(m_pAttentionSetupForm->getAttentionGetterSettings());
-	qDebug() << "HExperimentMain::getSettings - agsettings";
-	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
+//	qDebug() << "HExperimentMain::getSettings - agsettings";
+//	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
 	settings.setControlBarOptions(m_pControlBarOptionsForm->getConfigurationObject());
 	settings.setHLookSettings(m_pLookSettingsWidget->getHLookSettings());
 	settings.setStimulusDisplayInfo(m_pStimulusDisplayInfoWidget->getStimulusDisplayInfo());
@@ -373,6 +414,10 @@ void HExperimentMain::closeEvent(QCloseEvent* event)
 {
 	if (isModified())
 	{
+//		qDebug() << "closeEvent - original ags:";
+//		qDebug() << m_settings.getAttentionGetterSettings();
+//		qDebug() << "closeEvent - new ags: ";
+//		qDebug() << getSettings().getAttentionGetterSettings();
 		QMessageBox msgBox;
 		msgBox.setText("The settings for this experiment have been modified.");
 		msgBox.setInformativeText("Do you want to save your changes?");

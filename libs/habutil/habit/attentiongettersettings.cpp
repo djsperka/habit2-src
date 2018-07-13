@@ -163,12 +163,22 @@ bool Habit::operator==(const Habit::AttentionGetterSettings& lhs, const Habit::A
 {
 	return (lhs.getId() == rhs.getId() &&
 			lhs.isAttentionGetterUsed() == rhs.isAttentionGetterUsed() &&
-			lhs.getBackGroundColor() == rhs.getBackGroundColor() &&
+//			lhs.getBackGroundColor() == rhs.getBackGroundColor() &&
 			lhs.getAttentionGetterStimulus() == rhs.getAttentionGetterStimulus() &&
 			lhs.isFixedISI() == rhs.isFixedISI() &&
 			lhs.getFixedISIMS() == rhs.getFixedISIMS() &&
 			lhs.isSoundOnly() == rhs.isSoundOnly() &&
 			lhs.isNoISI() == rhs.isNoISI());
+}
+
+QDebug Habit::operator<<(QDebug dbg, const AttentionGetterSettings& ags)
+{
+	dbg.nospace() << "AttentionGetter: used? " << ags.isAttentionGetterUsed() <<
+			" bkgd " << ags.getBackGroundColor() << " isFixedISI " << ags.isFixedISI() <<
+			" fixedISIMS " << ags.getFixedISIMS() << " soundOnly " << ags.isSoundOnly() <<
+			" NoISI " << ags.isNoISI();
+	dbg.nospace() << ags.getAttentionGetterStimulus();
+	return dbg.space();
 }
 
 

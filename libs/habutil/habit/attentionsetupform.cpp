@@ -54,8 +54,6 @@ Habit::AttentionGetterSettings AttentionSetupForm::getAttentionGetterSettings()
 {
 	Habit::AttentionGetterSettings ags;
 	ags = m_pIntertrialIntervalSettingsWidget->getAttentionGetterSettings();
-	qDebug() << "AttentionSetupForm::getAttentionGetterSettings() - return this ss:";
-	qDebug() << ags.getAttentionGetterStimulus();
 	return ags;
 }
 

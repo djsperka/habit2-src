@@ -59,6 +59,7 @@ private:
 QDataStream & operator<< (QDataStream& stream, const AttentionGetterSettings& settings);
 QDataStream & operator>> (QDataStream& stream, AttentionGetterSettings& settings);
 bool operator==(const Habit::AttentionGetterSettings& lhs, const Habit::AttentionGetterSettings& rhs);
+QDebug operator<<(QDebug dbg, const AttentionGetterSettings& ags);
 
 
 } // namespace Habit
