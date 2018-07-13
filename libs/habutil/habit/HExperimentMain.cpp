@@ -209,7 +209,7 @@ void HExperimentMain::cancelButtonClicked()
 				accept();
 				break;
 			case QMessageBox::Cancel:
-				reject();
+				// don't do anything in this case.
 				break;
 			default:
 				// should never be reached
