@@ -96,12 +96,6 @@ void HResultsExplorerDialog::itemClicked(QModelIndex index)
 void HResultsExplorerDialog::selectionChanged(const QItemSelection& selected,const QItemSelection&)
 {
 	QModelIndexList indexes = selected.indexes();
-	qDebug() << "selectionChanged size " << indexes.size();
-	QModelIndex index;
-	foreach (index, indexes)
-	{
-		qDebug() << "index " << index;
-	}
 	if (indexes.size() > 0 && m_pFolderModel->fileInfo(indexes.first()).isFile())
 	{
 		ui->pbOpen->setEnabled(true);
