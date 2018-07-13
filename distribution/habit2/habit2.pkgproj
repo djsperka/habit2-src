@@ -566,7 +566,7 @@
 				<key>USE_HFS+_COMPRESSION</key>
 				<false/>
 				<key>VERSION</key>
-				<string>2.2.1</string>
+				<string>2.2.2</string>
 			</dict>
 			<key>TYPE</key>
 			<integer>0</integer>
@@ -968,7 +968,7 @@
 				</dict>
 			</array>
 			<key>NAME</key>
-			<string>habit2-2.2.1</string>
+			<string>habit2-2.2.2-beta-4</string>
 			<key>PAYLOAD_ONLY</key>
 			<false/>
 			<key>TREAT_MISSING_PRESENTATION_DOCUMENTS_AS_WARNING</key>
