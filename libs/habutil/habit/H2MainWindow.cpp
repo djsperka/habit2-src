@@ -445,77 +445,82 @@ void GUILib::H2MainWindow::showResultsFile(const QString filename)
 
 
 
-
-
-
-bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems, bool bCheckMonitors)
+bool GUILib::H2MainWindow::checkMonitorSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems)
 {
 	bool b = true;
-	sProblems.clear();
 	int iControl = habutilGetMonitorID(HPlayerPositionType::Control);
 	int iLeft = habutilGetMonitorID(HPlayerPositionType::Left);
 	int iCenter = habutilGetMonitorID(HPlayerPositionType::Center);
 	int iRight = habutilGetMonitorID(HPlayerPositionType::Right);
 	const HStimulusLayoutType& layoutType = settings.getStimulusDisplayInfo().getStimulusLayoutType();
 
-	if (bCheckMonitors)
-	{
-		// Control monitor specified?
-		if (iControl < 0)
-		{
-			b = false;
-			sProblems.append("No control monitor specified. Check preferences.");
-		}
+	sProblems.clear();
 
-		// Check stimulus layout type, then check preferences for monitor assignments.
-		if (layoutType == HStimulusLayoutType::HStimulusLayoutUnknown)
+	// Control monitor specified?
+	if (iControl < 0)
+	{
+		b = false;
+		sProblems.append("No control monitor specified. Check preferences.");
+	}
+
+	// Check stimulus layout type, then check preferences for monitor assignments.
+	if (layoutType == HStimulusLayoutType::HStimulusLayoutUnknown)
+	{
+		b = false;
+		sProblems.append("Stimulus layout not set. Check preferences.");
+	}
+	else if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
+	{
+		// Must have a setting for the center stim.
+		if (iCenter < 0)
 		{
 			b = false;
-			sProblems.append("Stimulus layout not set. Check preferences.");
+			sProblems.append("Stimulus layout type is \"single\". Please specify \"Center Monitor\" in preferences.");
 		}
-		else if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
+		else if (iCenter == iControl)
 		{
-			// Must have a setting for the center stim.
-			if (iCenter < 0)
-			{
-				b = false;
-				sProblems.append("Stimulus layout type is \"single\". Please specify \"Center Monitor\" in preferences.");
-			}
-			else if (iCenter == iControl)
-			{
-				b = false;
-				sProblems.append("Center and Control monitors are the same! Check preferences.");
-			}
-		}
-		else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-		{
-			if (iLeft < 0)
-			{
-				b = false;
-				sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Left Monitor\" in preferences.");
-			}
-			else if (iLeft == iControl)
-			{
-				b = false;
-				sProblems.append("Left and Control monitors are the same! Check preferences.");
-			}
-			if (iRight < 0)
-			{
-				b = false;
-				sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Right Monitor\" in preferences.");
-			}
-			else if (iRight == iControl)
-			{
-				b = false;
-				sProblems.append("Right and Control monitors are the same! Check preferences.");
-			}
-			if (iRight == iLeft)
-			{
-				b = false;
-				sProblems.append("Left and Right monitors are the same. Check preferences.");
-			}
+			b = false;
+			sProblems.append("Center and Control monitors are the same! Check preferences.");
 		}
 	}
+	else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		if (iLeft < 0)
+		{
+			b = false;
+			sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Left Monitor\" in preferences.");
+		}
+		else if (iLeft == iControl)
+		{
+			b = false;
+			sProblems.append("Left and Control monitors are the same! Check preferences.");
+		}
+		if (iRight < 0)
+		{
+			b = false;
+			sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Right Monitor\" in preferences.");
+		}
+		else if (iRight == iControl)
+		{
+			b = false;
+			sProblems.append("Right and Control monitors are the same! Check preferences.");
+		}
+		if (iRight == iLeft)
+		{
+			b = false;
+			sProblems.append("Left and Right monitors are the same. Check preferences.");
+		}
+	}
+	return b;
+}
+
+
+bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems)
+{
+	bool b = true;
+	sProblems.clear();
+	const HStimulusLayoutType& layoutType = settings.getStimulusDisplayInfo().getStimulusLayoutType();
+
 
 	// iterate over phases that are enabled
 	QListIterator<Habit::HPhaseSettings> iterator = settings.phaseIterator();
@@ -575,16 +580,14 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			return;
 		}
 
-		// pre-flight check. Verify that monitors have been configured, etc.
+		// pre-flight check. Verify that stimulus files can be found, any other checks on experiment settings.
+		// Monitors are not checked here.
 		QStringList sProblems;
-
-		// HACK false here is 'checkMonitors' - so the check skips looking at monitor preferences.
-		// see OTHER HACK below
-		if (!H2MainWindow::checkExperimentSettings(experimentSettings, sProblems, false))
+		if (!H2MainWindow::checkExperimentSettings(experimentSettings, sProblems))
 		{
 			QMessageBox msgBox;
 			msgBox.setText("This experiment cannot be run.");
-			msgBox.setInformativeText("Experiment settings are not complete.");
+			msgBox.setInformativeText("Experiment settings have errors, or are not complete.");
 			msgBox.setDetailedText(sProblems.join("\n"));
 			msgBox.setStandardButtons(QMessageBox::Ok);
 			msgBox.setDefaultButton(QMessageBox::Ok);
@@ -598,25 +601,27 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 		if (i == QDialog::Accepted)
 		{
 			bStimInDialog = m_bStimInDialog || m_pRunSettingsDialog->isDisplayStimInWindow();
-#define ORIGINAL_WAY_OF_DOING_IT
-#ifdef ORIGINAL_WAY_OF_DOING_IT
+
+			if (!bStimInDialog &&
+					!H2MainWindow::checkMonitorSettings(experimentSettings, sProblems))
+			{
+				QMessageBox msgBox;
+				msgBox.setText("This experiment cannot be run.");
+				msgBox.setInformativeText("Monitor settings have errors. Please check preferences.");
+				msgBox.setDetailedText(sProblems.join("\n"));
+				msgBox.setStandardButtons(QMessageBox::Ok);
+				msgBox.setDefaultButton(QMessageBox::Ok);
+				msgBox.exec();
+				return;
+			}
+
+
 			if (bStimInDialog)
 				pMediaManager = createMediaManager(experimentSettings, 320, 240);
 			else
 				pMediaManager = createMediaManager(experimentSettings);
-#else
-			// new way of doing it
 
-			// Two things have to happen, not necessarily in this order.
-			// First, HGMM::reset - this prepares gst pipelines (only default, background, AG, and first stim of each phase are prerolled.
-			// Second, widget(s) must be created and passed to the HGMM.
-			//    The widgets come on two varieties: embedded in a dialog, and not owned top-level.
-			//    When embedded in a dialog, the dialog itself must be deleted when experiment is done, as it is not owned by anything else. (???)
-			// If widgets are in a dialog, then they will be deleted when the dialog is deleted, so don't delete then separately
 
-			// if stim in dialog:
-			//    create
-#endif
 			// m_ControlPanel has no parent -- DELETE
 			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, NULL);
 

@@ -77,9 +77,9 @@ void TestMMDialog::experimentActivated(QString expt)
 		return;
 	}
 
-	// pre-flight check. Verify that monitors have been configured, etc.
+	// pre-flight check.
 	QStringList sProblems;
-	if (!GUILib::H2MainWindow::checkExperimentSettings(settings, sProblems, m_pFullScreen->isChecked()))
+	if (!GUILib::H2MainWindow::checkExperimentSettings(settings, sProblems))
 	{
 		QMessageBox msgBox;
 		msgBox.setText("This experiment cannot be run.");

@@ -86,7 +86,7 @@ void _loadSettings()
 		qDebug() << "_loadSettings: " << key << " NOT found";
 
 	qDebug() << "All keys " << settings.allKeys();
-	qDebug() << "stimnroot " << settings.value("stimroot").toString();
+	qDebug() << "stimroot " << settings.value("stimroot").toString();
 	// stim root
 	f_stimulusRootDir.setPath(settings.value("stimroot").toString());
 	f_stimulusRootUseDefault = settings.value("stimroot_use_default", false).toBool();
@@ -98,7 +98,7 @@ void _loadSettings()
 	f_iRightMonitor = settings.value("position/right", -1).toInt();
 
 	qDebug() << "_loadSettings: stimroot " << f_stimulusRootDir;
-	qDebug() << "_loadSettings: use defaiult " << f_stimulusRootUseDefault;
+	qDebug() << "_loadSettings: use default " << f_stimulusRootUseDefault;
 	qDebug() << "_loadSettings: last vi " << f_lastVideoImageDir;
 	qDebug() << "_loadSettings: last audio " << f_lastAudioDir;
 	qDebug() << "_loadSettings: control/left/center/right " << f_iControlMonitor << "/" << f_iLeftMonitor << "/" << f_iCenterMonitor << "/" << f_iRightMonitor;

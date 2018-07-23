@@ -35,8 +35,8 @@ class HStateMachine;
 
 	 public:
 		 H2MainWindow(bool bDefaultTestRun=true, bool bShowTestingIcon=false, bool bEditTemplates = false, bool bStimInDialog = false);
-		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems, bool bCheckMonitors = true);
-
+		 static bool checkExperimentSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems);
+		 static bool checkMonitorSettings(const Habit::ExperimentSettings& settings, QStringList& sProblems);
 	 protected:
 		 void closeEvent(QCloseEvent *event);
 
