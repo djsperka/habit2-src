@@ -57,7 +57,7 @@ namespace GUILib
 		void stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo&);
 
 	private:
-		void components();
+		void components(bool bReadOnly = false);
 		void connections();
 		bool isModified();
 		Habit::ExperimentSettings getSettings();	// get settings from current state of all forms

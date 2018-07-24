@@ -31,11 +31,11 @@ namespace GUILib
 		QAction *m_actionUpPhase;
 		QAction *m_actionDownPhase;
 
-		void components();
+		void components(bool bReadOnly=false);
 		void connections();
 
 	public:
-		HPhaseListWidget(const QStringList& phaseNames, QWidget* parent=NULL);
+		HPhaseListWidget(const QStringList& phaseNames, bool bReadOnly=false, QWidget* parent=NULL);
 		virtual ~HPhaseListWidget();
 		void clearSelection();
 		QString selectedPhase();

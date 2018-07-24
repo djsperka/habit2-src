@@ -16,7 +16,7 @@
 namespace GUILib
 {
 
-HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& phaseSettings, const QString& labelName, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent)
+HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& phaseSettings, const QString& labelName, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, bool bReadOnly, QWidget *parent)
 : QWidget(parent)
 {
 	QLabel *plabel = new QLabel("Phase name:");
@@ -32,10 +32,13 @@ HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& ph
 	m_pTabWidget = new QTabWidget(this);
 	//m_pHabituationWidget = new HHabituationSetupWidget(phaseSettings.habituationSettings());
 	m_pHabituationSettingsWidget = new HHabituationSettingsWidget(phaseSettings.habituationSettings());
+	m_pHabituationSettingsWidget->setDisabled(bReadOnly);
 	m_pTabWidget->addTab(m_pHabituationSettingsWidget, "Phase Settings");
 	m_pPhaseSettingsWidget = new HPhaseSettingsWidget(phaseSettings);
+	m_pPhaseSettingsWidget->setDisabled(bReadOnly);
 	m_pTabWidget->addTab(m_pPhaseSettingsWidget, QString("Trial Settings"));
 	m_pStimuliWidget = new HStimuliSettingsWidget(labelName, phaseSettings.stimuli(), phaseSettings.getSeqno(), stimulusDisplayInfo);
+	m_pStimuliWidget->setDisabled(bReadOnly);
 	m_pTabWidget->addTab(m_pStimuliWidget, QString("Stimuli"));
 
 	QVBoxLayout *vbox = new QVBoxLayout;
@@ -54,6 +57,9 @@ HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& ph
 	phaseNameTextChanged(phaseSettings.getName());
 	m_pcbEnabled->setChecked(phaseSettings.getIsEnabled());
 	m_pTabWidget->setEnabled(phaseSettings.getIsEnabled());	// calling setChecked does not lead to SIGNAL
+
+	m_plineeditPhaseName->setDisabled(bReadOnly);
+	m_pcbEnabled->setDisabled(bReadOnly);
 }
 
 HPhaseSettingsTabWidget::~HPhaseSettingsTabWidget()

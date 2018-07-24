@@ -44,7 +44,7 @@ HExperimentMain::HExperimentMain(const Habit::ExperimentSettings& experimentSett
 	HGMM::instance().reset(experimentSettings, dir);
 
 	// set up gui
-	components();
+	components(bReadOnly);
 	connections();
 	setWindowTitle(QString("Edit Experiment Settings: %1").arg(m_settings.getName()));
 
@@ -61,7 +61,7 @@ HExperimentMain::~HExperimentMain()
 	HGMM::instance().reset();
 }
 
-void HExperimentMain::components()
+void HExperimentMain::components(bool bReadOnly)
 {
 	QStringList slGeneral;
 	slGeneral << "Stimulus Display" << "Run-time Control Panel Display" << "Intertrial Interval" << "Look Settings";
@@ -76,34 +76,37 @@ void HExperimentMain::components()
 
 	// Stimulus display info
 	m_pStimulusDisplayInfoWidget = new HStimulusDisplayInfoWidget(m_settings.getStimulusDisplayInfo());
+	m_pStimulusDisplayInfoWidget->setDisabled(bReadOnly);
 	m_vecStackPages.append(m_sdiPageIndex = m_pPagesWidget->addWidget(m_pStimulusDisplayInfoWidget));
 
 	// control bar options
 	m_pControlBarOptionsForm = new ControlBarOptionsForm(m_settings.getControlBarOptions());
+	m_pControlBarOptionsForm->setDisabled(bReadOnly);
 	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pControlBarOptionsForm));
 
 	// Attention Getter
 	m_pAttentionSetupForm = new AttentionSetupForm(m_settings.getAttentionGetterSettings(), m_settings.getStimulusDisplayInfo());
+	m_pAttentionSetupForm->setDisabled(bReadOnly);
 	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pAttentionSetupForm));
 
 	// Look settings
 	m_pLookSettingsWidget = new HLookSettingsWidget(m_settings.getHLookSettings());
+	m_pLookSettingsWidget->setDisabled(bReadOnly);
 	m_vecStackPages.append(m_pPagesWidget->addWidget(m_pLookSettingsWidget));
 
 	// create phase list widget
 	QStringList phaseNames = m_settings.getPhaseNames();
-	m_pPhaseListWidget = new HPhaseListWidget(phaseNames);
+	m_pPhaseListWidget = new HPhaseListWidget(phaseNames, bReadOnly);
 	m_pPhaseListWidget->clearSelection();	// disables tool buttons
 
 	// add phase settings tab widgets...
 	QString s;
 	foreach(s, phaseNames)
 	{
-		HPhaseSettingsTabWidget *pTabWidget = new HPhaseSettingsTabWidget(m_settings.phaseAt(s), s, m_settings.getStimulusDisplayInfo());
+		HPhaseSettingsTabWidget *pTabWidget = new HPhaseSettingsTabWidget(m_settings.phaseAt(s), s, m_settings.getStimulusDisplayInfo(), bReadOnly);
 		m_pPagesWidget->addWidget(pTabWidget);
 		connect(pTabWidget, SIGNAL(phaseNameChanged(const QString&)), m_pPhaseListWidget, SLOT(phaseNameChanged(const QString&)));
 		connect(pTabWidget, SIGNAL(phaseEnabledClicked(bool)), m_pPhaseListWidget, SLOT(phaseEnabledClicked(bool)));
-		//connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), pTabWidget, SIGNAL(stimulusLayoutTypeChanged(int)));
 	}
 
 	QVBoxLayout *vboxContents = new QVBoxLayout;
@@ -148,13 +151,6 @@ void HExperimentMain::connections()
 	connect(m_pPhaseListWidget, SIGNAL(delPhase()), this, SLOT(delPhase()));
 	connect(m_pPhaseListWidget, SIGNAL(upPhase()), this, SLOT(upPhase()));
 	connect(m_pPhaseListWidget, SIGNAL(downPhase()), this, SLOT(downPhase()));
-
-	//connect(m_pStimulusDisplayInfoWidget, SIGNAL(stimulusLayoutTypeChanged(int)), m_pAttentionSetupForm, SLOT(stimulusLayoutTypeChanged(int)));
-	//connect(this, SIGNAL(stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo&)), m_pAttentionSetupForm, SLOT(stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo&)));
-
-	// connect stack widget's currentCjhanged to a slot to look for changes on previous page
-	// used for checking changes in stimulus displauy info
-	//connect(m_pPagesWidget, SIGNAL(currentChanged(int)), this, SLOT(currentStackPageChanged(int)));
 }
 
 

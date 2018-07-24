@@ -13,10 +13,10 @@
 
 using namespace GUILib;
 
-GUILib::HPhaseListWidget::HPhaseListWidget(const QStringList& phaseNames, QWidget* parent)
+GUILib::HPhaseListWidget::HPhaseListWidget(const QStringList& phaseNames,  bool bReadOnly, QWidget* parent)
 : QWidget(parent)
 {
-	components();
+	components(bReadOnly);
 	m_pModel = new QStringListModel(phaseNames);
 	m_pListView->setModel(m_pModel);
 	connections();
@@ -26,7 +26,7 @@ GUILib::HPhaseListWidget::~HPhaseListWidget()
 {
 }
 
-void  GUILib::HPhaseListWidget::components()
+void  GUILib::HPhaseListWidget::components(bool bReadOnly)
 {
 	m_pListView = new QListView(this);
 	m_pListView->setEditTriggers(QAbstractItemView::NoEditTriggers);		// cannot change name of phase directly in listview - use HPhaseSettingsTabWidget
@@ -44,6 +44,8 @@ void  GUILib::HPhaseListWidget::components()
 	connect(m_actionUpPhase, SIGNAL(triggered()), this, SIGNAL(upPhase()));
 	m_pPhaseToolBar->addAction(m_actionDownPhase);
 	connect(m_actionDownPhase, SIGNAL(triggered()), this, SIGNAL(downPhase()));
+
+	m_pPhaseToolBar->setDisabled(bReadOnly);
 
 	connect(m_pListView, SIGNAL(clicked(const QModelIndex&)), this, SIGNAL(phaseListViewItemClicked(const QModelIndex&)));
 	connect(m_pListView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(phaseClicked()));

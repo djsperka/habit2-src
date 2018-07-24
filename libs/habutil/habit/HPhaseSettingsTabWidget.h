@@ -31,7 +31,7 @@ private:
 	HHabituationSettingsWidget *m_pHabituationSettingsWidget;
 
 public:
-	HPhaseSettingsTabWidget(const Habit::HPhaseSettings& phaseSettings, const QString& labelName, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent=0);
+	HPhaseSettingsTabWidget(const Habit::HPhaseSettings& phaseSettings, const QString& labelName, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, bool bReadOnly = false, QWidget *parent=0);
 	virtual ~HPhaseSettingsTabWidget();
 	Habit::HPhaseSettings getPhaseSettings();
 
