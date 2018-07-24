@@ -34,14 +34,12 @@ HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEve
 , m_psm(NULL)
 {
 	// generate gui elements and make it look pretty
-	// There is a dependency in createExperiment to one of the ui components (stop trials button).
-	// I should eliminate that, but for now we wait on connections() until expt is created.
 	components();
 	doLayout();
 	m_pbStopTrials->setEnabled(false);
 	m_pbNextTrial->setEnabled(false);
 
-	// connections after expt created
+	// connections used to be after expt created, still down here.
 	connections();
 }
 
@@ -192,6 +190,10 @@ void HControlPanel::closeEvent(QCloseEvent* e)
 
 void HControlPanel::onExperimentStarted()
 {
+	// Dump position info re: Full screen startup
+	//
+	qDebug() << "HControlPanel::onExperimentStarted(): screen geometry of dlg is " << this->geometry();
+
 	// post event to log to have offset of elapsed timer at exp start.
 	// Obviously this is not to be taken as an absolute offset, but for
 	// the purposes of reliability it will be useful.

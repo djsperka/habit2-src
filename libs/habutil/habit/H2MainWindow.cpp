@@ -623,7 +623,14 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 
 			// m_ControlPanel has no parent -- DELETE
+#define TRY_WITH_PARENT
+#ifdef TRY_WITH_PARENT
+
+			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, this);
+
+#else
 			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, NULL);
+#endif
 
 			// m_pld has no parent -- DELETE BEFORE m_pControlPanel
 			m_pld = createLookDetector(experimentSettings, eventLog, m_pControlPanel);
@@ -725,8 +732,9 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				qDebug() << "Cleaning up...";
 				delete m_psm;
 				delete m_pld;
+#ifndef TRY_WITH_PARENT
 				delete m_pControlPanel;
-				//delete pMediaManager;
+#endif
 				delete m_pRunSettingsDialog;
 				qDebug() << "Cleaning up...done";
 			}
