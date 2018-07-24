@@ -627,7 +627,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		{
 			GstState old_state, new_state;
 			gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
-			qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
+			//qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
 			if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
 			{
 				pStimPipeline->emitNowPlaying();
