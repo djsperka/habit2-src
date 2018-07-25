@@ -31,7 +31,7 @@ namespace GUILib
 		virtual ~HStimulusInfoWidget();
 
 		// set m_info= info and initialize.
-		void setStimulusInfo(const Habit::StimulusInfo& info);
+		//void setStimulusInfo(const Habit::StimulusInfo& info);
 
 		// get stimulus info currently set in the widget
 		Habit::StimulusInfo getStimulusInfo();
@@ -43,6 +43,10 @@ namespace GUILib
 		// Make the widget reflect the contents of m_info
 		void initialize();
 
+		// handle the user's file selection. Return false if they cancel, true if selected, then stim info has that filename,
+		// stripped of leading folder if its in the current stim root
+		bool doFileSelection();
+
 		Ui::HStimulusInfoForm *ui;
 		Habit::StimulusInfo m_info;
 		QString m_label;
@@ -50,16 +54,14 @@ namespace GUILib
 		bool m_bIsVideoImage;
 
 	protected:
-//		void dragEnterEvent(QDragEnterEvent *event);
-//		void dropEvent(QDropEvent * event);
+		void dragEnterEvent(QDragEnterEvent *event);
+		void dropEvent(QDropEvent * event);
 
 	signals:
 		void stimulusInfoChanged();
 
 	protected slots:
 		void selectButtonClicked();
-		void backgroundColorClicked();
-		void customColorClicked();
 		void backgroundColorChecked(bool);
 	};
 };

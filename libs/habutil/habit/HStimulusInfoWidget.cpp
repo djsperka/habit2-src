@@ -11,6 +11,8 @@
 #include <QtDebug>
 #include <QFileDialog>
 #include <QColorDialog>
+#include <QDragEnterEvent>
+#include <QMimeData>
 
 
 
@@ -23,12 +25,12 @@ GUILib::HStimulusInfoWidget::HStimulusInfoWidget(const Habit::StimulusInfo& info
 {
 	//setFixedHeight(50);
 	ui->setupUi(this);
-	connections();
 	initialize();
+	connections();
 	// djs - Qt4.8 on mac has a bug in the uri passed with the drop event. The filename
 	// ends up looking like this: file:///.file/id=6571367.1706496
 	// I think this is fixed for Qt>5.2. Wait until then....
-	//setAcceptDrops(true);
+	setAcceptDrops(true);
 }
 
 GUILib::HStimulusInfoWidget::~HStimulusInfoWidget()
@@ -39,15 +41,17 @@ GUILib::HStimulusInfoWidget::~HStimulusInfoWidget()
 void GUILib::HStimulusInfoWidget::connections()
 {
 	connect(ui->pbSelectFile, SIGNAL(clicked()), this, SLOT(selectButtonClicked()));
-	connect(ui->cbUseBackgroundColor, SIGNAL(clicked(bool)), this, SLOT(backgroundColorChecked(bool)));
+
+	// can check/unckeck box from within the slot, so better make this queued connection.
+	connect(ui->cbUseBackgroundColor, SIGNAL(clicked(bool)), this, SLOT(backgroundColorChecked(bool)), Qt::QueuedConnection);
 }
 
-void GUILib::HStimulusInfoWidget::setStimulusInfo(const Habit::StimulusInfo& info)
-{
-	m_info = info;
-	initialize();
-	emit stimulusInfoChanged();
-}
+//void GUILib::HStimulusInfoWidget::setStimulusInfo(const Habit::StimulusInfo& info)
+//{
+//	m_info = info;
+//	initialize();
+//	emit stimulusInfoChanged();
+//}
 
 void GUILib::HStimulusInfoWidget::initialize()
 {
@@ -56,7 +60,10 @@ void GUILib::HStimulusInfoWidget::initialize()
 	ui->checkboxLoop->setChecked(m_info.isLoopPlayBack());
 	ui->sliderVolume->setValue(m_info.getVolume());
 	ui->cbUseBackgroundColor->setChecked(m_info.isBackground());
-	backgroundColorChecked(m_info.isBackground());
+
+	ui->pbSelectFile->setDisabled(m_info.isBackground());
+	ui->sliderVolume->setDisabled(m_info.isBackground());
+	ui->checkboxLoop->setDisabled(m_info.isBackground());
 	ui->lineeditFileBase->setDisabled(m_info.isBackground());
 }
 
@@ -79,14 +86,42 @@ void GUILib::HStimulusInfoWidget::backgroundColorChecked(bool checked)
 	ui->sliderVolume->setDisabled(checked);
 	ui->checkboxLoop->setDisabled(checked);
 	ui->lineeditFileBase->setDisabled(checked);
-	emit stimulusInfoChanged();
+
+	// if going from unchecked to checked, we're good.
+	// If going the other direction, checked to unchecked - we will make sure a file gets selected so the
+	// widget is not left in an inconsistent state (bkgd not checked, and no file selected).
+
+	if (!checked)
+	{
+		if (ui->lineeditFileBase->text().isEmpty() && !doFileSelection())
+		{
+			// Must select a file, if they didn't we should set checkbox back to checked.
+			ui->cbUseBackgroundColor->setChecked(true);
+			// do not emit - there's really no change.
+		}
+		else
+		{
+			emit stimulusInfoChanged();
+		}
+	}
+	else
+	{
+		emit stimulusInfoChanged();
+	}
 }
 
 void GUILib::HStimulusInfoWidget::selectButtonClicked()
 {
+	if (doFileSelection())
+	{
+		emit stimulusInfoChanged();
+	}
+}
+
+
+bool GUILib::HStimulusInfoWidget::doFileSelection()
+{
 	QString path;
-	Habit::StimulusInfo stimulusInfo = getStimulusInfo();	// get current filename, in case user has already changed it
-	QFileInfo fileInfo(stimulusInfo.getFileName());
 	const QString filterVideoImage("All Video and Images (*.avi *.mp4 *.wmf *.asf *.wmv *.mov *.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);;All Video (*.avi *.mp4 *.wmf *.asf *.wmv *.mov);;All Audio (*.mp3 *.ogg *.wma *.wav *.aiff);;All Images (*.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);; Audio Video Interleave (*.avi);;MP4 file format (*.mp4);;Windows Media Video (*.wmf *.asf *.wmv);;QuickTime (*.mov);;All Files (*.*)");
 	const QString filterAudio("All Audio and Video (*.mp3 *.ogg *.wma *.wav *.aiff *.avi *.mp4 *.wmf *.asf *.wmv *.mov);;All Files (*.*)");
 	QString filter;
@@ -94,14 +129,18 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 	QDir stimroot = habutilGetStimulusRootDir();
 
 	// Initial folder is the folder of the existing file (if any), otherwise the stim root dir.
-	if (stimulusInfo.getFileName().isEmpty())
+	if (ui->lineeditFileBase->text().isEmpty())
 	{
 		QDir lastdir = habutilGetLastDir(m_bIsVideoImage);
 		path = lastdir.absolutePath();
 	}
 	else
 	{
-		path = fileInfo.path();
+		QFileInfo fileInfo(ui->lineeditFileBase->text());
+		if (fileInfo.isRelative())
+			path = habutilGetStimulusRootDir().absolutePath();
+		else
+			path = fileInfo.path();
 	}
 
 	// Select file dialog....
@@ -123,34 +162,11 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 			qDebug() << "selected file is in stimroot path " << stimroot.canonicalPath();
 			qDebug() << "relative selected file: " << filename;
 		}
-		stimulusInfo.setFileName(filename);
-		setStimulusInfo(stimulusInfo);
+		ui->lineeditFileBase->setText(filename);
+		return true;
 	}
+	return false;
 }
-
-void GUILib::HStimulusInfoWidget::backgroundColorClicked()
-{
-	Habit::StimulusInfo stimulusInfo = getStimulusInfo();	// get current filename, in case user has already changed it
-	stimulusInfo.setFileName(QString("color(background)"));
-	setStimulusInfo(stimulusInfo);
-}
-
-void GUILib::HStimulusInfoWidget::customColorClicked()
-{
-	Habit::StimulusInfo stimulusInfo = getStimulusInfo();	// get current filename, in case user has already changed it
-
-	// Open color picker...
-	QColorDialog dlg;
-	dlg.setOption(QColorDialog::DontUseNativeDialog);
-	if (dlg.exec() == QDialog::Accepted)
-	{
-		QColor c = dlg.currentColor();
-		stimulusInfo.setFileName(QString("rgb(%1,%2,%3)").arg(c.red()).arg(c.green()).arg(c.blue()));
-		setStimulusInfo(stimulusInfo);
-	}
-}
-
-#if 0
 
 void GUILib::HStimulusInfoWidget::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -163,4 +179,3 @@ void GUILib::HStimulusInfoWidget::dropEvent(QDropEvent * event)
 	qDebug() << "got drop: " << event->mimeData()->data("text/uri-list");
 }
 
-#endif

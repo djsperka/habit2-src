@@ -88,6 +88,10 @@ void HStimulusSettingsEditor::doneClicked()
 		}
 		else
 		{
+			// Do a stupid-check on the stimulus info widgets, make sure the stimulus is a valid one.
+			Habit::StimulusSettings ss = m_pStimulusSettingsWidget->getStimulusSettings();
+
+
 			accept();
 		}
 	}
