@@ -181,7 +181,7 @@ void HResultsWidget::addHeaderTable(QTextCursor& cursor)
     constraints << QTextLength(QTextLength::PercentageLength, 75);
     tableFormat.setColumnWidthConstraints(constraints);
 
-    QTextTable *table = cursor.insertTable(4, 2, tableFormat);
+    QTextTable *table = cursor.insertTable(7, 2, tableFormat);
 
     // First row, exp name
     QTextTableCell cell;
@@ -216,5 +216,30 @@ void HResultsWidget::addHeaderTable(QTextCursor& cursor)
     cell = table->cellAt(3, 1);
     cursor = cell.firstCursorPosition();
     cursor.insertText(m_results.originalFilename(), m_boldFormat);
+
+    cell = table->cellAt(4, 0);
+    cursor = cell.firstCursorPosition();
+    cursor.insertText("Subject ID:", m_textFormat);
+
+    cell = table->cellAt(4, 1);
+    cursor = cell.firstCursorPosition();
+    cursor.insertText(QString("%1").arg(m_results.subjectSettings().getId()), m_boldFormat);
+
+    cell = table->cellAt(5, 0);
+    cursor = cell.firstCursorPosition();
+    cursor.insertText("Observer:", m_textFormat);
+
+    cell = table->cellAt(5, 1);
+    cursor = cell.firstCursorPosition();
+    cursor.insertText(m_results.subjectSettings().getObserver(), m_boldFormat);
+
+    cell = table->cellAt(6, 0);
+    cursor = cell.firstCursorPosition();
+    cursor.insertText("Notes:", m_textFormat);
+
+    cell = table->cellAt(6, 1);
+    cursor = cell.firstCursorPosition();
+    cursor.insertText(m_results.subjectSettings().getComments(), m_boldFormat);
+
 }
 

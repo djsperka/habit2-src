@@ -204,7 +204,23 @@ bool HResults::scanTrials(const HTrialScanner& scanner) const
 				sOrderName = "";
 				if (runSettings().map().contains(pse->seqno()))
 				{
-					sOrderName = runSettings().map().value(pse->seqno()).getOrderName();
+					Habit::PhaseRunSettings prs = runSettings().map().value(pse->seqno());
+					sOrderName = prs.getOrderName();
+					if (sOrderName.isEmpty()) sOrderName = "default";
+
+					if (prs.isOrderRandomized())
+					{
+						sOrderName += " (" + getRandomizationType(prs.getRandomizeMethod()).name() + ")";
+					}
+					else
+					{
+						sOrderName += " (none)";
+					}
+
+				}
+				else
+				{
+					sOrderName = "unknown (unknown)";
 				}
 
 				if (bInsidePhase) qCritical("Found phase start without preceding phase end event!");

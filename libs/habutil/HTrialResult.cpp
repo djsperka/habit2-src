@@ -9,7 +9,7 @@
 
 // This should be kept in sync with the enum defined in HTrialResultsRow. Pain but I can't think of a better way now.
 QStringList HTrialResult::headers =
-		QStringList() 	<< "SubjectID" << "Phase" << "Order" << "Trial" << "Repeat" << "EndType"
+		QStringList() 	<< "SubjectID" << "Phase" << "Order (randomization)" << "Trial" << "Repeat" << "EndType"
 						<< "Habituated" << "StimID" << "StimName" << "StimLabel"
 						<< "Left" << "Center" << "Right" << "ISS"
 						<< "Trial Start" << "Trial End"
