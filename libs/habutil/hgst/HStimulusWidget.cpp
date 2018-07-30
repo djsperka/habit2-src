@@ -17,8 +17,8 @@ HStimulusWidget::HStimulusWidget(const Habit::StimulusDisplayInfo& sdi, float sc
 , m_sizeTargetScreen(screenWidth, screenHeight)
 {
 	// frame style and shape
-	setFrameShape(QFrame::Box);
-	setLineWidth(2);
+	//setFrameShape(QFrame::Box);
+	//setLineWidth(2);
 
 	// background color
 	QPalette p = palette();
