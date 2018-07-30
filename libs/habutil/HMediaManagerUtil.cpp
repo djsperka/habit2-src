@@ -32,7 +32,7 @@ HGMM* createMediaManager(const Habit::ExperimentSettings& es)
 		pmm->setWidgets(pSingle);
 		pSingle->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pSingle->move(rect.x(), rect.y());
-		pSingle->showFullScreen();
+		//pSingle->showFullScreen();
 		qDebug() << "Center player index " << habutilGetMonitorID(HPlayerPositionType::Center) << " moved to rect " << rect;
 	}
 	else if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
@@ -41,14 +41,14 @@ HGMM* createMediaManager(const Habit::ExperimentSettings& es)
 		HStimulusWidget *pLeft = new HStimulusWidget(es.getStimulusDisplayInfo(), rectLeft.width(), rectLeft.height());
 		pLeft->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pLeft->move(rectLeft.x(), rectLeft.y());
-		pLeft->showFullScreen();
+		//pLeft->showFullScreen();
 		qDebug() << "Left player index " << habutilGetMonitorID(HPlayerPositionType::Left) << " moved to rect " << rectLeft;
 
 		QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
 		HStimulusWidget *pRight = new HStimulusWidget(es.getStimulusDisplayInfo(), rectRight.width(), rectRight.height());
 		pRight->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pRight->move(rectRight.x(), rectRight.y());
-		pRight->showFullScreen();
+		//pRight->showFullScreen();
 		qDebug() << "Right player index " << habutilGetMonitorID(HPlayerPositionType::Right) << " moved to rect " << rectRight;
 
 		//pmm = new HGMM(pLeft, pRight, rootDir, es.getStimulusDisplayInfo().getUseISS(), es.getStimulusDisplayInfo().getBackGroundColor(), HStimPipelineFactory);

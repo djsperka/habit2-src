@@ -747,12 +747,15 @@ void GUILib::H2MainWindow::adaptVideoWidgets(HGMM *pmm)
 {
 	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		pmm->getHStimulusWidget(HPlayerPositionType::Center)->showFullScreen();
+		//pmm->getHStimulusWidget(HPlayerPositionType::Center)->showFullScreen();
+		pmm->getHStimulusWidget(HPlayerPositionType::Center)->show();
 	}
 	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		pmm->getHStimulusWidget(HPlayerPositionType::Left)->showFullScreen();
-		pmm->getHStimulusWidget(HPlayerPositionType::Right)->showFullScreen();
+		//pmm->getHStimulusWidget(HPlayerPositionType::Left)->showFullScreen();
+		//pmm->getHStimulusWidget(HPlayerPositionType::Right)->showFullScreen();
+		pmm->getHStimulusWidget(HPlayerPositionType::Left)->show();
+		pmm->getHStimulusWidget(HPlayerPositionType::Right)->show();
 	}
 	return;
 
