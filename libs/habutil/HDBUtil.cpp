@@ -161,9 +161,7 @@ bool validateExperiment(int experimentId)
 
 	// check look_settings
 	list = dao.getColumnValuesFromTable("look_settings", "id", "experiment_id", QVariant(experimentId));
-	if (list.size() == 1)
-		qDebug() << " look_settings...OK";
-	else
+	if (list.size() != 1)
 	{
 		qDebug() << " look_settings...ERR: found " << list.size() << " records (expect 1)";
 		bval = false;
@@ -171,9 +169,7 @@ bool validateExperiment(int experimentId)
 
 	// check stimulus_display
 	list = dao.getColumnValuesFromTable("stimulus_display", "id", "experiment_id", QVariant(experimentId));
-	if (list.size() == 1)
-		qDebug() << " stimulus_display...OK";
-	else
+	if (list.size() != 1)
 	{
 		qDebug() << " stimulus_display...ERR: found " << list.size() << " records (expect 1)";
 		bval = false;
@@ -181,9 +177,7 @@ bool validateExperiment(int experimentId)
 
 	// check controlbar_options
 	list = dao.getColumnValuesFromTable("controlbar_options", "id", "experiment_id", QVariant(experimentId));
-	if (list.size() == 1)
-		qDebug() << " controlbar_options...OK";
-	else
+	if (list.size() != 1)
 	{
 		qDebug() << " controlbar_options...ERR: found " << list.size() << " records (expect 1)";
 		bval = false;
@@ -193,10 +187,8 @@ bool validateExperiment(int experimentId)
 	list = dao.getColumnValuesFromTable("attention_setup", "stimulus_id", "experiment_id", QVariant(experimentId));
 	if (list.size() == 1)
 	{
-		qDebug() << " attention_setup...OK";
-		if (validateStimulus(list.at(0).toInt()))
-			qDebug() << "  attention stimulus...OK";
-		else
+		//qDebug() << " attention_setup...OK";
+		if (!validateStimulus(list.at(0).toInt()))
 		{
 			qDebug() << "  attention stimulus...ERR";
 			bval = false;
@@ -220,9 +212,7 @@ bool validateExperiment(int experimentId)
 
 		// habituation_settings
 		listHab = dao.getColumnValuesFromTable("habituation_settings", "id", "phase_id", QVariant(phaseId));
-		if (listHab.size() == 1)
-			qDebug() << "  habituation_settings...OK";
-		else
+		if (listHab.size() != 1)
 		{
 			qDebug() << "  habituation_settings...ERR: found " << listHab.size() << " records (expect 1): " << listHab;
 			bval = false;
@@ -237,17 +227,19 @@ bool validateExperiment(int experimentId)
 			bool bval;
 			QVariant stimid = itStimuli.next();
 //			qDebug() << "     check stimulus id " << stimid.toInt();
-			if (validateStimulus(stimid.toInt()))
-			{
-				qDebug() << "   stimulus id " << stimid.toInt() << "...OK";
-			}
-			else
+			if (!validateStimulus(stimid.toInt()))
 			{
 				qDebug() << "   stimulus id " << stimid.toInt() << "...ERR";
 				bval = false;
 			}
 		}
 	}
+
+	if (bval)
+		qDebug() << "expt id " << experimentId << " name: " << sExptName << " ...OK";
+	else
+		qDebug() << "expt id " << experimentId << " name: " << sExptName << "...ERRORS exist in the settings for this experiment.";
+
 	return bval;
 }
 
