@@ -63,6 +63,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 
 	// This timer is only used when fixed isi is specified. Create the timer always to guard against null ptr errs.
 	m_ptimerFixedISI = new QTimer();
+	m_ptimerFixedISI->setTimerType(Qt::PreciseTimer);
 	m_ptimerFixedISI->setSingleShot(true);
 
 	if (m_agSettings.isAttentionGetterUsed() || m_agSettings.isSoundOnly())
@@ -143,6 +144,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	// Max stim time. The timer is controlled by this class, not one of the subclasses.
 	// create timer for stim always, even if not used.
 	m_ptimerMaxStimulusTime = new QTimer();
+	m_ptimerMaxStimulusTime->setTimerType(Qt::PreciseTimer);
 	m_ptimerMaxStimulusTime->setSingleShot(true);
 
 	if (m_phaseSettings.getIsMaxStimulusTime())
@@ -176,7 +178,8 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	sStimAborted->addTransition(sFinal);
 
 
-	// Initial state transition to AG request or directly to stim request...
+	// Initial state transition to AG request or stim request, depending on whether an ISI is used.
+	// When doing testing input, skip directly to stim running state: stimuli are not played, NO ISI even if one is configured!
 	if (!bTestingInput)
 	{
 		if (m_agSettings.isAttentionGetterUsed())

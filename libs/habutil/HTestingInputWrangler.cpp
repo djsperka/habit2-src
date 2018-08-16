@@ -24,6 +24,7 @@ HTestingInputWrangler::HTestingInputWrangler()
 , m_bIsEnabled(false)
 {
 	m_ptimer = new QTimer(this);
+	m_ptimer->setTimerType(Qt::PreciseTimer);
 	m_ptimer->setInterval(0);
 	QObject::connect(m_ptimer, SIGNAL(timeout()), this, SLOT(check()));
 }

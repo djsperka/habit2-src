@@ -8,6 +8,7 @@
  */
 
 #include "HLooker.h"
+#include "HElapsedTimer.h"
 #include <QtDebug>
 #include <QCoreApplication>
 
@@ -48,19 +49,23 @@ HLooker::HLooker(HEventLog& log, bool bIsLive)
 	if (m_bIsLive)
 	{
 		m_ptimerMinLookAwayTime = new QTimer();
+		m_ptimerMinLookAwayTime->setTimerType(Qt::PreciseTimer);
 		m_ptimerMinLookAwayTime->setSingleShot(true);
 		QObject::connect(m_ptimerMinLookAwayTime, SIGNAL(timeout()), this, SLOT(minLookAwayTimeout()));
 
 		m_ptimerMinLookTime = new QTimer();
+		m_ptimerMinLookTime->setTimerType(Qt::PreciseTimer);
 		m_ptimerMinLookTime->setSingleShot(true);
 		QObject::connect(m_ptimerMinLookTime, SIGNAL(timeout()), this, SLOT(minLookTimeReached()));
 
 		m_ptimerMaxLookAway = new QTimer();
+		m_ptimerMaxLookAway->setTimerType(Qt::PreciseTimer);
 		m_ptimerMaxLookAway->setSingleShot(true);
 		//QObject::connect(m_ptimerMaxLookAway, SIGNAL(timeout()), this, SIGNAL(maxLookAwayTime()));
 		QObject::connect(m_ptimerMaxLookAway, SIGNAL(timeout()), this, SLOT(maxLookAwayTimeout()));
 
 		m_ptimerMaxAccumulatedLook = new QTimer();
+		m_ptimerMaxAccumulatedLook->setTimerType(Qt::PreciseTimer);
 		m_ptimerMaxAccumulatedLook->setSingleShot(true);
 		QObject::connect(m_ptimerMaxAccumulatedLook, SIGNAL(timeout()), this, SLOT(maxAccumulatedLookTimeReached()));
 	}
@@ -370,8 +375,8 @@ void HLooker::onLookingStateEntered()
 						HLook l = it.next();
 						if (isLookToAnyStimulus(l))
 						{
-							//qDebug() << "emit lookAborted: ";
-							//qDebug() << l;
+					//		qDebug() << "sublook: ";
+					//		qDebug() << l;
 							emit lookAborted(l);
 						}
 					}
@@ -415,6 +420,10 @@ void HLooker::onLookingStateEntered()
 							if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
 							{
 								m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+								qDebug() << "HLooker::onLookingStateEntered() - !inclusive - started accum timer for (m_maxAccumulatedLookTimeMS - sumOfAllLooking)=" << (m_maxAccumulatedLookTimeMS - sumOfAllLooking) << " ms";
+								qDebug() << "                                m_maxAccumulatedLookTimeMS=" << m_maxAccumulatedLookTimeMS;
+								qDebug() << "                                sumOfCompleteLooks=" << getSumOfCompleteLooks();
+								qDebug() << "                                cumulativeLookTimeMS= " << cumulativeLookTimeMS;
 							}
 						}
 					}
@@ -430,9 +439,14 @@ void HLooker::onLookingStateEntered()
 							if (sumOfAllLooking < m_maxAccumulatedLookTimeMS)
 							{
 								m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+								qDebug() << "HLooker::onLookingStateEntered() - inclusive - started accum timer for (m_maxAccumulatedLookTimeMS - sumOfAllLooking)=" << (m_maxAccumulatedLookTimeMS - sumOfAllLooking) << " ms";
+								qDebug() << "                                m_maxAccumulatedLookTimeMS=" << m_maxAccumulatedLookTimeMS;
+								qDebug() << "                                sumOfCompleteLooks=" << getSumOfCompleteLooks();
+								qDebug() << "                                (lastLookAwayStartTimeMS - lookStartTimeMS)";
+								qDebug() << "                                lastLookAwayStartTimeMS= " << lastLookAwayStartTimeMS;
+								qDebug() << "                                lookStartTimeMS= " << lookStartTimeMS;
 							}
 						}
-
 					}
 				}
 			}
@@ -534,16 +548,66 @@ void HLooker::minLookTimeReached()
 		// there may have been a short look-away followed by a return to looking. In that case, the looking prior to the
 		// look-away is included in cumulativeLookTimeMS, and it was taken into account when starting the minLookTime timer.
 		// A better way is to add the time this timer was initialized with.
-		int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS + m_ptimerMinLookTime->interval();
-		if (sumOfAllLooking > m_maxAccumulatedLookTimeMS)
+		// djs 8-16-2018. When using inclusive looks, the timer can be set with incorrect time, because the non-looking
+		// periods are excluded. Thus, if you had a short look-away that was part of this look, the max accumulated looking
+		// timer will be set with too much time on it (extra by the amount of look-away). Fix this by separating the inclusive and
+		// !inclusive cases.
+
+
+		if (!m_bInclusiveLookTime)
 		{
-			emit maxAccumulatedLookTime();
+			int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS + m_ptimerMinLookTime->interval();
+			if (sumOfAllLooking > m_maxAccumulatedLookTimeMS)
+			{
+				emit maxAccumulatedLookTime();
+			}
+			else
+			{
+				if (isLive())
+				{
+//					qDebug() << "analyzeLooking(): m_iLookStartedIndex = " << m_iLookStartedIndex;
+//					qDebug() << "analyzeLooking(): lookStartTimeMS = " << lookStartTimeMS;
+//					qDebug() << "analyzeLooking(): lastLookStartTimeMS = " << lastLookStartTimeMS;
+//					qDebug() << "analyzeLooking(): cumulativeLookTimeMS = " << cumulativeLookTimeMS;
+//					qDebug() << "analyzeLooking(): lastLookAwayStartTimeMS = " << lastLookAwayStartTimeMS;
+//					qDebug() << "analyzeLooking(): sublooks.size = " << sublooks.size();
+					m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+				}
+			}
 		}
 		else
 		{
-			if (isLive())
-				m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+			// looking time ignores looks-away.
+			int sumOfAllLooking = getSumOfCompleteLooks() + (HElapsedTimer::elapsed() - lookStartTimeMS);
+			if (sumOfAllLooking > m_maxAccumulatedLookTimeMS)
+			{
+				emit maxAccumulatedLookTime();
+			}
+			else
+			{
+				if (isLive())
+				{
+					m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+				}
+			}
 		}
+
+//					if (!m_bInclusiveLookTime)
+//					{
+//						qDebug() << "HLooker::minLookTimeReached( !inclusive ) - started accum timer for (m_maxAccumulatedLookTimeMS - sumOfAllLooking)=" << (m_maxAccumulatedLookTimeMS - sumOfAllLooking) << " ms";
+//						qDebug() << "                                m_maxAccumulatedLookTimeMS=" << m_maxAccumulatedLookTimeMS;
+//						qDebug() << "                                sumOfCompleteLooks=" << getSumOfCompleteLooks();
+//						qDebug() << "                                cumulativeLookTimeMS= " << cumulativeLookTimeMS;
+//						qDebug() << "                                m_ptimerMinLookTime->interval()= " << m_ptimerMinLookTime->interval();
+//						qDebug() << "                                elapsed() = " << HElapsedTimer::elapsed();
+//					}
+//					else
+//					{
+//						qDebug() << "current time " << HElapsedTimer::elapsed() << " inclusive look time so far " << (HElapsedTimer::elapsed() - lookStartTimeMS);
+//						qDebug() << "theoretical timer..." << (m_maxAccumulatedLookTimeMS - (HElapsedTimer::elapsed() - lookStartTimeMS)) << " real timer " << (m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+//					}
+//				}
+//			}
 	}
 }
 
@@ -563,6 +627,12 @@ void HLooker::minLookAwayTimeout()
 			return;
 		}
 
+		//qDebug() << "analyzeLooking(): m_iLookStartedIndex = " << m_iLookStartedIndex;
+		//qDebug() << "analyzeLooking(): lookStartTimeMS = " << lookStartTimeMS;
+		//qDebug() << "analyzeLooking(): lastLookStartTimeMS = " << lastLookStartTimeMS;
+		//qDebug() << "analyzeLooking(): cumulativeLookTimeMS = " << cumulativeLookTimeMS;
+		//qDebug() << "analyzeLooking(): lastLookAwayStartTimeMS = " << lastLookAwayStartTimeMS;
+		//qDebug() << "analyzeLooking(): sublooks.size = " << sublooks.size();
 		if (cumulativeLookTimeMS >= m_minLookTimeMS)
 		{
 			HLook l;
@@ -582,23 +652,25 @@ void HLooker::minLookAwayTimeout()
 			if (m_bInclusiveLookTime)
 			{
 				l.setLookMS(lastLookAwayStartTimeMS - lookStartTimeMS);
+				qDebug() << "set look time to (lastLookAwayStartTimeMS - lookStartTimeMS)= " << lastLookAwayStartTimeMS << "-" << lookStartTimeMS;
 			}
 			else
 			{
 				l.setLookMS(cumulativeLookTimeMS);
+				qDebug() << "set look time to cumulativeLookTimeMS=" << cumulativeLookTimeMS;
 			}
 
 			m_looks.append(l);
-			//qDebug() << "emit look(2, inclusive=" << m_bInclusiveLookTime << "): " << l;
-			//qDebug() << "sublooks follow" << endl << sublooks;
+			qDebug() << "emit look(2, inclusive=" << m_bInclusiveLookTime << "): " << l;
+			qDebug() << "sublooks follow" << endl << sublooks;
 			emit look(l);
 
 		}
 		else
 		{
 			// Emit lookAborted once for each sublook that is in a look direction.
-			//qDebug() << "emit lookAborted(1)";
-			//qDebug() << "sublooks follow" << endl << sublooks;
+			qDebug() << "emit lookAborted(1)";
+			qDebug() << "sublooks follow" << endl << sublooks;
 
 			QListIterator<HLook> it(sublooks);
 			while (it.hasNext())
@@ -606,8 +678,8 @@ void HLooker::minLookAwayTimeout()
 				HLook l = it.next();
 				if (isLookToAnyStimulus(l))
 				{
-					//qDebug() << "emit lookAborted: ";
-					//qDebug() << l;
+					qDebug() << "sublook: ";
+					qDebug() << l;
 					emit lookAborted(l);
 				}
 			}
@@ -654,6 +726,13 @@ void HLooker::stopLooker(int tMS)
 			qCritical() << "Cannot analyze looking at index " << m_iLookStartedIndex;
 			return;
 		}
+
+		//qDebug() << "analyzeLooking(): m_iLookStartedIndex = " << m_iLookStartedIndex;
+		//qDebug() << "analyzeLooking(): lookStartTimeMS = " << lookStartTimeMS;
+		//qDebug() << "analyzeLooking(): lastLookStartTimeMS = " << lastLookStartTimeMS;
+		//qDebug() << "analyzeLooking(): cumulativeLookTimeMS = " << cumulativeLookTimeMS;
+		//qDebug() << "analyzeLooking(): lastLookAwayStartTimeMS = " << lastLookAwayStartTimeMS;
+		//qDebug() << "analyzeLooking(): sublooks.size = " << sublooks.size();
 
 
 		if (m_bLookAwayStarted)

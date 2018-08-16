@@ -41,6 +41,7 @@ HStimRunningState::HStimRunningState(HTrial& trial, HEventLog& log, const Habit:
 	if (m_phaseSettings.getIsMaxNoLookTime())
 	{
 		m_ptimerNoLook = new QTimer();
+		m_ptimerNoLook->setTimerType(Qt::PreciseTimer);
 		m_ptimerNoLook->setSingleShot(true);
 		connect(m_ptimerNoLook, SIGNAL(timeout()), this, SLOT(noLookTimeout()));
 	}
