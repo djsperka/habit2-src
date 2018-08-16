@@ -1,0 +1,28 @@
+# testing-exp-1 
+# 
+# Expect Look, 750ms (!inclusive)
+# Expect Look, 960ms (inclusive)
+# trial end, max stim time
+Test,0,0,NoneCenter,100
+Test,0,0,CenterNone,200
+Test,0,0,NoneCenter,250
+Test,0,0,CenterNone,400
+Test,0,0,NoneCenter,490
+Test,0,0,CenterNone,590
+Test,0,0,NoneCenter,660
+Test,0,0,CenterNone,1060
+
+# Expect look, 1000ms inclusive and !inclusive 
+# trial end, max accum look time
+Test,1,0,NoneCenter,100
+Test,1,0,CenterNone,1500
+
+# first look period too short - expect aborted look (400ms)
+# Expect look, 1000ms, both types
+# trial end, max accum look time
+Test,2,0,NoneCenter,100
+Test,2,0,CenterNone,500
+Test,2,0,NoneCenter,700
+Test,2,0,CenterNone,1000
+Test,2,0,NoneCenter,1050
+Test,2,0,CenterNone,1750
