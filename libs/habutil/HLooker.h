@@ -43,6 +43,7 @@ public:
 	bool setMaxAccumulatedLookTime(int tMaxAccum);
 	bool setMaxLookAwayTime(int tMaxLookAway);
 
+	bool setPhaseAccumulatedLookTime(int tPhaseAccum);
 	
 	// Assume that current Look/away status remains until tMS.
 	// If m_bLookStarted==true, check if there is enough looking time to
@@ -65,6 +66,7 @@ public slots:
 	void maxAccumulatedLookTimeReached();
 	void minLookTimeReached();
 	void maxLookAwayTimeout();
+	void phaseAccumulatedLookTimeReached();
 
 	// slots called when the individual states are entered. Handle things with these
 	// slots rather than the states' onEntry slots, as it makes it simpler to have
@@ -89,6 +91,7 @@ private:
 	int m_minLookAwayTimeMS;	// when look away has been at least this long, current look is ended.
 	int m_maxLookAwayTimeMS;	// when >0, if looking away for this long emit maxLookAwayTime()
 	int m_maxAccumulatedLookTimeMS; // when >0, when accumulated look time reaches this emit maxAccumulatedLookTime()
+	int m_phaseAccumulatedLookTimeMS; // when >0, when accumulated look time reaches this emit phaseAccumulatedLookTime(). Phase should manipulate this between trials.
 	HEventLog& m_log;
 	bool m_bInclusiveLookTime;	// if true (default), short look-aways are included in total look time.
 	bool m_bLookStarted;		// if true a look has been started but not yet ended.
@@ -104,6 +107,7 @@ private:
 	QTimer *m_ptimerMinLookAwayTime;	// m_minLookAwayTimeMS
 	QTimer *m_ptimerMaxLookAway;		// m_maxLookAwayTimeMS
 	QTimer *m_ptimerMaxAccumulatedLook;	// m_maxAccumulatedLookTimeMS
+	QTimer *m_ptimerPhaseAccumulatedLook; // m_phaseAccumulatedLookTimeMS
 
 	// List of all transitions. Starts from scratch each time initial state entered.
 	QList< QPair<const HLookTrans*, int> > m_transitions;
@@ -130,6 +134,7 @@ signals:
 	//void lookAwayStarted();
 	void maxLookAwayTime();
 	void maxAccumulatedLookTime();
+	void phaseAccumulatedLookTime();	// if/when the looking time in m_phaseAccumulatedLookTimeMS is hit
 };
 	
 class HLookerState: public QState

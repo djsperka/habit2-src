@@ -140,6 +140,14 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 		}
 	}
 
+	// If this phase uses total looking time for habituation, then a trial may end when that habituation time is reached,
+	// without any other trial-ending criteria. This is its own trial end type, used only in this special situation.
+	if (m_phaseSettings.habituationSettings().getHabituationType() == HHabituationType::HHabituationTypeTotalLookingTime)
+	{
+		HPhaseAccumulatedLookTimeState *sPhaseAccum = new HPhaseAccumulatedLookTimeState(*this, log);
+		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(phaseAccumulatedLookTime()), sPhaseAccum);
+		sPhaseAccum->addTransition(sFinal);
+	}
 
 	// Max stim time. The timer is controlled by this class, not one of the subclasses.
 	// create timer for stim always, even if not used.

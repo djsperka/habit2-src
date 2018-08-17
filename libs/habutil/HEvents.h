@@ -93,10 +93,11 @@ public:
 	static const HTrialEndType HTrialEndMaxLookAwayTime;
 	static const HTrialEndType HTrialEndAGAbort;
 	static const HTrialEndType HTrialEndMaxLookAwayTimeRepeat;
+	static const HTrialEndType HTrialEndPhaseAccumulatedLookTime;
 	static const HTrialEndType HTrialEndUndefined;
 	
 	// Undefined type not in A
-	static const HTrialEndType* A[8];
+	static const HTrialEndType* A[9];
 	
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }

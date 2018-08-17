@@ -121,6 +121,19 @@ protected:
 	void onEntry(QEvent* e);
 };
 
+class HPhaseAccumulatedLookTimeState: public HTrialChildState
+{
+
+public:
+	HPhaseAccumulatedLookTimeState(HTrial& trial, HEventLog& log) : HTrialChildState(trial, log, "HPhaseAccumulatedLookTimeState") {};
+	virtual ~HPhaseAccumulatedLookTimeState() {};
+
+protected:
+
+	// onEntry - append kTrialEnd event
+	void onEntry(QEvent* e);
+};
+
 class HMaxLookAwayTimeState: public HTrialChildState
 {
 	bool m_bRepeatTrialOnMaxLookAwayTime;

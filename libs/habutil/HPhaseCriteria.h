@@ -24,6 +24,7 @@ public:
 	HPhaseCriteria() {};
 	virtual ~HPhaseCriteria() {};
 	virtual bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber) = 0;
+	virtual const HHabituationType& habituationType() = 0;
 };
 
 
@@ -34,6 +35,7 @@ public:
 	virtual ~HPhaseFixedNCriteria() {};
 	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber);
 	int getN() { return m_N; };
+	const HHabituationType& habituationType() { return HHabituationType::HHabituationTypeFixedN; };
 protected:
 	int m_N;
 };
@@ -44,6 +46,7 @@ public:
 	HPhaseTotalLookingTimeCriteria(int msTotal, int N) : HPhaseFixedNCriteria(N), m_msTotal(msTotal) {};
 	virtual ~HPhaseTotalLookingTimeCriteria() {};
 	bool isPhaseComplete(const HPhaseLog& log, bool& isHabituated, int& eventNumber);
+	const HHabituationType& habituationType() { return HHabituationType::HHabituationTypeTotalLookingTime; };
 private:
 	int m_msTotal;
 };
@@ -66,6 +69,8 @@ public:
 	// If there are not enough trials completed to make a 'window' then return 0.
 	
 	bool getWindowSum(const HPhaseLog& log, int& iWindowSum, int ifirst);
+
+	const HHabituationType& habituationType() { return HHabituationType::HHabituationTypeCriterion; };
 private:
 	Habit::CriterionSettings m_c;	
 };	

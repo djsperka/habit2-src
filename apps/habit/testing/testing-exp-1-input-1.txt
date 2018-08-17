@@ -26,3 +26,14 @@ Test,2,0,NoneCenter,700
 Test,2,0,CenterNone,1000
 Test,2,0,NoneCenter,1050
 Test,2,0,CenterNone,1750
+
+
+# total looking time phase
+
+# first trial ends with 1000ms look
+TotalLookHab1,0,0,NoneCenter,500
+TotalLookHab1,0,0,CenterNone,1600
+TotalLookHab1,1,0,NoneCenter,500
+TotalLookHab1,1,0,CenterNone,1600
+TotalLookHab1,2,0,NoneCenter,500
+TotalLookHab1,2,0,CenterNone,1600

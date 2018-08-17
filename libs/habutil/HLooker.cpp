@@ -19,6 +19,7 @@ HLooker::HLooker(const HLooker& looker)
 , m_minLookAwayTimeMS(looker.m_minLookAwayTimeMS)
 , m_maxLookAwayTimeMS(looker.m_maxLookAwayTimeMS)
 , m_maxAccumulatedLookTimeMS(looker.m_maxAccumulatedLookTimeMS)
+, m_phaseAccumulatedLookTimeMS(looker.m_phaseAccumulatedLookTimeMS)
 , m_log(looker.m_log)
 , m_bInclusiveLookTime(looker.m_bInclusiveLookTime)
 , m_bLookStarted(looker.m_bLookStarted)
@@ -36,6 +37,7 @@ HLooker::HLooker(HEventLog& log, bool bIsLive)
 , m_minLookAwayTimeMS(0)
 , m_maxLookAwayTimeMS(0)
 , m_maxAccumulatedLookTimeMS(0)
+, m_phaseAccumulatedLookTimeMS(0)
 , m_log(log)
 , m_bInclusiveLookTime(false)
 , m_bLookStarted(false)
@@ -68,6 +70,12 @@ HLooker::HLooker(HEventLog& log, bool bIsLive)
 		m_ptimerMaxAccumulatedLook->setTimerType(Qt::PreciseTimer);
 		m_ptimerMaxAccumulatedLook->setSingleShot(true);
 		QObject::connect(m_ptimerMaxAccumulatedLook, SIGNAL(timeout()), this, SLOT(maxAccumulatedLookTimeReached()));
+
+		m_ptimerPhaseAccumulatedLook = new QTimer();
+		m_ptimerPhaseAccumulatedLook->setTimerType(Qt::PreciseTimer);
+		m_ptimerPhaseAccumulatedLook->setSingleShot(true);
+		QObject::connect(m_ptimerPhaseAccumulatedLook, SIGNAL(timeout()), this, SLOT(phaseAccumulatedLookTimeReached()));
+
 	}
 
 	// Create states and transitions for state machine.
@@ -217,6 +225,24 @@ bool HLooker::setMaxLookAwayTime(int t)
 	else
 	{
 		m_maxLookAwayTimeMS = t;
+		b = true;
+	}
+	return b;
+}
+
+bool HLooker::setPhaseAccumulatedLookTime(int tPhaseAccum)
+{
+	bool b = false;
+
+	// cannot do this if the looker is running
+	if (this->isRunning())
+	{
+		qWarning() << "Cannot set phase accum look time when HLooker is running.";
+		b = false;
+	}
+	else
+	{
+		m_phaseAccumulatedLookTimeMS = tPhaseAccum;
 		b = true;
 	}
 	return b;
@@ -480,6 +506,8 @@ void HLooker::onLookingStateExited()
 			m_ptimerMinLookTime->stop();
 		if (m_ptimerMaxAccumulatedLook->isActive())
 			m_ptimerMaxAccumulatedLook->stop();
+		if (m_ptimerPhaseAccumulatedLook->isActive())
+			m_ptimerPhaseAccumulatedLook->stop();
 	}
 }
 
@@ -520,26 +548,32 @@ void HLooker::maxAccumulatedLookTimeReached()
 	emit maxAccumulatedLookTime();
 }
 
+void HLooker::phaseAccumulatedLookTimeReached()
+{
+	emit phaseAccumulatedLookTime();
+}
+
 void HLooker::minLookTimeReached()
 {
+	int lastLookAwayStartTimeMS;
+	int cumulativeLookTimeMS;
+	int lookStartTimeMS;
+	int lastLookStartTimeMS;
+	HLookList sublooks;
+
+	if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS, sublooks))
+	{
+		qCritical() << "HLooker::minLookTimeReached() - Cannot analyze looking at index " << m_iLookStartedIndex;
+		return;
+	}
+
 	// this timeout indicates that the current looking has reached the minimum necessary to consider it a look().
 	// Now we start the timer for the max accumulated look time if needed.
 
 	emit lookPending();
+
 	if (m_maxAccumulatedLookTimeMS > 0)
 	{
-		int lastLookAwayStartTimeMS;
-		int cumulativeLookTimeMS;
-		int lookStartTimeMS;
-		int lastLookStartTimeMS;
-		HLookList sublooks;
-
-		if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS, sublooks))
-		{
-			qCritical() << "HLooker::minLookTimeReached() - Cannot analyze looking at index " << m_iLookStartedIndex;
-			return;
-		}
-
 		// Its possible that the max accumulated look time was reached during the "min look" time.
 		// Check if that's happened - if so then emit maxAccumulatedLookTime().
 		// Otherwise, start max accumulated look timer.
@@ -588,6 +622,42 @@ void HLooker::minLookTimeReached()
 				if (isLive())
 				{
 					m_ptimerMaxAccumulatedLook->start(m_maxAccumulatedLookTimeMS - sumOfAllLooking);
+				}
+			}
+		}
+
+		// check phaseAccumulatedLookTime
+		if (m_phaseAccumulatedLookTimeMS > 0)
+		{
+			if (!m_bInclusiveLookTime)
+			{
+				int sumOfAllLooking = getSumOfCompleteLooks() + cumulativeLookTimeMS + m_ptimerMinLookTime->interval();
+				if (sumOfAllLooking > m_phaseAccumulatedLookTimeMS)
+				{
+					emit phaseAccumulatedLookTime();
+				}
+				else
+				{
+					if (isLive())
+					{
+						m_ptimerPhaseAccumulatedLook->start(m_phaseAccumulatedLookTimeMS - sumOfAllLooking);
+					}
+				}
+			}
+			else
+			{
+				// looking time ignores looks-away.
+				int sumOfAllLooking = getSumOfCompleteLooks() + (HElapsedTimer::elapsed() - lookStartTimeMS);
+				if (sumOfAllLooking > m_phaseAccumulatedLookTimeMS)
+				{
+					emit phaseAccumulatedLookTime();
+				}
+				else
+				{
+					if (isLive())
+					{
+						m_ptimerPhaseAccumulatedLook->start(m_phaseAccumulatedLookTimeMS - sumOfAllLooking);
+					}
 				}
 			}
 		}
@@ -712,6 +782,7 @@ void HLooker::stopLooker(int tMS)
 		if (m_ptimerMinLookAwayTime->isActive()) m_ptimerMinLookAwayTime->stop();
 		if (m_ptimerMaxLookAway->isActive()) m_ptimerMaxLookAway->stop();
 		if (m_ptimerMaxAccumulatedLook->isActive()) m_ptimerMaxAccumulatedLook->stop();
+		if (m_ptimerPhaseAccumulatedLook->isActive()) m_ptimerPhaseAccumulatedLook->stop();
 	}
 
 	if (m_bLookStarted)

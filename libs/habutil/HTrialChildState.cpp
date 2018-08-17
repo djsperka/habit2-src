@@ -158,6 +158,13 @@ void HMaxAccumulatedLookTimeState::onEntry(QEvent* e)
 	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndMaxAccumulatedLookTime, HElapsedTimer::elapsed()));
 };
 
+void HPhaseAccumulatedLookTimeState::onEntry(QEvent* e)
+{
+	Q_UNUSED(e);
+	HState::onEntry(e);
+	eventLog().append(new HTrialEndEvent(HTrialEndType::HTrialEndPhaseAccumulatedLookTime, HElapsedTimer::elapsed()));
+};
+
 void HMaxLookAwayTimeState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);

@@ -46,6 +46,7 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	connect(this, SIGNAL(phaseStarted(QString)), &exp, SIGNAL(phaseStarted(QString)));
 	connect(m_sTrial, SIGNAL(trialStarted(int, int)), &exp, SIGNAL(trialStarted(int, int)));
 
+
 	checkPrerollStatus();
 };
 
@@ -89,6 +90,15 @@ void HPhase::checkPrerollStatus(int trialnumber, int repeat)
 			qDebug() << "HPhase::checkPrerollStatus() - trial/repeat " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial].first << "At last stim in phase; nothing to preroll.";
 		}
 	}
+
+	// set phase accumulated look time if needed
+	if (m_pcriteria->habituationType() == HHabituationType::HHabituationTypeTotalLookingTime)
+	{
+		int t = m_phaseSettings.habituationSettings().getTotalLookLengthToEnd() - eventLog().getPhaseLog().totalLookingTime();
+		experiment().getLookDetector().setPhaseAccumulatedLookTime(t);
+		qDebug() << "HPhase::checkPrerollStatus - set phaseAccumulatedLookTime " << t;
+	}
+
 }
 
 void HPhase::onEntry(QEvent* e)

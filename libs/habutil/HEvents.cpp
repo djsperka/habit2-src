@@ -116,9 +116,10 @@ const HTrialEndType HTrialEndType::HTrialEndMaxAccumulatedLookTime(4, "MaxAccumu
 const HTrialEndType HTrialEndType::HTrialEndMaxLookAwayTime(5, "MaxLookAwayTime");
 const HTrialEndType HTrialEndType::HTrialEndAGAbort(6, "AGAbort");
 const HTrialEndType HTrialEndType::HTrialEndMaxLookAwayTimeRepeat(7, "MaxLookAwayTimeRepeat");
+const HTrialEndType HTrialEndType::HTrialEndPhaseAccumulatedLookTime(8, "PhaseAccumulatedLookTime");
 const HTrialEndType HTrialEndType::HTrialEndUndefined(-1, "Unknown");
 	
-const HTrialEndType* HTrialEndType::A[8] =
+const HTrialEndType* HTrialEndType::A[9] =
 {
 	&HTrialEndType::HTrialEndGotLook, 
 	&HTrialEndType::HTrialEndMaxStimulusTime,
@@ -128,6 +129,7 @@ const HTrialEndType* HTrialEndType::A[8] =
 	&HTrialEndType::HTrialEndMaxLookAwayTime,
 	&HTrialEndType::HTrialEndAGAbort,
 	&HTrialEndType::HTrialEndMaxLookAwayTimeRepeat,
+	&HTrialEndType::HTrialEndPhaseAccumulatedLookTime,
 };
 	
 bool operator==(const HTrialEndType& lhs, const HTrialEndType& rhs)
@@ -149,6 +151,7 @@ bool isTrialEndTypeSuccessful(const HTrialEndType& etype)
 	return (etype == HTrialEndType::HTrialEndGotLook ||
 			etype == HTrialEndType::HTrialEndMaxStimulusTime ||
 			etype == HTrialEndType::HTrialEndMaxAccumulatedLookTime ||
+			etype == HTrialEndType::HTrialEndPhaseAccumulatedLookTime ||
 			etype == HTrialEndType::HTrialEndMaxLookAwayTime);
 }
 
