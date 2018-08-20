@@ -3,30 +3,37 @@
 # Expect Look, 750ms (!inclusive)
 # Expect Look, 960ms (inclusive)
 # trial end, max stim time
-Test,0,0,NoneCenter,100
-Test,0,0,CenterNone,200
-Test,0,0,NoneCenter,250
-Test,0,0,CenterNone,400
-Test,0,0,NoneCenter,490
-Test,0,0,CenterNone,590
-Test,0,0,NoneCenter,660
-Test,0,0,CenterNone,1060
+Test-Accum,0,0,NoneCenter,100
+Test-Accum,0,0,CenterNone,200
+Test-Accum,0,0,NoneCenter,250
+Test-Accum,0,0,CenterNone,400
+Test-Accum,0,0,NoneCenter,490
+Test-Accum,0,0,CenterNone,590
+Test-Accum,0,0,NoneCenter,660
+Test-Accum,0,0,CenterNone,1060
 
 # Expect look, 1000ms inclusive and !inclusive 
 # trial end, max accum look time
-Test,1,0,NoneCenter,100
-Test,1,0,CenterNone,1500
+Test-Accum,1,0,NoneCenter,100
+Test-Accum,1,0,CenterNone,1500
 
 # first look period too short - expect aborted look (400ms)
 # Expect look, 1000ms, both types
 # trial end, max accum look time
-Test,2,0,NoneCenter,100
-Test,2,0,CenterNone,500
-Test,2,0,NoneCenter,700
-Test,2,0,CenterNone,1000
-Test,2,0,NoneCenter,1050
-Test,2,0,CenterNone,1750
+Test-Accum,2,0,NoneCenter,100
+Test-Accum,2,0,CenterNone,500
+Test-Accum,2,0,NoneCenter,700
+Test-Accum,2,0,CenterNone,1000
+Test-Accum,2,0,NoneCenter,1050
+Test-Accum,2,0,CenterNone,1750
 
+# test inattentive time
+# 600ms look
+Test-Accum,3,0,NoneCenter,400
+Test-Accum,3,0,CenterNone,1000
+# long inattentive gap - trial should end before this look even starts
+Test-Accum,3,0,NoneCenter,2300
+Test-Accum,3,0,CenterNone,2900
 
 # total looking time phase
 
@@ -37,3 +44,13 @@ TotalLookHab1,1,0,NoneCenter,500
 TotalLookHab1,1,0,CenterNone,1600
 TotalLookHab1,2,0,NoneCenter,500
 TotalLookHab1,2,0,CenterNone,1600
+
+# Test-SingleLook phase. 
+Test-SingleLook,0,0,NoneCenter,400
+Test-SingleLook,0,0,CenterNone,1400
+Test-SingleLook,1,0,NoneCenter,400
+Test-SingleLook,1,0,CenterNone,950
+Test-SingleLook,1,0,NoneCenter,1000
+Test-SingleLook,1,0,CenterNone,1800
+
+

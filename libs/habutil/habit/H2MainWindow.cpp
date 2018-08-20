@@ -559,6 +559,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	Habit::ExperimentSettings experimentSettings;
 	HEventLog eventLog;
 	HGMM *pMediaManager = NULL;
+	HTestingInputWrangler *pWrangler = NULL;
 	QList<QWidget *> deleteList;	// list of things to be cleaned up after expt run
 	bool bStimInDialog = false;	// can be set on command line, or in RunSettingsDialog
 	QString expt = m_pExperimentListWidget->selectedExperiment();	// the experiment to run
@@ -615,6 +616,26 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				return;
 			}
 
+			// If there is a testing input file (which simulates mouse clicks for look/look away), load it now.
+			//HTestingInputWrangler *pWrangler;
+			if (bTestInput)
+			{
+				pWrangler = new HTestingInputWrangler();
+//				pWrangler->enable(m_pld, &m_psm->experiment());
+				// Get input file
+
+				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QStandardPaths::standardLocations(QStandardPaths::DesktopLocation)[0], "(*.txt)");
+
+				qDebug() << "Selected input file " << selectedFileName;
+				QFile file(selectedFileName);
+				if (!pWrangler->load(file, experimentSettings))
+				{
+					QMessageBox::critical(this, "Cannot load input file", "Cannot load testing input file.");
+					return;
+				}
+			}
+
+
 
 			if (bStimInDialog)
 				pMediaManager = createMediaManager(experimentSettings, 320, 240);
@@ -644,26 +665,26 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 
 			// If there is a testing input file (which simulates mouse clicks for look/look away), load it now.
-			HTestingInputWrangler *pWrangler;
+			//HTestingInputWrangler *pWrangler;
 			if (bTestInput)
 			{
-				pWrangler = new HTestingInputWrangler();
+//				pWrangler = new HTestingInputWrangler();
 				pWrangler->enable(m_pld, &m_psm->experiment());
-				// Get input file
-
-#if QT_VERSION >= 0x050000
-				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QStandardPaths::standardLocations(QStandardPaths::DesktopLocation)[0], "(*.txt)");
-#else
-				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation), "(*.txt)");
-#endif
-
-				qDebug() << "Selected input file " << selectedFileName;
-				QFile file(selectedFileName);
-				if (!pWrangler->load(file))
-				{
-					QMessageBox::critical(this, "Cannot load input file", "Cannot load testing input file.");
-					return;
-				}
+//				// Get input file
+//
+//#if QT_VERSION >= 0x050000
+//				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QStandardPaths::standardLocations(QStandardPaths::DesktopLocation)[0], "(*.txt)");
+//#else
+//				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation), "(*.txt)");
+//#endif
+//
+//				qDebug() << "Selected input file " << selectedFileName;
+//				QFile file(selectedFileName);
+//				if (!pWrangler->load(file))
+//				{
+//					QMessageBox::critical(this, "Cannot load input file", "Cannot load testing input file.");
+//					return;
+//				}
 			}
 
 			QDialog *pStimulusDisplayDialog  = NULL;
@@ -721,6 +742,27 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 				// reset the mm
 				HGMM::instance().reset();
+
+				// if testing input, do checking here
+				if (bTestInput)
+				{
+					HEvent *e;
+					qDebug() << "Event log dump";
+					foreach(e, eventLog)
+					{
+						if (e->type() == HEventType::HEventPhaseStart ||
+								e->type() == HEventType::HEventPhaseEnd ||
+								e->type() == HEventType::HEventTrialStart ||
+								e->type() == HEventType::HEventTrialEnd ||
+								e->type() == HEventType::HEventLook ||
+								e->type() == HEventType::HHabituationFailure ||
+								e->type() == HEventType::HHabituationSuccess)
+						{
+							qDebug() << e->eventCSV();
+						}
+					}
+					qDebug() << "Event log dump done";
+				}
 
 				// display results
 				HResultsDialog dialog(*results, this);

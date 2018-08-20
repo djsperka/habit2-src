@@ -37,7 +37,7 @@ class HTestingInputWrangler: public QObject
 	int m_lastCheckTime;
 	bool m_bIsEnabled;
 
-	bool processLine(const QString& line);
+	bool processLine(const QString& line, Habit::ExperimentSettings& expSettings);
 	void dump();
 
 public:
@@ -46,7 +46,7 @@ public:
 	HTestingInputWrangler();
 	virtual ~HTestingInputWrangler() {};
 	void enable(HLookDetector *pLD, const HExperiment* pExpt);
-	bool load(QFile& inputFile);
+	bool load(QFile& inputFile, Habit::ExperimentSettings& expSettings);
 	void stop();
 protected slots:
 	void phaseStarted(QString);

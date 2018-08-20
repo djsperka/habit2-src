@@ -53,7 +53,7 @@ void HTestingInputWrangler::stop()
 	if (m_ptimer && m_ptimer->isActive()) m_ptimer->stop();
 }
 
-bool HTestingInputWrangler::load(QFile& inputFile)
+bool HTestingInputWrangler::load(QFile& inputFile, Habit::ExperimentSettings& expSettings)
 {
 	bool b = false;
 
@@ -79,7 +79,7 @@ bool HTestingInputWrangler::load(QFile& inputFile)
     	while (!in.atEnd())
     	{
     		QString line = in.readLine();
-    		if (!processLine(line))
+    		if (!processLine(line, expSettings))
     		{
     			qDebug() << "Error in input file at line " << num << ": " << line;
     		}
@@ -99,7 +99,7 @@ bool HTestingInputWrangler::load(QFile& inputFile)
     return b;
 };
 
-bool HTestingInputWrangler::processLine(const QString& line)
+bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSettings& expSettings)
 {
 	// If line begins with # or is blank then skip it
 	if (line.trimmed().isEmpty() || line.startsWith('#'))
@@ -108,7 +108,7 @@ bool HTestingInputWrangler::processLine(const QString& line)
 	}
 	else if (line.startsWith('!'))
 	{
-		// This left as possible entry line for parameters. For now treated as a comment.
+		// !LookSettings,
 	}
 	else
 	{
