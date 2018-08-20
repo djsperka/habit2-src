@@ -122,11 +122,12 @@ void GUILib::HStimulusInfoWidget::selectButtonClicked()
 bool GUILib::HStimulusInfoWidget::doFileSelection()
 {
 	QString path;
-	const QString filterVideoImage("All Video and Images (*.avi *.mp4 *.wmf *.asf *.wmv *.mov *.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);;All Video (*.avi *.mp4 *.wmf *.asf *.wmv *.mov);;All Audio (*.mp3 *.ogg *.wma *.wav *.aiff);;All Images (*.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);; Audio Video Interleave (*.avi);;MP4 file format (*.mp4);;Windows Media Video (*.wmf *.asf *.wmv);;QuickTime (*.mov);;All Files (*.*)");
-	const QString filterAudio("All Audio and Video (*.mp3 *.ogg *.wma *.wav *.aiff *.avi *.mp4 *.wmf *.asf *.wmv *.mov);;All Files (*.*)");
+	const QString filterVideoImage("All Video and Images (*.avi *.mp4 *.wmf *.asf *.wmv *.mov *.m4v *.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);;All Video (*.avi *.mp4 *.wmf *.asf *.wmv *.mov *.m4v);;All Audio (*.mp3 *.ogg *.wma *.wav *.aiff);;All Images (*.bmp *.gif *.png *.jpg *.jpeg *.pbm *.pgm *.ppm *.tif *.tiff *.pict);; Audio Video Interleave (*.avi);;MP4 file format (*.mp4);;Windows Media Video (*.wmf *.asf *.wmv);;QuickTime (*.mov *.m4v);;All Files (*.*)");
+	const QString filterAudio("All Audio and Video (*.mp3 *.ogg *.wma *.wav *.aiff *.avi *.mp4 *.wmf *.asf *.wmv *.mov *.m4v);;All Files (*.*)");
 	QString filter;
 	QString filename;
 	QDir stimroot = habutilGetStimulusRootDir();
+
 
 	// Initial folder is the folder of the existing file (if any), otherwise the stim root dir.
 	if (ui->lineeditFileBase->text().isEmpty())
