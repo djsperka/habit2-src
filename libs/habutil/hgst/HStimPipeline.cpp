@@ -98,9 +98,9 @@ void HStimPipeline::pause()
 	if (GST_STATE_CHANGE_ASYNC == r)
 	{
 		m_iAsyncPause++;
-		qDebug() << "HStimPipeline::pause( "  << id() << " ) - GST_STATE_CHANGE_ASYNC " << m_iAsyncPause;
+		//qDebug() << "HStimPipeline::pause( "  << id() << " ) - GST_STATE_CHANGE_ASYNC " << m_iAsyncPause;
 	}
-	dumpGstStateChangeReturn("HStimPipeline::pause()", r);
+	//dumpGstStateChangeReturn("HStimPipeline::pause()", r);
 }
 
 void HStimPipeline::play()
@@ -678,7 +678,7 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 	GstEvent* event = GST_PAD_PROBE_INFO_EVENT(info);
 	if (event)
 	{
-		GstElement* parent = GST_PAD_PARENT(pad);
+		//GstElement* parent = GST_PAD_PARENT(pad);
 		//qDebug() << "eventProbeCB: Event type " << GST_EVENT_TYPE_NAME(event) << " from " << GST_ELEMENT_NAME(parent);
 
 		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
