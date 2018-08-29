@@ -634,10 +634,10 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			}
 		}
 	}
-	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_SEGMENT_DONE)
-	{
-		qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): SEGMENT_DONE";
-	}
+//	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_SEGMENT_DONE)
+//	{
+//		qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): SEGMENT_DONE";
+//	}
 	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_APPLICATION)
 	{
 		if (gst_message_has_name (msg, "DoSegmentSeek"))
@@ -664,6 +664,10 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			}
 			gst_object_unref(element);
 		}
+		else
+		{
+			qWarning() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): unhandled application message ";
+		}
 	}
 	return TRUE;
 }
@@ -687,9 +691,10 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 			if (pSource->bLoop)
 			{
 				//qDebug() << "eventProbeCB: Looping source, got segment-done event on pad " << GST_PAD_NAME(pad) << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-				if (!pSource->sWaitingForSegment2Pad.isEmpty() && QString(GST_PAD_NAME(pad)) != pSource->sWaitingForSegment2Pad)
+				if (pSource->nPadsLinked == 2 && QString(GST_PAD_NAME(pad)) != pSource->sWaitingForSegment2Pad)
 				{
-					qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source, n=2 case. pad=" << GST_PAD_NAME(pad) << " expecting" << pSource->sWaitingForSegment2Pad << "No seek issued.";
+					// skip the segment_done on this pad, waiting for the other pad
+					qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment_done on Looping source(2) pad=" << GST_PAD_NAME(pad) << " expecting" << pSource->sWaitingForSegment2Pad << "No seek issued.";
 				}
 				else
 				{
@@ -725,7 +730,9 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 					if (pSource->nPadsLinked == 1)
 					{
 						GstElement *parent = gst_pad_get_parent_element(pad);
-						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment_done from " << GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo << " waiting for segment " << pSource->bWaitingForSegment;
+						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment_done on looping source(1), from "
+								<< GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo
+								<< " Post DoSegmentSeek message.";
 						gst_object_unref(parent);
 
 						//if (!strcmp(GST_PAD_NAME(pad), "src_0")) return GST_PAD_PROBE_OK;
@@ -752,14 +759,16 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 						// have been issued.
 						//
 						GstElement *parent = gst_pad_get_parent_element(pad);
-						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment_done from " << GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo;
+						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment_done on looping source(2), from "
+								<< GST_ELEMENT_NAME(parent) << "/" << GST_PAD_NAME(pad) << " a/v " << pSource->bAudio << "/" << pSource->bVideo
+								<< " Post DoSegmentSeek message.";
 						gst_object_unref(parent);
 
 
 						// If the first of the two segments finishes, we issue the seek message.
 						// We don't issue any more seeks from here until we see a segment_done from the
 						// same pad.
-						if (!strcmp(GST_PAD_NAME(pad), "src_0")) return GST_PAD_PROBE_OK;
+						//if (!strcmp(GST_PAD_NAME(pad), "src_0")) return GST_PAD_PROBE_OK;
 						GstBus *	bus = gst_pipeline_get_bus(GST_PIPELINE(pSource->stimPipeline()->pipeline()));
 						GstStructure *structure = gst_structure_new("DoSegmentSeek", "element", G_TYPE_STRING, GST_ELEMENT_NAME(parent), NULL);
 						gst_bus_post (bus, gst_message_new_application (
@@ -790,22 +799,32 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 					//qDebug() << "eventProbeCB: Waiting for looping source to preroll after initial flushing seek, expected segment. This source is prerolled and ready to loop.";
 					pSource->bWaitingForPreroll = false;
 					pSource->bPrerolled = true;
+					if (pSource->nPadsLinked == 2)
+					{
+						pSource->sWaitingForSegment2Pad = GST_PAD_NAME(pad);
+					}
 				}
 				else if (pSource->bWaitingForSegment)
 				{
+					// as expected
+					pSource->bWaitingForSegment = false;
+					qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source(1), got expected segment on pad " << pSource->sWaitingForSegment2Pad;
+				}
+				else if (pSource->bWaitingForSegment2)
+				{
 					if (pSource->sWaitingForSegment2Pad == QString(GST_PAD_NAME(pad)))
 					{
-						pSource->bWaitingForSegment = false;
-						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source, got expected segment on pad " << pSource->sWaitingForSegment2Pad;
+						pSource->bWaitingForSegment2 = false;
+						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source(2), got expected segment on pad " << pSource->sWaitingForSegment2Pad;
 					}
 					else
 					{
-						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source, expected segment on pad " << pSource->sWaitingForSegment2Pad << ", continue waiting...";
+						qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source(2), expected segment on pad " << pSource->sWaitingForSegment2Pad << ", continue waiting...";
 					}
 				}
 				else
 				{
-					//qDebug() << "eventProbeCB: Looping source, unexpected segment.";
+					qWarning() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): Looping source, unexpected segment.";
 				}
 			}
 		}
