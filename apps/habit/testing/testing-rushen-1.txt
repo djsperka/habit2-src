@@ -1,0 +1,6 @@
+# testing-rushen-1 
+# 
+phase1,0,0,NoneCenter,500
+phase1,0,0,CenterNone,5500
+phase1,1,0,NoneCenter,200
+phase1,1,0,CenterNone,7200
