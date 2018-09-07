@@ -121,6 +121,7 @@ void TestMMDialog::experimentActivated(QString expt)
 		// connect to media manager signals
 		connect(this, SIGNAL(stim(unsigned int)), m_pmm, SLOT(stim(unsigned int)));
 		connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
+		connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
 		connect(m_pmm, SIGNAL(screen(int, QString)), this, SLOT(screen(int, QString)));
 
 		// clear indices and names
@@ -171,15 +172,22 @@ void TestMMDialog::experimentActivated(QString expt)
 		// get display widget(s)
 		if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 1024, 768));
-		else
-			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 1024, 768), new HStimulusWidget(settings.getStimulusDisplayInfo(), 1024, 768));
+		else if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 800, 600), new HStimulusWidget(settings.getStimulusDisplayInfo(), 800, 600));
+		else if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 400, 300), new HStimulusWidget(settings.getStimulusDisplayInfo(), 400, 300), new HStimulusWidget(settings.getStimulusDisplayInfo(), 400, 300));
 
 		QDialog *d = m_pmm->createStimulusWidget();
+
+		// preroll stuff
+		m_pmm->preroll(m_pmm->getAGKey());
 
 		// Now create a controller and exec() it
 		TestMMController controller(m_stimNames, d);
 		connect(&controller, SIGNAL(playItem(unsigned int)), this, SLOT(playItem(unsigned int)));
 		connect(&controller, SIGNAL(stopItem()), this, SLOT(stopItem()));
+		connect(m_pmm, SIGNAL(stimStarted(int)), &controller, SLOT(stimStarted(int)));
+		connect(m_pmm, SIGNAL(agStarted(int)), &controller, SLOT(stimStarted(int)));
 		controller.exec();
 
 
@@ -195,20 +203,33 @@ void TestMMDialog::experimentActivated(QString expt)
 
 void TestMMDialog::playItem(unsigned int uistim)
 {
-	qDebug() << "playItem(" << uistim << ") : " << m_stimIndices[uistim];
-	emit stim(m_stimIndices[uistim]);
+	if (m_stimIndices[uistim] == m_pmm->getAGKey())
+	{
+		m_pmm->ag();
+		qDebug() << "playItem(" << uistim << ") : key " << m_stimIndices[uistim] << m_stimIndices[uistim] << " AG";
+	}
+	else
+	{
+		qDebug() << "playItem(" << uistim << ") : " << m_stimIndices[uistim] << " stim";
+		m_pmm->stim(m_stimIndices[uistim]);
+	}
 }
 
 void TestMMDialog::stopItem()
 {
 	qDebug() << "stopItem()";
-	emit stim(m_stimIndices[0]);
+	m_pmm->defaultStim();
 }
 
 
 void TestMMDialog::stimStarted(int index)
 {
-	qDebug() << "started index " << index;
+	qDebug() << "TestMMDialog::stimStarted(" << index << ")";
+}
+
+void TestMMDialog::agStarted(int index)
+{
+	qDebug() << "TestMMDialog::agStarted(" << index << ")";
 }
 
 void TestMMDialog::screen(int screenid, QString filename)
