@@ -280,9 +280,10 @@ public:
 	static const HStimulusLayoutType HStimulusLayoutUnknown;
 	static const HStimulusLayoutType HStimulusLayoutSingle;
 	static const HStimulusLayoutType HStimulusLayoutLeftRight;
+	static const HStimulusLayoutType HStimulusLayoutTriple;
 
 	// The contents of this array are used to populate the radio buttons.
-	static const HStimulusLayoutType* A[2];
+	static const HStimulusLayoutType* A[3];
 
 	int number() const { return m_t; }
 	const QString& name() const { return m_s; }

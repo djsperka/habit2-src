@@ -123,7 +123,7 @@ void HStimPipeline::setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositi
 	g_object_set_property(G_OBJECT(sink), "widget", &v);
 }
 
-void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
+void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1, HVideoWidget *w2)
 {
 	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
@@ -139,6 +139,18 @@ void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1)
 		setWidgetPropertyOnSink(w1, HPlayerPositionType::Right);
 		if (w1)
 			w1->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Right]->size);
+	}
+	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		setWidgetPropertyOnSink(w0, HPlayerPositionType::Left);
+		if (w0)
+			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Left]->size);
+		setWidgetPropertyOnSink(w1, HPlayerPositionType::Center);
+		if (w1)
+			w1->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Center]->size);
+		setWidgetPropertyOnSink(w2, HPlayerPositionType::Right);
+		if (w2)
+			w2->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Right]->size);
 	}
 }
 
@@ -189,6 +201,12 @@ void HStimPipeline::initialize()
 	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
 		m_mapPipelineSources.insert(HPlayerPositionType::Left, addStimulusInfo(HPlayerPositionType::Left, stimulusSettings().getLeftStimulusInfo(), !iss()));
+		m_mapPipelineSources.insert(HPlayerPositionType::Right, addStimulusInfo(HPlayerPositionType::Right, stimulusSettings().getRightStimulusInfo(), !iss()));
+	}
+	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		m_mapPipelineSources.insert(HPlayerPositionType::Left, addStimulusInfo(HPlayerPositionType::Left, stimulusSettings().getLeftStimulusInfo(), !iss()));
+		m_mapPipelineSources.insert(HPlayerPositionType::Center, addStimulusInfo(HPlayerPositionType::Center, stimulusSettings().getCenterStimulusInfo(), !iss()));
 		m_mapPipelineSources.insert(HPlayerPositionType::Right, addStimulusInfo(HPlayerPositionType::Right, stimulusSettings().getRightStimulusInfo(), !iss()));
 	}
 	if (iss() && !stimulusSettings().getIndependentSoundInfo().getFileName().trimmed().isEmpty())
@@ -786,7 +804,9 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 		}
 		else if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
 		{
-			qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment on pad "  << GST_PAD_NAME(pad);// << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+			GstElement* parent = GST_PAD_PARENT(pad);
+			qDebug() << "HStimPipeline::eventProbeCB( " << pSource->stimPipeline()->id() << " ): segment from " << GST_ELEMENT_NAME(parent) << " on pad "  << GST_PAD_NAME(pad);// << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
+			//gst_object_unref(parent);
 			QMutexLocker locker(pSource->stimPipeline()->mutex());
 			if (pSource->bLoop)
 			{

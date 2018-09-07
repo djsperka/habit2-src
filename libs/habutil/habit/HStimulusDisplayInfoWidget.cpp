@@ -19,7 +19,10 @@ HStimulusDisplayInfoWidget::HStimulusDisplayInfoWidget(const Habit::StimulusDisp
 {
 	ui->setupUi(this);
 	connect(ui->pbBackgroundColor, SIGNAL(clicked()), this, SLOT(onColorChooserClick()));
-	connect(ui->listStimulusLayout, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelectionChanged()));
+	connect(ui->rbSingle, SIGNAL(toggled(bool)), this, SLOT(rbToggled(bool)));
+	connect(ui->rbLeftRight, SIGNAL(toggled(bool)), this, SLOT(rbToggled(bool)));
+	connect(ui->rbTriple, SIGNAL(toggled(bool)), this, SLOT(rbToggled(bool)));
+	//	connect(ui->listStimulusLayout, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelectionChanged()));
 	connect(ui->rbFullScreen, SIGNAL(toggled(bool)), ui->cbMaintainAspectRatio, SLOT(setEnabled(bool)));
 	initialize();
 }
@@ -29,22 +32,46 @@ HStimulusDisplayInfoWidget::~HStimulusDisplayInfoWidget()
 	delete ui;
 }
 
-void HStimulusDisplayInfoWidget::listItemSelectionChanged()
+void HStimulusDisplayInfoWidget::rbSingleToggled(bool b)
 {
-	QList<QListWidgetItem *> selectedItems = ui->listStimulusLayout->selectedItems();
-	if (selectedItems.size() == 1)
+	if (b)
 	{
-		// have to find which item is selected! This isn't straighforward with a QListWidget...
-		int i = ui->listStimulusLayout->row(selectedItems.at(0));
-		if (i >= 0)
-		{
-			emit stimulusLayoutTypeChanged(i);
-		}
-		else
-			qWarning() << "HStimulusDisplayInfoWidget::listItemSelectionChanged() : selected item not found in list widget!";
+		emit stimulusLayoutTypeChanged(HStimulusLayoutType::HStimulusLayoutSingle.number());
 	}
-	return;
 }
+
+void HStimulusDisplayInfoWidget::rbLeftRightToggled(bool b)
+{
+	if (b)
+	{
+		emit stimulusLayoutTypeChanged(HStimulusLayoutType::HStimulusLayoutLeftRight.number());
+	}
+}
+
+void HStimulusDisplayInfoWidget::rbTripleToggled(bool b)
+{
+	if (b)
+	{
+		emit stimulusLayoutTypeChanged(HStimulusLayoutType::HStimulusLayoutTriple.number());
+	}
+}
+
+//void HStimulusDisplayInfoWidget::listItemSelectionChanged()
+//{
+//	QList<QListWidgetItem *> selectedItems = ui->listStimulusLayout->selectedItems();
+//	if (selectedItems.size() == 1)
+//	{
+//		// have to find which item is selected! This isn't straighforward with a QListWidget...
+//		int i = ui->listStimulusLayout->row(selectedItems.at(0));
+//		if (i >= 0)
+//		{
+//			emit stimulusLayoutTypeChanged(i);
+//		}
+//		else
+//			qWarning() << "HStimulusDisplayInfoWidget::listItemSelectionChanged() : selected item not found in list widget!";
+//	}
+//	return;
+//}
 
 
 void HStimulusDisplayInfoWidget::onColorChooserClick() {
@@ -66,7 +93,13 @@ void HStimulusDisplayInfoWidget::initialize()
 	ui->pbBackgroundColor->setStyleSheet(st);
 
 	ui->cbxUseISS->setChecked(m_info.getUseISS());
-	ui->listStimulusLayout->setCurrentRow(m_info.getStimulusLayoutType().number());
+	if (m_info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+		ui->rbSingle->setChecked(true);
+	else if (m_info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+		ui->rbLeftRight->setChecked(true);
+	else
+		ui->rbTriple->setChecked(true);
+
 	ui->cbMaintainAspectRatio->setChecked(m_info.isOriginalAspectRatioMaintained());
 	if (m_info.getDisplayType() == HDisplayType::HDisplayTypeFullScreen)
 	{
@@ -84,7 +117,13 @@ Habit::StimulusDisplayInfo HStimulusDisplayInfoWidget::getStimulusDisplayInfo()
 {
 	Habit::StimulusDisplayInfo info;
 	info.setBackGroundColor(ui->pbBackgroundColor->palette().color(QPalette::Button));
-	info.setStimulusLayoutType(getStimulusLayoutType(ui->listStimulusLayout->currentRow()));
+	if (ui->rbSingle->isChecked())
+		info.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutSingle);
+	else if (ui->rbLeftRight->isChecked())
+		info.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutLeftRight);
+	else
+		info.setStimulusLayoutType(HStimulusLayoutType::HStimulusLayoutTriple);
+
 	info.setUseISS(ui->cbxUseISS->isChecked());
 	info.setMaintainOriginalAspectRatio(ui->cbMaintainAspectRatio->isChecked());
 	if (ui->rbFullScreen->isChecked())

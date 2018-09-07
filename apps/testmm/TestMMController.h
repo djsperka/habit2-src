@@ -42,6 +42,7 @@ public slots:
 	void stopClicked();
 	void nextClicked();
 	void replayClicked();
+	void stimStarted(int);
 
 };
 

@@ -44,6 +44,9 @@ namespace GUILib
 		// display background color on status widget
 		void setStatusBackground();
 
+		// generic set status, called by setSTatusAG/Stim
+		void setStatusLabels(const Habit::StimulusSettings& settings, const QString& stimOrAG);
+
 		// display AG image on status widget
 		void setStatusAG(const Habit::StimulusSettings& settings);
 

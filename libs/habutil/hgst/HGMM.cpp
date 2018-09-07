@@ -163,23 +163,26 @@ void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, const Habit::S
 	setWidgets(pLeft, pRight);
 }
 
-void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1)
+void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1, HStimulusWidget *p2)
 {
-	qWarning() << "HGMM::setWidgets - must check if static stim must be rebuilt";
-	if (p1)
+	if (p2)
+	{
+		// have all three. note order
+		m_pLeft = p0;
+		m_pCenter = p1;
+		m_pRight = p2;
+	}
+	else if (p1)
 	{
 		// have left and right
 		m_pCenter = p0;
 		m_pLeft = p0;
 		m_pRight = p1;
-		// DON'T DO THIS HERE!
-		//m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutLeftRight;
 	}
 	else
 	{
 		m_pCenter = p0;
 		m_pLeft = m_pRight = NULL;
-		//m_pStimulusLayoutType = &HStimulusLayoutType::HStimulusLayoutSingle;
 	}
 }
 
@@ -250,10 +253,6 @@ HGMM::~HGMM()
 	qDebug() << "~HGMM() - done";
 }
 
-//void HGMM::setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1)
-//{
-//	m_pStimulusLayoutType = &layoutType;
-//}
 
 HStimulusWidget *HGMM::getHStimulusWidget(const HPlayerPositionType& type)
 {
@@ -319,20 +318,6 @@ unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QCol
 {
 	Habit::StimulusSettings ss(name, color);
 	return addStimulus(key, ss, context, bForceSound);
-//	HPipeline *pipeline;
-//	Habit::StimulusSettings stimulus(name, color);
-//
-//	qDebug() << "HGMM::addStimulus(" << key << "): solid color stimulus - " << color << " context " << context;
-//zzzzzzzzzz
-//	pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_root, (context < 0), this);
-//
-//	// Add helper to map
-//	m_mapPipelines.insert(key, pipeline);
-//
-//	// add key to context map
-//	m_mapContext.insert(context, key);
-//
-//	return key;
 }
 
 unsigned int HGMM::addStimulus(const Habit::StimulusSettings& ss, int context, bool bForceSound)
@@ -634,7 +619,18 @@ void HGMM::playStim(unsigned int key)
 		{
 			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget());
 		}
-
+		else if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutTriple)
+		{
+			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pCenter->getHVideoWidget(), m_pRight->getHVideoWidget());
+		}
+		else
+			qCritical() << "HGMM::playStim  stimulus layout type " << getStimulusLayoutType().name() << " not handled.";
+	}
+	else
+	{
+		// calling playStim on the stim that's currently playing. Handling has to be a little different.
+		m_pipelineCurrent->pause();
+		m_pipelineCurrent->rewind();
 	}
 	m_bRewindCurrentPipeline = false;
 	pipeline->play();
@@ -669,6 +665,12 @@ void HGMM::updateGeometry()
 		m_pLeft->getHVideoWidget()->updateGeometry();
 		m_pRight->getHVideoWidget()->updateGeometry();
 	}
+	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		m_pLeft->getHVideoWidget()->updateGeometry();
+		m_pCenter->getHVideoWidget()->updateGeometry();
+		m_pRight->getHVideoWidget()->updateGeometry();
+	}
 }
 
 
@@ -693,7 +695,6 @@ QDialog* HGMM::createStimulusWidget()
 		connect(this, SIGNAL(stimulusChanged()), video->getHVideoWidget(), SLOT(stimulusChanged()));
 		hbox->addWidget(video);
 		pDialog->setLayout(hbox);
-		pDialog->setMinimumSize(320, 240);
 	}
 	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
@@ -705,6 +706,20 @@ QDialog* HGMM::createStimulusWidget()
 		hbox->addWidget(videoRight);
 		pDialog->setLayout(hbox);
 		qDebug() << "createStimulusWidget - L/R";
+	}
+	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		HStimulusWidget *videoLeft = getHStimulusWidget(HPlayerPositionType::Left);
+		HStimulusWidget *videoCenter = getHStimulusWidget(HPlayerPositionType::Center);
+		HStimulusWidget *videoRight = getHStimulusWidget(HPlayerPositionType::Right);
+		connect(this, SIGNAL(stimulusChanged()), videoLeft->getHVideoWidget(), SLOT(stimulusChanged()));
+		connect(this, SIGNAL(stimulusChanged()), videoRight->getHVideoWidget(), SLOT(stimulusChanged()));
+		connect(this, SIGNAL(stimulusChanged()), videoCenter->getHVideoWidget(), SLOT(stimulusChanged()));
+		hbox->addWidget(videoLeft);
+		hbox->addWidget(videoCenter);
+		hbox->addWidget(videoRight);
+		pDialog->setLayout(hbox);
+		qDebug() << "createStimulusWidget - Triple";
 	}
 	return pDialog;
 }

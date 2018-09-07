@@ -76,6 +76,13 @@ QWidget *GUILib::HStimulusSettingsWidget::getEditorWidget(const Habit::StimulusD
 		vbox->addWidget(m_pRight);
 		if (sdi.getUseISS()) vbox->addWidget(m_pSound);
 	}
+	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		vbox->addWidget(m_pLeft);
+		vbox->addWidget(m_pCenter);
+		vbox->addWidget(m_pRight);
+		if (sdi.getUseISS()) vbox->addWidget(m_pSound);
+	}
 	else
 	{
 		vbox->addWidget(m_pCenter);

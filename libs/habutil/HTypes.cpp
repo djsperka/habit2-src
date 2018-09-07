@@ -345,12 +345,14 @@ const HDisplayType& getDisplayType(int number_value)
 const HStimulusLayoutType HStimulusLayoutType::HStimulusLayoutUnknown(-1, "StimulusLayoutTypeUnknown", "Unknown");
 const HStimulusLayoutType HStimulusLayoutType::HStimulusLayoutSingle(0, "StimulusLayoutSingle", "Single");
 const HStimulusLayoutType HStimulusLayoutType::HStimulusLayoutLeftRight(1, "StimulusLayoutLeftRight", "Left/Right");
+const HStimulusLayoutType HStimulusLayoutType::HStimulusLayoutTriple(2, "StimulusLayoutTriple", "Triple");
 
 // The contents of this array are used to populate the radio buttons.
-const HStimulusLayoutType* HStimulusLayoutType::A[2] =
+const HStimulusLayoutType* HStimulusLayoutType::A[3] =
 {
 	&HStimulusLayoutType::HStimulusLayoutSingle,
-	&HStimulusLayoutType::HStimulusLayoutLeftRight
+	&HStimulusLayoutType::HStimulusLayoutLeftRight,
+	&HStimulusLayoutType::HStimulusLayoutTriple
 };
 
 bool operator==(const HStimulusLayoutType& lhs, const HStimulusLayoutType& rhs)

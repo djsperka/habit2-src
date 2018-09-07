@@ -40,6 +40,7 @@ public slots:
 	void playItem(unsigned int);
 	void stopItem();
 	void stimStarted(int index);
+	void agStarted(int index);
 	void screen(int screenid, QString filename);
 };
 

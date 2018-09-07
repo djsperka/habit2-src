@@ -22,6 +22,8 @@ TestMMController::TestMMController(const QStringList& names, QWidget *screens, Q
 	QStringListModel *pmodel = new QStringListModel(m_stringList);
 	m_list = new QListView;
 	m_list->setModel(pmodel);
+	m_list->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_list->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);
 	m_playButton = new QPushButton("Play");
@@ -94,4 +96,13 @@ void TestMMController::stopClicked()
 {
 	m_index = 0;
 	emit playItem(0);
+	m_playButton->setEnabled(true);
 }
+
+void TestMMController::stimStarted(int index)
+{
+	qDebug() << "started key " << index;
+	QModelIndex i = m_list->model()->index(m_index, 0);
+	m_list->setCurrentIndex(i);
+}
+
