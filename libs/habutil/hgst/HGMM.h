@@ -114,7 +114,7 @@ public:
 	void reset(HStimulusWidget *pLeft, HStimulusWidget *pRight,  const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
 
 	// assign widget(s) to hgmm
-	void setWidgets(HStimulusWidget *p0, HStimulusWidget *p1=NULL);
+	void setWidgets(HStimulusWidget *p0, HStimulusWidget *p1=NULL, HStimulusWidget *p2=NULL);
 
 	// Get reference to singleton instance of HGMM.
 	static HGMM& instance();
@@ -134,7 +134,7 @@ public:
 	const Habit::StimulusSettings& getStimulusSettings(unsigned int key) const;
 
 	// Change layout type and widgets. Must supply correct # of pointers.
-	void setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1);
+	//void setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1);
 	QList<unsigned int> getContextStimList(int context);
 
 	QDialog *createStimulusWidget();

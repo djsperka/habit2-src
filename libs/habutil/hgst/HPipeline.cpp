@@ -28,7 +28,7 @@ void HPipeline::detachWidgetsFromSinks()
 	//no-op
 }
 
-void HPipeline::attachWidgetsToSinks(HVideoWidget *, HVideoWidget *)
+void HPipeline::attachWidgetsToSinks(HVideoWidget *, HVideoWidget *, HVideoWidget *)
 {
 	// no-op
 }

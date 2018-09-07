@@ -34,7 +34,7 @@ namespace GUILib
 		bool m_bListStimulus;
 		unsigned int m_currentStimKey;	// if single stim, this is the current key
 		bool m_bPlaying;					// applies to both single and list
-		HStimulusWidget *m_w0, *m_w1;
+		HStimulusWidget *m_w0, *m_w1, *m_w2;
 		QList<unsigned int> m_idList;	// list of indices into media manager, m_pmm->play(m_idList[m_idListCurrent])
 		int m_idListCurrent;	// current index in the list m_idListCurrent[m_idist] is the current key
 		QPushButton *m_pbDown;

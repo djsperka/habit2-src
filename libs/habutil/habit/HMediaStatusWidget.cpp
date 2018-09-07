@@ -69,91 +69,104 @@ void HMediaStatusWidget::initialize()
 	setStatusBackground();
 }
 
+void HMediaStatusWidget::setStatusLabels(const Habit::StimulusSettings& settings, const QString& stimOrAG)
+{
+	if (m_layout == HStimulusLayoutType::HStimulusLayoutSingle)
+	{
+		if (m_bDisplayStimulusInfo)
+		{
+			ui->label1->setText(QString("Center: (%1) %2").arg(stimOrAG).arg(settings.getCenterStimulusInfo().label()));
+			ui->label2->setText(QString("Audio: (%1) %2").arg(stimOrAG).arg(settings.getIndependentSoundInfo().label()));
+			ui->label3->setHidden(true);
+			ui->label4->setHidden(true);
+		}
+		else
+		{
+			ui->label1->setText(QString("Center: (%1) Not displayed").arg(stimOrAG));
+			ui->label2->setText(QString("Audio: (%1) Not displayed").arg(stimOrAG));
+			ui->label3->setHidden(true);
+			ui->label4->setHidden(true);
+		}
+	}
+	else if (m_layout == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		if (m_bDisplayStimulusInfo)
+		{
+			ui->label1->setText(QString("Left: (%1) %2").arg(stimOrAG).arg(settings.getLeftStimulusInfo().label()));
+			ui->label2->setText(QString("Right: (%1) %2").arg(stimOrAG).arg(settings.getRightStimulusInfo().label()));
+			ui->label3->setText(QString("Audio: (%1) %2").arg(stimOrAG).arg(settings.getIndependentSoundInfo().label()));
+			ui->label4->setHidden(true);
+		}
+		else
+		{
+			ui->label1->setText(QString("Left: (%1) Not displayed").arg(stimOrAG));
+			ui->label2->setText(QString("Right: (%1) Not displayed").arg(stimOrAG));
+			ui->label3->setText(QString("Audio: (%1) Not displayed").arg(stimOrAG));
+			ui->label4->setHidden(true);
+		}
+	}
+	else if (m_layout == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		if (m_bDisplayStimulusInfo)
+		{
+			ui->label1->setText(QString("Left: (%1) %2").arg(stimOrAG).arg(settings.getLeftStimulusInfo().label()));
+			ui->label2->setText(QString("Center: (%1) %2").arg(stimOrAG).arg(settings.getCenterStimulusInfo().label()));
+			ui->label3->setText(QString("Right: (%1) %2").arg(stimOrAG).arg(settings.getRightStimulusInfo().label()));
+			ui->label4->setText(QString("Audio: (%1) %2").arg(stimOrAG).arg(settings.getIndependentSoundInfo().label()));
+		}
+		else
+		{
+			ui->label1->setText(QString("Left: (%1) Not displayed").arg(stimOrAG));
+			ui->label2->setText(QString("Center: (%1) Not displayed").arg(stimOrAG));
+			ui->label3->setText(QString("Right: (%1) Not displayed").arg(stimOrAG));
+			ui->label4->setText(QString("Audio: (%1) Not displayed").arg(stimOrAG));
+		}
+	}
+}
+
+
+
 void HMediaStatusWidget::setStatusBackground()
 {
 	if (m_layout == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		ui->label1->setText(QString("C: idle"));
-		ui->label2->setText(QString("S: idle"));
+		ui->label1->setText(QString("Center: idle"));
+		ui->label2->setText(QString("Audio: idle"));
 		ui->label3->setHidden(true);
+		ui->label4->setHidden(true);
 	}
 	else if (m_layout == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		ui->label1->setText(QString("L: idle"));
-		ui->label2->setText(QString("R: idle"));
-		ui->label2->setText(QString("S: idle"));
+		ui->label1->setText(QString("Left: idle"));
+		ui->label2->setText(QString("Right: idle"));
+		ui->label3->setText(QString("Audio: idle"));
+		ui->label4->setHidden(true);
+	}
+	else if (m_layout == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		ui->label1->setText(QString("Left: idle"));
+		ui->label2->setText(QString("Center: idle"));
+		ui->label3->setText(QString("Right: idle"));
+		ui->label4->setText(QString("Audio: idle"));
 	}
 	ui->statusStack->setCurrentIndex(0);
 }
 
+
+
 void HMediaStatusWidget::setStatusAG(const Habit::StimulusSettings& settings)
 {
-	if (m_layout == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		if (m_bDisplayStimulusInfo)
-		{
-			ui->label1->setText(QString("C: (AG) %1").arg(settings.getCenterStimulusInfo().label()));
-			ui->label2->setText(QString("S: (AG) %1").arg(settings.getIndependentSoundInfo().label()));
-			ui->label3->setHidden(true);
-		}
-		else
-		{
-			ui->label1->setText(QString("C: (AG) Attention Getter"));
-			ui->label2->setText(QString("S: (AG) Attention Getter"));
-			ui->label3->setHidden(true);
-		}
-	}
-	else if (m_layout == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		if (m_bDisplayStimulusInfo)
-		{
-			ui->label1->setText(QString("L: (AG) %1").arg(settings.getLeftStimulusInfo().label()));
-			ui->label2->setText(QString("R: (AG) %1").arg(settings.getRightStimulusInfo().label()));
-			ui->label3->setText(QString("S: (AG) %1").arg(settings.getIndependentSoundInfo().label()));
-		}
-		else
-		{
-			ui->label1->setText(QString("L: (AG) Attention Getter"));
-			ui->label2->setText(QString("R: (AG) Attention Getter"));
-			ui->label3->setText(QString("S: (AG) Attention Getter"));
-		}
-	}
+	// update labels
+	setStatusLabels(settings, QString("AG"));
+
 	// display the resource icon for attention in the contained widget
 	ui->statusStack->setCurrentIndex(1);
 }
 
 void HMediaStatusWidget::setStatusStim(const Habit::StimulusSettings& settings)
 {
-	if (m_layout == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		if (m_bDisplayStimulusInfo)
-		{
-			ui->label1->setText(QString("C: %1").arg(settings.getCenterStimulusInfo().label()));
-			ui->label2->setText(QString("S: %1").arg(settings.getIndependentSoundInfo().label()));
-			ui->label3->setHidden(true);
-		}
-		else
-		{
-			ui->label1->setText(QString("C: Stimulus info not displayed"));
-			ui->label2->setText(QString("S: Stimulus info not displayed"));
-			ui->label3->setHidden(true);
-		}
-	}
-	else if (m_layout == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		if (m_bDisplayStimulusInfo)
-		{
-			ui->label1->setText(QString("L: %1").arg(settings.getLeftStimulusInfo().label()));
-			ui->label2->setText(QString("R: %1").arg(settings.getRightStimulusInfo().label()));
-			ui->label3->setText(QString("S: %1").arg(settings.getIndependentSoundInfo().label()));
-		}
-		else
-		{
-			ui->label1->setText(QString("L: Stimulus info not displayed"));
-			ui->label2->setText(QString("R: Stimulus info not displayed"));
-			ui->label3->setText(QString("S: Stimulus info not displayed"));
-		}
-	}
+	// update labels
+	setStatusLabels(settings, QString("Stim"));
 
 	// display the resource icon for stim in the contained widget
 	ui->statusStack->setCurrentIndex(2);

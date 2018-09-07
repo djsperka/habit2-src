@@ -42,7 +42,7 @@ bool habutilStimulusColorOK(const QString& color)
 		iR = reRGB.cap(1).toInt(&bR);
 		iG = reRGB.cap(1).toInt(&bG);
 		iB = reRGB.cap(1).toInt(&bB);
-		b = (bR && bG && bB && (0<=iR<=255) && (0<=iG<=255) && (0<=iB<=255));
+		b = (bR && bG && bB && 0<=iR && iR<=255 && 0<=iG && iG<=255 && 0<=iB && iB<=255);
 		if (!b)
 			qDebug() << "Color spec rgb values out of range (0-255): " << color;
 	}
@@ -77,6 +77,29 @@ bool habutilStimulusFilesFound(const Habit::HStimulusSettings& settings, const H
 				) ||
 				settings.getRightStimulusInfo().isBackground()
 			);
+	else if (layoutType == HStimulusLayoutType::HStimulusLayoutTriple)
+		b = (
+				(
+					!settings.getLeftStimulusInfo().getFileName().isEmpty() &&
+					(stimRootDir.exists(settings.getLeftStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getLeftStimulusInfo().getFileName()))
+				) ||
+				settings.getLeftStimulusInfo().isBackground()
+			) &&
+			(
+				(
+					!settings.getRightStimulusInfo().getFileName().isEmpty() &&
+					(stimRootDir.exists(settings.getRightStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getRightStimulusInfo().getFileName()))
+				) ||
+				settings.getRightStimulusInfo().isBackground()
+			) &&
+			(
+				(
+					!settings.getCenterStimulusInfo().getFileName().isEmpty() &&
+					(stimRootDir.exists(settings.getCenterStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getCenterStimulusInfo().getFileName()))
+				) ||
+				settings.getCenterStimulusInfo().isBackground()
+			);
+
 	else
 	{
 		b = false;

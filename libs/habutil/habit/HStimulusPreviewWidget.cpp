@@ -40,6 +40,7 @@ void GUILib::HStimulusPreviewWidget::initialize(const Habit::StimulusDisplayInfo
 	// and the stimulus widget(s)
 	m_w0 = new HStimulusWidget(info, 320, 240);
 	m_w1 = new HStimulusWidget(info, 320, 240);
+	m_w2 = new HStimulusWidget(info, 320, 240);
 
 	// set up label for stim name and buttons for advancing stim through orders.
 	m_pbNext = new QPushButton(">");
@@ -91,17 +92,29 @@ QWidget* GUILib::HStimulusPreviewWidget::createStimulusWidget(const Habit::Stimu
 {
 	QWidget *pWidget = new QWidget;
 	QHBoxLayout *hbox = new QHBoxLayout;
+
+	// Note the ordering of the widgets for the left/right case. The call to
+	// HGMM::instance().setWidgets(m_w0, m_w1, m_w2); in showEvent() must match up with
+	// the usage of the widgets here or you'll not see the correct thing. When calling
+	// setWidgets with three args, its left,center,right... consequently the l/r widget
+	// created below uses m_w0,m_w2. The single case uses m_w1.
+
 	if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		// this is done in HGMM::setWidgets
-		//connect(this, SIGNAL(stimulusChanged()), m_w0->getHVideoWidget(), SLOT(stimulusChanged()));
-		hbox->addWidget(m_w0);
+		hbox->addWidget(m_w1);
 		pWidget->setLayout(hbox);
 	}
 	else if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
 		hbox->addWidget(m_w0);
+		hbox->addWidget(m_w2);
+		pWidget->setLayout(hbox);
+	}
+	else if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		hbox->addWidget(m_w0);
 		hbox->addWidget(m_w1);
+		hbox->addWidget(m_w2);
 		pWidget->setLayout(hbox);
 	}
 	return pWidget;
@@ -335,13 +348,13 @@ void GUILib::HStimulusPreviewWidget::hideEvent(QHideEvent *event)
 	// m_bSingleStimulus, m_currentStimKey - when a single stim is playing
 	// m_bListStimulus, m_idList, m_idListCurrent - when an order is playing
 	HGMM::instance().defaultStim();	// this forces cleanup on the stim that's playing
-	HGMM::instance().setWidgets(NULL, NULL);
+	HGMM::instance().setWidgets(NULL, NULL, NULL);
 }
 
 void GUILib::HStimulusPreviewWidget::showEvent(QShowEvent *event)
 {
 	qDebug() << "show event";
-	HGMM::instance().setWidgets(m_w0, m_w1);
+	HGMM::instance().setWidgets(m_w0, m_w1, m_w2);
 	if (m_bSingleStimulus)
 	{
 		if (m_bPlaying)

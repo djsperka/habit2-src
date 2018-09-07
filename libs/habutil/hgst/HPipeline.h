@@ -52,7 +52,7 @@ public:
 	virtual void dump();
 
 	virtual void detachWidgetsFromSinks();	// default is a no-op
-	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL);		// default is a no-op
+	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
 
 	//static HPipeline* createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound=false, bool bISS=false);
 

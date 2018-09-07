@@ -40,7 +40,9 @@ namespace GUILib
 
 	private slots:
 		void onColorChooserClick();
-		void listItemSelectionChanged();
+		void rbSingleToggled(bool);
+		void rbLeftRightToggled(bool);
+		void rbTripleToggled(bool);
 
 	};
 };

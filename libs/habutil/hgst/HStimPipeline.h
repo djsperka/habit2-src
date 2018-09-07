@@ -105,7 +105,7 @@ public:
 
 
 	void detachWidgetsFromSinks();	// default is a no-op
-	void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL);		// default is a no-op
+	void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
 	void setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt);
 
 	GstElement *pipeline() const { return m_pipeline; }

@@ -511,6 +511,44 @@ bool GUILib::H2MainWindow::checkMonitorSettings(const Habit::ExperimentSettings&
 			sProblems.append("Left and Right monitors are the same. Check preferences.");
 		}
 	}
+	else if (layoutType == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		if (iLeft < 0)
+		{
+			b = false;
+			sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Left Monitor\" in preferences.");
+		}
+		else if (iLeft == iControl)
+		{
+			b = false;
+			sProblems.append("Left and Control monitors are the same! Check preferences.");
+		}
+		if (iCenter < 0)
+		{
+			b = false;
+			sProblems.append("Stimulus layout type is \"single\". Please specify \"Center Monitor\" in preferences.");
+		}
+		else if (iCenter == iControl)
+		{
+			b = false;
+			sProblems.append("Center and Control monitors are the same! Check preferences.");
+		}
+		if (iRight < 0)
+		{
+			b = false;
+			sProblems.append("Stimulus layout type is \"left/right\". Please specify \"Right Monitor\" in preferences.");
+		}
+		else if (iRight == iControl)
+		{
+			b = false;
+			sProblems.append("Right and Control monitors are the same! Check preferences.");
+		}
+		if (iRight == iLeft || iRight == iCenter || iCenter == iLeft)
+		{
+			b = false;
+			sProblems.append("Cannot assign same monitor twice. Check preferences.");
+		}
+	}
 	return b;
 }
 
@@ -519,7 +557,6 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 {
 	bool b = true;
 	sProblems.clear();
-	const HStimulusLayoutType& layoutType = settings.getStimulusDisplayInfo().getStimulusLayoutType();
 
 
 	// iterate over phases that are enabled
@@ -533,7 +570,7 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 			while (it.hasNext())
 			{
 				const StimulusSettings& ss = it.next();
-				if (!habutilStimulusFilesFound(ss, layoutType))
+				if (!habutilStimulusFilesFound(ss, settings.getStimulusDisplayInfo().getStimulusLayoutType()))
 				{
 					b = false;
 					sProblems.append(QString("%1 stimulus \"%2\" file(s) not found.\n").arg(ps.getName()).arg(ss.getName()));
@@ -708,6 +745,12 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Left));
 					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Right));
 				}
+				else if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+				{
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Left));
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Center));
+					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Right));
+				}
 			}
 
 			// This is where the experiment is actually run.
@@ -789,14 +832,17 @@ void GUILib::H2MainWindow::adaptVideoWidgets(HGMM *pmm)
 {
 	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		//pmm->getHStimulusWidget(HPlayerPositionType::Center)->showFullScreen();
 		pmm->getHStimulusWidget(HPlayerPositionType::Center)->show();
 	}
 	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		//pmm->getHStimulusWidget(HPlayerPositionType::Left)->showFullScreen();
-		//pmm->getHStimulusWidget(HPlayerPositionType::Right)->showFullScreen();
 		pmm->getHStimulusWidget(HPlayerPositionType::Left)->show();
+		pmm->getHStimulusWidget(HPlayerPositionType::Right)->show();
+	}
+	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		pmm->getHStimulusWidget(HPlayerPositionType::Left)->show();
+		pmm->getHStimulusWidget(HPlayerPositionType::Center)->show();
 		pmm->getHStimulusWidget(HPlayerPositionType::Right)->show();
 	}
 	return;
