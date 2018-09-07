@@ -112,6 +112,12 @@ void HControlPanel::onTrialStarted(int trialindex, int repeatindex)
 	return;
 }
 
+void HControlPanel::onNextTrial()
+{
+	m_log.append(new HAbortTrialEvent(HElapsedTimer::elapsed()));
+	m_psm->postEvent(new HAbortTrialQEvent());
+}
+
 void HControlPanel::onLookingDirection(QString sLookingDirection)
 {
 	m_pExperimentStatusWidget->setLooking(sLookingDirection);
@@ -147,17 +153,13 @@ void HControlPanel::onStartTrials()
 	m_psm->start();
 }
 
-void HControlPanel::onNextTrial()
-{
-	m_log.append(new HAbortTrialEvent(HElapsedTimer::elapsed()));
-	m_psm->postEvent(new HAbortTrialQEvent());
-}
-
 void HControlPanel::onStopTrials()
 {
+	//qDebug() << "HControlPanel::onStopTrials()";
 	m_log.append(new HExperimentQuitEvent(HElapsedTimer::elapsed()));
-	m_psm->stop();
-	m_pmm->clear();
+	//m_psm->stop();
+	//m_pmm->clear();
+	//qDebug() << "HControlPanel::onStopTrials() - callaccept";
 	accept();
 }
 
