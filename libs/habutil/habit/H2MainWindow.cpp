@@ -690,8 +690,8 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 #elif defined(Q_OS_WIN)
 
+			// this is deleted down below. Not in the delete list, mind you. Note order dependence with look detector.
 			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, NULL);
-			deleteList.append(m_pControlPanel);
 
 #else
 
@@ -826,7 +826,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				qDebug() << "Cleaning up...";
 				delete m_psm;
 				delete m_pld;
-#ifndef TRY_WITH_PARENT
+#if defined(Q_OS_WIN)
 				delete m_pControlPanel;
 #endif
 				delete m_pRunSettingsDialog;
