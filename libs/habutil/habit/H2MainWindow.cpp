@@ -679,15 +679,24 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			else
 				pMediaManager = createMediaManager(experimentSettings);
 
+			// On mac it works OK to have a parent with the control panel - the keyboard grab works as expected.
+			// On windows, the keyboard grab doesn't work - or so it seems - cannot get any keyboard events through.
+			// So, on windows make the control panel have NO PARENT, and make sure to add it to the DELETE LIST
+			// below!
 
-			// m_ControlPanel has no parent -- DELETE
-#define TRY_WITH_PARENT
-#ifdef TRY_WITH_PARENT
+#if defined(Q_OS_MAC)
 
 			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, this);
 
-#else
+#elif defined(Q_OS_WIN)
+
 			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, NULL);
+			deleteList.append(m_pControlPanel);
+
+#else
+
+			qFatal() << "unhandled OS type in H2MainWindow";
+
 #endif
 
 			// m_pld has no parent -- DELETE BEFORE m_pControlPanel
