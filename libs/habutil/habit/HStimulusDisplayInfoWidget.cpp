@@ -19,9 +19,9 @@ HStimulusDisplayInfoWidget::HStimulusDisplayInfoWidget(const Habit::StimulusDisp
 {
 	ui->setupUi(this);
 	connect(ui->pbBackgroundColor, SIGNAL(clicked()), this, SLOT(onColorChooserClick()));
-	connect(ui->rbSingle, SIGNAL(toggled(bool)), this, SLOT(rbToggled(bool)));
-	connect(ui->rbLeftRight, SIGNAL(toggled(bool)), this, SLOT(rbToggled(bool)));
-	connect(ui->rbTriple, SIGNAL(toggled(bool)), this, SLOT(rbToggled(bool)));
+	connect(ui->rbSingle, SIGNAL(toggled(bool)), this, SLOT(rbSingleToggled(bool)));
+	connect(ui->rbLeftRight, SIGNAL(toggled(bool)), this, SLOT(rbLeftRightToggled(bool)));
+	connect(ui->rbTriple, SIGNAL(toggled(bool)), this, SLOT(rbTripleToggled(bool)));
 	//	connect(ui->listStimulusLayout, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelectionChanged()));
 	connect(ui->rbFullScreen, SIGNAL(toggled(bool)), ui->cbMaintainAspectRatio, SLOT(setEnabled(bool)));
 	initialize();
