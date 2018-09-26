@@ -171,8 +171,13 @@ public:
 
 public Q_SLOTS:
 
+	// replace current stimulus with the one id'd by the key
 	void stim(unsigned int);
+
+	// replace current stimulus with the one id'd by the current ag key
 	void ag();
+
+	//
 	void nowPlaying();
 
 Q_SIGNALS:

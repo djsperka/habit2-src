@@ -129,7 +129,11 @@ void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1, HVi
 	{
 		setWidgetPropertyOnSink(w0, HPlayerPositionType::Center);
 		if (w0)
+		{
 			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Center]->size);
+			qDebug() << "Setting stimulus size " << m_mapPipelineSources[HPlayerPositionType::Center]->size
+					<< " prerolled? " << m_mapPipelineSources[HPlayerPositionType::Center]->bPrerolled;
+		}
 	}
 	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
@@ -587,6 +591,7 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 		}
 	}
+	qDebug()  << "padAdded done - size " << pSource->size;
 
 }
 

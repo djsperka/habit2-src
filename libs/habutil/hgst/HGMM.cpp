@@ -436,6 +436,14 @@ void HGMM::nowPlaying()
 	}
 	else if (m_bPendingStim)
 	{
+		//updateGeometry();
+		if (m_pCenter)
+		{
+			qDebug() << "HGMM::nowPlaying(): widget> " << (m_pCenter->getHVideoWidget()==NULL ? "NULL" :  " NOT NULL");
+			updateGeometry();
+		}
+		else
+			qDebug() << "nowPlaying - m_pCenter is NULL!!!";
 		qDebug() << "HGMM::nowPlaying: Q_EMIT(stimStarted(" << m_iPendingStimKey << "))";
 		Q_EMIT(stimStarted(m_iPendingStimKey));
 	}
@@ -445,6 +453,7 @@ void HGMM::nowPlaying()
 	}
 }
 
+// replace current stimulus with the one identified by 'key'.
 void HGMM::stim(unsigned int key)
 {
 	qDebug() << "HGMM::stim(" << key << ")";
@@ -588,11 +597,17 @@ void HGMM::playStim(unsigned int key)
 		pipeline = m_mapPipelines.value(m_defaultKey);
 	}
 
+
+	// detach widgets from sinks, if there is a current pipeline (which there should be
+	// unless we've just started up).
+	// Disconnect 'nowPlaying' signal from the pipeline. That signal is emitted when the
+	// stimulus enters PLAYING state. Because of that, we pause and rewind if the current
+	// pipeline is the same as the new one.
+
 	if (pipeline != m_pipelineCurrent)
 	{
 
-		// deal with current pipeline. After this 'm_pipelineCurrent' is no longer connected to the display.
-		// 	Its also been "cleaned", whatever that means.
+		// deal with current pipeline. After this 'm_pipelineCurrent' is no longer connected to the display widget.
 		if (m_pipelineCurrent)
 		{
 			qDebug() << "HGMM::playstim: pause current stim";
@@ -603,13 +618,14 @@ void HGMM::playStim(unsigned int key)
 			// check disposition of the current pipeline. By default it will be cleaned up, but that can
 			// be overridden by calling rewindCurrentPipeline(). Such a call will only apply to m_pipelineCurrent,
 			// and will revert to the default after this call is done.
+
 			if (m_bRewindCurrentPipeline)
 				m_pipelineCurrent->rewind();
 			else
 				m_pipelineCurrent->cleanup();	// might not cleanup
 		}
 
-		// set things up for new pipeline 'pipeline'
+		// Attach new pipeline sinks to the widgets.
 		connect(pipeline, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 		if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutSingle)
 		{
@@ -658,6 +674,7 @@ void HGMM::updateGeometry()
 	// Create a helper.
 	if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
+		qDebug() << "HGMM::updateGeometry( SINGLE ) - widget size " << m_pCenter->getHVideoWidget()->getStimulusSize();
 		m_pCenter->getHVideoWidget()->updateGeometry();
 	}
 	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
@@ -671,6 +688,7 @@ void HGMM::updateGeometry()
 		m_pCenter->getHVideoWidget()->updateGeometry();
 		m_pRight->getHVideoWidget()->updateGeometry();
 	}
+	qDebug() << "HGMM::updateGeometry" << getStimulusLayoutType().name() << " done.";
 }
 
 

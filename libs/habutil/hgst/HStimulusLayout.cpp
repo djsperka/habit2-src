@@ -91,6 +91,7 @@ void HStimulusLayout::setGeometry(const QRect& r)
 	if (w->getStimulusSize().isEmpty())
 	{
 		m_item->setGeometry(r);
+		qDebug() << "HStimulusLayout::setGeometry(" << r << ") - widget has no size set.";
 	}
 	else
 	{
@@ -98,14 +99,16 @@ void HStimulusLayout::setGeometry(const QRect& r)
 		{
 			QSize s = w->getStimulusSize().scaled(r.size(), m_bMaintainAspectRatio ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
 
-			qDebug() << "setGeometry() rect " << r.size() << " maintain? " << m_bMaintainAspectRatio;
-			qDebug() << "scaled " << s;
+			qDebug() << "HStimulusLayout::setGeometry(" << r << ", maintain " << m_bMaintainAspectRatio << ") scaled " << s;
 			// the geometry that we assign to the widget has its position as well as the size.
 			// If the scaled size doesn't match that of the given rect 'r', then figure out which side
 			// has the extra and split the difference
 
 			if (s == r.size())
+			{
 				m_item->setGeometry(r);
+				qDebug() << "HStimulusLayout::setGeometry(" << r << ") HDisplayTypeFullScreen scaled==r";
+			}
 			else
 			{
 				if (s.width() == r.size().width())
@@ -113,12 +116,14 @@ void HStimulusLayout::setGeometry(const QRect& r)
 					int diff = r.size().height() - s.height();
 					QRect rnew(QPoint(r.x(), r.y()+diff/2), s);
 					m_item->setGeometry(rnew);
+					qDebug() << "HStimulusLayout::setGeometry(" << r << ") scaled width at max, use " << rnew;
 				}
 				else
 				{
 					int diff = r.size().width() - s.width();
 					QRect rnew(QPoint(r.x()+diff/2, r.y()), s);
 					m_item->setGeometry(rnew);
+					qDebug() << "HStimulusLayout::setGeometry(" << r << ") scaled height at max, use " << rnew;
 				}
 			}
 		}
@@ -135,6 +140,7 @@ void HStimulusLayout::setGeometry(const QRect& r)
 			int ydiff = r.height() - s.height();
 			QRect rnew(QPoint(r.x() + xdiff/2, r.y() + ydiff/2), s);
 			m_item->setGeometry(rnew);
+			qDebug() << "HStimulusLayout::setGeometry() - HDisplayTypeOriginalSize - set geom " << rnew;
 		}
 		else
 		{
