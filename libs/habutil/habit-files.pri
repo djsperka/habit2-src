@@ -155,6 +155,7 @@ SOURCES += \
  	habit/HMonitorSettingsForm.ui \
  	habit/HStimulusDisplayInfoForm.ui \
  	habit/HStimulusInfoForm.ui \
+ 	habit/HStimulusInfoForm2.ui \
  	habit/HStimulusOrderSelectionForm.ui \
  	habit/HSubjectSettingsForm.ui \
  	habit/HStimulusOrderEditorform.ui \

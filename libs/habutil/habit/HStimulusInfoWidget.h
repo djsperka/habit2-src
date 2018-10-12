@@ -16,7 +16,7 @@
 
 namespace Ui
 {
-	class HStimulusInfoForm;
+	class HStimulusInfoForm2;
 };
 
 
@@ -47,11 +47,12 @@ namespace GUILib
 		// stripped of leading folder if its in the current stim root
 		bool doFileSelection();
 
-		Ui::HStimulusInfoForm *ui;
+		Ui::HStimulusInfoForm2 *ui;
 		Habit::StimulusInfo m_info;
 		QString m_label;
 		QDir m_rootDir;
 		bool m_bIsVideoImage;
+		QString m_currentFilePath;	// holds current filename, in the event user switches to bkgd and back.
 
 	protected:
 		void dragEnterEvent(QDragEnterEvent *event);
