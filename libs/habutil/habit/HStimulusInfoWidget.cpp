@@ -7,7 +7,7 @@
 
 #include "HStimulusInfoWidget.h"
 #include "HWorkspaceUtil.h"
-#include "ui_HStimulusInfoForm.h"
+#include "ui_HStimulusInfoForm2.h"
 #include <QtDebug>
 #include <QFileDialog>
 #include <QColorDialog>
@@ -18,13 +18,14 @@
 
 GUILib::HStimulusInfoWidget::HStimulusInfoWidget(const Habit::StimulusInfo& info, const QString& label, QWidget *parent, bool isVideoImage)
 : QWidget(parent)
-, ui(new Ui::HStimulusInfoForm)
+, ui(new Ui::HStimulusInfoForm2)
 , m_info(info)
 , m_label(label)
 , m_bIsVideoImage(isVideoImage)
 {
 	//setFixedHeight(50);
 	ui->setupUi(this);
+	ui->gbMain->setTitle(label);
 	initialize();
 	connections();
 	// djs - Qt4.8 on mac has a bug in the uri passed with the drop event. The filename
@@ -46,17 +47,15 @@ void GUILib::HStimulusInfoWidget::connections()
 	connect(ui->cbUseBackgroundColor, SIGNAL(clicked(bool)), this, SLOT(backgroundColorChecked(bool)), Qt::QueuedConnection);
 }
 
-//void GUILib::HStimulusInfoWidget::setStimulusInfo(const Habit::StimulusInfo& info)
-//{
-//	m_info = info;
-//	initialize();
-//	emit stimulusInfoChanged();
-//}
-
 void GUILib::HStimulusInfoWidget::initialize()
 {
-	ui->labelPosition->setText(m_label);
-	ui->lineeditFileBase->setText(m_info.getFileName());
+	//ui->labelPosition->setText(m_label);
+	//ui->lineeditFileBase->setText(m_info.getFileName());
+	m_currentFilePath = m_info.getFileName();
+	if (m_info.isBackground())
+		ui->labelFilePath->setText("Background color only");
+	else
+		ui->labelFilePath->setText(m_info.getFileName());
 	ui->checkboxLoop->setChecked(m_info.isLoopPlayBack());
 	ui->sliderVolume->setValue(m_info.getVolume());
 	ui->cbUseBackgroundColor->setChecked(m_info.isBackground());
@@ -64,14 +63,14 @@ void GUILib::HStimulusInfoWidget::initialize()
 	ui->pbSelectFile->setDisabled(m_info.isBackground());
 	ui->sliderVolume->setDisabled(m_info.isBackground());
 	ui->checkboxLoop->setDisabled(m_info.isBackground());
-	ui->lineeditFileBase->setDisabled(m_info.isBackground());
+	//ui->lineeditFileBase->setDisabled(m_info.isBackground());
 }
 
 Habit::StimulusInfo GUILib::HStimulusInfoWidget::getStimulusInfo()
 {
 	Habit::StimulusInfo info;
 	info.setId(m_info.getId());
-	info.setFileName(ui->lineeditFileBase->text());
+	info.setFileName(m_currentFilePath);
 	info.setVolume(ui->sliderVolume->value());
 	info.setLoopPlayBack(ui->checkboxLoop->isChecked());
 	info.setIsBackground(ui->cbUseBackgroundColor->isChecked());
@@ -85,7 +84,7 @@ void GUILib::HStimulusInfoWidget::backgroundColorChecked(bool checked)
 	ui->pbSelectFile->setDisabled(checked);
 	ui->sliderVolume->setDisabled(checked);
 	ui->checkboxLoop->setDisabled(checked);
-	ui->lineeditFileBase->setDisabled(checked);
+	//ui->lineeditFileBase->setDisabled(checked);zzzzzzz
 
 	// if going from unchecked to checked, we're good.
 	// If going the other direction, checked to unchecked - we will make sure a file gets selected so the
@@ -93,7 +92,7 @@ void GUILib::HStimulusInfoWidget::backgroundColorChecked(bool checked)
 
 	if (!checked)
 	{
-		if (ui->lineeditFileBase->text().isEmpty() && !doFileSelection())
+		if (m_currentFilePath.isEmpty() && !doFileSelection())
 		{
 			// Must select a file, if they didn't we should set checkbox back to checked.
 			ui->cbUseBackgroundColor->setChecked(true);
@@ -101,11 +100,13 @@ void GUILib::HStimulusInfoWidget::backgroundColorChecked(bool checked)
 		}
 		else
 		{
+			ui->labelFilePath->setText(m_currentFilePath);
 			emit stimulusInfoChanged();
 		}
 	}
 	else
 	{
+		ui->labelFilePath->setText("Background color only");
 		emit stimulusInfoChanged();
 	}
 }
@@ -130,14 +131,14 @@ bool GUILib::HStimulusInfoWidget::doFileSelection()
 
 
 	// Initial folder is the folder of the existing file (if any), otherwise the stim root dir.
-	if (ui->lineeditFileBase->text().isEmpty())
+	if (m_currentFilePath.isEmpty())
 	{
 		QDir lastdir = habutilGetLastDir(m_bIsVideoImage);
 		path = lastdir.absolutePath();
 	}
 	else
 	{
-		QFileInfo fileInfo(ui->lineeditFileBase->text());
+		QFileInfo fileInfo(m_currentFilePath);
 		if (fileInfo.isRelative())
 			path = habutilGetStimulusRootDir().absolutePath();
 		else
@@ -163,7 +164,8 @@ bool GUILib::HStimulusInfoWidget::doFileSelection()
 			qDebug() << "selected file is in stimroot path " << stimroot.canonicalPath();
 			qDebug() << "relative selected file: " << filename;
 		}
-		ui->lineeditFileBase->setText(filename);
+		m_currentFilePath = filename;
+		ui->labelFilePath->setText(filename);
 		return true;
 	}
 	return false;
