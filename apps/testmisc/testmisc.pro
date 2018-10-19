@@ -2,8 +2,8 @@ TEMPLATE = app
 SOURCES = testmisc.cpp
 HEADERS = testmisc.h
 TARGET = testmisc
-CONFIG += qt debug_and_release qtestlib
-QT += phonon sql
+CONFIG += qt debug_and_release
+QT += sql testlib
 
 QMAKE_CXXFLAGS += -fvisibility=hidden
 CONFIG(debug, debug|release) {
