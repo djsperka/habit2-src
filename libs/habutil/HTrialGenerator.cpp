@@ -8,11 +8,17 @@
  */
 
 #include "HTrialGenerator.h"
+#include <QtDebug>
 
 HTrialGenerator::HTrialGenerator(int N, bool bRand, bool bBlocks) : m_N(N), m_bRand(bRand), m_bBlocks(bBlocks)
 {
 	for (int i=0; i<m_N; i++) m_remaining.append(i);
-	qsrand(time(NULL));
+	static bool bSeeded = false;
+	if (!bSeeded)
+	{
+		qsrand(time(NULL));
+		bSeeded = true;
+	}
 }
 
 unsigned int HTrialGenerator::next()
