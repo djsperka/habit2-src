@@ -166,9 +166,9 @@ int main(int argc, char *argv[])
 #endif
 #ifdef Q_OS_WIN
 	h.setStyleSheet(QString(
-			"QWidget { font-family:\"Arial\"; font-size:12px }"
-			"QWidget[objectName^=\"explainer\"] {font-size:9px}"
-			"QWidget[objectName^=\"sidebar\"] {font-size:9px; font-style:italic}"
+			"QWidget { font-family:\"Arial\"; font-size:13px }"
+			"QWidget[objectName^=\"explainer\"] {font-size:10px}"
+		"QWidget[objectName^=\"sidebar\"] {font-size:10px; color:rgb(50,50,50)}"
 			));
 #endif
 
