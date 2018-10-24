@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>512</width>
-    <height>571</height>
+    <height>756</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>StackedWidget</string>
   </property>
   <property name="currentIndex">
-   <number>0</number>
+   <number>2</number>
   </property>
   <widget class="QWidget" name="pageFixedN">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -83,21 +83,35 @@
   <widget class="QWidget" name="pageCriterion">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_10">
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>Maximum number of trials:</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <item>
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>Maximum number of trials:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBoxMaxNumberOfHabituationTrials">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBoxMaxNumberOfHabituationTrials">
-        <property name="minimum">
-         <number>1</number>
+       <widget class="QLabel" name="sidebar_5">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The maximum number of trials. If habituation criteria below are not met after this many trials, the phase ends. In that case the results will indicate that habituation failed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="value">
-         <number>3</number>
+        <property name="wordWrap">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -139,7 +153,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QLabel" name="label_5">
+          <widget class="QLabel" name="sidebar">
            <property name="text">
             <string>Choose the method used for determining the basis for habituation. Total looking in the basis window will be used, along with the settings below, to determine when habituation is achieved. </string>
            </property>
@@ -203,7 +217,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_7">
+          <widget class="QLabel" name="sidebar_2">
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Habituation is achieved if the sum of looking in a window &lt;span style=&quot; font-style:italic;&quot;&gt;falls to this percentage (or less)&lt;/span&gt; of the sum of looking in the basis window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
@@ -235,46 +249,60 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <layout class="QFormLayout" name="formLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>Window Type:</string>
-           </property>
-          </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Window Type:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Window size (trials):</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="comboWindowType">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For a &lt;span style=&quot; font-style:italic;&quot;&gt;fixed window, &lt;/span&gt;windows are [&lt;span style=&quot; font-style:italic;&quot;&gt;1,2,...,size], [size+1,...,2*size],...&lt;/span&gt;&lt;/p&gt;&lt;p&gt;For a &lt;span style=&quot; font-style:italic;&quot;&gt;sliding window, &lt;/span&gt;windows are &lt;span style=&quot; font-style:italic;&quot;&gt;[1,2,...size], [2,3,...,size+1],...&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>Window size (trials):</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QSpinBox" name="spinWindowSize">
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="value">
-            <number>3</number>
-           </property>
-          </widget>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_8">
+           <item>
+            <widget class="QComboBox" name="comboWindowType">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For a &lt;span style=&quot; font-style:italic;&quot;&gt;fixed window, &lt;/span&gt;windows are [&lt;span style=&quot; font-style:italic;&quot;&gt;1,2,...,size], [size+1,...,2*size],...&lt;/span&gt;&lt;/p&gt;&lt;p&gt;For a &lt;span style=&quot; font-style:italic;&quot;&gt;sliding window, &lt;/span&gt;windows are &lt;span style=&quot; font-style:italic;&quot;&gt;[1,2,...size], [2,3,...,size+1],...&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinWindowSize">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="value">
+              <number>3</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="sidebar_3">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify your definition of a &lt;span style=&quot; font-style:italic;&quot;&gt;window. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify your definition of a &lt;span style=&quot; font-style:italic;&quot;&gt;window. &lt;/span&gt;The &lt;span style=&quot; font-style:italic;&quot;&gt;size&lt;/span&gt; denotes the number of consecutive trials that constitute a &lt;span style=&quot; font-style:italic;&quot;&gt;window.&lt;/span&gt; If the &lt;span style=&quot; font-style:italic;&quot;&gt;type&lt;/span&gt; is &lt;span style=&quot; font-weight:600;&quot;&gt;fixed&lt;/span&gt;, then windows do not overlap. For example, a &lt;span style=&quot; font-weight:600;&quot;&gt;fixed&lt;/span&gt; window of size &lt;span style=&quot; font-weight:600;&quot;&gt;3 &lt;/span&gt;means that trials 1-3, 4-6, 7-9... are grouped for consideration. A &lt;span style=&quot; font-weight:600;&quot;&gt;sliding&lt;/span&gt; window of size &lt;span style=&quot; font-weight:600;&quot;&gt;3&lt;/span&gt; means that trials 1-3, 2-4, 3-5... are grouped. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -289,21 +317,35 @@
   <widget class="QWidget" name="pageTotalLookingTime">
    <layout class="QVBoxLayout" name="verticalLayout_6">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_11">
+     <layout class="QHBoxLayout" name="horizontalLayout_9">
       <item>
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>Maximum number of trials:</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>Maximum number of trials:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBoxMaximumNumberOfTotalLookingTrials">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBoxMaximumNumberOfTotalLookingTrials">
-        <property name="minimum">
-         <number>1</number>
+       <widget class="QLabel" name="sidebar_6">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The maximum number of trials. If habituation criteria below are not met after this many trials, the phase ends. In that case the results will indicate that habituation failed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
-        <property name="value">
-         <number>3</number>
+        <property name="wordWrap">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -322,7 +364,7 @@
        <widget class="QLineEdit" name="lineeditTotalLookingTime"/>
       </item>
       <item>
-       <widget class="QLabel" name="label_12">
+       <widget class="QLabel" name="sidebar_4">
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The sum of &lt;span style=&quot; font-style:italic;&quot;&gt;complete looks&lt;/span&gt; across &lt;span style=&quot; font-style:italic;&quot;&gt;all habituation trials&lt;/span&gt; must be at least this much.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>

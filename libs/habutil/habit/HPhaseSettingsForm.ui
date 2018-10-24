@@ -121,7 +121,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_6">
+                <widget class="QLabel" name="sidebar">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -327,7 +327,7 @@
               </layout>
              </item>
              <item>
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="sidebar_2">
                <property name="font">
                 <font>
                  <pointsize>10</pointsize>
@@ -411,7 +411,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_8">
+              <widget class="QLabel" name="sidebar_3">
                <property name="font">
                 <font>
                  <pointsize>10</pointsize>

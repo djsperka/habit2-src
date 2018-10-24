@@ -157,6 +157,21 @@ int main(int argc, char *argv[])
 	h.setOrganizationName("Infant Cognition Lab");
 	h.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
 
+#ifdef Q_OS_MAC
+	h.setStyleSheet(QString(
+			"QWidget { font-family:\"Arial\"; font-size:13px }"
+			"QWidget[objectName^=\"explainer\"] {font-size:10px}"
+			"QWidget[objectName^=\"sidebar\"] {font-size:10px; color:rgb(50,50,50)}"
+			));
+#endif
+#ifdef Q_OS_WIN
+	h.setStyleSheet(QString(
+			"QWidget { font-family:\"Arial\"; font-size:13px }"
+			"QWidget[objectName^=\"explainer\"] {font-size:10px}"
+		"QWidget[objectName^=\"sidebar\"] {font-size:10px; color:rgb(50,50,50)}"
+			));
+#endif
+
 	QCommandLineParser parser;
     parser.setApplicationDescription("Habit - Infant cognition stimulus presentation and DAQ application");
     parser.addHelpOption();
