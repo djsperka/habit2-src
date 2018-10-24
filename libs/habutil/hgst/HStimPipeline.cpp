@@ -177,6 +177,9 @@ void HStimPipeline::cleanup()
 		qDeleteAll(m_mapPipelineSources);
 		m_mapPipelineSources.clear();
 		m_bInitialized = false;
+		m_bRewindPending = false;
+		bInitialFlushingSeekDone = false;
+		m_iAsyncPause = 0;
 	}
 //	else
 //	{
