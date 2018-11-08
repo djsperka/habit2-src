@@ -94,10 +94,12 @@ void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 //	// Need to know if AG is used. If it is, add attention getter settings to media manager
 //	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
 //	{
-	qDebug() << "add ag";
-	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
-	qDebug() << "sound only? " << settings.getAttentionGetterSettings().isSoundOnly();
-		addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getAttentionGetterSettings().isSoundOnly());
+//	qDebug() << "add ag";
+//	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
+//	qDebug() << "sound only? " << settings.getAttentionGetterSettings().isSoundOnly();
+
+	addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getAttentionGetterSettings().isSoundOnly());
+
 //	}
 
 	QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
@@ -436,14 +438,6 @@ void HGMM::nowPlaying()
 	}
 	else if (m_bPendingStim)
 	{
-		//updateGeometry();
-		if (m_pCenter)
-		{
-			qDebug() << "HGMM::nowPlaying(): widget> " << (m_pCenter->getHVideoWidget()==NULL ? "NULL" :  " NOT NULL");
-			updateGeometry();
-		}
-		else
-			qDebug() << "nowPlaying - m_pCenter is NULL!!!";
 		qDebug() << "HGMM::nowPlaying: Q_EMIT(stimStarted(" << m_iPendingStimKey << "))";
 		Q_EMIT(stimStarted(m_iPendingStimKey));
 	}
