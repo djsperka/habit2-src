@@ -40,9 +40,11 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	sExperiment->addTransition(sExperiment, SIGNAL(finished()), sFinal);
 
 
-	// Create phases.
+	// Create phases and connect them by an automatic transition. The last phase is connected to the final state
+	// for the experiment.
 	// Each HPhase gets a list of stimuli, as pairs of <int, StimulusSettings>, and these are used in order as the
 	// stimuli for that phase. The <int> part is passed to the media manager as the key to play that stimulus.
+	//
 	//
 
 	QListIterator<HPhaseSettings> phaseIterator = experimentSettings.phaseIterator();
