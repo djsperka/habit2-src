@@ -1,6 +1,6 @@
 TEMPLATE = app
-SOURCES = testmisc.cpp
-HEADERS = testmisc.h
+SOURCES = testmisc.cpp TestPreroller.cpp
+HEADERS = testmisc.h TestPreroller.h
 TARGET = testmisc
 CONFIG += qt debug_and_release
 QT += sql testlib
