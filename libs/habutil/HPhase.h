@@ -57,12 +57,15 @@ public:
 	void requestAG();
 	// DJS const HPhaseType& ptype() const { return m_phaseSettings.getPhaseType(); };
 
+	const QString& name() const { return m_phaseSettings.getName(); };
+
 protected:
 	virtual void onEntry(QEvent* e);
 	virtual void onExit(QEvent* e);
 
 signals:
 	void phaseStarted(QString phaseName);
+	void phaseEnded(QString phaseName);
 	void trialStarted(int trialNumber, int repeatNumber);
 	
 public slots:

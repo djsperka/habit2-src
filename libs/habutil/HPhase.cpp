@@ -44,6 +44,7 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	setObjectName(QString(phaseSettings.getName()));
 
 	connect(this, SIGNAL(phaseStarted(QString)), &exp, SIGNAL(phaseStarted(QString)));
+	connect(this, SIGNAL(phaseEnded(QString)), &exp, SLOT(phaseEnded(QString)));
 	connect(m_sTrial, SIGNAL(trialStarted(int, int)), &exp, SIGNAL(trialStarted(int, int)));
 
 
@@ -64,10 +65,22 @@ void HPhase::agStarted(int id)
 void HPhase::stimStarted(int stimid)
 {
 	eventLog().append(new HStimStartEvent(stimid, HElapsedTimer::elapsed()));
+	qDebug() << "stimStarted( " << stimid << " )";
+	if (m_itrial+1 < m_stimuli.size())
+		qDebug() << "stimStarted - next trial " << m_itrial+1 << " stim " << m_stimuli[m_itrial+1].first;
+	else
+		qDebug() << "stimStarted - in last trial";
+	if (m_itrial+2 < m_stimuli.size())
+		qDebug() << "stimStarted - next trial " << m_itrial+2 << " stim " << m_stimuli[m_itrial+2].first;
+	else
+		qDebug() << "stimStarted - close to end";
 }
 
 void HPhase::checkPrerollStatus(int trialnumber, int repeat)
 {
+
+	// I think this can be done later, after playStim().
+	// This is called from
 	// If trialnumber is negative, then preroll the first stim
 	if (trialnumber < 0)
 	{
@@ -90,6 +103,8 @@ void HPhase::checkPrerollStatus(int trialnumber, int repeat)
 			qDebug() << "HPhase::checkPrerollStatus() - trial/repeat " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial].first << "At last stim in phase; nothing to preroll.";
 		}
 	}
+
+	// This should be done here, before looking is started (i.e. in StimRunning)
 
 	// set phase accumulated look time if needed
 	if (m_pcriteria->habituationType() == HHabituationType::HHabituationTypeTotalLookingTime)
@@ -154,6 +169,7 @@ void HPhase::onExit(QEvent* e)
 	QObject::disconnect(&experiment().getMediaManager(), SIGNAL(screen(int, const QString&)), this, SLOT(screenStarted(int, const QString&)));
 	QObject::disconnect(&experiment().getMediaManager(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
 	QObject::disconnect(&experiment().getMediaManager(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
+	QObject::disconnect(this, SIGNAL(phaseEnded(QString)), &experiment(), SLOT(onPhaseEnded(QString)));
 	
 };
 

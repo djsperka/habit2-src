@@ -49,6 +49,8 @@ private slots:
 	void onAttention();
 	void onLook(HLook l);
 	void onLookAborted(HLook l);
+	void onPhaseStarted(QString phaseName);
+	void onPhaseEnded(QString phaseName);
 
 private:
 	HGMM& m_mm;

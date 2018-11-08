@@ -44,7 +44,7 @@ public:
 
 protected:
 	virtual void onEntry(QEvent* e);
-//	virtual void onExit(QEvent* e);
+	virtual void onExit(QEvent* e);
 	
 private:
 	const Habit::HPhaseSettings m_phaseSettings;

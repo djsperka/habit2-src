@@ -38,4 +38,12 @@ void HExperiment::onLookAborted(HLook l)
 	eventLog().append(new HIncompleteLookEvent(l, HElapsedTimer::elapsed()));
 }
 
+void HExperiment::onPhaseStarted(QString phase)
+{
+	qDebug() << "HExperiment::phaseStarted( " << phase << ")";
+}
 
+void HExperiment::onPhaseEnded(QString phase)
+{
+	qDebug() << "HExperiment::phaseEnded( " << phase << ")";
+}

@@ -231,9 +231,14 @@ void HTrial::onEntry(QEvent* e)
 	HState::onEntry(e);
 }
 
+void HTrial::onExit(QEvent *)
+{
+	qDebug() << "HTrial::onExit phase " << phase().name() << "  trial " << m_trialNumber << " repeat " << m_repeatNumber;
+}
 
 void HTrial::onStimRunningEntered()
 {
+	qDebug() << "HTrial::onStimRunningEntered trial " << m_trialNumber << " repeat " << m_repeatNumber;
 	phase().experiment().getLookDetector().enableLook();
 //	eventLog().append(new HLookEnabledEvent(HElapsedTimer::elapsed()));
 	if (m_phaseSettings.getIsMaxStimulusTime() && m_phaseSettings.getMeasureStimulusTimeFromOnset())
