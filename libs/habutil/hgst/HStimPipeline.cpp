@@ -393,13 +393,15 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 	// we get the frame rate - that tells us whether its an image (rate=0) or video. We also get the
 	// resolution.
 
-	GstCaps *new_pad_caps = NULL;
-	new_pad_caps = gst_pad_get_current_caps(newPad);
 	bool isVideo=false, isImage=false, isAudio=false;
 	int width=-1, height=-1;
+	GstCaps *new_pad_caps = gst_pad_get_current_caps(newPad);
 	parseCaps(new_pad_caps, isVideo, isImage, width, height, isAudio);
-	pSource->size = QSize(width, height);
 	gst_caps_unref(new_pad_caps);
+
+	// set size of source, but only if this is an image or video stream. Audio streams have no size.
+	// Container that has video and audio - this prevents us from wiping out the size if audio pad appears second.
+	if (isImage || isVideo) pSource->size = QSize(width, height);
 
 	if (isImage)
 	{
