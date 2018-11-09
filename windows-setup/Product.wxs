@@ -11,7 +11,7 @@
 		
     <Package 
       Id="*" 
-      InstallerVersion="200" 
+      InstallerVersion="301" 
       Compressed="yes" 
       InstallScope="perMachine" 
       Platform="x64"
@@ -42,6 +42,9 @@
 			<MergeRef Id="gstreamer_effects"/>
 			<MergeRef Id="gstreamer_libav"/>
 		</Feature>
+    <Feature Id="VCRedist" Title="Visual C++ 14.1 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
+      <MergeRef Id="VCRedist"/>
+    </Feature>
 
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
     <UIRef Id="WixUI_Minimal" />
@@ -116,6 +119,11 @@
         <RemoveFolder Id="RemoveDesktopFolder" Directory="DesktopFolder" On="uninstall" />
         <RegistryValue Root="HKCU" Key="Software\habit2" Name="installed" Type="integer" Value="1" KeyPath="yes" />
       </Component>
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <DirectoryRef Id="TARGETDIR">
+      <Merge Id="VCRedist" SourceFile="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.13.26020\MergeModules\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>
     </DirectoryRef>
   </Fragment>
 </Wix>

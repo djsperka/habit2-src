@@ -6,7 +6,7 @@
     <ProductVersion>3.10</ProductVersion>
     <ProjectGuid>5de3e207-fabd-4b67-b44e-d9a041f8aa26</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>windows_setup</OutputName>
+    <OutputName>habit2-2.2.5-rc1.2788-win-x64</OutputName>
     <OutputType>Package</OutputType>
     <HabitStagingFolder Condition=" '$(HabitStagingFolder)' == '' ">$(MSBuildProjectDirectory)\exe\</HabitStagingFolder>
     <HabitStimFolder Condition=" '$(HabitStimFolder)' == '' ">$(MSBuildProjectDirectory)\..\distribution\stim</HabitStimFolder>
