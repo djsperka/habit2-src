@@ -1,0 +1,7 @@
+.qmake.stash
+language.settings.xml
+**/debug/*
+**/release/*
+Makefile
+Makefile.*
+ui_*.h
