@@ -5,7 +5,7 @@
  *      Author: dan
  */
 
-#include "Preroller.h""
+#include "Preroller.h"
 #include "HGMM.h"
 #include <QtDebug>
 
@@ -21,7 +21,7 @@ Preroller::~Preroller() {
 	// TODO Auto-generated destructor stub
 }
 
-void Preroller::updatePrerollList(const QString& phaseName, int trial=-1)
+void Preroller::updatePrerollList(const QString& phaseName, int trial)
 {
 	int index;
 	if (hasPhase(phaseName, &index))
@@ -102,7 +102,7 @@ void Preroller::processPendingList()
 	m_pendingPrerolledList.clear();
 }
 
-void void Preroller::addToCleanupList(int id)
+void Preroller::addToCleanupList(int id)
 {
 	m_pendingCleanupList.append(id);
 }
@@ -130,7 +130,7 @@ bool Preroller::hasPhase(const QString& name, int *index)
 	for (i=0; i<m_phases.size() && !(bFound = (name == m_phases[i].name)); i++) ;
 	if (bFound && index)
 		*index = i;
-	return b;
+	return bFound;
 }
 
 QList<_PTS> Preroller::getNextTrials(int n, const QString& phase, int trial)

@@ -12,6 +12,20 @@
 #include <QPair>
 #include <QList>
 
+struct _PTS
+{
+	QString name;
+	int trial;
+	int stimid;
+
+	bool operator==(const _PTS& pts) const
+	{
+		if (&pts == this) return true;
+		return (pts.name == name && pts.trial == trial && pts.stimid == stimid);
+	}
+};
+
+
 class Preroller
 {
 	class _phsthab
@@ -26,12 +40,6 @@ class Preroller
 	int m_nInPhase;			// number of stim in current phase to preroll
 	int m_nInNextPhase;		// number of stim in next phase to preroll (when current phase is a habituation phase)
 
-	typedef struct _phase_trial_stimid
-	{
-		QString name;
-		int trial;
-		int stimid;
-	} _PTS;
 
 	QList<_phsthab> m_phases;
 	QList<_PTS> m_prerolledList;		// stimuli that have been prerolled
@@ -39,7 +47,7 @@ class Preroller
 	QList<int> m_pendingCleanupList;	// to be cleaned up...
 
 	bool hasPhase(const QString& name, int *index=NULL);
-	const _phsthab& phase(int index) { return m_phases.qt(index); };
+	const _phsthab& phase(int index) { return m_phases.at(index); };
 	void addToPending(const QString& name, int trial, int stimid);
 
 	void removeFromPrerolled(const QString& phaseName, int trial);
