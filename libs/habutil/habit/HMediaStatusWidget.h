@@ -61,7 +61,6 @@ namespace GUILib
 	protected slots:
 		void onAGStarted(int key);
 		void onStimStarted(int key);
-		void onCleared();
 	};
 };
 

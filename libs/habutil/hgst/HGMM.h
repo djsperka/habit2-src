@@ -142,10 +142,6 @@ public:
 
 	QDialog *createStimulusWidget();
 
-	// set all pipelines to paused state, then monitor and wait for all pads to be assigned.
-	// emit mmReady() if all are ready; emit mmFail() if not ready before timeout ms.
-	// DO NOT USE void getReady(int ms);
-
 	// each pipeline represents a single stimulus (single or dual screen, i.e. Habit::StimulusSettings)
 	const QMap<unsigned int, HPipeline *>& pipelineMap() const { return m_mapPipelines; };
 
@@ -186,10 +182,7 @@ public Q_SLOTS:
 Q_SIGNALS:
 	void agStarted(int);
 	void stimStarted(int);
-	void cleared();
 	void screen(int, const QString&);
-	void mmReady();
-	void mmFail();
 	void stimulusChanged();
 	void prerolling(int);
 	void prerolled(int);
