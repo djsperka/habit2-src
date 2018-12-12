@@ -1,3 +1,4 @@
+
 /*
  * HAGStimPipeline.h
  *
@@ -21,6 +22,8 @@ public:
 	// The only reason for this class is to have a no-op cleanup() function. That way HGMM::playStim can safely call cleanup() on every stim
 	// it disconnects and the AG (and any other stim that should not be cleaned up) will be safe.
 	virtual void cleanup();
+	virtual bool isStatic() { return true; };
+
 
 	virtual void forceCleanup();
 };

@@ -17,7 +17,7 @@
 #include "experimentsettings.h"
 
 HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HGMM* pmm, HEventLog& log, bool bInputTesting=false);
-void populateMediaManager(HGMM* pmm, const Habit::HPhaseSettings& ps, const Habit::RunSettings& runSettings, QList< QPair<int, QString> >& stimidListOrdered);
+void populateMediaManager(HGMM* pmm, const Habit::HPhaseSettings& ps, const Habit::PhaseRunSettings& phaseRunSettings, QList< QPair<int, QString> >& stimidListOrdered);
 void getOrderedStimidList(HGMM* pmm, const Habit::HPhaseSettings& ps, const Habit::RunSettings& runSettings, QList< QPair<int, QString> >& stimidListOrdered);
 
 

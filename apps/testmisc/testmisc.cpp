@@ -1103,18 +1103,18 @@ void TestHabutil::testTrialGenerator()
 }
 
 
-//QTEST_MAIN(TestHabutil);
+QTEST_MAIN(TestPreroller);
 //#include "testmisc.moc"
 
-int main(int argc, char **argv)
-{
-	   int status = 0;
-	   {
-	      TestHabutil tc;
-	      status |= QTest::qExec(&tc, argc, argv);
-	   }
-	   {
-	      TestPreroller tc;
-	      status |= QTest::qExec(&tc, argc, argv);
-	   }
-}
+//int main(int argc, char **argv)
+//{
+//	   int status = 0;
+//	   {
+//	      TestHabutil tc;
+//	      status |= QTest::qExec(&tc, argc, argv);
+//	   }
+//	   {
+//	      TestPreroller tc;
+//	      status |= QTest::qExec(&tc, argc, argv);
+//	   }
+//}

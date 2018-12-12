@@ -43,6 +43,7 @@ public:
 	// pipeline control
 	virtual void initialize() = 0;
 	virtual void cleanup() = 0;
+	virtual bool isStatic() = 0;
 
 	// open files (if needed), begin parse, etc, pipleline will be ready to play immediately
 	virtual void preroll() = 0;
@@ -68,6 +69,11 @@ public:
 
 	Q_SIGNALS:
 		void nowPlaying();
+		// called when ASYNC_DONE message received on bus that indicates prerolling is done
+		void prerolled(int);
+
+		// called from preroll()
+		void prerolling(int);
 
 };
 
