@@ -52,6 +52,17 @@ void HStimPipeline::emitNowPlaying()
 	Q_EMIT nowPlaying();
 }
 
+void HStimPipeline::emitPrerolling()
+{
+	Q_EMIT prerolling(this->id());
+}
+
+void HStimPipeline::emitPrerolled()
+{
+	qDebug() << "emitPrerolled " << this->id();
+	Q_EMIT prerolled(this->id());
+}
+
 void HStimPipeline::rewind()
 {
 	// flushing seek. gsgtreamer will handle state, as long as we're paused or playing, which
@@ -645,6 +656,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		{
 			if (pStimPipeline->m_iAsyncPause) pStimPipeline->m_iAsyncPause--;
 			qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): pipeline is now prerolled. m_iAsyncPause=" << pStimPipeline->m_iAsyncPause;
+			pStimPipeline->emitPrerolled();
 			GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pStimPipeline->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pStimPipeline->pipeline()));
 		}
 		//#endif here see bottom

@@ -73,6 +73,9 @@ class HGMM: public QObject
 	// Get the next key for m_mapStim. The values are doled out sequentially. Nothing special,
 	// this is a convenience.
 	unsigned int nextKey();
+
+	// add stimulus using key 'key', and the stimulus settings 'ss'. Applies to the context/phase 'context'.
+	// If 'bForceSound' is true, the pipeline will generate sound even if the
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss, int context, bool bForceSound = false);
 	unsigned int addStimulus(unsigned int key, const QString& name, const QColor& color, int context, bool bForceSound = false);
 	bool getContext(unsigned int key, int& context);
@@ -188,6 +191,9 @@ Q_SIGNALS:
 	void mmReady();
 	void mmFail();
 	void stimulusChanged();
+	void prerolling(int);
+	void prerolled(int);
+	void detached(int);
 
 };
 #endif /* APPS_HG2_HGMM_H_ */

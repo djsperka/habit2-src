@@ -58,8 +58,15 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 
 		if (ps.getIsEnabled())
 		{
+			// Now get the order list and randomization selections from HRunSettings.
+			// These are saved in a PhaseRunSettings struct.
+			// This order list should consist of numbers from 0...n-1, where
+			// n is the number of stimuli configured for this phase.
+			Q_ASSERT(runSettings.map().contains(ps.getSeqno()));
+			PhaseRunSettings prs(runSettings.map().value(ps.getSeqno()));
+
 			stimidListOrdered.clear();
-			populateMediaManager(pmm, ps, runSettings, stimidListOrdered);
+			populateMediaManager(pmm, ps, prs, stimidListOrdered);
 			pcrit = createPhaseCriteria(ps.habituationSettings());
 			pHPhase = new HPhase(*sExperiment, pcrit, log, stimidListOrdered, ps, experimentSettings.getHLookSettings(), experimentSettings.getAttentionGetterSettings(), bTestingInput);
 
@@ -117,11 +124,7 @@ void getOrderedStimidList(HGMM* pmm, const HPhaseSettings& ps, const Habit::RunS
 	// MM keys to use in the experiment.
 	stimidListInitial = pmm->getContextStimList(ps.getSeqno());
 
-	// Now get the order list from HRunSettings.
-	// This order list should consist of numbers from 0...n-1, where
-	// n is the number of stimuli configured for this phase.
 	Q_ASSERT(runSettings.map().contains(ps.getSeqno()));
-
 	PhaseRunSettings prs(runSettings.map().value(ps.getSeqno()));
 	list = prs.getOrderList();
 	HTrialGenerator htg(list.size(), prs.isOrderRandomized(), prs.getRandomizeMethod()==1);
@@ -138,7 +141,7 @@ void getOrderedStimidList(HGMM* pmm, const HPhaseSettings& ps, const Habit::RunS
 	}
 }
 
-void populateMediaManager(HGMM* pmm, const HPhaseSettings& ps, const Habit::RunSettings& runSettings, QList< QPair<int, QString> >& stimidListOrdered)
+void populateMediaManager(HGMM* pmm, const HPhaseSettings& ps, const Habit::PhaseRunSettings& prs, QList< QPair<int, QString> >& stimidListOrdered)
 {
 	QList<unsigned int> stimidListInitial;
 	QList< QPair<int, QString> > list;
@@ -158,10 +161,9 @@ void populateMediaManager(HGMM* pmm, const HPhaseSettings& ps, const Habit::RunS
 	// Now get the order list from HRunSettings.
 	// This order list should consist of numbers from 0...n-1, where
 	// n is the number of stimuli configured for this phase.
-	Q_ASSERT(runSettings.map().contains(ps.getSeqno()));
-
-	PhaseRunSettings prs(runSettings.map().value(ps.getSeqno()));
 	list = prs.getOrderList();
+
+	// HTrialGenerator will generate a sequence of stimuli according to the run settings/randomization/etc.
 	HTrialGenerator htg(list.size(), prs.isOrderRandomized(), prs.getRandomizeMethod()==1);
 	for (int i=0; i<ps.habituationSettings().getNTrials(); i++)
 	{

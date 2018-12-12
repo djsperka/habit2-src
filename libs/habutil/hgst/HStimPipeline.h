@@ -68,6 +68,8 @@ class HStimPipeline: public HPipeline
 
 	HStimPipelineSource *addStimulusInfo(const HPlayerPositionType& ppt, const Habit::StimulusInfo& info, bool bAudio);
 	void emitNowPlaying();
+	void emitPrerolling();
+	void emitPrerolled();
 	void dumpGstStateChangeReturn(const QString& s, GstStateChangeReturn r);
 
 public:
@@ -85,7 +87,8 @@ public:
 	// a pair of descriptors are left open (and later re-used -- so there doesn't appear to be a growing list of
 	// open descriptors)
 	virtual void cleanup();
-	virtual void preroll() { pause(); };
+	virtual bool isStatic() { return false; };
+	virtual void preroll() { pause(); Q_EMIT prerolling(this->id()); };
 
 	// set to pipeline to playing state. The bus callback function will emit 'nowPlaying' signal
 	// when state change is complete.
