@@ -33,7 +33,6 @@ void HMediaStatusWidget::connections()
 {
 	connect(m_pMediaManager, SIGNAL(agStarted(int)), this, SLOT(onAGStarted(int)));
 	connect(m_pMediaManager, SIGNAL(stimStarted(int)), this, SLOT(onStimStarted(int)));
-	connect(m_pMediaManager, SIGNAL(cleared()), this, SLOT(onCleared()));
 }
 
 void HMediaStatusWidget::setMediaManager(const HGMM* pmm)
@@ -187,7 +186,3 @@ void HMediaStatusWidget::onStimStarted(int key)
 	setStatusStim(settings);
 }
 
-void HMediaStatusWidget::onCleared()
-{
-	setStatusBackground();
-}
