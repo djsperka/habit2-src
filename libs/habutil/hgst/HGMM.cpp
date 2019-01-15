@@ -89,7 +89,7 @@ void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 {
 	qDebug() << "HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir) - layout type " << settings.getStimulusDisplayInfo().getStimulusLayoutType().name();
 	reset();
-	reset(settings.getStimulusDisplayInfo(), dir);
+	modifyStimulusDisplay(settings.getStimulusDisplayInfo(), dir);
 
 //	// Need to know if AG is used. If it is, add attention getter settings to media manager
 //	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
@@ -113,7 +113,7 @@ void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 	}
 }
 
-void HGMM::reset(const Habit::StimulusDisplayInfo& info, const QDir& dir)
+void HGMM::modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const QDir& dir)
 {
 	qDebug() << "HGMM::reset(" << info << ", " << dir << " )";
 	m_sdinfo = info;
@@ -153,19 +153,19 @@ void HGMM::reset(const Habit::StimulusDisplayInfo& info, const QDir& dir)
 
 }
 
-void HGMM::reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir)
-{
-	qDebug() << "HGMM::reset(HStimulusWidget *pCenter, info, dir)";
-	reset(info, dir);
-	setWidgets(pCenter);
-}
-
-void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, const Habit::StimulusDisplayInfo& info, const QDir& dir)
-{
-	qDebug() << "HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, info, dir)";
-	reset(info, dir);
-	setWidgets(pLeft, pRight);
-}
+//void HGMM::reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir)
+//{
+//	qDebug() << "HGMM::reset(HStimulusWidget *pCenter, info, dir)";
+//	modifyStimulusDisplay(info, dir);
+//	setWidgets(pCenter);
+//}
+//
+//void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, const Habit::StimulusDisplayInfo& info, const QDir& dir)
+//{
+//	qDebug() << "HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, info, dir)";
+//	modifyStimulusDisplay(info, dir);
+//	setWidgets(pLeft, pRight);
+//}
 
 void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1, HStimulusWidget *p2)
 {
@@ -429,10 +429,10 @@ unsigned int HGMM::addAG(const Habit::StimulusSettings& ssAG, bool bForceSound)
 	return m_agKey;
 }
 
-void HGMM::clear()
-{
-	stim(m_backgroundKey);
-}
+//void HGMM::clear()
+//{
+//	stim(m_backgroundKey);
+//}
 
 void HGMM::ag()
 {

@@ -76,7 +76,6 @@ namespace Habit {
 	typedef QMap<QString, StimulusSettings> StimulusSettingsNameMap;
 	typedef QMap<QString, StimulusSettings>::iterator StimulusSettingsNameMapIterator;
 	QDebug operator<<(QDebug dbg, const StimulusSettings& ss);
-	
 
 } //namespace Habit
 

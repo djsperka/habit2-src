@@ -38,6 +38,11 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="debug/|habit.xcodeproj/|release/|testing/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="apps/habit"/>
+						<entry excluding="debug/|release/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs/gstqt"/>
+						<entry excluding="debug/*|release/*" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs/habutil"/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -79,17 +84,42 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="debug/|habit.xcodeproj/|release/|testing/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="apps/habit"/>
+						<entry excluding="debug/|release/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs/gstqt"/>
+						<entry excluding="debug/|release/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs/habutil"/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="habit2.null.928124121" name="habit2"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="debug">
+			<resource resourceType="PROJECT" workspacePath="/habit2"/>
+		</configuration>
+		<configuration configurationName="release"/>
+		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/habit2"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1896196386;cdt.managedbuild.toolchain.gnu.macosx.base.1896196386.1531725882;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1792033932;cdt.managedbuild.tool.gnu.c.compiler.input.1377669866">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.328219213;cdt.managedbuild.tool.gnu.cpp.compiler.input.1044185024">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.404769459;cdt.managedbuild.tool.gnu.cpp.compiler.input.1636335141">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1896196386;cdt.managedbuild.toolchain.gnu.macosx.base.1896196386.1531725882;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.526762846;cdt.managedbuild.tool.gnu.cpp.compiler.input.2142149145">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.400976994.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1329786685;cdt.managedbuild.tool.gnu.c.compiler.input.1188537221">
@@ -111,18 +141,4 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="habit2.null.928124121" name="habit2"/>
-	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="debug">
-			<resource resourceType="PROJECT" workspacePath="/habit2"/>
-		</configuration>
-		<configuration configurationName="release"/>
-		<configuration configurationName="Default">
-			<resource resourceType="PROJECT" workspacePath="/habit2"/>
-		</configuration>
-	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>

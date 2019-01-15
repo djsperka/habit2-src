@@ -59,7 +59,7 @@ void HControlPanel::setStateMachine(HStateMachine *psm)
 
 	// Set some slots to update text labels in the control panel
 	connect(&m_psm->experiment(), SIGNAL(phaseStarted(QString)), this, SLOT(onPhaseStarted(QString)));
-	connect(&m_psm->experiment(), SIGNAL(trialStarted(int, int)), this, SLOT(onTrialStarted(int, int)));
+	connect(&m_psm->experiment(), SIGNAL(trialStarted(int, unsigned int, unsigned int)), this, SLOT(onTrialStarted(int, unsigned int, unsigned int)));
 
 	connect(&m_psm->experiment().getLookDetector(), SIGNAL(lookingDirection(QString)), this, SLOT(onLookingDirection(QString)));
 }
@@ -106,7 +106,7 @@ void HControlPanel::onPhaseStarted(QString phaseName)
 	m_pExperimentStatusWidget->setPhase(phaseName);
 }
 
-void HControlPanel::onTrialStarted(int trialindex, int repeatindex)
+void HControlPanel::onTrialStarted(int context, unsigned int trialindex, unsigned int repeatindex)
 {
 	m_pExperimentStatusWidget->setTrial(trialindex, repeatindex);
 	return;

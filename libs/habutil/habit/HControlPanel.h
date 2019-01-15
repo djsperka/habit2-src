@@ -63,7 +63,7 @@ namespace GUILib
 		void onExperimentFinished();
 		void onExperimentStarted();
 		void onPhaseStarted(QString phaseName);
-		void onTrialStarted(int trialindex, int repeatindex);
+		void onTrialStarted(int context, unsigned int trialindex, unsigned int repeatindex);
 		void onLookingDirection(QString sLookingDirection);
 
 	protected:
