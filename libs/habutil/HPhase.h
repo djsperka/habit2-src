@@ -38,24 +38,24 @@ class HPhase: public HExperimentChildState
 	Q_OBJECT
 	
 	HPhaseCriteria *m_pcriteria;
-	QList< QPair<int, QString> >m_stimuli;
 	const Habit::HPhaseSettings m_phaseSettings;
 	const Habit::HLookSettings m_lookSettings;
 	int m_itrial;		// this is the current trial. First trial is '0'. Stim found at m_stimuli[m_itrial].second
 	HTrial* m_sTrial;
 
 public:
-	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const QList< QPair<int, QString> >& stimuli, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput=false);
+	HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput=false);
 	virtual ~HPhase() {};
 	bool advance();
 	HTrial* getHTrial() { return m_sTrial; };
 	inline int currentTrialNumber() { return m_itrial; };	
-	unsigned int currentStimNumber() { return m_stimuli.at(m_itrial).first; };
-//	inline Habit::StimulusSettings currentStimulusSettings() { return m_stimuli.at(m_itrial).second; };
+	//unsigned int currentStimNumber() { return m_stimuli.at(m_itrial).first; };
 	
-	void requestCurrentStim();
+	// seqno in db is called context or phase context in much of the source
+	int context() { return m_phaseSettings.getSeqno(); };
+
+	//void requestCurrentStim();
 	void requestAG();
-	// DJS const HPhaseType& ptype() const { return m_phaseSettings.getPhaseType(); };
 
 	const QString& name() const { return m_phaseSettings.getName(); };
 
@@ -64,8 +64,8 @@ protected:
 	virtual void onExit(QEvent* e);
 
 signals:
-	void phaseStarted(QString phaseName);
-	void phaseEnded(QString phaseName);
+	void phaseStarted(QString phaseName, int context);
+	void phaseEnded(QString phaseName, int context);
 	void trialStarted(int trialNumber, int repeatNumber);
 	
 public slots:
@@ -73,7 +73,7 @@ public slots:
 	void screenStarted(int, const QString&);
 	void agStarted(int);
 	void stimStarted(int);
-	void checkPrerollStatus(int trialnumber=-1, int repeat=0);
+	//void checkPrerollStatus(int trialnumber=-1, int repeat=0);
 };
 
 class HAllTrialsDoneTransition: public QAbstractTransition

@@ -21,7 +21,7 @@ void HTrialInitialState::onEntry(QEvent* e)
 	eventLog().append(new HTrialStartEvent(trial().getTrialNumber(), trial().getRepeatNumber(), HElapsedTimer::elapsed()));
 
 	// emit signal...
-	emit trialStarted(trial().getTrialNumber(), trial().getRepeatNumber());
+	emit trialStarted(trial().phase().context(), trial().getTrialNumber(), trial().getRepeatNumber());
 }
 
 
@@ -128,7 +128,9 @@ void HStimRequestState::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
 	HState::onEntry(e);
-	trial().phase().requestCurrentStim();		// phase directly calls mm play() function. mm emits *Started() signals, caught in transition from this state.
+	qDebug() << "HStimRequestState::onEntry - context " << trial().phase().context() << " trial number " << trial().getTrialNumber();
+	trial().phase().experiment().requestStim(trial().phase().context(), trial().getTrialNumber());
+	//trial().phase().requestCurrentStim();		// phase directly calls mm play() function. mm emits *Started() signals, caught in transition from this state.
 };
 
 void HAGRequestState::onEntry(QEvent* e)

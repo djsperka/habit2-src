@@ -88,7 +88,7 @@ HG3Dialog::HG3Dialog(const QDir& dirStimRoot, int screen, const QString& flag, Q
 
 	m_sbWhich = new QSpinBox(this);
 	m_sbWhich->setMinimum(0);
-	m_sbWhich->setMaximum(m_pmm->nStimuli()-1);
+	m_sbWhich->setMaximum(100);
 
 	vbox->addWidget(m_sbWhich);
 	vbox->addWidget(buttonBox);
@@ -126,22 +126,11 @@ void HG3Dialog::agStarted()
 
 QWidget *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot, const QString& flag)
 {
-//	QHBoxLayout *hbox = new QHBoxLayout;
-	m_pVideoWidgetCenter = new HStimulusWidget(sdi, 1024, 768);
-	m_pVideoWidgetCenter->setMinimumSize(320, 240);
-//	hbox->addWidget(m_pVideoWidgetCenter);
-
-	//m_pmm = new HGMM(m_pVideoWidgetCenter, dirStimRoot, true, sdi.getBackGroundColor(), HStimPipelineFactory);
-	m_pmm = &HGMM::instance();
-	m_pmm->reset(m_pVideoWidgetCenter, sdi, dirStimRoot);
-	//connect(m_pmm, SIGNAL(mmReady()), this, SLOT(mmReady()));
-	//connect(m_pmm, SIGNAL(mmFail()), this, SLOT(mmFail()));
+	HGMM::instance().modifyStimulusDisplay(sdi, dirStimRoot);
+	m_pVideoWidgetCenter = HGMM::instance().getHStimulusWidget(HPlayerPositionType::Center);
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetCenter->getHVideoWidget(), SLOT(stimulusChanged()));
-
-	// create background
-//	m_pmm->addBackground(QColor(Qt::green));
 
 	// pic
 	if (flag.contains("all") || flag.contains("2"))
@@ -266,14 +255,11 @@ QWidget *HG3Dialog::initSingleScreen(const Habit::StimulusDisplayInfo& sdi, cons
 
 QWidget *HG3Dialog::initLRScreen(const Habit::StimulusDisplayInfo& sdi, const QDir& dirStimRoot, const QString& flag)
 {
-	m_pVideoWidgetLeft = new HStimulusWidget(sdi, 1024, 768);
-	m_pVideoWidgetLeft->setMinimumSize(320, 240);
-	m_pVideoWidgetRight = new HStimulusWidget(sdi, 1024, 768);
-	m_pVideoWidgetRight->setMinimumSize(320, 240);
 
 	// NOTE: skipping ISS below.
-	m_pmm = &HGMM::instance();
-	m_pmm->reset(m_pVideoWidgetLeft, m_pVideoWidgetRight, sdi, dirStimRoot);
+	HGMM::instance().modifyStimulusDisplay(sdi, dirStimRoot);
+	m_pVideoWidgetLeft = HGMM::instance().getHStimulusWidget(HPlayerPositionType::Left);
+	m_pVideoWidgetRight = HGMM::instance().getHStimulusWidget(HPlayerPositionType::Right);
 	connect(m_pmm, SIGNAL(agStarted()), this, SLOT(agStarted()));
 	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	connect(m_pmm, SIGNAL(stimulusChanged()), m_pVideoWidgetLeft->getHVideoWidget(), SLOT(stimulusChanged()));

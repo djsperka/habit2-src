@@ -8,15 +8,13 @@
 #include "HExperiment.h"
 #include "HElapsedTimer.h"
 #include "HLookDetector.h"
+#include "HGMM.h"
 #include <QObject>
+#include <algorithm>
 
-HExperiment::HExperiment(HEventLog& log, HGMM& mm, HLookDetector& ld, QState* parent)
+HExperiment::HExperiment(HEventLog& log, HLookDetector& ld, QState* parent)
 : HLogState(log, "HExperiment", parent)
-, m_mm(mm)
 , m_ld(ld)
-, m_pPreTestPhase(NULL)
-, m_pHabituationPhase(NULL)
-, m_pTestPhase(NULL)
 {
 	connect(&m_ld, SIGNAL(attention()), this, SLOT(onAttention()));
 	connect(&m_ld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
@@ -27,6 +25,7 @@ void HExperiment::onAttention()
 {
 	eventLog().append(new HAttentionEvent(HElapsedTimer::elapsed()));
 }
+
 
 void HExperiment::onLook(HLook l)
 {
@@ -47,3 +46,161 @@ void HExperiment::onPhaseEnded(QString phase)
 {
 	qDebug() << "HExperiment::phaseEnded( " << phase << ")";
 }
+
+QDebug operator<<(QDebug dbg, const PhaseStimStuff& pss)
+{
+	dbg.nospace() << "Context " << pss.context << " hab? " << pss.isHabituation << endl;
+	dbg.nospace() << pss.sslist;
+	return dbg.space();
+}
+
+
+void HExperiment::onExit(QEvent* e)
+{
+	Q_UNUSED(e);
+	// on exiting experiment, tell Media Manager to put up blank screen.
+	HGMM::instance().defaultStim();
+};
+
+void HExperiment::onEntry(QEvent *)
+{
+//		qDebug() << "HExperiment - phase stimuli lists";
+//		qDebug() << m_phaseStimulusLists;
+}
+
+
+QDebug operator<<(QDebug dbg, const PhT& pht)
+{
+	dbg.nospace() << "PhT: (" << pht.context << "," << pht.trial << ")";
+	return dbg.nospace();
+}
+
+
+void HExperiment::requestStim(int context, unsigned int trial)
+{
+	qDebug() << "REQUEST STIM (" << context << "," << trial << ")";
+}
+
+void HExperiment::requestCleanup(int context, unsigned int trial)
+{
+	qDebug() << "REQUEST CLEANUP (" << context << "," << trial << ")";
+	// find in preroll list
+	PhT key(context, trial);
+	PhTStimidMap::iterator it = m_prerolled.find(key);
+	if (it != m_prerolled.end())
+	{
+		m_cleanup.append(it.value());
+		m_prerolled.remove(key);
+	}
+}
+
+void HExperiment::requestCleanup(int context)
+{
+	qDebug() << "REQUEST CLEANUP (" << context << ")";
+
+	// must iterate through all and find those in this context.
+
+	for(PhTStimidMap::iterator it = m_prerolled.begin(); it != m_prerolled.end(); )
+	{
+		if (it.key().context == context)
+		{
+			m_cleanup.append(it.value());
+			it = m_prerolled.erase(it);
+		}
+		else
+		{
+			++it;
+	    }
+	}
+}
+
+void HExperiment::prerollAsNeeded(int context, unsigned int trial)
+{
+	qDebug() << "PREROLL AS NEEDED (" << context << "," << trial << ")";
+	prerollList(nextTrials(context, trial));
+}
+
+void HExperiment::prerollAsNeeded(int context)
+{
+	qDebug() << "PREROLL AS NEEDED (" << context << ")";
+	prerollList(nextTrials(context, 0));
+}
+
+void HExperiment::addPhaseStimulusList(int context, const Habit::HStimulusSettingsList& sslist, bool isHab)
+{
+	m_phaseStimulusLists.append(PhaseStimStuff(sslist, context, isHab));
+}
+
+void HExperiment::printLists()
+{
+	foreach (auto stuff, m_phaseStimulusLists)
+	{
+		qDebug() << "Context " << stuff.context;
+		qDebug() << "Stimuli in order";
+		qDebug() << stuff;
+		qDebug() << "=====";
+	}
+}
+
+void HExperiment::prerollList(const PhTList& l)
+{
+	foreach(PhT pht, l)
+	{
+		// check if its already prerolled
+		if (!m_prerolled.contains(pht))
+		{
+			unsigned int i = HGMM::instance().addStimulus(getStimulusSettings(pht), pht.context);
+			HGMM::instance().preroll(i);
+			m_prerolled.insert(pht, i);
+		}
+	}
+}
+
+Habit::StimulusSettings HExperiment::getStimulusSettings(const PhT& pht)
+{
+	Q_ASSERT_X(
+			(pht.context<m_phaseStimulusLists.size() &&
+			pht.trial<m_phaseStimulusLists.at(pht.context).sslist.size()),
+			"HExperiment::getStimulusSettings",
+			"Context/trial not found"
+			);
+	return m_phaseStimulusLists.at(pht.context).sslist.at(pht.trial);
+}
+
+PhTList HExperiment::nextTrials(int context, int trial, int n)
+{
+	PhTList l;
+	PhaseStimulusLists::iterator it;
+	it = std::find_if(m_phaseStimulusLists.begin(), m_phaseStimulusLists.end(), [context](const PhaseStimStuff& psstuff) { return psstuff.context == context; });
+	if (it != m_phaseStimulusLists.end())
+	{
+		int istart = trial;
+		bool bDone = false;	// set to true when we want to get something from
+							// the next phase but there are no  more phases
+		while (l.size()<n && !bDone)
+		{
+			for (int i=istart; i < it->sslist.size() && l.size() < n; i++)
+				l.append(PhT(context, i));
+			if (l.size() < n)
+			{
+				if (++it != m_phaseStimulusLists.end())
+					istart = 0;
+				else
+					bDone = true;
+			}
+		}
+
+		if (!bDone && it->isHabituation)
+		{
+			if (++it != m_phaseStimulusLists.end())
+			{
+				PhTList lhab;
+				lhab = nextTrials(it->context);
+				l.append(lhab);
+			}
+		}
+	}
+	return l;
+}
+
+

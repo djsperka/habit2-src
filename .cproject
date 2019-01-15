@@ -38,6 +38,11 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="debug/|habit.xcodeproj/|release/|testing/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="apps/habit"/>
+						<entry excluding="debug/|release/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs/gstqt"/>
+						<entry excluding="debug/*|release/*" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs/habutil"/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -79,6 +84,11 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="debug/|habit.xcodeproj/|release/|testing/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="apps/habit"/>
+						<entry excluding="debug/|release/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs/gstqt"/>
+						<entry excluding="debug/|release/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libs/habutil"/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

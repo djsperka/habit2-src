@@ -50,7 +50,7 @@ public:
 	void stop();
 protected slots:
 	void phaseStarted(QString);
-	void trialStarted(int, int);
+	void trialStarted(int, unsigned int, unsigned int);
 	void lookDetectorEnabled();
 	void lookDetectorDisabled();
 	void check();

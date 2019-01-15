@@ -61,10 +61,17 @@ class HGMM: public QObject
 	unsigned int m_defaultKey;	// this key will always work
 
 
+	// Singleton. Uses HStimPipelineFactory() to generate HPipeline objs.
 	HGMM(PipelineFactory factory = HStimPipelineFactory);
 	HGMM(HGMM& mm);	// not defined.
+
+
 	void playStim(unsigned int key);
+
+	// Thread func that runs the GMainLoop and exits.
 	static gpointer threadFunc(gpointer user_data);
+
+	// Call updateGeometry() on each non-NULL HStimulusWidget.
 	void updateGeometry();
 
 	// cleanup all pipelines, including static.
@@ -75,7 +82,7 @@ class HGMM: public QObject
 	unsigned int nextKey();
 
 	// add stimulus using key 'key', and the stimulus settings 'ss'. Applies to the context/phase 'context'.
-	// If 'bForceSound' is true, the pipeline will generate sound even if the
+	// If 'bForceSound' is true, the pipeline will generate sound even if the StimulusDisplayInfo says otherwise
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss, int context, bool bForceSound = false);
 	unsigned int addStimulus(unsigned int key, const QString& name, const QColor& color, int context, bool bForceSound = false);
 	bool getContext(unsigned int key, int& context);
@@ -108,13 +115,13 @@ public:
 	// all-new pipelines reconfigured using the new Info.
 	// Intended for use when in ExperimentEditor - this must be called when no widgets are
 	// displayed or even playing (not really sure what happens, but its easy to ensure so this is cautionary).
-	void reset(const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
+	void modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
 
 
 	// Re-initialize mm, create pipelines for default, background. Widgets ARE set, but no other stimuli or ag
 	// are configured.
-	void reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
-	void reset(HStimulusWidget *pLeft, HStimulusWidget *pRight,  const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
+	//void reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
+	//void reset(HStimulusWidget *pLeft, HStimulusWidget *pRight,  const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
 
 	// assign widget(s) to hgmm
 	void setWidgets(HStimulusWidget *p0, HStimulusWidget *p1=NULL, HStimulusWidget *p2=NULL);
@@ -122,11 +129,26 @@ public:
 	// Get reference to singleton instance of HGMM.
 	static HGMM& instance();
 
+
+	// add stimuli to the un-curated list.
 	virtual unsigned int addAG(const Habit::StimulusSettings& ags, bool bForceSound = false);
-	virtual void addStimuli(const Habit::StimuliSettings& ss, int context, bool bForceSound = false);
 	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context, bool bForceSound = false);
 	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context, bool bForceSound = false);
+
+	// update the given pipeline to use a new stim. Used when changing AG stim, e.g.
 	virtual bool replaceStimulus(unsigned int key, const Habit::StimulusSettings& stimulus, bool bForceSound = false);
+
+	// Add stimuli to be used in curated pipelines. These should be coming from
+	// a phase - where StimuliSettings hold the stim (and orders) for a single phase.
+	// A pipeline is created with a call to its factory method. Each such call takes args
+	// StimulusSettings, context, bForceSound. The latter arg, bForceSound, tells the
+	// factory to inlcude audio in the output, even if the StimulusDisplayInfo says
+	// there is no sound.
+	virtual void addStimuli(const Habit::StimuliSettings& ss, int context, bool bForceSound = false);
+
+
+
+
 
 	unsigned int getAGKey() const { return m_agKey; };
 	unsigned int getBackgroundKey() const { return m_backgroundKey; };
@@ -144,8 +166,6 @@ public:
 
 	// each pipeline represents a single stimulus (single or dual screen, i.e. Habit::StimulusSettings)
 	const QMap<unsigned int, HPipeline *>& pipelineMap() const { return m_mapPipelines; };
-
-	unsigned int nStimuli() const { return m_mapPipelines.size(); };
 
 	// tell hgmm that currently playing stim should be rewound, not cleaned up
 	void rewindCurrentPipeline() { m_bRewindCurrentPipeline = true; };
@@ -165,7 +185,6 @@ public:
 
 	virtual void defaultStim() { stim(m_defaultKey); };
 	virtual void background() { stim(m_backgroundKey); };
-	virtual void clear();
 	virtual void stop();
 
 public Q_SLOTS:

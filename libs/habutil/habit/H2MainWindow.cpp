@@ -595,7 +595,6 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 {
 	Habit::ExperimentSettings experimentSettings;
 	HEventLog eventLog;
-	HGMM *pMediaManager = NULL;
 	HTestingInputWrangler *pWrangler = NULL;
 	QList<QWidget *> deleteList;	// list of things to be cleaned up after expt run
 	bool bStimInDialog = false;	// can be set on command line, or in RunSettingsDialog
@@ -675,9 +674,9 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 
 			if (bStimInDialog)
-				pMediaManager = createMediaManager(experimentSettings, 320, 240);
+				initializeMediaManager(experimentSettings, 320, 240);
 			else
-				pMediaManager = createMediaManager(experimentSettings);
+				initializeMediaManager(experimentSettings);
 
 			// On mac it works OK to have a parent with the control panel - the keyboard grab works as expected.
 			// On windows, the keyboard grab doesn't work - or so it seems - cannot get any keyboard events through.
@@ -686,12 +685,12 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 #if defined(Q_OS_MAC)
 
-			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, this);
+			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), &HGMM::instance(), this);
 
 #elif defined(Q_OS_WIN)
 
 			// this is deleted down below. Not in the delete list, mind you. Note order dependence with look detector.
-			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pMediaManager, NULL);
+			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), &HGMM::instance(), NULL);
 
 #else
 
@@ -703,7 +702,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			m_pld = createLookDetector(experimentSettings, eventLog, m_pControlPanel);
 
 			// state machine has no parent -- DELETE
-			m_psm = createExperiment(this, m_pRunSettingsDialog->getRunSettings(), experimentSettings, m_pld, pMediaManager, eventLog, bTestInput);
+			m_psm = createExperiment(this, m_pRunSettingsDialog->getRunSettings(), experimentSettings, m_pld, eventLog, bTestInput);
 
 			// set state machine and dialog title
 			m_pControlPanel->setStateMachine(m_psm);
@@ -736,7 +735,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			QDialog *pStimulusDisplayDialog  = NULL;
 			if (bStimInDialog)
 			{
-				pStimulusDisplayDialog = pMediaManager->createStimulusWidget();
+				pStimulusDisplayDialog = HGMM::instance().createStimulusWidget();
 				deleteList.append(pStimulusDisplayDialog);
 				qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
 				//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
@@ -744,7 +743,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			}
 			else
 			{
-				adaptVideoWidgets(pMediaManager);
+				adaptVideoWidgets(&HGMM::instance());
 				if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 				{
 					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Center));
@@ -766,7 +765,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			int cpStatus = m_pControlPanel->exec();
 
 			// delete the video widgets.
-			pMediaManager->stop();
+			HGMM::instance().stop();
 			qDeleteAll(deleteList.begin(), deleteList.end());
 			deleteList.clear();
 
