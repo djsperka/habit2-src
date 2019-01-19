@@ -60,6 +60,7 @@ typedef QList< PhaseStimStuff > PhaseStimulusLists;
 typedef QList< PhT > PhTList;
 typedef QMap<PhT, unsigned int> PhTStimidMap;
 typedef QList<unsigned int> StimidList;
+typedef QList<QPair<PhT, unsigned int> > PhTStimidPairList;
 
 class HExperiment: public HLogState
 {
@@ -92,8 +93,9 @@ public:
 	void requestCleanup(int context);
 
 Q_SIGNALS:
-	void phaseStarted(QString phaseName);
-	void trialStarted(int trialnumber, int repeatnumber);
+	void phaseStarted(QString phaseName, int context);
+	void phaseEnded(QString phaseName, int context);
+	void trialStarted(int context, unsigned int trial, unsigned int repeat);
 
 private Q_SLOTS:
 	void onAttention();
@@ -106,7 +108,7 @@ private:
 	HLookDetector& m_ld;
 	PhaseStimulusLists m_phaseStimulusLists;
 	PhTStimidMap m_prerolled;					// curated stimuli that we've prerolled here
-	StimidList m_cleanup;						// curated stimuli that need to be cleaned up
+	PhTStimidPairList m_cleanup;				// curated stimuli that need to be cleaned up
 
 	PhTList nextTrials(int context, int trial=0, int n=PREROLL_PADDING);	// include given context/trial
 	Habit::StimulusSettings getStimulusSettings(const PhT& pht);

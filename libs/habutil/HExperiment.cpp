@@ -79,6 +79,14 @@ QDebug operator<<(QDebug dbg, const PhT& pht)
 void HExperiment::requestStim(int context, unsigned int trial)
 {
 	qDebug() << "REQUEST STIM (" << context << "," << trial << ")";
+	PhT key(context, trial);
+	PhTStimidMap::iterator it = m_prerolled.find(key);
+	if (it != m_prerolled.end())
+	{
+		HGMM::instance().stim(it.value());
+	}
+	else
+		qCritical() << "requestStim(" << context << ", " << trial << ") This stim is not prerolled!";
 }
 
 void HExperiment::requestCleanup(int context, unsigned int trial)
@@ -89,7 +97,7 @@ void HExperiment::requestCleanup(int context, unsigned int trial)
 	PhTStimidMap::iterator it = m_prerolled.find(key);
 	if (it != m_prerolled.end())
 	{
-		m_cleanup.append(it.value());
+		m_cleanup.append(qMakePair(key, it.value()));
 		m_prerolled.remove(key);
 	}
 }
@@ -104,7 +112,7 @@ void HExperiment::requestCleanup(int context)
 	{
 		if (it.key().context == context)
 		{
-			m_cleanup.append(it.value());
+			m_cleanup.append(qMakePair(it.key(), it.value()));
 			it = m_prerolled.erase(it);
 		}
 		else
@@ -152,6 +160,11 @@ void HExperiment::prerollList(const PhTList& l)
 			unsigned int i = HGMM::instance().addStimulus(getStimulusSettings(pht), pht.context);
 			HGMM::instance().preroll(i);
 			m_prerolled.insert(pht, i);
+			qDebug() << "HExperiment::prerollList: prerolling " << pht << " stimid " << i;
+		}
+		else
+		{
+			qDebug() << "HExperiment::prerollList: " << pht << " already prerolled";
 		}
 	}
 }
@@ -180,7 +193,7 @@ PhTList HExperiment::nextTrials(int context, int trial, int n)
 		while (l.size()<n && !bDone)
 		{
 			for (int i=istart; i < it->sslist.size() && l.size() < n; i++)
-				l.append(PhT(context, i));
+				l.append(PhT(it->context, i));
 			if (l.size() < n)
 			{
 				if (++it != m_phaseStimulusLists.end())
@@ -200,6 +213,9 @@ PhTList HExperiment::nextTrials(int context, int trial, int n)
 			}
 		}
 	}
+
+	qDebug() << "nextTrials(" << context << ", " << trial << ", " << n;
+	qDebug() << l;
 	return l;
 }
 

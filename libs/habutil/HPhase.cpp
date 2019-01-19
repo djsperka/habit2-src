@@ -39,15 +39,8 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	// signal when trial complete entered must be caught
 	connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
 
-	// Set object name - trick to allow updating status labels when this phase is entered.
-	setObjectName(QString(phaseSettings.getName()));
-
 	connect(this, SIGNAL(phaseStarted(QString, int)), &exp, SIGNAL(phaseStarted(QString, int)));
 	connect(this, SIGNAL(phaseEnded(QString, int)), &exp, SLOT(phaseEnded(QString, int)));
-	//connect(m_sTrial, SIGNAL(trialStarted(int, int)), &exp, SIGNAL(trialStarted(int, int)));
-
-
-	//checkPrerollStatus();
 };
 
 
