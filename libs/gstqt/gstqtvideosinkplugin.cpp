@@ -33,9 +33,9 @@ static gboolean plugin_init(GstPlugin *plugin)
                             G_STRINGIFY(QTVIDEOSINK_NAME), 0,
                             "Debug category for GstQtVideoSink");
 
-    if(!gst_element_register(plugin, G_STRINGIFY(QTVIDEOSINK_NAME),
+    if(!gst_element_register(plugin, G_STRINGIFY(HABIT2_PLUGIN_NAME),
                 GST_RANK_NONE, GST_TYPE_QT_VIDEO_SINK)) {
-        GST_ERROR("Failed to register " G_STRINGIFY(QTVIDEOSINK_NAME));
+        GST_ERROR("Failed to register " G_STRINGIFY(HABIT2_PLUGIN_NAME));
         return FALSE;
     }
 //#ifndef GST_QT_VIDEO_SINK_NO_OPENGL
@@ -65,7 +65,7 @@ static gboolean plugin_init(GstPlugin *plugin)
 GST_PLUGIN_DEFINE (
     GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
-    QTVIDEOSINK_NAME,
+    HABIT2_PLUGIN_NAME,
     "A video sink that can draw on any Qt surface",
     plugin_init,
     PACKAGE_VERSION,
