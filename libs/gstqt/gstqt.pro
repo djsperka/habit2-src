@@ -19,7 +19,8 @@ DEFINES += \
 			PACKAGE_ORIGIN="\\\"http://gstreamer.freedesktop.org/\\\"" \
 			PACKAGE_VERSION="\\\"1.2.0\\\"" \
 			QWIDGETVIDEOSINK_NAME="qwidget5videosink" \
-			QTVIDEOSINK_NAME="qt5videosink"
+			QTVIDEOSINK_NAME="qt5videosink" \
+			HABIT2_PLUGIN_NAME="qt"
 
 # Input
 SOURCES +=	gstqwidgetvideosink.cpp \
