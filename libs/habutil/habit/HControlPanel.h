@@ -62,7 +62,7 @@ namespace GUILib
 		void onLook(HLook l);
 		void onExperimentFinished();
 		void onExperimentStarted();
-		void onPhaseStarted(QString phaseName);
+		void onPhaseStarted(QString phaseName, int context);
 		void onTrialStarted(int context, unsigned int trialindex, unsigned int repeatindex);
 		void onLookingDirection(QString sLookingDirection);
 

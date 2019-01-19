@@ -50,6 +50,8 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 
 	QListIterator<HPhaseSettings> phaseIterator = experimentSettings.phaseIterator();
 	QState* plast = NULL;
+	int iFirstPhaseContext=-1;	// grab the context of the first phase, for prerolling that phase.
+
 	while (phaseIterator.hasNext())
 	{
 		HPhaseCriteria* pcrit = (HPhaseCriteria *)NULL;
@@ -80,6 +82,7 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 			{
 				sExperiment->setInitialState(pHPhase);
 				plast = pHPhase;
+				iFirstPhaseContext = ps.getSeqno();
 			}
 
 			// Now tell the experiment state that this phase has a certain order of stimuli.
@@ -103,6 +106,9 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 		// This is a trivial case
 		sExperiment->setInitialState(sExperimentFinal);
 	}
+
+	// preroll stimuli for the first phase
+	sExperiment->prerollAsNeeded(iFirstPhaseContext);
 
 	// Store the stimulus settings events in the log
 	QMapIterator<unsigned int, HPipeline *> it(HGMM::instance().pipelineMap());
@@ -159,7 +165,8 @@ Habit::HStimulusSettingsList getOrderOfStimuli(const PhaseRunSettings& prs, unsi
 		int itmp = htg.next();
 
 		// itmp is an index into the stimuli settings list
-		sslist.append(ss.stimuli().at(itmp));
+		sslist.append(ss.stimuli().at(list.at(itmp).first));
+		//no sslist.append(ss.stimuli().at(itmp));
 	}
 	qDebug() << "get order of stim retgurn";
 	qDebug() << sslist;
