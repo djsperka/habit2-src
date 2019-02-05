@@ -27,7 +27,7 @@ public:
 	// these are public because I'm being lazy
 	bool bWaitingForPreroll;		// i.e. waiting for ASYNC_DONE after initial flushing segment seek. Looping sources only.
 	bool bPrerolled;
-	bool bWaitingForPrerollSegment;	// true when flushing segment seek issued, but segment not received. Used in event probe.
+	//bool bWaitingForPrerollSegment;	// true when flushing segment seek issued, but segment not received. Used in event probe.
 	bool bWaitingForSegment;		// true when non-flushing segment seek issued, but segment not received. Used in event probe.
 	bool bWaitingForSegment2;
 	QString sWaitingForSegment2Pad;
