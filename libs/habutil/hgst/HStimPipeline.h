@@ -27,7 +27,7 @@ public:
 	// these are public because I'm being lazy
 	bool bWaitingForPreroll;		// i.e. waiting for ASYNC_DONE after initial flushing segment seek. Looping sources only.
 	bool bPrerolled;
-	bool bWaitingForPrerollSegment;	// true when flushing segment seek issued, but segment not received. Used in event probe.
+	//bool bWaitingForPrerollSegment;	// true when flushing segment seek issued, but segment not received. Used in event probe.
 	bool bWaitingForSegment;		// true when non-flushing segment seek issued, but segment not received. Used in event probe.
 	bool bWaitingForSegment2;
 	QString sWaitingForSegment2Pad;
@@ -48,25 +48,26 @@ class HStimPipeline: public HPipeline
 {
 	Q_OBJECT
 
-	bool m_bInitialized;
+	bool m_bInitialized;	// on creation, not initialized. Init'd on first call to any of pause(), preroll(), play().
 	QDir m_dirStimRoot;
-	//Habit::StimulusDisplayInfo m_stimulusDisplayInfo;
-	//const HStimulusLayoutType& m_stimulusLayoutType;
-	//bool m_bISS;
+	bool m_bUsingMixer;		// check isUsingMixer() in padAdded() to see if audio streams connect to mixer or not
 	bool m_bRewindPending;	// true when expecting ASYNC_DONE due to rewind() call
 	GstElement *m_pipeline;
 	QMutex m_mutex;
 	QMap<HPlayerPositionType, HStimPipelineSource* > m_mapPipelineSources;
 
-	// Add the stimulus contained in 'info' to 'pipeline' at position 'ppt'.
-	// The bool vars 'bVideo' and 'bAudio' dictate whether to IGNORE any streams of their respective types.
-	// This only applies to stim that are not static color-type, for which we only have a filename and a position
-	// type (i.e. Center/Left/Right, which imply video/image, and Sound, which implies... sound). The input stim
-	// files are fed to a decodebin, and the 'pad-added' signal is connected to our 'padAdded' method. In that method
-	// stream types can be deduced from the caps. Note that audio streams may be ignored for either of two reasons:
-	// if 'bAudio' is false, OR if 'bAudio' is true, but the sound is muted in 'info' (i.e. it is set to 0).
-
+	// Add the stimulus contained in 'info' to 'pipeline' at position 'ppt'. This method kicks off the construction
+	// of the pipeline, setting up the filesrc and decodebin, but not performing any change-of-state.
+	// If 'bAudio' is true, then the pipeline will incorporate any audio stream from this source into the
+	// pipeline as well. If 'bAudio' is false, then any audio stream is ignored. Obviously this seems silly
+	// in the event of a Sound stimulus, but we can have a non-NULL sound source in an experiment that doesn't
+	// use ISS. In such an experiment, however, the user might be using a sound-only attention-getter. IN that case,
+	// the caller must handle the logic appropriately.
 	HStimPipelineSource *addStimulusInfo(const HPlayerPositionType& ppt, const Habit::StimulusInfo& info, bool bAudio);
+
+	// the sink carries a 'widget' property. Setting it to the widget pointer makes the video stream appear on that widget.
+	void setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt);
+
 	void emitNowPlaying();
 	void emitPrerolling();
 	void emitPrerolled();
@@ -88,6 +89,8 @@ public:
 	// open descriptors)
 	virtual void cleanup();
 	virtual bool isStatic() { return false; };
+
+	// preroll pipeline
 	virtual void preroll() { pause(); Q_EMIT prerolling(this->id()); };
 
 	// set to pipeline to playing state. The bus callback function will emit 'nowPlaying' signal
@@ -106,20 +109,27 @@ public:
 	// set GST_DEBUG_DUMP_DOT_DIR and call this for dot file of current pipeline
 	virtual void dump();
 
-
+	// manage widget property on video sink element
 	void detachWidgetsFromSinks();	// default is a no-op
 	void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
-	void setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt);
 
+	// return the GstElement corresponding to the entire pipeline
 	GstElement *pipeline() const { return m_pipeline; }
+
+	bool getUsingMixer() const { return m_bUsingMixer; };
+
 	QMap<HPlayerPositionType, HStimPipelineSource* >& getPipelineSourceMap() { return m_mapPipelineSources; }
 	QMutex *mutex() { return &m_mutex; };
 
+	// callback functions for gstreamer
+
+	// bus callback - bus messages here
 	static gboolean busCallback(GstBus *, GstMessage *msg, gpointer pdata);
 
 	// Callback function for 'pad-added' signal from decodebin elements
 	static void padAdded(GstElement *src, GstPad *newPad, gpointer p);
 
+	// event probe for events passing through the pipeline
 	static GstPadProbeReturn eventProbeCB(GstPad * pad, GstPadProbeInfo * info, gpointer p);
 
 };
