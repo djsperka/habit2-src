@@ -13,6 +13,13 @@ CONFIG(debug, debug|release) {
 include(../../habit2.pri)
 LIBS += -lgstvideo-1.0 -lgstbase-1.0
 
+
+!win32 {
+    PKGCONFIG += gstreamer-plugins-base-1.0
+} else {
+# need changes to INCLUDEPATH?
+}
+
 DEFINES += \
 			PACKAGE=\\\"qt-gstreamer\\\" \
 			PACKAGE_NAME=\\\"QtGstreamer\\\" \
