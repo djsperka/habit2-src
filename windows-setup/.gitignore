@@ -1,0 +1,7 @@
+build/*
+exe/*
+*.msi
+*.wixpdb
+.vs/*
+windows-setup.sln
+
