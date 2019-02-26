@@ -13,13 +13,21 @@ CONFIG(debug, debug|release) {
 include(../../habit2.pri)
 LIBS += -lgstvideo-1.0 -lgstbase-1.0
 
+
+!win32 {
+    PKGCONFIG += gstreamer-plugins-base-1.0
+} else {
+# need changes to INCLUDEPATH?
+}
+
 DEFINES += \
 			PACKAGE=\\\"qt-gstreamer\\\" \
 			PACKAGE_NAME=\\\"QtGstreamer\\\" \
 			PACKAGE_ORIGIN="\\\"http://gstreamer.freedesktop.org/\\\"" \
 			PACKAGE_VERSION="\\\"1.2.0\\\"" \
 			QWIDGETVIDEOSINK_NAME="qwidget5videosink" \
-			QTVIDEOSINK_NAME="qt5videosink"
+			QTVIDEOSINK_NAME="qt5videosink" \
+			HABIT2_PLUGIN_NAME="qt"
 
 # Input
 SOURCES +=	gstqwidgetvideosink.cpp \

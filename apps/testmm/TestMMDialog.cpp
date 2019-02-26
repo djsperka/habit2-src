@@ -147,7 +147,7 @@ void TestMMDialog::experimentActivated(QString expt)
 			m_stimNames.append("Background");
 			if (ps.getIsEnabled())
 			{
-				getOrderedStimidList(m_pmm, ps, pRunSettingsDialog->getRunSettings(), stimidListOrdered);
+				getOrderedStimidList(ps, pRunSettingsDialog->getRunSettings(), stimidListOrdered);
 
 				qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno();
 				QListIterator< QPair<int, QString> > it(stimidListOrdered);

@@ -10,7 +10,8 @@ HEADERS += \
 	hgst/HStimulusWidget.h \
 	hgst/HVideoWidget.h \
 	hgst/HStimulusLayout.h \
-	hgst/HGMMException.h
+	hgst/HGMMException.h \
+	hgst/Preroller.h
 
 SOURCES += \
 	hgst/HGMM.cpp \
@@ -20,4 +21,6 @@ SOURCES += \
 	hgst/HStimulusWidget.cpp \
 	hgst/HVideoWidget.cpp \
 	hgst/HStimulusLayout.cpp \
-	hgst/HGMMException.cpp
+	hgst/HGMMException.cpp \
+	hgst/Preroller.cpp
+	

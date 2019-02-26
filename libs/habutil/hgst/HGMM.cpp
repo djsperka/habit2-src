@@ -31,9 +31,9 @@ HGMM::HGMM(PipelineFactory factory)
 , m_gthread(NULL)
 , m_pgml(NULL)
 , m_pipelineFactory(factory)
-, m_backgroundKey(0)
-, m_agKey(0)
-, m_defaultKey(0)
+, m_backgroundKey(99998)
+, m_agKey(99999)
+, m_defaultKey(99997)
 , m_bPendingAG(false)
 , m_bPendingStim(false)
 , m_iPendingStimKey(0)
@@ -89,15 +89,17 @@ void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 {
 	qDebug() << "HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir) - layout type " << settings.getStimulusDisplayInfo().getStimulusLayoutType().name();
 	reset();
-	reset(settings.getStimulusDisplayInfo(), dir);
+	modifyStimulusDisplay(settings.getStimulusDisplayInfo(), dir);
 
 //	// Need to know if AG is used. If it is, add attention getter settings to media manager
 //	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
 //	{
-	qDebug() << "add ag";
-	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
-	qDebug() << "sound only? " << settings.getAttentionGetterSettings().isSoundOnly();
-		addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getAttentionGetterSettings().isSoundOnly());
+//	qDebug() << "add ag";
+//	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
+//	qDebug() << "sound only? " << settings.getAttentionGetterSettings().isSoundOnly();
+
+	addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getAttentionGetterSettings().isSoundOnly());
+
 //	}
 
 	QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
@@ -111,7 +113,7 @@ void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
 	}
 }
 
-void HGMM::reset(const Habit::StimulusDisplayInfo& info, const QDir& dir)
+void HGMM::modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const QDir& dir)
 {
 	qDebug() << "HGMM::reset(" << info << ", " << dir << " )";
 	m_sdinfo = info;
@@ -132,13 +134,15 @@ void HGMM::reset(const Habit::StimulusDisplayInfo& info, const QDir& dir)
 
 	if (m_mapPipelines.contains(m_backgroundKey))
 	{
+		qDebug() << "reconfigure background key " << m_backgroundKey;
 		m_mapPipelines.value(m_backgroundKey)->reconfigure(m_sdinfo);
 	}
 	else
 	{
+		qDebug() << "add background key " << m_backgroundKey;
 		m_backgroundKey = addStimulus(QString("background"), m_sdinfo.getBackGroundColor(), -2);
 	}
-	preroll(m_defaultKey);
+	preroll(m_backgroundKey);
 
 	// just reconfigure ag if it already exists, don't create here
 	if (m_mapPipelines.contains(m_agKey))
@@ -149,19 +153,19 @@ void HGMM::reset(const Habit::StimulusDisplayInfo& info, const QDir& dir)
 
 }
 
-void HGMM::reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir)
-{
-	qDebug() << "HGMM::reset(HStimulusWidget *pCenter, info, dir)";
-	reset(info, dir);
-	setWidgets(pCenter);
-}
-
-void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, const Habit::StimulusDisplayInfo& info, const QDir& dir)
-{
-	qDebug() << "HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, info, dir)";
-	reset(info, dir);
-	setWidgets(pLeft, pRight);
-}
+//void HGMM::reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir)
+//{
+//	qDebug() << "HGMM::reset(HStimulusWidget *pCenter, info, dir)";
+//	modifyStimulusDisplay(info, dir);
+//	setWidgets(pCenter);
+//}
+//
+//void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, const Habit::StimulusDisplayInfo& info, const QDir& dir)
+//{
+//	qDebug() << "HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, info, dir)";
+//	modifyStimulusDisplay(info, dir);
+//	setWidgets(pLeft, pRight);
+//}
 
 void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1, HStimulusWidget *p2)
 {
@@ -308,6 +312,10 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 	// Add helper to map
 	m_mapPipelines.insert(key, pipeline);
 
+	// add signals
+	connect(pipeline, SIGNAL(prerolling(int)), this, SIGNAL(prerolling(int)));
+	connect(pipeline, SIGNAL(prerolled(int)), this, SIGNAL(prerolled(int)));
+
 	// add key to context map
 	m_mapContext.insert(context, key);
 
@@ -361,6 +369,10 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 	{
 		pipelineToBeReplaced = m_mapPipelines.value(key);
 
+		// disconnect signals
+		disconnect(pipelineToBeReplaced, SIGNAL(prerolling(int)), this, SIGNAL(prerolling(int)));
+		disconnect(pipelineToBeReplaced, SIGNAL(prerolled(int)), this, SIGNAL(prerolled(int)));
+
 		// Now get the context. If this fails, something is wrong, because every stim should have one.
 		if (!getContext(key, context))
 		{
@@ -377,6 +389,11 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 			// replace pipeline in map
 			// don't add key to context map, its already there
 			m_mapPipelines[key] = pipelineTheNewOne;
+
+			// signals
+			connect(pipelineTheNewOne, SIGNAL(prerolling(int)), this, SIGNAL(prerolling(int)));
+			connect(pipelineTheNewOne, SIGNAL(prerolled(int)), this, SIGNAL(prerolled(int)));
+
 
 			// clean up and destroy old one
 			if (key == m_backgroundKey || key == m_defaultKey || key == m_agKey)
@@ -412,10 +429,10 @@ unsigned int HGMM::addAG(const Habit::StimulusSettings& ssAG, bool bForceSound)
 	return m_agKey;
 }
 
-void HGMM::clear()
-{
-	stim(m_backgroundKey);
-}
+//void HGMM::clear()
+//{
+//	stim(m_backgroundKey);
+//}
 
 void HGMM::ag()
 {
@@ -436,14 +453,6 @@ void HGMM::nowPlaying()
 	}
 	else if (m_bPendingStim)
 	{
-		//updateGeometry();
-		if (m_pCenter)
-		{
-			qDebug() << "HGMM::nowPlaying(): widget> " << (m_pCenter->getHVideoWidget()==NULL ? "NULL" :  " NOT NULL");
-			updateGeometry();
-		}
-		else
-			qDebug() << "nowPlaying - m_pCenter is NULL!!!";
 		qDebug() << "HGMM::nowPlaying: Q_EMIT(stimStarted(" << m_iPendingStimKey << "))";
 		Q_EMIT(stimStarted(m_iPendingStimKey));
 	}
@@ -614,6 +623,11 @@ void HGMM::playStim(unsigned int key)
 			disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 			m_pipelineCurrent->pause();
 			m_pipelineCurrent->detachWidgetsFromSinks();
+
+			if (!m_pipelineCurrent->isStatic())
+			{
+				emit detached(m_pipelineCurrent->id());
+			}
 
 			// check disposition of the current pipeline. By default it will be cleaned up, but that can
 			// be overridden by calling rewindCurrentPipeline(). Such a call will only apply to m_pipelineCurrent,

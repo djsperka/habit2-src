@@ -8,7 +8,7 @@
 #include <HIntertrialIntervalSettingsWidget.h>
 #include "ui_HIntertrialIntervalSettingsForm.h"
 #include "HStimulusSettingsEditor.h"
-
+#include <QIntValidator>
 
 
 

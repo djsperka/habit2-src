@@ -20,6 +20,8 @@
 #include <QBuffer>
 #include <QDataStream>
 
+#include "TestPreroller.h"
+
 Habit::StimulusSettings TestHabutil::getSS()
 {
 	Habit::StimulusSettings ss0(QString("stim 0"));
@@ -1101,5 +1103,18 @@ void TestHabutil::testTrialGenerator()
 }
 
 
-QTEST_MAIN(TestHabutil);
+QTEST_MAIN(TestPreroller);
 //#include "testmisc.moc"
+
+//int main(int argc, char **argv)
+//{
+//	   int status = 0;
+//	   {
+//	      TestHabutil tc;
+//	      status |= QTest::qExec(&tc, argc, argv);
+//	   }
+//	   {
+//	      TestPreroller tc;
+//	      status |= QTest::qExec(&tc, argc, argv);
+//	   }
+//}

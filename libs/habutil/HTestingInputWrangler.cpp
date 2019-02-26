@@ -36,7 +36,7 @@ void HTestingInputWrangler::enable(HLookDetector *pLD, const HExperiment* pExpt)
 	connect(m_pLD, SIGNAL(lookDetectorEnabled()), this, SLOT(lookDetectorEnabled()));
 	connect(m_pLD, SIGNAL(lookDetectorDisabled()), this, SLOT(lookDetectorDisabled()));
 	connect(pExpt, SIGNAL(phaseStarted(QString)), this, SLOT(phaseStarted(QString)));
-	connect(pExpt, SIGNAL(trialStarted(int, int)), this, SLOT(trialStarted(int, int)));
+	connect(pExpt, SIGNAL(trialStarted(int, unsigned int, unsigned int)), this, SLOT(trialStarted(int, unsigned int, unsigned int)));
 	connect(pExpt, SIGNAL(exited()), this, SLOT(experimentFinished()));
 	connect(pExpt->machine(), SIGNAL(stopped()), this, SLOT(experimentFinished()));
 	m_bIsEnabled = true;
@@ -242,7 +242,7 @@ void HTestingInputWrangler::phaseStarted(QString sPhase)
 	}
 }
 
-void HTestingInputWrangler::trialStarted(int itrial, int irepeat)
+void HTestingInputWrangler::trialStarted(int context, unsigned int itrial, unsigned int irepeat)
 {
 	Q_ASSERT(m_bIsEnabled);
 	// initialize pointer to the event log found in m_pCurrentEventLogMap for this trial/repeat

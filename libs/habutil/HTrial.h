@@ -37,26 +37,26 @@ class HTrial: public HPhaseChildState
 public:
 	HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phaseSettings, const Habit::HLookSettings& lookSettings, const Habit::AttentionGetterSettings& agSettings, bool bTestingInput = false);
 	~HTrial() {};
-	void setTrialNumber(int i);
+	void setTrialNumber(unsigned int i);
 	void incrementRepeatNumber();
-	int getTrialNumber() { return m_trialNumber; };
-	int getRepeatNumber() { return m_repeatNumber; };
+	unsigned int getTrialNumber() { return m_trialNumber; };
+	unsigned int getRepeatNumber() { return m_repeatNumber; };
 
 protected:
 	virtual void onEntry(QEvent* e);
-//	virtual void onExit(QEvent* e);
+	virtual void onExit(QEvent* e);
 	
 private:
 	const Habit::HPhaseSettings m_phaseSettings;
 	const Habit::HLookSettings m_lookSettings;
 	const Habit::AttentionGetterSettings m_agSettings;
-	int m_trialNumber;
-	int m_repeatNumber;
+	unsigned int m_trialNumber;
+	unsigned int m_repeatNumber;
 	QTimer* m_ptimerMaxStimulusTime;
 	QTimer* m_ptimerFixedISI;
 	
-signals:
-	void trialStarted(int trialnumber, int repeatnumber);
+//signals:
+//	void trialStarted(int trialnumber, int repeatnumber);
 
 public slots:
 	void onStimRunningEntered();

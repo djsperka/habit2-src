@@ -47,7 +47,7 @@ public:
 	~HTrialInitialState() {};
 
 signals:
-	void trialStarted(int trialnumber, int repeatnumber);
+	void trialStarted(int context, unsigned int trialnumber, unsigned int repeatnumber);
 	
 protected:
 	virtual void onEntry(QEvent* e);

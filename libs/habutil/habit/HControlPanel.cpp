@@ -58,8 +58,8 @@ void HControlPanel::setStateMachine(HStateMachine *psm)
 	connect(m_psm, SIGNAL(started()), this, SLOT(onExperimentStarted()));
 
 	// Set some slots to update text labels in the control panel
-	connect(&m_psm->experiment(), SIGNAL(phaseStarted(QString)), this, SLOT(onPhaseStarted(QString)));
-	connect(&m_psm->experiment(), SIGNAL(trialStarted(int, int)), this, SLOT(onTrialStarted(int, int)));
+	connect(&m_psm->experiment(), SIGNAL(phaseStarted(QString, int)), this, SLOT(onPhaseStarted(QString, int)));
+	connect(&m_psm->experiment(), SIGNAL(trialStarted(int, unsigned int, unsigned int)), this, SLOT(onTrialStarted(int, unsigned int, unsigned int)));
 
 	connect(&m_psm->experiment().getLookDetector(), SIGNAL(lookingDirection(QString)), this, SLOT(onLookingDirection(QString)));
 }
@@ -69,6 +69,10 @@ void HControlPanel::components()
 	this->setObjectName("HControlPanel");
 
 	m_pMediaStatusWidget = new HMediaStatusWidget(m_experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType(), m_experimentSettings.getControlBarOptions().isCurrentStimulusDisplayed(), this);
+//	m_pExperimentStatusWidget = new HExperimentStatusWidget(
+//			m_experimentSettings.getName(),
+//			m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(),
+//			m_experimentSettings.getControlBarOptions().isCurrentStimulusDisplayed(), this);
 	m_pExperimentStatusWidget = new HExperimentStatusWidget(m_experimentSettings.getName(), m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(), this);
 
 	m_pbStartTrials = new QPushButton(tr("Start Trials"));
@@ -100,13 +104,13 @@ void HControlPanel::doLayout()
 	mainLayout->addStretch();
 }
 
-void HControlPanel::onPhaseStarted(QString phaseName)
+void HControlPanel::onPhaseStarted(QString phaseName, int context)
 {
-	// The object name(s) of the phase objects has to be set to the phase name!
+	qDebug() << "onPhaseStarted " << phaseName << " " << context;
 	m_pExperimentStatusWidget->setPhase(phaseName);
 }
 
-void HControlPanel::onTrialStarted(int trialindex, int repeatindex)
+void HControlPanel::onTrialStarted(int context, unsigned int trialindex, unsigned int repeatindex)
 {
 	m_pExperimentStatusWidget->setTrial(trialindex, repeatindex);
 	return;
