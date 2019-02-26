@@ -5,3 +5,4 @@ language.settings.xml
 Makefile
 Makefile.*
 ui_*.h
+.DS_Store
