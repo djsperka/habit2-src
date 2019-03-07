@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<installer-gui-script minSpecVersion="2">
+<installer-gui-script minSpecVersion="1">
     <pkg-ref id="edu.ucdavis.infantcognitionlab.habit2"/>
-    <background>file="h2.png" mime-type="application/rtf"</background>
-	<license>file="habit-copyright.rtf" mime-type="application/rtf"</license>
-	<welcome>file="welcome.rtf" mime-type="application/rtf"</welcome>
+    <background>file="h2.png" alignment="bottomleft" scaling="proportional"</background>
+	<license>file="habit-copyright.rtf"</license>
+	<welcome>file="welcome.rtf"</welcome>
 	<options customize="never" require-scripts="false"/>
     <volume-check>
         <allowed-os-versions>

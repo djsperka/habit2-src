@@ -38,9 +38,9 @@
 									<key>GID</key>
 									<integer>80</integer>
 									<key>PATH</key>
-									<string>../root/Applications/habit2.app</string>
+									<string>root/Applications/habit2.app</string>
 									<key>PATH_TYPE</key>
-									<integer>1</integer>
+									<integer>3</integer>
 									<key>PERMISSIONS</key>
 									<integer>493</integer>
 									<key>TYPE</key>
@@ -73,48 +73,13 @@
 											<array>
 												<dict>
 													<key>CHILDREN</key>
-													<array>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>../stim/.DS_Store</string>
-															<key>PATH_TYPE</key>
-															<integer>1</integer>
-															<key>PERMISSIONS</key>
-															<integer>420</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>../stim/examples</string>
-															<key>PATH_TYPE</key>
-															<integer>1</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-													</array>
-													<key>EXPANDED</key>
-													<true/>
+													<array/>
 													<key>GID</key>
 													<integer>80</integer>
 													<key>PATH</key>
-													<string>../stim</string>
+													<string>stim</string>
 													<key>PATH_TYPE</key>
-													<integer>1</integer>
+													<integer>3</integer>
 													<key>PERMISSIONS</key>
 													<integer>493</integer>
 													<key>TYPE</key>
@@ -588,17 +553,60 @@
 			<dict>
 				<key>ALIGNMENT</key>
 				<integer>4</integer>
+				<key>APPAREANCES</key>
+				<dict>
+					<key>DARK_AQUA</key>
+					<dict>
+						<key>ALIGNMENT</key>
+						<integer>4</integer>
+						<key>BACKGROUND_PATH</key>
+						<dict>
+							<key>PATH</key>
+							<string>../../icons/baby.png</string>
+							<key>PATH_TYPE</key>
+							<integer>1</integer>
+						</dict>
+						<key>CUSTOM</key>
+						<true/>
+						<key>LAYOUT_DIRECTION</key>
+						<integer>0</integer>
+						<key>SCALING</key>
+						<integer>0</integer>
+					</dict>
+					<key>LIGHT_AQUA</key>
+					<dict>
+						<key>ALIGNMENT</key>
+						<integer>4</integer>
+						<key>BACKGROUND_PATH</key>
+						<dict>
+							<key>PATH</key>
+							<string>../icons/baby.png</string>
+							<key>PATH_TYPE</key>
+							<integer>3</integer>
+						</dict>
+						<key>CUSTOM</key>
+						<true/>
+						<key>LAYOUT_DIRECTION</key>
+						<integer>0</integer>
+						<key>SCALING</key>
+						<integer>0</integer>
+					</dict>
+				</dict>
 				<key>BACKGROUND_PATH</key>
 				<dict>
 					<key>PATH</key>
-					<string>../../icons/baby.png</string>
+					<string>../icons/baby.png</string>
 					<key>PATH_TYPE</key>
-					<integer>1</integer>
+					<integer>3</integer>
 				</dict>
 				<key>CUSTOM</key>
 				<true/>
+				<key>LAYOUT_DIRECTION</key>
+				<integer>0</integer>
 				<key>SCALING</key>
 				<integer>0</integer>
+				<key>SHARED_SETTINGS_FOR_ALL_APPAREANCES</key>
+				<true/>
 			</dict>
 			<key>INSTALLATION TYPE</key>
 			<dict>
@@ -706,9 +714,9 @@
 						<key>VALUE</key>
 						<dict>
 							<key>PATH</key>
-							<string>../files/welcome.rtf</string>
+							<string>files/welcome.rtf</string>
 							<key>PATH_TYPE</key>
-							<integer>1</integer>
+							<integer>3</integer>
 						</dict>
 					</dict>
 				</array>
@@ -723,9 +731,9 @@
 						<key>VALUE</key>
 						<dict>
 							<key>PATH</key>
-							<string>../files/habit-copyright.rtf</string>
+							<string>files/habit-copyright.rtf</string>
 							<key>PATH_TYPE</key>
-							<integer>1</integer>
+							<integer>3</integer>
 						</dict>
 					</dict>
 				</array>
@@ -733,6 +741,11 @@
 				<integer>0</integer>
 			</dict>
 			<key>README</key>
+			<dict>
+				<key>LOCALIZATIONS</key>
+				<array/>
+			</dict>
+			<key>SUMMARY</key>
 			<dict>
 				<key>LOCALIZATIONS</key>
 				<array/>
@@ -795,9 +808,9 @@
 			<key>BUILD_PATH</key>
 			<dict>
 				<key>PATH</key>
-				<string>/Users/dan/Desktop/habit2-installer-build</string>
+				<string>dist</string>
 				<key>PATH_TYPE</key>
-				<integer>0</integer>
+				<integer>3</integer>
 			</dict>
 			<key>EXCLUDED_FILES</key>
 			<array>
@@ -968,7 +981,7 @@
 				</dict>
 			</array>
 			<key>NAME</key>
-			<string>habit2-2.2.5-rc1.2788-mac-x64</string>
+			<string>habit2-x.y.z-mac-x64</string>
 			<key>PAYLOAD_ONLY</key>
 			<false/>
 			<key>TREAT_MISSING_PRESENTATION_DOCUMENTS_AS_WARNING</key>

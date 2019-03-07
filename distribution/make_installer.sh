@@ -10,13 +10,13 @@ INST_SIGNER="3rd Party Mac Developer Installer: University of California- Davis 
 
 # get svn revision
 # ASSUME we are inside of project. TODO: Can add project name to command?
-REV=`svn info | grep "Revision:" | cut -d : -f 2 | tr -d '[:space:]'`
-echo "at SVN revision $REV"
+#REV=`svn info | grep "Revision:" | cut -d : -f 2 | tr -d '[:space:]'`
+#echo "at SVN revision $REV"
 
 # version
 # TODO VERSION should come from elsewhere
-VERSION=2.2.1
-VERSION_FULL=${VERSION}.${REV}
+VERSION=2.2.5
+VERSION_FULL=${VERSION}
 
 # sign
 # ASSUME app has been relocated & prepped for shipment (make .build_release_pkg)
@@ -44,11 +44,11 @@ DMG_DIR=${BUILD_DIR}/dist
 mkdir -p $DMG_DIR
 rm -f ${DMG_DIR}/*.pkg
 INSTALLER_PACKAGE_FILE=${DMG_DIR}/Habit2-$VERSION_FULL-mac-x64.pkg
-productbuild --version $VERSION_FULL --distribution $DISTRIBUTION_PLIST --resources files --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" $INSTALLER_PACKAGE_FILE
+productbuild --version $VERSION_FULL --resources files --distribution $DISTRIBUTION_PLIST --package-path $PACKAGE_FILE  --sign "$INST_SIGNER" $INSTALLER_PACKAGE_FILE
 
 # create dmg installer
-INSTALLER_DMG_FILE=${BUILD_DIR}/Habit2-${VERSION_FULL}-mac-x64.dmg
-hdiutil create -volname "Habit2 Installer" -fs HFSX -srcfolder $DMG_DIR -ov $INSTALLER_DMG_FILE
+#INSTALLER_DMG_FILE=${BUILD_DIR}/Habit2-${VERSION_FULL}-mac-x64.dmg
+#hdiutil create -volname "Habit2 Installer" -fs HFSX -srcfolder $DMG_DIR -ov $INSTALLER_DMG_FILE
 
 
 

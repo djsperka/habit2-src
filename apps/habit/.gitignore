@@ -1,0 +1,6 @@
+/.build_release_pkg
+/.clean_pkgroot
+/.copy_app
+/.copy_gstreamer
+/.copy_plugin
+/.relocate_app
