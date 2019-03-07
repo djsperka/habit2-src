@@ -264,15 +264,15 @@ void HExperimentMain::generalListViewItemClicked(const QModelIndex& index)
 //	qDebug() << "generalItemClicked row " << index.row() << " switch to " << m_vecStackPages.at(index.row());
 	// check stimulus display info page. We do this every time page changes, though it might be smarter to only do this when
 	// leaving sdi page.
-	qDebug() << "Current index " << m_pPagesWidget->currentIndex() << " new index " << index.row() << " sdi page index " << m_sdiPageIndex;
+	//qDebug() << "Current index " << m_pPagesWidget->currentIndex() << " new index " << index.row() << " sdi page index " << m_sdiPageIndex;
 	checkStimulusDisplayInfo();
 	m_pPhaseListWidget->clearSelection();
 	m_pPagesWidget->setCurrentIndex(m_vecStackPages.at(index.row()));
 }
 
-void HExperimentMain::phaseListViewItemClicked(const QModelIndex& index)
+void HExperimentMain::phaseListViewItemClicked(const QModelIndex&)
 {
-	qDebug() << "Current index " << m_pPagesWidget->currentIndex() << " new index " << index.row() << " sdi page index " << m_sdiPageIndex;
+	//qDebug() << "Current index " << m_pPagesWidget->currentIndex() << " new index " << index.row() << " sdi page index " << m_sdiPageIndex;
 	checkStimulusDisplayInfo();
 
 	m_pGeneralListView->selectionModel()->select(m_pGeneralListView->selectionModel()->selection(), QItemSelectionModel::Deselect);

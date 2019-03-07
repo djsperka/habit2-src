@@ -12,8 +12,6 @@
 #include <QVBoxLayout>
 #include <QStyle>
 
-const int f_previewContext = 0;
-
 GUILib::HStimulusPreviewWidget::HStimulusPreviewWidget(const Habit::StimulusDisplayInfo& info, QWidget *parent)
 : QWidget(parent)
 , m_pCurrentStimulusWidget(NULL)
@@ -341,9 +339,9 @@ void GUILib::HStimulusPreviewWidget::clear()
 	m_currentStimKey = HGMM::instance().getBackgroundKey();
 }
 
-void GUILib::HStimulusPreviewWidget::hideEvent(QHideEvent *event)
+void GUILib::HStimulusPreviewWidget::hideEvent(QHideEvent *)
 {
-	qDebug() << "hide event";
+	//qDebug() << "hide event";
 	// current state of the widget is held in the vars
 	// m_bSingleStimulus, m_currentStimKey - when a single stim is playing
 	// m_bListStimulus, m_idList, m_idListCurrent - when an order is playing
@@ -351,9 +349,9 @@ void GUILib::HStimulusPreviewWidget::hideEvent(QHideEvent *event)
 	HGMM::instance().setWidgets(NULL, NULL, NULL);
 }
 
-void GUILib::HStimulusPreviewWidget::showEvent(QShowEvent *event)
+void GUILib::HStimulusPreviewWidget::showEvent(QShowEvent *)
 {
-	qDebug() << "show event";
+	//qDebug() << "show event";
 	HGMM::instance().setWidgets(m_w0, m_w1, m_w2);
 	if (m_bSingleStimulus)
 	{
@@ -382,9 +380,9 @@ void GUILib::HStimulusPreviewWidget::showEvent(QShowEvent *event)
 	updateNavigation();
 }
 
-void GUILib::HStimulusPreviewWidget::setStimulusLayoutType(const HStimulusLayoutType& type)
+void GUILib::HStimulusPreviewWidget::setStimulusLayoutType(const HStimulusLayoutType&)
 {
-	qDebug() << "HStimulusPreviewWidget::setStimulusLayoutType(" << type.name() << ")";
+	//qDebug() << "HStimulusPreviewWidget::setStimulusLayoutType(" << type.name() << ")";
 //	m_pmm->setLayoutType(type);
 //	if (type == HStimulusLayoutType::HStimulusLayoutSingle)
 //		m_pmm->stack()->setCurrentIndex(0);

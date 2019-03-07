@@ -385,7 +385,7 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 
 void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 {
-	GstElement *audioMixer=NULL, *audioSink=NULL;
+	GstElement *audioMixer=NULL;
 	HStimPipelineSource *pSource = (HStimPipelineSource *)p;
 	QString factory, prefix;
 	const HPlayerPositionType *pppt=&HPlayerPositionType::UnknownPlayerPositionType;
@@ -773,7 +773,7 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 	if (event)
 	{
 		//GstElement* parent = GST_PAD_PARENT(pad);
-		qDebug() << sDebugPrefix << "Event type " << GST_EVENT_TYPE_NAME(event) << " from " << GST_ELEMENT_NAME(GST_PAD_PARENT(pad));
+		//qDebug() << sDebugPrefix << "Event type " << GST_EVENT_TYPE_NAME(event) << " from " << GST_ELEMENT_NAME(GST_PAD_PARENT(pad));
 
 		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
 		{
@@ -872,7 +872,7 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 		}
 		else if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
 		{
-			GstElement* parent = GST_PAD_PARENT(pad);
+			//GstElement* parent = GST_PAD_PARENT(pad);
 			qDebug() << sDebugPrefix << "got SEGMENT event";
 			// << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
 			QMutexLocker locker(pSource->stimPipeline()->mutex());
