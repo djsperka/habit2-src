@@ -1,0 +1,15 @@
+﻿stim,t1,center,examples/images/fish/carp.jpg,,
+stim,t2,center,examples/images/fish/pike.jpg,,
+stim,t3,center,examples/images/fish/scad.jpg,,
+stim,t4,center,examples/images/fish/mackarel.jpg,,
+stim,t5,center,examples/images/fish/anchovy.jpg,,
+stim,t6,center,examples/images/fish/cod.jpg,,
+stim,t7,center,examples/images/fish/redeye.jpg,,
+stim,t8,center,examples/images/fish/blenny.jpg,,
+stim,t9,center,examples/images/fish/gurnard.jpg,,
+stim,t10,center,examples/images/fish/angelshark.jpg,,
+stim,t11,center,examples/images/fish/chub.jpg,,
+stim,t12,center,examples/images/fish/dab.jpg,,
+order,testA,t1,t2,t3,t4
+order,testB,t5,t6,t7,t8
+order,testC,t9,t10,t11,t12
