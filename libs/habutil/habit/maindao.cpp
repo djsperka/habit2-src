@@ -10,7 +10,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QString>
 #include <QtGui/QColor>
-#include <QtCore/QTDebug>
+#include <QtCore/QtDebug>
 #include <QSet>
 #include <QList>
 

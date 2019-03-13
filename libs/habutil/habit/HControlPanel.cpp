@@ -16,7 +16,7 @@
 #include "HTrialGenerator.h"
 #include "HElapsedTimer.h"
 #include "maindao.h"
-#include <QtCore/QTDebug>
+#include <QtCore/QtDebug>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
