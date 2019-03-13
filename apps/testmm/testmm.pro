@@ -2,7 +2,7 @@ TARGET = testmm
 TEMPLATE = app
 QMAKE_CXXFLAGS += -fvisibility=hidden
 
-QT += sql widgets multimedia printsupport
+QT += sql widgets printsupport
 CONFIG += qt debug_and_release c++11
 
 #PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
