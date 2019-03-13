@@ -687,6 +687,10 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), &HGMM::instance(), this);
 
+#elif defined(Q_OS_LINUX)
+
+			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), &HGMM::instance(), this);
+
 #elif defined(Q_OS_WIN)
 
 			// this is deleted down below. Not in the delete list, mind you. Note order dependence with look detector.

@@ -594,6 +594,9 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 #if defined(Q_OS_MAC)
 					qDebug() << "make osxaudiosink for mac";
 					audioSink = makeElement("osxaudiosink", HPlayerPositionType::Control, id);
+#elif defined(Q_OS_LINUX)
+					qDebug() << "make alsasink for linux";
+					audioSink = makeElement("alsaudiosink", HPlayerPositionType::Control, id);
 #elif defined(Q_OS_WIN)
 					qDebug() << "make directsoundsink for win";
 					audioSink = makeElement("directsoundsink", HPlayerPositionType::Control, id);
@@ -632,6 +635,9 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 #if defined(Q_OS_MAC)
 				qDebug() << "make osxaudiosink for mac";
 				audioSink = makeElement("osxaudiosink", HPlayerPositionType::Control, id);
+#elif defined(Q_OS_LINUX)
+				qDebug() << "make alsasink for linux";
+				audioSink = makeElement("alsasink", HPlayerPositionType::Control, id);
 #elif defined(Q_OS_WIN)
 				qDebug() << "make directsoundsink for win";
 				audioSink = makeElement("directsoundsink", HPlayerPositionType::Control, id);

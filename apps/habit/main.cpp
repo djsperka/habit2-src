@@ -233,6 +233,8 @@ int main(int argc, char *argv[])
 		QString file_name = habutilGetLogDir().absolutePath();
 #if defined(Q_OS_MAC)
 		file_name += QString("/habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));
+#elif defined(Q_OS_LINUX)
+		file_name += QString("/habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));
 #else
 		file_name += QString("\\habit-%1.log").arg(QDateTime::currentDateTime().toString("yyyy.MM.dd.hh.mm"));
 #endif
