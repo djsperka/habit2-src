@@ -621,6 +621,7 @@ void HGMM::playStim(unsigned int key)
 		{
 			qDebug() << "HGMM::playstim: pause current stim";
 			disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
+			disconnect(m_pipelineCurrent, SIGNAL(screen(const QString&, int)), this, SIGNAL(screenStarted(const QString&, int)));
 			m_pipelineCurrent->pause();
 			m_pipelineCurrent->detachWidgetsFromSinks();
 
@@ -639,8 +640,10 @@ void HGMM::playStim(unsigned int key)
 				m_pipelineCurrent->cleanup();	// might not cleanup
 		}
 
-		// Attach new pipeline sinks to the widgets.
 		connect(pipeline, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
+		connect(pipeline, SIGNAL(screen(const QString&, int)), this, SIGNAL(screenStarted(const QString&, int)));
+
+		// Attach new pipeline sinks to the widgets.
 		if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutSingle)
 		{
 			pipeline->attachWidgetsToSinks(m_pCenter->getHVideoWidget());
@@ -678,6 +681,7 @@ void HGMM::stop()
 	if (m_pipelineCurrent)
 	{
 		disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
+		disconnect(m_pipelineCurrent, SIGNAL(screen(const QString&, int)), this, SIGNAL(screenStarted(const QString&, int)));
 		m_pipelineCurrent->pause();
 		m_pipelineCurrent->detachWidgetsFromSinks();
 	}

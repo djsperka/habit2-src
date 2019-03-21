@@ -540,7 +540,7 @@ private:
 class HStimulusSettingsEvent: public HEvent
 {
 public:
-	HStimulusSettingsEvent(Habit::StimulusSettings settings = Habit::StimulusSettings(), int stimindex=-2, int timestamp=0)
+	HStimulusSettingsEvent(const Habit::StimulusSettings& settings, int stimindex=-2, int timestamp=0)
 	: HEvent(HEventType::HEventStimulusSettings, timestamp)
 	, m_settings(settings)
 	, m_stimindex(stimindex)

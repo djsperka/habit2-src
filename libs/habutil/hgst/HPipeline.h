@@ -75,6 +75,10 @@ public:
 		// called from preroll()
 		void prerolling(int);
 
+		// this really means "this stim has started. the int arg is an HPlayerPositionType -
+		// call getPlayerPositionType()
+		void screen(const QString&, int);
+
 };
 
 std::ostream& operator<<(std::ostream& os, const HPipeline& p);

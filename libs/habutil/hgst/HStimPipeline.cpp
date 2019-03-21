@@ -76,6 +76,28 @@ void HStimPipeline::emitPrerolled()
 	Q_EMIT prerolled(this->id());
 }
 
+void HStimPipeline::emitScreen(int ppid)
+{
+	const HPlayerPositionType& ppt = getPlayerPositionType(ppid);
+	QString filename;
+
+	if (ppt == HPlayerPositionType::Left)
+	{
+		emit screen(stimulusSettings().getLeftStimulusInfo().getAbsoluteFilenameOrColor(m_dirStimRoot), ppid);
+	}
+	else if (ppt == HPlayerPositionType::Center)
+	{
+		emit screen(stimulusSettings().getCenterStimulusInfo().getAbsoluteFilenameOrColor(m_dirStimRoot), ppid);
+	}
+	else if (ppt == HPlayerPositionType::Right)
+	{
+		emit screen(stimulusSettings().getRightStimulusInfo().getAbsoluteFilenameOrColor(m_dirStimRoot), ppid);
+	}
+	else if (ppt == HPlayerPositionType::Sound)
+	{
+		emit screen(stimulusSettings().getIndependentSoundInfo().getAbsoluteFilenameOrColor(m_dirStimRoot), ppid);
+	}
+}
 void HStimPipeline::rewind()
 {
 	// flushing seek. gsgtreamer will handle state, as long as we're paused or playing, which
@@ -286,13 +308,6 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 			GstElement *src, *sink, *convert;
 
 			/* Create the elements */
-
-#if 0
-			src = makeElement("videotestsrc", ppt, id());
-			Q_ASSERT(src);
-
-			g_object_set(G_OBJECT(src), "pattern", GST_VIDEO_TEST_SRC_SOLID, "foreground-color", info.getColor().rgba(), NULL);
-#else
 			GError *gerror = NULL;
 			QString s = QString("videotestsrc pattern=solid-color foreground-color=%1").arg(info.getColor().rgba());
 			src = gst_parse_bin_from_description(s.toStdString().c_str(), true, &gerror);
@@ -302,7 +317,7 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 				return NULL;
 			}
 			Q_ASSERT(src);
-#endif
+
 			sink = makeElement("qwidget5videosink", ppt, id());
 			Q_ASSERT(sink);
 			convert = makeElement("videoconvert", ppt, id());
@@ -726,6 +741,48 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			{
 				pStimPipeline->emitNowPlaying();
 			}
+		}
+		else
+		{
+			QString sElementName(GST_ELEMENT_NAME(msg->src));
+			GstState old_state, new_state;
+			QString sFactoryName, sPrefixUnused;
+			int stimid;
+			// pointer to a (const HPlayerPositionType)
+			const HPlayerPositionType *pppt=&HPlayerPositionType::UnknownPlayerPositionType;
+			gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
+			if (parseElementName(sElementName, sFactoryName, pppt, stimid, sPrefixUnused))
+			{
+				if (sFactoryName == "qwidget5videosink")
+				{
+					if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
+					{
+						pStimPipeline->emitScreen(pppt->number());
+					}
+				}
+				else
+				{
+#if defined(Q_OS_MAC)
+					QString sSoundSinkName("osxaudiosink");
+#elif defined(Q_OS_LINUX)
+					QString sSoundSinkName("alsasink");
+#elif defined(Q_OS_WIN)
+					QString sSoundSinkName("directsoundsink");
+#else
+					qCritical() << "Unsupported OS. Don't know name of audio sink element.";
+					QString sSoundSinkName("UNKNOWN");
+#endif
+					if (sFactoryName == sSoundSinkName)
+					{
+						if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
+						{
+							pStimPipeline->emitScreen(pppt->number());
+						}
+					}
+				}
+
+			}
+
 		}
 	}
 //	else if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_SEGMENT_DONE)

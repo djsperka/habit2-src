@@ -44,9 +44,9 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 };
 
 
-void HPhase::screenStarted(int playerid, const QString& filename)
+void HPhase::screenStarted(const QString& filenameOrColor, int playerid)
 {
-	eventLog().append(new HScreenStartEvent(filename, playerid, HElapsedTimer::elapsed()));
+	eventLog().append(new HScreenStartEvent(filenameOrColor, playerid, HElapsedTimer::elapsed()));
 }
 
 void HPhase::agStarted(int id)
@@ -59,46 +59,6 @@ void HPhase::stimStarted(int stimid)
 	eventLog().append(new HStimStartEvent(stimid, HElapsedTimer::elapsed()));
 	qDebug() << "stimStarted( " << stimid << " )";
 }
-
-//void HPhase::checkPrerollStatus(int trialnumber, int repeat)
-//{
-//
-//	// I think this can be done later, after playStim().
-//	// This is called from
-//	// If trialnumber is negative, then preroll the first stim
-//	if (trialnumber < 0)
-//	{
-//		if (m_stimuli.size() > 0)
-//		{
-//			qDebug() << "HPhase::checkPrerollStatus() - preroll first stimulus";
-//			HGMM::instance().preroll(m_stimuli[0].first);
-//		}
-//	}
-//	else
-//	{
-//		int prerollID = m_itrial+1;
-//		if (prerollID < m_stimuli.size())
-//		{
-//			qDebug() << "HPhase::checkPrerollStatus() - trial/repeat " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial].first << " will preroll(" << m_stimuli[prerollID].first << ")";
-//			HGMM::instance().preroll(m_stimuli[prerollID].first);
-//		}
-//		else
-//		{
-//			qDebug() << "HPhase::checkPrerollStatus() - trial/repeat " << trialnumber << "/" << repeat << " : m_itrial " << m_itrial << " current stim " << m_stimuli[m_itrial].first << "At last stim in phase; nothing to preroll.";
-//		}
-//	}
-//
-//	// This should be done here, before looking is started (i.e. in StimRunning)
-//
-//	// set phase accumulated look time if needed
-//	if (m_pcriteria->habituationType() == HHabituationType::HHabituationTypeTotalLookingTime)
-//	{
-//		int t = m_phaseSettings.habituationSettings().getTotalLookLengthToEnd() - eventLog().getPhaseLog().totalLookingTime();
-//		experiment().getLookDetector().setPhaseAccumulatedLookTime(t);
-//		qDebug() << "HPhase::checkPrerollStatus - set phaseAccumulatedLookTime " << t;
-//	}
-//
-//}
 
 void HPhase::onEntry(QEvent* e)
 {
@@ -119,7 +79,7 @@ void HPhase::onEntry(QEvent* e)
 	// connect media manager signal agStarted(int) to slot agStarted(int)
 	// connect media manager signal stimStarted(int) to slot stimStarted(int)
 	// disconnect onExit() from this state.
-	QObject::connect(&HGMM::instance(), SIGNAL(screen(int, const QString&)), this, SLOT(screenStarted(int, const QString&)));
+	QObject::connect(&HGMM::instance(), SIGNAL(screenStarted(const QString&, int)), this, SLOT(screenStarted(const QString&, int)));
 	QObject::connect(&HGMM::instance(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
 	QObject::connect(&HGMM::instance(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 
@@ -150,7 +110,7 @@ void HPhase::onExit(QEvent* e)
 
 	// connect media manager signal screen(int) to slot screenStarted(int)
 	// disconnect onExit() from this state.
-	QObject::disconnect(&HGMM::instance(), SIGNAL(screen(int, const QString&)), this, SLOT(screenStarted(int, const QString&)));
+	QObject::disconnect(&HGMM::instance(), SIGNAL(screenStarted(const QString&, int)), this, SLOT(screenStarted(const QString&, int)));
 	QObject::disconnect(&HGMM::instance(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
 	QObject::disconnect(&HGMM::instance(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	QObject::disconnect(this, SIGNAL(phaseStarted(QString, int)), &experiment(), SLOT(onPhaseStarted(QString, int)));
@@ -159,24 +119,6 @@ void HPhase::onExit(QEvent* e)
 	// cleanup any remaining stim
 	experiment().requestCleanup(context());
 };
-
-
-//void HPhase::requestCurrentStim()
-//{
-//	if (m_itrial < m_stimuli.size())
-//	{
-//		qDebug() << "HPhase::requestCurrentStim(): stim " << m_stimuli.at(m_itrial).first << " label " << m_stimuli.at(m_itrial).second;
-//		eventLog().append(new HStimLabelRequestEvent(m_stimuli.at(m_itrial).first, m_stimuli.at(m_itrial).second, HElapsedTimer::elapsed()));
-//		HGMM::instance().stim(m_stimuli.at(m_itrial).first);
-//	}
-//	else
-//	{
-//		eventLog().append(new HStimLabelRequestEvent(-1, QString("ERROR"), HElapsedTimer::elapsed()));
-//		HGMM::instance().defaultStim();
-//		qDebug() << "Bad trial index (" << m_itrial << ")for phase " << m_name << " max " << m_stimuli.size();
-//	}
-//
-//}
 
 void HPhase::requestAG()
 {

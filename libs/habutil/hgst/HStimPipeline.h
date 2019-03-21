@@ -71,6 +71,7 @@ class HStimPipeline: public HPipeline
 	void emitNowPlaying();
 	void emitPrerolling();
 	void emitPrerolled();
+	void emitScreen(int ppid);
 	void dumpGstStateChangeReturn(const QString& s, GstStateChangeReturn r);
 
 public:

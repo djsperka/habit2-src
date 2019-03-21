@@ -70,7 +70,7 @@ signals:
 	
 public slots:
 	void onTrialCompleteEntered();
-	void screenStarted(int, const QString&);
+	void screenStarted(const QString&, int);
 	void agStarted(int);
 	void stimStarted(int);
 	//void checkPrerollStatus(int trialnumber=-1, int repeat=0);

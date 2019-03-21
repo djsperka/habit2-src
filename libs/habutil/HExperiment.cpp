@@ -78,11 +78,12 @@ QDebug operator<<(QDebug dbg, const PhT& pht)
 
 void HExperiment::requestStim(int context, unsigned int trial)
 {
-	qDebug() << "REQUEST STIM (" << context << "," << trial << ")";
 	PhT key(context, trial);
 	PhTStimidMap::iterator it = m_prerolled.find(key);
 	if (it != m_prerolled.end())
 	{
+		eventLog().append(new HStimulusSettingsEvent(getStimulusSettings(key), it.value(), HElapsedTimer::elapsed()));
+		eventLog().append(new HStimRequestEvent(it.value(), HElapsedTimer::elapsed()));
 		HGMM::instance().stim(it.value());
 	}
 	else
@@ -91,7 +92,6 @@ void HExperiment::requestStim(int context, unsigned int trial)
 
 void HExperiment::requestCleanup(int context, unsigned int trial)
 {
-	qDebug() << "REQUEST CLEANUP (" << context << "," << trial << ")";
 	// find in preroll list
 	PhT key(context, trial);
 	PhTStimidMap::iterator it = m_prerolled.find(key);
@@ -104,8 +104,6 @@ void HExperiment::requestCleanup(int context, unsigned int trial)
 
 void HExperiment::requestCleanup(int context)
 {
-	qDebug() << "REQUEST CLEANUP (" << context << ")";
-
 	// must iterate through all and find those in this context.
 
 	for(PhTStimidMap::iterator it = m_prerolled.begin(); it != m_prerolled.end(); )
@@ -124,13 +122,11 @@ void HExperiment::requestCleanup(int context)
 
 void HExperiment::prerollAsNeeded(int context, unsigned int trial)
 {
-	qDebug() << "PREROLL AS NEEDED (" << context << "," << trial << ")";
 	prerollList(nextTrials(context, trial));
 }
 
 void HExperiment::prerollAsNeeded(int context)
 {
-	qDebug() << "PREROLL AS NEEDED (" << context << ")";
 	prerollList(nextTrials(context, 0));
 }
 
@@ -160,11 +156,11 @@ void HExperiment::prerollList(const PhTList& l)
 			unsigned int i = HGMM::instance().addStimulus(getStimulusSettings(pht), pht.context);
 			HGMM::instance().preroll(i);
 			m_prerolled.insert(pht, i);
-			qDebug() << "HExperiment::prerollList: prerolling " << pht << " stimid " << i;
+			//qDebug() << "HExperiment::prerollList: prerolling " << pht << " stimid " << i;
 		}
 		else
 		{
-			qDebug() << "HExperiment::prerollList: " << pht << " already prerolled";
+			//qDebug() << "HExperiment::prerollList: " << pht << " already prerolled";
 		}
 	}
 }
@@ -214,8 +210,8 @@ PhTList HExperiment::nextTrials(int context, int trial, int n)
 		}
 	}
 
-	qDebug() << "nextTrials(" << context << ", " << trial << ", " << n;
-	qDebug() << l;
+//	qDebug() << "nextTrials(" << context << ", " << trial << ", " << n;
+//	qDebug() << l;
 	return l;
 }
 

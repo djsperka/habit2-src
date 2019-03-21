@@ -195,13 +195,16 @@ public Q_SLOTS:
 	// replace current stimulus with the one id'd by the current ag key
 	void ag();
 
-	//
+	// when stim is playing - as denoted by gstreamer's bus message
+	// indicating pipeline has changed state from GST_STATE_PAUSED to
+	// GST_STATE_PLAYING
 	void nowPlaying();
 
 Q_SIGNALS:
 	void agStarted(int);
 	void stimStarted(int);
-	void screen(int, const QString&);
+	void screenStarted(const QString&, int);
+	//void screen(int, const QString&);
 	void stimulusChanged();
 	void prerolling(int);
 	void prerolled(int);

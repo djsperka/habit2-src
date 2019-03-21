@@ -90,6 +90,7 @@ bool HPipeline::parseElementName(const QString& elementName, QString& factoryNam
 
 void HPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio)
 {
+	QString sDebugPrefix("HPipeline::parseCaps(): ");
 	GstStructure *new_pad_struct = NULL;
 	const gchar *new_pad_type = NULL;
 	gchar *s_new_pad_caps = NULL;
@@ -97,7 +98,7 @@ void HPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& widt
 	new_pad_struct = gst_caps_get_structure(caps, 0);
 	new_pad_type = gst_structure_get_name(new_pad_struct);
 	s_new_pad_caps = gst_caps_to_string(caps);
-	qDebug() << "HPipeline::parseCaps: " << s_new_pad_caps;
+	//qDebug() << "HPipeline::parseCaps: " << s_new_pad_caps;
 
 	isAudio = g_str_has_prefix(s_new_pad_caps, "audio/x-raw");
 	if (g_str_has_prefix(s_new_pad_caps, "video/x-raw"))
@@ -107,13 +108,18 @@ void HPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& widt
 		if (v && G_VALUE_HOLDS_INT(v))
 			width = g_value_get_int(v);
 		else
-			qCritical() << "Width is not an int!?!";
-
+		{
+			qCritical() << sDebugPrefix << "Width is not an int!?!";
+			qCritical() << sDebugPrefix << s_new_pad_caps;
+		}
 		v = gst_structure_get_value(new_pad_struct, "height");
 		if (v && G_VALUE_HOLDS_INT(v))
 			height = g_value_get_int(v);
 		else
-			qCritical() << "Height is not an int!?!";
+		{
+			qCritical() << sDebugPrefix << "Height is not an int!?!";
+			qCritical() << sDebugPrefix << s_new_pad_caps;
+		}
 
 		// check framerate
 		v = gst_structure_get_value(new_pad_struct, "framerate");
@@ -130,11 +136,19 @@ void HPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& widt
 				isImage = false;
 				isVideo = true;
 			}
-			else qCritical() << "negative numerator?";
+			else
+			{
+				qCritical() << sDebugPrefix << "negative numerator?";
+				qCritical() << sDebugPrefix << s_new_pad_caps;
+			}
 		}
-		else qCritical() << "framerate not in caps or unexpected value type";
+		else
+		{
+			qCritical() << sDebugPrefix << "framerate not in caps or unexpected value type";
+			qCritical() << sDebugPrefix << s_new_pad_caps;
+		}
 	}
-	qDebug() << "HPipeline::parseCaps: Video? " << isVideo << " Image? " << isImage << " Audio? :" << isAudio << " Resolution: " << width << "x" << height;
+	//qDebug() << "HPipeline::parseCaps: Video? " << isVideo << " Image? " << isImage << " Audio? :" << isAudio << " Resolution: " << width << "x" << height;
 }
 
 

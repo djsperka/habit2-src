@@ -268,38 +268,30 @@ bool HResults::scanTrials(const HTrialScanner& scanner) const
 			else if (e->type() == HEventType::HEventScreenStart)
 			{
 				HScreenStartEvent* psse = static_cast<HScreenStartEvent*>(e);
-
+				const HPlayerPositionType& ppt = getPlayerPositionType(psse->playerid());
 				// Do not keep filename unless stim request has been seen. Otherwise we will
 				// record attention getter file(s).
 				if (bHaveStimRequest)
 				{
-					switch(psse->playerid())
-					{
-					case 0:
+					if (ppt == HPlayerPositionType::Sound)
 					{
 						trialResult.setStimISS(psse->filename());
-						break;
 					}
-					case 1:
+					else if (ppt == HPlayerPositionType::Left)
 					{
 						trialResult.setStimLeft(psse->filename());
-						break;
 					}
-					case 2:
+					else if (ppt == HPlayerPositionType::Right)
 					{
 						trialResult.setStimRight(psse->filename());
-						break;
 					}
-					case 3:
+					else if (ppt == HPlayerPositionType::Center)
 					{
 						trialResult.setStimCenter(psse->filename());
-						break;
 					}
-					default:
+					else
 					{
 						qWarning() << "Warning: cannot match player id to monitor.";
-						break;
-					}
 					}
 				}
 			}

@@ -107,6 +107,15 @@ QString StimulusInfo::getAbsoluteFileName(const QDir& stimBaseDir) const
     return fileName_;
 }
 
+QString StimulusInfo::getAbsoluteFilenameOrColor(const QDir& stimBaseDir) const
+{
+	if (isBackground() || isColor())
+	{
+		QString sColor("Color(rgb) %1");
+		return sColor.arg(color_.name());
+	}
+	return getAbsoluteFileName(stimBaseDir);
+}
 
 void StimulusInfo::setFileName(const QString& fileName)
 {
