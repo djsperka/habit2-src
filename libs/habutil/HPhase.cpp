@@ -40,7 +40,7 @@ HPhase::HPhase(HExperiment& exp, HPhaseCriteria* pcriteria, HEventLog& log, cons
 	connect(sTrialComplete, SIGNAL(entered()), this, SLOT(onTrialCompleteEntered()));
 
 	connect(this, SIGNAL(phaseStarted(QString, int)), &exp, SIGNAL(phaseStarted(QString, int)));
-	connect(this, SIGNAL(phaseEnded(QString, int)), &exp, SLOT(phaseEnded(QString, int)));
+	connect(this, SIGNAL(phaseEnded(QString, int)), &exp, SIGNAL(phaseEnded(QString, int)));
 };
 
 
@@ -113,8 +113,8 @@ void HPhase::onExit(QEvent* e)
 	QObject::disconnect(&HGMM::instance(), SIGNAL(screenStarted(const QString&, int)), this, SLOT(screenStarted(const QString&, int)));
 	QObject::disconnect(&HGMM::instance(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
 	QObject::disconnect(&HGMM::instance(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
-	QObject::disconnect(this, SIGNAL(phaseStarted(QString, int)), &experiment(), SLOT(onPhaseStarted(QString, int)));
-	QObject::disconnect(this, SIGNAL(phaseEnded(QString, int)), &experiment(), SLOT(onPhaseEnded(QString, int)));
+	QObject::disconnect(this, SIGNAL(phaseStarted(QString, int)), &experiment(), SIGNAL(phaseStarted(QString, int)));
+	QObject::disconnect(this, SIGNAL(phaseEnded(QString, int)), &experiment(), SIGNAL(phaseEnded(QString, int)));
 	
 	// cleanup any remaining stim
 	experiment().requestCleanup(context());

@@ -36,7 +36,6 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	HTrialInitialState* sInitial = new HTrialInitialState(*this, log);
 	setInitialState(sInitial);
 	QObject::connect(sInitial, SIGNAL(trialStarted(int, unsigned int, unsigned int)), &this->phase().experiment(), SIGNAL(trialStarted(int, unsigned int, unsigned int)));
-	QObject::connect(sInitial, SIGNAL(trialStarted(int, int)), &phase, SLOT(checkPrerollStatus(int, int)));
 
 	// AG states
 	HAGRequestState* sAGRequest = new HAGRequestState(*this, log);
