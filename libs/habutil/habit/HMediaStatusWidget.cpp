@@ -25,7 +25,6 @@ HMediaStatusWidget::HMediaStatusWidget(const HStimulusLayoutType& layout, bool b
 
 HMediaStatusWidget::~HMediaStatusWidget()
 {
-	qDebug() << "HMediaStatusWidget::~HMediaStatusWidget()";
 	delete ui;
 }
 

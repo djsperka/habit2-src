@@ -24,13 +24,11 @@ HExperimentStatusWidget::HExperimentStatusWidget(const QString& name, bool bDisp
 
 HExperimentStatusWidget::~HExperimentStatusWidget()
 {
-	qDebug() << "HExperimentStatusWidget::~HExperimentStatusWidget()";
 	delete ui;
 }
 
 void HExperimentStatusWidget::connections()
 {
-	qDebug() << "connections";
 }
 
 
@@ -52,7 +50,6 @@ void HExperimentStatusWidget::setStatus(QString status)
 
 void HExperimentStatusWidget::setPhase(QString phase)
 {
-	qDebug() << "setPhase " << m_bDisplayCurrentPhaseTrial;
 	if (m_bDisplayCurrentPhaseTrial)
 	{
 		ui->labelPhase->setText(phase);

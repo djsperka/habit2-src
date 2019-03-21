@@ -15,14 +15,10 @@ HSubjectSettingsWidget::HSubjectSettingsWidget(bool bTestRun, QWidget *parent)
 , ui(new Ui::HSubjectSettingsForm)
 {
 	ui->setupUi(this);
-	//connect(ui->cbxTestRun, SIGNAL(clicked(bool)), this, SLOT(testRunClicked(bool)));
-	//ui->cbxTestRun->setChecked(bTestRun);
-	//testRunClicked(bTestRun);
 }
 
 HSubjectSettingsWidget::~HSubjectSettingsWidget()
 {
-	qDebug() << "HSubjectSettingsWidget::~HSubjectSettingsWidget()";
 	delete ui;
 }
 

@@ -22,7 +22,6 @@ GUILib::HRunSettingsDialog::HRunSettingsDialog(const Habit::ExperimentSettings& 
 
 GUILib::HRunSettingsDialog::~HRunSettingsDialog()
 {
-	qDebug() << "GUILib::HRunSettingsDialog::~HRunSettingsDialog()";
 }
 
 QString GUILib::HRunSettingsDialog::getRunLabel() const

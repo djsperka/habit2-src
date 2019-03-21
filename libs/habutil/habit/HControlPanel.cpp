@@ -45,8 +45,6 @@ HControlPanel::HControlPanel(const Habit::ExperimentSettings& exptSettings, HEve
 
 HControlPanel::~HControlPanel()
 {
-	qDebug() << "HControlPanel::~HControlPanel()";
-	//delete m_pmm;
 }
 
 void HControlPanel::setStateMachine(HStateMachine *psm)

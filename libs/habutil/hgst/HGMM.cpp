@@ -50,8 +50,6 @@ void HGMM::reset()
 	qDeleteAll(m_mapPipelines);
 	m_mapPipelines.clear();
 	m_mapContext.clear();
-
-	qDebug() << "map has " << m_mapPipelines.count() << "keys";
 	m_pCenter = m_pLeft = m_pRight = NULL;
 	m_pipelineCurrent = NULL;
 	m_sdinfo = Habit::StimulusDisplayInfo();
@@ -195,16 +193,14 @@ gpointer HGMM::threadFunc(gpointer user_data)
 {
 	GMainLoop *pgml = (GMainLoop *)user_data;
 	// create and start main loop here
-	qDebug() << "starting main loop\n";
+	qDebug() << "HGMM::threadFunc: starting main loop\n";
 	g_main_loop_run(pgml);
-	qDebug() << "main loop ended\n";
+	qDebug() << "HGMM::threadFunc: main loop ended\n";
 	return NULL;
 }
 
 HGMM::~HGMM()
 {
-	qDebug() << "~HGMM()";
-
 	// just call cleanup on all pipelines
 	QMapIterator<unsigned int, HPipeline *> it(m_mapPipelines);
 	while (it.hasNext())
@@ -218,7 +214,7 @@ HGMM::~HGMM()
 	p = dynamic_cast<HStaticStimPipeline *>(m_mapPipelines[m_backgroundKey]);
 	if (!p)
 	{
-		qCritical() << "~HGMM - cannot cast background stim to static.";
+		qCritical() << "~HGMM: cannot cast background stim to static.";
 	}
 	else
 	{
@@ -244,11 +240,11 @@ HGMM::~HGMM()
 	}
 
 	// exit main loop
-	qDebug() << "quit main loop";
+	qDebug() << "HGMM::~HGMM: quit main loop";
 	g_main_loop_quit(m_pgml);
-	qDebug() << "g_thread_join...";
+	qDebug() << "HGMM::~HGMM: g_thread_join...";
 	g_thread_join(m_gthread);
-	qDebug() << "g_thread_join done\n";
+	qDebug() << "HGMM::~HGMM: g_thread_join done\n";
 
 	g_main_loop_unref(m_pgml);
 	g_thread_unref(m_gthread);
