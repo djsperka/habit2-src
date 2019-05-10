@@ -2,3 +2,5 @@
 root
 dist
 build
+/*.pkg
+/*.pkg
