@@ -43,7 +43,7 @@ qt_bin=''
 if args.qt == '5.9.1':
     env['QT_BIN'] = '/Users/dan/Qt/5.9.1/clang_64/bin'
     env['OSMIN'] = '101100'
-    env['OSMAX'] = '101200'
+    env['OSMAX'] = '101299'
 elif args.qt == '5.12.1':
     env['QT_BIN'] = '/Users/dan/Qt/5.12.1/5.12.1/clang_64/bin'
     env['OSMIN'] = '101300'

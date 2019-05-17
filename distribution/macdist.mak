@@ -88,10 +88,20 @@ $(BUILDDIR)/stamp-qmake: $(BUILDDIR)/stamp-getsrc
 
 qmake: $(BUILDDIR)/stamp-qmake
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# modify version number in main habit dialog
+
+$(BUILDDIR)/stamp-patch-src: $(BUILDDIR)/stamp-qmake
+	sed -i -e '/HABIT_VERSION/s/\".*\"/\"$(DIST_VERSION)\"/' $(SRCDIR)/apps/habit/version.h
+	touch $@
+
+patch-src: $(BUILDDIR)/stamp-patch-src
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # compile in release mode
 
-$(BUILDDIR)/stamp-build: $(BUILDDIR)/stamp-qmake
+$(BUILDDIR)/stamp-build: $(BUILDDIR)/stamp-patch-src
 	cd $(SRCDIR) && make release
 	touch $@
 
