@@ -130,6 +130,15 @@ void HExperiment::prerollAsNeeded(int context)
 	prerollList(nextTrials(context, 0));
 }
 
+void HExperiment::prerollNextPhase(int context_current)
+{
+	// get context of next phase, if any
+	PhaseStimulusLists::iterator it;
+	it = std::find_if(m_phaseStimulusLists.begin(), m_phaseStimulusLists.end(), [context_current](const PhaseStimStuff& psstuff) { return psstuff.context == context_current; });
+	if (it != m_phaseStimulusLists.end())
+		prerollAsNeeded(it->context);
+}
+
 void HExperiment::addPhaseStimulusList(int context, const Habit::HStimulusSettingsList& sslist, bool isHab)
 {
 	m_phaseStimulusLists.append(PhaseStimStuff(sslist, context, isHab));

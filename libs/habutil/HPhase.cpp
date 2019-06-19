@@ -130,6 +130,10 @@ void HPhase::onTrialCompleteEntered()
 {
 	bool isHabituated = false;
 	int eventNumber = HEventType::HEventUndefined.number();
+
+	// request cleanup of stimulus
+	experiment().requestCleanup(context(), m_itrial);
+
 	if (m_pcriteria->isPhaseComplete(eventLog().getPhaseLog(), isHabituated, eventNumber))
 	{
 		machine()->postEvent(new HAllTrialsDoneEvent());
@@ -147,12 +151,14 @@ void HPhase::onTrialCompleteEntered()
 		{
 			qWarning() << "Unhandled event type from HPhaseCriteria::isPhaseComplete";
 		}
+
+		// Even when the phase is complete, make sure to preroll as needed.
+		// This should start with the next phase/context.
+		experiment().prerollNextPhase(context());
+
 	}
 	else 
 	{
-		// request cleanup of stimulus
-		experiment().requestCleanup(context(), m_itrial);
-
 		// update trial number and post "new trial" event
 		m_sTrial->setTrialNumber(++m_itrial);
 		machine()->postEvent(new HNewTrialEvent());

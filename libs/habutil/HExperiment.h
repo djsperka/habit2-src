@@ -86,6 +86,7 @@ public:
 	// preroll calls
 	void prerollAsNeeded(int context);
 	void prerollAsNeeded(int context, unsigned int trial);
+	void prerollNextPhase(int context_current);
 
 	// stim request and cleanup
 	void requestStim(int context, unsigned int trial);
