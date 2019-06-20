@@ -158,7 +158,7 @@ SOURCES += \
  	habit/HStimulusInfoForm2.ui \
  	habit/HStimulusOrderSelectionForm.ui \
  	habit/HSubjectSettingsForm.ui \
- 	habit/HStimulusOrderEditorform.ui \
+ 	habit/HStimulusOrderEditorForm.ui \
  	habit/HResultsExplorerForm.ui \
  	habit/HMediaStatusForm.ui \
  	habit/HExperimentStatusForm.ui \
