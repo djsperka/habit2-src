@@ -15,6 +15,6 @@ testmm.subdir = apps/testmm
 testmm.depends = habutil
 testmisc.subdir = apps/testmisc
 testmisc.depends = habutil
-gst1.subdir = apps/gst1
-gst1.depends = habutil
+gstsp.subdir = apps/gst1
+gstsp.depends = habutil
 
