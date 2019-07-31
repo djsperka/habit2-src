@@ -1,4 +1,4 @@
-TARGET = gst1
+TARGET = gstsp
 TEMPLATE = app
 QMAKE_CXXFLAGS += -fvisibility=hidden
 
