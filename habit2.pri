@@ -9,10 +9,10 @@
 !win32 {
     CONFIG += link_pkgconfig c++11
     PKGCONFIG += gstreamer-1.0
-    INCLUDEPATH += \
-                    /usr/local/include \
-                    /Users/dan/git/gst-plugins-base \
-                    /Users/dan/git/gst-plugins-good
+ #   INCLUDEPATH += \
+ #                   /usr/local/include \
+ #                   /Users/dan/git/gst-plugins-base \
+ #                   /Users/dan/git/gst-plugins-good
 } else {
 	# MIN DEPLOYMENT TARGET is 10.9 - Mavericks
 	QMAKE_MACOSX_DEPLOYMENT_TARGET=10.9
