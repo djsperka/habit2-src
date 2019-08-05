@@ -23,12 +23,19 @@ static GstPadProbeReturn pad_probe_block_cb (GstPad * pad, GstPadProbeInfo * inf
 static GstPadProbeReturn pad_probe_idle_cb (GstPad * pad, GstPadProbeInfo * info, gpointer user_data);
 static void pad_added_cb (GstElement * element, GstPad * pad, gpointer user_data);
 static void pad_added_preroll_cb (GstElement * element, GstPad * pad, gpointer user_data);
+static void no_more_pads_preroll_cb (GstElement * element, gpointer user_data);
 
 static gboolean tick_cb (gpointer data)
 {
 	SourceElements *se;
 	GstPad *sinkpad;
-	g_print("tick_cb state is %d\n", state);
+
+
+	// get running time
+	GstClockTime abs = gst_clock_get_time(gst_element_get_clock(pipeline));
+	GstClockTime base = gst_element_get_base_time(pipeline);
+
+	g_print("tick_cb state is %d, abs %u base %u run time %u\n", state, abs, base, GST_TIME_AS_SECONDS(abs-base));
 
 	// check state
 	// 0 - initial
@@ -58,9 +65,9 @@ static gboolean tick_cb (gpointer data)
 			gst_bin_add_many (GST_BIN (pipeline), sele1->filesrc, sele1->dbin, NULL);
 			gst_element_link_many (sele1->filesrc, sele1->dbin, NULL);
 
-			// set pad-added listener
+			// set pad-added listener1
 			g_signal_connect (sele1->dbin, "pad-added", G_CALLBACK (pad_added_preroll_cb), sele1);
-
+			g_signal_connect(sele1->dbin, "no-more-pads", G_CALLBACK(no_more_pads_preroll_cb), sele1);
 			gst_element_sync_state_with_parent (sele1->dbin);
 			gst_element_sync_state_with_parent (sele1->filesrc);
 
@@ -152,7 +159,13 @@ static GstPadProbeReturn pad_probe_idle_cb (GstPad * pad, GstPadProbeInfo * info
 	GstPad *sinkpad, *srcpad;
 	SourceElements *sele = (SourceElements *)user_data;
 
+	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline));
+
 	g_print("pad_probe_idle_cb unlink dbin srcpad from tail\n");
+
+	// get running time
+	GstClockTime abs = gst_clock_get_time(gst_element_get_clock(sele->dbin));
+	GstClockTime base = gst_element_get_base_time(sele->dbin);
 
 	// unlink decodebin from tail
 	sinkpad = gst_element_get_static_pad (conv, "sink");
@@ -172,21 +185,26 @@ static GstPadProbeReturn pad_probe_idle_cb (GstPad * pad, GstPadProbeInfo * info
 	gst_bin_remove(GST_BIN(pipeline), sele->dbin);
 
 	g_print("pad_probe_idle_cb set filesrc, dbin NULL\n");
-	gst_element_set_state(sele->filesrc, GST_STATE_NULL);
 	gst_element_set_state(sele->dbin, GST_STATE_NULL);
+	gst_element_set_state(sele->filesrc, GST_STATE_NULL);
 
 	gst_object_unref(sele->filesrc);
 	gst_object_unref(sele->dbin);
+
 
 	// hack - must get src pad from next element
 	g_print("pad_probe_idle_cb link new src NULL\n");
 	sinkpad = gst_element_get_static_pad (conv, "sink");
 	SourceElements *sele1 = (SourceElements *)srcs->next->data;
 	gst_pad_link(sele1->srcpad, sinkpad);
-	get_pad_set_offset(sele1->srcpad, )
-	gst_clock_get_time(gst_element_get_clock(...)) - gst_element_get_base_time (...)
+	// absolute time gst_clock_get_time ()
+	// running-time = absolute-time - base-time
+	gst_pad_set_offset(sele1->srcpad, abs-base);
 	gst_object_unref(sinkpad);
 
+	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "after");
+
+	g_print("set to 7\n");
 	g_atomic_int_set(&state, 7);
 
 	g_print("pad_probe_idle_cb return\n");
@@ -199,6 +217,13 @@ static GstPadProbeReturn pad_probe_block_cb (GstPad * pad, GstPadProbeInfo * inf
   g_print("pad_probe_block_cb\n");
   g_atomic_int_set(&state, 4);
   return GST_PAD_PROBE_OK;
+}
+
+static void no_more_pads_preroll_cb (GstElement * element, gpointer user_data)
+{
+	g_print("no more pads\n");
+	SourceElements *sele = (SourceElements *)user_data;
+    gst_pad_add_probe (sele->srcpad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, pad_probe_block_cb, user_data, NULL);
 }
 
 
@@ -220,9 +245,6 @@ static void pad_added_preroll_cb (GstElement * element, GstPad * pad, gpointer u
     g_print("pad_added_preroll_cb - video/x-raw\n");
     sele->srcpad = pad;
     g_object_ref(sele->srcpad);
-
-    gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, pad_probe_block_cb, user_data, NULL);
-
   }
 
   gst_caps_unref (caps);
