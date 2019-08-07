@@ -15,6 +15,7 @@ static GstElement *conv, *scale, *avsink;
 static gboolean linked = FALSE;
 static GList *srcs;
 static int state=0;
+static gint in_idle_probe = FALSE;
 
 static gboolean tick_cb (gpointer data);
 static gboolean message_cb (GstBus * bus, GstMessage * message, gpointer user_data);
@@ -81,18 +82,40 @@ static gboolean tick_cb (gpointer data)
 	case 5:
 		g_print("at state 5, set idle probe\n");
 		// set idle probe on converter sink pad, not on dbin src -- latter will cause crash in idle probe
-		// when dbin is removed/state changed.
+		// when dbin is removed/state changed. Note that userdata sent is the SourceElements obj for the
+		// piece that will be destroyed, thus the probe will have filesrc, dbin, and the dbin srcpad.
+		in_idle_probe = FALSE;
+		se = (SourceElements *)srcs->data;
 		sinkpad = gst_element_get_static_pad(conv, "sink");
-		gst_pad_add_probe (sinkpad, GST_PAD_PROBE_TYPE_IDLE, pad_probe_idle_cb, srcs->data, NULL);
+		gst_pad_add_probe (sinkpad, GST_PAD_PROBE_TYPE_IDLE, pad_probe_idle_cb, se, NULL);
 		gst_object_unref(sinkpad);
-
-		g_atomic_int_set(&state, 6);
+		break;
+	case 6:
+		g_print("set to 7 duh\n");
+		g_atomic_int_set(&state, 7);
+		break;
+	case 7:
+		GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "after");
+		g_atomic_int_set(&state, 8);
 		break;
 	default:
 		break;
 	}
 	return TRUE;
 }
+
+static GstPadProbeReturn
+cb_have_data (GstPad          *pad,
+              GstPadProbeInfo *info,
+              gpointer         user_data)
+{
+  GstBuffer *buffer;
+  buffer = GST_PAD_PROBE_INFO_BUFFER (info);
+  g_print("have data\n");
+
+  return GST_PAD_PROBE_OK;
+}
+
 
 static gboolean message_cb (GstBus * bus, GstMessage * message, gpointer user_data)
 {
@@ -154,23 +177,45 @@ static gboolean message_cb (GstBus * bus, GstMessage * message, gpointer user_da
 }
 
 
+// The first step in replacing the head of the pipeline is to set an idle probe at the point where
+// we want to break off the head. This probe is set on the pad that will be kept, on the videoconverter
+// element's sink pad, not the decodebin src pad on the head-side.
+// (This is because the probe has to remove and destroy elements, but this pad is part of one of those
+// elements, which leads to bad things and a crash).
+// Inside the probe,
+
 static GstPadProbeReturn pad_probe_idle_cb (GstPad * pad, GstPadProbeInfo * info, gpointer user_data)
 {
-	GstPad *sinkpad, *srcpad;
+	// check if we're in this func already
+	if (!g_atomic_int_compare_and_exchange (&in_idle_probe, FALSE, TRUE))
+		return GST_PAD_PROBE_OK;
+
+	GstPad *srcpad, *sinkpad;
 	SourceElements *sele = (SourceElements *)user_data;
 
-	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline));
+	//GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline));
 
-	g_print("pad_probe_idle_cb unlink dbin srcpad from tail\n");
+	GstElement *parent, *dbinparent;
+	parent = gst_pad_get_parent_element(pad);
+	dbinparent = gst_pad_get_parent_element(sele->srcpad);
+	gchar *parentname, *dbinparentname;
+	parentname = gst_element_get_name(parent);
+	dbinparentname = gst_element_get_name(dbinparent);
+	g_print("pad_probe_idle_cb unlink dbin srcpad on %s from sinkpad on %s\n", dbinparentname, parentname);
+	g_free(parentname);
+	g_free(dbinparentname);	// what a pain
+	gst_object_unref(dbinparent);
+	gst_object_unref(parent);
 
 	// get running time
 	GstClockTime abs = gst_clock_get_time(gst_element_get_clock(sele->dbin));
 	GstClockTime base = gst_element_get_base_time(sele->dbin);
 
 	// unlink decodebin from tail
-	sinkpad = gst_element_get_static_pad (conv, "sink");
-	gst_pad_unlink(sele->srcpad, sinkpad);
-	gst_object_unref(sinkpad);
+	if (!gst_pad_unlink(sele->srcpad, pad))
+	{
+		g_error("cannot unlink srcpad and idle probe pad\n");
+	}
 
 	// now unlink filesrc and decodebin
 	g_print("pad_probe_idle_cb unlink filesrc from dbin\n");
@@ -194,18 +239,27 @@ static GstPadProbeReturn pad_probe_idle_cb (GstPad * pad, GstPadProbeInfo * info
 
 	// hack - must get src pad from next element
 	g_print("pad_probe_idle_cb link new src NULL\n");
-	sinkpad = gst_element_get_static_pad (conv, "sink");
+//	sinkpad = gst_element_get_static_pad (conv, "sink");
 	SourceElements *sele1 = (SourceElements *)srcs->next->data;
-	gst_pad_link(sele1->srcpad, sinkpad);
+	if (GST_PAD_LINK_FAILED(gst_pad_link(sele1->srcpad, pad)))
+	{
+		g_printerr("cannot link new srcpad with probe pad\n");
+	}
 	// absolute time gst_clock_get_time ()
 	// running-time = absolute-time - base-time
 	gst_pad_set_offset(sele1->srcpad, abs-base);
-	gst_object_unref(sinkpad);
+	//gst_object_unref(sinkpad);
 
-	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "after");
+	gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
-	g_print("set to 7\n");
+	g_print("set to 6\n");
 	g_atomic_int_set(&state, 7);
+
+	// add data probe
+	gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_BUFFER,
+	      (GstPadProbeCallback) cb_have_data, NULL, NULL);
+
+
 
 	g_print("pad_probe_idle_cb return\n");
 	return GST_PAD_PROBE_REMOVE;
@@ -313,7 +367,8 @@ int main (int argc, char **argv)
   pipeline = gst_pipeline_new (NULL);
   conv = gst_element_factory_make ("videoconvert", NULL);
   scale = gst_element_factory_make ("videoscale", NULL);
-  avsink = gst_element_factory_make("autovideosink", NULL);
+  //avsink = gst_element_factory_make("autovideosink", NULL);
+  avsink = gst_element_factory_make("xvimagesink", NULL);
   if (!pipeline || !conv || !scale || !avsink)
   {
 	  g_error ("Failed to create elements");
