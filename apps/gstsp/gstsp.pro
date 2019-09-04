@@ -35,5 +35,5 @@ INCLUDEPATH += 	../../libs/habutil \
 				../../libs/habutil/hgst
 
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit ../../libs/habutil/hgst 
-SOURCES			=	main.cpp
+SOURCES			=	gstsp.cpp
 HEADERS			=	
