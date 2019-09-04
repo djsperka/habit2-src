@@ -293,10 +293,9 @@ static void pad_added_preroll_cb (GstElement * element, GstPad * pad, gpointer u
   s = gst_caps_get_structure (caps, 0);
   name = gst_structure_get_name (s);
 
-  g_print("pad_added_preroll_cb\n");
+  g_print("pad_added_preroll_cb name %s\n", name);
   if (strcmp (name, "video/x-raw") == 0)
   {
-    g_print("pad_added_preroll_cb - video/x-raw\n");
     sele->srcpad = pad;
     g_object_ref(sele->srcpad);
   }
@@ -364,11 +363,13 @@ int main (int argc, char **argv)
 
 
   // make the tail end of the pipeline
+  // the src part will be linked/unlinked
   pipeline = gst_pipeline_new (NULL);
   conv = gst_element_factory_make ("videoconvert", NULL);
   scale = gst_element_factory_make ("videoscale", NULL);
-  //avsink = gst_element_factory_make("autovideosink", NULL);
-  avsink = gst_element_factory_make("xvimagesink", NULL);
+  // works on mac
+  avsink = gst_element_factory_make("autovideosink", NULL);
+  // works on linux avsink = gst_element_factory_make("xvimagesink", NULL);
   if (!pipeline || !conv || !scale || !avsink)
   {
 	  g_error ("Failed to create elements");
