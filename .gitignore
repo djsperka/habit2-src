@@ -1,3 +1,5 @@
+.project
+.cproject
 .qmake.stash
 language.settings.xml
 **/debug/*
