@@ -27,16 +27,26 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.1257896330" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.1222908215" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.253239128" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1710438387" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.526762846" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.695222706" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/opt/gstreamer/include/gstreamer-1.0/gst/"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2142149145" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1792033932" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1013163593" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1377669866" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 						</toolChain>
@@ -77,16 +87,26 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.1031128026" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.1069372880" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.414586186" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1698167148" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1699345841" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.19884514" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/opt/gstreamer/include/gstreamer-1.0/gst/"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/lib/glib-2.0/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2025051944" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.138218134" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.68399121" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1737455509" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 						</toolChain>
@@ -128,16 +148,26 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.942780267" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.1622628678" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1128683920" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1923801301" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1486229871" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1648981882" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/opt/gstreamer/include/gstreamer-1.0/gst/"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.476326423" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1783974372" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.2078666200" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0"/>
+									<listOptionValue builtIn="false" value="/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1893558733" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 						</toolChain>
@@ -200,6 +230,12 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.558471058.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.2094829403;cdt.managedbuild.tool.gnu.cpp.compiler.input.1587015315">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1896196386.1776526335.210168965;cdt.managedbuild.toolchain.gnu.macosx.base.1896196386.1776526335.210168965.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1486229871;cdt.managedbuild.tool.gnu.cpp.compiler.input.476326423">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1896196386.1776526335.210168965;cdt.managedbuild.toolchain.gnu.macosx.base.1896196386.1776526335.210168965.;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1783974372;cdt.managedbuild.tool.gnu.c.compiler.input.1893558733">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.229328595;cdt.managedbuild.toolchain.gnu.macosx.base.229328595.93897259;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1909747358;cdt.managedbuild.tool.gnu.c.compiler.input.620655973">

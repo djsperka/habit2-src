@@ -11,17 +11,17 @@ include(../../habit2.pri)
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
 	!win32 {
-		LIBS += -L../../libs/habutil/debug -lhabutil
+		LIBS += -L/usr/local/lib -lboost_filesystem -L../../libs/habutil/debug -lhabutil
 		PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
 	} else {
-		LIBS += -L../../libs/habutil/debug -lhabutil
+		LIBS += -L/usr/local/lib -lboost_filesystem -L../../libs/habutil/debug -lhabutil
 		PRE_TARGETDEPS += ../../libs/habutil/debug/habutil.lib
 	}
 	DEFINES += HABIT_DEBUG
 } else {
 	DESTDIR = release
 	!win32 {
-		LIBS += -L../../libs/habutil/release -lhabutil
+		LIBS += -L/usr/local/lib -lboost_filesystem -L../../libs/habutil/release -lhabutil
 		PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
 	} else {
 		LIBS += -L../../libs/habutil/release -lhabutil
@@ -32,8 +32,9 @@ CONFIG(debug, debug|release) {
 
 INCLUDEPATH += 	../../libs/habutil \
 				../../libs/habutil/habit \
-				../../libs/habutil/hgst
+				../../libs/habutil/hgst \
+				/usr/local/include
 
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit ../../libs/habutil/hgst 
-SOURCES			=	gstsp.cpp
-HEADERS			=	
+SOURCES			=	gstsp.cpp MM1.cpp
+HEADERS			=	MM1.h
