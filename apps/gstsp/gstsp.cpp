@@ -5,6 +5,90 @@
  *      Author: dan
  */
 
+#include "MM1.h"
+#include <boost/filesystem.hpp>
+
+MM1 *f_pmm1=NULL;
+gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loop);
+
+int main (int argc, char **argv)
+{
+  GIOChannel *io_stdin;
+  GMainLoop *loop;
+  gst_init (&argc, &argv);
+
+  f_pmm1 = new MM1(true, false, argc==2 ? argv[1] : "videotestsrc");
+
+  // args can be filename(s)
+  for (int i=1; i<argc; i++)
+  {
+	  boost::filesystem::path p(argv[i]);
+	  if (exists(p) && is_regular_file(p))
+	  {
+		  unsigned int ifile = f_pmm1->addSource(argv[i]);
+		  g_print("Source (%u) %s\n", ifile, argv[i]);
+	  }
+	  else
+		  g_print("not found %s\n", argv[i]);
+  }
+
+  g_print("create main loop\n");
+  loop = g_main_loop_new (NULL, FALSE);
+
+  /* Add a keyboard watch so we get notified of keystrokes */
+#ifdef G_OS_WIN32
+  io_stdin = g_io_channel_win32_new_fd (fileno (stdin));
+#else
+  io_stdin = g_io_channel_unix_new (fileno (stdin));
+#endif
+  g_io_add_watch (io_stdin, G_IO_IN, (GIOFunc) handle_keyboard, loop);
+
+  g_print("run loop\n");
+  g_main_loop_run (loop);
+
+  g_main_loop_unref (loop);
+  g_print("quitting\n");
+
+  return 0;
+}
+
+
+/* Process keyboard input */
+gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loop)
+{
+  gchar *str = NULL;
+
+  if (g_io_channel_read_line (source, &str, NULL, NULL,
+          NULL) != G_IO_STATUS_NORMAL) {
+    return TRUE;
+  }
+
+  switch (g_ascii_tolower (str[0])) {
+  case 'p':
+  {
+	  unsigned int ui = (unsigned int)atoi(str+1);
+	  f_pmm1->preroll(ui);
+	  break;
+  }
+  case 's':
+  {
+	  g_print("Enter filename of src\n");
+	  break;
+  }
+  case 'q':
+      g_main_loop_quit (loop);
+      break;
+  default:
+      break;
+  }
+
+  g_free (str);
+
+  return TRUE;
+}
+
+
+#if 0
 
 #include <gst/gst.h>
 #include <stdio.h>
@@ -26,6 +110,7 @@ typedef struct
 	gulong probeidV, probeidA;
 } Stim;
 
+
 typedef struct
 {
 	std::vector<Stim *> *pstimuli;
@@ -38,9 +123,8 @@ static GMainLoop *loop;
 static GstElement *pipeline;
 static GstElement *conv, *scale, *avsink;
 std::vector<Stim *> srcs;
-static int state=0;
-static gint in_idle_probe = FALSE;
-
+static Stim *newstim;
+static Stim *currentstim;
 
 
 void prerollStim(Stim *stim, GstElement *pipeline);
@@ -97,7 +181,11 @@ int main (int argc, char **argv)
   stim->haveV = true;
   stim->haveA = false;
   stim->vblocked  = stim->ablocked = false;
+  stim->vsrcpad = gst_element_get_static_pad(data.testsrc, "src");
+  gst_object_ref(data.testsrc);
+
   srcs.push_back(stim);
+  currentstim = stim;
 
 
   for (int i=1; i<argc; i++)
@@ -149,48 +237,48 @@ int main (int argc, char **argv)
 
 void playStim(CustomData *pdata)
 {
-	// set blocking probes on src pads
-	//
-	Stim *pstim = NULL;
+	// set blocking probes on src pad(s) of current stim.
+	// Block all sources, the callback will count and decide when there's enough blockage.
+	newstim = NULL;
 	for (auto s : *pdata->pstimuli)
 	{
 		if (!s->done && !s->playing && s->prerolled)
 		{
 			g_print("available to play %s\n", s->filename->str);
-			pstim = s;
+			newstim = s;
 			break;
 		}
 	}
 
-	if (pstim)
+	if (newstim)
 	{
 		// set blocking probe(s)
-		pstim->probeidV = gst_pad_add_probe (pstim->vsrcpad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, pad_probe_block_for_switch_cb, pstim, NULL);
+		currentstim->probeidV = gst_pad_add_probe (currentstim->vsrcpad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, pad_probe_block_for_switch_cb, currentstim, NULL);
 
 	}
 }
 
 void prerollStim(Stim *stim, GstElement *pipeline)
 {
-	GstElement *filesrc, *dbin;
 	g_print("start preroll for stim file %s\n", stim->filename->str);
 
-	filesrc = gst_element_factory_make ("filesrc", NULL);
-	dbin = gst_element_factory_make ("decodebin", NULL);
-	g_object_set (filesrc, "location", stim->filename->str, NULL);
+	stim->filesrc = gst_element_factory_make ("filesrc", NULL);
+	stim->dbin = gst_element_factory_make ("decodebin", NULL);
+	g_object_set (stim->filesrc, "location", stim->filename->str, NULL);
 
-	gst_bin_add_many (GST_BIN (pipeline), filesrc, dbin, NULL);
-	if (!gst_element_link_many (filesrc, dbin, NULL))
+	gst_object_ref(stim->filesrc);
+	gst_object_ref(stim->dbin);
+
+	gst_bin_add_many (GST_BIN (pipeline), stim->filesrc, stim->dbin, NULL);
+	if (!gst_element_link_many (stim->filesrc, stim->dbin, NULL))
 	{
 	  g_error ("Failed to link elements");
 	}
 
-	g_signal_connect (dbin, "pad-added", G_CALLBACK (pad_added_cb), stim);
+	g_signal_connect (stim->dbin, "pad-added", G_CALLBACK (pad_added_cb), stim);
 
-    gst_element_sync_state_with_parent (filesrc);
-    gst_element_sync_state_with_parent (dbin);
-
-
+    gst_element_sync_state_with_parent (stim->filesrc);
+    gst_element_sync_state_with_parent (stim->dbin);
 }
 
 
@@ -248,6 +336,30 @@ message_cb (GstBus * bus, GstMessage * message, gpointer user_data)
 		{
 			/* it's our message */
 			g_print ("Ready to do switch\n");
+
+			// detach vsrcpad newstim->vsrcpad from conv sink pad
+			GstPad *convsink = gst_element_get_static_pad(conv, "sink");
+			gst_pad_unlink(currentstim->vsrcpad, convsink);
+
+			// get rid of test src
+			gst_element_set_state(pdata->testsrc, GST_STATE_NULL);
+
+			// link new src and set offset
+			gst_pad_link(newstim->vsrcpad, convsink);
+
+			GstClockTime abs = gst_clock_get_time(gst_element_get_clock(conv));
+			GstClockTime base = gst_element_get_base_time(conv);
+			// same base time GstClockTime base2 = gst_element_get_base_time(newstim->dbin);
+			// TRY SETTING ON SINK gst_pad_set_offset(newstim->vsrcpad, abs-base);
+			gst_pad_set_offset(convsink, abs-base);
+			gst_object_unref(convsink);
+
+			g_print("GST_MESSAGE_APPLICATION:  abs %u base %u run time %u\n", abs, base, GST_TIME_AS_MSECONDS(abs-base));
+
+
+			// unblock vsrcpad
+			gst_pad_remove_probe(newstim->vsrcpad, newstim->probeidV);
+			newstim->vblocked = false;
 		}
 		break;
 	}
@@ -294,6 +406,10 @@ handle_keyboard (GIOChannel * source, GIOCondition cond, CustomData *pdata)
   case 'q':
       g_main_loop_quit (pdata->loop);
       break;
+  case 'd':
+	  g_print("dump to dot file\n");
+	  GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "gstsp");
+	  break;
   default:
       break;
   }
@@ -381,3 +497,4 @@ GstPadProbeReturn pad_probe_block_for_switch_cb (GstPad * pad, GstPadProbeInfo *
 	return GST_PAD_PROBE_OK;
 }
 
+#endif
