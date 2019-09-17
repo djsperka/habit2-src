@@ -17,15 +17,15 @@ int main (int argc, char **argv)
   GMainLoop *loop;
   gst_init (&argc, &argv);
 
-  f_pmm1 = new MM1(true, false, argc==2 ? argv[1] : "videotestsrc");
+  f_pmm1 = new MM1(true, false, argv[1]);
 
   // args can be filename(s)
-  for (int i=1; i<argc; i++)
+  for (int i=2; i<argc; i++)
   {
 	  boost::filesystem::path p(argv[i]);
 	  if (exists(p) && is_regular_file(p))
 	  {
-		  unsigned int ifile = f_pmm1->addSource(argv[i]);
+		  unsigned int ifile = f_pmm1->addStim(argv[i]);
 		  g_print("Source (%u) %s\n", ifile, argv[i]);
 	  }
 	  else
@@ -64,10 +64,30 @@ gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loo
   }
 
   switch (g_ascii_tolower (str[0])) {
+  case 'r':
+  {
+	  unsigned int ui = (unsigned int)atoi(str+1);
+	  try
+	  {
+		  f_pmm1->preroll(ui);
+	  }
+	  catch (std::exception const &e)
+	  {
+		  g_print("exception: %s\n", e.what());
+	  }
+	  break;
+  }
   case 'p':
   {
 	  unsigned int ui = (unsigned int)atoi(str+1);
-	  f_pmm1->preroll(ui);
+	  try
+	  {
+		  f_pmm1->play(ui);
+	  }
+	  catch (std::exception const &e)
+	  {
+		  g_print("exception: %s\n", e.what());
+	  }
 	  break;
   }
   case 's':
