@@ -5,10 +5,13 @@
  *      Author: dan
  */
 
-#include "MM1.h"
+#include "HMM.h"
+//#include "MM1.h"
 #include <boost/filesystem.hpp>
 
-MM1 *f_pmm1=NULL;
+//MM1 *f_pmm1=NULL;
+HMM *f_pmm=NULL;
+
 gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loop);
 
 int main (int argc, char **argv)
@@ -17,15 +20,17 @@ int main (int argc, char **argv)
   GMainLoop *loop;
   gst_init (&argc, &argv);
 
-  f_pmm1 = new MM1(true, false, argv[1]);
+//  f_pmm1 = new MM1(true, false, argv[1]);
+  f_pmm = new HMM("videotestsrc");
 
   // args can be filename(s)
-  for (int i=2; i<argc; i++)
+  for (int i=1; i<argc; i++)
   {
 	  boost::filesystem::path p(argv[i]);
 	  if (exists(p) && is_regular_file(p))
 	  {
-		  unsigned int ifile = f_pmm1->addStim(argv[i]);
+		  unsigned int ifile = f_pmm->addStimInfo(argv[i], true);
+		  //unsigned int ifile=0;
 		  g_print("Source (%u) %s\n", ifile, argv[i]);
 	  }
 	  else
@@ -69,7 +74,7 @@ gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loo
 	  unsigned int ui = (unsigned int)atoi(str+1);
 	  try
 	  {
-		  f_pmm1->preroll(ui);
+		  f_pmm->preroll(ui);
 	  }
 	  catch (std::exception const &e)
 	  {
@@ -82,7 +87,7 @@ gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loo
 	  unsigned int ui = (unsigned int)atoi(str+1);
 	  try
 	  {
-		  f_pmm1->play(ui);
+		  f_pmm->play(ui);
 	  }
 	  catch (std::exception const &e)
 	  {
