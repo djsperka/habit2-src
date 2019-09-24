@@ -229,7 +229,7 @@ void HMM::play(HMMStimID id)
 		{
 			// now put blocking probe on each stream, with a Noop counter holding a swap counter
 			pp.second->setBlockingProbeID(
-					gst_pad_add_probe(pp.second->srcpad(), GST_PAD_PROBE_TYPE_BLOCK, &HMM::padProbeBlockCallback, pcounter, NULL)
+					gst_pad_add_probe(pp.second->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HMM::padProbeBlockCallback, pcounter, NULL)
 					);
 			g_print("added probe for stream type %d: block %lu\n", pp.first, pp.second->getBlockingProbeID());
 		}
