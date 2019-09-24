@@ -47,12 +47,15 @@ typedef unsigned long HMMStimID;
 class HMMStream
 {
 	GstPad *m_srcpad;
-	gulong m_probeid;
+	gulong m_probeidBlocking;
+	gulong m_probeidEvent;
 public:
-	HMMStream(GstPad *src, gulong probeid=0): m_srcpad(src), m_probeid(probeid) {};
-	GstPad* srcpad() { return m_srcpad; };
-	void setProbeID(gulong probeid) { m_probeid = probeid; };
-	gulong getProbeID() { return m_probeid; };
+	HMMStream(GstPad *src, gulong probeid=0): m_srcpad(src), m_probeidBlocking(probeid) {}
+	GstPad* srcpad() { return m_srcpad; }
+	void setBlockingProbeID(gulong probeid) { m_probeidBlocking = probeid; }
+	gulong getBlockingProbeID() { return m_probeidBlocking; }
+	void setEventProbeID(gulong probeid) { m_probeidEvent = probeid; }
+	gulong getEventProbeID() { return m_probeidEvent; }
 };
 
 
@@ -242,6 +245,7 @@ public:
 	static void padAddedCallback(GstElement * element, GstPad * pad, HMMSourcePrerollCounter *pcounter);
 	static void noMorePadsCallback(GstElement * element, HMMSourcePrerollCounter *pcounter);
 	static GstPadProbeReturn padProbeBlockCallback(GstPad * pad, GstPadProbeInfo * info, gpointer user_data);
+	static GstPadProbeReturn eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, gpointer p);
 
 
 };
