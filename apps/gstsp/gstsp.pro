@@ -11,7 +11,7 @@ include(../../habit2.pri)
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
 	!win32 {
-		LIBS += -L/usr/local/lib -lboost_filesystem -L../../libs/habutil/debug -lhabutil
+		LIBS += -L/usr/local/lib -lboost_filesystem -lboost_system -L../../libs/habutil/debug -lhabutil
 		PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
 	} else {
 		LIBS += -L/usr/local/lib -lboost_filesystem -L../../libs/habutil/debug -lhabutil
