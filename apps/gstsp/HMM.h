@@ -49,6 +49,7 @@ class HMMStream
 	GstPad *m_srcpad;
 	gulong m_probeidBlocking;
 	gulong m_probeidEvent;
+	gulong m_probeidIdle;
 public:
 	HMMStream(GstPad *src, gulong probeid=0): m_srcpad(src), m_probeidBlocking(probeid) {}
 	GstPad* srcpad() { return m_srcpad; }
@@ -56,6 +57,8 @@ public:
 	gulong getBlockingProbeID() { return m_probeidBlocking; }
 	void setEventProbeID(gulong probeid) { m_probeidEvent = probeid; }
 	gulong getEventProbeID() { return m_probeidEvent; }
+	void setIdleProbeID(gulong probeid) { m_probeidIdle = probeid; }
+	gulong getIdleProbeID() { return m_probeidIdle; }
 };
 
 

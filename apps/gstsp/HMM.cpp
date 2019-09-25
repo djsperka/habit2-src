@@ -200,6 +200,7 @@ void HMM::play(HMMStimID id)
 		throw std::runtime_error("id is not prerolled, cannot play");
 	g_print("play %lu current is %lu\n", id, m_stimidCurrent);
 
+
 	// The stim in 'mmstim' is prerolled and ready to play. It is a partial pipeline,
 	// with a set of src pads matching the preferred pattern (number of video, audio, and audio source(s).
 	// The stim in 'mmstimCurrent' is the currently playing stim.
@@ -218,9 +219,9 @@ void HMM::play(HMMStimID id)
 	HMMStimSwapCounter *pcounterSwap = new HMMStimSwapCounter(pstimCurrent, pstimPending, this, (int)pstimCurrent->sourceMap().size());
 	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: pstimCurrent->sourceMap())
 	{
-		g_print("will set blocking probe for src pos %d\n", p.first);
 		HMMSource* psrc = p.second.get();
 		HMMSource* psrcPending = pstimPending->getSource(p.first);
+		g_print("will set blocking probe for src pos %d\n", p.first);
 		if (!psrcPending)
 			throw std::runtime_error("Pending source not found corresponding to current src");
 
@@ -230,6 +231,7 @@ void HMM::play(HMMStimID id)
 			// now put blocking probe on each stream, with a Noop counter holding a swap counter
 			pp.second->setBlockingProbeID(
 					gst_pad_add_probe(pp.second->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HMM::padProbeBlockCallback, pcounter, NULL)
+					//gst_pad_add_probe(pp.second->srcpad(), GST_PAD_PROBE_TYPE_IDLE, &HMM::padProbeIdleCallback, pcounter, NULL)
 					);
 			g_print("added probe for stream type %d: block %lu\n", pp.first, pp.second->getBlockingProbeID());
 		}
@@ -317,6 +319,24 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 			if (!gst_element_seek(phmm->getStim(id)->getSource(pos)->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
 				throw std::runtime_error("seek failed");
+			}
+		}
+		else if (gst_message_has_name (msg, "loop"))
+		{
+			g_print("Got loop msg\n");
+			HMMStimID id;
+			HMMStimPosition pos;
+			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "id", G_TYPE_ULONG, &id, "pos", G_TYPE_INT, &pos, NULL))
+				throw std::runtime_error("Cannot get stuff from msg");
+
+			g_print("id %lu pos %d\n", id, pos);
+			if (!phmm)
+				throw std::runtime_error("Cannot get source for stim to be flushed");
+
+			// NON-flushing seek
+			if (!gst_element_seek(phmm->getStim(id)->getSource(pos)->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+			{
+				throw std::runtime_error("LOOPING seek failed");
 			}
 		}
 		break;
@@ -421,8 +441,12 @@ void HMM::padAddedCallback(GstElement *, GstPad * pad, HMMSourcePrerollCounter *
 
 			// save this stream
 			pcounter->source()->addStream(HMMStreamType::VIDEO, pstream);
+
+			// set blocking probe on the src pad
 			pstream->setBlockingProbeID(gst_pad_add_probe(pstream->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HMM::padProbeBlockCallback, pcounter, NULL));
-			//pstream->setEventProbeID(gst_pad_add_probe(pstream->srcpad(), GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HMM::eventProbeCallback, pcounter, NULL));
+
+			// set event probe on src pad.
+			pstream->setEventProbeID(gst_pad_add_probe(pstream->srcpad(), GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HMM::eventProbeCallback, pcounter, NULL));
 		}
 	}
 
@@ -499,6 +523,7 @@ void HMMStimSwapCounter::operator()(void)
 				gst_pad_set_offset(psink, abs-base);
 				gst_object_unref(psink);
 
+				g_print("Set offset on tail pad to %lums\n", GST_TIME_AS_MSECONDS(abs-base));
 				// remove probe on the video src pad
 				gst_pad_remove_probe(pvideoPending->srcpad(), pvideoPending->getBlockingProbeID());
 
@@ -512,7 +537,8 @@ void HMMStimSwapCounter::operator()(void)
 
 GstPadProbeReturn HMM::eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, gpointer p)
 {
-	HMMSource* psrcPending = (HMMSource *)p;
+	//HMMSource* psrcPending = (HMMSource *)p;
+	HMMSourcePrerollCounter *pcounter = (HMMSourcePrerollCounter *)p;
 
 	// Note: GST_PAD_PROBE_INFO_EVENT(d) returns a GstEvent* or NULL if info->data does not have an event.
 	// In this routine, because its an event probe, it should always contain an event?
@@ -526,6 +552,13 @@ GstPadProbeReturn HMM::eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, 
 		if (GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT_DONE)
 		{
 			g_print("Got segment_done event from %s\n", GST_ELEMENT_NAME(GST_PAD_PARENT(pad)));
+
+			// post bus message to flush
+			GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pcounter->pipeline()));
+			GstStructure *structure = gst_structure_new("loop", "id", G_TYPE_ULONG, pcounter->id(), "pos", G_TYPE_INT, pcounter->pos(),  NULL);
+			gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(pcounter->source()->bin()), structure));
+			gst_object_unref(bus);
+
 		}
 	}
 	return GST_PAD_PROBE_OK;
