@@ -47,18 +47,15 @@ typedef unsigned long HMMStimID;
 class HMMStream
 {
 	GstPad *m_srcpad;
-	gulong m_probeidBlocking;
-	gulong m_probeidEvent;
-	gulong m_probeidIdle;
+	gulong m_probeid;	// this can be a blocking probe or an idle probe. If its nonzero, its blocking m_srcpad.
+	gulong m_probeidEvent; // event probe handy for looping
 public:
-	HMMStream(GstPad *src, gulong probeid=0): m_srcpad(src), m_probeidBlocking(probeid) {}
+	HMMStream(GstPad *src, gulong probeid=0): m_srcpad(src), m_probeid(probeid), m_probeidEvent(0) {}
 	GstPad* srcpad() { return m_srcpad; }
-	void setBlockingProbeID(gulong probeid) { m_probeidBlocking = probeid; }
-	gulong getBlockingProbeID() { return m_probeidBlocking; }
+	void setProbeID(gulong probeid) { m_probeid = probeid; }
+	gulong getProbeID() { return m_probeid; }
 	void setEventProbeID(gulong probeid) { m_probeidEvent = probeid; }
 	gulong getEventProbeID() { return m_probeidEvent; }
-	void setIdleProbeID(gulong probeid) { m_probeidIdle = probeid; }
-	gulong getIdleProbeID() { return m_probeidIdle; }
 };
 
 
@@ -78,9 +75,10 @@ private:
 	HMMSourceType m_sourceType;	// what types of stream will be accepted in padAdded
 	GstElement *m_bin;			// element for seeks on this source
 	std::map<HMMStreamType, stream_ptr> m_streamMap;
+	bool m_bloop;
 
 public:
-	HMMSource(HMMSourceType t, GstElement *bin);
+	HMMSource(HMMSourceType t, GstElement *bin, bool loop=false);
 	HMMSource(const HMMSource&) = delete;
 	virtual ~HMMSource() {};
 	void operator=(const HMMSource&) = delete;
@@ -89,6 +87,8 @@ public:
 	std::map<HMMStreamType, stream_ptr>& streamMap() { return m_streamMap; }
 	HMMStream *getStream(HMMStreamType t);
 	GstElement *bin() { return m_bin; }
+	void setLooping(bool b) { m_bloop = b; }
+	bool isLooping() { return m_bloop; }
 };
 
 
@@ -155,6 +155,21 @@ public:
 	HMM* hmm() { return m_pmm; }
 };
 
+
+class HMMPlayStimCounter: public HMMCounter
+{
+	HMMStimID m_stimidCurrent;
+	HMMStimID m_stimidPending;
+	HMM* m_phmm;
+public:
+	HMMPlayStimCounter(HMMStimID current, HMMStimID pending, HMM* phmm): m_stimidCurrent(current), m_stimidPending(pending), m_phmm(phmm) {}
+	~HMMPlayStimCounter() {}
+	HMMStimID current() { return m_stimidCurrent; }
+	HMMStimID pending() { return m_stimidPending; }
+	HMM* hmm() { return m_phmm; }
+	void operator()(void);
+};
+
 // HMMStim would correspond to StimulusSettings - the collection of individual sources (files)
 // that comprise the "stimulus" to be presented. The MMStimPosition corresponds to the
 // PlayerPositionType, L/R/C/ISS, and more generally provides a video stream on the src pad if
@@ -188,7 +203,6 @@ class HMM
 {
 	bool m_bVideo, m_bAudio;
 	GstElement *m_pipeline;
-	//GstElement *m_conv, *m_scale, *m_vsink;	// pipeline video goes through in order conv-scale-vsink
 
 	// the stim info is supplied when addStim is called - it represents _the_ability_to_ display/play that "stim"
 	// What does a stim contain?
@@ -242,6 +256,8 @@ public:
 	void addVideoTail(HMMStimPosition pos, HMMVideoTail tail) { m_stimTailMap[pos] = tail; }
 	HMMVideoTail* getVideoTail(HMMStimPosition pos);
 
+	// get stuff
+	GstElement *pipeline() { return m_pipeline; }
 
 	// bus callback - bus messages here
 	static gboolean busCallback(GstBus *, GstMessage *msg, gpointer pdata);
@@ -249,132 +265,8 @@ public:
 	static void noMorePadsCallback(GstElement * element, HMMSourcePrerollCounter *pcounter);
 	static GstPadProbeReturn padProbeBlockCallback(GstPad * pad, GstPadProbeInfo * info, gpointer user_data);
 	static GstPadProbeReturn eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, gpointer p);
-
-
-};
-
-
-
-
-
-
-
-#if 0
-
-
-// MMSource represents a single source (e.g. a file), which may produce one or more streams, but
-// no more than one each of audio, video.
-// The source type represents what the configuration expects this file to contain, even though the
-// file may not have those pads. Source type can be VIDEO_ONLY, AUDIO_ONLY, AUDIO_VIDEO, and the value
-// tells MMSource how to handle video and/or audio streams from the source. A source may contain a stream
-// that is ignored here - e.g. its OK to specify AUDIO_ONLY on a movie file that contains video and audio,
-// the video stream is safely ignored.
-
-class MMSource
-{
-	int counter;	// used to track async actions on all streams
-	MMStimState stimState;
-public:
-	MMSource() {};
-	virtual ~MMSource() {};
-	MMSource(const MMSource&) = delete;
-	void operator=(const MMSource&) = delete;
-	bool dec_counter();
-	void inc_counter();
-	void set_counter(int c);
-	void set_stim_state(MMStimState state) { stimState = state; };
-	MMStimState state() const { return stimState; };
-	void addStream(MMStream *pstream);	// takes ownership
-	MMSourceType sourceType;
-	bool prerolled;
-	GstElement *ele;	// a bin, but here probably uridecodebin
-	boost::ptr_list<MMStream> streams;
-	void *pstim;	// bad bad bad
-};
-
-// MMStim would correspond to StimulusSettings - the collection of individual sources (files)
-// that comprise the "stimulus" to be presented. The MMStimPosition corresponds to the
-// PlayerPositionType, L/R/C/ISS, and more generally provides a video stream on the src pad if
-// ppt is a video type, and audio on the src pad is an audio type. Its up the the application
-// to decide what to do with all of them.
-
-class MMStim
-{
-	std::string filename;
-	GstElement *m_pipeline;
-	boost::ptr_map<MMStimPosition, MMSource> m_sourceMap;
-	int counter;
-	bool prerolled;
-	MMStimState stimState;
-public:
-	MMStim(const std::string& f, GstElement *pipeline) : filename(f), m_pipeline(pipeline), counter(0), prerolled(false), stimState(MMStimState::NONE) {};
-	~MMStim() {};
-	std::string uri() const;
-	void addSource(MMStimPosition, MMSource* psrc);
-	void set_counter(int c);
-	bool dec_counter();
-	bool isPrerolled() const {return prerolled; };
-	void set_stim_state(MMStimState state) { stimState = state; };
-	MMStimState state() const { return stimState; };
-	const boost::ptr_map<MMStimPosition, MMSource>& sourcemap() const { return m_sourceMap; };
-};
-
-class MM1
-{
-	bool m_bVideo, m_bAudio;
-	GstElement *m_pipeline;
-	GstElement *m_bkgd;
-	GstElement *m_conv, *m_scale, *m_vsink;	// pipeline video goes through in order conv-scale-vsink
-	boost::ptr_map<unsigned long, MMStim> stimMap;
-
-//	typedef struct
-//	{
-//		GstPad *srcpad;
-//		gulong probeid;
-//	} PadStruct;
-//
-//	typedef struct
-//	{
-//		std::string filename;
-//		GstElement *filesrc, *dbin;
-//	} SourceStruct;
-
-	unsigned long m_ulCurrentStim;
-	unsigned long m_stimidBkgd;
-	unsigned long m_ulPending;
-
-	std::string getUri(const std::string& filename);
-
-public:
-	MM1(bool bVideo, bool bAudio=false, const std::string& bkgd="videotestsrc");
-	virtual ~MM1();
-
-
-	// add a (single) file as a source
-	unsigned int addStim(const std::string& filename);
-	unsigned int addStim(MMStim* pstim);
-	void preroll(unsigned long id);
-	void play(unsigned long id);
-
-	bool hasStim(unsigned long id);
-	const MMStim& getStim(unsigned long id);	// throws, better check
-	unsigned long getPendingID() const { return m_ulPending; };
-
-	// bus callback - bus messages here
-	static gboolean busCallback(GstBus *, GstMessage *msg, gpointer pdata);
-
-	static void padAddedCallback(GstElement * element, GstPad * pad, MMSource *pmmsrc);
-	static void noMorePadsCallback(GstElement * element, MMSource *pmmsrc);
-	static GstPadProbeReturn padProbeBlockCallback (GstPad * pad, GstPadProbeInfo * info, gpointer user_data);
-
+	static GstPadProbeReturn padProbeIdleCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);
 
 };
-
-
-
-
-#endif
-
-
 
 #endif /* HMM_H_ */
