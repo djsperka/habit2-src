@@ -144,14 +144,14 @@ public:
 class HMM;
 class HMMStimSwapCounter: public HMMCounter
 {
-	HMMStim *m_pstimCurrent;
-	HMMStim *m_pstimPending;
+	HMMStimID m_stimidCurrent;
+	HMMStimID m_stimidPending;
 	HMM* m_pmm;
 public:
-	HMMStimSwapCounter(HMMStim* pstimCurrent, HMMStim *pstimPending, HMM* pmm, int counter=0): HMMCounter(counter), m_pstimCurrent(pstimCurrent), m_pstimPending(pstimPending), m_pmm(pmm) {}
+	HMMStimSwapCounter(HMMStimID curr, HMMStimID pend, HMM* pmm, int counter=0): HMMCounter(counter), m_stimidCurrent(curr), m_stimidPending(pend), m_pmm(pmm) {}
 	void operator()(void);
-	HMMStim *stimCurrent() const { return m_pstimCurrent; }
-	HMMStim *stimPending() const { return m_pstimPending; }
+	HMMStimID current() const { return m_stimidCurrent; }
+	HMMStimID pending() const { return m_stimidPending; }
 	HMM* hmm() { return m_pmm; }
 };
 
@@ -251,6 +251,7 @@ public:
 	HMMStim *getStim(HMMStimID id);
 	void preroll(HMMStimID id);
 	void play(HMMStimID id);
+	void dump(const char *c);
 
 	// tail
 	void addVideoTail(HMMStimPosition pos, HMMVideoTail tail) { m_stimTailMap[pos] = tail; }

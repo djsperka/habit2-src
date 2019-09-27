@@ -100,6 +100,11 @@ gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loo
 	  g_print("Enter filename of src\n");
 	  break;
   }
+  case 'd':
+  {
+	  f_pmm->dump(str);
+	  break;
+  }
   case 'q':
       g_main_loop_quit (loop);
       break;
