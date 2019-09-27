@@ -157,6 +157,12 @@ HMMVideoTail* HMM::getVideoTail(HMMStimPosition pos)
 	return ptail;
 }
 
+
+void HMM::dump(const char *c)
+{
+	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, c);
+}
+
 void HMM::preroll(HMMStimID id)
 {
 	if (m_stimMap.count(id) > 0)
@@ -218,7 +224,7 @@ void HMM::play(HMMStimID id)
 	HMMStim *pstimCurrent = m_stimMap[m_stimidCurrent].get();
 	HMMStim *pstimPending = m_stimMap[id].get();
 
-	HMMStimSwapCounter *pcounterSwap = new HMMStimSwapCounter(pstimCurrent, pstimPending, this, (int)pstimCurrent->sourceMap().size());
+	HMMStimSwapCounter *pcounterSwap = new HMMStimSwapCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
 	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: pstimCurrent->sourceMap())
 	{
 		HMMSource* psrc = p.second.get();
@@ -510,26 +516,26 @@ void HMMNoopCounter::operator()(void)
 	//g_print("HMMNoopCounter triggered\n");
 }
 
-void HMMPlayStimCounter::operator()(void)
-{
-	// post bus message
-	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->hmm()->pipeline()));
-	GstStructure *structure = gst_structure_new("play", "id", G_TYPE_ULONG, this->pending(),  NULL);
-	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->source()->bin()), structure));
-	gst_object_unref(bus);
-
-
-}
+//void HMMPlayStimCounter::operator()(void)
+//{
+//	// post bus message
+//	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->hmm()->pipeline()));
+//	GstStructure *structure = gst_structure_new("play", "id", G_TYPE_ULONG, this->pending(),  NULL);
+//	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->source()->bin()), structure));
+//	gst_object_unref(bus);
+//
+//
+//}
 void HMMStimSwapCounter::operator()(void)
 {
 	//g_print("HMMStimSwapCounter triggered\n");
 
-	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: stimCurrent()->sourceMap())
+	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: hmm()->getStim(current())->sourceMap())
 	{
 		if (p.first > 0)
 		{
 			HMMSource* psrc = p.second.get();
-			HMMSource* psrcPending = stimPending()->getSource(p.first);
+			HMMSource* psrcPending = hmm()->getStim(pending())->getSource(p.first);
 			if (!psrcPending)
 				throw std::runtime_error("Pending source not found corresponding to current src");
 			// does current source have a video stream?
@@ -561,12 +567,12 @@ void HMMStimSwapCounter::operator()(void)
 				// remove probe on the pending video src pad
 				gst_pad_remove_probe(pvideoPending->srcpad(), pvideoPending->getProbeID());
 
-				// finally, do flushing seek on removed source
-				// TODO - the actual disposition of the source really controlled at the stim level
-
+//				// finally, do flushing seek on removed source
+//				// TODO - the actual disposition of the source really controlled at the stim level
+//
 				GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->hmm()->pipeline()));
-				GstStructure *structure = gst_structure_new("seek", "id", G_TYPE_ULONG, this->id(), "pos", G_TYPE_INT, this->pos(),  NULL);
-				gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->source()->bin()), structure));
+				GstStructure *structure = gst_structure_new("seek", "id", G_TYPE_ULONG, this->current(), "pos", G_TYPE_INT, p.first,  NULL);
+				gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->hmm()->pipeline()), structure));
 				gst_object_unref(bus);
 
 
