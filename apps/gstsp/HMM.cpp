@@ -224,7 +224,8 @@ void HMM::play(HMMStimID id)
 	HMMStim *pstimCurrent = m_stimMap[m_stimidCurrent].get();
 	HMMStim *pstimPending = m_stimMap[id].get();
 
-	HMMStimSwapCounter *pcounterSwap = new HMMStimSwapCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
+	//HMMStimSwapCounter *pcounterSwap = new HMMStimSwapCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
+	HMMPlayStimCounter *pcounterPlay = new HMMPlayStimCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
 	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: pstimCurrent->sourceMap())
 	{
 		HMMSource* psrc = p.second.get();
@@ -233,7 +234,7 @@ void HMM::play(HMMStimID id)
 		if (!psrcPending)
 			throw std::runtime_error("Pending source not found corresponding to current src");
 
-		HMMNoopCounter *pcounter = new HMMNoopCounter((int)(psrc->streamMap().size()), pcounterSwap);
+		HMMNoopCounter *pcounter = new HMMNoopCounter((int)(psrc->streamMap().size()), pcounterPlay);
 		for (std::pair<const HMMStreamType, HMMSource::stream_ptr>& pp: psrc->streamMap())
 		{
 			// now put blocking probe on each stream, with a Noop counter holding a swap counter
@@ -242,15 +243,77 @@ void HMM::play(HMMStimID id)
 			{
 				pp.second->setProbeID(
 						//gst_pad_add_probe(pp.second->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HMM::padProbeBlockCallback, pcounter, NULL)
-						gst_pad_add_probe(pp.second->srcpad(), GST_PAD_PROBE_TYPE_IDLE, &HMM::padProbeIdleCallback, pcounter, NULL)
+						gst_pad_add_probe(pp.second->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM|GST_PAD_PROBE_TYPE_IDLE), &HMM::padProbeBlockCallback, pcounter, NULL)
+						//gst_pad_add_probe(pp.second->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_IDLE/*|GST_PAD_PROBE_TYPE_BLOCK*/), &HMM::padProbeIdleCallback, pcounter, NULL)
 						);
 				g_print("added probe for stream type %d: block %lu\n", pp.first, pp.second->getProbeID());
 			}
 		}
 	}
-	m_stimidCurrent = id;
+	// NOT YET m_stimidCurrent = id;
 }
 
+
+HMMStimID HMM::swap(HMMStimID id)
+{
+	HMMStimID current = m_stimidCurrent;
+	g_print("HMM::swap(current %lu new %lu\n", current, id);
+	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: getStim(m_stimidCurrent)->sourceMap())
+	{
+		if (p.first > 0)
+		{
+			HMMSource* psrc = p.second.get();
+			HMMSource* psrcPending = getStim(id)->getSource(p.first);
+			if (!psrcPending)
+				throw std::runtime_error("Pending source not found corresponding to current src");
+			// does current source have a video stream?
+			HMMStream *pvideoCurrent = psrc->getStream(HMMStreamType::VIDEO);
+			HMMStream *pvideoPending = psrcPending->getStream(HMMStreamType::VIDEO);
+
+			if (pvideoCurrent)
+			{
+				if (!pvideoPending)
+					throw std::runtime_error("Pending source missing video stream");
+
+				// unlink
+				HMMVideoTail* ptail = getVideoTail(p.first);
+				if (!ptail)
+					throw std::runtime_error("cannot find video tail");
+				GstPad *psink = gst_element_get_static_pad(ptail->m_conv, "sink");
+				gst_pad_unlink(pvideoCurrent->srcpad(), psink);
+
+				// link
+				gst_pad_link(pvideoPending->srcpad(), psink);
+
+				// set offset on tail pad
+				GstClockTime abs = gst_clock_get_time(gst_element_get_clock(ptail->m_conv));
+				GstClockTime base = gst_element_get_base_time(ptail->m_conv);
+				gst_pad_set_offset(psink, abs-base);
+				gst_object_unref(psink);
+
+				g_print("Set offset on tail pad to %lums\n", GST_TIME_AS_MSECONDS(abs-base));
+				// remove probe on the pending video src pad
+				g_print("remove probe on pad, probeid %d\n", pvideoPending->getProbeID());
+				gst_pad_remove_probe(pvideoPending->srcpad(), pvideoPending->getProbeID());
+
+				// finally, do flushing seek on removed source
+				// TODO - the actual disposition of the source really controlled at the stim level
+
+				GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
+				GstStructure *structure = gst_structure_new("seek", "id", G_TYPE_ULONG, current, "pos", G_TYPE_INT, p.first,  NULL);
+				gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(pipeline()), structure));
+				gst_object_unref(bus);
+
+
+			}
+			else
+				throw std::runtime_error("Current source has video pos but no video stream");
+		}
+	}
+	m_stimidCurrent = id;
+	g_print("HMM::swap - done\n");
+	return current;
+}
 
 gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 {
@@ -350,6 +413,16 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 			{
 				throw std::runtime_error("LOOPING seek failed");
 			}
+		}
+		else if (gst_message_has_name (msg, "play"))
+		{
+			HMMStimID id;
+			g_print("Got play msg\n");
+			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "id", G_TYPE_ULONG, &id, NULL))
+				throw std::runtime_error("Cannot get stuff from play msg");
+			g_print("play id %lu\n", id);
+			HMMStimID previous = phmm->swap(id);
+			g_print("current is %lu prev %lu\n", id, previous);
 		}
 		break;
 	}
@@ -516,16 +589,16 @@ void HMMNoopCounter::operator()(void)
 	//g_print("HMMNoopCounter triggered\n");
 }
 
-//void HMMPlayStimCounter::operator()(void)
-//{
-//	// post bus message
-//	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->hmm()->pipeline()));
-//	GstStructure *structure = gst_structure_new("play", "id", G_TYPE_ULONG, this->pending(),  NULL);
-//	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->source()->bin()), structure));
-//	gst_object_unref(bus);
-//
-//
-//}
+void HMMPlayStimCounter::operator()(void)
+{
+	// post bus message
+	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->hmm()->pipeline()));
+	GstStructure *structure = gst_structure_new("play", "id", G_TYPE_ULONG, this->pending(),  NULL);
+	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(hmm()->pipeline()), structure));
+	gst_object_unref(bus);
+}
+
+
 void HMMStimSwapCounter::operator()(void)
 {
 	//g_print("HMMStimSwapCounter triggered\n");

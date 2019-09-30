@@ -162,7 +162,7 @@ class HMMPlayStimCounter: public HMMCounter
 	HMMStimID m_stimidPending;
 	HMM* m_phmm;
 public:
-	HMMPlayStimCounter(HMMStimID current, HMMStimID pending, HMM* phmm): m_stimidCurrent(current), m_stimidPending(pending), m_phmm(phmm) {}
+	HMMPlayStimCounter(HMMStimID current, HMMStimID pending, HMM* phmm, int counter=0): HMMCounter(counter), m_stimidCurrent(current), m_stimidPending(pending), m_phmm(phmm) {}
 	~HMMPlayStimCounter() {}
 	HMMStimID current() { return m_stimidCurrent; }
 	HMMStimID pending() { return m_stimidPending; }
@@ -233,6 +233,9 @@ class HMM
 	std::map<HMMStimPosition, HMMVideoTail> m_stimTailMap;
 
 	std::string getUri(const std::string& filename);
+
+	// substitute stim with 'id' for current stim, make it current (return previous stimid)
+	HMMStimID swap(HMMStimID id);
 
 	// factory
 	HMMStim* makeStimFromFile(HMMStimID id, const std::string& filename);
