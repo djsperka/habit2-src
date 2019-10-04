@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>82</height>
+    <width>407</width>
+    <height>79</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,24 +15,19 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="labelMain">
-     <property name="font">
-      <font>
-       <pointsize>16</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Display setting (optional - for your testing only)</string>
      </property>
-     <property name="text">
-      <string>Testing Options</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="cbTesting">
-     <property name="text">
-      <string>Display stimuli in a window - do not use separate monitors</string>
-     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QCheckBox" name="cbTesting">
+        <property name="text">
+         <string>Display stimuli in a window - do not use separate monitors</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

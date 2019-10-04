@@ -10,6 +10,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QString>
+#include <QScrollArea>
+#include <QGroupBox>
 
 GUILib::HRunSettingsDialog::HRunSettingsDialog(const Habit::ExperimentSettings& s, bool bTestRun, QWidget* parent)
 : QDialog(parent)
@@ -103,7 +105,15 @@ void GUILib::HRunSettingsDialog::components(bool bTestRun)
 	m_pSubjectSettingsWidget = new HSubjectSettingsWidget(bTestRun, this);
 	v->addWidget(m_pSubjectSettingsWidget);
 
+	// Create a widget, with vbox layout, and add each stim order selection Widget to it.
+	// Set that widget into a QScrollArea, and add the scroll area to the dialog.
+	// This addresses the problem where too many phases cannot be viewed in dialog.
 	// iterate over phases that are enabled
+
+	QGroupBox *orderGroup = new QGroupBox("Specify stimulus order for each phase (REQUIRED)");
+	QWidget *orderWidget = new QWidget;
+	QVBoxLayout *orderVBox = new QVBoxLayout;
+	QScrollArea *scrollArea = new QScrollArea;
 	QListIterator<Habit::HPhaseSettings> iterator = m_exptSettings.phaseIterator();
 	while (iterator.hasNext())
 	{
@@ -111,10 +121,17 @@ void GUILib::HRunSettingsDialog::components(bool bTestRun)
 		if (ps.getIsEnabled())
 		{
 			GUILib::HStimulusOrderSelectionWidget* w = new HStimulusOrderSelectionWidget(ps.stimuli(), ps.getName(), ps.getSeqno(), this);
-			v->addWidget(w);
+			orderVBox->addWidget(w);
 			m_map.insert(ps.getSeqno(), QPair<GUILib::HStimulusOrderSelectionWidget*, bool>(w, false));
 		}
 	}
+	orderWidget->setLayout(orderVBox);
+	scrollArea->setWidget(orderWidget);
+	scrollArea->setWidgetResizable(true);
+	QVBoxLayout *vboxGroup = new QVBoxLayout;
+	vboxGroup->addWidget(scrollArea);
+	orderGroup->setLayout(vboxGroup);
+	v->addWidget(orderGroup);
 
 	// buttons
 	QHBoxLayout *h = new QHBoxLayout;
