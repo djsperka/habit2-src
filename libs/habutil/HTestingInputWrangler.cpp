@@ -35,7 +35,7 @@ void HTestingInputWrangler::enable(HLookDetector *pLD, const HExperiment* pExpt)
 	m_pLD = pLD;
 	connect(m_pLD, SIGNAL(lookDetectorEnabled()), this, SLOT(lookDetectorEnabled()));
 	connect(m_pLD, SIGNAL(lookDetectorDisabled()), this, SLOT(lookDetectorDisabled()));
-	connect(pExpt, SIGNAL(phaseStarted(QString)), this, SLOT(phaseStarted(QString)));
+	connect(pExpt, SIGNAL(phaseStarted(QString, int)), this, SLOT(phaseStarted(QString, int)));
 	connect(pExpt, SIGNAL(trialStarted(int, unsigned int, unsigned int)), this, SLOT(trialStarted(int, unsigned int, unsigned int)));
 	connect(pExpt, SIGNAL(exited()), this, SLOT(experimentFinished()));
 	connect(pExpt->machine(), SIGNAL(stopped()), this, SLOT(experimentFinished()));
@@ -225,7 +225,7 @@ bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSe
 	return true;
 }
 
-void HTestingInputWrangler::phaseStarted(QString sPhase)
+void HTestingInputWrangler::phaseStarted(QString sPhase, int)
 {
 	Q_ASSERT(m_bIsEnabled);
 	// when phase starts, get
@@ -287,7 +287,7 @@ void HTestingInputWrangler::check()
 	int tRelative = t - m_offsetTime;	// compare to tEvent-tEventOffsetTime
 	if (t == m_lastCheckTime) return;
 
-#if 0
+#if 1
 	if (tRelative % 1000 == 0)
 	{
 		if (m_inputIterator.hasNext())
@@ -337,8 +337,7 @@ void HTestingInputWrangler::dump()
 		while (itTrialRepeat.hasNext())
 		{
 			QPair<int, int> tr = itTrialRepeat.next();
-			qDebug() << "Trial/repeat " << tr.first << "/" << tr.second;
-
+			qDebug() << "Trial/repeat " << tr.first << "/" << tr.second << " has " << pEventLogMap->value(tr)->count() << " events";
 		}
 
 	}

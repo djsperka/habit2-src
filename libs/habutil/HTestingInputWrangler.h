@@ -49,7 +49,7 @@ public:
 	bool load(QFile& inputFile, Habit::ExperimentSettings& expSettings);
 	void stop();
 protected slots:
-	void phaseStarted(QString);
+	void phaseStarted(QString, int);
 	void trialStarted(int, unsigned int, unsigned int);
 	void lookDetectorEnabled();
 	void lookDetectorDisabled();

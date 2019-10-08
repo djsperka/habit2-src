@@ -1,0 +1,9 @@
+# Use with test-toallook
+# look settings 500/100
+# max trial time 4s from stim onset
+# habituation trial, total looking 4000ms
+# phase, trial, repeat, trans, ms
+habituation, 0, 0, NoneCenter, 150
+habituation, 0, 0, CenterNone, 1150
+habituation, 0, 0, NoneCenter, 1500
+habituation, 0, 0, NoneCenter, 5000

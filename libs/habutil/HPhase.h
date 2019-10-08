@@ -66,13 +66,14 @@ protected:
 signals:
 	void phaseStarted(QString phaseName, int context);
 	void phaseEnded(QString phaseName, int context);
-	void trialStarted(int trialNumber, int repeatNumber);
+	//void trialStarted(int trialNumber, int repeatNumber);
 	
 public slots:
 	void onTrialCompleteEntered();
 	void screenStarted(const QString&, int);
 	void agStarted(int);
 	void stimStarted(int);
+	void trialStarted(int context, unsigned int trial, unsigned int repeat);
 	//void checkPrerollStatus(int trialnumber=-1, int repeat=0);
 };
 

@@ -60,6 +60,20 @@ void HPhase::stimStarted(int stimid)
 	qDebug() << "stimStarted( " << stimid << " )";
 }
 
+void HPhase::trialStarted(int context, unsigned int trial, unsigned int repeat)
+{
+	// If phase criteria uses total looking time, update the look detector so it knows when this
+	// criteria is met
+
+	if (m_pcriteria->habituationType() == HHabituationType::HHabituationTypeTotalLookingTime)
+	{
+		int t = m_phaseSettings.habituationSettings().getTotalLookLengthToEnd() - eventLog().getPhaseLog().totalLookingTime();
+		experiment().getLookDetector().setPhaseAccumulatedLookTime(t);
+		qDebug() << "HPhase::trialStarted - set phaseAccumulatedLookTime " << t;
+	}
+}
+
+
 void HPhase::onEntry(QEvent* e)
 {
 	Q_UNUSED(e);
