@@ -36,5 +36,5 @@ INCLUDEPATH += 	../../libs/habutil \
 				/usr/local/include
 
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit ../../libs/habutil/hgst 
-SOURCES			=	gstsp.cpp  HMM.cpp HMMPort.cpp HMMSource.cpp HMMStim.cpp HMMCounter.cpp
-HEADERS			=	HMM.h HMMPort.h HMMTypes.h HMMPort.h HMMStream.h HMMSource.h HMMStim.h HMMCounter.h
+SOURCES			=	gstsp.cpp  HMM.cpp Port.cpp Source.cpp Stim.cpp Counter.cpp
+HEADERS			=	HMM.h HMMTypes.h Port.h Stream.h Source.h Stim.h Counter.h

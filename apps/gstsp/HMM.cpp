@@ -6,6 +6,7 @@
  */
 
 #include "HMM.h"
+using namespace hmm;
 
 const HMMStimPosition VIDEO_POS(1);
 bool f_looping = false;
@@ -64,10 +65,10 @@ HMM::HMM(const std::string& bkgd)
 		throw std::runtime_error("Cannot get src pad from background bin");
 
 	// create a src and add a stream
-	HMMSource *psource = new HMMSource(HMMSourceType::VIDEO_ONLY, ele);
-	psource->addStream(HMMStreamType::VIDEO, new HMMStream(srcpad));
+	Source *psource = new Source(HMMSourceType::VIDEO_ONLY, ele);
+	psource->addStream(HMMStreamType::VIDEO, new Stream(srcpad));
 
-	HMMStim *pstim = new HMMStim();
+	Stim *pstim = new Stim();
 	pstim->addSource(VIDEO_POS, psource);
 	m_stimMap.insert(std::make_pair(m_stimidBkgd, pstim));
 	m_stimidCurrent = m_stimidBkgd;
@@ -87,9 +88,9 @@ HMMStimID HMM::addStimInfo(const std::string& filename_or_description, bool bIsF
 	return id;
 }
 
-HMMStim *HMM::getStim(HMMStimID id)
+Stim *HMM::getStim(HMMStimID id)
 {
-	HMMStim *pstim = NULL;
+	Stim *pstim = NULL;
 	if (m_stimMap.count(id) > 0)
 	{
 		pstim = m_stimMap[id].get();
@@ -129,7 +130,7 @@ void HMM::preroll(HMMStimID id)
 	//
 	// instead, assume a single source, video only
 
-	HMMStim *pstim = NULL;
+	Stim *pstim = NULL;
 	const stim_info& info = m_stimInfoMap.at(id);
 
 	// The calls to makeXXXforPreroll() will sync elements in the newly created bin(s) with the
@@ -172,21 +173,21 @@ void HMM::play(HMMStimID id)
 	// One detail that is important is to set the offset on the sink pad side of the new connection. The offset
 	// should be the current running time (VERIFY THIS)
 
-	HMMStim *pstimCurrent = m_stimMap[m_stimidCurrent].get();
-	HMMStim *pstimPending = m_stimMap[id].get();
+	Stim *pstimCurrent = m_stimMap[m_stimidCurrent].get();
+	Stim *pstimPending = m_stimMap[id].get();
 
 	//HMMStimSwapCounter *pcounterSwap = new HMMStimSwapCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
-	HMMPlayStimCounter *pcounterPlay = new HMMPlayStimCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
-	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: pstimCurrent->sourceMap())
+	PlayStimCounter *pcounterPlay = new PlayStimCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
+	for (std::pair<const HMMStimPosition, Stim::source_ptr>& p: pstimCurrent->sourceMap())
 	{
-		HMMSource* psrc = p.second.get();
-		HMMSource* psrcPending = pstimPending->getSource(p.first);
+		Source* psrc = p.second.get();
+		Source* psrcPending = pstimPending->getSource(p.first);
 		g_print("will set blocking (IDLE) probe for src pos %d\n", p.first);
 		if (!psrcPending)
 			throw std::runtime_error("Pending source not found corresponding to current src");
 
-		HMMNoopCounter *pcounter = new HMMNoopCounter((int)(psrc->streamMap().size()), pcounterPlay);
-		for (std::pair<const HMMStreamType, HMMSource::stream_ptr>& pp: psrc->streamMap())
+		NoopCounter *pcounter = new NoopCounter((int)(psrc->streamMap().size()), pcounterPlay);
+		for (std::pair<const HMMStreamType, Source::stream_ptr>& pp: psrc->streamMap())
 		{
 			// now put blocking probe on each stream, with a Noop counter holding a swap counter
 
@@ -209,17 +210,17 @@ HMMStimID HMM::swap(HMMStimID id)
 {
 	HMMStimID current = m_stimidCurrent;
 	g_print("HMM::swap(current %lu new %lu\n", current, id);
-	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: getStim(m_stimidCurrent)->sourceMap())
+	for (std::pair<const HMMStimPosition, Stim::source_ptr>& p: getStim(m_stimidCurrent)->sourceMap())
 	{
 		if (p.first > 0)
 		{
-			HMMSource* psrc = p.second.get();
-			HMMSource* psrcPending = getStim(id)->getSource(p.first);
+			Source* psrc = p.second.get();
+			Source* psrcPending = getStim(id)->getSource(p.first);
 			if (!psrcPending)
 				throw std::runtime_error("Pending source not found corresponding to current src");
 			// does current source have a video stream?
-			HMMStream *pvideoCurrent = psrc->getStream(HMMStreamType::VIDEO);
-			HMMStream *pvideoPending = psrcPending->getStream(HMMStreamType::VIDEO);
+			Stream *pvideoCurrent = psrc->getStream(HMMStreamType::VIDEO);
+			Stream *pvideoPending = psrcPending->getStream(HMMStreamType::VIDEO);
 
 			if (pvideoCurrent)
 			{
@@ -383,13 +384,13 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 	return TRUE;
 }
 
-HMMStim* HMM::makeStimFromFile(HMMStimID id, const std::string& filename)
+Stim* HMM::makeStimFromFile(HMMStimID id, const std::string& filename)
 {
-	HMMStim *pstim=new HMMStim();
+	Stim *pstim=new Stim();
 	pstim->setStimState(HMMStimState::PREROLLING);
 
 	// Our stim have just one source, a file at pos 1
-	HMMStimPrerollCounter *pstimCounter = new HMMStimPrerollCounter(id, pstim, 1);
+	StimPrerollCounter *pstimCounter = new StimPrerollCounter(id, pstim, 1);
 
 	std::string uri("file://");
 	uri.append(filename);
@@ -397,12 +398,12 @@ HMMStim* HMM::makeStimFromFile(HMMStimID id, const std::string& filename)
 	g_object_set (ele, "uri", uri.c_str(), NULL);
 	gst_object_ref(ele);
 	gst_bin_add(GST_BIN(m_pipeline), ele);
-	HMMSource *psrc = new HMMSource(HMMSourceType::VIDEO_ONLY, ele, true);
+	Source *psrc = new Source(HMMSourceType::VIDEO_ONLY, ele, true);
 	pstim->addSource(VIDEO_POS, psrc);
 
 	// make a functor to manage the preroll process
 	// TODO this is a mem leak!
-	HMMSourcePrerollCounter* psourceCounter = new HMMSourcePrerollCounter(id, VIDEO_POS, psrc, m_pipeline, 1, pstimCounter);
+	SourcePrerollCounter* psourceCounter = new SourcePrerollCounter(id, VIDEO_POS, psrc, m_pipeline, 1, pstimCounter);
 
 	g_signal_connect (ele, "pad-added", G_CALLBACK(HMM::padAddedCallback), psourceCounter);
 	g_signal_connect (ele, "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), psourceCounter);
@@ -412,26 +413,26 @@ HMMStim* HMM::makeStimFromFile(HMMStimID id, const std::string& filename)
 	return pstim;
 }
 
-HMMStim* HMM::makeStimFromDesc(HMMStimID id, const std::string& description)
+Stim* hmm::HMM::makeStimFromDesc(HMMStimID id, const std::string& description)
 {
-	HMMStim *pstim=NULL;
+	Stim *pstim=NULL;
 	throw std::runtime_error("cannot make stim from desc");	// todo, sync with parent()?
 	return pstim;
 }
 
 
-void HMM::noMorePadsCallback(GstElement *, HMMSourcePrerollCounter *pcounter)
+void HMM::noMorePadsCallback(GstElement *, SourcePrerollCounter *pcounter)
 {
 	pcounter->decrement();
 }
 
 
-void HMM::padAddedCallback(GstElement *, GstPad * pad, HMMSourcePrerollCounter *pcounter)
+void HMM::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pcounter)
 {
 	GstCaps *caps;
 	GstStructure *s;
 	const gchar *name;
-	HMMStream *pstream = NULL;
+	Stream *pstream = NULL;
 
 	caps = gst_pad_get_current_caps (pad);
 	s = gst_caps_get_structure (caps, 0);
@@ -464,12 +465,12 @@ void HMM::padAddedCallback(GstElement *, GstPad * pad, HMMSourcePrerollCounter *
 					gst_object_unref(sinkpad);
 					GstPad *srcpad = gst_element_get_static_pad(freeze, "src");
 					gst_object_ref(srcpad);
-					pstream = new HMMStream(srcpad);
+					pstream = new Stream(srcpad);
 				}
 				else
 				{
 					gst_object_ref(pad);
-					pstream = new HMMStream(pad);
+					pstream = new Stream(pad);
 				}
 			}
 			else
@@ -491,7 +492,7 @@ void HMM::padAddedCallback(GstElement *, GstPad * pad, HMMSourcePrerollCounter *
 
 GstPadProbeReturn HMM::padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data)
 {
-	HMMCounter *pcounter = (HMMCounter *)user_data;
+	Counter *pcounter = (Counter *)user_data;
 	if (pcounter->decrement())
 	{
 		g_print("HMM::padProbeBlockCallback: decrement() returned TRUE, DO NOT delete counter\n");
@@ -502,7 +503,7 @@ GstPadProbeReturn HMM::padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpoint
 
 GstPadProbeReturn HMM::padProbeIdleCallback(GstPad *pad, GstPadProbeInfo *, gpointer user_data)
 {
-	HMMCounter *pcounter = (HMMCounter *)user_data;
+	Counter *pcounter = (Counter *)user_data;
 	g_print("HMM::padProbeIdleCallback, from element %s pad %s ghost? %s\n", GST_ELEMENT_NAME(GST_PAD_PARENT(pad)), GST_PAD_NAME(pad), (GST_IS_GHOST_PAD(pad) ? "YES" : "NO"));
 	if (GST_IS_GHOST_PAD(pad))
 	{
@@ -523,7 +524,7 @@ GstPadProbeReturn HMM::padProbeIdleCallback(GstPad *pad, GstPadProbeInfo *, gpoi
 GstPadProbeReturn HMM::eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, gpointer p)
 {
 	//HMMSource* psrcPending = (HMMSource *)p;
-	HMMSourcePrerollCounter *pcounter = (HMMSourcePrerollCounter *)p;
+	SourcePrerollCounter *pcounter = (SourcePrerollCounter *)p;
 
 	// Note: GST_PAD_PROBE_INFO_EVENT(d) returns a GstEvent* or NULL if info->data does not have an event.
 	// In this routine, because its an event probe, it should always contain an event?

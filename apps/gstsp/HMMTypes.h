@@ -8,6 +8,7 @@
 #ifndef HMMTYPES_H_
 #define HMMTYPES_H_
 
+namespace hmm {
 
 enum class HMMSourceType
 {
@@ -38,6 +39,6 @@ typedef int HMMStimPosition;
 typedef unsigned long HMMStimID;
 
 
-
+};	// end namespace hmm
 
 #endif /* HMMTYPES_H_ */

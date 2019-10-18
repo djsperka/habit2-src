@@ -5,22 +5,23 @@
  *      Author: dan
  */
 
-#include "HMMSource.h"
+#include "Source.h"
+using namespace hmm;
 
-HMMSource::HMMSource(HMMSourceType t, GstElement *bin, bool loop)
+Source::Source(HMMSourceType t, GstElement *bin, bool loop)
 : m_sourceType(t)
 , m_bin(bin)
 , m_bloop(loop)
 {};
 
-void HMMSource::addStream(HMMStreamType t, HMMStream *pstream)
+void Source::addStream(HMMStreamType t, Stream *pstream)
 {
 	m_streamMap.insert(std::make_pair(t, stream_ptr(pstream)));
 }
 
-HMMStream *HMMSource::getStream(HMMStreamType t)
+Stream *Source::getStream(HMMStreamType t)
 {
-	HMMStream *pstream = NULL;
+	Stream *pstream = NULL;
 	if (m_streamMap.count(t) == 1)
 		pstream = m_streamMap[t].get();
 	return pstream;
