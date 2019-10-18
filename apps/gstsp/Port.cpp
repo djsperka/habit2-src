@@ -5,36 +5,38 @@
  *      Author: dan
  */
 
-#include "HMMPort.h"
-#include "HMMStim.h"
+#include "Port.h"
+#include "Stim.h"
 #include <exception>
 #include <sstream>
 #include <QtDebug>
 
-HMMPort::HMMPort()
+using namespace hmm;
+
+Port::Port()
 : m_mixer(nullptr)
 {
 }
 
-HMMPort::~HMMPort()
+Port::~Port()
 {
 }
 
-void HMMPort::addVideoEle(HMMStimPosition pos, GstElement *ele)
+void Port::addVideoEle(HMMStimPosition pos, GstElement *ele)
 {
 	if (m_mapPosEle.count(pos) > 0)
 		throw std::runtime_error("port already has ele at this stim position");
 	m_mapPosEle[pos] = ele;
 }
 
-void HMMPort::addAudioMixer(GstElement *mixer)
+void Port::addAudioMixer(GstElement *mixer)
 {
 	if (m_mixer)
 		throw std::runtime_error("port has audio mixer, cannot add another");
 	m_mixer = mixer;
 }
 
-void HMMPort::connect(HMMStim& stim)
+void Port::connect(Stim& stim)
 {
 	// check that the port has nothing connected...
 	std::ostringstream oss;
@@ -61,12 +63,12 @@ void HMMPort::connect(HMMStim& stim)
 
 	// OK now connect all video streams in 'stim' to the port.
 	//
-	HMMStim::HMMStimPosSourceMap::iterator it;
+	Stim::HMMStimPosSourceMap::iterator it;
 	for (it = stim.sourceMap().begin(); it!= stim.sourceMap().end(); it++)
 	{
 		qDebug() << "StimPosition: " << (int)(it->first) << "SourceType: " << (int)(it->second->sourceType());
 		// does this source have a video stream?
-		HMMStream *pstream = it->second->getStream(HMMStreamType::VIDEO);
+		Stream *pstream = it->second->getStream(HMMStreamType::VIDEO);
 		if (pstream)
 		{
 			if (m_mapPosEle.count(it->first) > 0)
@@ -82,7 +84,7 @@ void HMMPort::connect(HMMStim& stim)
 	}
 }
 
-void HMMPort::disconnect()
+void Port::disconnect()
 {
 	// Any pads connected will be unceremoniously disconnected.
 	// Any request pads from the mixer will be returned

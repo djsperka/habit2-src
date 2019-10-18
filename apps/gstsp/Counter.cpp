@@ -5,17 +5,17 @@
  *      Author: dan
  */
 
-#include "HMMCounter.h"
+#include "Counter.h"
 #include "HMM.h"
+using namespace hmm;
 
-
-void HMMCounter::increment()
+void Counter::increment()
 {
 	g_atomic_int_inc(&m_counter);
 //	g_print("inc to %d\n", m_counter);
 }
 
-bool HMMCounter::decrement()
+bool Counter::decrement()
 {
 	if (g_atomic_int_dec_and_test(&m_counter))
 	{
@@ -32,27 +32,27 @@ bool HMMCounter::decrement()
 }
 
 
-void HMMSourcePrerollCounter::operator()(void)
+void SourcePrerollCounter::operator()(void)
 {
-	g_print("HMMSourcePrerollCounter (%lu) triggered\n", m_id);
+	g_print("SourcePrerollCounter (%lu) triggered\n", m_id);
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
 	GstStructure *structure = gst_structure_new("seek", "id", G_TYPE_ULONG, this->id(), "pos", G_TYPE_INT, this->pos(),  NULL);
 	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->source()->bin()), structure));
 	gst_object_unref(bus);
 }
 
-void HMMStimPrerollCounter::operator()(void)
+void StimPrerollCounter::operator()(void)
 {
-	//g_print("HMMStimPrerollCounter (%lu) triggered\n", m_id);
+	//g_print("StimPrerollCounter (%lu) triggered\n", m_id);
 	stim()->setStimState(HMMStimState::PREROLLED);
 }
 
-void HMMNoopCounter::operator()(void)
+void NoopCounter::operator()(void)
 {
 	//g_print("HMMNoopCounter triggered\n");
 }
 
-void HMMPlayStimCounter::operator()(void)
+void PlayStimCounter::operator()(void)
 {
 	// post bus message
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->hmm()->pipeline()));
@@ -62,21 +62,21 @@ void HMMPlayStimCounter::operator()(void)
 }
 
 
-void HMMStimSwapCounter::operator()(void)
+void StimSwapCounter::operator()(void)
 {
-	//g_print("HMMStimSwapCounter triggered\n");
+	//g_print("StimSwapCounter triggered\n");
 
-	for (std::pair<const HMMStimPosition, HMMStim::source_ptr>& p: hmm()->getStim(current())->sourceMap())
+	for (std::pair<const HMMStimPosition, Stim::source_ptr>& p: hmm()->getStim(current())->sourceMap())
 	{
 		if (p.first > 0)
 		{
-			HMMSource* psrc = p.second.get();
-			HMMSource* psrcPending = hmm()->getStim(pending())->getSource(p.first);
+			Source* psrc = p.second.get();
+			Source* psrcPending = hmm()->getStim(pending())->getSource(p.first);
 			if (!psrcPending)
 				throw std::runtime_error("Pending source not found corresponding to current src");
 			// does current source have a video stream?
-			HMMStream *pvideoCurrent = psrc->getStream(HMMStreamType::VIDEO);
-			HMMStream *pvideoPending = psrcPending->getStream(HMMStreamType::VIDEO);
+			Stream *pvideoCurrent = psrc->getStream(HMMStreamType::VIDEO);
+			Stream *pvideoPending = psrcPending->getStream(HMMStreamType::VIDEO);
 
 			if (pvideoCurrent)
 			{

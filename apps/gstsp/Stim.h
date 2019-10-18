@@ -8,7 +8,7 @@
 #ifndef HMMSTIM_H_
 #define HMMSTIM_H_
 
-#include "HMMSource.h"
+#include "Source.h"
 #include <map>
 #include <memory>
 
@@ -17,25 +17,27 @@
 // PlayerPositionType, L/R/C/ISS, and more generally provides a video stream on the src pad if
 // ppt is a video type, and audio on the src pad is an audio type. Its up the the application
 // to decide what to do with all of them.
+namespace hmm {
 
-class HMMStim
+class Stim
 {
 public:
-	typedef std::unique_ptr<HMMSource> source_ptr;
+	typedef std::unique_ptr<Source> source_ptr;
 	typedef std::map<HMMStimPosition, source_ptr> HMMStimPosSourceMap;
 private:
 	HMMStimState m_stimState;
 	HMMStimPosSourceMap m_sourceMap;
 public:
-	HMMStim(): m_stimState(HMMStimState::NONE) {};
-	virtual ~HMMStim() {};
-	void addSource(HMMStimPosition, HMMSource* psrc);
-	HMMSource *getSource(HMMStimPosition pos);
+	Stim(): m_stimState(HMMStimState::NONE) {};
+	virtual ~Stim() {};
+	void addSource(HMMStimPosition, Source* psrc);
+	Source *getSource(HMMStimPosition pos);
 	void setStimState(HMMStimState state) { m_stimState = state; }
 	HMMStimState getStimState() const { return m_stimState; }
 	std::map<HMMStimPosition, source_ptr>& sourceMap() { return m_sourceMap; }
 };
 
 
+} // end namespace
 
 #endif /* HMMSTIM_H_ */

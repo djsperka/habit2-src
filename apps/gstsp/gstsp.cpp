@@ -10,7 +10,7 @@
 #include <boost/filesystem.hpp>
 
 //MM1 *f_pmm1=NULL;
-HMM *f_pmm=NULL;
+hmm::HMM *f_pmm=NULL;
 
 gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loop);
 
@@ -21,7 +21,7 @@ int main (int argc, char **argv)
   gst_init (&argc, &argv);
 
 //  f_pmm1 = new MM1(true, false, argv[1]);
-  f_pmm = new HMM("videotestsrc");
+  f_pmm = new hmm::HMM("videotestsrc");
 
   // args can be filename(s)
   for (int i=1; i<argc; i++)

@@ -5,16 +5,17 @@
  *      Author: dan
  */
 
-#include "HMMStim.h"
+#include "Stim.h"
+using namespace hmm;
 
-void HMMStim::addSource(HMMStimPosition pos, HMMSource *psrc)
+void Stim::addSource(HMMStimPosition pos, Source *psrc)
 {
 	m_sourceMap.insert(make_pair(pos, source_ptr(psrc)));
 }
 
-HMMSource *HMMStim::getSource(HMMStimPosition pos)
+Source *Stim::getSource(HMMStimPosition pos)
 {
-	HMMSource *psrc = NULL;
+	Source *psrc = NULL;
 	if (m_sourceMap.count(pos) == 1)
 	{
 		psrc = m_sourceMap[pos].get();

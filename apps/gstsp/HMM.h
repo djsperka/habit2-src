@@ -14,14 +14,14 @@
 #include <string>
 #include <gst/gst.h>
 
-#include "HMMStream.h"
-#include "HMMSource.h"
-#include "HMMStim.h"
-#include "HMMCounter.h"
-#include "HMMPort.h"
+#include "Stream.h"
+#include "Source.h"
+#include "Stim.h"
+#include "Counter.h"
+#include "Port.h"
 
 
-
+namespace hmm {
 
 struct HMMVideoTail
 {
@@ -52,7 +52,7 @@ class HMM
 
 	// this is where prerolled stim and playing stim are. When replaced, dispose of HMMStim (TODO - persistence of ag)
 
-	typedef std::unique_ptr<HMMStim> stim_ptr;
+	typedef std::unique_ptr<Stim> stim_ptr;
 	std::map<HMMStimID, stim_ptr> m_stimMap;
 
 	HMMStimID m_stimidCurrent;
@@ -63,7 +63,7 @@ class HMM
 	// required ("Center", or "left"/"right"), and the optional spots in the audio mixer for sound.
 	//
 	std::map<HMMStimPosition, HMMVideoTail> m_stimTailMap;
-	HMMPort m_port;
+	Port m_port;
 
 	std::string getUri(const std::string& filename);
 
@@ -71,8 +71,8 @@ class HMM
 	HMMStimID swap(HMMStimID id);
 
 	// factory
-	HMMStim* makeStimFromFile(HMMStimID id, const std::string& filename);
-	HMMStim* makeStimFromDesc(HMMStimID id, const std::string& description);
+	Stim* makeStimFromFile(HMMStimID id, const std::string& filename);
+	Stim* makeStimFromDesc(HMMStimID id, const std::string& description);
 
 public:
 	HMM(const std::string& bkgd=std::string("videotestsrc"));
@@ -81,7 +81,7 @@ public:
 
 	// add a (single) file as a source
 	HMMStimID addStimInfo(const std::string& filename_or_description, bool bIsFile=true);
-	HMMStim *getStim(HMMStimID id);
+	Stim *getStim(HMMStimID id);
 	void preroll(HMMStimID id);
 	void play(HMMStimID id);
 	void dump(const char *c);
@@ -95,12 +95,14 @@ public:
 
 	// bus callback - bus messages here
 	static gboolean busCallback(GstBus *, GstMessage *msg, gpointer pdata);
-	static void padAddedCallback(GstElement * element, GstPad * pad, HMMSourcePrerollCounter *pcounter);
-	static void noMorePadsCallback(GstElement * element, HMMSourcePrerollCounter *pcounter);
+	static void padAddedCallback(GstElement * element, GstPad * pad, SourcePrerollCounter *pcounter);
+	static void noMorePadsCallback(GstElement * element, SourcePrerollCounter *pcounter);
 	static GstPadProbeReturn padProbeBlockCallback(GstPad * pad, GstPadProbeInfo * info, gpointer user_data);
 	static GstPadProbeReturn eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, gpointer p);
 	static GstPadProbeReturn padProbeIdleCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);
 
 };
+
+} // end namespace hmm
 
 #endif /* HMM_H_ */

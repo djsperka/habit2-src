@@ -13,9 +13,11 @@
 #include <map>
 #include <list>
 
-class HMMStim;
+namespace hmm {
 
-class HMMPort
+class Stim;
+
+class Port
 {
 	typedef std::map<HMMStimPosition, GstElement *> HMMPortPosEleMap;
 	HMMPortPosEleMap m_mapPosEle;				// video only; StimPosition <--> GstElement (downstream)
@@ -23,14 +25,15 @@ class HMMPort
 	std::list<GstPad *> m_listRequestPads;		// request pads taken from audio mixer
 
 public:
-	HMMPort();
-	virtual ~HMMPort();
+	Port();
+	virtual ~Port();
 
 	void addVideoEle(HMMStimPosition pos, GstElement *ele);
 	void addAudioMixer(GstElement *mixer);
 
-	void connect(HMMStim& stim);	// assumes not connected, will throw otherwise
+	void connect(Stim& stim);	// assumes not connected, will throw otherwise
 	void disconnect();				// might not be connected, will be OK if not
 };
 
+}
 #endif /* HMMPORT_H_ */
