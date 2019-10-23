@@ -13,7 +13,7 @@
 #include <list>
 #include <string>
 #include <gst/gst.h>
-
+#include "stimulussettings.h"
 #include "Stream.h"
 #include "Source.h"
 #include "Stim.h"
@@ -26,6 +26,13 @@ namespace hmm {
 struct HMMVideoTail
 {
 	GstElement *m_conv, *m_scale, *m_vsink;
+};
+
+
+struct HMMConfiguration
+{
+	std::map<HMMStimPosition, std::string> video;
+	std::map<HMMStimPosition, std::string> audio;
 };
 
 class HMM
@@ -47,48 +54,57 @@ class HMM
 	// stim_info corresponds to StimulusSettings
 	// a factory method will be used to create the HMMStim from this object's description
 
-	typedef std::pair<bool, std::string> stim_info;	// first: true->isFile, false->is a bin description, e.g. "videotestsrc"
-	std::map<HMMStimID, stim_info> m_stimInfoMap;
+	//typedef std::pair<bool, std::string> stim_info;	// first: true->isFile, false->is a bin description, e.g. "videotestsrc"
+	//std::map<HMMStimID, stim_info> m_stimInfoMap;
 
-	// this is where prerolled stim and playing stim are. When replaced, dispose of HMMStim (TODO - persistence of ag)
-
+	std::map<HMMStimID, Habit::StimulusSettings> m_ssMap;
 	typedef std::unique_ptr<Stim> stim_ptr;
-	std::map<HMMStimID, stim_ptr> m_stimMap;
+	std::map<HMMInstanceID, stim_ptr> m_instanceMap;
 
-	HMMStimID m_stimidCurrent;
-	HMMStimID m_stimidBkgd;
+	HMMInstanceID m_iidCurrent;
+	HMMInstanceID m_stimidBkgd;
 	//HMMStimID m_stimidPending;
 
 	// The Port grew out of the VideoTail - it represents a receptacle with a spot for each video stream
 	// required ("Center", or "left"/"right"), and the optional spots in the audio mixer for sound.
 	//
-	std::map<HMMStimPosition, HMMVideoTail> m_stimTailMap;
+	//std::map<HMMStimPosition, HMMVideoTail> m_stimTailMap;
 	Port m_port;
 
 	std::string getUri(const std::string& filename);
+
 
 	// substitute stim with 'id' for current stim, make it current (return previous stimid)
 	HMMStimID swap(HMMStimID id);
 
 	// factory
+	Stim *makeStim(const Habit::StimulusSettings& ss);
 	Stim* makeStimFromFile(HMMStimID id, const std::string& filename);
 	Stim* makeStimFromDesc(HMMStimID id, const std::string& description);
 
 public:
-	HMM(const std::string& bkgd=std::string("videotestsrc"));
+	HMM(const HMMConfiguration& config);
 	virtual ~HMM();
+
+	// const stim positions
+	static const HMMStimPosition STIMPOS_AUDIO;
+	static const HMMStimPosition STIMPOS_CONTROL;
+	static const HMMStimPosition STIMPOS_LEFT;
+	static const HMMStimPosition STIMPOS_CENTER;
+	static const HMMStimPosition STIMPOS_RIGHT;
 
 
 	// add a (single) file as a source
-	HMMStimID addStimInfo(const std::string& filename_or_description, bool bIsFile=true);
+	//HMMStimID addStimInfo(const std::string& filename_or_description, bool bIsFile=true);
+	HMMStimID addStim(const Habit::StimulusSettings& settings);
 	Stim *getStim(HMMStimID id);
-	void preroll(HMMStimID id);
-	void play(HMMStimID id);
+	HMMInstanceID preroll(HMMStimID id);
+	void play(const HMMInstanceID& id);
 	void dump(const char *c);
 
 	// tail
-	void addVideoTail(HMMStimPosition pos, HMMVideoTail tail) { m_stimTailMap[pos] = tail; }
-	HMMVideoTail* getVideoTail(HMMStimPosition pos);
+	//void addVideoTail(HMMStimPosition pos, HMMVideoTail tail) { m_stimTailMap[pos] = tail; }
+	//HMMVideoTail* getVideoTail(HMMStimPosition pos);
 
 	// get stuff
 	GstElement *pipeline() { return m_pipeline; }

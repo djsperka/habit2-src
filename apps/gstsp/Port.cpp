@@ -14,7 +14,6 @@
 using namespace hmm;
 
 Port::Port()
-: m_mixer(nullptr)
 {
 }
 
@@ -24,24 +23,25 @@ Port::~Port()
 
 void Port::addVideoEle(HMMStimPosition pos, GstElement *ele)
 {
-	if (m_mapPosEle.count(pos) > 0)
+	if (m_mapPosVideo.count(pos) > 0)
 		throw std::runtime_error("port already has ele at this stim position");
-	m_mapPosEle[pos] = ele;
+	m_mapPosVideo[pos] = ele;
 }
 
-void Port::addAudioMixer(GstElement *mixer)
+void Port::addAudioEle(HMMStimPosition pos, GstElement *ele)
 {
-	if (m_mixer)
-		throw std::runtime_error("port has audio mixer, cannot add another");
-	m_mixer = mixer;
+	if (m_mapPosAudio.count(pos) > 0)
+		throw std::runtime_error("port already has ele at this stim position");
+	m_mapPosAudio[pos] = ele;
 }
 
 void Port::connect(Stim& stim)
 {
 	// check that the port has nothing connected...
+	g_print("Port::connect() - start\n");
 	std::ostringstream oss;
 	bool bThrow = false;
-	for (auto it: m_mapPosEle)
+	for (auto it: m_mapPosVideo)
 	{
 		GstPad *pad = gst_element_get_static_pad(it.second, "sink");
 		if (gst_pad_is_linked(pad))
@@ -52,11 +52,11 @@ void Port::connect(Stim& stim)
 		gst_object_unref(pad);
 	}
 
-	if (!m_listRequestPads.empty())
-	{
-		bThrow = true;
-		oss << "audio request pads still present. ";
-	}
+//	if (!m_listRequestPads.empty())
+//	{
+//		bThrow = true;
+//		oss << "audio request pads still present. ";
+//	}
 
 //	if (bThrow)
 //		throw std::runtime_error(oss.str().c_str());
@@ -71,17 +71,43 @@ void Port::connect(Stim& stim)
 		Stream *pstream = it->second->getStream(HMMStreamType::VIDEO);
 		if (pstream)
 		{
-			if (m_mapPosEle.count(it->first) > 0)
+			g_print("Found a video stream for this source\n");
+			if (m_mapPosVideo.count(it->first) > 0)
 			{
-				GstPad *pad = gst_element_get_static_pad(m_mapPosEle[it->first], "sink");
-				gst_pad_link(pstream->srcpad(), pad);
-				GstClockTime abs = gst_clock_get_time(gst_element_get_clock(m_mapPosEle[it->first]));
-				GstClockTime base = gst_element_get_base_time(m_mapPosEle[it->first]);
-				gst_pad_set_offset(pad, abs-base);
+				GstPad *pad = gst_element_get_static_pad(m_mapPosVideo[it->first], "sink");
+				GstPadLinkReturn r = gst_pad_link(pstream->srcpad(), pad);
+				if (r != GST_PAD_LINK_OK)
+				{
+					g_print("pad link error %d\n", (int)r);
+					throw std::runtime_error("Cannot link pads.");
+				}
+				// set offset on the downstream pad, but not when initializing the pipeline.
+				GstClock *clock = gst_element_get_clock(m_mapPosVideo[it->first]);
+				if (clock)
+				{
+					GstClockTime abs = gst_clock_get_time(clock);
+					GstClockTime base = gst_element_get_base_time(m_mapPosVideo[it->first]);
+					gst_pad_set_offset(pad, abs-base);
+					gst_object_unref(clock);
+				}
+				else
+				{
+					g_print("clock not set, do not set offset on pad....\n");
+				}
 				gst_object_unref(pad);
 			}
+			else
+			{
+				oss << "Stim pos " << (int)it->first << " port does not have video ele at this pos ";
+				throw std::runtime_error(oss.str().c_str());
+			}
+		}
+		else
+		{
+			g_print("NO VIDEO STREAM FOUND for this source\n");
 		}
 	}
+	g_print("Port::connect() - done\n");
 }
 
 void Port::disconnect()
@@ -89,14 +115,14 @@ void Port::disconnect()
 	// Any pads connected will be unceremoniously disconnected.
 	// Any request pads from the mixer will be returned
 
-	for (std::list<GstPad *>::iterator it = m_listRequestPads.begin(); it != m_listRequestPads.end(); it++)
-	{
-		throw std::runtime_error("HMMPort::disconnect () not implemented for audio");
-	}
+//	for (std::list<GstPad *>::iterator it = m_listRequestPads.begin(); it != m_listRequestPads.end(); it++)
+//	{
+//		throw std::runtime_error("HMMPort::disconnect () not implemented for audio");
+//	}
 
-	for (HMMPortPosEleMap::iterator it = m_mapPosEle.begin(); it != m_mapPosEle.end(); it++)
+	for (HMMPortPosEleMap::iterator it = m_mapPosVideo.begin(); it != m_mapPosVideo.end(); it++)
 	{
-		GstPad *pad = gst_element_get_static_pad(m_mapPosEle[it->first], "sink");
+		GstPad *pad = gst_element_get_static_pad(m_mapPosVideo[it->first], "sink");
 		if (gst_pad_is_linked(pad))
 		{
 			gst_pad_unlink(gst_pad_get_peer(pad), pad);
