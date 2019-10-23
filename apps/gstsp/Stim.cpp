@@ -16,6 +16,11 @@ void Stim::addSource(HMMStimPosition pos, Source *psrc)
 Source *Stim::getSource(HMMStimPosition pos)
 {
 	Source *psrc = NULL;
+	g_print("stim has %lu sources\n", m_sourceMap.size());
+	for (HMMStimPosSourceMap::iterator it = m_sourceMap.begin(); it!= m_sourceMap.end(); it++)
+	{
+		g_print("Source at position ", (int)it->first);
+	}
 	if (m_sourceMap.count(pos) == 1)
 	{
 		psrc = m_sourceMap[pos].get();

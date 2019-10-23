@@ -8,70 +8,100 @@
 #include "HMM.h"
 using namespace hmm;
 
-const HMMStimPosition VIDEO_POS(1);
 bool f_looping = false;
 
 
+const HMMStimPosition HMM::STIMPOS_CONTROL = 0;
+const HMMStimPosition HMM::STIMPOS_LEFT = 1;
+const HMMStimPosition HMM::STIMPOS_CENTER = 2;
+const HMMStimPosition HMM::STIMPOS_RIGHT = 3;
+const HMMStimPosition HMM::STIMPOS_AUDIO = 4;
 
-HMM::HMM(const std::string& bkgd)
+HMM::HMM(const HMMConfiguration& config)
 {
-	GstElement *conv, *scale, *vsink;
-	m_stimidBkgd = addStimInfo(bkgd, false);
+//	GstElement *conv, *scale, *vsink;
+	m_stimidBkgd = 0;		// TODO: should do this somehow with addStimInfo? There id starts at 1, so OK with 0 here.
 
 	// create pipeline
-
 	m_pipeline = gst_pipeline_new (NULL);
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
 	gst_bus_add_watch(bus, &HMM::busCallback, this);
 	gst_object_unref(bus);
 
-	// hardcode type of pipeline - just video for now
-	conv = gst_element_factory_make ("videoconvert", NULL);
-	scale = gst_element_factory_make ("videoscale", NULL);
-	vsink = gst_element_factory_make("autovideosink", NULL);
-	gst_object_ref(conv);
-	gst_object_ref(scale);
-	gst_object_ref(vsink);
-	gst_bin_add_many(GST_BIN(m_pipeline), conv, scale, vsink, NULL);
-	if (!gst_element_link_many (conv, scale, vsink, NULL))
+	// set up background stim while configuring port.
+	// each stim position gets a background source
+	Stim *pbkgd = new Stim();
+
+	// Configure port. Video first.
+	for (std::map<HMMStimPosition, std::string>::const_iterator it = config.video.begin(); it!= config.video.end(); it++)
 	{
-		throw std::runtime_error("Cannot link conv-scale-sink");
+
+		// Configure the pipeline first.
+		// TODO: must specify alternate sinks here e.g. gstqtvideosink, now its hard coded to do autovideosink
+		// By adding a video element to the port - it will always search for a video stream from the source
+		// with the same stim position (StimPosition is like "left", "right", "center", etc.
+
+		g_print("HMM: Configuring pipeline, add video path at position %d  \"%s\"\n", (int)it->first, it->second.c_str());
+		GstElement *conv, *scale, *vsink;
+		conv = gst_element_factory_make ("videoconvert", NULL);
+		scale = gst_element_factory_make ("videoscale", NULL);
+		vsink = gst_element_factory_make("autovideosink", NULL);
+		gst_object_ref(conv);
+		gst_bin_add_many(GST_BIN(m_pipeline), conv, scale, vsink, NULL);
+		if (!gst_element_link_many (conv, scale, vsink, NULL))
+		{
+			throw std::runtime_error("Cannot link conv-scale-sink");
+		}
+		m_port.addVideoEle(it->first, conv);	// port takes ownership of the conv element
+		//=====end pipeline config. The port keeps the conv ele with the "StimPosition" value.
+
+		// Now configure background source for this particular video path. A new stim was created above,
+		// here we create  a test element and create the source/stream manually.
+
+		GstElement *ptest = gst_element_factory_make ("videotestsrc", NULL);
+		gst_bin_add(GST_BIN(m_pipeline), ptest);
+		GstPad *pad = gst_element_get_static_pad(ptest, "src");
+		Stream *pstream = new Stream(pad);
+		Source *psource = new Source(hmm::HMMSourceType::VIDEO_ONLY, ptest, false);
+		psource->addStream(hmm::HMMStreamType::VIDEO, pstream);
+		pbkgd->addSource(it->first, psource);
 	}
 
-	HMMVideoTail tail = {conv, scale, vsink};
-	addVideoTail(VIDEO_POS, tail);
+	// Now configure audio - note we may also configure background for audio
 
-	//HMMPort::addAudioMixer(m_port, mixer);
-	m_port.addVideoEle(VIDEO_POS, conv);	// port takes ownership
-
-	// tail end of pipeline is ready.
-
-	// set up background. This bypasses normal procedure for stim
-	GError *err=NULL;
-	GstElement *ele = gst_parse_bin_from_description(bkgd.c_str(), TRUE, &err);
-	if (!ele)
+	for (std::map<HMMStimPosition, std::string>::const_iterator it = config.audio.begin(); it!= config.audio.end(); it++)
 	{
-		throw std::runtime_error("bad bkgd description");
+		g_print("HMM: Configuring pipeline, add audio path \"%s\"\n", it->second.c_str());
+		GstElement *audioSink = NULL, *audioMixer=NULL;
+#if defined(Q_OS_MAC)
+		g_print("make osxaudiosink for mac\n");
+		audioSink = gst_element_factory_make("osxaudiosink", NULL);
+#elif defined(Q_OS_LINUX)
+		g_print("make alsasink for linux\n");
+		audioSink = gst_element_factory_make("alsaudiosink", NULL);
+#elif defined(Q_OS_WIN)
+		g_print("make directsoundsink for win\n");
+		audioSink = gst_element_factory_make("directsoundsink", NULL);
+#else
+		throw std::runtime_error("unsupported OS - no audio sink");
+#endif
+
+		if (!audioSink)
+			throw std::runtime_error("Cannot create audio sink");
+
+		audioMixer = gst_element_factory_make("audiomixer", NULL);
+		if (!audioMixer)
+			throw std::runtime_error("Cannot create audio mixer");
+
+		gst_bin_add_many(GST_BIN(m_pipeline), audioMixer, audioSink, NULL);
+		gst_element_link(audioMixer, audioSink);
+		m_port.addAudioEle(it->first, audioMixer);
 	}
-	gst_element_set_name(ele, "background");
-	gst_bin_add(GST_BIN(m_pipeline), ele);
-	if (!gst_element_link(ele, conv))
-	{
-		throw std::runtime_error("Cannot link bkgd into pipeline");
-	}
 
-	GstPad *srcpad = gst_element_get_static_pad(ele, "src");
-	if (!srcpad)
-		throw std::runtime_error("Cannot get src pad from background bin");
-
-	// create a src and add a stream
-	Source *psource = new Source(HMMSourceType::VIDEO_ONLY, ele);
-	psource->addStream(HMMStreamType::VIDEO, new Stream(srcpad));
-
-	Stim *pstim = new Stim();
-	pstim->addSource(VIDEO_POS, psource);
-	m_stimMap.insert(std::make_pair(m_stimidBkgd, pstim));
+	m_stimMap.insert(std::make_pair(m_stimidBkgd, pbkgd));
 	m_stimidCurrent = m_stimidBkgd;
+	g_print("HMM(): m_port.connect( bkgd = %lu)\n", m_stimidBkgd);
+	m_port.connect(*pbkgd);
 	gst_element_set_state(m_pipeline, GST_STATE_PLAYING);
 
 }
@@ -81,12 +111,19 @@ HMM::~HMM()
 {
 }
 
-HMMStimID HMM::addStimInfo(const std::string& filename_or_description, bool bIsFile)
+HMMStimID HMM::addStim(const Habit::StimulusSettings& settings)
 {
 	HMMStimID id = (HMMStimID)((unsigned long)m_stimInfoMap.size()+1);
-	m_stimInfoMap.insert(make_pair(id, make_pair(bIsFile, filename_or_description)));
+	m_ssmap.insert(make_pair(id, settings));
 	return id;
 }
+
+//HMMStimID HMM::addStimInfo(const std::string& filename_or_description, bool bIsFile)
+//{
+//	HMMStimID id = (HMMStimID)((unsigned long)m_stimInfoMap.size()+1);
+//	m_stimInfoMap.insert(make_pair(id, make_pair(bIsFile, filename_or_description)));
+//	return id;
+//}
 
 Stim *HMM::getStim(HMMStimID id)
 {
@@ -112,15 +149,13 @@ void HMM::dump(const char *c)
 	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, c);
 }
 
-void HMM::preroll(HMMStimID id)
+HMMInstanceID HMM::preroll(HMMStimID id)
 {
-	if (m_stimMap.count(id) > 0)
-		throw std::runtime_error("id already prerolled, don't do it again.");
+	// this stim id had better be in the ssmap:
+	if (m_ssMap.count(id) != 1)
+		throw std::runtime_error("id not found, no settings found, cannot preroll");
 
-	if (m_stimInfoMap.count(id) != 1)
-		throw std::runtime_error("id not found, cannot preroll");
-
-	g_print("prerolling %lu\n", id);
+	g_print("prerolling stimID %lu\n", id);
 
 	// at this point we would set in motion the preroll for _each_of_the_sources_, e.g. left,
 	// right, ISS, or whatever topology is in use.
@@ -130,36 +165,18 @@ void HMM::preroll(HMMStimID id)
 	//
 	// instead, assume a single source, video only
 
-	Stim *pstim = NULL;
-	const stim_info& info = m_stimInfoMap.at(id);
+	unsigned long iid = 1000 + m_instanceMap.size();
+	HMMInstanceID instanceID(iid, id);
+	m_instanceMap[instanceID] = makeStim(m_ssMap.at(id));
 
-	// The calls to makeXXXforPreroll() will sync elements in the newly created bin(s) with the
-	// pipeline state, which will initiatethe preroll. The preroll will NOT necessarily be complete
-	// on return here, but will be started.
-	if (info.first)
-		pstim = makeStimFromFile(id, info.second);
-	else
-		pstim = makeStimFromDesc(id, info.second);
-
-	m_stimMap.insert(std::make_pair(id, pstim));
-
-	return;
-
+	return instanceID;
 }
 
 
-void HMM::play(HMMStimID id)
+void HMM::play(HMMInstanceID id)
 {
-	if (m_stimMap.count(id) != 1)
-		throw std::runtime_error("id not in stimMap, cannot play.");
-
-	if (m_stimMap[id]->getStimState() != HMMStimState::PREROLLED)
-		throw std::runtime_error("id is not prerolled, cannot play");
-	g_print("play %lu current is %lu\n", id, m_stimidCurrent);
-
-	g_print("call HMMPort::connect()\n");
-	m_port.connect(*m_stimMap[id]);
-
+	if (m_instanceMap.count(id) != 1)
+		throw std::runtime_error("instance id not found, cannot play.");
 
 	// The stim in 'mmstim' is prerolled and ready to play. It is a partial pipeline,
 	// with a set of src pads matching the preferred pattern (number of video, audio, and audio source(s).
@@ -173,10 +190,9 @@ void HMM::play(HMMStimID id)
 	// One detail that is important is to set the offset on the sink pad side of the new connection. The offset
 	// should be the current running time (VERIFY THIS)
 
-	Stim *pstimCurrent = m_stimMap[m_stimidCurrent].get();
-	Stim *pstimPending = m_stimMap[id].get();
+	Stim *pstimCurrent = m_instanceMap[m_iidCurrent].get();
+	Stim *pstimPending = m_instanceMap[id].get();
 
-	//HMMStimSwapCounter *pcounterSwap = new HMMStimSwapCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
 	PlayStimCounter *pcounterPlay = new PlayStimCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
 	for (std::pair<const HMMStimPosition, Stim::source_ptr>& p: pstimCurrent->sourceMap())
 	{

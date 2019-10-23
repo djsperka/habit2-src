@@ -38,6 +38,25 @@ enum class HMMStimState
 typedef int HMMStimPosition;
 typedef unsigned long HMMStimID;
 
+class HMMInstanceID
+{
+	int m_instanceID;
+	HMMStimID m_stimID;
+
+	HMMInstanceID& operator=(const HMMInstanceID& inst);	// unimplemented - immutable
+public:
+	HMMInstanceID(int instanceID, HMMStimID stimid): m_instanceID(instanceID), m_stimID(stimid) {};
+	HMMInstanceID(const HMMInstanceID& inst): m_instanceID(inst.instanceid()), m_stimID(inst.stimid()) {};
+	virtual ~HMMInstanceID() {};
+
+	HMMStimID stimid() const { return m_stimID; }
+	int instanceid() const { return m_instanceID; }
+	bool operator<(const HMMInstanceID& inst) const
+	{
+		return (m_instanceID < inst.instanceid());
+	}
+};
+
 
 };	// end namespace hmm
 

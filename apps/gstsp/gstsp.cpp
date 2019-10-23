@@ -8,6 +8,7 @@
 #include "HMM.h"
 //#include "MM1.h"
 #include <boost/filesystem.hpp>
+#include <rapidjson/>
 
 //MM1 *f_pmm1=NULL;
 hmm::HMM *f_pmm=NULL;
@@ -21,21 +22,25 @@ int main (int argc, char **argv)
   gst_init (&argc, &argv);
 
 //  f_pmm1 = new MM1(true, false, argv[1]);
-  f_pmm = new hmm::HMM("videotestsrc");
 
-  // args can be filename(s)
-  for (int i=1; i<argc; i++)
-  {
-	  boost::filesystem::path p(argv[i]);
-	  if (exists(p) && is_regular_file(p))
-	  {
-		  unsigned int ifile = f_pmm->addStimInfo(argv[i], true);
-		  //unsigned int ifile=0;
-		  g_print("Source (%u) %s\n", ifile, argv[i]);
-	  }
-	  else
-		  g_print("not found %s\n", argv[i]);
-  }
+  // Set up configuration for the mm port - the backend that is - number of video outputs, audio?
+  hmm::HMMConfiguration config;
+  config.video[hmm::HMM::STIMPOS_CENTER] = "center";
+  f_pmm = new hmm::HMM(config);
+
+//  // args can be filename(s)
+//  for (int i=1; i<argc; i++)
+//  {
+//	  boost::filesystem::path p(argv[i]);
+//	  if (exists(p) && is_regular_file(p))
+//	  {
+//		  unsigned int ifile = f_pmm->addStimInfo(argv[i], true);
+//		  //unsigned int ifile=0;
+//		  g_print("Source (%u) %s\n", ifile, argv[i]);
+//	  }
+//	  else
+//		  g_print("not found %s\n", argv[i]);
+//  }
 
   g_print("create main loop\n");
   loop = g_main_loop_new (NULL, FALSE);

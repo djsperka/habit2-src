@@ -31,9 +31,10 @@ private:
 	GstElement *m_bin;			// element for seeks on this source
 	std::map<HMMStreamType, stream_ptr> m_streamMap;
 	bool m_bloop;
+	unsigned int m_volume;
 
 public:
-	Source(HMMSourceType t, GstElement *bin, bool loop=false);
+	Source(HMMSourceType t, GstElement *bin, bool loop=false, unsigned int volume=0);
 	Source(const Source&) = delete;
 	virtual ~Source() {};
 	void operator=(const Source&) = delete;
@@ -44,6 +45,8 @@ public:
 	GstElement *bin() { return m_bin; }
 	void setLooping(bool b) { m_bloop = b; }
 	bool isLooping() { return m_bloop; }
+	void setVolume(unsigned int v100) { m_volume = v100; }
+	unsigned int volume() const { return m_volume; }
 };
 
 }

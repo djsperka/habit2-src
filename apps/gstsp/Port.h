@@ -20,16 +20,15 @@ class Stim;
 class Port
 {
 	typedef std::map<HMMStimPosition, GstElement *> HMMPortPosEleMap;
-	HMMPortPosEleMap m_mapPosEle;				// video only; StimPosition <--> GstElement (downstream)
-	GstElement *m_mixer;						// the actual mixer used in pipeline
-	std::list<GstPad *> m_listRequestPads;		// request pads taken from audio mixer
+	HMMPortPosEleMap m_mapPosVideo;				// video only; StimPosition <--> GstElement (downstream)
+	HMMPortPosEleMap m_mapPosAudio;				// audio only; StimPosition <--> GstElement (mixer downstream)
 
 public:
 	Port();
 	virtual ~Port();
 
 	void addVideoEle(HMMStimPosition pos, GstElement *ele);
-	void addAudioMixer(GstElement *mixer);
+	void addAudioEle(HMMStimPosition pos, GstElement *mixer);
 
 	void connect(Stim& stim);	// assumes not connected, will throw otherwise
 	void disconnect();				// might not be connected, will be OK if not
