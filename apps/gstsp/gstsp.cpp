@@ -8,7 +8,8 @@
 #include "HMM.h"
 //#include "MM1.h"
 #include <boost/filesystem.hpp>
-#include <rapidjson/>
+#include <sstream>
+//#include <rapidjson/>
 
 //MM1 *f_pmm1=NULL;
 hmm::HMM *f_pmm=NULL;
@@ -64,7 +65,7 @@ int main (int argc, char **argv)
 
 
 /* Process keyboard input */
-gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loop)
+gboolean handle_keyboard (GIOChannel * source, GIOCondition, GMainLoop *loop)
 {
   gchar *str = NULL;
 
@@ -79,7 +80,8 @@ gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loo
 	  unsigned int ui = (unsigned int)atoi(str+1);
 	  try
 	  {
-		  f_pmm->preroll(ui);
+		  hmm::HMMInstanceID iid = f_pmm->preroll(ui);
+		  g_print("prerolled stimid %lu got instance ID %lu\n", ui, (unsigned int)iid);
 	  }
 	  catch (std::exception const &e)
 	  {
@@ -92,7 +94,8 @@ gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loo
 	  unsigned int ui = (unsigned int)atoi(str+1);
 	  try
 	  {
-		  f_pmm->play(ui);
+		  g_print("attempt to play instance ID %lu\n", ui);
+		  f_pmm->play((hmm::HMMInstanceID)ui);
 	  }
 	  catch (std::exception const &e)
 	  {

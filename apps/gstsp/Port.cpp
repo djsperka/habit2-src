@@ -131,3 +131,18 @@ void Port::disconnect()
 	}
 }
 
+std::vector<HMMStimPosition> Port::getVideoPositions() const
+{
+	std::vector<HMMStimPosition> vec;
+	for (HMMPortPosEleMap::const_iterator it = m_mapPosVideo.begin(); it!= m_mapPosVideo.end(); it++)
+		vec.push_back(it->first);
+	return vec;
+}
+
+std::vector<HMMStimPosition> Port::getAudioPositions() const
+{
+	std::vector<HMMStimPosition> vec;
+	for (HMMPortPosEleMap::const_iterator it = m_mapPosAudio.begin(); it!= m_mapPosAudio.end(); it++)
+		vec.push_back(it->first);
+	return vec;
+}

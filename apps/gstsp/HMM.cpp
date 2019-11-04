@@ -6,6 +6,8 @@
  */
 
 #include "HMM.h"
+#include <algorithm>
+#include <vector>
 using namespace hmm;
 
 bool f_looping = false;
@@ -20,7 +22,7 @@ const HMMStimPosition HMM::STIMPOS_AUDIO = 4;
 HMM::HMM(const HMMConfiguration& config)
 {
 //	GstElement *conv, *scale, *vsink;
-	m_stimidBkgd = 0;		// TODO: should do this somehow with addStimInfo? There id starts at 1, so OK with 0 here.
+	m_iidBkgd = 0;		// TODO: should do this somehow with addStimInfo? There id starts at 1, so OK with 0 here.
 
 	// create pipeline
 	m_pipeline = gst_pipeline_new (NULL);
@@ -98,9 +100,9 @@ HMM::HMM(const HMMConfiguration& config)
 		m_port.addAudioEle(it->first, audioMixer);
 	}
 
-	m_stimMap.insert(std::make_pair(m_stimidBkgd, pbkgd));
-	m_stimidCurrent = m_stimidBkgd;
-	g_print("HMM(): m_port.connect( bkgd = %lu)\n", m_stimidBkgd);
+	m_instanceMap.insert(std::make_pair(m_iidBkgd, pbkgd));
+	m_iidCurrent = m_iidBkgd;
+	g_print("HMM(): m_port.connect( bkgd = %lu)\n", m_iidBkgd);
 	m_port.connect(*pbkgd);
 	gst_element_set_state(m_pipeline, GST_STATE_PLAYING);
 
@@ -113,36 +115,20 @@ HMM::~HMM()
 
 HMMStimID HMM::addStim(const Habit::StimulusSettings& settings)
 {
-	HMMStimID id = (HMMStimID)((unsigned long)m_stimInfoMap.size()+1);
-	m_ssmap.insert(make_pair(id, settings));
+	HMMStimID id = (HMMStimID)((unsigned long)m_ssMap.size()+1);
+	m_ssMap.insert(std::make_pair(id, settings));
 	return id;
 }
 
-//HMMStimID HMM::addStimInfo(const std::string& filename_or_description, bool bIsFile)
-//{
-//	HMMStimID id = (HMMStimID)((unsigned long)m_stimInfoMap.size()+1);
-//	m_stimInfoMap.insert(make_pair(id, make_pair(bIsFile, filename_or_description)));
-//	return id;
-//}
-
-Stim *HMM::getStim(HMMStimID id)
+Stim *HMM::getStimInstance(HMMInstanceID id)
 {
 	Stim *pstim = NULL;
-	if (m_stimMap.count(id) > 0)
+	if (m_instanceMap.count(id) > 0)
 	{
-		pstim = m_stimMap[id].get();
+		pstim = m_instanceMap[id].get();
 	}
 	return pstim;
 }
-
-HMMVideoTail* HMM::getVideoTail(HMMStimPosition pos)
-{
-	HMMVideoTail *ptail=NULL;
-	if (m_stimTailMap.count(pos) == 1)
-		ptail = &m_stimTailMap[pos];
-	return ptail;
-}
-
 
 void HMM::dump(const char *c)
 {
@@ -162,18 +148,21 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	//
 	// Prerolling the stim means prerolling each individual source. Only when all sources are prerolled
 	// is the stim fully prerolled.
-	//
-	// instead, assume a single source, video only
 
-	unsigned long iid = 1000 + m_instanceMap.size();
-	HMMInstanceID instanceID(iid, id);
-	m_instanceMap[instanceID] = makeStim(m_ssMap.at(id));
+	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceMap.size());
+	m_instanceMap[instanceID] = stim_ptr(makeStim(m_ssMap.at(id)));
+
+	// Now sync all elements with parent
+	for (std::map<HMMInstanceID, stim_ptr>::iterator it = m_instanceMap[instanceID]->sourceMap().begin(); it != m_instanceMap[instanceID]->sourceMap().end(); it++)
+	{
+		gst_element_sync_state_with_parent(it.second->bin());
+	}
 
 	return instanceID;
 }
 
 
-void HMM::play(HMMInstanceID id)
+void HMM::play(const HMMInstanceID& id)
 {
 	if (m_instanceMap.count(id) != 1)
 		throw std::runtime_error("instance id not found, cannot play.");
@@ -193,7 +182,7 @@ void HMM::play(HMMInstanceID id)
 	Stim *pstimCurrent = m_instanceMap[m_iidCurrent].get();
 	Stim *pstimPending = m_instanceMap[id].get();
 
-	PlayStimCounter *pcounterPlay = new PlayStimCounter(m_stimidCurrent, id, this, (int)pstimCurrent->sourceMap().size());
+	PlayStimCounter *pcounterPlay = new PlayStimCounter(pstimCurrent, pstimPending, this, (int)pstimCurrent->sourceMap().size());
 	for (std::pair<const HMMStimPosition, Stim::source_ptr>& p: pstimCurrent->sourceMap())
 	{
 		Source* psrc = p.second.get();
@@ -210,78 +199,75 @@ void HMM::play(HMMInstanceID id)
 			if (pp.first == HMMStreamType::VIDEO)
 			{
 				pp.second->setProbeID(
-						//gst_pad_add_probe(pp.second->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HMM::padProbeBlockCallback, pcounter, NULL)
 						gst_pad_add_probe(pp.second->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM|GST_PAD_PROBE_TYPE_IDLE), &HMM::padProbeBlockCallback, pcounter, NULL)
-						//gst_pad_add_probe(pp.second->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_IDLE/*|GST_PAD_PROBE_TYPE_BLOCK*/), &HMM::padProbeIdleCallback, pcounter, NULL)
 						);
 				g_print("added probe for stream type %d: block %lu\n", pp.first, pp.second->getProbeID());
 			}
 		}
 	}
-	// NOT YET m_stimidCurrent = id;
 }
 
 
-HMMStimID HMM::swap(HMMStimID id)
-{
-	HMMStimID current = m_stimidCurrent;
-	g_print("HMM::swap(current %lu new %lu\n", current, id);
-	for (std::pair<const HMMStimPosition, Stim::source_ptr>& p: getStim(m_stimidCurrent)->sourceMap())
-	{
-		if (p.first > 0)
-		{
-			Source* psrc = p.second.get();
-			Source* psrcPending = getStim(id)->getSource(p.first);
-			if (!psrcPending)
-				throw std::runtime_error("Pending source not found corresponding to current src");
-			// does current source have a video stream?
-			Stream *pvideoCurrent = psrc->getStream(HMMStreamType::VIDEO);
-			Stream *pvideoPending = psrcPending->getStream(HMMStreamType::VIDEO);
-
-			if (pvideoCurrent)
-			{
-				if (!pvideoPending)
-					throw std::runtime_error("Pending source missing video stream");
-
-				// unlink
-				HMMVideoTail* ptail = getVideoTail(p.first);
-				if (!ptail)
-					throw std::runtime_error("cannot find video tail");
-				GstPad *psink = gst_element_get_static_pad(ptail->m_conv, "sink");
-				gst_pad_unlink(pvideoCurrent->srcpad(), psink);
-
-				// link
-				gst_pad_link(pvideoPending->srcpad(), psink);
-
-				// set offset on tail pad
-				GstClockTime abs = gst_clock_get_time(gst_element_get_clock(ptail->m_conv));
-				GstClockTime base = gst_element_get_base_time(ptail->m_conv);
-				gst_pad_set_offset(psink, abs-base);
-				gst_object_unref(psink);
-
-				g_print("Set offset on tail pad to %lums\n", GST_TIME_AS_MSECONDS(abs-base));
-				// remove probe on the pending video src pad
-				g_print("remove probe on pad, probeid %d\n", pvideoPending->getProbeID());
-				gst_pad_remove_probe(pvideoPending->srcpad(), pvideoPending->getProbeID());
-
-				// finally, do flushing seek on removed source
-				// TODO - the actual disposition of the source really controlled at the stim level
-
-				GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
-				GstStructure *structure = gst_structure_new("seek", "id", G_TYPE_ULONG, current, "pos", G_TYPE_INT, p.first,  NULL);
-				gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(pipeline()), structure));
-				gst_object_unref(bus);
-
-
-			}
-			else
-				throw std::runtime_error("Current source has video pos but no video stream");
-		}
-	}
-	m_stimidCurrent = id;
-	g_print("HMM::swap - done\n");
-	return current;
-}
+//HMMStimID HMM::swap(HMMStimID id)
+//{
+//	HMMInstanceID current = m_iidCurrent;
+//	g_print("HMM::swap(current %lu new %lu\n", current, id);
+//	for (std::pair<const HMMStimPosition, Stim::source_ptr>& p: getStimInstance(m_iidCurrent)->sourceMap())
+//	{
+//		if (p.first > 0)
+//		{
+//			Source* psrc = p.second.get();
+//			Source* psrcPending = getStim(id)->getSource(p.first);
+//			if (!psrcPending)
+//				throw std::runtime_error("Pending source not found corresponding to current src");
+//			// does current source have a video stream?
+//			Stream *pvideoCurrent = psrc->getStream(HMMStreamType::VIDEO);
+//			Stream *pvideoPending = psrcPending->getStream(HMMStreamType::VIDEO);
+//
+//			if (pvideoCurrent)
+//			{
+//				if (!pvideoPending)
+//					throw std::runtime_error("Pending source missing video stream");
+//
+//				// unlink
+//				HMMVideoTail* ptail = getVideoTail(p.first);
+//				if (!ptail)
+//					throw std::runtime_error("cannot find video tail");
+//				GstPad *psink = gst_element_get_static_pad(ptail->m_conv, "sink");
+//				gst_pad_unlink(pvideoCurrent->srcpad(), psink);
+//
+//				// link
+//				gst_pad_link(pvideoPending->srcpad(), psink);
+//
+//				// set offset on tail pad
+//				GstClockTime abs = gst_clock_get_time(gst_element_get_clock(ptail->m_conv));
+//				GstClockTime base = gst_element_get_base_time(ptail->m_conv);
+//				gst_pad_set_offset(psink, abs-base);
+//				gst_object_unref(psink);
+//
+//				g_print("Set offset on tail pad to %lums\n", GST_TIME_AS_MSECONDS(abs-base));
+//				// remove probe on the pending video src pad
+//				g_print("remove probe on pad, probeid %d\n", pvideoPending->getProbeID());
+//				gst_pad_remove_probe(pvideoPending->srcpad(), pvideoPending->getProbeID());
+//
+//				// finally, do flushing seek on removed source
+//				// TODO - the actual disposition of the source really controlled at the stim level
+//
+//				GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
+//				GstStructure *structure = gst_structure_new("seek", "id", G_TYPE_ULONG, current, "pos", G_TYPE_INT, p.first,  NULL);
+//				gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(pipeline()), structure));
+//				gst_object_unref(bus);
+//
+//
+//			}
+//			else
+//				throw std::runtime_error("Current source has video pos but no video stream");
+//		}
+//	}
+//	m_stimidCurrent = id;
+//	g_print("HMM::swap - done\n");
+//	return current;
+//}
 
 gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 {
@@ -351,15 +337,15 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 			g_print("Got seek msg\n");
 			HMMStimID id;
 			HMMStimPosition pos;
-			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "id", G_TYPE_ULONG, &id, "pos", G_TYPE_INT, &pos, NULL))
-				throw std::runtime_error("Cannot get stuff from msg");
+			Source *psrc;
+			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "psrc", G_TYPE_POINTER, &psrc, NULL))
+				throw std::runtime_error("Cannot get source ptr from msg");
 
-			g_print("id %lu pos %d\n", id, pos);
 			if (!phmm)
-				throw std::runtime_error("Cannot get source for stim to be flushed");
+				throw std::runtime_error("Bus message (seek) does not carry hmm pointer!");
 
 			// flushing seek
-			if (!gst_element_seek(phmm->getStim(id)->getSource(pos)->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+			if (!gst_element_seek(psrc->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
 				throw std::runtime_error("seek failed");
 			}
@@ -369,28 +355,31 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 			g_print("Got loop msg\n");
 			HMMStimID id;
 			HMMStimPosition pos;
-			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "id", G_TYPE_ULONG, &id, "pos", G_TYPE_INT, &pos, NULL))
-				throw std::runtime_error("Cannot get stuff from msg");
+			Source *psrc;
+			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "psrc", G_TYPE_POINTER, &psrc, NULL))
+				throw std::runtime_error("Cannot get source from msg");
 
-			g_print("id %lu pos %d\n", id, pos);
 			if (!phmm)
-				throw std::runtime_error("Cannot get source for stim to be flushed");
+				throw std::runtime_error("Bus message (seek) does not carry hmm pointer!");
 
 			// NON-flushing seek
-			if (!gst_element_seek(phmm->getStim(id)->getSource(pos)->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
+			if (!gst_element_seek(psrc->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
 				throw std::runtime_error("LOOPING seek failed");
 			}
 		}
 		else if (gst_message_has_name (msg, "play"))
 		{
-			HMMStimID id;
+			Stim *pCurrent;
+			Stim *pPending;
 			g_print("Got play msg\n");
-			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "id", G_TYPE_ULONG, &id, NULL))
+			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "current", G_TYPE_POINTER, &pCurrent, "pending", G_TYPE_POINTER, &pPending, NULL))
 				throw std::runtime_error("Cannot get stuff from play msg");
-			g_print("play id %lu\n", id);
-			HMMStimID previous = phmm->swap(id);
-			g_print("current is %lu prev %lu\n", id, previous);
+			g_print("disconnect\n");
+			phmm->port().disconnect();
+			g_print("connect\n");
+			phmm->port().connect(*pPending);
+			g_print("done.\n");
 		}
 		break;
 	}
@@ -400,41 +389,119 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 	return TRUE;
 }
 
-Stim* HMM::makeStimFromFile(HMMStimID id, const std::string& filename)
+
+Stim *HMM::makeStim(const Habit::StimulusSettings& ss)
 {
 	Stim *pstim=new Stim();
-	pstim->setStimState(HMMStimState::PREROLLING);
+	pstim->setStimState(HMMStimState::INITIALIZING);
 
-	// Our stim have just one source, a file at pos 1
-	StimPrerollCounter *pstimCounter = new StimPrerollCounter(id, pstim, 1);
+	// This counter is triggered once all the sources have been prerolled.
+	// It needs to know how many sources there are (whih are being prerolled), and it is passed to the counter
+	// used for each source - when they are triggered (i.e. each stream in the source is prerolled),
+	// they decrement this counter.
+	// Note that below we increment this counter for each file-based source (not the
+	// bin-based videotestsrc, as it doesn't need prerolling process as the files do)
+	StimPrerollCounter *pstimCounter = new StimPrerollCounter(pstim, 0);
 
+	// Now a bit of Habit messiness. The StimulusSettings object as originally written had
+	// slots for 4 stimuli, and which ones were used depended on the StimulusDisplay settings for the experiment -
+	// single screen, dual screen, etc.
+	// In the HMM, the Port configuration is equivalent to the StimulusDisplay settings, but with
+	// one complication: The "StimPosition" used here is similar to the "HPlayerPositionType" (left, center, right, iss)
+	// used in habit. The complication is that the "StimPosition" is arbitrary here, whereas it had definite values
+	// assigned in Habit. I've accounted for this by making the integer values for constants HMMSTimPosition::LEFT etc
+	// equivalent to their HPlayerPositionType counterparts "number()" value.
+	std::vector<hmm::HMMStimPosition> vecPositions(m_port.getVideoPositions());
+	for (auto x: vecPositions)
+	{
+		Habit::StimulusInfo info;
+		Source *psrc;
+
+		if (x == HMM::STIMPOS_LEFT)
+		{
+			info = ss.getLeftStimulusInfo();
+		}
+		else if (x == HMM::STIMPOS_CENTER)
+		{
+			info = ss.getCenterStimulusInfo();
+		}
+		else if (x == HMM::STIMPOS_RIGHT)
+		{
+			info = ss.getRightStimulusInfo();
+		}
+		else
+			throw std::runtime_error("Port has non-Habit video position.");
+
+		// check type of stim. In StimulusInfo, first check if its a color, then assume file.
+		// TODO: accomodate 'bin' types.
+		if (info.isColor() || info.isBackground())
+		{
+			throw std::runtime_error("HMM::makeStim - cannot do color.");
+		}
+		else
+		{
+			// has to be a file
+			pstimCounter->increment();
+			psrc = makeSourceFromFile(info.getAbsoluteFileName().toStdString(), HMMSourceType::AUDIO_VIDEO, info.isLoopPlayBack(), info.getVolume());
+			pstim->addSource(x, psrc);
+
+			// make a functor to manage the preroll process
+			// TODO this is a mem leak!
+			SourcePrerollCounter* psourceCounter = new SourcePrerollCounter(psrc, m_pipeline, 1, pstimCounter);
+
+			g_signal_connect (psrc->bin(), "pad-added", G_CALLBACK(HMM::padAddedCallback), psourceCounter);
+			g_signal_connect (psrc->bin(), "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), psourceCounter);
+		}
+	}
+}
+
+Source *HMM::makeSourceFromFile(const std::string& filename, HMMSourceType stype, bool loop, unsigned int volume)
+{
 	std::string uri("file://");
 	uri.append(filename);
 	GstElement *ele = gst_element_factory_make("uridecodebin", NULL);
 	g_object_set (ele, "uri", uri.c_str(), NULL);
 	gst_object_ref(ele);
 	gst_bin_add(GST_BIN(m_pipeline), ele);
-	Source *psrc = new Source(HMMSourceType::VIDEO_ONLY, ele, true);
-	pstim->addSource(VIDEO_POS, psrc);
-
-	// make a functor to manage the preroll process
-	// TODO this is a mem leak!
-	SourcePrerollCounter* psourceCounter = new SourcePrerollCounter(id, VIDEO_POS, psrc, m_pipeline, 1, pstimCounter);
-
-	g_signal_connect (ele, "pad-added", G_CALLBACK(HMM::padAddedCallback), psourceCounter);
-	g_signal_connect (ele, "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), psourceCounter);
-
-	gst_element_sync_state_with_parent (ele);
-
-	return pstim;
+	Source *psrc = new Source(stype, ele, loop, volume);
+	return psrc;
 }
 
-Stim* hmm::HMM::makeStimFromDesc(HMMStimID id, const std::string& description)
-{
-	Stim *pstim=NULL;
-	throw std::runtime_error("cannot make stim from desc");	// todo, sync with parent()?
-	return pstim;
-}
+//Stim* HMM::makeStimFromFile(HMMStimID id, const std::string& filename)
+//{
+//	Stim *pstim=new Stim();
+//	pstim->setStimState(HMMStimState::INITIALIZING);
+//
+//	// Our stim have just one source, a file at pos 1
+//	StimPrerollCounter *pstimCounter = new StimPrerollCounter(id, pstim, 1);
+//
+//	std::string uri("file://");
+//	uri.append(filename);
+//	GstElement *ele = gst_element_factory_make("uridecodebin", NULL);
+//	g_object_set (ele, "uri", uri.c_str(), NULL);
+//	gst_object_ref(ele);
+//	gst_bin_add(GST_BIN(m_pipeline), ele);
+//	Source *psrc = new Source(HMMSourceType::VIDEO_ONLY, ele, true);
+//	pstim->addSource(VIDEO_POS, psrc);
+//
+//	// make a functor to manage the preroll process
+//	// TODO this is a mem leak!
+//	SourcePrerollCounter* psourceCounter = new SourcePrerollCounter(id, VIDEO_POS, psrc, m_pipeline, 1, pstimCounter);
+//
+//	g_signal_connect (ele, "pad-added", G_CALLBACK(HMM::padAddedCallback), psourceCounter);
+//	g_signal_connect (ele, "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), psourceCounter);
+//
+//	gst_element_sync_state_with_parent (ele);
+//
+//	return pstim;
+//}
+//
+//Stim* HMM::makeStimFromDesc(HMMStimID id, const std::string& description)
+//{
+//	Stim *pstim=NULL;
+//	throw std::runtime_error("cannot make stim from desc");	// todo, sync with parent()?
+//	return pstim;
+//}
 
 
 void HMM::noMorePadsCallback(GstElement *, SourcePrerollCounter *pcounter)
@@ -469,7 +536,6 @@ void HMM::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pco
 				gint num = gst_value_get_fraction_numerator(v);
 				if (num == 0)
 				{
-					gboolean gb;
 					GstElement *freeze = gst_element_factory_make("imagefreeze", NULL);
 					if (!freeze)
 						throw std::runtime_error("Cannot create freeze element");
@@ -557,7 +623,7 @@ GstPadProbeReturn HMM::eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, 
 
 			// post bus message to flush
 			GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pcounter->pipeline()));
-			GstStructure *structure = gst_structure_new("loop", "id", G_TYPE_ULONG, pcounter->id(), "pos", G_TYPE_INT, pcounter->pos(),  NULL);
+			GstStructure *structure = gst_structure_new("loop", "psrc", G_TYPE_POINTER, pcounter->source(), NULL);
 			gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(pcounter->source()->bin()), structure));
 			gst_object_unref(bus);
 
