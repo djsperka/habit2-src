@@ -32,28 +32,22 @@ public:
 
 class StimPrerollCounter: public Counter
 {
-	HMMStimID m_id;
 	Stim *m_pstim;
 public:
-	StimPrerollCounter(HMMStimID id, Stim *pstim, int counter=0): Counter(counter), m_id(id), m_pstim(pstim) {}
+	StimPrerollCounter(Stim *pstim, int counter=0): Counter(counter), m_pstim(pstim) {}
 	void operator()(void);
 	Stim *stim() const { return m_pstim; }
-	HMMStimID id() const {return m_id; }
 };
 
 class SourcePrerollCounter: public Counter
 {
-	HMMStimID m_id;
-	HMMStimPosition  m_pos;
 	Source *m_psource;
 	GstElement *m_pipeline;
 public:
-	SourcePrerollCounter(HMMStimID id, HMMStimPosition pos, Source *psource, GstElement *pipeline, int counter=0, Counter *psubCounter=NULL): Counter(counter, psubCounter), m_id(id), m_pos(pos), m_psource(psource), m_pipeline(pipeline) {}
+	SourcePrerollCounter(Source *psource, GstElement *pipeline, int counter=0, Counter *psubCounter=NULL): Counter(counter, psubCounter), m_psource(psource), m_pipeline(pipeline) {}
 	void operator()(void);
 	Source *source() const { return m_psource; }
-	HMMStimID id() const {return m_id; }
 	GstElement *pipeline() const { return m_pipeline; }
-	HMMStimPosition pos() const { return m_pos; }
 };
 
 // can use this on sources to carry along another counter to act on stim.
@@ -81,14 +75,14 @@ public:
 
 class PlayStimCounter: public Counter
 {
-	HMMStimID m_stimidCurrent;
-	HMMStimID m_stimidPending;
+	Stim *m_pCurrent;
+	Stim *m_pPending;
 	HMM* m_phmm;
 public:
-	PlayStimCounter(HMMStimID current, HMMStimID pending, HMM* phmm, int counter=0): Counter(counter), m_stimidCurrent(current), m_stimidPending(pending), m_phmm(phmm) {}
+	PlayStimCounter(Stim *current, Stim *pending, HMM* phmm, int counter=0): Counter(counter), m_pCurrent(current), m_pPending(pending), m_phmm(phmm) {}
 	~PlayStimCounter() {}
-	HMMStimID current() { return m_stimidCurrent; }
-	HMMStimID pending() { return m_stimidPending; }
+	Stim *current() { return m_pCurrent; }
+	Stim *pending() { return m_pPending; }
 	HMM* hmm() { return m_phmm; }
 	void operator()(void);
 };

@@ -10,7 +10,7 @@
 
 #include "HMMTypes.h"
 #include <map>
-#include <list>
+#include <vector>
 #include <string>
 #include <gst/gst.h>
 #include "stimulussettings.h"
@@ -62,8 +62,7 @@ class HMM
 	std::map<HMMInstanceID, stim_ptr> m_instanceMap;
 
 	HMMInstanceID m_iidCurrent;
-	HMMInstanceID m_stimidBkgd;
-	//HMMStimID m_stimidPending;
+	HMMInstanceID m_iidBkgd;
 
 	// The Port grew out of the VideoTail - it represents a receptacle with a spot for each video stream
 	// required ("Center", or "left"/"right"), and the optional spots in the audio mixer for sound.
@@ -75,12 +74,14 @@ class HMM
 
 
 	// substitute stim with 'id' for current stim, make it current (return previous stimid)
-	HMMStimID swap(HMMStimID id);
+	//HMMStimID swap(HMMStimID id);
 
 	// factory
 	Stim *makeStim(const Habit::StimulusSettings& ss);
-	Stim* makeStimFromFile(HMMStimID id, const std::string& filename);
-	Stim* makeStimFromDesc(HMMStimID id, const std::string& description);
+	//Stim* makeStimFromFile(HMMStimID id, const std::string& filename);
+	//Stim* makeStimFromDesc(HMMStimID id, const std::string& description);
+	Source *makeSourceFromFile(const std::string& filename, HMMSourceType stype, bool loop = false, unsigned int volume=0);
+
 
 public:
 	HMM(const HMMConfiguration& config);
@@ -97,7 +98,7 @@ public:
 	// add a (single) file as a source
 	//HMMStimID addStimInfo(const std::string& filename_or_description, bool bIsFile=true);
 	HMMStimID addStim(const Habit::StimulusSettings& settings);
-	Stim *getStim(HMMStimID id);
+	Stim *getStimInstance(HMMInstanceID id);
 	HMMInstanceID preroll(HMMStimID id);
 	void play(const HMMInstanceID& id);
 	void dump(const char *c);
@@ -105,6 +106,9 @@ public:
 	// tail
 	//void addVideoTail(HMMStimPosition pos, HMMVideoTail tail) { m_stimTailMap[pos] = tail; }
 	//HMMVideoTail* getVideoTail(HMMStimPosition pos);
+
+	// Port access
+	Port &port() { return m_port; }
 
 	// get stuff
 	GstElement *pipeline() { return m_pipeline; }

@@ -11,7 +11,7 @@
 #include "HMMTypes.h"
 #include <gst/gst.h>
 #include <map>
-#include <list>
+#include <vector>
 
 namespace hmm {
 
@@ -29,6 +29,9 @@ public:
 
 	void addVideoEle(HMMStimPosition pos, GstElement *ele);
 	void addAudioEle(HMMStimPosition pos, GstElement *mixer);
+
+	std::vector<HMMStimPosition> getVideoPositions() const;
+	std::vector<HMMStimPosition> getAudioPositions() const;
 
 	void connect(Stim& stim);	// assumes not connected, will throw otherwise
 	void disconnect();				// might not be connected, will be OK if not
