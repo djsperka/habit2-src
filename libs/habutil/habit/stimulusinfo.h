@@ -41,7 +41,7 @@ namespace Habit
 		// case BEWARE: there may be a value for filename.
 		// Note getAbsoluteFilenameOrColor() is intended for display use, please don't rely on parsing it.
 		QString getFileName() const;
-		QString getAbsoluteFileName(const QDir& stimBaseDir) const;
+		QString getAbsoluteFileName(const QDir& stimBaseDir = QDir("/")) const;
 		QString getAbsoluteFilenameOrColor(const QDir& stimBaseDir) const;
 		void setFileName(const QString& fileName);
 		bool isBackground() const;
