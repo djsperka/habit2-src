@@ -168,6 +168,7 @@ void HPhase::onTrialCompleteEntered()
 
 		// Even when the phase is complete, make sure to preroll as needed.
 		// This should start with the next phase/context.
+		qDebug() << "HPhase::onTrialCompleteEntered(): call prerollNextPhase( " << context() << ")";
 		experiment().prerollNextPhase(context());
 
 	}
@@ -178,6 +179,7 @@ void HPhase::onTrialCompleteEntered()
 		machine()->postEvent(new HNewTrialEvent());
 
 		// now request prerolling. This call uses the updated trial number
+		qDebug() << "HPhase::onTrialCompleteEntered(): call prerollAsNeeded(" << context() << ", " << m_itrial << ")";
 		experiment().prerollAsNeeded(context(), m_itrial);
 	}
 };

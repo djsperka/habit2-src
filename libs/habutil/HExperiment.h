@@ -45,6 +45,8 @@ struct PhT
 QDebug operator<<(QDebug dbg, const PhT& pht);
 
 
+// The stimuli for a phase(context) are saved here in the order they will be used. There is one StimulusSettings obj
+// per trial - that is the stim played during that trial.
 struct PhaseStimStuff
 {
 	PhaseStimStuff(const Habit::HStimulusSettingsList& l, int c, bool b) : sslist(l), context(c), isHabituation(b) {};
@@ -56,11 +58,21 @@ struct PhaseStimStuff
 
 QDebug operator<<(QDebug dbg, const PhaseStimStuff& pss);
 
+
 typedef QList< PhaseStimStuff > PhaseStimulusLists;
 typedef QList< PhT > PhTList;
 typedef QMap<PhT, unsigned int> PhTStimidMap;
 typedef QList<unsigned int> StimidList;
 typedef QList<QPair<PhT, unsigned int> > PhTStimidPairList;
+
+class PhaseStimStuffVector: public QVector<PhaseStimStuff>
+{
+public:
+	PhaseStimStuffVector(): QVector<PhaseStimStuff>() {}
+	virtual ~PhaseStimStuffVector() {}
+	bool hasContext(int c);
+	const PhaseStimStuff& atContext(int c);
+};
 
 class HExperiment: public HLogState
 {
@@ -107,7 +119,7 @@ private Q_SLOTS:
 
 private:
 	HLookDetector& m_ld;
-	PhaseStimulusLists m_phaseStimulusLists;
+	PhaseStimulusLists m_phaseStimulusLists;	// list of phases in the experiment, with the stim for each
 	PhTStimidMap m_prerolled;					// curated stimuli that we've prerolled here
 	PhTStimidPairList m_cleanup;				// curated stimuli that need to be cleaned up
 

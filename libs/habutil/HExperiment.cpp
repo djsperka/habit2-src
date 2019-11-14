@@ -12,6 +12,7 @@
 #include <QObject>
 #include <algorithm>
 
+
 HExperiment::HExperiment(HEventLog& log, HLookDetector& ld, QState* parent)
 : HLogState(log, "HExperiment", parent)
 , m_ld(ld)
@@ -135,6 +136,7 @@ void HExperiment::prerollNextPhase(int context_current)
 	// get context of next phase, if any
 	PhaseStimulusLists::iterator it;
 	it = std::find_if(m_phaseStimulusLists.begin(), m_phaseStimulusLists.end(), [context_current](const PhaseStimStuff& psstuff) { return psstuff.context == context_current; });
+	qDebug() << "HExperiment::prerollNextPhase(current=" << context_current << "): found next context " << it->context;
 	if (it != m_phaseStimulusLists.end())
 		prerollAsNeeded(it->context);
 }
@@ -176,13 +178,16 @@ void HExperiment::prerollList(const PhTList& l)
 
 Habit::StimulusSettings HExperiment::getStimulusSettings(const PhT& pht)
 {
-	Q_ASSERT_X(
-			(pht.context<m_phaseStimulusLists.size() &&
-			pht.trial<m_phaseStimulusLists.at(pht.context).sslist.size()),
-			"HExperiment::getStimulusSettings",
-			"Context/trial not found"
-			);
-	return m_phaseStimulusLists.at(pht.context).sslist.at(pht.trial);
+	//verify that we can find the context and trial in m_phaseStimulusLists
+	PhaseStimulusLists::iterator it;
+	it = std::find_if(m_phaseStimulusLists.begin(), m_phaseStimulusLists.end(), [pht](const PhaseStimStuff& psstuff) { return psstuff.context == pht.context; });
+	if (it == m_phaseStimulusLists.end())
+	{
+		qCritical() << "HExperiment::getStimulusSettings: Context/trial " << pht << " not found.";
+		Q_ASSERT(false);
+	}
+	return it->sslist.at(pht.trial);
+
 }
 
 PhTList HExperiment::nextTrials(int context, int trial, int n)
