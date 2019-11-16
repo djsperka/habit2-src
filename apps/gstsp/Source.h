@@ -25,11 +25,12 @@ namespace hmm {
 class Source
 {
 public:
-	typedef std::unique_ptr<Stream> stream_ptr;
+	//typedef std::unique_ptr<Stream> stream_ptr;
+	typedef Stream* StreamP;
 private:
 	HMMSourceType m_sourceType;	// what types of stream will be accepted in padAdded
 	GstElement *m_bin;			// element for seeks on this source
-	std::map<HMMStreamType, stream_ptr> m_streamMap;
+	std::map<HMMStreamType, StreamP> m_streamMap;
 	bool m_bloop;
 	unsigned int m_volume;
 
@@ -40,7 +41,7 @@ public:
 	void operator=(const Source&) = delete;
 	void addStream(HMMStreamType t, Stream *pstream);	// takes ownership
 	HMMSourceType sourceType() const { return m_sourceType; }
-	std::map<HMMStreamType, stream_ptr>& streamMap() { return m_streamMap; }
+	std::map<HMMStreamType, StreamP>& streamMap() { return m_streamMap; }
 	Stream *getStream(HMMStreamType t);
 	GstElement *bin() { return m_bin; }
 	void setLooping(bool b) { m_bloop = b; }

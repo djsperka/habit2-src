@@ -18,8 +18,8 @@ gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loo
 
 int main (int argc, char **argv)
 {
-  GIOChannel *io_stdin;
-  GMainLoop *loop;
+//  GIOChannel *io_stdin;
+//  GMainLoop *loop;
   gst_init (&argc, &argv);
 
 //  f_pmm1 = new MM1(true, false, argv[1]);
@@ -29,36 +29,23 @@ int main (int argc, char **argv)
   config.video[hmm::HMM::STIMPOS_CENTER] = "center";
   f_pmm = new hmm::HMM(config);
 
-//  // args can be filename(s)
-//  for (int i=1; i<argc; i++)
-//  {
-//	  boost::filesystem::path p(argv[i]);
-//	  if (exists(p) && is_regular_file(p))
-//	  {
-//		  unsigned int ifile = f_pmm->addStimInfo(argv[i], true);
-//		  //unsigned int ifile=0;
-//		  g_print("Source (%u) %s\n", ifile, argv[i]);
-//	  }
-//	  else
-//		  g_print("not found %s\n", argv[i]);
-//  }
+//  g_print("create main loop\n");
+//  loop = g_main_loop_new (NULL, FALSE);
 
-  g_print("create main loop\n");
-  loop = g_main_loop_new (NULL, FALSE);
 
-  /* Add a keyboard watch so we get notified of keystrokes */
-#ifdef G_OS_WIN32
-  io_stdin = g_io_channel_win32_new_fd (fileno (stdin));
-#else
-  io_stdin = g_io_channel_unix_new (fileno (stdin));
-#endif
-  g_io_add_watch (io_stdin, G_IO_IN, (GIOFunc) handle_keyboard, loop);
-
-  g_print("run loop\n");
-  g_main_loop_run (loop);
-
-  g_main_loop_unref (loop);
-  g_print("quitting\n");
+//  /* Add a keyboard watch so we get notified of keystrokes */
+//#ifdef G_OS_WIN32
+//  io_stdin = g_io_channel_win32_new_fd (fileno (stdin));
+//#else
+//  io_stdin = g_io_channel_unix_new (fileno (stdin));
+//#endif
+//  g_io_add_watch (io_stdin, G_IO_IN, (GIOFunc) handle_keyboard, loop);
+//
+//  g_print("run loop\n");
+//  g_main_loop_run (loop);
+//
+//  g_main_loop_unref (loop);
+//  g_print("quitting\n");
 
   return 0;
 }

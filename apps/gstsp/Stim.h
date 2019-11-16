@@ -22,8 +22,9 @@ namespace hmm {
 class Stim
 {
 public:
-	typedef std::unique_ptr<Source> source_ptr;
-	typedef std::map<HMMStimPosition, source_ptr> HMMStimPosSourceMap;
+	//typedef std::unique_ptr<Source> source_ptr;
+	typedef Source* SourceP;
+	typedef std::map<HMMStimPosition, SourceP> HMMStimPosSourceMap;
 private:
 	HMMStimState m_stimState;
 	HMMStimPosSourceMap m_sourceMap;
@@ -34,7 +35,7 @@ public:
 	Source *getSource(HMMStimPosition pos);
 	void setStimState(HMMStimState state) { m_stimState = state; }
 	HMMStimState getStimState() const { return m_stimState; }
-	std::map<HMMStimPosition, source_ptr>& sourceMap() { return m_sourceMap; }
+	std::map<HMMStimPosition, SourceP>& sourceMap() { return m_sourceMap; }
 };
 
 
