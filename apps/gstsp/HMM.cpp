@@ -24,6 +24,10 @@ HMM::HMM(const HMMConfiguration& config)
 //	GstElement *conv, *scale, *vsink;
 	m_iidBkgd = 0;		// TODO: should do this somehow with addStimInfo? There id starts at 1, so OK with 0 here.
 
+	// launch main loop thread
+	m_pgml = g_main_loop_new(NULL, FALSE);
+	m_gthread = g_thread_new("HMM-main-loop", &HMM::threadFunc, m_pgml);
+
 	// create pipeline
 	m_pipeline = gst_pipeline_new (NULL);
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
@@ -108,9 +112,29 @@ HMM::HMM(const HMMConfiguration& config)
 
 }
 
+gpointer HMM::threadFunc(gpointer user_data)
+{
+	GMainLoop *pgml = (GMainLoop *)user_data;
+	// create and start main loop here
+	qDebug() << "HMM::threadFunc: starting main loop\n";
+	g_main_loop_run(pgml);
+	qDebug() << "HMM::threadFunc: main loop ended\n";
+	return NULL;
+}
+
 
 HMM::~HMM()
 {
+	// exit main loop
+	qDebug() << "HMM::~HMM: quit main loop";
+	g_main_loop_quit(m_pgml);
+	qDebug() << "HMM::~HMM: g_thread_join...";
+	g_thread_join(m_gthread);
+	qDebug() << "HMM::~HMM: g_thread_join done\n";
+
+	g_main_loop_unref(m_pgml);
+	g_thread_unref(m_gthread);
+
 }
 
 HMMStimID HMM::addStim(const Habit::StimulusSettings& settings)
@@ -122,10 +146,10 @@ HMMStimID HMM::addStim(const Habit::StimulusSettings& settings)
 
 Stim *HMM::getStimInstance(HMMInstanceID id)
 {
-	Stim *pstim = NULL;
+	StimP pstim = NULL;
 	if (m_instanceMap.count(id) > 0)
 	{
-		pstim = m_instanceMap[id].get();
+		pstim = m_instanceMap[id];
 	}
 	return pstim;
 }
@@ -150,14 +174,13 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	// is the stim fully prerolled.
 
 	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceMap.size());
-	m_instanceMap[instanceID] = stim_ptr(makeStim(m_ssMap.at(id)));
+	m_instanceMap[instanceID] = makeStim(m_ssMap.at(id));
 
-	// Now sync all elements with parent
-	for (std::map<HMMInstanceID, stim_ptr>::iterator it = m_instanceMap[instanceID]->sourceMap().begin(); it != m_instanceMap[instanceID]->sourceMap().end(); it++)
+	// Now sync all elements in the newly-created Stim with parent.
+	for (std::map<HMMStimPosition, Stim::SourceP>::iterator it = m_instanceMap[instanceID]->sourceMap().begin(); it != m_instanceMap[instanceID]->sourceMap().end(); it++)
 	{
-		gst_element_sync_state_with_parent(it.second->bin());
+		gst_element_sync_state_with_parent(it->second->bin());
 	}
-
 	return instanceID;
 }
 
@@ -179,20 +202,20 @@ void HMM::play(const HMMInstanceID& id)
 	// One detail that is important is to set the offset on the sink pad side of the new connection. The offset
 	// should be the current running time (VERIFY THIS)
 
-	Stim *pstimCurrent = m_instanceMap[m_iidCurrent].get();
-	Stim *pstimPending = m_instanceMap[id].get();
+	Stim *pstimCurrent = m_instanceMap[m_iidCurrent];
+	Stim *pstimPending = m_instanceMap[id];
 
 	PlayStimCounter *pcounterPlay = new PlayStimCounter(pstimCurrent, pstimPending, this, (int)pstimCurrent->sourceMap().size());
-	for (std::pair<const HMMStimPosition, Stim::source_ptr>& p: pstimCurrent->sourceMap())
+	for (std::pair<HMMStimPosition, Stim::SourceP> p: pstimCurrent->sourceMap())
 	{
-		Source* psrc = p.second.get();
-		Source* psrcPending = pstimPending->getSource(p.first);
+		Stim::SourceP psrc = p.second;
+		Stim::SourceP psrcPending = pstimPending->getSource(p.first);
 		g_print("will set blocking (IDLE) probe for src pos %d\n", p.first);
 		if (!psrcPending)
 			throw std::runtime_error("Pending source not found corresponding to current src");
 
 		NoopCounter *pcounter = new NoopCounter((int)(psrc->streamMap().size()), pcounterPlay);
-		for (std::pair<const HMMStreamType, Source::stream_ptr>& pp: psrc->streamMap())
+		for (std::pair<HMMStreamType, Source::StreamP> pp: psrc->streamMap())
 		{
 			// now put blocking probe on each stream, with a Noop counter holding a swap counter
 
@@ -453,6 +476,7 @@ Stim *HMM::makeStim(const Habit::StimulusSettings& ss)
 			g_signal_connect (psrc->bin(), "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), psourceCounter);
 		}
 	}
+	return pstim;
 }
 
 Source *HMM::makeSourceFromFile(const std::string& filename, HMMSourceType stype, bool loop, unsigned int volume)

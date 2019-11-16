@@ -39,6 +39,8 @@ class HMM
 {
 	bool m_bVideo, m_bAudio;
 	GstElement *m_pipeline;
+	GThread *m_gthread;
+	GMainLoop *m_pgml;
 
 	// the stim info is supplied when addStim is called - it represents _the_ability_to_ display/play that "stim"
 	// What does a stim contain?
@@ -58,8 +60,9 @@ class HMM
 	//std::map<HMMStimID, stim_info> m_stimInfoMap;
 
 	std::map<HMMStimID, Habit::StimulusSettings> m_ssMap;
-	typedef std::unique_ptr<Stim> stim_ptr;
-	std::map<HMMInstanceID, stim_ptr> m_instanceMap;
+	//typedef std::unique_ptr<Stim> stim_ptr;
+	typedef Stim* StimP;
+	std::map<HMMInstanceID, StimP> m_instanceMap;
 
 	HMMInstanceID m_iidCurrent;
 	HMMInstanceID m_iidBkgd;
@@ -87,6 +90,9 @@ public:
 	HMM(const HMMConfiguration& config);
 	virtual ~HMM();
 
+	// Thread func that runs the GMainLoop and exits.
+	static gpointer threadFunc(gpointer user_data);
+
 	// const stim positions
 	static const HMMStimPosition STIMPOS_AUDIO;
 	static const HMMStimPosition STIMPOS_CONTROL;
@@ -94,18 +100,12 @@ public:
 	static const HMMStimPosition STIMPOS_CENTER;
 	static const HMMStimPosition STIMPOS_RIGHT;
 
-
 	// add a (single) file as a source
-	//HMMStimID addStimInfo(const std::string& filename_or_description, bool bIsFile=true);
 	HMMStimID addStim(const Habit::StimulusSettings& settings);
 	Stim *getStimInstance(HMMInstanceID id);
 	HMMInstanceID preroll(HMMStimID id);
 	void play(const HMMInstanceID& id);
 	void dump(const char *c);
-
-	// tail
-	//void addVideoTail(HMMStimPosition pos, HMMVideoTail tail) { m_stimTailMap[pos] = tail; }
-	//HMMVideoTail* getVideoTail(HMMStimPosition pos);
 
 	// Port access
 	Port &port() { return m_port; }
