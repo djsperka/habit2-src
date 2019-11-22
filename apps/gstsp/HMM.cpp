@@ -8,6 +8,7 @@
 #include "HMM.h"
 #include <algorithm>
 #include <vector>
+#include <sstream>
 using namespace hmm;
 
 bool f_looping = false;
@@ -19,7 +20,19 @@ const HMMStimPosition HMM::STIMPOS_CENTER = 2;
 const HMMStimPosition HMM::STIMPOS_RIGHT = 3;
 const HMMStimPosition HMM::STIMPOS_AUDIO = 4;
 
-HMM::HMM(const HMMConfiguration& config)
+
+void HMMConfiguration::addVideoSink(HMMStimPosition pos, const std::string& name, const std::string& sink)
+{
+	video[pos] = std::make_pair(name, sink);
+}
+
+void HMMConfiguration::addAudioSink(HMMStimPosition pos, const std::string& name, const std::string& sink)
+{
+	audio[pos] = std::make_pair(name, sink);
+}
+
+HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
+: m_factory(factory)
 {
 //	GstElement *conv, *scale, *vsink;
 	m_iidBkgd = 0;		// TODO: should do this somehow with addStimInfo? There id starts at 1, so OK with 0 here.
@@ -39,7 +52,7 @@ HMM::HMM(const HMMConfiguration& config)
 	Stim *pbkgd = new Stim();
 
 	// Configure port. Video first.
-	for (std::map<HMMStimPosition, std::string>::const_iterator it = config.video.begin(); it!= config.video.end(); it++)
+	for (StimPosTailMap::const_iterator it = config.video.begin(); it!= config.video.end(); it++)
 	{
 
 		// Configure the pipeline first.
@@ -47,18 +60,22 @@ HMM::HMM(const HMMConfiguration& config)
 		// By adding a video element to the port - it will always search for a video stream from the source
 		// with the same stim position (StimPosition is like "left", "right", "center", etc.
 
-		g_print("HMM: Configuring pipeline, add video path at position %d  \"%s\"\n", (int)it->first, it->second.c_str());
+		g_print("HMM: Configuring pipeline, add video path \"%s\" at position %d using sink \"%s\"\n", (int)it->first, it->second.first.c_str(), it->second.second.c_str());
 		GstElement *conv, *scale, *vsink;
 		conv = gst_element_factory_make ("videoconvert", NULL);
 		scale = gst_element_factory_make ("videoscale", NULL);
-		vsink = gst_element_factory_make("autovideosink", NULL);
+
+		// create video sink. The sink factory name was passed in the config.
+		vsink = gst_element_factory_make(it->second.second.c_str(), NULL);
 		gst_object_ref(conv);
+		gst_object_ref(vsink);
 		gst_bin_add_many(GST_BIN(m_pipeline), conv, scale, vsink, NULL);
 		if (!gst_element_link_many (conv, scale, vsink, NULL))
 		{
 			throw std::runtime_error("Cannot link conv-scale-sink");
 		}
 		m_port.addVideoEle(it->first, conv);	// port takes ownership of the conv element
+		m_port.addVideoSink(it->first, vsink);
 		//=====end pipeline config. The port keeps the conv ele with the "StimPosition" value.
 
 		// Now configure background source for this particular video path. A new stim was created above,
@@ -75,26 +92,17 @@ HMM::HMM(const HMMConfiguration& config)
 
 	// Now configure audio - note we may also configure background for audio
 
-	for (std::map<HMMStimPosition, std::string>::const_iterator it = config.audio.begin(); it!= config.audio.end(); it++)
+	for (StimPosTailMap::const_iterator it = config.audio.begin(); it!= config.audio.end(); it++)
 	{
-		g_print("HMM: Configuring pipeline, add audio path \"%s\"\n", it->second.c_str());
+		g_print("HMM: Configuring pipeline, add audio path \"%s\"\n", it->second.first.c_str());
 		GstElement *audioSink = NULL, *audioMixer=NULL;
-#if defined(Q_OS_MAC)
-		g_print("make osxaudiosink for mac\n");
-		audioSink = gst_element_factory_make("osxaudiosink", NULL);
-#elif defined(Q_OS_LINUX)
-		g_print("make alsasink for linux\n");
-		audioSink = gst_element_factory_make("alsaudiosink", NULL);
-#elif defined(Q_OS_WIN)
-		g_print("make directsoundsink for win\n");
-		audioSink = gst_element_factory_make("directsoundsink", NULL);
-#else
-		throw std::runtime_error("unsupported OS - no audio sink");
-#endif
-
+		audioSink = gst_element_factory_make(it->second.second.c_str(), NULL);
 		if (!audioSink)
-			throw std::runtime_error("Cannot create audio sink");
-
+		{
+			std::ostringstream oss;
+			oss << "Cannot create sink \"" << it->second.second.c_str() << "\" at audio pos " << it->first;
+			throw std::runtime_error(oss.str());
+		}
 		audioMixer = gst_element_factory_make("audiomixer", NULL);
 		if (!audioMixer)
 			throw std::runtime_error("Cannot create audio mixer");
@@ -102,6 +110,7 @@ HMM::HMM(const HMMConfiguration& config)
 		gst_bin_add_many(GST_BIN(m_pipeline), audioMixer, audioSink, NULL);
 		gst_element_link(audioMixer, audioSink);
 		m_port.addAudioEle(it->first, audioMixer);
+		m_port.addAudioSink(it->first, audioSink);
 	}
 
 	m_instanceMap.insert(std::make_pair(m_iidBkgd, pbkgd));
@@ -137,12 +146,6 @@ HMM::~HMM()
 
 }
 
-HMMStimID HMM::addStim(const Habit::StimulusSettings& settings)
-{
-	HMMStimID id = (HMMStimID)((unsigned long)m_ssMap.size()+1);
-	m_ssMap.insert(std::make_pair(id, settings));
-	return id;
-}
 
 Stim *HMM::getStimInstance(HMMInstanceID id)
 {
@@ -161,10 +164,6 @@ void HMM::dump(const char *c)
 
 HMMInstanceID HMM::preroll(HMMStimID id)
 {
-	// this stim id had better be in the ssmap:
-	if (m_ssMap.count(id) != 1)
-		throw std::runtime_error("id not found, no settings found, cannot preroll");
-
 	g_print("prerolling stimID %lu\n", id);
 
 	// at this point we would set in motion the preroll for _each_of_the_sources_, e.g. left,
@@ -174,7 +173,7 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	// is the stim fully prerolled.
 
 	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceMap.size());
-	m_instanceMap[instanceID] = makeStim(m_ssMap.at(id));
+	m_instanceMap[instanceID] = m_factory(id, *this);
 
 	// Now sync all elements in the newly-created Stim with parent.
 	for (std::map<HMMStimPosition, Stim::SourceP>::iterator it = m_instanceMap[instanceID]->sourceMap().begin(); it != m_instanceMap[instanceID]->sourceMap().end(); it++)
@@ -412,74 +411,21 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 	return TRUE;
 }
 
-
-Stim *HMM::makeStim(const Habit::StimulusSettings& ss)
+Source *HMM::makeSourceFromColor(unsigned long aarrggbb)
 {
-	Stim *pstim=new Stim();
-	pstim->setStimState(HMMStimState::INITIALIZING);
-
-	// This counter is triggered once all the sources have been prerolled.
-	// It needs to know how many sources there are (whih are being prerolled), and it is passed to the counter
-	// used for each source - when they are triggered (i.e. each stream in the source is prerolled),
-	// they decrement this counter.
-	// Note that below we increment this counter for each file-based source (not the
-	// bin-based videotestsrc, as it doesn't need prerolling process as the files do)
-	StimPrerollCounter *pstimCounter = new StimPrerollCounter(pstim, 0);
-
-	// Now a bit of Habit messiness. The StimulusSettings object as originally written had
-	// slots for 4 stimuli, and which ones were used depended on the StimulusDisplay settings for the experiment -
-	// single screen, dual screen, etc.
-	// In the HMM, the Port configuration is equivalent to the StimulusDisplay settings, but with
-	// one complication: The "StimPosition" used here is similar to the "HPlayerPositionType" (left, center, right, iss)
-	// used in habit. The complication is that the "StimPosition" is arbitrary here, whereas it had definite values
-	// assigned in Habit. I've accounted for this by making the integer values for constants HMMSTimPosition::LEFT etc
-	// equivalent to their HPlayerPositionType counterparts "number()" value.
-	std::vector<hmm::HMMStimPosition> vecPositions(m_port.getVideoPositions());
-	for (auto x: vecPositions)
-	{
-		Habit::StimulusInfo info;
-		Source *psrc;
-
-		if (x == HMM::STIMPOS_LEFT)
-		{
-			info = ss.getLeftStimulusInfo();
-		}
-		else if (x == HMM::STIMPOS_CENTER)
-		{
-			info = ss.getCenterStimulusInfo();
-		}
-		else if (x == HMM::STIMPOS_RIGHT)
-		{
-			info = ss.getRightStimulusInfo();
-		}
-		else
-			throw std::runtime_error("Port has non-Habit video position.");
-
-		// check type of stim. In StimulusInfo, first check if its a color, then assume file.
-		// TODO: accomodate 'bin' types.
-		if (info.isColor() || info.isBackground())
-		{
-			throw std::runtime_error("HMM::makeStim - cannot do color.");
-		}
-		else
-		{
-			// has to be a file
-			pstimCounter->increment();
-			psrc = makeSourceFromFile(info.getAbsoluteFileName().toStdString(), HMMSourceType::AUDIO_VIDEO, info.isLoopPlayBack(), info.getVolume());
-			pstim->addSource(x, psrc);
-
-			// make a functor to manage the preroll process
-			// TODO this is a mem leak!
-			SourcePrerollCounter* psourceCounter = new SourcePrerollCounter(psrc, m_pipeline, 1, pstimCounter);
-
-			g_signal_connect (psrc->bin(), "pad-added", G_CALLBACK(HMM::padAddedCallback), psourceCounter);
-			g_signal_connect (psrc->bin(), "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), psourceCounter);
-		}
-	}
-	return pstim;
+	std::ostringstream oss;
+	GError *gerror = NULL;
+	GstElement *src;
+	oss << "videotestsrc pattern=solid-color foreground-color=" << aarrggbb;
+	src = gst_parse_bin_from_description(oss.str().c_str(), true, &gerror);
+	if (src == NULL || gerror != NULL)
+		throw std::runtime_error("Cannot create color source");
+	gst_object_ref(src);
+	return new Source(hmm::HMMSourceType::VIDEO_ONLY, src, false, 0);
 }
 
-Source *HMM::makeSourceFromFile(const std::string& filename, HMMSourceType stype, bool loop, unsigned int volume)
+
+Source *HMM::makeSourceFromFile(const std::string& filename, HMMSourceType stype, void *userdata, bool loop, unsigned int volume)
 {
 	std::string uri("file://");
 	uri.append(filename);
@@ -488,51 +434,17 @@ Source *HMM::makeSourceFromFile(const std::string& filename, HMMSourceType stype
 	gst_object_ref(ele);
 	gst_bin_add(GST_BIN(m_pipeline), ele);
 	Source *psrc = new Source(stype, ele, loop, volume);
+
+	g_signal_connect (psrc->bin(), "pad-added", G_CALLBACK(HMM::padAddedCallback), userdata);
+	g_signal_connect (psrc->bin(), "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), userdata);
+
 	return psrc;
 }
-
-//Stim* HMM::makeStimFromFile(HMMStimID id, const std::string& filename)
-//{
-//	Stim *pstim=new Stim();
-//	pstim->setStimState(HMMStimState::INITIALIZING);
-//
-//	// Our stim have just one source, a file at pos 1
-//	StimPrerollCounter *pstimCounter = new StimPrerollCounter(id, pstim, 1);
-//
-//	std::string uri("file://");
-//	uri.append(filename);
-//	GstElement *ele = gst_element_factory_make("uridecodebin", NULL);
-//	g_object_set (ele, "uri", uri.c_str(), NULL);
-//	gst_object_ref(ele);
-//	gst_bin_add(GST_BIN(m_pipeline), ele);
-//	Source *psrc = new Source(HMMSourceType::VIDEO_ONLY, ele, true);
-//	pstim->addSource(VIDEO_POS, psrc);
-//
-//	// make a functor to manage the preroll process
-//	// TODO this is a mem leak!
-//	SourcePrerollCounter* psourceCounter = new SourcePrerollCounter(id, VIDEO_POS, psrc, m_pipeline, 1, pstimCounter);
-//
-//	g_signal_connect (ele, "pad-added", G_CALLBACK(HMM::padAddedCallback), psourceCounter);
-//	g_signal_connect (ele, "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), psourceCounter);
-//
-//	gst_element_sync_state_with_parent (ele);
-//
-//	return pstim;
-//}
-//
-//Stim* HMM::makeStimFromDesc(HMMStimID id, const std::string& description)
-//{
-//	Stim *pstim=NULL;
-//	throw std::runtime_error("cannot make stim from desc");	// todo, sync with parent()?
-//	return pstim;
-//}
-
 
 void HMM::noMorePadsCallback(GstElement *, SourcePrerollCounter *pcounter)
 {
 	pcounter->decrement();
 }
-
 
 void HMM::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pcounter)
 {

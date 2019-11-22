@@ -12,6 +12,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <gst/gst.h>
 #include "stimulussettings.h"
 #include "Stream.h"
@@ -19,6 +20,8 @@
 #include "Stim.h"
 #include "Counter.h"
 #include "Port.h"
+#include "StimFactory.h"
+
 
 
 namespace hmm {
@@ -28,11 +31,13 @@ struct HMMVideoTail
 	GstElement *m_conv, *m_scale, *m_vsink;
 };
 
-
+typedef std::map<HMMStimPosition, std::pair<std::string, std::string> > StimPosTailMap;
 struct HMMConfiguration
 {
-	std::map<HMMStimPosition, std::string> video;
-	std::map<HMMStimPosition, std::string> audio;
+	StimPosTailMap video;
+	StimPosTailMap audio;
+	void addVideoSink(HMMStimPosition pos, const std::string& name, const std::string& sink);
+	void addAudioSink(HMMStimPosition pos, const std::string& name, const std::string& sink);
 };
 
 class HMM
@@ -41,6 +46,7 @@ class HMM
 	GstElement *m_pipeline;
 	GThread *m_gthread;
 	GMainLoop *m_pgml;
+	StimFactory& m_factory;
 
 	// the stim info is supplied when addStim is called - it represents _the_ability_to_ display/play that "stim"
 	// What does a stim contain?
@@ -56,11 +62,7 @@ class HMM
 	// stim_info corresponds to StimulusSettings
 	// a factory method will be used to create the HMMStim from this object's description
 
-	//typedef std::pair<bool, std::string> stim_info;	// first: true->isFile, false->is a bin description, e.g. "videotestsrc"
-	//std::map<HMMStimID, stim_info> m_stimInfoMap;
-
-	std::map<HMMStimID, Habit::StimulusSettings> m_ssMap;
-	//typedef std::unique_ptr<Stim> stim_ptr;
+	//std::map<HMMStimID, Habit::StimulusSettings> m_ssMap;
 	typedef Stim* StimP;
 	std::map<HMMInstanceID, StimP> m_instanceMap;
 
@@ -69,25 +71,12 @@ class HMM
 
 	// The Port grew out of the VideoTail - it represents a receptacle with a spot for each video stream
 	// required ("Center", or "left"/"right"), and the optional spots in the audio mixer for sound.
-	//
-	//std::map<HMMStimPosition, HMMVideoTail> m_stimTailMap;
 	Port m_port;
 
 	std::string getUri(const std::string& filename);
 
-
-	// substitute stim with 'id' for current stim, make it current (return previous stimid)
-	//HMMStimID swap(HMMStimID id);
-
-	// factory
-	Stim *makeStim(const Habit::StimulusSettings& ss);
-	//Stim* makeStimFromFile(HMMStimID id, const std::string& filename);
-	//Stim* makeStimFromDesc(HMMStimID id, const std::string& description);
-	Source *makeSourceFromFile(const std::string& filename, HMMSourceType stype, bool loop = false, unsigned int volume=0);
-
-
 public:
-	HMM(const HMMConfiguration& config);
+	HMM(const HMMConfiguration& config, StimFactory& factory);
 	virtual ~HMM();
 
 	// Thread func that runs the GMainLoop and exits.
@@ -112,6 +101,10 @@ public:
 
 	// get stuff
 	GstElement *pipeline() { return m_pipeline; }
+
+	// factory method for sources
+	Source *makeSourceFromFile(const std::string& filename, HMMSourceType stype, void *userdata=NULL, bool loop = false, unsigned int volume=0);
+	Source *makeSourceFromColor(unsigned long aarrggbb);
 
 	// bus callback - bus messages here
 	static gboolean busCallback(GstBus *, GstMessage *msg, gpointer pdata);
