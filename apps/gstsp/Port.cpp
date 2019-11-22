@@ -35,6 +35,20 @@ void Port::addAudioEle(HMMStimPosition pos, GstElement *ele)
 	m_mapPosAudio[pos] = ele;
 }
 
+void Port::addVideoSink(HMMStimPosition pos, GstElement *sink)
+{
+	if (m_mapPosVideoSink.count(pos) > 0)
+		throw std::runtime_error("port already has video sink at this stim position");
+	m_mapPosVideoSink[pos] = sink;
+}
+
+void Port::addAudioSink(HMMStimPosition pos, GstElement *sink)
+{
+	if (m_mapPosAudioSink.count(pos) > 0)
+		throw std::runtime_error("port already has audio sink at this stim position");
+	m_mapPosAudioSink[pos] = sink;
+}
+
 void Port::connect(Stim& stim)
 {
 	// check that the port has nothing connected...
