@@ -47,11 +47,7 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 	gst_bus_add_watch(bus, &HMM::busCallback, this);
 	gst_object_unref(bus);
 
-	// set up background stim while configuring port.
-	// each stim position gets a background source
-	Stim *pbkgd = new Stim();
-
-	// Configure port. Video first.
+	// Configure port object. Video first.
 	for (StimPosTailMap::const_iterator it = config.video.begin(); it!= config.video.end(); it++)
 	{
 
@@ -60,7 +56,7 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		// By adding a video element to the port - it will always search for a video stream from the source
 		// with the same stim position (StimPosition is like "left", "right", "center", etc.
 
-		g_print("HMM: Configuring pipeline, add video path \"%s\" at position %d using sink \"%s\"\n", (int)it->first, it->second.first.c_str(), it->second.second.c_str());
+		g_print("HMM: Configuring pipeline, add video path \"%s\" at position %d using sink \"%s\"\n", it->second.first.c_str(), (int)it->first, it->second.second.c_str());
 		GstElement *conv, *scale, *vsink;
 		conv = gst_element_factory_make ("videoconvert", NULL);
 		scale = gst_element_factory_make ("videoscale", NULL);
@@ -78,16 +74,16 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		m_port.addVideoSink(it->first, vsink);
 		//=====end pipeline config. The port keeps the conv ele with the "StimPosition" value.
 
-		// Now configure background source for this particular video path. A new stim was created above,
-		// here we create  a test element and create the source/stream manually.
-
-		GstElement *ptest = gst_element_factory_make ("videotestsrc", NULL);
-		gst_bin_add(GST_BIN(m_pipeline), ptest);
-		GstPad *pad = gst_element_get_static_pad(ptest, "src");
-		Stream *pstream = new Stream(pad);
-		Source *psource = new Source(hmm::HMMSourceType::VIDEO_ONLY, ptest, false);
-		psource->addStream(hmm::HMMStreamType::VIDEO, pstream);
-		pbkgd->addSource(it->first, psource);
+//		// Now configure background source for this particular video path. A new stim was created above,
+//		// here we create  a test element and create the source/stream manually.
+//
+//		GstElement *ptest = gst_element_factory_make ("videotestsrc", NULL);
+//		gst_bin_add(GST_BIN(m_pipeline), ptest);
+//		GstPad *pad = gst_element_get_static_pad(ptest, "src");
+//		Stream *pstream = new Stream(pad);
+//		Source *psource = new Source(hmm::HMMSourceType::VIDEO_ONLY, ptest, false);
+//		psource->addStream(hmm::HMMStreamType::VIDEO, pstream);
+//		pbkgd->addSource(it->first, psource);
 	}
 
 	// Now configure audio - note we may also configure background for audio
@@ -113,10 +109,11 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		m_port.addAudioSink(it->first, audioSink);
 	}
 
-	m_instanceMap.insert(std::make_pair(m_iidBkgd, pbkgd));
+	m_iidBkgd = 0;
+	m_instanceMap.insert(std::make_pair(m_iidBkgd, m_factory(0, *this)));
 	m_iidCurrent = m_iidBkgd;
 	g_print("HMM(): m_port.connect( bkgd = %lu)\n", m_iidBkgd);
-	m_port.connect(*pbkgd);
+	m_port.connect(*getStimInstance(m_iidBkgd));
 	gst_element_set_state(m_pipeline, GST_STATE_PLAYING);
 
 }
