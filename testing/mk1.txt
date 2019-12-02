@@ -1,0 +1,27 @@
+# commen t
+! comme t
+# phase, trial, repeat, trans, ms
+Pretest, 0, 0, NoneCenter, 150
+Pretest, 0, 0, CenterNone, 3150
+Habituation, 0, 0, NoneCenter, 200
+Habituation, 0, 0, CenterNone, 4200
+Habituation, 1, 0, NoneCenter, 200
+Habituation, 1, 0, CenterNone, 4200
+Habituation, 2, 0, NoneCenter, 200
+Habituation, 2, 0, CenterNone, 4200
+Habituation, 3, 0, NoneCenter, 200
+Habituation, 3, 0, CenterNone, 4200
+Habituation, 4, 0, NoneCenter, 200
+Habituation, 4, 0, CenterNone, 1200
+Habituation, 5, 0, NoneCenter, 200
+Habituation, 5, 0, CenterNone, 1200
+Habituation, 6, 0, NoneCenter, 200
+Habituation, 6, 0, CenterNone, 1200
+Habituation, 7, 0, NoneCenter, 200
+Habituation, 7, 0, CenterNone, 1200
+Test, 0, 0,NoneCenter, 700
+Test, 0, 0, CenterNone, 3000
+Test, 1, 0,NoneCenter, 700
+Test, 1, 0, CenterNone, 3000
+Test, 2, 0,NoneCenter, 3700
+Test, 2, 0, CenterNone, 4400
