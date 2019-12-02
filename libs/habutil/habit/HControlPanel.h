@@ -60,6 +60,7 @@ namespace GUILib
 		void onStopTrials();
 		void onAttention();
 		void onLook(HLook l);
+		void onExperimentStopped();
 		void onExperimentFinished();
 		void onExperimentStarted();
 		void onPhaseStarted(QString phaseName, int context);
