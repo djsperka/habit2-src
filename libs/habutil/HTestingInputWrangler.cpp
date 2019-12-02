@@ -225,15 +225,15 @@ bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSe
 	return true;
 }
 
-void HTestingInputWrangler::phaseStarted(QString sPhase, int)
+void HTestingInputWrangler::phaseStarted(QString sPhase, int context)
 {
 	Q_ASSERT(m_bIsEnabled);
 	// when phase starts, get
-	qDebug() << "HTestingInputWrangler::phaseStarted(\"" << sPhase << "\")";
+	qDebug() << "HTestingInputWrangler::phaseStarted(\"" << sPhase << "\", " << context << ")";
 	if (m_map.contains(sPhase))
 	{
 		m_pCurrentEventLogMap = &m_map[sPhase];
-		qDebug() << "There are events for this phase.";
+		qDebug() << "There are " << m_pCurrentEventLogMap->size() << " events for this phase.";
 	}
 	else
 	{
