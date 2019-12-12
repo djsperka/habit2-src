@@ -63,6 +63,10 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 
 		// create video sink. The sink factory name was passed in the config.
 		vsink = gst_element_factory_make(it->second.second.c_str(), NULL);
+		if (!vsink)
+		{
+			throw std::runtime_error("Cannot create sink element. Check GST_PLUGIN_PATH.");
+		}
 		gst_object_ref(conv);
 		gst_object_ref(vsink);
 		gst_bin_add_many(GST_BIN(m_pipeline), conv, scale, vsink, NULL);
