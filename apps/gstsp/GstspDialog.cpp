@@ -26,7 +26,9 @@
 GstspDialog::GstspDialog(QWidget *parent)
 : QDialog(parent)
 {
+	qDebug() << "GstspDialog::GstspDialog()";
 	components();
+	qDebug() << "GstspDialog::GstspDialog()  -done";
 }
 
 GstspDialog::~GstspDialog()
