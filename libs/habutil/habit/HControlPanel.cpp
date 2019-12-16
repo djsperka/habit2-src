@@ -53,6 +53,7 @@ void HControlPanel::setStateMachine(HStateMachine *psm)
 
 	// connect the state machine's finished() signal to this dialog's close() slot
 	connect(m_psm, SIGNAL(finished()), this, SLOT(onExperimentFinished()));
+	connect(m_psm, SIGNAL(stopped()), this, SLOT(onExperimentStopped()));
 	connect(m_psm, SIGNAL(started()), this, SLOT(onExperimentStarted()));
 
 	// Set some slots to update text labels in the control panel
@@ -157,22 +158,24 @@ void HControlPanel::onStartTrials()
 
 void HControlPanel::onStopTrials()
 {
-	//qDebug() << "HControlPanel::onStopTrials()";
 	m_log.append(new HExperimentQuitEvent(HElapsedTimer::elapsed()));
-	//m_psm->stop();
-	//m_pmm->clear();
-	//qDebug() << "HControlPanel::onStopTrials() - callaccept";
-	accept();
+	qDebug() << "HControlPanel::onStopTrials() - stop state machine";
+
+	// stopping the state machine triggers onExperimentStopped -- let that issue accept().
+	m_psm->stop();
 }
 
 void HControlPanel::onExperimentFinished()
 {
 	m_log.append(new HExperimentEndEvent(HElapsedTimer::elapsed()));
-//	if (m_pmm)
-//	{
-//		delete m_pmm;
-//		m_pmm = NULL;
-//	}
+	qDebug() << "HControlPanel::onExperimentFinished() - accept()";
+	accept();
+}
+
+void HControlPanel::onExperimentStopped()
+{
+	m_log.append(new HExperimentEndEvent(HElapsedTimer::elapsed()));
+	qDebug() << "HControlPanel::onExperimentStopped() - accept()";
 	accept();
 }
 
