@@ -136,9 +136,23 @@ void HExperiment::prerollNextPhase(int context_current)
 	// get context of next phase, if any
 	PhaseStimulusLists::iterator it;
 	it = std::find_if(m_phaseStimulusLists.begin(), m_phaseStimulusLists.end(), [context_current](const PhaseStimStuff& psstuff) { return psstuff.context == context_current; });
-	qDebug() << "HExperiment::prerollNextPhase(current=" << context_current << "): found next context " << it->context;
 	if (it != m_phaseStimulusLists.end())
-		prerollAsNeeded(it->context);
+	{
+		it++;
+		if (it != m_phaseStimulusLists.end())
+		{
+			qDebug() << "HExperiment::prerollNextPhase(current=" << context_current << "): found next context " << it->context;
+			prerollAsNeeded(it->context);
+		}
+		else
+		{
+			qDebug() << "HExperiment::prerollNextPhase(current=" << context_current << "): this is the last phase";
+		}
+	}
+	else
+	{
+		qWarning() << "HExperiment::prerollNextPhase(current=" << context_current << "): this phase not found.";
+	}
 }
 
 void HExperiment::addPhaseStimulusList(int context, const Habit::HStimulusSettingsList& sslist, bool isHab)
