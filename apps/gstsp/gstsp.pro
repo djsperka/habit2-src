@@ -36,5 +36,6 @@ INCLUDEPATH += 	../../libs/habutil \
 				/usr/local/include
 
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit ../../libs/habutil/hgst 
-SOURCES			=	gstsp.cpp  HMM.cpp Port.cpp Source.cpp Stim.cpp Counter.cpp GstspDialog.cpp HabitStimFactory.cpp
-HEADERS			=	HMM.h HMMTypes.h Port.h Stream.h Source.h Stim.h Counter.h GstspDialog.h StimFactory.h HabitStimFactory.h
+SOURCES			=	gstsp.cpp  HMM.cpp Port.cpp Source.cpp Stim.cpp Counter.cpp GstspDialog.cpp HabitStimFactory.cpp GstspControlDialog.cpp
+HEADERS			=	HMM.h HMMTypes.h Port.h Stream.h Source.h Stim.h Counter.h GstspDialog.h StimFactory.h HabitStimFactory.h GstspControlDialog.h
+FORMS =	gstspcontroldialog.ui

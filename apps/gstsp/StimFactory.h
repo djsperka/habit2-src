@@ -13,8 +13,13 @@
 
 
 // This factory separates the HMM (which only operates on Stim, Source, Stream)
-// from Habit (StimulusSettings, StimulusDisplayInfo, ...)
+// from the details of the configuration. A subclass, HabitStimFactory, does this
+// for Habit (StimulusSettings, StimulusDisplayInfo, ...)
 // The operator(id) returns a Stim*, all ready to go (or throws an exception).
+//
+// Stim* stim = factory()(stimid, hmm);
+//
+// This stim has initial elements created, and elements are in
 //
 // The Stim created are owned by the caller. The relevant GstElement objects are
 // ref'd and should be unref'd by the destructor of the Stim, Source, and Stream (TODO - NOT IMPLEMENTED????)
@@ -38,6 +43,7 @@ public:
 	StimFactory() {};
 	virtual ~StimFactory() {};
 	virtual hmm::Stim* operator()(hmm::HMMStimID id, hmm::HMM& mm) = 0;
+	virtual hmm::Stim* background(hmm::HMM& mm) = 0;
 };
 
 

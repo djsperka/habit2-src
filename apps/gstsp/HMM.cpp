@@ -114,10 +114,12 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 	}
 
 	m_iidBkgd = 0;
-	m_instanceMap.insert(std::make_pair(m_iidBkgd, m_factory(0, *this)));
+	m_instanceMap.insert(std::make_pair(m_iidBkgd, m_factory.background(*this)));
 	m_iidCurrent = m_iidBkgd;
-	g_print("HMM(): m_port.connect( bkgd = %lu)\n", m_iidBkgd);
-	m_port.connect(*getStimInstance(m_iidBkgd));
+	//g_print("HMM(): m_port.connect( bkgd = %lu)\n", m_iidBkgd);
+	//m_port.connect(*getStimInstance(m_iidBkgd));
+
+	g_print("set playing...");
 	gst_element_set_state(m_pipeline, GST_STATE_PLAYING);
 
 }
@@ -160,6 +162,7 @@ Stim *HMM::getStimInstance(HMMInstanceID id)
 
 void HMM::dump(const char *c)
 {
+	g_print("dump to %s\n", c);
 	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, c);
 }
 
@@ -172,10 +175,16 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	//
 	// Prerolling the stim means prerolling each individual source. Only when all sources are prerolled
 	// is the stim fully prerolled.
+	//
+	// When the sync_state call below happens, what happens depends on how the Sources which make up
+	// the Stim are set up. If a Source is a multimedia file, then the file is opened and decoding
+	// begins. As decoding progresses, new Src pads are created. Each such pad represents a stream that
+	// is either VIDEO or AUDIO (other stream types are ignored). The new pads are blocked, and once blocked,
+	//
 
 	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceMap.size());
 	m_instanceMap[instanceID] = m_factory(id, *this);
-
+	dump("preroll");
 	// Now sync all elements in the newly-created Stim with parent.
 	for (std::map<HMMStimPosition, Stim::SourceP>::iterator it = m_instanceMap[instanceID]->sourceMap().begin(); it != m_instanceMap[instanceID]->sourceMap().end(); it++)
 	{
@@ -292,7 +301,7 @@ void HMM::play(const HMMInstanceID& id)
 //	return current;
 //}
 
-gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
+gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 {
 	HMM* phmm = (HMM *)user_data;
 	//g_print("MM1::busCallback(%s - %s)\n", GST_MESSAGE_TYPE_NAME(msg), GST_MESSAGE_SRC_NAME(msg));
@@ -358,8 +367,6 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 		if (gst_message_has_name (msg, "seek"))
 		{
 			g_print("Got seek msg\n");
-			HMMStimID id;
-			HMMStimPosition pos;
 			Source *psrc;
 			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "psrc", G_TYPE_POINTER, &psrc, NULL))
 				throw std::runtime_error("Cannot get source ptr from msg");
@@ -376,8 +383,6 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 		else if (gst_message_has_name (msg, "loop"))
 		{
 			g_print("Got loop msg\n");
-			HMMStimID id;
-			HMMStimPosition pos;
 			Source *psrc;
 			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "psrc", G_TYPE_POINTER, &psrc, NULL))
 				throw std::runtime_error("Cannot get source from msg");
@@ -412,6 +417,7 @@ gboolean HMM::busCallback(GstBus *bus, GstMessage *msg, gpointer user_data)
 	return TRUE;
 }
 
+#if 0
 Source *HMM::makeSourceFromColor(unsigned long aarrggbb)
 {
 	std::ostringstream oss;
@@ -430,10 +436,18 @@ Source *HMM::makeSourceFromFile(const std::string& filename, HMMSourceType stype
 {
 	std::string uri("file://");
 	uri.append(filename);
+	g_print("HMM::makeSourceFromFile(%s)\n", uri.c_str());
 	GstElement *ele = gst_element_factory_make("uridecodebin", NULL);
+	if (!ele)
+		g_print("NULL ele!\n");
 	g_object_set (ele, "uri", uri.c_str(), NULL);
-	gst_object_ref(ele);
-	gst_bin_add(GST_BIN(m_pipeline), ele);
+
+	// add ele to pipeline. pipeline takes ownership, will unref when ele is removed.
+	if (!gst_bin_add(GST_BIN(m_pipeline), ele))
+		g_print("ERROR- cannot add uridecodebin\n");
+
+	// Source does not ref the ele, assumes that its in a pipeline and ref'd there.
+	// TODO: not sure I like how ownership seems ill-defined.
 	Source *psrc = new Source(stype, ele, loop, volume);
 
 	g_signal_connect (psrc->bin(), "pad-added", G_CALLBACK(HMM::padAddedCallback), userdata);
@@ -441,6 +455,7 @@ Source *HMM::makeSourceFromFile(const std::string& filename, HMMSourceType stype
 
 	return psrc;
 }
+#endif
 
 void HMM::noMorePadsCallback(GstElement *, SourcePrerollCounter *pcounter)
 {
@@ -466,7 +481,8 @@ void HMM::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pco
 		{
 			pcounter->increment();
 
-			// check if stream is a still image. If so, add imagefreeze
+			// check if stream is a still image. If so, add imagefreeze and use its src pad
+			// in the Stream object. If its a video, use that pad. Have to ref it in the latter case.
 			const GValue *v = gst_structure_get_value(s, "framerate");
 			if (v && GST_VALUE_HOLDS_FRACTION(v))
 			{

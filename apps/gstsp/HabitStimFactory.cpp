@@ -11,12 +11,13 @@
 
 using namespace hmm;
 
-HabitStimFactory::HabitStimFactory(const Habit::StimulusDisplayInfo& sdi)
+HabitStimFactory::HabitStimFactory(const Habit::StimulusDisplayInfo& sdi, const QDir& rootDir)
 : m_sdi(sdi)
+, m_dir(rootDir)
 {
 	// create stimulus settings for the background.
 	Habit::StimulusSettings background("background", sdi.getBackGroundColor());
-	addStimulusSettings(background);
+	m_bkgdID = addStimulusSettings(background);
 }
 
 HabitStimFactory::~HabitStimFactory()
@@ -30,6 +31,11 @@ hmm::HMMStimID HabitStimFactory::addStimulusSettings(const Habit::StimulusSettin
 	return id;
 }
 
+hmm::Stim* HabitStimFactory::background(hmm::HMM& mm)
+{
+	return operator()(m_bkgdID, mm);
+}
+
 hmm::Stim* HabitStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm)
 {
 	hmm::Stim *pstim = NULL;
@@ -41,22 +47,60 @@ hmm::Stim* HabitStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm)
 	return pstim;
 }
 
-hmm::Source *HabitStimFactory::makeSource(const Habit::StimulusInfo& info, hmm::HMM& mm, void *userdata, hmm::HMMSourceType stype)
+hmm::Source *HabitStimFactory::makeSource(const Habit::StimulusInfo& info, GstElement *pipeline, void *userdata, hmm::HMMSourceType stype)
 {
 	hmm::Source *psrc=NULL;
 	if (info.isColor() || info.isBackground())
 	{
-		psrc = mm.makeSourceFromColor(info.getColor().rgba());
+		psrc = makeSourceFromColor(pipeline, info.getColor().rgba());
 	}
 	else
 	{
-		psrc = mm.makeSourceFromFile(info.getAbsoluteFileName().toStdString(), stype, userdata, info.isLoopPlayBack(), info.getVolume());
+		g_print("HabitStimFactory::makeSource(%s)\n", info.getAbsoluteFileName(m_dir).toStdString().c_str());
+		psrc = makeSourceFromFile(pipeline, info.getAbsoluteFileName(m_dir).toStdString(), stype, userdata, info.isLoopPlayBack(), info.getVolume());
 	}
 	return psrc;
 }
 
+hmm::Source *HabitStimFactory::makeSourceFromColor(GstElement *pipeline, unsigned long aarrggbb)
+{
+	std::ostringstream oss;
+	GError *gerror = NULL;
+	GstElement *src;
+	oss << "videotestsrc pattern=solid-color foreground-color=" << aarrggbb;
+	src = gst_parse_bin_from_description(oss.str().c_str(), true, &gerror);
+	if (src == NULL || gerror != NULL)
+		throw std::runtime_error("Cannot create color source");
+	gst_bin_add(GST_BIN(pipeline), src);
+	return new Source(hmm::HMMSourceType::VIDEO_ONLY, src, false, 0);
+}
 
-hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& sdi, hmm::HMM& mm)
+
+hmm::Source *HabitStimFactory::makeSourceFromFile(GstElement *pipeline, const std::string& filename, HMMSourceType stype, void *userdata, bool loop, unsigned int volume)
+{
+	std::string uri("file://");
+	uri.append(filename);
+	g_print("HMM::makeSourceFromFile(%s)\n", uri.c_str());
+	GstElement *ele = gst_element_factory_make("uridecodebin", NULL);
+	if (!ele)
+		g_print("NULL ele!\n");
+	g_object_set (ele, "uri", uri.c_str(), NULL);
+
+	// add ele to pipeline. pipeline takes ownership, will unref when ele is removed.
+	if (!gst_bin_add(GST_BIN(pipeline), ele))
+		g_print("ERROR- cannot add uridecodebin\n");
+
+	// Source does not ref the ele, assumes that its in a pipeline and ref'd there.
+	// TODO: not sure I like how ownership seems ill-defined.
+	Source *psrc = new Source(stype, ele, loop, volume);
+
+	g_signal_connect (psrc->bin(), "pad-added", G_CALLBACK(HMM::padAddedCallback), userdata);
+	g_signal_connect (psrc->bin(), "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), userdata);
+
+	return psrc;
+}
+
+hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& sdi, GstElement *pipeline)
 {
 	hmm::Source *psrc;
 	Habit::StimulusInfo info;
@@ -84,7 +128,7 @@ hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, co
 	{
 		// center
 		pstimCounter->increment();
-		pstim->addSource(HMM::STIMPOS_CENTER, makeSource(ss.getCenterStimulusInfo(), mm,
+		pstim->addSource(HMM::STIMPOS_CENTER, makeSource(pipeline, ss.getCenterStimulusInfo(),
 				new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 				(sdi.getUseISS() ? HMMSourceType::VIDEO_ONLY : HMMSourceType::AUDIO_VIDEO)));
 

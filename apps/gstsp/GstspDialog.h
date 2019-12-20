@@ -21,7 +21,9 @@ class GstspDialog: public QDialog
 
 private:
 	hmm::HMM *m_pmm;
-	QMap<hmm::HMMStimID, QString> m_mapStimIDNames;
+	//QMap<hmm::HMMStimID, QString> m_mapStimIDNames;
+	QList<hmm::HMMStimID> m_listIDs;		// list of stimid
+	QStringList m_stringlistNames;			// list of stim names, same order as id list
 
 public:
 	GstspDialog(QWidget *parent=0);
@@ -33,6 +35,8 @@ signals:
 
 public slots:
 
+	void preroll(int);
+	void dump();
 	void experimentActivated(QString expt);
 	void playItem(unsigned int);
 	void stopItem();
