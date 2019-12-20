@@ -13,9 +13,6 @@
 #include "HLoggerObject.h"
 #include "GstspDialog.h"
 
-
-
-//MM1 *f_pmm1=NULL;
 hmm::HMM *f_pmm=NULL;
 
 gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loop);
@@ -23,10 +20,12 @@ gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loo
 int main (int argc, char **argv)
 {
 	QApplication app(argc, argv);
-	gst_init(&argc, &argv);
 	app.setApplicationName("habit2");
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
+
+	// init gstreamer
+	gst_init(&argc, &argv);
 
 	// specify workspace dir and/or stim root dir
 	for (int i=1; i<argc; i++)

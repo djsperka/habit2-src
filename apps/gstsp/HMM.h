@@ -102,7 +102,15 @@ public:
 	// get stuff
 	GstElement *pipeline() { return m_pipeline; }
 
-	// factory method for sources
+	// Create Source* with the given file as input. Creates uridecodebin element, connects pad-added signal and no-more-pads signal
+	// to callbacks. Element is left in READY state. The userdata passed is sent to the callbacks.
+	// For these sources, the prerolling scheme is this: The counter is created with count=1. It is incremented
+	// for each pad created (only pads we use - those we do not use are ignored and we do not increment counter).
+	// As each pad is created,  a blocking probe is set, with the same counter passed. The no-more-pads callback
+	// also decrements the counter (this matches the initial setting of 1). The blocking probe callback decrements
+	// the counter. When the counter reaches 0 and fires, it initiates a flushing seek. The pad is already blocked,
+	// so data will be flushed and flow again (this time with a SEGMENT event at the head). The parent counter,
+	// which tallied the Sources being prerolled, is decremented as well.
 	Source *makeSourceFromFile(const std::string& filename, HMMSourceType stype, void *userdata=NULL, bool loop = false, unsigned int volume=0);
 	Source *makeSourceFromColor(unsigned long aarrggbb);
 

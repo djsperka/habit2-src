@@ -66,17 +66,7 @@ void Port::connect(Stim& stim)
 		gst_object_unref(pad);
 	}
 
-//	if (!m_listRequestPads.empty())
-//	{
-//		bThrow = true;
-//		oss << "audio request pads still present. ";
-//	}
-
-//	if (bThrow)
-//		throw std::runtime_error(oss.str().c_str());
-
 	// OK now connect all video streams in 'stim' to the port.
-	//
 	Stim::HMMStimPosSourceMap::iterator it;
 	for (it = stim.sourceMap().begin(); it!= stim.sourceMap().end(); it++)
 	{

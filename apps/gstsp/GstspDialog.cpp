@@ -20,7 +20,8 @@
 #include <QList>
 
 #include "HMM.h"
-
+#include "GstspControlDialog.h"
+#include "HWorkspaceUtil.h"
 
 
 GstspDialog::GstspDialog(QWidget *parent)
@@ -103,21 +104,24 @@ void GstspDialog::experimentActivated(QString expt)
 	}
 
 #if defined(Q_OS_MAC)
-		qDebug() << "make osxaudiosink for mac";
-		config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "osxaudiosink");
+	qDebug() << "make osxaudiosink for mac";
+	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "osxaudiosink");
 #elif defined(Q_OS_LINUX)
-		qDebug() << "make alsasink for linux";
-		config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "alsasink");
+	qDebug() << "make alsasink for linux";
+	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "alsasink");
 #elif defined(Q_OS_WIN)
-		qDebug() << "make directsoundsink for win";
-		config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "directsoundsink");
+	qDebug() << "make directsoundsink for win";
+	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "directsoundsink");
 #else
-		qDebug() << "Unsupported OS.";
-		throw std::runtime_error("Unsupported OS, cannot create audio sink");
+	qDebug() << "Unsupported OS.";
+	throw std::runtime_error("Unsupported OS, cannot create audio sink");
 #endif
 
+	//
+	QDir root = habutilGetStimulusRootDir();
+
 	// Get stim settings, add to factory, save stimid for each
-	HabitStimFactory factory(settings.getStimulusDisplayInfo());
+	HabitStimFactory factory(settings.getStimulusDisplayInfo(), root);
 
 	// save ag key if needed
 	bool bAGUsed = (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI());
@@ -132,15 +136,32 @@ void GstspDialog::experimentActivated(QString expt)
 		for (const Habit::StimulusSettings& ss: stimuliSettings.stimuli())
 		{
 			qDebug() << "Stimulus " << ss.getName();
-			m_mapStimIDNames[factory.addStimulusSettings(ss)] = ss.getName();
+			hmm::HMMStimID id = factory.addStimulusSettings(ss);
+			m_stringlistNames.append(ss.getName());
+			m_listIDs.append(id);
 		}
 	}
 
 	m_pmm = new hmm::HMM(config, factory);
 
 	// create widget for control and display
+	GstspControlDialog *control = new GstspControlDialog(m_stringlistNames, m_listIDs, this);
+	connect(control, &GstspControlDialog::preroll, this, &GstspDialog::preroll);
+	connect(control, &GstspControlDialog::dump, this, &GstspDialog::dump);
+	control->exec();
 
+}
 
+void GstspDialog::preroll(int id)
+{
+	hmm::HMMInstanceID iid = m_pmm->preroll((hmm::HMMStimID)id);
+	qDebug() << "Got instance ID " << (int)iid;
+}
+
+void GstspDialog::dump()
+{
+	qDebug() << "Dump dot file base name " << GST_ELEMENT_NAME(m_pmm->pipeline());
+	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(m_pmm->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(m_pmm->pipeline()));
 }
 
 void GstspDialog::playItem(unsigned int)
