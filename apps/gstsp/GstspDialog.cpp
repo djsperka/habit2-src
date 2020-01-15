@@ -22,6 +22,7 @@
 #include "HMM.h"
 #include "GstspControlDialog.h"
 #include "HWorkspaceUtil.h"
+#include "HStimulusWidget.h"
 
 
 GstspDialog::GstspDialog(QWidget *parent)
@@ -144,12 +145,59 @@ void GstspDialog::experimentActivated(QString expt)
 
 	m_pmm = new hmm::HMM(config, factory);
 
-	// create widget for control and display
+	// Display widget
+	StimDisplayWidget *psdw = new StimDisplayWidget(settings.getStimulusDisplayInfo(), 320, 240, this);
+	setWidgetPropertyOnSinks(psdw, config.video.size());
+	psdw->show();
+	psdw->raise();
+	//psw->activateWindow();
+
+
+	// create widget for control
 	GstspControlDialog *control = new GstspControlDialog(m_stringlistNames, m_listIDs, this);
 	connect(control, &GstspControlDialog::preroll, this, &GstspDialog::preroll);
 	connect(control, &GstspControlDialog::dump, this, &GstspDialog::dump);
 	control->exec();
 
+	psdw->close();
+
+}
+
+void GstspDialog::setWidgetPropertyOnSinks(StimDisplayWidget *psdw, unsigned int nwidgets)
+{
+	if (nwidgets == 1)
+	{
+		GValue v = G_VALUE_INIT;
+		g_value_init(&v, G_TYPE_POINTER);
+		g_value_set_pointer(&v, psdw->getVideoWidget(0));
+		m_pmm->port().setWidget(hmm::HMM::STIMPOS_CENTER, v);
+	}
+	if (nwidgets == 2)
+	{
+		GValue v = G_VALUE_INIT;
+		g_value_init(&v, G_TYPE_POINTER);
+		g_value_set_pointer(&v, psdw->getVideoWidget(0));
+		m_pmm->port().setWidget(hmm::HMM::STIMPOS_LEFT, v);
+		v = G_VALUE_INIT;
+		g_value_init(&v, G_TYPE_POINTER);
+		g_value_set_pointer(&v, psdw->getVideoWidget(1));
+		m_pmm->port().setWidget(hmm::HMM::STIMPOS_RIGHT, v);
+	}
+	if (nwidgets == 3)
+	{
+		GValue v = G_VALUE_INIT;
+		g_value_init(&v, G_TYPE_POINTER);
+		g_value_set_pointer(&v, psdw->getVideoWidget(0));
+		m_pmm->port().setWidget(hmm::HMM::STIMPOS_LEFT, v);
+		v = G_VALUE_INIT;
+		g_value_init(&v, G_TYPE_POINTER);
+		g_value_set_pointer(&v, psdw->getVideoWidget(1));
+		m_pmm->port().setWidget(hmm::HMM::STIMPOS_RIGHT, v);
+		v = G_VALUE_INIT;
+		g_value_init(&v, G_TYPE_POINTER);
+		g_value_set_pointer(&v, psdw->getVideoWidget(2));
+		m_pmm->port().setWidget(hmm::HMM::STIMPOS_CENTER, v);
+	}
 }
 
 void GstspDialog::preroll(int id)

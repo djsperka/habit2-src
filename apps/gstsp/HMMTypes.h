@@ -28,7 +28,7 @@ enum class HMMStreamType
 enum class HMMStimState
 {
 	NONE,
-	INITIALIZING,
+	PREROLLING,
 	PREROLLED,
 	PLAYING,
 	PENDING_PAUSE,

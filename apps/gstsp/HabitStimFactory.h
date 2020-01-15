@@ -20,10 +20,10 @@ class HabitStimFactory: public StimFactory
 	QDir m_dir;
 	hmm::HMMStimID m_bkgdID;
 	std::map<hmm::HMMStimID, Habit::StimulusSettings> m_ssMap;
-	hmm::Source *makeSource(GstElement *pipeline, const Habit::StimulusInfo& info, void *userdata, hmm::HMMSourceType stype);
-	hmm::Source *makeSourceFromColor(GstElement *pipeline, unsigned long aarrggbb);
-	hmm::Source *makeSourceFromFile(GstElement *pipeline, const std::string& filename, hmm::HMMSourceType stype, void *userdata, bool loop, unsigned int volume);
-	hmm::Stim *makeHabitStim(const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& sdi, GstElement *pipeline);
+
+	hmm::Stim *makeHabitStim(const Habit::StimulusSettings& ss, GstElement *pipeline);
+	void addSourceToStim(hmm::Stim *pstim, hmm::HMMStimPosition pos, hmm::HMMSourceType stype, GstElement *pipeline, const Habit::StimulusInfo& info);
+
 public:
 	HabitStimFactory(const Habit::StimulusDisplayInfo& sdi, const QDir& rootDir);
 	virtual ~HabitStimFactory();

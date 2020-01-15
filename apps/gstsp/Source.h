@@ -11,6 +11,7 @@
 #include "Stream.h"
 #include <memory>
 #include <map>
+#include <string>
 
 // MMSource represents a single source (e.g. a file), which may produce one or more streams, but
 // no more than one each of audio, video.
@@ -20,8 +21,9 @@
 // that is ignored here - e.g. its OK to specify AUDIO_ONLY on a movie file that contains video and audio,
 // the video stream is safely ignored.
 
-namespace hmm {
-
+namespace hmm
+{
+class Stim;
 class Source
 {
 public:
@@ -29,27 +31,56 @@ public:
 	typedef Stream* StreamP;
 private:
 	HMMSourceType m_sourceType;	// what types of stream will be accepted in padAdded
-	GstElement *m_bin;			// element for seeks on this source
+	Stim *m_parent;
 	std::map<HMMStreamType, StreamP> m_streamMap;
-	bool m_bloop;
-	unsigned int m_volume;
 
+protected:
+	Source(HMMSourceType t, Stim *parent);
+	void addStream(HMMStreamType streamType, GstPad *srcpad);
 public:
-	Source(HMMSourceType t, GstElement *bin, bool loop=false, unsigned int volume=0);
 	Source(const Source&) = delete;
 	virtual ~Source() {};
 	void operator=(const Source&) = delete;
-	void addStream(HMMStreamType t, Stream *pstream);	// takes ownership
 	HMMSourceType sourceType() const { return m_sourceType; }
 	std::map<HMMStreamType, StreamP>& streamMap() { return m_streamMap; }
 	Stream *getStream(HMMStreamType t);
-	GstElement *bin() { return m_bin; }
-	void setLooping(bool b) { m_bloop = b; }
-	bool isLooping() { return m_bloop; }
-	void setVolume(unsigned int v100) { m_volume = v100; }
-	unsigned int volume() const { return m_volume; }
+	Stim *parentStim() { return m_parent; }
+
+	virtual GstElement *bin() = 0;	// element for seeks on this source
+	virtual void preroll() = 0;
+	virtual void stop() = 0;
+	virtual void rewind() = 0;
 };
 
+class ColorSource: public Source
+{
+	ColorSource(HMMSourceType, Stim *parent, unsigned int argb);
+	unsigned int m_argb;
+	GstElement *m_ele;
+public:
+	GstElement *bin();
+	virtual void preroll();
+	virtual void stop();
+	virtual void rewind();
+	friend class Stim;
+};
+
+class FileSource: public Source
+{
+	std::string m_filename;
+	bool m_bloop;
+	unsigned int m_volume;
+	GstElement *m_ele;
+	FileSource(HMMSourceType t, Stim *parent, const std::string& file, bool bloop, unsigned int volume);
+
+public:
+	GstElement *bin();
+	virtual void preroll();
+	virtual void stop();
+	virtual void rewind();
+	friend class Stim;
+
+};
 }
 
 

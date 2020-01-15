@@ -34,8 +34,7 @@ void HMMConfiguration::addAudioSink(HMMStimPosition pos, const std::string& name
 HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 : m_factory(factory)
 {
-//	GstElement *conv, *scale, *vsink;
-	m_iidBkgd = 0;		// TODO: should do this somehow with addStimInfo? There id starts at 1, so OK with 0 here.
+	g_print("HMM::HMM()\n");
 
 	// launch main loop thread
 	m_pgml = g_main_loop_new(NULL, FALSE);
@@ -48,6 +47,8 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 	gst_object_unref(bus);
 
 	// Configure port object. Video first.
+	g_print("HMM::HMM(): configure video ports\n");
+
 	for (StimPosTailMap::const_iterator it = config.video.begin(); it!= config.video.end(); it++)
 	{
 
@@ -92,6 +93,7 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 
 	// Now configure audio - note we may also configure background for audio
 
+	g_print("HMM::HMM(): configure audio ports\n");
 	for (StimPosTailMap::const_iterator it = config.audio.begin(); it!= config.audio.end(); it++)
 	{
 		g_print("HMM: Configuring pipeline, add audio path \"%s\"\n", it->second.first.c_str());
@@ -113,15 +115,18 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		m_port.addAudioSink(it->first, audioSink);
 	}
 
-	m_iidBkgd = 0;
-	m_instanceMap.insert(std::make_pair(m_iidBkgd, m_factory.background(*this)));
-	m_iidCurrent = m_iidBkgd;
-	//g_print("HMM(): m_port.connect( bkgd = %lu)\n", m_iidBkgd);
-	//m_port.connect(*getStimInstance(m_iidBkgd));
+	g_print("HMM::HMM(): configure background default screen\n");
 
-	g_print("set playing...");
+	m_iidBkgd = 99;
+	m_instanceMap[m_iidBkgd] = m_factory.background(*this);
+	m_instanceMap.insert(std::make_pair(m_iidBkgd, m_instanceMap[m_iidBkgd]));
+	m_iidCurrent = m_iidBkgd;
+	g_print("HMM(): m_port.connect( bkgd = %lu)\n", m_iidBkgd);
+	m_port.connect(*m_instanceMap[m_iidBkgd]);
+	g_print("set playing...\n");
 	gst_element_set_state(m_pipeline, GST_STATE_PLAYING);
 
+	g_print("HMM::HMM() - done.\n");
 }
 
 gpointer HMM::threadFunc(gpointer user_data)
@@ -185,11 +190,13 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceMap.size());
 	m_instanceMap[instanceID] = m_factory(id, *this);
 	dump("preroll");
-	// Now sync all elements in the newly-created Stim with parent.
-	for (std::map<HMMStimPosition, Stim::SourceP>::iterator it = m_instanceMap[instanceID]->sourceMap().begin(); it != m_instanceMap[instanceID]->sourceMap().end(); it++)
-	{
-		gst_element_sync_state_with_parent(it->second->bin());
-	}
+	m_instanceMap[instanceID]->preroll();
+
+//	// Now sync all elements in the newly-created Stim with parent.
+//	for (std::map<HMMStimPosition, Stim::SourceP>::iterator it = m_instanceMap[instanceID]->sourceMap().begin(); it != m_instanceMap[instanceID]->sourceMap().end(); it++)
+//	{
+//		gst_element_sync_state_with_parent(it->second->bin());
+//	}
 	return instanceID;
 }
 
@@ -462,68 +469,68 @@ void HMM::noMorePadsCallback(GstElement *, SourcePrerollCounter *pcounter)
 	pcounter->decrement();
 }
 
-void HMM::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pcounter)
-{
-	GstCaps *caps;
-	GstStructure *s;
-	const gchar *name;
-	Stream *pstream = NULL;
-
-	caps = gst_pad_get_current_caps (pad);
-	s = gst_caps_get_structure (caps, 0);
-	name = gst_structure_get_name (s);
-
-	g_print("padAddedCallback: %s\n", name);
-	if (strcmp (name, "video/x-raw") == 0)
-	{
-		if (pcounter->source()->sourceType() == HMMSourceType::VIDEO_ONLY ||
-			pcounter->source()->sourceType() == HMMSourceType::AUDIO_VIDEO)
-		{
-			pcounter->increment();
-
-			// check if stream is a still image. If so, add imagefreeze and use its src pad
-			// in the Stream object. If its a video, use that pad. Have to ref it in the latter case.
-			const GValue *v = gst_structure_get_value(s, "framerate");
-			if (v && GST_VALUE_HOLDS_FRACTION(v))
-			{
-				gint num = gst_value_get_fraction_numerator(v);
-				if (num == 0)
-				{
-					GstElement *freeze = gst_element_factory_make("imagefreeze", NULL);
-					if (!freeze)
-						throw std::runtime_error("Cannot create freeze element");
-					GstPad *sinkpad = gst_element_get_static_pad(freeze, "sink");
-					if (!sinkpad)
-						throw std::runtime_error("Cannot get sinkpad from imagefreeze");
-					gst_bin_add(GST_BIN(pcounter->pipeline()), freeze);
-					gst_pad_link(pad, sinkpad);
-					gst_object_unref(sinkpad);
-					GstPad *srcpad = gst_element_get_static_pad(freeze, "src");
-					gst_object_ref(srcpad);
-					pstream = new Stream(srcpad);
-				}
-				else
-				{
-					gst_object_ref(pad);
-					pstream = new Stream(pad);
-				}
-			}
-			else
-				throw std::runtime_error("NO FRAMERATE IN CAPS");
-
-			// save this stream
-			pcounter->source()->addStream(HMMStreamType::VIDEO, pstream);
-
-			// set blocking probe on the src pad
-			pstream->setProbeID(gst_pad_add_probe(pstream->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HMM::padProbeBlockCallback, pcounter, NULL));
-
-			// set event probe on src pad.
-			pstream->setEventProbeID(gst_pad_add_probe(pstream->srcpad(), GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HMM::eventProbeCallback, pcounter, NULL));
-		}
-	}
-
-	gst_caps_unref (caps);
-}
+//void HMM::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pcounter)
+//{
+//	GstCaps *caps;
+//	GstStructure *s;
+//	const gchar *name;
+//	Stream *pstream = NULL;
+//
+//	caps = gst_pad_get_current_caps (pad);
+//	s = gst_caps_get_structure (caps, 0);
+//	name = gst_structure_get_name (s);
+//
+//	g_print("padAddedCallback: %s\n", name);
+//	if (strcmp (name, "video/x-raw") == 0)
+//	{
+//		if (pcounter->source()->sourceType() == HMMSourceType::VIDEO_ONLY ||
+//			pcounter->source()->sourceType() == HMMSourceType::AUDIO_VIDEO)
+//		{
+//			pcounter->increment();
+//
+//			// check if stream is a still image. If so, add imagefreeze and use its src pad
+//			// in the Stream object. If its a video, use that pad. Have to ref it in the latter case.
+//			const GValue *v = gst_structure_get_value(s, "framerate");
+//			if (v && GST_VALUE_HOLDS_FRACTION(v))
+//			{
+//				gint num = gst_value_get_fraction_numerator(v);
+//				if (num == 0)
+//				{
+//					GstElement *freeze = gst_element_factory_make("imagefreeze", NULL);
+//					if (!freeze)
+//						throw std::runtime_error("Cannot create freeze element");
+//					GstPad *sinkpad = gst_element_get_static_pad(freeze, "sink");
+//					if (!sinkpad)
+//						throw std::runtime_error("Cannot get sinkpad from imagefreeze");
+//					gst_bin_add(GST_BIN(pcounter->pipeline()), freeze);
+//					gst_pad_link(pad, sinkpad);
+//					gst_object_unref(sinkpad);
+//					GstPad *srcpad = gst_element_get_static_pad(freeze, "src");
+//					gst_object_ref(srcpad);
+//					pstream = new Stream(srcpad);
+//				}
+//				else
+//				{
+//					gst_object_ref(pad);
+//					pstream = new Stream(pad);
+//				}
+//			}
+//			else
+//				throw std::runtime_error("NO FRAMERATE IN CAPS");
+//
+//			// save this stream
+//			pcounter->source()->addStream(HMMStreamType::VIDEO, pstream);
+//
+//			// set blocking probe on the src pad
+//			pstream->setProbeID(gst_pad_add_probe(pstream->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &HMM::padProbeBlockCallback, pcounter, NULL));
+//
+//			// set event probe on src pad.
+//			pstream->setEventProbeID(gst_pad_add_probe(pstream->srcpad(), GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &HMM::eventProbeCallback, pcounter, NULL));
+//		}
+//	}
+//
+//	gst_caps_unref (caps);
+//}
 
 GstPadProbeReturn HMM::padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data)
 {

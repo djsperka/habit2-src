@@ -12,6 +12,7 @@
 #include <QMap>
 #include <QString>
 #include "HMMTypes.h"
+#include "StimDisplayWidget.h"
 
 namespace hmm { class HMM; };
 
@@ -29,6 +30,7 @@ public:
 	GstspDialog(QWidget *parent=0);
 	~GstspDialog();
 	void components();
+	void setWidgetPropertyOnSinks(StimDisplayWidget *psdw, unsigned int nwidgets);
 
 signals:
 	void stim(unsigned int);
