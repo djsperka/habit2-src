@@ -36,9 +36,19 @@ public:
 	void setStimState(HMMStimState state) { m_stimState = state; }
 	HMMStimState getStimState() const { return m_stimState; }
 	std::map<HMMStimPosition, SourceP>& sourceMap() { return m_sourceMap; }
+
+	void addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, unsigned long aarrggbb);
+	void addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, const std::string& filename, bool loop=false, int volume=0);
+
+	// set up blocking probes and sync
+	void preroll();
+
+	// block playing sources with idle probe
+	void stop();
+
+	// flushing seek on (already blocked) sources
+	void rewind();
 };
-
-
 } // end namespace
 
 #endif /* HMMSTIM_H_ */

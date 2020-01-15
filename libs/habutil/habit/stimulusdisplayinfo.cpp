@@ -18,13 +18,20 @@ Habit::StimulusDisplayInfo::StimulusDisplayInfo()
 
 Habit::StimulusDisplayInfo::StimulusDisplayInfo(const StimulusDisplayInfo& info)
 {
-	id_ = info.getId();
-	pstyle_ = &info.getPresentationStyle();
-	pdtype_ = &info.getDisplayType();
-	isOriginalAspectRatioMaintained_ = info.isOriginalAspectRatioMaintained();
-	backGroundColor_ = info.getBackGroundColor();
-	playouttype_ = &info.getStimulusLayoutType();
-	useISS_ = info.getUseISS();
+	setId(info.getId());
+	setPresentationStyle(info.getPresentationStyle());
+	setDisplayType(info.getDisplayType());
+	setMaintainOriginalAspectRatio(info.isOriginalAspectRatioMaintained());
+	setBackGroundColor(info.getBackGroundColor());
+	setStimulusLayoutType(info.getStimulusLayoutType());
+	setUseISS(info.getUseISS());
+	//id_ = info.getId();
+	//pstyle_ = &info.getPresentationStyle();
+	//pdtype_ = &info.getDisplayType();
+	//isOriginalAspectRatioMaintained_ = info.isOriginalAspectRatioMaintained();
+	//backGroundColor_ = info.getBackGroundColor();
+	//playouttype_ = &info.getStimulusLayoutType();
+	//useISS_ = info.getUseISS();
 }
 
 Habit::StimulusDisplayInfo& Habit::StimulusDisplayInfo::operator=(const Habit::StimulusDisplayInfo& rhs)

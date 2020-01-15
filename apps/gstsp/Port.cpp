@@ -123,6 +123,7 @@ void Port::disconnect()
 //	{
 //		throw std::runtime_error("HMMPort::disconnect () not implemented for audio");
 //	}
+	g_print("Port::disconnect() not implemented for audio\n");
 
 	for (HMMPortPosEleMap::iterator it = m_mapPosVideo.begin(); it != m_mapPosVideo.end(); it++)
 	{
@@ -150,3 +151,15 @@ std::vector<HMMStimPosition> Port::getAudioPositions() const
 		vec.push_back(it->first);
 	return vec;
 }
+
+void Port::setWidget(HMMStimPosition pos, GValue& value)
+{
+	// find sink for 'pos'
+	if (m_mapPosVideoSink.count(pos) == 1)
+	{
+		g_object_set_property(G_OBJECT(m_mapPosVideoSink[pos]), "widget", &value);
+	}
+	else
+		throw std::runtime_error("Cannot set port at this pos");
+}
+

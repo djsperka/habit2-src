@@ -59,7 +59,9 @@ public:
 	std::vector<HMMStimPosition> getVideoPositions() const;
 	std::vector<HMMStimPosition> getAudioPositions() const;
 
-	void connect(Stim& stim);	// assumes not connected, will throw otherwise
+	void setWidget(HMMStimPosition pos, GValue& value);
+
+	void connect(Stim& stim);	// Plugs all srcs from Stim into this port. Assumes not connected, will throw otherwise
 	void disconnect();				// might not be connected, will be OK if not
 };
 
