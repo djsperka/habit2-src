@@ -18,10 +18,11 @@ class Stream
 {
 	GstPad *m_srcpad;
 	Source *m_parent;
+	GstElement *m_sink;
 	gulong m_probeid;	// this can be a blocking probe or an idle probe. If its nonzero, its blocking m_srcpad.
 	gulong m_probeidEvent; // event probe handy for looping
 
-	Stream(GstPad *src, Source *parent, gulong probeid=0): m_srcpad(src), m_parent(parent), m_probeid(probeid), m_probeidEvent(0) {}
+	Stream(GstPad *src, Source *parent, GstElement *sink, gulong probeid=0): m_srcpad(src), m_parent(parent), m_sink(sink), m_probeid(probeid), m_probeidEvent(0) {}
 
 public:
 	GstPad* srcpad() { return m_srcpad; }

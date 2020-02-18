@@ -35,6 +35,7 @@ bool Counter::decrement()
 void SourcePrerollCounter::operator()(void)
 {
 	g_print("SourcePrerollCounter triggered\n");
+	this->source()->setSeeking(true);
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
 	GstStructure *structure = gst_structure_new("seek", "psrc", G_TYPE_POINTER, this->source(),  NULL);
 	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->source()->bin()), structure));

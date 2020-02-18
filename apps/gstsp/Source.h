@@ -9,6 +9,7 @@
 #define HMMSOURCE_H_
 
 #include "Stream.h"
+#include "Counter.h"
 #include <memory>
 #include <map>
 #include <string>
@@ -33,21 +34,28 @@ private:
 	HMMSourceType m_sourceType;	// what types of stream will be accepted in padAdded
 	Stim *m_parent;
 	std::map<HMMStreamType, StreamP> m_streamMap;
+	bool m_bSeeking;
 
 protected:
 	Source(HMMSourceType t, Stim *parent);
-	void addStream(HMMStreamType streamType, GstPad *srcpad);
+
 public:
 	Source(const Source&) = delete;
 	virtual ~Source() {};
 	void operator=(const Source&) = delete;
 	HMMSourceType sourceType() const { return m_sourceType; }
 	std::map<HMMStreamType, StreamP>& streamMap() { return m_streamMap; }
+	void addStream(HMMStreamType streamType, GstPad *srcpad, GstElement *sink, gulong probeid=0);
 	Stream *getStream(HMMStreamType t);
 	Stim *parentStim() { return m_parent; }
+	void setSeeking(bool b) { m_bSeeking = b; }
+	bool isSeeking() const { return m_bSeeking; }
+
+
+	static void parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio);
 
 	virtual GstElement *bin() = 0;	// element for seeks on this source
-	virtual void preroll() = 0;
+	virtual void preroll(GstElement *pipeline, Counter *pc) = 0;
 	virtual void stop() = 0;
 	virtual void rewind() = 0;
 };
@@ -59,7 +67,7 @@ class ColorSource: public Source
 	GstElement *m_ele;
 public:
 	GstElement *bin();
-	virtual void preroll();
+	virtual void preroll(GstElement *pipeline, Counter *pc);
 	virtual void stop();
 	virtual void rewind();
 	friend class Stim;
@@ -75,11 +83,14 @@ class FileSource: public Source
 
 public:
 	GstElement *bin();
-	virtual void preroll();
+	virtual void preroll(GstElement *pipeline, Counter *pc);
 	virtual void stop();
 	virtual void rewind();
 	friend class Stim;
 
+	static void noMorePadsCallback(GstElement *, SourcePrerollCounter *pspc);
+	static void padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pspc);
+	static GstPadProbeReturn padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);
 };
 }
 

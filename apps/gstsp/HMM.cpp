@@ -190,7 +190,7 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceMap.size());
 	m_instanceMap[instanceID] = m_factory(id, *this);
 	dump("preroll");
-	m_instanceMap[instanceID]->preroll();
+	m_instanceMap[instanceID]->preroll(pipeline());
 
 //	// Now sync all elements in the newly-created Stim with parent.
 //	for (std::map<HMMStimPosition, Stim::SourceP>::iterator it = m_instanceMap[instanceID]->sourceMap().begin(); it != m_instanceMap[instanceID]->sourceMap().end(); it++)
@@ -378,8 +378,7 @@ gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "psrc", G_TYPE_POINTER, &psrc, NULL))
 				throw std::runtime_error("Cannot get source ptr from msg");
 
-			if (!phmm)
-				throw std::runtime_error("Bus message (seek) does not carry hmm pointer!");
+			g_print("Source element is %s\n", GST_ELEMENT_NAME(psrc->bin()));
 
 			// flushing seek
 			if (!gst_element_seek(psrc->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
@@ -393,9 +392,6 @@ gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 			Source *psrc;
 			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "psrc", G_TYPE_POINTER, &psrc, NULL))
 				throw std::runtime_error("Cannot get source from msg");
-
-			if (!phmm)
-				throw std::runtime_error("Bus message (seek) does not carry hmm pointer!");
 
 			// NON-flushing seek
 			if (!gst_element_seek(psrc->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))

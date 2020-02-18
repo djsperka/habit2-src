@@ -41,7 +41,7 @@ public:
 	void addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, const std::string& filename, bool loop=false, int volume=0);
 
 	// set up blocking probes and sync
-	void preroll();
+	void preroll(GstElement *pipeline);
 
 	// block playing sources with idle probe
 	void stop();
