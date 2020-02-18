@@ -45,12 +45,15 @@ void Stim::addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipel
 	m_sourceMap[pos] = pfilesource;
 }
 
-void Stim::preroll()
+void Stim::preroll(GstElement *pipeline)
 {
 	m_stimState = HMMStimState::PREROLLING;
+
+	// construct a stim preroll counter....
+	StimPrerollCounter *psc = new StimPrerollCounter(this, m_sourceMap.size());
 	for (auto p: m_sourceMap)
 	{
-		p.second->preroll();
+		p.second->preroll(pipeline, psc);
 	}
 }
 
