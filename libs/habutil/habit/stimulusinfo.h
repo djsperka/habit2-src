@@ -22,7 +22,7 @@ namespace Habit
 	public:
 		StimulusInfo();
 		StimulusInfo(const QString& name, const QString& filename, bool is_loop=false, float audio=0, bool isBackground = false, bool isColor = false, QColor color = QColor());
-		StimulusInfo(const QString& filename, bool is_loop=false, float audio=0, bool isBackground = false, bool isColor = false, QColor color = QColor());
+		StimulusInfo(const QString& filename, bool is_loop=false, float audio=50, bool isBackground = false, bool isColor = false, QColor color = QColor());
 		StimulusInfo(const QColor& color);
 		StimulusInfo(const StimulusInfo& );
 		StimulusInfo(const StimulusInfoOld& oldInfo);

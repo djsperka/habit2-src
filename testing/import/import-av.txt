@@ -1,0 +1,3 @@
+stim,s1,center,/Users/dan/Desktop/HTESTING/stim/examples/mov/Loop.mov,audio,/Users/dan/Desktop/HTESTING/stim/examples/sounds/jaw_harp.wav
+stim,s2,center,/Users/dan/Desktop/HTESTING/stim/examples/images/tools/hydrant.png,audio,/Users/dan/Desktop/HTESTING/stim/examples/sounds/rubber_ducky.wav
+stim,s3,center,/Users/dan/Desktop/HTESTING/stim/examples/mov/Loop.mov,audio,/Users/dan/Desktop/HTESTING/stim/examples/sounds/cuckoo_clock2_x.wav
