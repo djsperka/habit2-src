@@ -558,6 +558,12 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 	bool b = true;
 	sProblems.clear();
 
+	// If an attention getter is used, verify that the stimulus is OK.
+	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() && !habutilStimulusFilesFound(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getStimulusDisplayInfo().getStimulusLayoutType()))
+	{
+		b = false;
+		sProblems.append(QString("Attention getter file(s) not found.\n"));
+	}
 
 	// iterate over phases that are enabled
 	QListIterator<Habit::HPhaseSettings> iterator = settings.phaseIterator();
