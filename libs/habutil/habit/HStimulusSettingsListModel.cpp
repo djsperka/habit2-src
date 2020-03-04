@@ -26,7 +26,7 @@ QVariant HStimulusSettingsListModel::data(const QModelIndex & index, int role) c
 		// Make sure that the stimulus at this row has
 		// 1) stim defined for each configured screen
 		// 2) the stim file(s) exist
-		if (!habutilStimulusFilesFound(m_list[index.row()], *m_pLayoutType))
+		if (!habutilStimulusFilesFound(m_list[index.row()], m_sdi))
 			return QBrush(Qt::yellow);
 	}
     return QVariant();

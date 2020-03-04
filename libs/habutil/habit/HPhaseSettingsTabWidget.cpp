@@ -50,7 +50,8 @@ HPhaseSettingsTabWidget::HPhaseSettingsTabWidget(const Habit::HPhaseSettings& ph
 	connect(m_plineeditPhaseName, SIGNAL(textChanged(const QString&)), this, SIGNAL(phaseNameChanged(const QString&)));
 	connect(m_pcbEnabled, SIGNAL(clicked(bool)), m_pTabWidget, SLOT(setEnabled(bool)));
 	connect(m_pcbEnabled, SIGNAL(clicked(bool)), this, SIGNAL(phaseEnabledClicked(bool)));
-	connect(this, SIGNAL(stimulusLayoutTypeChanged(int)), m_pStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
+	// This is not connected any more. FIXME
+	//connect(this, SIGNAL(stimulusLayoutTypeChanged(int)), m_pStimuliWidget, SLOT(stimulusLayoutTypeChanged(int)));
 
 	// initialize
 	m_plineeditPhaseName->setText(phaseSettings.getName());

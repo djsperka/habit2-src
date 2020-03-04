@@ -25,7 +25,7 @@ namespace GUILib
 	private:
 		Habit::StimuliSettings m_stimuli;
 		int m_context;
-		const Habit::StimulusDisplayInfo& m_stimulusDisplayInfo;
+		const Habit::StimulusDisplayInfo& m_sdi;
 		HStimulusSettingsListWidget *m_pStimulusSettingsListWidget;
 		HStimulusOrderListWidget *m_pStimulusOrderListWidget;
 		HStimulusPreviewWidget *m_pStimulusPreviewWidget;
@@ -34,13 +34,12 @@ namespace GUILib
 		void connections();
 		void populate();
 	public:
-		HStimuliSettingsWidget(const QString& labelName, const Habit::StimuliSettings& stimuli, int context, const Habit::StimulusDisplayInfo& stimulusDisplayInfo, QWidget *parent=0);
+		HStimuliSettingsWidget(const QString& labelName, const Habit::StimuliSettings& stimuli, int context, const Habit::StimulusDisplayInfo& sdi, QWidget *parent=0);
 		virtual ~HStimuliSettingsWidget() {};
 
 		// Get stimulisettings as currently defined in the widget (including changes)
 		Habit::StimuliSettings getStimuliSettings();
 	protected slots:
-		void stimulusLayoutTypeChanged(int);
 		void importClicked();
 		void previewStimulus(int);
 		void previewOrder(int);

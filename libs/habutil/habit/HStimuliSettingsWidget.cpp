@@ -30,25 +30,17 @@ HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const S
 : QWidget(parent)
 , m_stimuli(stimuli)
 , m_context(context)
-, m_stimulusDisplayInfo(info)
+, m_sdi(info)
 {
 	create(labelName, info);
 	connections();
-	//populate();
-	stimulusLayoutTypeChanged(info.getStimulusLayoutType().number());
+	//stimulusLayoutTypeChanged(info.getStimulusLayoutType().number());
 }
-
-#if 0
-void HStimuliSettingsWidget::populate()
-{
-	HGMM::instance().addStimuli(m_stimuli, m_context);
-}
-#endif
 
 void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisplayInfo& info)
 {
-	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_stimulusDisplayInfo);
-	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_stimulusDisplayInfo.getStimulusLayoutType());
+	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_sdi);
+	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_sdi);
 	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(info, this);
 
 	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(labelName));
@@ -292,13 +284,6 @@ void HStimuliSettingsWidget::importClicked()
 	}
 }
 
-void HStimuliSettingsWidget::stimulusLayoutTypeChanged(int i)
-{
-	m_pStimulusSettingsListWidget->setStimulusLayoutType(getStimulusLayoutType(i));
-	m_pStimulusOrderListWidget->setStimulusLayoutType(getStimulusLayoutType(i));
-	m_pStimulusPreviewWidget->setStimulusLayoutType(getStimulusLayoutType(i));
-}
-
 Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()
 {
 	Habit::StimuliSettings settings;
@@ -310,8 +295,6 @@ Habit::StimuliSettings HStimuliSettingsWidget::getStimuliSettings()
 void HStimuliSettingsWidget::currentStimulusSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
 	Q_UNUSED(previous);
-
-	//qDebug() << "HStimuliSettingsWidget::currentStimulusSelectionChanged( " << current.row() << ", " << previous.row() << ")";
 
 	// look at current selection in order widget
 	if (current.row() > -1)

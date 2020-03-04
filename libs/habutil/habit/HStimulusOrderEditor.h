@@ -10,6 +10,7 @@
 
 #include <QDialog>
 #include "stimulussettings.h"
+#include "stimulusdisplayinfo.h"
 #include "HStimulusOrder.h"
 #include "HStimulusSettingsListModel.h"
 #include "HStimulusNameListModel.h"
@@ -32,7 +33,7 @@ namespace GUILib
 		Ui::HStimulusOrderEditorForm *ui;
 		Habit::HStimulusOrder m_originalOrder;
 		Habit::HStimulusSettingsList m_stimlist;
-		const HStimulusLayoutType& m_layoutType;
+		const Habit::StimulusDisplayInfo& m_sdi;
 		GUILib::HStimulusSettingsListModel* m_pStimListModel;
 		HStimulusNameListModel *m_pOrderModel;
 		//HStimulusNameLabelTableModel *m_pOrderModel;
@@ -42,7 +43,7 @@ namespace GUILib
 		void add(const QString& name);
 
 	public:
-		HStimulusOrderEditor(const Habit::HStimulusOrder& order, const Habit::HStimulusSettingsList& stimlist, const HStimulusLayoutType& layoutType, QWidget* parent=0);
+		HStimulusOrderEditor(const Habit::HStimulusOrder& order, const Habit::HStimulusSettingsList& stimlist, const Habit::StimulusDisplayInfo& sdi, QWidget* parent=0);
 		virtual ~HStimulusOrderEditor();
 		Habit::HStimulusOrder getOrder();	// get the value as currently configured
 

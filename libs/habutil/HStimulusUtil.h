@@ -9,9 +9,10 @@
 #define HSTIMULUSUTIL_H_
 
 #include "stimulussettings.h"
+#include "stimulusdisplayinfo.h"
 #include "HTypes.h"
 
-bool habutilStimulusFilesFound(const Habit::HStimulusSettings& settings, const HStimulusLayoutType& layoutType);
+bool habutilStimulusFilesFound(const Habit::HStimulusSettings& settings, const Habit::StimulusDisplayInfo& info);
 
 
 #endif /* HSTIMULUSUTIL_H_ */

@@ -25,7 +25,7 @@ HStimulusSettingsListWidget::HStimulusSettingsListWidget(Habit::HStimulusSetting
 
 void HStimulusSettingsListWidget::create()
 {
-	m_pmodel = new HStimulusSettingsListModel(m_list, m_sdi.getStimulusLayoutType());
+	m_pmodel = new HStimulusSettingsListModel(m_list, m_sdi);
 	m_pListView = new QListView(this);
 	m_pListView->setModel(m_pmodel);
 
@@ -49,10 +49,10 @@ void HStimulusSettingsListWidget::create()
 	setLayout(h);
 }
 
-void HStimulusSettingsListWidget::setStimulusLayoutType(const HStimulusLayoutType& layoutType)
-{
-	m_pmodel->setLayoutType(layoutType);
-}
+//void HStimulusSettingsListWidget::setStimulusLayoutType(const HStimulusLayoutType& layoutType)
+//{
+//	m_pmodel->setLayoutType(layoutType);
+//}
 
 
 void HStimulusSettingsListWidget::connections()

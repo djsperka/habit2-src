@@ -276,6 +276,7 @@ void GUILib::HStimulusPreviewWidget::preview(unsigned int key, bool bPlayNow)
 	m_bSingleStimulus = true;
 	m_currentStimKey = key;
 	m_bListStimulus = false;
+	HGMM::instance().preroll(key);
 	if (bPlayNow)
 	{
 		HGMM::instance().stim(key);
@@ -283,7 +284,6 @@ void GUILib::HStimulusPreviewWidget::preview(unsigned int key, bool bPlayNow)
 	}
 	else
 	{
-		HGMM::instance().pause(key);
 		m_bPlaying = false;
 	}
 	updateNavigation();
@@ -296,14 +296,15 @@ void GUILib::HStimulusPreviewWidget::preview(const QList<unsigned int>& list, bo
 	m_bListStimulus = true;
 	m_idList = list;
 	m_idListCurrent = 0;
+	HGMM::instance().preroll(m_idList[m_idListCurrent]);
 	if (bPlayNow)
 	{
+		// this call just sets pipeline state to PLAYING
 		HGMM::instance().stim(m_idList[m_idListCurrent]);
 		m_bPlaying = true;
 	}
 	else
 	{
-		HGMM::instance().pause(m_idList[m_idListCurrent]);
 		m_bPlaying = false;
 	}
 	updateNavigation();

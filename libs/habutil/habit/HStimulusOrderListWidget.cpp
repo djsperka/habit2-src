@@ -7,6 +7,7 @@
 
 #include "HStimulusOrderListWidget.h"
 #include "HStimulusOrderEditor.h"
+#include "HTypes.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QtDebug>
@@ -15,20 +16,20 @@
 using namespace GUILib;
 using namespace Habit;
 
-HStimulusOrderListWidget::HStimulusOrderListWidget(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList, const HStimulusLayoutType& layoutType, QWidget *parent)
+HStimulusOrderListWidget::HStimulusOrderListWidget(Habit::HStimulusOrderList& list, const Habit::HStimulusSettingsList& ssList, const Habit::StimulusDisplayInfo& sdi, QWidget *parent)
 : QWidget(parent)
 , m_list(list)
 , m_ssList(ssList)
-, m_playoutType(&layoutType)
+, m_sdi(sdi)
 {
 	create();
 	connections();
 }
 
-void HStimulusOrderListWidget::setStimulusLayoutType(const HStimulusLayoutType& layoutType)
-{
-	m_playoutType = &layoutType;
-}
+//void HStimulusOrderListWidget::setStimulusLayoutType(int ilayoutType)
+//{
+//	m_ilayoutType = ilayoutType;
+//}
 
 void HStimulusOrderListWidget::create()
 {
@@ -134,7 +135,7 @@ void HStimulusOrderListWidget::editClicked()
 void HStimulusOrderListWidget::editItem(const QModelIndex& index)
 {
 	HStimulusOrder order(m_list.at(index.row()));
-	HStimulusOrderEditor* pEditor = new HStimulusOrderEditor(order, m_ssList, *m_playoutType, this);
+	HStimulusOrderEditor* pEditor = new HStimulusOrderEditor(order, m_ssList, m_sdi, this);
 	int status = pEditor->exec();
 	if (status == QDialog::Accepted)
 	{
@@ -145,7 +146,7 @@ void HStimulusOrderListWidget::editItem(const QModelIndex& index)
 void HStimulusOrderListWidget::newClicked()
 {
 	HStimulusOrder order;
-	HStimulusOrderEditor* pEditor = new HStimulusOrderEditor(order, m_ssList, *m_playoutType, this);
+	HStimulusOrderEditor* pEditor = new HStimulusOrderEditor(order, m_ssList, m_sdi, this);
 	int status = pEditor->exec();
 	if (status == QDialog::Accepted)
 	{

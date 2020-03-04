@@ -11,6 +11,7 @@
 #include <QAbstractListModel>
 #include <QList>
 #include "stimulisettings.h"
+#include "stimulusdisplayinfo.h"
 
 namespace GUILib
 {
@@ -19,14 +20,14 @@ namespace GUILib
 		Q_OBJECT
 	private:
 		Habit::HStimulusSettingsList& m_list;
-		const HStimulusLayoutType* m_pLayoutType;
+		const Habit::StimulusDisplayInfo& m_sdi;
 	public:
-		HStimulusSettingsListModel(Habit::HStimulusSettingsList& list, const HStimulusLayoutType& layoutType): m_list(list), m_pLayoutType(&layoutType) {};
+		HStimulusSettingsListModel(Habit::HStimulusSettingsList& list, const Habit::StimulusDisplayInfo& sdi): m_list(list), m_sdi(sdi) {};
 		virtual ~HStimulusSettingsListModel() {};
 		int rowCount(const QModelIndex& index = QModelIndex()) const;
 		QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-		void setLayoutType(const HStimulusLayoutType& layoutType) { m_pLayoutType = &layoutType; };
+		//void setLayoutType(const HStimulusLayoutType& layoutType) { m_pLayoutType = &layoutType; };
 		void changed(const QModelIndex & topLeft, const QModelIndex & bottomRight);
 		void append(const Habit::StimulusSettings& newStim);
 		void clobber(const Habit::StimulusSettings& stim);

@@ -41,7 +41,7 @@ namespace GUILib
 		void append(const Habit::HStimulusSettings& ss);
 		void clobber(const Habit::HStimulusSettings& ss);
 		void clearSelection();
-		void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
+		//void setStimulusLayoutType(const HStimulusLayoutType& layoutType);
 
 	Q_SIGNALS:
 		void previewStimulus(int);

@@ -15,6 +15,8 @@
 static const QString sreCOLOR("color\\((.*)\\)");
 static const QString sreRGB("rgb\\((\\d+),(\\d+),(\\d+)\\)");
 
+#define CHECK_ISS_FILE(f, dir) (f.isEmpty() || (dir.exists(f)))
+#define CHECK_STIM_FILE(f, dir) ((!f.isEmpty() && dir.exists(f)) || habutilStimulusColorOK(f))
 
 bool habutilStimulusColorOK(const QString& color)
 {
@@ -50,60 +52,48 @@ bool habutilStimulusColorOK(const QString& color)
 }
 
 
-bool habutilStimulusFilesFound(const Habit::HStimulusSettings& settings, const HStimulusLayoutType& layoutType)
+bool habutilStimulusFilesFound(const Habit::HStimulusSettings& settings, const Habit::StimulusDisplayInfo& info)
 {
 	bool b = true;
 	QDir stimRootDir = habutilGetStimulusRootDir();
-	if (layoutType == HStimulusLayoutType::HStimulusLayoutSingle)
-		b = (
-				(
-					!settings.getCenterStimulusInfo().getFileName().isEmpty() &&
-					(stimRootDir.exists(settings.getCenterStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getCenterStimulusInfo().getFileName()))
-				) ||
-				settings.getCenterStimulusInfo().isBackground()
-			);
-	else if (layoutType == HStimulusLayoutType::HStimulusLayoutLeftRight)
-		b = (
-				(
-					!settings.getLeftStimulusInfo().getFileName().isEmpty() &&
-					(stimRootDir.exists(settings.getLeftStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getLeftStimulusInfo().getFileName()))
-				) ||
-				settings.getLeftStimulusInfo().isBackground()
-			) &&
-			(
-				(
-					!settings.getRightStimulusInfo().getFileName().isEmpty() &&
-					(stimRootDir.exists(settings.getRightStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getRightStimulusInfo().getFileName()))
-				) ||
-				settings.getRightStimulusInfo().isBackground()
-			);
-	else if (layoutType == HStimulusLayoutType::HStimulusLayoutTriple)
-		b = (
-				(
-					!settings.getLeftStimulusInfo().getFileName().isEmpty() &&
-					(stimRootDir.exists(settings.getLeftStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getLeftStimulusInfo().getFileName()))
-				) ||
-				settings.getLeftStimulusInfo().isBackground()
-			) &&
-			(
-				(
-					!settings.getRightStimulusInfo().getFileName().isEmpty() &&
-					(stimRootDir.exists(settings.getRightStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getRightStimulusInfo().getFileName()))
-				) ||
-				settings.getRightStimulusInfo().isBackground()
-			) &&
-			(
-				(
-					!settings.getCenterStimulusInfo().getFileName().isEmpty() &&
-					(stimRootDir.exists(settings.getCenterStimulusInfo().getFileName()) || habutilStimulusColorOK(settings.getCenterStimulusInfo().getFileName()))
-				) ||
-				settings.getCenterStimulusInfo().isBackground()
-			);
+	if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	{
+		b = CHECK_STIM_FILE(settings.getCenterStimulusInfo().getFileName(), stimRootDir) ||
+				settings.getCenterStimulusInfo().isBackground();
+		if (info.getUseISS())
+		{
+			b = b && CHECK_ISS_FILE(settings.getIndependentSoundInfo().getFileName(), stimRootDir);
+		}
+	}
+	else if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		b = (	CHECK_STIM_FILE(settings.getLeftStimulusInfo().getFileName(), stimRootDir) ||
+				settings.getLeftStimulusInfo().isBackground()) &&
+			(	CHECK_STIM_FILE(settings.getRightStimulusInfo().getFileName(), stimRootDir) ||
+				settings.getRightStimulusInfo().isBackground());
+		if (info.getUseISS())
+		{
+			b = b &&  CHECK_ISS_FILE(settings.getIndependentSoundInfo().getFileName(), stimRootDir);
+		}
 
+	}
+	else if (info.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		b = (	CHECK_STIM_FILE(settings.getLeftStimulusInfo().getFileName(), stimRootDir) ||
+				settings.getLeftStimulusInfo().isBackground()) &&
+			(   CHECK_STIM_FILE(settings.getCenterStimulusInfo().getFileName(), stimRootDir) ||
+				settings.getCenterStimulusInfo().isBackground()) &&
+			(	CHECK_STIM_FILE(settings.getRightStimulusInfo().getFileName(), stimRootDir) ||
+				settings.getRightStimulusInfo().isBackground());
+		if (info.getUseISS())
+		{
+			b = b &&  CHECK_ISS_FILE(settings.getIndependentSoundInfo().getFileName(), stimRootDir);
+		}
+	}
 	else
 	{
 		b = false;
-		qWarning() << "habutilStimulusFilesFound: stimulus layout type " << layoutType.name() << " is not handled here.";
+		qWarning() << "habutilStimulusFilesFound: stimulus layout type " << info.getStimulusLayoutType().name() << " is not handled here.";
 	}
 	return b;
 }

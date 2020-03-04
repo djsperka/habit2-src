@@ -14,12 +14,12 @@
 using namespace GUILib;
 using namespace Habit;
 
-HStimulusOrderEditor::HStimulusOrderEditor(const HStimulusOrder& order, const HStimulusSettingsList& stimlist, const HStimulusLayoutType& layoutType, QWidget* parent)
+HStimulusOrderEditor::HStimulusOrderEditor(const HStimulusOrder& order, const HStimulusSettingsList& stimlist, const Habit::StimulusDisplayInfo& sdi, QWidget* parent)
 : QDialog(parent)
 , ui(new Ui::HStimulusOrderEditorForm)
 , m_originalOrder(order)
 , m_stimlist(stimlist)
-, m_layoutType(layoutType)
+, m_sdi(sdi)
 {
 	components();
 	connections();
@@ -36,7 +36,7 @@ void HStimulusOrderEditor::components()
 {
 	ui->setupUi(this);
 	ui->lineeditName->setText(m_originalOrder.getName());
-	m_pStimListModel = new HStimulusSettingsListModel(m_stimlist, m_layoutType);
+	m_pStimListModel = new HStimulusSettingsListModel(m_stimlist, m_sdi);
 	ui->listviewStimuli->setModel(m_pStimListModel);
 	m_pOrderModel = new HStimulusNameListModel(m_originalOrder.getList(), m_stimlist.names());
 	ui->listviewOrder->setModel(m_pOrderModel);
