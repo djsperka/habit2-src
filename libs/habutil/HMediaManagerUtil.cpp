@@ -16,17 +16,16 @@
 #include <QApplication>
 #include "HWorkspaceUtil.h"
 
-HGMM* initializeMediaManager(const Habit::ExperimentSettings& es)
+void initializeMediaManager(const Habit::ExperimentSettings& es)
 {
-	HGMM *pmm = NULL;
 	QDir rootDir = habutilGetStimulusRootDir();
+	HGMM::instance().reset(es, rootDir);
 
 	if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		QRect rect = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
 		HStimulusWidget *pSingle = new HStimulusWidget(es.getStimulusDisplayInfo(), rect.width(), rect.height());
 
-		HGMM::instance().reset(es, rootDir);
 		HGMM::instance().setWidgets(pSingle);
 		pSingle->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pSingle->move(rect.x(), rect.y());
@@ -46,7 +45,6 @@ HGMM* initializeMediaManager(const Habit::ExperimentSettings& es)
 		pRight->move(rectRight.x(), rectRight.y());
 		qDebug() << "Right player index " << habutilGetMonitorID(HPlayerPositionType::Right) << " moved to rect " << rectRight;
 
-		HGMM::instance().reset(es, rootDir);
 		HGMM::instance().setWidgets(pLeft, pRight);
 	}
 	else if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
@@ -69,16 +67,15 @@ HGMM* initializeMediaManager(const Habit::ExperimentSettings& es)
 		pRight->move(rectRight.x(), rectRight.y());
 		qDebug() << "Right player index " << habutilGetMonitorID(HPlayerPositionType::Right) << " moved to rect " << rectRight;
 
-		HGMM::instance().reset(es, rootDir);
 		HGMM::instance().setWidgets(pLeft, pCenter, pRight);
 	}
 
-	return &HGMM::instance();
+	return;
 }
 
 
-
-HGMM* initializeMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth, int screenHeight)
+#if 0
+void initializeMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth, int screenHeight)
 {
 	HGMM* pmm;
 	QDir rootDir = habutilGetStimulusRootDir();
@@ -109,10 +106,42 @@ HGMM* initializeMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWi
 		qFatal("Unknown stimulus layout type in initializeMediaManager");
 	}
 
-	return &HGMM::instance();	// TODO: This method should not return pointer
+	return;
 }
+#endif
 
-HGMM* initializeMediaManager(const Habit::ExperimentSettings& es, int screenWidth, int screenHeight)
+void initializeMediaManager(const Habit::ExperimentSettings& es, int screenWidth, int screenHeight)
 {
-	return initializeMediaManager(es.getStimulusDisplayInfo(), screenWidth, screenHeight);
+//	return initializeMediaManager(es.getStimulusDisplayInfo(), screenWidth, screenHeight);
+	QDir rootDir = habutilGetStimulusRootDir();
+	HGMM::instance().reset(es, rootDir);
+
+	Habit::StimulusDisplayInfo sdi = es.getStimulusDisplayInfo();
+	if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	{
+		HStimulusWidget *pSingle = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		HGMM::instance().modifyStimulusDisplay(sdi, rootDir);
+		HGMM::instance().setWidgets(pSingle);
+	}
+	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	{
+		HStimulusWidget *pLeft = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		HStimulusWidget *pRight = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		HGMM::instance().modifyStimulusDisplay(sdi, rootDir);
+		HGMM::instance().setWidgets(pLeft, pRight);
+	}
+	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	{
+		HStimulusWidget *pLeft = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		HStimulusWidget *pRight = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		HStimulusWidget *pCenter = new HStimulusWidget(sdi, screenWidth, screenHeight);
+		HGMM::instance().modifyStimulusDisplay(sdi, rootDir);
+		HGMM::instance().setWidgets(pLeft, pCenter, pRight);
+	}
+	else
+	{
+		qFatal("Unknown stimulus layout type in initializeMediaManager");
+	}
+
+	return;
 }

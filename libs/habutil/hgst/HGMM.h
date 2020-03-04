@@ -106,10 +106,10 @@ public:
 	void reset();
 
 	// Re-initializes the mm, creates pipelines for default, background, and attention-getter (if configured),
-	// and all configured stimuli. The default, background, and attention-getter are prerolled.
+	// and all configured stimuli (if bPopulate==true). The default, background, and attention-getter are prerolled.
 	// No widgets are set - call setWidgets() for that. Otherwise,
 	// the mm will be ready to play all stimuli. Context stim lists are also available.
-	void reset(const Habit::ExperimentSettings& settings, const QDir& dir = QDir::rootPath());
+	void reset(const Habit::ExperimentSettings& settings, const QDir& dir = QDir::rootPath(), bool bPopulate = false);
 
 	// Reconfigure all existing pipelines using the supplied StimulusDisplayInfo. The stimuli themselves remain, but they get
 	// all-new pipelines reconfigured using the new Info.

@@ -83,30 +83,34 @@ void HGMM::cleanupAll()
 	}
 	return;
 }
-void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir)
+void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir, bool bPopulate)
 {
 	qDebug() << "HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir) - layout type " << settings.getStimulusDisplayInfo().getStimulusLayoutType().name();
 	reset();
 	modifyStimulusDisplay(settings.getStimulusDisplayInfo(), dir);
 
 //	// Need to know if AG is used. If it is, add attention getter settings to media manager
-//	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
-//	{
-//	qDebug() << "add ag";
+	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
+	{
+		qDebug() << "Adding AG...";
 //	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
 //	qDebug() << "sound only? " << settings.getAttentionGetterSettings().isSoundOnly();
 
-	addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getAttentionGetterSettings().isSoundOnly());
+		// FIXME ag is prerolled in addAG(). Shouldn't do that.
+		addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getAttentionGetterSettings().isSoundOnly());
+	}
 
-//	}
-
-	QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
-	while (phaseIterator.hasNext())
+	if (bPopulate)
 	{
-		const Habit::HPhaseSettings& ps = phaseIterator.next();
-		if (ps.getIsEnabled())
+		qDebug() << "Populating stimuli...";
+		QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
+		while (phaseIterator.hasNext())
 		{
-			addStimuli(ps.stimuli(), ps.getSeqno());
+			const Habit::HPhaseSettings& ps = phaseIterator.next();
+			if (ps.getIsEnabled())
+			{
+				addStimuli(ps.stimuli(), ps.getSeqno());
+			}
 		}
 	}
 }

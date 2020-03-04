@@ -559,7 +559,7 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 	sProblems.clear();
 
 	// If an attention getter is used, verify that the stimulus is OK.
-	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() && !habutilStimulusFilesFound(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getStimulusDisplayInfo().getStimulusLayoutType()))
+	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() && !habutilStimulusFilesFound(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getStimulusDisplayInfo()))
 	{
 		b = false;
 		sProblems.append(QString("Attention getter file(s) not found.\n"));
@@ -576,7 +576,7 @@ bool GUILib::H2MainWindow::checkExperimentSettings(const Habit::ExperimentSettin
 			while (it.hasNext())
 			{
 				const StimulusSettings& ss = it.next();
-				if (!habutilStimulusFilesFound(ss, settings.getStimulusDisplayInfo().getStimulusLayoutType()))
+				if (!habutilStimulusFilesFound(ss, settings.getStimulusDisplayInfo()))
 				{
 					b = false;
 					sProblems.append(QString("%1 stimulus \"%2\" file(s) not found.\n").arg(ps.getName()).arg(ss.getName()));

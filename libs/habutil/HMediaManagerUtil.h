@@ -11,8 +11,7 @@
 #include "experimentsettings.h"
 #include "stimulusdisplayinfo.h"
 
-HGMM* initializeMediaManager(const Habit::ExperimentSettings& es, int screenWidth, int screenHeight);
-HGMM* initializeMediaManager(const Habit::StimulusDisplayInfo& sdi, int screenWidth, int screenHeight);
-HGMM* initializeMediaManager(const Habit::ExperimentSettings& es);
+void initializeMediaManager(const Habit::ExperimentSettings& es, int screenWidth, int screenHeight);
+void initializeMediaManager(const Habit::ExperimentSettings& es);
 
 
