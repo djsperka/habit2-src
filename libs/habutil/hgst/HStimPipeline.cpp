@@ -467,6 +467,7 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			GstElement *sink = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("qwidget5videosink", *pppt, id)));
 			Q_ASSERT(sink);
 			gst_element_link (freeze, sink);
+			gst_object_unref(sink);
 
 			// set states of all newly-added elements.
 			if (!gst_element_sync_state_with_parent(queue))
