@@ -246,10 +246,16 @@ void FileSource::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCount
 					throw std::runtime_error("Cannot link image pads.");
 				}
 
-				//
+				// The freeze element is part of the head, not the tail. Use the 'src' pad
+				// at the end of the head (the src pad of the imagefreeze element here) for the
+				// probe
+				freezepad = gst_element_get_static_pad(freeze, "src");
+				gulong probeid = gst_pad_add_probe(freezepad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
 
-				// save this stream. Note the pad is ref'd
-				pspc->source()->addStream(HMMStreamType::VIDEO, pad, sink, probeid);
+				// save this stream. Note the pad is ref'd because of the call to get_static_pad
+				// TODO MAKE SURE THIS GETS UNREF'D
+				pspc->source()->addStream(HMMStreamType::VIDEO, freezepad, sink, probeid);
+				gst_object_unref(freezepad);
 
 			}
 		}
