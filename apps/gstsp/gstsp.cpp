@@ -17,6 +17,21 @@ hmm::HMM *f_pmm=NULL;
 
 gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loop);
 
+void glibPrintFunc(const gchar *string);
+void glibPrinterrFunc(const gchar *string);
+
+void glibPrintFunc(const gchar *string)
+{
+	QString s(string);
+	qDebug() << s;
+}
+
+void glibPrinterrFunc(const gchar *string)
+{
+	QString s(string);
+	qCritical() << s;
+}
+
 int main (int argc, char **argv)
 {
 	QApplication app(argc, argv);
@@ -50,6 +65,8 @@ int main (int argc, char **argv)
 	}
 
 	qInstallMessageHandler(&HLoggerObject::loggingHandler);
+	g_set_print_handler(glibPrintFunc);
+	g_set_printerr_handler(glibPrinterrFunc);
 
 	if (!habutilInitWorkspace())
 		return 0;
