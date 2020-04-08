@@ -51,6 +51,8 @@ public:
 	Port();
 	virtual ~Port();
 
+	// Both the video and audio pipeline segments have a first (*Ele) and last (*Sink) element -
+	// they are all specified with these functions.
 	void addVideoEle(HMMStimPosition pos, GstElement *ele);
 	void addAudioEle(HMMStimPosition pos, GstElement *mixer);
 	void addVideoSink(HMMStimPosition pos, GstElement *sink);

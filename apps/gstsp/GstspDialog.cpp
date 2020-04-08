@@ -136,7 +136,6 @@ void GstspDialog::experimentActivated(QString expt)
 		qDebug() << "Phase " << ps.getName();
 		for (const Habit::StimulusSettings& ss: stimuliSettings.stimuli())
 		{
-			qDebug() << "Stimulus " << ss.getName();
 			hmm::HMMStimID id = factory.addStimulusSettings(ss);
 			m_stringlistNames.append(ss.getName());
 			m_listIDs.append(id);
@@ -154,13 +153,15 @@ void GstspDialog::experimentActivated(QString expt)
 
 
 	// create widget for control
-	GstspControlDialog *control = new GstspControlDialog(m_stringlistNames, m_listIDs, this);
-	connect(control, &GstspControlDialog::preroll, this, &GstspDialog::preroll);
-	connect(control, &GstspControlDialog::dump, this, &GstspDialog::dump);
-	control->exec();
-
+	m_control = new GstspControlDialog(m_stringlistNames, m_listIDs, this);
+	connect(m_control, &GstspControlDialog::preroll, this, &GstspDialog::preroll);
+	connect(m_control, &GstspControlDialog::dump, this, &GstspDialog::dump);
+	connect(m_control, &GstspControlDialog::play, this, &GstspDialog::playItem);
+	m_control->exec();
 	psdw->close();
 
+	delete m_pmm;
+	m_pmm = NULL;
 }
 
 void GstspDialog::setWidgetPropertyOnSinks(StimDisplayWidget *psdw, unsigned int nwidgets)
@@ -200,7 +201,7 @@ void GstspDialog::setWidgetPropertyOnSinks(StimDisplayWidget *psdw, unsigned int
 	}
 }
 
-void GstspDialog::preroll(int id)
+void GstspDialog::preroll(unsigned int id)
 {
 	hmm::HMMInstanceID iid = m_pmm->preroll((hmm::HMMStimID)id);
 	qDebug() << "Got instance ID " << (int)iid;
@@ -212,9 +213,9 @@ void GstspDialog::dump()
 	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(m_pmm->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(m_pmm->pipeline()));
 }
 
-void GstspDialog::playItem(unsigned int)
+void GstspDialog::playItem(unsigned int iid)
 {
-
+	m_pmm->play(iid);
 }
 
 void GstspDialog::stopItem()

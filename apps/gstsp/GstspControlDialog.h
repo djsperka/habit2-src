@@ -30,12 +30,14 @@ public:
     ~GstspControlDialog();
 
 signals:
-	void preroll(int id);
+	void preroll(unsigned int id);
 	void dump();
+	void play(unsigned int);
 
 private slots:
     void onPrerollClicked();
     void onDumpClicked();
+    void onPlayClicked();
 
 private:
     Ui::gstspcontroldialog *ui;

@@ -39,15 +39,45 @@ public:
 	Stim *stim() const { return m_pstim; }
 };
 
+
+// Attach this to BOTH pad-added callback AND blocking probe. Initialize with value 1.
+// Increment in pad-added, decrement in no-more-pads and in each blocking probe. When this
+// counter hits zero, we know that all streams have been found&started by the decoder, and
+// each of the streams is now blocked.
+// If this is an image, where there isn't a stream - just a single image passed (needs imagefreeze later) -
+// that's all we need. If its a video or audio stream, then we set up a flushing seek, and
+// reset the counter to the number of streams. We post a bus message, and the bus callback issues a
+// flushing seek. In blocking probe we decrement again, and when this fires we are
+// prerolled.
+
+
+
+/*
+ *
+ *
+ *
+ *     BXCVADFGHJKL1234567890
+ *
+ *
+ *
+ *
+ */
+
+
+
+
+
 class SourcePrerollCounter: public Counter
 {
 	Source *m_psource;
 	GstElement *m_pipeline;
+	bool m_bIsImage;	// if true, no flushing seek needed to preroll.
 public:
-	SourcePrerollCounter(Source *psource, GstElement *pipeline, int counter=0, Counter *psubCounter=NULL): Counter(counter, psubCounter), m_psource(psource), m_pipeline(pipeline) {}
+	SourcePrerollCounter(Source *psource, GstElement *pipeline, int counter=0, Counter *psubCounter=NULL): Counter(counter, psubCounter), m_psource(psource), m_pipeline(pipeline), m_bIsImage(false) {}
 	void operator()(void);
 	Source *source() const { return m_psource; }
 	GstElement *pipeline() const { return m_pipeline; }
+	void setIsImage(bool isImage) { m_bIsImage = isImage; }
 };
 
 // can use this on sources to carry along another counter to act on stim.

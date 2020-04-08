@@ -41,7 +41,7 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 	m_gthread = g_thread_new("HMM-main-loop", &HMM::threadFunc, m_pgml);
 
 	// create pipeline
-	m_pipeline = gst_pipeline_new (NULL);
+	m_pipeline = gst_pipeline_new ("gstsp-pipeline");
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
 	gst_bus_add_watch(bus, &HMM::busCallback, this);
 	gst_object_unref(bus);
@@ -109,6 +109,8 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		if (!audioMixer)
 			throw std::runtime_error("Cannot create audio mixer");
 
+		gst_object_ref(audioMixer);
+		gst_object_ref(audioSink);
 		gst_bin_add_many(GST_BIN(m_pipeline), audioMixer, audioSink, NULL);
 		gst_element_link(audioMixer, audioSink);
 		m_port.addAudioEle(it->first, audioMixer);
@@ -142,6 +144,14 @@ gpointer HMM::threadFunc(gpointer user_data)
 
 HMM::~HMM()
 {
+	// destroy all Stim in instance map
+	for (std::pair<HMMInstanceID, StimP> p : m_instanceMap)
+	{
+		delete p.second;
+	}
+	m_instanceMap.clear();
+	gst_element_set_state(m_pipeline, GST_STATE_NULL);
+
 	// exit main loop
 	qDebug() << "HMM::~HMM: quit main loop";
 	g_main_loop_quit(m_pgml);
@@ -188,7 +198,9 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	//
 
 	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceMap.size());
-	m_instanceMap[instanceID] = m_factory(id, *this);
+	std::ostringstream oss;
+	oss << "iid-" << instanceID;
+	m_instanceMap[instanceID] = m_factory(id, *this, oss.str().c_str());
 	dump("preroll");
 	m_instanceMap[instanceID]->preroll(pipeline());
 
@@ -201,11 +213,21 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 }
 
 
-void HMM::play(const HMMInstanceID& id)
+void HMM::play(const HMMInstanceID& iid)
 {
-	if (m_instanceMap.count(id) != 1)
+	if (m_instanceMap.count(iid) != 1)
 		throw std::runtime_error("instance id not found, cannot play.");
 
+	Stim *pstimCurrent = m_instanceMap[m_iidCurrent];
+	Stim *pstimPending = m_instanceMap[iid];
+
+	if (pstimPending->getStimState() != HMMStimState::PREROLLED)
+	{
+		g_print("HMM::play(%d) - not prerolled\n", iid);
+		return;
+	}
+
+	g_print("HMM::play(%d) - prerolled and ready\n", iid);
 	// The stim in 'mmstim' is prerolled and ready to play. It is a partial pipeline,
 	// with a set of src pads matching the preferred pattern (number of video, audio, and audio source(s).
 	// The stim in 'mmstimCurrent' is the currently playing stim.
@@ -217,9 +239,6 @@ void HMM::play(const HMMInstanceID& id)
 	// of the streams are blocked, we can then detach the mmstimCurrent, and attach mmstim.
 	// One detail that is important is to set the offset on the sink pad side of the new connection. The offset
 	// should be the current running time (VERIFY THIS)
-
-	Stim *pstimCurrent = m_instanceMap[m_iidCurrent];
-	Stim *pstimPending = m_instanceMap[id];
 
 	PlayStimCounter *pcounterPlay = new PlayStimCounter(pstimCurrent, pstimPending, this, (int)pstimCurrent->sourceMap().size());
 	for (std::pair<HMMStimPosition, Stim::SourceP> p: pstimCurrent->sourceMap())
@@ -238,12 +257,13 @@ void HMM::play(const HMMInstanceID& id)
 			if (pp.first == HMMStreamType::VIDEO)
 			{
 				pp.second->setProbeID(
-						gst_pad_add_probe(pp.second->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM|GST_PAD_PROBE_TYPE_IDLE), &HMM::padProbeBlockCallback, pcounter, NULL)
+						gst_pad_add_probe(pp.second->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM|GST_PAD_PROBE_TYPE_IDLE), &HMM::padProbeIdleCallback, pcounter, NULL)
 						);
 				g_print("added probe for stream type %d: block %lu\n", pp.first, pp.second->getProbeID());
 			}
 		}
 	}
+
 }
 
 
@@ -370,17 +390,15 @@ gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 	}
 	case GST_MESSAGE_APPLICATION:
 	{
-		g_print("MM1::busCallback(%s - %s)\n", GST_MESSAGE_TYPE_NAME(msg), GST_MESSAGE_SRC_NAME(msg));
+		g_print("MM1::busCallback(message type %s from ele %s)\n", GST_MESSAGE_TYPE_NAME(msg), GST_MESSAGE_SRC_NAME(msg));
 		if (gst_message_has_name (msg, "seek"))
 		{
-			g_print("Got seek msg\n");
 			Source *psrc;
 			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "psrc", G_TYPE_POINTER, &psrc, NULL))
 				throw std::runtime_error("Cannot get source ptr from msg");
 
-			g_print("Source element is %s\n", GST_ELEMENT_NAME(psrc->bin()));
-
 			// flushing seek
+			g_print("seek message - flushing seek on element %s\n", GST_ELEMENT_NAME(psrc->bin()));
 			if (!gst_element_seek(psrc->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
 				throw std::runtime_error("seek failed");
@@ -388,12 +406,12 @@ gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 		}
 		else if (gst_message_has_name (msg, "loop"))
 		{
-			g_print("Got loop msg\n");
 			Source *psrc;
 			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "psrc", G_TYPE_POINTER, &psrc, NULL))
 				throw std::runtime_error("Cannot get source from msg");
 
 			// NON-flushing seek
+			g_print("loop message - non-flushing seek on element %s\n", GST_ELEMENT_NAME(psrc->bin()));
 			if (!gst_element_seek(psrc->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
 				throw std::runtime_error("LOOPING seek failed");
@@ -550,7 +568,7 @@ GstPadProbeReturn HMM::padProbeIdleCallback(GstPad *pad, GstPadProbeInfo *, gpoi
 	}
 	if (pcounter->decrement())
 	{
-		g_print("HMM::padIdleBlockCallback: decrement() returned TRUE, DO NOT delete counter\n");
+		g_print("HMM::padProbeIdleCallback: decrement() returned TRUE, DO NOT delete counter\n");
 
 		//delete pcounter;
 	}

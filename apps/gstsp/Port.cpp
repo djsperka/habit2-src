@@ -19,6 +19,23 @@ Port::Port()
 
 Port::~Port()
 {
+	// need to unref all this stuff....
+	for (std::pair<HMMStimPosition, GstElement *> p : m_mapPosVideo)
+	{
+		gst_object_unref(p.second);
+	}
+	for (std::pair<HMMStimPosition, GstElement *> p : m_mapPosAudio)
+	{
+		gst_object_unref(p.second);
+	}
+	for (std::pair<HMMStimPosition, GstElement *> p : m_mapPosVideoSink)
+	{
+		gst_object_unref(p.second);
+	}
+	for (std::pair<HMMStimPosition, GstElement *> p : m_mapPosAudioSink)
+	{
+		gst_object_unref(p.second);
+	}
 }
 
 void Port::addVideoEle(HMMStimPosition pos, GstElement *ele)
@@ -65,6 +82,17 @@ void Port::connect(Stim& stim)
 		}
 		gst_object_unref(pad);
 	}
+
+
+	/*
+	 *
+	 *
+	 * 12345r7890qetyuilzxccvbnm,./
+	 *
+	 * - Bronte 4/8/20
+	 *
+	 *
+	 */
 
 	// OK now connect all video streams in 'stim' to the port.
 	Stim::HMMStimPosSourceMap::iterator it;

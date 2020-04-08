@@ -10,11 +10,21 @@
 #include <sstream>
 using namespace hmm;
 
-Source::Source(HMMSourceType t, Stim *parent)
+Source::Source(HMMSourceType t)
 : m_sourceType(t)
-, m_parent(parent)
+, m_parent(NULL)
 , m_bSeeking(false)
 {};
+
+Source::~Source()
+{
+	// delete the streams
+	for (std::pair<HMMStreamType, StreamP> namestream : m_streamMap)
+	{
+		delete namestream.second;
+	}
+	m_streamMap.clear();
+}
 
 //void Source::addStream(HMMStreamType t, Stream *pstream)
 //{
@@ -89,21 +99,16 @@ void Source::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, 
 
 
 
-ColorSource::ColorSource(HMMSourceType t, Stim *parent, unsigned int argb)
-: Source(t, parent)
-, m_argb(argb)
+ColorSource::ColorSource(HMMSourceType stype, GstElement *ele)
+: Source(stype)
+, m_ele(ele)
 {
-	std::ostringstream oss;
-	GError *gerror = NULL;
-	oss << "videotestsrc pattern=solid-color foreground-color=" << m_argb;
-	m_ele = gst_element_factory_make("videotestsrc", NULL);
-	if (m_ele == NULL)
-	{
-		throw std::runtime_error("Cannot create color source");
-	}
-	g_object_set (m_ele, "pattern", 17, "foreground-color", m_argb, NULL);
-	GstPad *srcpad = gst_element_get_static_pad(m_ele, "src");
-	addStream(HMMStreamType::VIDEO, srcpad, NULL);
+	gst_object_ref(ele);
+}
+
+ColorSource::~ColorSource()
+{
+	gst_object_unref(m_ele);
 }
 
 GstElement *ColorSource::bin()
@@ -113,7 +118,18 @@ GstElement *ColorSource::bin()
 
 void ColorSource::preroll(GstElement *pipeline, Counter *pStimCounter)
 {
-	g_print("prerolling color %x\n", m_argb);
+	Stream *vs = nullptr;
+	g_print("prerolling color\n");
+
+	// must have a single video stream
+	vs = getStream(HMMStreamType::VIDEO);
+	if (streamCount() != 1 || !vs)
+		throw std::runtime_error("cannot preroll color source, must have 1 video stream");
+
+	// set blocking probe and a fake sink
+	GstElement *sink = gst_element_factory_make("fakesink", NULL);
+	gulong probeid = gst_pad_add_probe(vs->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &ColorSource::padProbeBlockCallback, pspc, NULL);
+
 }
 
 void ColorSource::stop()
@@ -126,18 +142,18 @@ void ColorSource::rewind()
 
 }
 
-FileSource::FileSource(HMMSourceType t, Stim *parent, const std::string& filename, bool bloop, unsigned int volume)
-: Source(t, parent)
-, m_filename(filename)
+FileSource::FileSource(HMMSourceType stype, GstElement *ele, bool bloop, unsigned int volume)
+: Source(stype)
 , m_bloop(bloop)
 , m_volume(volume)
+, m_ele(ele)
 {
-	std::string uri("file://");
-	uri.append(m_filename);
-	m_ele = gst_element_factory_make("uridecodebin", NULL);
-	if (!m_ele)
-		throw std::runtime_error("gst_element_factory_make(uridecodebin) returned NULL");
-	g_object_set (m_ele, "uri", uri.c_str(), NULL);
+	gst_object_ref(ele);
+}
+
+FileSource::~FileSource()
+{
+	gst_object_unref(m_ele);
 }
 
 GstElement *FileSource::bin()
@@ -147,7 +163,7 @@ GstElement *FileSource::bin()
 
 void FileSource::preroll(GstElement *pipeline, Counter *pStimCounter)
 {
-	g_print("FileSource prerolling %s\n", m_filename.c_str());
+	g_print("FileSource prerolling\n");
 
 	// a filesource is created with uridecodebin, so we set up the machinery to do this.
 	// One thing we need is a counter specific to this source. When triggered it will
@@ -172,8 +188,9 @@ void FileSource::rewind()
 }
 
 // Need access to counter (decrement)
-void FileSource::noMorePadsCallback(GstElement *, SourcePrerollCounter *pspc)
+void FileSource::noMorePadsCallback(GstElement *src, SourcePrerollCounter *pspc)
 {
+	g_print("noMorePads(%s)\n", GST_ELEMENT_NAME(src));
 	// decrement here, negates the initial setting of (1) of counter.
 	pspc->decrement();
 }
@@ -182,7 +199,10 @@ void FileSource::noMorePadsCallback(GstElement *, SourcePrerollCounter *pspc)
 // need access to counter, Source* (must add Streams)
 // padAdded called once for each stream, so incrementing counter here is un-done
 // when the blocking probe callback is called.
-void FileSource::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pspc)
+// ALL streams are handled here, and a Stream* is added to the source object. The port will decide
+// which stream(s) are needed.
+
+void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCounter *pspc)
 {
 	GstCaps *caps;
 	GstStructure *s;
@@ -200,80 +220,89 @@ void FileSource::padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCount
 	gst_caps_unref(new_pad_caps);
 
 
-	g_print("padAddedCallback: %s\n", name);
 	if (strcmp (name, "video/x-raw") == 0)
 	{
-		if (pspc->source()->sourceType() == HMMSourceType::VIDEO_ONLY || pspc->source()->sourceType() == HMMSourceType::AUDIO_VIDEO)
+		// increment counter
+		pspc->increment();
+
+		// handle images and video differently
+		if (isVideo)
 		{
-			// increment counter
-			pspc->increment();
+			gulong probeid = gst_pad_add_probe(pad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
 
-			// handle images and video differently
-			if (isVideo)
+			// add fake sink
+			GstElement *sink = gst_element_factory_make("fakesink", NULL);
+			gst_bin_add(GST_BIN(pspc->pipeline()), sink);
+			GstPad *sinkpad = gst_element_get_static_pad(sink, "sink");
+			GstPadLinkReturn r = gst_pad_link(pad, sinkpad);
+			gst_object_unref(sinkpad);
+			if (r != GST_PAD_LINK_OK)
 			{
-				gulong probeid = gst_pad_add_probe(pad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
-
-				// add fake sink
-				GstElement *sink = gst_element_factory_make("fakesink", NULL);
-				gst_bin_add(GST_BIN(pspc->pipeline()), sink);
-				GstPad *sinkpad = gst_element_get_static_pad(sink, "sink");
-				GstPadLinkReturn r = gst_pad_link(pad, sinkpad);
-				gst_object_unref(sinkpad);
-				if (r != GST_PAD_LINK_OK)
-				{
-					g_print("fake sink pad link error %d\n", (int)r);
-					throw std::runtime_error("Cannot link pads.");
-				}
-
-				// save this stream. Note the pad is ref'd
-				pspc->source()->addStream(HMMStreamType::VIDEO, pad, sink, probeid);
-				gst_object_ref(pad);
+				g_print("fake sink pad link error %d\n", (int)r);
+				throw std::runtime_error("Cannot link pads.");
 			}
-			else if (isImage)
+
+			// save this stream. Note the pad is ref'd
+			pspc->source()->addStream(HMMStreamType::VIDEO, pad, sink, probeid);
+			gst_object_ref(pad);
+			g_print("padAddedCallback(%s) - video stream %d x %d\n", GST_ELEMENT_NAME(src), width, height);
+		}
+		else if (isImage)
+		{
+			gulong probeid = gst_pad_add_probe(pad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
+			pspc->setIsImage(true);
+
+			// for images, append an imagefreeze element and use its src pad for probe and connection
+			// add fake sink
+			GstElement *freeze = gst_element_factory_make("imagefreeze", NULL);
+			GstElement *sink = gst_element_factory_make("fakesink", NULL);
+			gst_bin_add_many(GST_BIN(pspc->pipeline()), freeze, sink, NULL);
+			GstPad *freezesink = gst_element_get_static_pad(freeze, "sink");
+			GstPadLinkReturn r = gst_pad_link(pad, freezesink);
+			gboolean blink = gst_element_link(freeze, sink);
+			gst_object_unref(freezesink);
+			if (r != GST_PAD_LINK_OK || !blink)
 			{
-				// for images, append an imagefreeze element and use its src pad for probe and connection
-				// add fake sink
-				GstElement *freeze = gst_element_factory_make("imagefreeze", NULL);
-				GstElement *sink = gst_element_factory_make("fakesink", NULL);
-				gst_bin_add_many(GST_BIN(pspc->pipeline()), freeze, sink, NULL);
-				GstPad *freezepad = gst_element_get_static_pad(freeze, "sink");
-				GstPadLinkReturn r = gst_pad_link(pad, freezepad);
-				gboolean blink = gst_element_link(freeze, sink);
-				gst_object_unref(freezepad);
-				if (r != GST_PAD_LINK_OK || !blink)
-				{
-					g_print("fake sink pad/imagefreeze link error %d\n", (int)r);
-					throw std::runtime_error("Cannot link image pads.");
-				}
-
-				// The freeze element is part of the head, not the tail. Use the 'src' pad
-				// at the end of the head (the src pad of the imagefreeze element here) for the
-				// probe
-				freezepad = gst_element_get_static_pad(freeze, "src");
-				gulong probeid = gst_pad_add_probe(freezepad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
-
-				// save this stream. Note the pad is ref'd because of the call to get_static_pad
-				// TODO MAKE SURE THIS GETS UNREF'D
-				pspc->source()->addStream(HMMStreamType::VIDEO, freezepad, sink, probeid);
-				gst_object_unref(freezepad);
-
+				g_print("fake sink pad/imagefreeze link error %d\n", (int)r);
+				throw std::runtime_error("Cannot link image pads.");
 			}
+
+			// The freeze element is part of the head, not the tail.
+			// Using the freeze src pad for probe.
+			// The srcpad on the freeze element is used in the stream as the connection point.
+			GstPad *freezesrc = gst_element_get_static_pad(freeze, "src");
+			// save this stream. Note the pad is ref'd because of the call to get_static_pad
+			// TODO MAKE SURE THIS GETS UNREF'D
+			pspc->source()->addStream(HMMStreamType::VIDEO, freezesrc, sink, probeid);
+
+			g_print("padAddedCallback(%s) - image stream %d x %d\n", GST_ELEMENT_NAME(src), width, height);
 		}
 	}
 	else if (strcmp (name, "audio/x-raw") == 0)
 	{
-		if (pspc->source()->sourceType() == HMMSourceType::VIDEO_ONLY || pspc->source()->sourceType() == HMMSourceType::AUDIO_VIDEO)
+		// increment counter
+		pspc->increment();
+
+		// blocking probe
+		gulong probeid = gst_pad_add_probe(pad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
+
+		// add fake sink
+		GstElement *sink = gst_element_factory_make("fakesink", NULL);
+		gst_bin_add(GST_BIN(pspc->pipeline()), sink);
+		GstPad *sinkpad = gst_element_get_static_pad(sink, "sink");
+		GstPadLinkReturn r = gst_pad_link(pad, sinkpad);
+		gst_object_unref(sinkpad);
+		if (r != GST_PAD_LINK_OK)
 		{
-			// increment counter
-			pspc->increment();
-
-			// blocking probe
-			gulong probeid = gst_pad_add_probe(pad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
-
-			// save this stream. Note the pad is ref'd
-			pspc->source()->addStream(HMMStreamType::VIDEO, pad, NULL, probeid);
-			gst_object_ref(pad);
+			g_print("fake sink pad link error %d\n", (int)r);
+			throw std::runtime_error("Cannot link audio pads.");
 		}
+
+		// save this stream. Note the pad is ref'd
+		pspc->source()->addStream(HMMStreamType::AUDIO, pad, NULL, probeid);
+		gst_object_ref(pad);
+		g_print("padAddedCallback(%s) - audio stream\n", GST_ELEMENT_NAME(src));
+
 	}
 
 	// free caps
@@ -287,10 +316,6 @@ GstPadProbeReturn FileSource::padProbeBlockCallback(GstPad *, GstPadProbeInfo *,
 {
 	SourcePrerollCounter *pcounter = (SourcePrerollCounter *)user_data;
 	g_print("In pad probe callback - seeking %s\n", (pcounter->source()->isSeeking() ? "TRUE" : "FALSE"));
-	if (!pcounter->source()->isSeeking() && pcounter->decrement())
-	{
-		g_print("HMM::padProbeBlockCallback: decrement() returned TRUE, DO NOT delete counter\n");
-		//delete pcounter;
-	}
+	pcounter->decrement();
 	return GST_PAD_PROBE_OK;
 }

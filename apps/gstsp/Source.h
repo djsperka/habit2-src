@@ -35,13 +35,14 @@ private:
 	Stim *m_parent;
 	std::map<HMMStreamType, StreamP> m_streamMap;
 	bool m_bSeeking;
+	void setParent(Stim *parent) { m_parent = parent; }
 
 protected:
-	Source(HMMSourceType t, Stim *parent);
+	Source(HMMSourceType t);
 
 public:
 	Source(const Source&) = delete;
-	virtual ~Source() {};
+	virtual ~Source();
 	void operator=(const Source&) = delete;
 	HMMSourceType sourceType() const { return m_sourceType; }
 	std::map<HMMStreamType, StreamP>& streamMap() { return m_streamMap; }
@@ -50,7 +51,7 @@ public:
 	Stim *parentStim() { return m_parent; }
 	void setSeeking(bool b) { m_bSeeking = b; }
 	bool isSeeking() const { return m_bSeeking; }
-
+	int streamCount() const { return m_streamMap.size(); }
 
 	static void parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio);
 
@@ -58,14 +59,18 @@ public:
 	virtual void preroll(GstElement *pipeline, Counter *pc) = 0;
 	virtual void stop() = 0;
 	virtual void rewind() = 0;
+
+	friend class Stim;
+
 };
 
 class ColorSource: public Source
 {
-	ColorSource(HMMSourceType, Stim *parent, unsigned int argb);
-	unsigned int m_argb;
 	GstElement *m_ele;
+
 public:
+	ColorSource(HMMSourceType stype, GstElement *ele);
+	virtual ~ColorSource();
 	GstElement *bin();
 	virtual void preroll(GstElement *pipeline, Counter *pc);
 	virtual void stop();
@@ -75,18 +80,18 @@ public:
 
 class FileSource: public Source
 {
-	std::string m_filename;
+//	std::string m_filename;
 	bool m_bloop;
 	unsigned int m_volume;
 	GstElement *m_ele;
-	FileSource(HMMSourceType t, Stim *parent, const std::string& file, bool bloop, unsigned int volume);
 
 public:
+	FileSource(HMMSourceType stype, GstElement *ele, bool bloop=false, unsigned int volume=0);
+	virtual ~FileSource();
 	GstElement *bin();
 	virtual void preroll(GstElement *pipeline, Counter *pc);
 	virtual void stop();
 	virtual void rewind();
-	friend class Stim;
 
 	static void noMorePadsCallback(GstElement *, SourcePrerollCounter *pspc);
 	static void padAddedCallback(GstElement *, GstPad * pad, SourcePrerollCounter *pspc);

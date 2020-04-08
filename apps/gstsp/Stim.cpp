@@ -10,9 +10,14 @@
 #include "Stim.h"
 using namespace hmm;
 
-void Stim::addSource(HMMStimPosition pos, Source *psrc)
+Stim::~Stim()
 {
-	m_sourceMap.insert(std::make_pair(pos, psrc));
+	// delete source map
+	for (std::pair<HMMStimPosition, SourceP> p : m_sourceMap)
+	{
+		delete p.second;
+	}
+	m_sourceMap.clear();
 }
 
 Source *Stim::getSource(HMMStimPosition pos)
@@ -31,19 +36,18 @@ Source *Stim::getSource(HMMStimPosition pos)
 }
 
 
-void Stim::addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, unsigned long aarrggbb)
+void Stim::addSource(HMMStimPosition pos, Source *src)
 {
-	ColorSource *pcolorsource = new ColorSource(stype, this, aarrggbb);
-	gst_bin_add(GST_BIN(pipeline), pcolorsource->bin());
-	m_sourceMap[pos] = pcolorsource;
+	src->setParent(this);
+	m_sourceMap[pos] = src;
 }
 
-void Stim::addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, const std::string& filename, bool loop, int volume)
-{
-	FileSource *pfilesource = new FileSource(stype, this, filename, loop, volume);
-	gst_bin_add(GST_BIN(pipeline), pfilesource->bin());
-	m_sourceMap[pos] = pfilesource;
-}
+//void Stim::addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, const std::string& filename, bool loop, int volume)
+//{
+//	FileSource *pfilesource = new FileSource(stype, this, filename, loop, volume, pipeline);
+//	//gst_bin_add(GST_BIN(pipeline), pfilesource->bin());
+//	m_sourceMap[pos] = pfilesource;
+//}
 
 void Stim::preroll(GstElement *pipeline)
 {

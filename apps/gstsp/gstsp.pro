@@ -2,7 +2,7 @@ TARGET = gstsp
 TEMPLATE = app
 QMAKE_CXXFLAGS += -fvisibility=hidden
 
-QT += sql widgets printsupport
+QT += sql widgets printsupport multimedia
 CONFIG += qt debug_and_release c++11
 
 # Get gstreamer stuff from this file.
