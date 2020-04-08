@@ -32,83 +32,29 @@ HabitStimFactory::~HabitStimFactory()
 hmm::HMMStimID HabitStimFactory::addStimulusSettings(const Habit::StimulusSettings& settings)
 {
 	hmm::HMMStimID id = (hmm::HMMStimID)((unsigned long)m_ssMap.size());
-	g_print("HabitStimFactory::addStimulusSettings - Add ss for id %d\n", (int)id);
 	m_ssMap[id] = settings;
-	g_print("HabitStimFactory::addStimulusSettings - stim name %s\n", m_ssMap[id].getName().toStdString().c_str());
+	g_print("HabitStimFactory::addStimulusSettings() %d: %s\n", (int)id, settings.getName().toStdString().c_str());
 	return id;
 }
 
 hmm::Stim* HabitStimFactory::background(hmm::HMM& mm)
 {
-	return operator()(m_bkgdID, mm);
+	return operator()(m_bkgdID, mm, "BKGD");
 }
 
-hmm::Stim* HabitStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm)
+hmm::Stim* HabitStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm, const std::string& prefix)
 {
 	hmm::Stim *pstim = NULL;
 	g_print("HabitStimFactory::operator(%d)\n", (int)id);
 	if (m_ssMap.count(id) == 0)
 		throw std::runtime_error("StimFactory(id) not found");
 	else
-		pstim = makeHabitStim(m_ssMap[id], mm.pipeline());
+		pstim = makeHabitStim(m_ssMap[id], mm.pipeline(), prefix);
 
 	return pstim;
 }
 
-//hmm::Source *HabitStimFactory::makeSource(GstElement *pipeline, const Habit::StimulusInfo& info, void *userdata, hmm::HMMSourceType stype)
-//{
-//	hmm::Source *psrc=NULL;
-//	if (info.isColor() || info.isBackground())
-//	{
-//		psrc = makeSourceFromColor(pipeline, info.getColor().rgba());
-//	}
-//	else
-//	{
-//		g_print("HabitStimFactory::makeSource(%s)\n", info.getAbsoluteFileName(m_dir).toStdString().c_str());
-//		psrc = makeSourceFromFile(pipeline, info.getAbsoluteFileName(m_dir).toStdString(), stype, userdata, info.isLoopPlayBack(), info.getVolume());
-//	}
-//	return psrc;
-//}
-//
-//hmm::Source *HabitStimFactory::makeSourceFromColor(GstElement *pipeline, unsigned long aarrggbb)
-//{
-//	std::ostringstream oss;
-//	GError *gerror = NULL;
-//	GstElement *src;
-//	oss << "videotestsrc pattern=solid-color foreground-color=" << aarrggbb;
-//	src = gst_parse_bin_from_description(oss.str().c_str(), true, &gerror);
-//	if (src == NULL || gerror != NULL)
-//		throw std::runtime_error("Cannot create color source");
-//	gst_bin_add(GST_BIN(pipeline), src);
-//	return new Source(hmm::HMMSourceType::VIDEO_ONLY, src, false, 0);
-//}
-//
-//
-//hmm::Source *HabitStimFactory::makeSourceFromFile(GstElement *pipeline, const std::string& filename, HMMSourceType stype, void *userdata, bool loop, unsigned int volume)
-//{
-//	std::string uri("file://");
-//	uri.append(filename);
-//	g_print("HMM::makeSourceFromFile(%s)\n", uri.c_str());
-//	GstElement *ele = gst_element_factory_make("uridecodebin", NULL);
-//	if (!ele)
-//		g_print("NULL ele!\n");
-//	g_object_set (ele, "uri", uri.c_str(), NULL);
-//
-//	// add ele to pipeline. pipeline takes ownership, will unref when ele is removed.
-//	if (!gst_bin_add(GST_BIN(pipeline), ele))
-//		g_print("ERROR- cannot add uridecodebin\n");
-//
-//	// Source does not ref the ele, assumes that its in a pipeline and ref'd there.
-//	// TODO: not sure I like how ownership seems ill-defined.
-//	Source *psrc = new Source(stype, ele, loop, volume);
-//
-//	g_signal_connect (psrc->bin(), "pad-added", G_CALLBACK(HMM::padAddedCallback), userdata);
-//	g_signal_connect (psrc->bin(), "no-more-pads", G_CALLBACK(HMM::noMorePadsCallback), userdata);
-//
-//	return psrc;
-//}
-
-hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, GstElement *pipeline)
+hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, GstElement *pipeline, const std::string& prefix)
 {
 	Habit::StimulusInfo info;
 	hmm::Stim *pstim=new hmm::Stim();
@@ -126,14 +72,18 @@ hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, Gs
 	if (m_sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		// center
-		addSourceToStim(pstim, HMM::STIMPOS_CENTER,
+		std::string posPrefix(prefix);
+		posPrefix.append("-C");
+		addSourceToStim(pstim, posPrefix, HMM::STIMPOS_CENTER,
 				(m_sdi.getUseISS() ? HMMSourceType::VIDEO_ONLY : HMMSourceType::AUDIO_VIDEO),
 				pipeline, ss.getCenterStimulusInfo());
 
 		// iss?
 		if (m_sdi.getUseISS())
 		{
-			addSourceToStim(pstim, HMM::STIMPOS_AUDIO, HMMSourceType::AUDIO_ONLY,
+			std::string issPrefix(prefix);
+			posPrefix.append("-A");
+			addSourceToStim(pstim, issPrefix, HMM::STIMPOS_AUDIO, HMMSourceType::AUDIO_ONLY,
 					pipeline, ss.getIndependentSoundInfo());
 		}
 	}
@@ -196,16 +146,46 @@ hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, Gs
 	return pstim;
 }
 
-void HabitStimFactory::addSourceToStim(Stim *pstim, hmm::HMMStimPosition pos, hmm::HMMSourceType stype, GstElement *pipeline, const Habit::StimulusInfo& info)
+void HabitStimFactory::addSourceToStim(Stim *pstim, const std::string& prefix, hmm::HMMStimPosition pos, hmm::HMMSourceType stype, GstElement *pipeline, const Habit::StimulusInfo& info)
 {
+	GstElement *ele = NULL;
 	if (info.isColor() || info.isBackground())
 	{
-		pstim->addSource(pos, stype, pipeline, info.getColor().rgba());
+		std::ostringstream oss;
+		oss << prefix << "-videotestsrc";
+		ele = gst_element_factory_make("videotestsrc", oss.str().c_str());
+		if (ele == NULL)
+		{
+			throw std::runtime_error("Cannot create color source");
+		}
+		oss.clear();
+		oss << prefix << "-fakesink";
+		GstElement *sink = gst_element_factory_make("fakesink", oss.str().c_str());
+		gst_bin_add_many(GST_BIN(pipeline), ele, sink, NULL);
+		gst_element_link(ele, sink);
+		//g_object_set (ele, "pattern", 17, "foreground-color", info.getColor().rgba(), NULL);
+
+		ColorSource *src = new ColorSource(stype, ele);
+		GstPad *srcpad = gst_element_get_static_pad(ele, "src");
+		src->addStream(HMMStreamType::VIDEO, srcpad, sink);
+		g_print("ColorSource %x done m_ele %p\n", info.getColor().rgba(), ele);
+		pstim->addSource(pos, src);
 	}
 	else
 	{
-		//g_print("HabitStimFactory::makeSource(%s)\n", info.getAbsoluteFileName(m_dir).toStdString().c_str());
-		pstim->addSource(pos, stype, pipeline, info.getAbsoluteFileName(m_dir).toStdString());
+		std::string uri("file://");
+		std::string filename(info.getAbsoluteFileName(m_dir).toStdString());
+		uri.append(filename);
+		std::ostringstream oss;
+		oss << prefix << "-uridecodebin";
+		ele = gst_element_factory_make("uridecodebin", oss.str().c_str());
+		gst_bin_add(GST_BIN(pipeline), ele);
+		g_print("FileSource %s done m_ele %p\n", filename.c_str(), ele);
+		if (!ele)
+			throw std::runtime_error("gst_element_factory_make(uridecodebin) returned NULL");
+		g_object_set(ele, "uri", uri.c_str(), NULL);
+		FileSource *f = new FileSource(stype, ele, info.isLoopPlayBack(), info.getVolume());
+		pstim->addSource(pos, f);
 	}
 }
 

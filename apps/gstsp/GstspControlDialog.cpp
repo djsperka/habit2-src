@@ -30,6 +30,8 @@ GstspControlDialog::GstspControlDialog(const QStringList& list, const QList<hmm:
     // Add preroll button
     QPushButton *button = ui->buttonBox->addButton("Preroll", QDialogButtonBox::ActionRole);
     connect(button, &QPushButton::clicked, this, &GstspControlDialog::onPrerollClicked);
+    QPushButton *button1 = ui->buttonBox->addButton("Play", QDialogButtonBox::ActionRole);
+    connect(button1, &QPushButton::clicked, this, &GstspControlDialog::onPlayClicked);
     QPushButton *button2 = ui->buttonBox->addButton("Dump", QDialogButtonBox::ActionRole);
     connect(button2, &QPushButton::clicked, this, &GstspControlDialog::onDumpClicked);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -56,7 +58,30 @@ void GstspControlDialog::onPrerollClicked()
 		for (auto index: selected)
 		{
 			qDebug() << "row " << index.row() << " id " << (int)(idList.at(index.row()));
-			emit preroll((int)idList.at(index.row()));
+			emit preroll((unsigned int)idList.at(index.row()));
+		}
+	}
+	else
+	{
+		emit dump();
+	}
+}
+
+void GstspControlDialog::onPlayClicked()
+{
+	QModelIndexList selected = ui->listView->selectionModel()->selectedIndexes();
+	qDebug() << "play clicked";
+	if (selected.size() > 0)
+	{
+		for (auto index: selected)
+		{
+			bool b;
+			unsigned int iid = ui->lineEditIID->text().toUInt(&b);
+			if (b)
+			{
+				qDebug() << "emit play(" << iid << ")";
+				emit play(iid);
+			}
 		}
 	}
 	else

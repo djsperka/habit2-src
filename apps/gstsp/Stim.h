@@ -30,15 +30,17 @@ private:
 	HMMStimPosSourceMap m_sourceMap;
 public:
 	Stim(): m_stimState(HMMStimState::NONE) {};
-	virtual ~Stim() {};
-	void addSource(HMMStimPosition, Source* psrc);
+	virtual ~Stim();
 	Source *getSource(HMMStimPosition pos);
 	void setStimState(HMMStimState state) { m_stimState = state; }
 	HMMStimState getStimState() const { return m_stimState; }
 	std::map<HMMStimPosition, SourceP>& sourceMap() { return m_sourceMap; }
 
-	void addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, unsigned long aarrggbb);
-	void addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, const std::string& filename, bool loop=false, int volume=0);
+//	void addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, unsigned long aarrggbb);
+//	void addSource(HMMStimPosition pos, HMMSourceType stype, GstElement *pipeline, const std::string& filename, bool loop=false, int volume=0);
+
+	// set parent on source, add to this.
+	void addSource(HMMStimPosition pos, SourceP s);
 
 	// set up blocking probes and sync
 	void preroll(GstElement *pipeline);

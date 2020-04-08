@@ -34,12 +34,32 @@ bool Counter::decrement()
 
 void SourcePrerollCounter::operator()(void)
 {
-	g_print("SourcePrerollCounter triggered\n");
-	this->source()->setSeeking(true);
-	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
-	GstStructure *structure = gst_structure_new("seek", "psrc", G_TYPE_POINTER, this->source(),  NULL);
-	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->source()->bin()), structure));
-	gst_object_unref(bus);
+	if (m_bIsImage)
+	{
+		this->source()->parentStim()->setStimState(HMMStimState::PREROLLED);
+		g_print("SourcePrerollCounter - image stream is prerolled.\n");
+	}
+	else
+	{
+		if (!this->source()->isSeeking())
+		{
+			// this is when we are first filling the pipeline, but a segment seek has not yet been issued.
+			// Set the 'seeking' flag, post a message on the bus.
+			// This object is still attached to the probe, so we should reset it to the number of streams.
+			this->source()->setSeeking(true);
+			this->setCounter(this->source()->streamMap().size());
+			GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
+			GstStructure *structure = gst_structure_new("seek", "psrc", G_TYPE_POINTER, this->source(),  NULL);
+			gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->source()->bin()), structure));
+			gst_object_unref(bus);
+			g_print("SourcePrerollCounter - segment seek issued, reset counter to %d\n", this->source()->streamMap().size());
+		}
+		else
+		{
+			this->source()->parentStim()->setStimState(HMMStimState::PREROLLED);
+			g_print("SourcePrerollCounter - all streams are prerolled.\n");
+		}
+	}
 }
 
 void StimPrerollCounter::operator()(void)
@@ -49,7 +69,7 @@ void StimPrerollCounter::operator()(void)
 
 void NoopCounter::operator()(void)
 {
-	//g_print("HMMNoopCounter triggered\n");
+	g_print("HMMNoopCounter triggered\n");
 }
 
 void PlayStimCounter::operator()(void)

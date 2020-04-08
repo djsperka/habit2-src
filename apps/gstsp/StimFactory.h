@@ -9,6 +9,7 @@
 #define STIMFACTORY_H_
 
 #include <map>
+#include <string>
 #include "HMMTypes.h"
 
 
@@ -17,7 +18,9 @@
 // for Habit (StimulusSettings, StimulusDisplayInfo, ...)
 // The operator(id) returns a Stim*, all ready to go (or throws an exception).
 //
-// Stim* stim = factory()(stimid, hmm);
+// Stim* stim = factory()(stimid, hmm, prefix);
+//
+// prefix is prepended to all element names - make each stim have a unique prefix
 //
 // This stim has initial elements created, and elements are in
 //
@@ -42,7 +45,7 @@ class StimFactory
 public:
 	StimFactory() {};
 	virtual ~StimFactory() {};
-	virtual hmm::Stim* operator()(hmm::HMMStimID id, hmm::HMM& mm) = 0;
+	virtual hmm::Stim* operator()(hmm::HMMStimID id, hmm::HMM& mm, const std::string& prefix) = 0;
 	virtual hmm::Stim* background(hmm::HMM& mm) = 0;
 };
 
