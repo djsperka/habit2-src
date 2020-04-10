@@ -97,7 +97,7 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 	for (StimPosTailMap::const_iterator it = config.audio.begin(); it!= config.audio.end(); it++)
 	{
 		g_print("HMM: Configuring pipeline, add audio path \"%s\"\n", it->second.first.c_str());
-		GstElement *audioSink = NULL, *audioMixer=NULL;
+		GstElement *audioSink = NULL, *audioMixer=NULL, *audioTestSrc=NULL;
 		audioSink = gst_element_factory_make(it->second.second.c_str(), NULL);
 		if (!audioSink)
 		{
@@ -115,6 +115,25 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		gst_element_link(audioMixer, audioSink);
 		m_port.addAudioEle(it->first, audioMixer);
 		m_port.addAudioSink(it->first, audioSink);
+
+		// create a single source that will always live with the mixer
+		audioTestSrc = gst_element_factory_make("audiotestsrc", NULL);
+		if (!audioTestSrc)
+			throw std::runtime_error("Cannot create audio test src");
+		g_object_set (audioTestSrc, "volume", (gdouble)0.1, NULL);
+
+		gst_bin_add(GST_BIN(m_pipeline), audioTestSrc);
+		gst_element_link(audioTestSrc, audioMixer);
+//		GstPad *aPad = gst_element_get_request_pad(audioMixer, "sink_%us");
+//		if (!aPad)
+//			throw std::runtime_error("Cannot get request pad from audio mixer");
+//		GstPad *aSrcPad = gst_element_get_static_pad(audioTestSrc, "src");
+//		if (!aSrcPad)
+//			throw std::runtime_error("Cannot get src pad from audiotestsrc");
+//		gst_pad_link(aSrcPad, aPad);
+//		gst_object_unref(aSrcPad);
+//		gst_object_unref(aPad);
+
 	}
 
 	g_print("HMM::HMM(): configure background default screen\n");
@@ -223,11 +242,11 @@ void HMM::play(const HMMInstanceID& iid)
 
 	if (pstimPending->getStimState() != HMMStimState::PREROLLED)
 	{
-		g_print("HMM::play(%d) - not prerolled\n", iid);
+		g_print("HMM::play(%lu) - not prerolled\n", iid);
 		return;
 	}
 
-	g_print("HMM::play(%d) - prerolled and ready\n", iid);
+	g_print("HMM::play(%lu) - prerolled and ready\n", iid);
 	// The stim in 'mmstim' is prerolled and ready to play. It is a partial pipeline,
 	// with a set of src pads matching the preferred pattern (number of video, audio, and audio source(s).
 	// The stim in 'mmstimCurrent' is the currently playing stim.
@@ -240,7 +259,7 @@ void HMM::play(const HMMInstanceID& iid)
 	// One detail that is important is to set the offset on the sink pad side of the new connection. The offset
 	// should be the current running time (VERIFY THIS)
 
-	PlayStimCounter *pcounterPlay = new PlayStimCounter(pstimCurrent, pstimPending, this, (int)pstimCurrent->sourceMap().size());
+	PlayStimCounter *pcounterPlay = new PlayStimCounter(iid, this, (int)pstimCurrent->sourceMap().size());
 	for (std::pair<HMMStimPosition, Stim::SourceP> p: pstimCurrent->sourceMap())
 	{
 		Stim::SourceP psrc = p.second;
@@ -398,7 +417,7 @@ gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 				throw std::runtime_error("Cannot get source ptr from msg");
 
 			// flushing seek
-			g_print("seek message - flushing seek on element %s\n", GST_ELEMENT_NAME(psrc->bin()));
+			g_print("MM1::busCallback(seek message) - flushing seek on element %s\n", GST_ELEMENT_NAME(psrc->bin()));
 			if (!gst_element_seek(psrc->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
 				throw std::runtime_error("seek failed");
@@ -411,7 +430,7 @@ gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 				throw std::runtime_error("Cannot get source from msg");
 
 			// NON-flushing seek
-			g_print("loop message - non-flushing seek on element %s\n", GST_ELEMENT_NAME(psrc->bin()));
+			g_print("MM1::busCallback(loop message) - non-flushing seek on element %s\n", GST_ELEMENT_NAME(psrc->bin()));
 			if (!gst_element_seek(psrc->bin(), 1.0, GST_FORMAT_TIME, (GstSeekFlags)(GST_SEEK_FLAG_SEGMENT), GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE))
 			{
 				throw std::runtime_error("LOOPING seek failed");
@@ -421,14 +440,14 @@ gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 		{
 			Stim *pCurrent;
 			Stim *pPending;
-			g_print("Got play msg\n");
-			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "current", G_TYPE_POINTER, &pCurrent, "pending", G_TYPE_POINTER, &pPending, NULL))
+			HMMInstanceID iid = 0;
+			g_print("MM1::busCallback(play message)\n");
+			if (FALSE == gst_structure_get(gst_message_get_structure(msg), "iid", G_TYPE_ULONG, &iid, NULL))
 				throw std::runtime_error("Cannot get stuff from play msg");
-			g_print("disconnect\n");
-			phmm->port().disconnect();
-			g_print("connect\n");
-			phmm->port().connect(*pPending);
-			g_print("done.\n");
+			phmm->swap(iid);
+//			phmm->port().disconnect();
+//			phmm->port().connect(*pPending);
+			g_print("MM1::busCallback(play message) - done\n");
 		}
 		break;
 	}
@@ -436,6 +455,33 @@ gboolean HMM::busCallback(GstBus *, GstMessage *msg, gpointer user_data)
 		break;
 	}
 	return TRUE;
+}
+
+
+void HMM::swap(HMMInstanceID iid)
+{
+	port().disconnect();
+
+	// now m_iidCurrent is done and dangling. Dispose.
+	dispose(m_iidCurrent);
+
+	// Get the instance 'iid', connect it (this also releases the blocking probe)
+	Stim *pstim = getStimInstance(iid);
+	if (!pstim)
+		throw std::runtime_error("HMM::swap() cannot find instance.");
+	port().connect(*pstim);
+	m_iidCurrent = iid;
+}
+
+
+void HMM::dispose(HMMInstanceID iid)
+{
+	// Get the instance 'iid', connect it (this also releases the blocking probe)
+	Stim *pstim = getStimInstance(iid);
+	if (!pstim)
+		throw std::runtime_error("HMM::dispose() cannot find instance.");
+
+
 }
 
 #if 0
@@ -561,17 +607,7 @@ GstPadProbeReturn HMM::padProbeIdleCallback(GstPad *pad, GstPadProbeInfo *, gpoi
 {
 	Counter *pcounter = (Counter *)user_data;
 	g_print("HMM::padProbeIdleCallback, from element %s pad %s ghost? %s\n", GST_ELEMENT_NAME(GST_PAD_PARENT(pad)), GST_PAD_NAME(pad), (GST_IS_GHOST_PAD(pad) ? "YES" : "NO"));
-	if (GST_IS_GHOST_PAD(pad))
-	{
-		GstPad *targetpad = gst_ghost_pad_get_target(GST_GHOST_PAD(pad));
-		g_print("target pad %s/%s\n", GST_ELEMENT_NAME(GST_PAD_PARENT(targetpad)), GST_PAD_NAME(targetpad));
-	}
-	if (pcounter->decrement())
-	{
-		g_print("HMM::padProbeIdleCallback: decrement() returned TRUE, DO NOT delete counter\n");
-
-		//delete pcounter;
-	}
+	pcounter->decrement();
 	g_print("HMM::padProbeIdleCallback, from element %s - done.\n", GST_ELEMENT_NAME(GST_PAD_PARENT(pad)));
 	return GST_PAD_PROBE_OK;
 }

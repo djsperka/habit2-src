@@ -105,14 +105,12 @@ public:
 
 class PlayStimCounter: public Counter
 {
-	Stim *m_pCurrent;
-	Stim *m_pPending;
+	HMMInstanceID m_iid;
 	HMM* m_phmm;
 public:
-	PlayStimCounter(Stim *current, Stim *pending, HMM* phmm, int counter=0): Counter(counter), m_pCurrent(current), m_pPending(pending), m_phmm(phmm) {}
+	PlayStimCounter(HMMInstanceID iid, HMM* phmm, int counter=0): Counter(counter), m_iid(iid), m_phmm(phmm) {}
 	~PlayStimCounter() {}
-	Stim *current() { return m_pCurrent; }
-	Stim *pending() { return m_pPending; }
+	HMMInstanceID iid() { return m_iid; }
 	HMM* hmm() { return m_phmm; }
 	void operator()(void);
 };

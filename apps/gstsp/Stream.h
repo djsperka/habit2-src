@@ -25,8 +25,10 @@ class Stream
 	Stream(GstPad *src, Source *parent, GstElement *sink, gulong probeid=0): m_srcpad(src), m_parent(parent), m_sink(sink), m_probeid(probeid), m_probeidEvent(0) {}
 
 public:
-	virtual ~Stream() { gst_object_unref(m_srcpad); gst_object_unref(m_sink); }
+	virtual ~Stream() { gst_object_unref(m_srcpad); }	// NOTE not unref-ing sink!
 	GstPad* srcpad() { return m_srcpad; }
+	//GstElement *sink() { return m_sink; }
+	//void setSink(GstElement *sink) { m_sink = sink; }
 	void setProbeID(gulong probeid) { m_probeid = probeid; }
 	gulong getProbeID() { return m_probeid; }
 	void setEventProbeID(gulong probeid) { m_probeidEvent = probeid; }

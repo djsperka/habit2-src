@@ -75,6 +75,12 @@ class HMM
 
 	std::string getUri(const std::string& filename);
 
+	// swap the iid in for current stim. dispose of current
+	void swap(HMMInstanceID iid);
+
+	// dispose of this stim or rewind as needed
+	void dispose(HMMInstanceID iid);
+
 public:
 	HMM(const HMMConfiguration& config, StimFactory& factory);
 	virtual ~HMM();

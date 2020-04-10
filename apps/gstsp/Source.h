@@ -35,6 +35,7 @@ private:
 	Stim *m_parent;
 	std::map<HMMStreamType, StreamP> m_streamMap;
 	bool m_bSeeking;
+	GstElement *m_extra;
 	void setParent(Stim *parent) { m_parent = parent; }
 
 protected:
@@ -52,6 +53,7 @@ public:
 	void setSeeking(bool b) { m_bSeeking = b; }
 	bool isSeeking() const { return m_bSeeking; }
 	int streamCount() const { return m_streamMap.size(); }
+	void saveExtraElement(GstElement *ele) { m_extra = ele; }
 
 	static void parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio);
 
@@ -84,6 +86,8 @@ class FileSource: public Source
 	bool m_bloop;
 	unsigned int m_volume;
 	GstElement *m_ele;
+	bool m_bIsImage;
+	GstElement *m_freeze;	// only valid if m_bIsImage==true
 
 public:
 	FileSource(HMMSourceType stype, GstElement *ele, bool bloop=false, unsigned int volume=0);

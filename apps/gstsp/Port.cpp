@@ -71,14 +71,13 @@ void Port::connect(Stim& stim)
 	// check that the port has nothing connected...
 	g_print("Port::connect() - start\n");
 	std::ostringstream oss;
-	bool bThrow = false;
 	for (auto it: m_mapPosVideo)
 	{
 		GstPad *pad = gst_element_get_static_pad(it.second, "sink");
 		if (gst_pad_is_linked(pad))
 		{
-			bThrow = true;
 			oss << "port pad \"" << (int)it.first << " still connected. ";
+			throw std::runtime_error(oss.str().c_str());
 		}
 		gst_object_unref(pad);
 	}
@@ -89,7 +88,17 @@ void Port::connect(Stim& stim)
 	 *
 	 * 12345r7890qetyuilzxccvbnm,./
 	 *
-	 * - Bronte 4/8/20
+	 * - Bronte 4/8/200000[3oliuuhhfxxzzxvcxxncxxxxxxxxcccc 000000000000xxx
+	 * 0009000000900099853900000qwerzxevx000000000nnbvcssxgh000000-/00pp;ln0000------[[-bxzqefbbn nfhn555rxd5qwesszzzjccd3e;kjgfsqweytrtrerggfdxawaww3q1234567890qwertyuyipdmmkkh./dgndgnnf23570mbzx,mfguujjyxxxxxxxxxxxxxxxppppppppppppu6665555h7777777777777777777j99999gwvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv,gtemhcgytgrtytu6aoooooooooopm,nOtf8vsou76tuiuj76513vbmvhtwwe555rewwww245xcfdsxzw332u7h123457--=zqert31hj,.mbcxzaaw321zaxcbre21vnjfsvvbn71av000000000-00000000000999098h98777333323pppoutrjxmb21256uioop12370-fgx322`zzzxcvm,uu7123456778
+	 * "m    tb111199rstaxccccccccccccccccccccccxccccccccccccccccccccccccccccccccccccccccccccccccccnfnr888888888888ddddwfgyujnbhyuhbhyhbvgytgbv gt6yhb bgyujhgyuijhyuikjuikjjhjhhhhvjg yi8mm
+	 *
+	 * 12346567890qwewettyuiopzxxcvvvbnm12223rrrrrrrr1111111111111234567890qwertyyyuuiioppzxcvbmnm,,1
+	 * hbbhkll,,mmmmmm  mm,mmm,mmmmmmmm8ykkr3k,lo3
+	 * 323455cccccxtuffgvfgtrewqxnm312345678900000000qqwerrrrtyuuiopzxgavu3bbcmzaqe5e168900
+	 *
+	 *
+	 *
+	 * ldq2lvuffjcfjgcxxzi.,653w34 bxhnnnnnn333333333333333333333333222222222331211bbbbbbbvbmmmmmmmmm55r5yoo6rhvew4uluhffddee3tyhhg vlui1233333333w3333o[hsyiobyy44er444444444444u8888bgz33337ywrhbffdsea3qw;ddsdsebew33jkhfsw2333211122ryyyhjjjjjj[yteswwwwwseedddfhhhsdqvf,,,cx
 	 *
 	 *
 	 */
@@ -98,19 +107,36 @@ void Port::connect(Stim& stim)
 	Stim::HMMStimPosSourceMap::iterator it;
 	for (it = stim.sourceMap().begin(); it!= stim.sourceMap().end(); it++)
 	{
-		qDebug() << "StimPosition: " << (int)(it->first) << "SourceType: " << (int)(it->second->sourceType());
+		g_print("Port::connect(): SourcePosition %d SourceType %d\n", (int)(it->first), (int)(it->second->sourceType()));
 		// does this source have a video stream?
 		Stream *pstream = it->second->getStream(HMMStreamType::VIDEO);
 		if (pstream)
 		{
-			g_print("Found a video stream for this source\n");
+			g_print("Port::connect(): Found a video stream for this source\n");
 			if (m_mapPosVideo.count(it->first) > 0)
 			{
 				GstPad *pad = gst_element_get_static_pad(m_mapPosVideo[it->first], "sink");
+
+				// the pendign stream should have a connected fake sink.
+				if (gst_pad_is_linked(pstream->srcpad()))
+				{
+					g_print("Port::connect(): This stream is linked, unlinking...\n");
+					GstPad *l = gst_pad_get_peer(pstream->srcpad());
+					GstElement *sink = GST_ELEMENT_CAST(gst_pad_get_parent(l));
+					gst_element_set_state(sink, GST_STATE_NULL);
+					gst_bin_remove(GST_BIN(stim.pipeline()), sink);
+					gst_object_unref(l);
+					gst_object_unref(sink);
+				}
+
+				/*
+				 * BXVVNMO12344567890QERTYUIOPZXCCCVBNNNNM, - BRONTE
+				 */
+
 				GstPadLinkReturn r = gst_pad_link(pstream->srcpad(), pad);
 				if (r != GST_PAD_LINK_OK)
 				{
-					g_print("pad link error %d\n", (int)r);
+					g_print("Port::connect():pad link error %d\n", (int)r);
 					throw std::runtime_error("Cannot link pads.");
 				}
 				// set offset on the downstream pad, but not when initializing the pipeline.
@@ -124,9 +150,17 @@ void Port::connect(Stim& stim)
 				}
 				else
 				{
-					g_print("clock not set, do not set offset on pad....\n");
+					g_print("Port::connect(): linked, not setting offset on pad.\n");
 				}
 				gst_object_unref(pad);
+
+				// finally, remove blocking probe
+				if (pstream->getProbeID())
+				{
+					g_print("Port::connect(): removed blocking probe ");
+					gst_pad_remove_probe(pstream->srcpad(), pstream->getProbeID());
+					pstream->setProbeID(0);
+				}
 			}
 			else
 			{
@@ -136,7 +170,7 @@ void Port::connect(Stim& stim)
 		}
 		else
 		{
-			g_print("NO VIDEO STREAM FOUND for this source\n");
+			g_print("Port::connect(): NO VIDEO STREAM FOUND for this source\n");
 		}
 	}
 	g_print("Port::connect() - done\n");
@@ -153,6 +187,10 @@ void Port::disconnect()
 //	}
 	g_print("Port::disconnect() not implemented for audio\n");
 
+	// Iterate over the "ele" map - these are the first elements in the tail for a particular
+	// position. The sink pad on those elements are connected to the stim - unceremoniously
+	// unlink them here. This will leave you with a stim that has no tail connected -
+	// it should be blocked on the pad opposite this one.
 	for (HMMPortPosEleMap::iterator it = m_mapPosVideo.begin(); it != m_mapPosVideo.end(); it++)
 	{
 		GstPad *pad = gst_element_get_static_pad(m_mapPosVideo[it->first], "sink");

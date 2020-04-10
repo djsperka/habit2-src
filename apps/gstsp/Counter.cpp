@@ -27,7 +27,7 @@ bool Counter::decrement()
 			m_psubCounter->decrement();
 		return true;
 	}
-//	g_print("dec to %d\n", m_counter);
+	g_print("Counter::decrement() dec to %d\n", m_counter);
 	return false;
 }
 
@@ -56,7 +56,6 @@ void SourcePrerollCounter::operator()(void)
 		}
 		else
 		{
-			this->source()->parentStim()->setStimState(HMMStimState::PREROLLED);
 			g_print("SourcePrerollCounter - all streams are prerolled.\n");
 		}
 	}
@@ -76,7 +75,7 @@ void PlayStimCounter::operator()(void)
 {
 	// post bus message
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->hmm()->pipeline()));
-	GstStructure *structure = gst_structure_new("play", "current", G_TYPE_POINTER, this->current(), "pending", G_TYPE_POINTER, this->pending(),  NULL);
+	GstStructure *structure = gst_structure_new("play", "iid", G_TYPE_ULONG, this->iid(), NULL);
 	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(hmm()->pipeline()), structure));
 	gst_object_unref(bus);
 }
