@@ -57,7 +57,7 @@ hmm::Stim* HabitStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm, const s
 hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, GstElement *pipeline, const std::string& prefix)
 {
 	Habit::StimulusInfo info;
-	hmm::Stim *pstim=new hmm::Stim();
+	hmm::Stim *pstim=new hmm::Stim(pipeline);
 	pstim->setStimState(hmm::HMMStimState::NONE);
 
 	// Now a bit of Habit messiness. The StimulusSettings object as originally written had
@@ -167,7 +167,7 @@ void HabitStimFactory::addSourceToStim(Stim *pstim, const std::string& prefix, h
 
 		ColorSource *src = new ColorSource(stype, ele);
 		GstPad *srcpad = gst_element_get_static_pad(ele, "src");
-		src->addStream(HMMStreamType::VIDEO, srcpad, sink);
+		src->addStream(HMMStreamType::VIDEO, srcpad, NULL);
 		g_print("ColorSource %x done m_ele %p\n", info.getColor().rgba(), ele);
 		pstim->addSource(pos, src);
 	}

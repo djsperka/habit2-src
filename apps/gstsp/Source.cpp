@@ -7,6 +7,7 @@
 
 #include "Source.h"
 #include "Counter.h"
+#include "Stim.h"
 #include <sstream>
 using namespace hmm;
 
@@ -14,6 +15,7 @@ Source::Source(HMMSourceType t)
 : m_sourceType(t)
 , m_parent(NULL)
 , m_bSeeking(false)
+, m_extra(NULL)
 {};
 
 Source::~Source()
@@ -24,6 +26,13 @@ Source::~Source()
 		delete namestream.second;
 	}
 	m_streamMap.clear();
+	if (m_extra)
+	{
+		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_extra);
+		gst_element_set_state(m_extra, GST_STATE_NULL);
+		gst_object_unref(m_extra);
+		m_extra = NULL;
+	}
 }
 
 //void Source::addStream(HMMStreamType t, Stream *pstream)
@@ -108,7 +117,9 @@ ColorSource::ColorSource(HMMSourceType stype, GstElement *ele)
 
 ColorSource::~ColorSource()
 {
+	gst_element_set_state(m_ele, GST_STATE_NULL);
 	gst_object_unref(m_ele);
+	gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
 }
 
 GstElement *ColorSource::bin()
@@ -127,8 +138,8 @@ void ColorSource::preroll(GstElement *pipeline, Counter *pStimCounter)
 		throw std::runtime_error("cannot preroll color source, must have 1 video stream");
 
 	// set blocking probe and a fake sink
-	GstElement *sink = gst_element_factory_make("fakesink", NULL);
-	gulong probeid = gst_pad_add_probe(vs->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &ColorSource::padProbeBlockCallback, pspc, NULL);
+	//GstElement *sink = gst_element_factory_make("fakesink", NULL);
+	//gulong probeid = gst_pad_add_probe(vs->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &ColorSource::padProbeBlockCallback, pspc, NULL);
 
 }
 
@@ -147,13 +158,23 @@ FileSource::FileSource(HMMSourceType stype, GstElement *ele, bool bloop, unsigne
 , m_bloop(bloop)
 , m_volume(volume)
 , m_ele(ele)
+, m_bIsImage(false)
+, m_freeze(NULL)
 {
 	gst_object_ref(ele);
 }
 
 FileSource::~FileSource()
 {
+	gst_element_set_state(m_ele, GST_STATE_NULL);
 	gst_object_unref(m_ele);
+	gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
+	if (m_bIsImage)
+	{
+		gst_element_set_state(m_freeze, GST_STATE_NULL);
+		gst_object_unref(m_ele);
+		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_freeze);
+	}
 }
 
 GstElement *FileSource::bin()
@@ -243,18 +264,27 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCo
 			}
 
 			// save this stream. Note the pad is ref'd
-			pspc->source()->addStream(HMMStreamType::VIDEO, pad, sink, probeid);
+			pspc->source()->addStream(HMMStreamType::VIDEO, pad, NULL, probeid);
 			gst_object_ref(pad);
+
+			// sync fakesink
+			gst_element_sync_state_with_parent(sink);
 			g_print("padAddedCallback(%s) - video stream %d x %d\n", GST_ELEMENT_NAME(src), width, height);
 		}
 		else if (isImage)
 		{
-			gulong probeid = gst_pad_add_probe(pad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
 			pspc->setIsImage(true);
 
 			// for images, append an imagefreeze element and use its src pad for probe and connection
 			// add fake sink
+			//
+			//              ---------------                      ------------
+			//  (new pad)-->| imagefreeze |(stream.srcpad())---->| fakesink |
+			//              ---------------                      ------------
+			//
 			GstElement *freeze = gst_element_factory_make("imagefreeze", NULL);
+			gst_object_ref(freeze);
+			pspc->source()->saveExtraElement(freeze);
 			GstElement *sink = gst_element_factory_make("fakesink", NULL);
 			gst_bin_add_many(GST_BIN(pspc->pipeline()), freeze, sink, NULL);
 			GstPad *freezesink = gst_element_get_static_pad(freeze, "sink");
@@ -271,9 +301,14 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCo
 			// Using the freeze src pad for probe.
 			// The srcpad on the freeze element is used in the stream as the connection point.
 			GstPad *freezesrc = gst_element_get_static_pad(freeze, "src");
+			gulong probeid = gst_pad_add_probe(freezesrc, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
 			// save this stream. Note the pad is ref'd because of the call to get_static_pad
 			// TODO MAKE SURE THIS GETS UNREF'D
-			pspc->source()->addStream(HMMStreamType::VIDEO, freezesrc, sink, probeid);
+			pspc->source()->addStream(HMMStreamType::VIDEO, freezesrc, NULL, probeid);
+
+			// sync fakesink and freeze
+			gst_element_sync_state_with_parent(freeze);
+			gst_element_sync_state_with_parent(sink);
 
 			g_print("padAddedCallback(%s) - image stream %d x %d\n", GST_ELEMENT_NAME(src), width, height);
 		}
@@ -301,6 +336,10 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCo
 		// save this stream. Note the pad is ref'd
 		pspc->source()->addStream(HMMStreamType::AUDIO, pad, NULL, probeid);
 		gst_object_ref(pad);
+
+		// sync fakesink
+		gst_element_sync_state_with_parent(sink);
+
 		g_print("padAddedCallback(%s) - audio stream\n", GST_ELEMENT_NAME(src));
 
 	}

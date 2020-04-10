@@ -90,10 +90,10 @@ int main (int argc, char **argv)
 		}
 	}
 
-	qInstallMessageHandler(&HLoggerObject::loggingHandler);
-	g_set_print_handler(glibPrintFunc);
-	g_set_printerr_handler(glibPrinterrFunc);
-	gst_debug_add_log_function(gstLogFunction, NULL, NULL);
+//	qInstallMessageHandler(&HLoggerObject::loggingHandler);
+//	g_set_print_handler(glibPrintFunc);
+//	g_set_printerr_handler(glibPrinterrFunc);
+//	gst_debug_add_log_function(gstLogFunction, NULL, NULL);
 
 	if (!habutilInitWorkspace())
 		return 0;
