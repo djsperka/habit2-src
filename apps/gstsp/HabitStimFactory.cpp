@@ -57,7 +57,7 @@ hmm::Stim* HabitStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm, const s
 hmm::Stim *HabitStimFactory::makeHabitStim(const Habit::StimulusSettings& ss, GstElement *pipeline, const std::string& prefix)
 {
 	Habit::StimulusInfo info;
-	hmm::Stim *pstim=new hmm::Stim(pipeline);
+	hmm::Stim *pstim=new hmm::Stim(pipeline, prefix);
 	pstim->setStimState(hmm::HMMStimState::NONE);
 
 	// Now a bit of Habit messiness. The StimulusSettings object as originally written had
@@ -151,41 +151,11 @@ void HabitStimFactory::addSourceToStim(Stim *pstim, const std::string& prefix, h
 	GstElement *ele = NULL;
 	if (info.isColor() || info.isBackground())
 	{
-		std::ostringstream oss;
-		oss << prefix << "-videotestsrc";
-		ele = gst_element_factory_make("videotestsrc", oss.str().c_str());
-		if (ele == NULL)
-		{
-			throw std::runtime_error("Cannot create color source");
-		}
-		oss.clear();
-		oss << prefix << "-fakesink";
-		GstElement *sink = gst_element_factory_make("fakesink", oss.str().c_str());
-		gst_bin_add_many(GST_BIN(pipeline), ele, sink, NULL);
-		gst_element_link(ele, sink);
-		//g_object_set (ele, "pattern", 17, "foreground-color", info.getColor().rgba(), NULL);
-
-		ColorSource *src = new ColorSource(stype, ele);
-		GstPad *srcpad = gst_element_get_static_pad(ele, "src");
-		src->addStream(HMMStreamType::VIDEO, srcpad, NULL);
-		g_print("ColorSource %x done m_ele %p\n", info.getColor().rgba(), ele);
-		pstim->addSource(pos, src);
+		pstim->addSource(pos, new ColorSource(stype, prefix, pipeline));
 	}
 	else
 	{
-		std::string uri("file://");
-		std::string filename(info.getAbsoluteFileName(m_dir).toStdString());
-		uri.append(filename);
-		std::ostringstream oss;
-		oss << prefix << "-uridecodebin";
-		ele = gst_element_factory_make("uridecodebin", oss.str().c_str());
-		gst_bin_add(GST_BIN(pipeline), ele);
-		g_print("FileSource %s done m_ele %p\n", filename.c_str(), ele);
-		if (!ele)
-			throw std::runtime_error("gst_element_factory_make(uridecodebin) returned NULL");
-		g_object_set(ele, "uri", uri.c_str(), NULL);
-		FileSource *f = new FileSource(stype, ele, info.isLoopPlayBack(), info.getVolume());
-		pstim->addSource(pos, f);
+		pstim->addSource(pos, new FileSource(stype, info.getAbsoluteFileName(m_dir).toStdString(), prefix, pipeline, info.isLoopPlayBack(), info.getVolume()));
 	}
 }
 

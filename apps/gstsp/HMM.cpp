@@ -33,6 +33,7 @@ void HMMConfiguration::addAudioSink(HMMStimPosition pos, const std::string& name
 
 HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 : m_factory(factory)
+, m_instanceCounter(0)
 {
 	g_print("HMM::HMM()\n");
 
@@ -120,7 +121,8 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		audioTestSrc = gst_element_factory_make("audiotestsrc", NULL);
 		if (!audioTestSrc)
 			throw std::runtime_error("Cannot create audio test src");
-		g_object_set (audioTestSrc, "volume", (gdouble)0.1, NULL);
+		//g_object_set (audioTestSrc, "volume", (gdouble)0.1, NULL);
+		g_object_set(audioTestSrc, "wave", 4);
 
 		gst_bin_add(GST_BIN(m_pipeline), audioTestSrc);
 		gst_element_link(audioTestSrc, audioMixer);
@@ -183,6 +185,14 @@ HMM::~HMM()
 
 }
 
+void HMM::removeStimInstance(HMMInstanceID id)
+{
+	InstanceMap::iterator it = m_instanceMap.find(id);
+	if (it != m_instanceMap.end())
+		m_instanceMap.erase(it);
+	else
+		throw std::runtime_error("Cannot remove stim instance.");
+}
 
 Stim *HMM::getStimInstance(HMMInstanceID id)
 {
@@ -216,11 +226,12 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	// is either VIDEO or AUDIO (other stream types are ignored). The new pads are blocked, and once blocked,
 	//
 
-	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceMap.size());
+	HMMInstanceID instanceID = (HMMInstanceID)(1000 + m_instanceCounter);
+	m_instanceCounter++;
 	std::ostringstream oss;
 	oss << "iid-" << instanceID;
 	m_instanceMap[instanceID] = m_factory(id, *this, oss.str().c_str());
-	dump("preroll");
+	//dump("preroll");
 	m_instanceMap[instanceID]->preroll(pipeline());
 
 //	// Now sync all elements in the newly-created Stim with parent.
@@ -246,7 +257,7 @@ void HMM::play(const HMMInstanceID& iid)
 		return;
 	}
 
-	g_print("HMM::play(%lu) - prerolled and ready\n", iid);
+	g_print("HMM::play(%lu) - set IDLE probes on %d sources\n", iid, (int)pstimCurrent->sourceMap().size());
 	// The stim in 'mmstim' is prerolled and ready to play. It is a partial pipeline,
 	// with a set of src pads matching the preferred pattern (number of video, audio, and audio source(s).
 	// The stim in 'mmstimCurrent' is the currently playing stim.
@@ -264,22 +275,23 @@ void HMM::play(const HMMInstanceID& iid)
 	{
 		Stim::SourceP psrc = p.second;
 		Stim::SourceP psrcPending = pstimPending->getSource(p.first);
-		g_print("will set blocking (IDLE) probe for src pos %d\n", p.first);
 		if (!psrcPending)
 			throw std::runtime_error("Pending source not found corresponding to current src");
 
+		g_print("create noop counter with count = %d\n", psrc->streamMap().size());
 		NoopCounter *pcounter = new NoopCounter((int)(psrc->streamMap().size()), pcounterPlay);
 		for (std::pair<HMMStreamType, Source::StreamP> pp: psrc->streamMap())
 		{
 			// now put blocking probe on each stream, with a Noop counter holding a swap counter
-
-			if (pp.first == HMMStreamType::VIDEO)
-			{
+//
+//			if (pp.first == HMMStreamType::VIDEO)
+//			{
+				g_print("HMM::play(%lu) - adding probe for stream type %d\n", iid, pp.first);
 				pp.second->setProbeID(
 						gst_pad_add_probe(pp.second->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM|GST_PAD_PROBE_TYPE_IDLE), &HMM::padProbeIdleCallback, pcounter, NULL)
 						);
-				g_print("added probe for stream type %d: block %lu\n", pp.first, pp.second->getProbeID());
-			}
+				g_print("HMM::play(%lu) - added probe for stream type %d: block %lu\n", iid, pp.first, pp.second->getProbeID());
+//			}
 		}
 	}
 
@@ -473,14 +485,30 @@ void HMM::swap(HMMInstanceID iid)
 	m_iidCurrent = iid;
 }
 
+/*
+ *
+ * 12344567888890qwertyuiopasqersnfnu90wsa1
+ *
+ * bnnnnnnnnnnnnnnngfuo80xbgm, mmmkhg34
+ *
+ * bronte - 4/13/20
+ *
+ */
 
 void HMM::dispose(HMMInstanceID iid)
 {
 	// Get the instance 'iid', connect it (this also releases the blocking probe)
+	g_print("HMM::dispose(%lu)\n", iid);
+
 	Stim *pstim = getStimInstance(iid);
 	if (!pstim)
 		throw std::runtime_error("HMM::dispose() cannot find instance.");
+	removeStimInstance(iid);
 
+	// Just delete the stim?
+	g_print("delete pstim\n");
+	delete pstim;
+	g_print("HMM::dispose(%lu) - done\n", iid);
 
 }
 
@@ -524,7 +552,7 @@ Source *HMM::makeSourceFromFile(const std::string& filename, HMMSourceType stype
 }
 #endif
 
-void HMM::noMorePadsCallback(GstElement *, SourcePrerollCounter *pcounter)
+void HMM::noMorePadsCallback(GstElement *, FileSourcePrerollCounter *pcounter)
 {
 	pcounter->decrement();
 }
@@ -606,7 +634,8 @@ GstPadProbeReturn HMM::padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpoint
 GstPadProbeReturn HMM::padProbeIdleCallback(GstPad *pad, GstPadProbeInfo *, gpointer user_data)
 {
 	Counter *pcounter = (Counter *)user_data;
-	g_print("HMM::padProbeIdleCallback, from element %s pad %s ghost? %s\n", GST_ELEMENT_NAME(GST_PAD_PARENT(pad)), GST_PAD_NAME(pad), (GST_IS_GHOST_PAD(pad) ? "YES" : "NO"));
+	g_print("HMM::padProbeIdleCallback, from element %s - start.\n", GST_ELEMENT_NAME(GST_PAD_PARENT(pad)));
+	//g_print("HMM::padProbeIdleCallback, from element %s pad %s ghost? %s\n", GST_ELEMENT_NAME(GST_PAD_PARENT(pad)), GST_PAD_NAME(pad), (GST_IS_GHOST_PAD(pad) ? "YES" : "NO"));
 	pcounter->decrement();
 	g_print("HMM::padProbeIdleCallback, from element %s - done.\n", GST_ELEMENT_NAME(GST_PAD_PARENT(pad)));
 	return GST_PAD_PROBE_OK;
@@ -616,7 +645,7 @@ GstPadProbeReturn HMM::padProbeIdleCallback(GstPad *pad, GstPadProbeInfo *, gpoi
 GstPadProbeReturn HMM::eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, gpointer p)
 {
 	//HMMSource* psrcPending = (HMMSource *)p;
-	SourcePrerollCounter *pcounter = (SourcePrerollCounter *)p;
+	FileSourcePrerollCounter *pcounter = (FileSourcePrerollCounter *)p;
 
 	// Note: GST_PAD_PROBE_INFO_EVENT(d) returns a GstEvent* or NULL if info->data does not have an event.
 	// In this routine, because its an event probe, it should always contain an event?
@@ -633,8 +662,8 @@ GstPadProbeReturn HMM::eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, 
 
 			// post bus message to flush
 			GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pcounter->pipeline()));
-			GstStructure *structure = gst_structure_new("loop", "psrc", G_TYPE_POINTER, pcounter->source(), NULL);
-			gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(pcounter->source()->bin()), structure));
+			GstStructure *structure = gst_structure_new("loop", "psrc", G_TYPE_POINTER, pcounter->fileSource(), NULL);
+			gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(pcounter->fileSource()->bin()), structure));
 			gst_object_unref(bus);
 
 		}

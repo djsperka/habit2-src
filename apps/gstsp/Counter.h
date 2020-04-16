@@ -14,7 +14,7 @@
 namespace hmm {
 
 class Stim;
-class Source;
+class FileSource;
 
 class Counter
 {
@@ -67,15 +67,15 @@ public:
 
 
 
-class SourcePrerollCounter: public Counter
+class FileSourcePrerollCounter: public Counter
 {
-	Source *m_psource;
+	FileSource *m_psource;
 	GstElement *m_pipeline;
 	bool m_bIsImage;	// if true, no flushing seek needed to preroll.
 public:
-	SourcePrerollCounter(Source *psource, GstElement *pipeline, int counter=0, Counter *psubCounter=NULL): Counter(counter, psubCounter), m_psource(psource), m_pipeline(pipeline), m_bIsImage(false) {}
+	FileSourcePrerollCounter(FileSource *psource, GstElement *pipeline, int counter=0, Counter *psubCounter=NULL): Counter(counter, psubCounter), m_psource(psource), m_pipeline(pipeline), m_bIsImage(false) {}
 	void operator()(void);
-	Source *source() const { return m_psource; }
+	FileSource *fileSource() const { return m_psource; }
 	GstElement *pipeline() const { return m_pipeline; }
 	void setIsImage(bool isImage) { m_bIsImage = isImage; }
 };
