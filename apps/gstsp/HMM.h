@@ -64,7 +64,9 @@ class HMM
 
 	//std::map<HMMStimID, Habit::StimulusSettings> m_ssMap;
 	typedef Stim* StimP;
-	std::map<HMMInstanceID, StimP> m_instanceMap;
+	typedef std::map<HMMInstanceID, StimP> InstanceMap;
+	InstanceMap m_instanceMap;
+	unsigned int m_instanceCounter;
 
 	HMMInstanceID m_iidCurrent;
 	HMMInstanceID m_iidBkgd;
@@ -80,6 +82,7 @@ class HMM
 
 	// dispose of this stim or rewind as needed
 	void dispose(HMMInstanceID iid);
+	void removeStimInstance(HMMInstanceID iid);		// TODO: will throw, not trying to be pretty
 
 public:
 	HMM(const HMMConfiguration& config, StimFactory& factory);
@@ -122,8 +125,8 @@ public:
 
 	// bus callback - bus messages here
 	static gboolean busCallback(GstBus *, GstMessage *msg, gpointer pdata);
-	static void padAddedCallback(GstElement * element, GstPad * pad, SourcePrerollCounter *pcounter);
-	static void noMorePadsCallback(GstElement * element, SourcePrerollCounter *pcounter);
+	static void padAddedCallback(GstElement * element, GstPad * pad, FileSourcePrerollCounter *pcounter);
+	static void noMorePadsCallback(GstElement * element, FileSourcePrerollCounter *pcounter);
 	static GstPadProbeReturn padProbeBlockCallback(GstPad * pad, GstPadProbeInfo * info, gpointer user_data);
 	static GstPadProbeReturn eventProbeCallback(GstPad * pad, GstPadProbeInfo * info, gpointer p);
 	static GstPadProbeReturn padProbeIdleCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);
