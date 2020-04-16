@@ -27,15 +27,17 @@ public:
 	typedef std::map<HMMStimPosition, SourceP> HMMStimPosSourceMap;
 private:
 	GstElement *m_pipeline;
+	std::string m_prefix;
 	HMMStimState m_stimState;
 	HMMStimPosSourceMap m_sourceMap;
 public:
-	Stim(GstElement *pipeline): m_pipeline(pipeline), m_stimState(HMMStimState::NONE) {};
+	Stim(GstElement *pipeline, const std::string& prefix): m_pipeline(pipeline), m_prefix(prefix), m_stimState(HMMStimState::NONE) {};
 	virtual ~Stim();
 	GstElement *pipeline() const { return m_pipeline; }
 	void setStimState(HMMStimState state) { m_stimState = state; }
 	HMMStimState getStimState() const { return m_stimState; }
 	std::map<HMMStimPosition, SourceP>& sourceMap() { return m_sourceMap; }
+	const std::string& prefix() { return m_prefix; }
 
 	// set parent on source, add to this.
 	void addSource(HMMStimPosition pos, SourceP s);
