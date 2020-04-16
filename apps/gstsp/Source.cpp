@@ -15,24 +15,20 @@ Source::Source(HMMSourceType t)
 : m_sourceType(t)
 , m_parent(NULL)
 , m_bSeeking(false)
-, m_extra(NULL)
 {};
 
 Source::~Source()
 {
+	g_print("Source destructor\n");
+
 	// delete the streams
 	for (std::pair<HMMStreamType, StreamP> namestream : m_streamMap)
 	{
+		g_print("delete stream\n");
 		delete namestream.second;
 	}
 	m_streamMap.clear();
-	if (m_extra)
-	{
-		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_extra);
-		gst_element_set_state(m_extra, GST_STATE_NULL);
-		gst_object_unref(m_extra);
-		m_extra = NULL;
-	}
+	g_print("Source destructor done\n");
 }
 
 //void Source::addStream(HMMStreamType t, Stream *pstream)
@@ -108,15 +104,32 @@ void Source::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, 
 
 
 
-ColorSource::ColorSource(HMMSourceType stype, GstElement *ele)
+ColorSource::ColorSource(HMMSourceType stype, const std::string& prefix, GstElement *pipeline)
 : Source(stype)
-, m_ele(ele)
 {
-	gst_object_ref(ele);
+	std::ostringstream oss;
+	oss << prefix << "-videotestsrc";
+	m_ele = gst_element_factory_make("videotestsrc", oss.str().c_str());
+	gst_object_ref(m_ele);
+	if (m_ele == NULL)
+	{
+		throw std::runtime_error("Cannot create color source");
+	}
+	oss.clear();
+	oss << prefix << "-fakesink";
+	GstElement *sink = gst_element_factory_make("fakesink", oss.str().c_str());
+	gst_bin_add_many(GST_BIN(pipeline), m_ele, sink, NULL);
+	gst_element_link(m_ele, sink);
+	//g_object_set (ele, "pattern", 17, "foreground-color", info.getColor().rgba(), NULL);
+
+	GstPad *srcpad = gst_element_get_static_pad(m_ele, "src");
+	gst_object_ref(srcpad);
+	addStream(HMMStreamType::VIDEO, srcpad, NULL);
 }
 
 ColorSource::~ColorSource()
 {
+	g_print("ColorSource destructor\n");
 	gst_element_set_state(m_ele, GST_STATE_NULL);
 	gst_object_unref(m_ele);
 	gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
@@ -153,28 +166,112 @@ void ColorSource::rewind()
 
 }
 
-FileSource::FileSource(HMMSourceType stype, GstElement *ele, bool bloop, unsigned int volume)
+FileSource::FileSource(HMMSourceType stype, const std::string& filename, const std::string& prefix, GstElement *pipeline, bool bloop, unsigned int volume)
 : Source(stype)
 , m_bloop(bloop)
 , m_volume(volume)
-, m_ele(ele)
+, m_ele(NULL)
 , m_bIsImage(false)
 , m_freeze(NULL)
 {
-	gst_object_ref(ele);
+
+	std::string uri("file://");
+	uri.append(filename);
+	std::ostringstream oss;
+	oss << prefix << "-uridecodebin";
+	m_ele = gst_element_factory_make("uridecodebin", oss.str().c_str());
+	gst_object_ref(m_ele);
+	gst_bin_add(GST_BIN(pipeline), m_ele);
+	g_print("FileSource %s done m_ele %p\n", filename.c_str(), m_ele);
+	if (!m_ele)
+		throw std::runtime_error("gst_element_factory_make(uridecodebin) returned NULL");
+	g_object_set(m_ele, "uri", uri.c_str(), NULL);
 }
 
 FileSource::~FileSource()
 {
-	gst_element_set_state(m_ele, GST_STATE_NULL);
-	gst_object_unref(m_ele);
-	gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
-	if (m_bIsImage)
+	g_print("FileSource destructor\n");
+
+	if (!m_bIsImage)
 	{
-		gst_element_set_state(m_freeze, GST_STATE_NULL);
+		g_print("!image, set NULL %s\n", GST_ELEMENT_NAME(m_ele));
+		gst_element_set_state(m_ele, GST_STATE_NULL);
 		gst_object_unref(m_ele);
-		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_freeze);
+		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
+
 	}
+	else
+	{
+		// Here we have
+		/*
+		 *
+		 *       +---------------+  +-------------+
+		 *       | uridecodebin  |--| imagefreeze |---
+		 *       +---------------+  +-------------+
+		 *
+		 *                         |               |
+		 *                    unlink here      this is srcpad, has probe
+		 *
+		 *                    remove ele from bin - that unlinks
+		 */
+		g_print("image, ele %s, unlink %s\n", GST_ELEMENT_NAME(m_ele), GST_ELEMENT_NAME(m_freeze));
+		gst_element_set_state(m_ele, GST_STATE_NULL);
+		gst_object_unref(m_ele);
+		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
+
+		// remove probe on src pad of freeze element
+		Stream* str = getStream(HMMStreamType::VIDEO);
+		if (str && str->getProbeID())
+		{
+			g_print("video stream has probe %lu\n", str->getProbeID());
+			gst_pad_remove_probe(str->srcpad(), str->getProbeID());
+		}
+
+		gst_object_unref(m_freeze);
+		g_print("set state...");
+		gst_element_set_state(m_freeze, GST_STATE_NULL);
+		g_print("...done\n");
+		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_freeze);
+
+#if 0
+		// set event probe in same place - the callback will remove from pipeline.
+		// then  send EOS
+		FileSourceDisposalHelper *phelper = new FileSourceDisposalHelper();
+		phelper->filter = m_freeze;
+		phelper->pipeline = parentStim()->pipeline();
+		gst_object_ref(m_freeze);
+		gst_object_ref(parentStim()->pipeline());
+		gulong pt = gst_pad_add_probe (str->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_BLOCK | GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM), &FileSource::padProbeEventCallback, phelper, NULL);
+		g_print("added event probe %lu\n", pt);
+
+		GstPad *sinkpad = gst_element_get_static_pad(m_freeze, "sink");
+		gst_pad_send_event(sinkpad, gst_event_new_eos());
+		gst_object_unref(sinkpad);
+
+		// unref our copy of the freeze element
+		gst_object_unref(m_freeze);
+#endif
+	}
+}
+
+GstPadProbeReturn FileSource::padProbeEventCallback(GstPad *pad, GstPadProbeInfo *info, gpointer user_data)
+{
+	FileSourceDisposalHelper *phelper = (FileSourceDisposalHelper *)user_data;
+	g_print("FileSource::poadProbeEventCallback() - start\n");
+
+	if (GST_EVENT_TYPE (GST_PAD_PROBE_INFO_DATA (info)) != GST_EVENT_EOS)
+	    return GST_PAD_PROBE_PASS;
+
+	g_print("FileSource::poadProbeEventCallback() - have EOS\n");
+	gst_pad_remove_probe(pad, GST_PAD_PROBE_INFO_ID(info));
+	gst_element_set_state(phelper->filter, GST_STATE_NULL);
+	gst_bin_remove(GST_BIN(phelper->pipeline), phelper->filter);
+	gst_object_unref(phelper->pipeline);
+	gst_object_unref(phelper->filter);
+	delete phelper;
+	g_print("FileSource::poadProbeEventCallback() - done\n");
+
+	return GST_PAD_PROBE_OK;
 }
 
 GstElement *FileSource::bin()
@@ -189,7 +286,7 @@ void FileSource::preroll(GstElement *pipeline, Counter *pStimCounter)
 	// a filesource is created with uridecodebin, so we set up the machinery to do this.
 	// One thing we need is a counter specific to this source. When triggered it will
 	// post a message on the bus
-	SourcePrerollCounter *pspc = new SourcePrerollCounter(this, pipeline, 1, pStimCounter);
+	FileSourcePrerollCounter *pspc = new FileSourcePrerollCounter(this, pipeline, 1, pStimCounter);
 	//
 	// no linking, just deal with pad-added
 	g_signal_connect (m_ele, "pad-added", G_CALLBACK(FileSource::padAddedCallback), pspc);
@@ -209,7 +306,7 @@ void FileSource::rewind()
 }
 
 // Need access to counter (decrement)
-void FileSource::noMorePadsCallback(GstElement *src, SourcePrerollCounter *pspc)
+void FileSource::noMorePadsCallback(GstElement *src, FileSourcePrerollCounter *pspc)
 {
 	g_print("noMorePads(%s)\n", GST_ELEMENT_NAME(src));
 	// decrement here, negates the initial setting of (1) of counter.
@@ -223,7 +320,7 @@ void FileSource::noMorePadsCallback(GstElement *src, SourcePrerollCounter *pspc)
 // ALL streams are handled here, and a Stream* is added to the source object. The port will decide
 // which stream(s) are needed.
 
-void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCounter *pspc)
+void FileSource::padAddedCallback(GstElement *src, GstPad * pad, FileSourcePrerollCounter *pspc)
 {
 	GstCaps *caps;
 	GstStructure *s;
@@ -264,7 +361,7 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCo
 			}
 
 			// save this stream. Note the pad is ref'd
-			pspc->source()->addStream(HMMStreamType::VIDEO, pad, NULL, probeid);
+			pspc->fileSource()->addStream(HMMStreamType::VIDEO, pad, NULL, probeid);
 			gst_object_ref(pad);
 
 			// sync fakesink
@@ -284,7 +381,7 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCo
 			//
 			GstElement *freeze = gst_element_factory_make("imagefreeze", NULL);
 			gst_object_ref(freeze);
-			pspc->source()->saveExtraElement(freeze);
+			pspc->fileSource()->addImageElement(freeze);
 			GstElement *sink = gst_element_factory_make("fakesink", NULL);
 			gst_bin_add_many(GST_BIN(pspc->pipeline()), freeze, sink, NULL);
 			GstPad *freezesink = gst_element_get_static_pad(freeze, "sink");
@@ -304,7 +401,7 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCo
 			gulong probeid = gst_pad_add_probe(freezesrc, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
 			// save this stream. Note the pad is ref'd because of the call to get_static_pad
 			// TODO MAKE SURE THIS GETS UNREF'D
-			pspc->source()->addStream(HMMStreamType::VIDEO, freezesrc, NULL, probeid);
+			pspc->fileSource()->addStream(HMMStreamType::VIDEO, freezesrc, NULL, probeid);
 
 			// sync fakesink and freeze
 			gst_element_sync_state_with_parent(freeze);
@@ -334,7 +431,7 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCo
 		}
 
 		// save this stream. Note the pad is ref'd
-		pspc->source()->addStream(HMMStreamType::AUDIO, pad, NULL, probeid);
+		pspc->fileSource()->addStream(HMMStreamType::AUDIO, pad, NULL, probeid);
 		gst_object_ref(pad);
 
 		// sync fakesink
@@ -353,8 +450,8 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, SourcePrerollCo
 // so if its a/v. Payload inside functor is a bus message, so needs pipeline, Source*
 GstPadProbeReturn FileSource::padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data)
 {
-	SourcePrerollCounter *pcounter = (SourcePrerollCounter *)user_data;
-	g_print("In pad probe callback - seeking %s\n", (pcounter->source()->isSeeking() ? "TRUE" : "FALSE"));
+	FileSourcePrerollCounter *pcounter = (FileSourcePrerollCounter *)user_data;
+	g_print("In pad probe callback - seeking %s\n", (pcounter->fileSource()->isSeeking() ? "TRUE" : "FALSE"));
 	pcounter->decrement();
 	return GST_PAD_PROBE_OK;
 }

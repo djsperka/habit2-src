@@ -13,21 +13,24 @@ using namespace hmm;
 Stim::~Stim()
 {
 	// delete source map
+	g_print("deleting stim %s with %lu sources\n", m_prefix.c_str(), m_sourceMap.size());
 	for (std::pair<HMMStimPosition, SourceP> p : m_sourceMap)
 	{
+		g_print("about to delete source\n");
 		delete p.second;
 	}
 	m_sourceMap.clear();
+	g_print("deleting stim - done\n");
 }
 
 Source *Stim::getSource(HMMStimPosition pos)
 {
 	Source *psrc = NULL;
-	g_print("stim has %lu sources\n", m_sourceMap.size());
-	for (HMMStimPosSourceMap::iterator it = m_sourceMap.begin(); it!= m_sourceMap.end(); it++)
-	{
-		g_print("Source at position ", (int)it->first);
-	}
+//	g_print("stim has %lu sources\n", m_sourceMap.size());
+//	for (HMMStimPosSourceMap::iterator it = m_sourceMap.begin(); it!= m_sourceMap.end(); it++)
+//	{
+//		g_print("Source at position ", (int)it->first);
+//	}
 	if (m_sourceMap.count(pos) == 1)
 	{
 		psrc = m_sourceMap[pos];

@@ -108,6 +108,7 @@ void Port::connect(Stim& stim)
 	for (it = stim.sourceMap().begin(); it!= stim.sourceMap().end(); it++)
 	{
 		g_print("Port::connect(): SourcePosition %d SourceType %d\n", (int)(it->first), (int)(it->second->sourceType()));
+
 		// does this source have a video stream?
 		Stream *pstream = it->second->getStream(HMMStreamType::VIDEO);
 		if (pstream)
@@ -145,6 +146,7 @@ void Port::connect(Stim& stim)
 				{
 					GstClockTime abs = gst_clock_get_time(clock);
 					GstClockTime base = gst_element_get_base_time(m_mapPosVideo[it->first]);
+					g_print("setting pad offset to %u ms", GST_TIME_AS_MSECONDS(abs-base));
 					gst_pad_set_offset(pad, abs-base);
 					gst_object_unref(clock);
 				}
@@ -157,7 +159,7 @@ void Port::connect(Stim& stim)
 				// finally, remove blocking probe
 				if (pstream->getProbeID())
 				{
-					g_print("Port::connect(): removed blocking probe ");
+					g_print("Port::connect(): removed blocking probe\n");
 					gst_pad_remove_probe(pstream->srcpad(), pstream->getProbeID());
 					pstream->setProbeID(0);
 				}
@@ -171,6 +173,19 @@ void Port::connect(Stim& stim)
 		else
 		{
 			g_print("Port::connect(): NO VIDEO STREAM FOUND for this source\n");
+		}
+
+
+
+		// does this source have a audio stream?
+		pstream = it->second->getStream(HMMStreamType::AUDIO);
+		if (pstream)
+		{
+			g_print("Port::connect(): Found an audio stream for this source - WARNING\n");
+
+			// Just unblock it
+			gst_pad_remove_probe(pstream->srcpad(), pstream->getProbeID());
+			pstream->setProbeID(0);
 		}
 	}
 	g_print("Port::connect() - done\n");

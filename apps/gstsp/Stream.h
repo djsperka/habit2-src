@@ -22,6 +22,7 @@ class Stream
 	gulong m_probeid;	// this can be a blocking probe or an idle probe. If its nonzero, its blocking m_srcpad.
 	gulong m_probeidEvent; // event probe handy for looping
 
+	// ref the pad before calling, will be unref'd on destroy
 	Stream(GstPad *src, Source *parent, GstElement *sink, gulong probeid=0): m_srcpad(src), m_parent(parent), m_sink(sink), m_probeid(probeid), m_probeidEvent(0) {}
 
 public:

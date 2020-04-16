@@ -55,14 +55,14 @@ Stim *makeHabitStim(const Habit::StimulusSettings& ss, const Habit::StimulusDisp
 		// center
 		pstimCounter->increment();
 		pstim->addSource(HMM::STIMPOS_CENTER, makeSource(ss.getCenterStimulusInfo(), mm,
-				new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
+				new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 				(sdi.getUseISS() ? HMMSourceType::VIDEO_ONLY : HMMSourceType::AUDIO_VIDEO)));
 
 		// iss?
 		if (sdi.getUseISS())
 		{
 			pstimCounter->increment();
-			SourcePrerollCounter* psourceCounter = new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter);
+			FileSourcePrerollCounter* psourceCounter = new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter);
 			pstim->addSource(HMM::STIMPOS_AUDIO, makeSource(ss.getIndependentSoundInfo(), mm, psourceCounter, HMMSourceType::AUDIO_ONLY));
 		}
 	}
@@ -71,13 +71,13 @@ Stim *makeHabitStim(const Habit::StimulusSettings& ss, const Habit::StimulusDisp
 		// left
 		pstimCounter->increment();
 		pstim->addSource(HMM::STIMPOS_LEFT, makeSource(ss.getLeftStimulusInfo(), mm,
-				new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
+				new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 				(sdi.getUseISS() ? HMMSourceType::VIDEO_ONLY : HMMSourceType::AUDIO_VIDEO)));
 
 		// right
 		pstimCounter->increment();
 		pstim->addSource(HMM::STIMPOS_RIGHT, makeSource(ss.getRightStimulusInfo(), mm,
-				new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
+				new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 				(sdi.getUseISS() ? HMMSourceType::VIDEO_ONLY : HMMSourceType::AUDIO_VIDEO)));
 
 		// iss?
@@ -85,7 +85,7 @@ Stim *makeHabitStim(const Habit::StimulusSettings& ss, const Habit::StimulusDisp
 		{
 			pstimCounter->increment();
 			pstim->addSource(HMM::STIMPOS_AUDIO, makeSource(ss.getIndependentSoundInfo(), mm,
-					new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
+					new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 					HMMSourceType::AUDIO_ONLY));
 		}
 	}
@@ -94,19 +94,19 @@ Stim *makeHabitStim(const Habit::StimulusSettings& ss, const Habit::StimulusDisp
 		// left
 		pstimCounter->increment();
 		pstim->addSource(HMM::STIMPOS_LEFT, makeSource(ss.getLeftStimulusInfo(), mm,
-				new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
+				new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 				(sdi.getUseISS() ? HMMSourceType::VIDEO_ONLY : HMMSourceType::AUDIO_VIDEO)));
 
 		// right
 		pstimCounter->increment();
 		pstim->addSource(HMM::STIMPOS_RIGHT, makeSource(ss.getRightStimulusInfo(), mm,
-				new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
+				new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 				(sdi.getUseISS() ? HMMSourceType::VIDEO_ONLY : HMMSourceType::AUDIO_VIDEO)));
 
 		// center
 		pstimCounter->increment();
 		pstim->addSource(HMM::STIMPOS_CENTER, makeSource(ss.getCenterStimulusInfo(), mm,
-				new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
+				new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 				(sdi.getUseISS() ? HMMSourceType::VIDEO_ONLY : HMMSourceType::AUDIO_VIDEO)));
 
 		// iss?
@@ -114,7 +114,7 @@ Stim *makeHabitStim(const Habit::StimulusSettings& ss, const Habit::StimulusDisp
 		{
 			pstimCounter->increment();
 			pstim->addSource(HMM::STIMPOS_AUDIO, makeSource(ss.getIndependentSoundInfo(), mm,
-					new SourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
+					new FileSourcePrerollCounter(psrc, mm.pipeline(), 1, pstimCounter),
 					HMMSourceType::AUDIO_ONLY));
 		}
 	}
