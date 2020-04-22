@@ -74,12 +74,15 @@ void Port::connect(Stim& stim)
 	for (auto it: m_mapPosVideo)
 	{
 		GstPad *pad = gst_element_get_static_pad(it.second, "sink");
+		g_print("conect() - pad? %s\n", (pad ? "YES" : "NO"));
 		if (gst_pad_is_linked(pad))
 		{
-			oss << "port pad \"" << (int)it.first << " still connected. ";
+			oss << "port pad \"" << it.first << " still connected. ";
 			throw std::runtime_error(oss.str().c_str());
 		}
+		g_print("unref\n");
 		gst_object_unref(pad);
+		g_print("unref done\n");
 	}
 
 
@@ -105,9 +108,10 @@ void Port::connect(Stim& stim)
 
 	// OK now connect all video streams in 'stim' to the port.
 	Stim::HMMStimPosSourceMap::iterator it;
+	g_print("start connecting... %d sources\n", stim.sourceMap().size());
 	for (it = stim.sourceMap().begin(); it!= stim.sourceMap().end(); it++)
 	{
-		g_print("Port::connect(): SourcePosition %d SourceType %d\n", (int)(it->first), (int)(it->second->sourceType()));
+		g_print("Port::connect(): SourcePosition %s SourceType %d\n", it->first.c_str(), (int)(it->second->sourceType()));
 
 		// does this source have a video stream?
 		Stream *pstream = it->second->getStream(HMMStreamType::VIDEO);
@@ -166,7 +170,7 @@ void Port::connect(Stim& stim)
 			}
 			else
 			{
-				oss << "Stim pos " << (int)it->first << " port does not have video ele at this pos ";
+				oss << "Stim pos " << it->first << " port does not have video ele at this pos ";
 				throw std::runtime_error(oss.str().c_str());
 			}
 		}

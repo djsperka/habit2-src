@@ -1,0 +1,12 @@
+{
+"stim_display_positions" : [
+								{ "type" : "video", "position" : "center", "screen" : 0, "sink" : "qwidget5videosink" },
+								{ "type" : "audio", "position" : "speaker", "sink" : "osxaudiosink" }
+							],
+"stimuli" : [
+				{ "name" : "bkgd", "sources" : [ { "position" : "center", "color" : "0x80808000" } ] },
+				{ "name" : "b1", "sources" : [ { "position" : "center", "image" : "images/test/B-1.png" } ] },
+				{ "name" : "r1", "sources" : [ { "position" : "center", "image" : "images/test/R-1.png" } ] },
+				{ "name" : "g1", "sources" : [ { "position" : "center", "image" : "images/test/G-1.png" } ] }
+			]
+}

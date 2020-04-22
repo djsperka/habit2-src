@@ -14,21 +14,34 @@ using namespace hmm;
 bool f_looping = false;
 
 
-const HMMStimPosition HMM::STIMPOS_CONTROL = 0;
-const HMMStimPosition HMM::STIMPOS_LEFT = 1;
-const HMMStimPosition HMM::STIMPOS_CENTER = 2;
-const HMMStimPosition HMM::STIMPOS_RIGHT = 3;
-const HMMStimPosition HMM::STIMPOS_AUDIO = 4;
+const HMMStimPosition HMM::STIMPOS_CONTROL = "control";
+const HMMStimPosition HMM::STIMPOS_LEFT = "left";
+const HMMStimPosition HMM::STIMPOS_CENTER = "center";
+const HMMStimPosition HMM::STIMPOS_RIGHT = "right";
+const HMMStimPosition HMM::STIMPOS_AUDIO = "speaker";
 
 
-void HMMConfiguration::addVideoSink(HMMStimPosition pos, const std::string& name, const std::string& sink)
+// the specific audio sink element used depends on platform
+#if defined(Q_OS_MAC)
+#define AUDIOSINK_ELEMENT "osxaudiosink"
+#elif defined(Q_OS_LINUX)
+#define AUDIOSINK_ELEMENT "alsaudiosink"
+#elif defined(Q_OS_WIN)
+#define AUDIOSINK_ELEMENT "directsoundsink"
+#else
+#define AUDIOSINK_ELEMENT "UNSUPPORTED_PLATFORM"
+#endif
+
+
+
+void HMMConfiguration::addVideoSink(HMMStimPosition pos, const std::string& sink)
 {
-	video[pos] = std::make_pair(name, sink);
+	video[pos] = sink;
 }
 
-void HMMConfiguration::addAudioSink(HMMStimPosition pos, const std::string& name, const std::string& sink)
+void HMMConfiguration::addAudioSink(HMMStimPosition pos, const std::string& sink)
 {
-	audio[pos] = std::make_pair(name, sink);
+	audio[pos] = sink;
 }
 
 HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
@@ -58,13 +71,13 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		// By adding a video element to the port - it will always search for a video stream from the source
 		// with the same stim position (StimPosition is like "left", "right", "center", etc.
 
-		g_print("HMM: Configuring pipeline, add video path \"%s\" at position %d using sink \"%s\"\n", it->second.first.c_str(), (int)it->first, it->second.second.c_str());
+		g_print("HMM: Configuring pipeline, add video position %s using sink \"%s\"\n", it->first.c_str(), it->second.c_str());
 		GstElement *conv, *scale, *vsink;
 		conv = gst_element_factory_make ("videoconvert", NULL);
 		scale = gst_element_factory_make ("videoscale", NULL);
 
 		// create video sink. The sink factory name was passed in the config.
-		vsink = gst_element_factory_make(it->second.second.c_str(), NULL);
+		vsink = gst_element_factory_make(it->second.c_str(), NULL);
 		if (!vsink)
 		{
 			throw std::runtime_error("Cannot create sink element. Check GST_PLUGIN_PATH.");
@@ -79,17 +92,6 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 		m_port.addVideoEle(it->first, conv);	// port takes ownership of the conv element
 		m_port.addVideoSink(it->first, vsink);
 		//=====end pipeline config. The port keeps the conv ele with the "StimPosition" value.
-
-//		// Now configure background source for this particular video path. A new stim was created above,
-//		// here we create  a test element and create the source/stream manually.
-//
-//		GstElement *ptest = gst_element_factory_make ("videotestsrc", NULL);
-//		gst_bin_add(GST_BIN(m_pipeline), ptest);
-//		GstPad *pad = gst_element_get_static_pad(ptest, "src");
-//		Stream *pstream = new Stream(pad);
-//		Source *psource = new Source(hmm::HMMSourceType::VIDEO_ONLY, ptest, false);
-//		psource->addStream(hmm::HMMStreamType::VIDEO, pstream);
-//		pbkgd->addSource(it->first, psource);
 	}
 
 	// Now configure audio - note we may also configure background for audio
@@ -97,13 +99,17 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 	g_print("HMM::HMM(): configure audio ports\n");
 	for (StimPosTailMap::const_iterator it = config.audio.begin(); it!= config.audio.end(); it++)
 	{
-		g_print("HMM: Configuring pipeline, add audio path \"%s\"\n", it->second.first.c_str());
+		g_print("HMM: Configuring pipeline, add audio position \"%s\" using sink element %s\n", it->first.c_str(), AUDIOSINK_ELEMENT);
 		GstElement *audioSink = NULL, *audioMixer=NULL, *audioTestSrc=NULL;
-		audioSink = gst_element_factory_make(it->second.second.c_str(), NULL);
+		if (it->second.size() > 0)
+			audioSink = gst_element_factory_make(it->second.c_str(), NULL);
+		else
+			audioSink = gst_element_factory_make(AUDIOSINK_ELEMENT, NULL);
+
 		if (!audioSink)
 		{
 			std::ostringstream oss;
-			oss << "Cannot create sink \"" << it->second.second.c_str() << "\" at audio pos " << it->first;
+			oss << "Cannot create sink \"" << it->second << "\" at audio pos " << it->first;
 			throw std::runtime_error(oss.str());
 		}
 		audioMixer = gst_element_factory_make("audiomixer", NULL);

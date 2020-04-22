@@ -108,6 +108,12 @@ public:
 	static GstPadProbeReturn padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);
 	static GstPadProbeReturn padProbeEventCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);
 };
+
+
+// helper functions
+FileSource *makeFileSource(HMMSourceType stype, const std::string& filename, const std::string& prefix, GstElement *pipeline, bool bloop, unsigned int volume);
+ColorSource *makeColorSource(unsigned int rgba);
+//ImageSource *makeImageSource(const std::sgtring& filename);
 }
 
 

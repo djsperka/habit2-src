@@ -7,6 +7,7 @@
 
 #ifndef HMMTYPES_H_
 #define HMMTYPES_H_
+#include <string>
 
 namespace hmm {
 
@@ -35,7 +36,7 @@ enum class HMMStimState
 	PAUSED
 };
 
-typedef int HMMStimPosition;
+typedef std::string HMMStimPosition;
 typedef unsigned long HMMStimID;
 typedef unsigned long HMMInstanceID;
 

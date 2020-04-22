@@ -31,13 +31,13 @@ struct HMMVideoTail
 	GstElement *m_conv, *m_scale, *m_vsink;
 };
 
-typedef std::map<HMMStimPosition, std::pair<std::string, std::string> > StimPosTailMap;
+typedef std::map<HMMStimPosition, std::string> StimPosTailMap;
 struct HMMConfiguration
 {
 	StimPosTailMap video;
 	StimPosTailMap audio;
-	void addVideoSink(HMMStimPosition pos, const std::string& name, const std::string& sink);
-	void addAudioSink(HMMStimPosition pos, const std::string& name, const std::string& sink);
+	void addVideoSink(HMMStimPosition pos, const std::string& sink = std::string("qwidget5videosink"));
+	void addAudioSink(HMMStimPosition pos, const std::string& sink = std::string());	// empty string means "figure it out" depending on platform
 };
 
 class HMM

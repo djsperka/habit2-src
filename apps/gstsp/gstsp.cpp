@@ -6,17 +6,37 @@
  */
 
 #include "HMM.h"
-#include <boost/filesystem.hpp>
 #include <sstream>
 #include <QApplication>
+#include <QDir>
 #include "HWorkspaceUtil.h"
 #include "HLoggerObject.h"
 #include "GstspDialog.h"
+#include "GstspClientDialog.h"
+#include "JsonStimFactory.h"
 
 #include <QCameraInfo>
 #include <QList>
 
 hmm::HMM *f_pmm=NULL;
+static gchar *f_script=NULL;
+static gchar *f_workspace=NULL;
+static gchar *f_rootdir=NULL;
+static gchar *f_server=NULL;
+static gchar *f_defaultServer="127.0.0.1";
+static gint f_port=5254;
+static GOptionEntry entries[] =
+{
+  { "server", 's', 0, G_OPTION_ARG_STRING, &f_server, "Server ip or name", "ip-addr" },
+  { "port", 'p', 0, G_OPTION_ARG_INT, &f_port, "Server port [5254]", "port-number"},
+  { "load", 'l', 0, G_OPTION_ARG_FILENAME, &f_script, "Script file to load on startup", "path-to-file" },
+  { "workspace", 'w', 0, G_OPTION_ARG_FILENAME, &f_workspace, "Load experiment drop down selection from this workspace", "workspace-path" },
+  { "root", 'r', 0, G_OPTION_ARG_FILENAME, &f_rootdir, "Habit stim root folder", NULL },
+  { NULL }
+};
+
+
+
 
 gboolean handle_keyboard (GIOChannel * source, GIOCondition cond, GMainLoop *loop);
 
@@ -60,104 +80,86 @@ void glibPrinterrFunc(const gchar *string)
 
 int main (int argc, char **argv)
 {
+	// parse command line
+	GError *error = NULL;
+	GOptionContext *context;
+	context = g_option_context_new ("- remote looking time experiment platform");
+	g_option_context_add_main_entries (context, entries, NULL);
+	if (!g_option_context_parse (context, &argc, &argv, &error))
+	{
+	  g_print ("option parsing failed: %s\n", error->message);
+	  exit (1);
+	}
+
+	// Qt application yakkity yak
 	QApplication app(argc, argv);
-	app.setApplicationName("habit2");
+	app.setApplicationName("habit2-client");
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
 
 	// init gstreamer
 	gst_init(&argc, &argv);
 
-	// specify workspace dir and/or stim root dir
-	for (int i=1; i<argc; i++)
+
+	if (f_server)
 	{
-		if (!strcmp(argv[i], "-w"))
+		if (!f_script)
 		{
-			if (i < (argc-1))
-			{
-				habutilSetWorkspace(argv[i+1]);
-				i++;
-			}
+			g_print("must specify script file on command line\n");
+			exit(1);
 		}
-		else if (!strcmp(argv[i], "-r"))
+
+		g_print("Server option %s : %d\n", f_server, f_port);
+
+		// need image root dir. full path on command line, or relative to exe folder.
+		std::string imageroot;
+		if (f_rootdir)
 		{
-			habutilSetStimulusRootDir(QString(argv[i+1]));
-			i++;
+			g_print("rootdir %s\n", f_rootdir);
+			imageroot = std::string(f_rootdir);
+			g_free(f_rootdir);
 		}
 		else
 		{
-			qDebug() << "Unrecognized command line arg " << QString(argv[i]);
+			QDir dirExe(QCoreApplication::applicationDirPath());
+			dirExe.cd("../../Stimuli");
+			imageroot = dirExe.path().toStdString();
 		}
+
+		hmm::JsonStimFactory *pfactory = new hmm::JsonStimFactory(std::string(f_script), imageroot);
+
+		hmm::HMM* phmm = new hmm::HMM(pfactory->getHMMConfiguration(), *pfactory);
+
+		GstspClientDialog *pClientDialog = new GstspClientDialog(f_server, f_port);
+		pClientDialog->exec();
+
+		delete phmm;
+		g_free(f_server);
+		g_free(f_script);
 	}
-
-//	qInstallMessageHandler(&HLoggerObject::loggingHandler);
-//	g_set_print_handler(glibPrintFunc);
-//	g_set_printerr_handler(glibPrinterrFunc);
-//	gst_debug_add_log_function(gstLogFunction, NULL, NULL);
-
-	if (!habutilInitWorkspace())
-		return 0;
-
-	//~~~~~~~~~~~~~~~~~~~~~~~
-    GstDeviceMonitor *monitor;
-    monitor = gst_device_monitor_new ();
-
-    GstCaps *caps = gst_caps_new_empty_simple ("video/x-raw");
-    gst_device_monitor_add_filter (monitor, "Video/Source", caps);
-    gst_caps_unref (caps);
-
-    // need to start?
-    gst_device_monitor_start (monitor);
-
-    // get devices
-    g_print("getting devices...\n");
-	GList* devices = gst_device_monitor_get_devices(monitor);
-    g_print("done getting devices...\n");
-
-	// iterate over the list
-	for (GList *iterator = devices; iterator != NULL; iterator = iterator->next)
+	else
 	{
-		GstDevice *d = (GstDevice *)iterator->data;
-		g_print("Current item is '%s'\n", gst_device_get_display_name(d));
+		if (f_workspace)
+		{
+			habutilSetWorkspace(QString(f_workspace));
+			g_free(f_workspace);
+		}
+		if (f_rootdir)
+		{
+			habutilSetStimulusRootDir(QString(f_rootdir));
+			g_free(f_rootdir);
+		}
+
+		if (!habutilInitWorkspace())
+			return 0;
+
+		GstspDialog *dialog = new GstspDialog();
+		dialog->exec();
 	}
 
-	//get qt devices
-	g_print("getting qt devices...\n");
-	const QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
-	for (const QCameraInfo &cameraInfo : cameras) {
-	    g_print("cameraInfo.deviceName(): %s %s\n", cameraInfo.deviceName().toStdString().c_str(), cameraInfo.description().toStdString().c_str());
-	}
-	g_print("getting qt devices done.\n");
-	//~~~~~~~~~~~~~~~~~~~~~~~
-
-	GstspDialog *dialog = new GstspDialog();
-	dialog->exec();
-
-//  // Set up configuration for the mm port - the backend that is - number of video outputs, audio?
-//  hmm::HMMConfiguration config;
-//  config.video[hmm::HMM::STIMPOS_CENTER] = "center";
-//  f_pmm = new hmm::HMM(config);
-
-//  g_print("create main loop\n");
-//  loop = g_main_loop_new (NULL, FALSE);
-
-
-//  /* Add a keyboard watch so we get notified of keystrokes */
-//#ifdef G_OS_WIN32
-//  io_stdin = g_io_channel_win32_new_fd (fileno (stdin));
-//#else
-//  io_stdin = g_io_channel_unix_new (fileno (stdin));
-//#endif
-//  g_io_add_watch (io_stdin, G_IO_IN, (GIOFunc) handle_keyboard, loop);
-//
-//  g_print("run loop\n");
-//  g_main_loop_run (loop);
-//
-//  g_main_loop_unref (loop);
-//  g_print("quitting\n");
-
-  return 0;
+	return 0;
 }
+
 
 //
 ///* Process keyboard input */

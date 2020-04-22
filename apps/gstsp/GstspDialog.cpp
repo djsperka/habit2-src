@@ -90,29 +90,29 @@ void GstspDialog::experimentActivated(QString expt)
 	hmm::HMMConfiguration config;
 	if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		config.addVideoSink(hmm::HMM::STIMPOS_CENTER, "center", "qwidget5videosink");
+		config.addVideoSink(hmm::HMM::STIMPOS_CENTER);
 	}
 	else if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		config.addVideoSink(hmm::HMM::STIMPOS_LEFT, "left", "qwidget5videosink");
-		config.addVideoSink(hmm::HMM::STIMPOS_RIGHT, "right", "qwidget5videosink");
+		config.addVideoSink(hmm::HMM::STIMPOS_LEFT);
+		config.addVideoSink(hmm::HMM::STIMPOS_RIGHT);
 	}
 	else if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
 	{
-		config.addVideoSink(hmm::HMM::STIMPOS_LEFT, "left", "qwidget5videosink");
-		config.addVideoSink(hmm::HMM::STIMPOS_RIGHT, "right", "qwidget5videosink");
-		config.addVideoSink(hmm::HMM::STIMPOS_CENTER, "center", "qwidget5videosink");
+		config.addVideoSink(hmm::HMM::STIMPOS_LEFT);
+		config.addVideoSink(hmm::HMM::STIMPOS_RIGHT);
+		config.addVideoSink(hmm::HMM::STIMPOS_CENTER);
 	}
 
 #if defined(Q_OS_MAC)
 	qDebug() << "make osxaudiosink for mac";
-	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "osxaudiosink");
+	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO,"osxaudiosink");
 #elif defined(Q_OS_LINUX)
 	qDebug() << "make alsasink for linux";
-	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "alsasink");
+	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "alsasink");
 #elif defined(Q_OS_WIN)
 	qDebug() << "make directsoundsink for win";
-	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "audio", "directsoundsink");
+	config.addAudioSink(hmm::HMM::STIMPOS_AUDIO, "directsoundsink");
 #else
 	qDebug() << "Unsupported OS.";
 	throw std::runtime_error("Unsupported OS, cannot create audio sink");
