@@ -30,7 +30,7 @@ public:
     ~GstspControlDialog();
 
 signals:
-	void preroll(unsigned int id);
+	void preroll(QString id);
 	void dump();
 	void play(unsigned int);
 

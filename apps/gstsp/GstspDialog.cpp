@@ -201,9 +201,9 @@ void GstspDialog::setWidgetPropertyOnSinks(StimDisplayWidget *psdw, unsigned int
 	}
 }
 
-void GstspDialog::preroll(unsigned int id)
+void GstspDialog::preroll(QString id)
 {
-	hmm::HMMInstanceID iid = m_pmm->preroll((hmm::HMMStimID)id);
+	hmm::HMMInstanceID iid = m_pmm->preroll(id.toStdString());
 	qDebug() << "Got instance ID " << (int)iid;
 }
 

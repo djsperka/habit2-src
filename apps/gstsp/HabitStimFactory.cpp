@@ -31,9 +31,9 @@ HabitStimFactory::~HabitStimFactory()
 
 hmm::HMMStimID HabitStimFactory::addStimulusSettings(const Habit::StimulusSettings& settings)
 {
-	hmm::HMMStimID id = (hmm::HMMStimID)((unsigned long)m_ssMap.size());
+	hmm::HMMStimID id = settings.getName().toStdString();
 	m_ssMap[id] = settings;
-	g_print("HabitStimFactory::addStimulusSettings() %d: %s\n", (int)id, settings.getName().toStdString().c_str());
+	g_print("HabitStimFactory::addStimulusSettings(): %s\n", settings.getName().toStdString().c_str());
 	return id;
 }
 
@@ -45,7 +45,7 @@ hmm::Stim* HabitStimFactory::background(hmm::HMM& mm)
 hmm::Stim* HabitStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm, const std::string& prefix)
 {
 	hmm::Stim *pstim = NULL;
-	g_print("HabitStimFactory::operator(%d)\n", (int)id);
+	g_print("HabitStimFactory::operator(%s)\n", id.c_str());
 	if (m_ssMap.count(id) == 0)
 		throw std::runtime_error("StimFactory(id) not found");
 	else

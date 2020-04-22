@@ -218,7 +218,7 @@ void HMM::dump(const char *c)
 
 HMMInstanceID HMM::preroll(HMMStimID id)
 {
-	g_print("prerolling stimID %lu\n", id);
+	g_print("prerolling stimID %s\n", id.c_str());
 
 	// at this point we would set in motion the preroll for _each_of_the_sources_, e.g. left,
 	// right, ISS, or whatever topology is in use.

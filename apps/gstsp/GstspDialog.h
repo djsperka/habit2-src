@@ -38,7 +38,7 @@ signals:
 
 public slots:
 
-	void preroll(unsigned int);
+	void preroll(QString);
 	void dump();
 	void experimentActivated(QString expt);
 	void playItem(unsigned int);

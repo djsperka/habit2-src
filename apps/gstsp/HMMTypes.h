@@ -37,7 +37,7 @@ enum class HMMStimState
 };
 
 typedef std::string HMMStimPosition;
-typedef unsigned long HMMStimID;
+typedef std::string HMMStimID;
 typedef unsigned long HMMInstanceID;
 
 //class HMMInstanceID

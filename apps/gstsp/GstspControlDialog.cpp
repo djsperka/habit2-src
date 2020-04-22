@@ -57,8 +57,8 @@ void GstspControlDialog::onPrerollClicked()
 	{
 		for (auto index: selected)
 		{
-			qDebug() << "row " << index.row() << " id " << (int)(idList.at(index.row()));
-			emit preroll((unsigned int)idList.at(index.row()));
+			qDebug() << "row " << index.row() << " id " << idList.at(index.row()).c_str();
+			emit preroll(QString(idList.at(index.row()).c_str()));
 		}
 	}
 	else
