@@ -20,7 +20,7 @@ class HStimulusLayout : public QLayout
 	Q_OBJECT
 
 public:
-	HStimulusLayout(HVideoWidget *pVideoWidget, const HDisplayType& displayType, bool bMaintainAspectRatio, const QSize& sizeTargetScreen);
+	HStimulusLayout(HVideoWidget *pVideoWidget, bool bOriginalSize, bool bMaintainAspectRatio, const QSize& sizeTargetScreen);
 	~HStimulusLayout();
 
   QSize sizeHint() const;
@@ -33,9 +33,9 @@ public:
 
 private:
   QLayoutItem* m_item;	// only one item is allowed, and it must be an HVideoWidget
-  const HDisplayType& m_displayType;
-  bool m_bMaintainAspectRatio;		// only applies to display type HDisplayType::HDisplayTypeFullScreen
-  QSize m_targetDisplaySize;			// only applies to HDisplayType::HDisplayTypeOriginalSize
+  bool m_bOriginalSize;				// maintain original size of stim
+  bool m_bMaintainAspectRatio;		// only matters when false==m_bOriginalSize
+  QSize m_targetDisplaySize;		// only matters when true==m_bOiginalSize
 
 };
 

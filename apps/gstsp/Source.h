@@ -32,13 +32,14 @@ public:
 	typedef Stream* StreamP;
 private:
 	HMMSourceType m_sourceType;	// what types of stream will be accepted in padAdded
+	std::string m_prefix;		// prefix attached to elements in this source
 	Stim *m_parent;
 	std::map<HMMStreamType, StreamP> m_streamMap;
 	bool m_bSeeking;
 	void setParent(Stim *parent) { m_parent = parent; }
 
 protected:
-	Source(HMMSourceType stype);
+	Source(HMMSourceType stype, const std::string& prefix);
 
 public:
 	Source(const Source&) = delete;
@@ -52,6 +53,7 @@ public:
 	void setSeeking(bool b) { m_bSeeking = b; }
 	bool isSeeking() const { return m_bSeeking; }
 	int streamCount() const { return m_streamMap.size(); }
+	const std::string& prefix() const { return m_prefix; };
 
 	static void parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio);
 
@@ -79,6 +81,26 @@ public:
 };
 
 
+
+class ImageSource: public Source
+{
+	GstElement *m_ele;
+
+public:
+	ImageSource(HMMSourceType stype, const std::string& filename, const std::string& prefix, GstElement *pipeline);
+	virtual ~ImageSource();
+	GstElement *bin() { return m_ele; }
+	virtual void preroll(GstElement *pipeline, Counter *pc);
+	virtual void stop();
+	virtual void rewind();
+	friend class Stim;
+
+	static void typefoundCallback(GstElement *typefind, guint probability, GstCaps *caps, gpointer data);
+	static GstPadProbeReturn padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);
+
+};
+
+
 struct FileSourceDisposalHelper
 {
 	GstElement *filter;
@@ -102,6 +124,7 @@ public:
 	virtual void stop();
 	virtual void rewind();
 
+	bool isLoop() const { return m_bloop; }
 	void addImageElement(GstElement *ele) { m_freeze = ele; m_bIsImage = true; }
 	static void noMorePadsCallback(GstElement *, FileSourcePrerollCounter *pspc);
 	static void padAddedCallback(GstElement *, GstPad * pad, FileSourcePrerollCounter *pspc);

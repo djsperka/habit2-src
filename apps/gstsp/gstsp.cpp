@@ -14,6 +14,7 @@
 #include "GstspDialog.h"
 #include "GstspClientDialog.h"
 #include "JsonStimFactory.h"
+#include "StimDisplayWidget.h"
 
 #include <QCameraInfo>
 #include <QList>
@@ -25,6 +26,9 @@ static gchar *f_rootdir=NULL;
 static gchar *f_server=NULL;
 static gchar *f_defaultServer="127.0.0.1";
 static gint f_port=5254;
+static gboolean f_bfullScreen = false;
+static gint f_width=320;
+static gint f_height=240;
 static GOptionEntry entries[] =
 {
   { "server", 's', 0, G_OPTION_ARG_STRING, &f_server, "Server ip or name", "ip-addr" },
@@ -32,6 +36,9 @@ static GOptionEntry entries[] =
   { "load", 'l', 0, G_OPTION_ARG_FILENAME, &f_script, "Script file to load on startup", "path-to-file" },
   { "workspace", 'w', 0, G_OPTION_ARG_FILENAME, &f_workspace, "Load experiment drop down selection from this workspace", "workspace-path" },
   { "root", 'r', 0, G_OPTION_ARG_FILENAME, &f_rootdir, "Habit stim root folder", NULL },
+  { "fullscreen", 'F', 0, G_OPTION_ARG_NONE, &f_bfullScreen, "display stim fullscreen", NULL },
+  { "width", 'W', 0, G_OPTION_ARG_INT, &f_width, "stim display width in pixels", "px" },
+  { "height", 'H', 0, G_OPTION_ARG_INT, &f_height, "stim display height in pixels", "px" },
   { NULL }
 };
 
@@ -77,6 +84,7 @@ void glibPrinterrFunc(const gchar *string)
 	QString s(string);
 	qCritical() << s;
 }
+
 
 int main (int argc, char **argv)
 {
@@ -130,7 +138,21 @@ int main (int argc, char **argv)
 
 		hmm::HMM* phmm = new hmm::HMM(pfactory->getHMMConfiguration(), *pfactory);
 
+		// Create stimulus widget, then assign widgets to sinks for video display.
+		std::vector<hmm::HMMStimPosition> vecPositions(phmm->port().getVideoPositions());
 		GstspClientDialog *pClientDialog = new GstspClientDialog(f_server, f_port);
+		StimDisplayWidget *psdw = new StimDisplayWidget(vecPositions.size(), true, true, 0x80808000, f_width, f_height, pClientDialog);
+		for (int i=0; i<vecPositions.size(); i++)
+		{
+			GValue v = G_VALUE_INIT;
+			g_value_init(&v, G_TYPE_POINTER);
+			g_value_set_pointer(&v, psdw->getVideoWidget(i));
+			phmm->port().setWidget(vecPositions[i], v);
+		}
+
+		psdw->show();
+		psdw->raise();
+
 		pClientDialog->exec();
 
 		delete phmm;

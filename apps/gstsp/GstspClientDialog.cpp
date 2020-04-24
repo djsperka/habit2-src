@@ -68,11 +68,9 @@ void GstspClientDialog::displayError(QAbstractSocket::SocketError socketError)
 void GstspClientDialog::readServerCommand()
 {
 	char buf[1024];
-	qDebug() << "try read...";
 	m_dataStream.startTransaction();
 
 	qint64 available = m_ptcpSocket->bytesAvailable();
-	qDebug() << "have bytes " << available;
 
 	qint64 nread = m_ptcpSocket->readLine(buf, 1024);
 	if (nread > 0)

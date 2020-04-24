@@ -41,6 +41,18 @@ StimDisplayWidget::StimDisplayWidget(const Habit::StimulusDisplayInfo& sdi, unsi
 	setLayout(hbox);
 }
 
+StimDisplayWidget::StimDisplayWidget(unsigned int n, bool bOriginalSize, bool bMaintainAspectRatio, unsigned int rgba, unsigned long width, unsigned long height, const QWidget *parent)
+{
+	QHBoxLayout *hbox = new QHBoxLayout;
+	for (int i=0; i<n; i++)
+	{
+		HStimulusWidget *w = new HStimulusWidget(bOriginalSize, bMaintainAspectRatio, rgba, 320, 240, this);
+		m_vecVideoWidgets.push_back(w->getHVideoWidget());
+		hbox->addWidget(w);
+	}
+	setLayout(hbox);
+}
+
 StimDisplayWidget::~StimDisplayWidget()
 {
 }

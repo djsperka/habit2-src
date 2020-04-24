@@ -155,7 +155,17 @@ void HabitStimFactory::addSourceToStim(Stim *pstim, const std::string& prefix, h
 	}
 	else
 	{
-		pstim->addSource(pos, new FileSource(stype, info.getAbsoluteFileName(m_dir).toStdString(), prefix, pipeline, info.isLoopPlayBack(), info.getVolume()));
+		// HACK check if its jpg or png, if so use ImageSource
+		QFileInfo fileInfo(info.getAbsoluteFileName(m_dir));
+		QString ext = fileInfo.suffix().toLower();
+		if (ext == "jpg" || ext == "png")
+		{
+			pstim->addSource(pos, new ImageSource(stype, info.getAbsoluteFileName(m_dir).toStdString(), prefix, pipeline));
+		}
+		else
+		{
+			pstim->addSource(pos, new FileSource(stype, info.getAbsoluteFileName(m_dir).toStdString(), prefix, pipeline, info.isLoopPlayBack(), info.getVolume()));
+		}
 	}
 }
 

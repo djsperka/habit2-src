@@ -11,8 +11,9 @@
 #include <sstream>
 using namespace hmm;
 
-Source::Source(HMMSourceType t)
+Source::Source(HMMSourceType t, const std::string& prefix)
 : m_sourceType(t)
+, m_prefix(prefix)
 , m_parent(NULL)
 , m_bSeeking(false)
 {};
@@ -105,7 +106,7 @@ void Source::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, 
 
 
 ColorSource::ColorSource(HMMSourceType stype, const std::string& prefix, GstElement *pipeline)
-: Source(stype)
+: Source(stype, prefix)
 {
 	std::ostringstream oss;
 	oss << prefix << "-videotestsrc";
@@ -115,7 +116,7 @@ ColorSource::ColorSource(HMMSourceType stype, const std::string& prefix, GstElem
 	{
 		throw std::runtime_error("Cannot create color source");
 	}
-	oss.clear();
+	oss.str("");
 	oss << prefix << "-fakesink";
 	GstElement *sink = gst_element_factory_make("fakesink", oss.str().c_str());
 	gst_bin_add_many(GST_BIN(pipeline), m_ele, sink, NULL);
@@ -166,8 +167,186 @@ void ColorSource::rewind()
 
 }
 
+
+/*
+ImageSource(HMMSourceType stype, const std::string& prefix, GstElement *pipeline);
+virtual ~ImageSource();
+GstElement *bin();
+virtual void preroll(GstElement *pipeline, Counter *pc);
+virtual void stop();
+virtual void rewind();
+*/
+
+ImageSource::ImageSource(HMMSourceType stype, const std::string& filename, const std::string& prefix, GstElement *pipeline)
+: Source(stype, prefix)
+, m_ele(NULL)
+{
+	/*
+	 *  Initially construct this:
+	 *
+	 *   +----------------bin--------------------+
+	 *   |  +-------------+   +--------------+   |
+	 *   |  |   filesrc   |---|   typefind   |   |
+	 *   |  +-------------+   +--------------+   |
+	 *   +---------------------------------------+
+	 *
+	 *
+	 */
+
+	GstElement *filesrc, *typefind;
+
+	std::ostringstream oss;
+	oss << prefix << "-filesrc";
+	filesrc = gst_element_factory_make("filesrc", oss.str().c_str());
+
+	oss.str("");
+	oss << prefix << "-typefind";
+	typefind = gst_element_factory_make("typefind", oss.str().c_str());
+	g_print("created %s\n", oss.str().c_str());
+
+	oss.str("");
+	oss << prefix << "-imagebin";
+	m_ele = gst_bin_new(oss.str().c_str());
+	gst_object_ref(m_ele);
+	gst_bin_add_many(GST_BIN(m_ele), filesrc, typefind, NULL);
+
+	gst_bin_add(GST_BIN(pipeline), m_ele);
+	gst_element_link(filesrc, typefind);
+
+	// set properties
+	g_object_set(filesrc, "location", filename.c_str());
+
+}
+
+
+ImageSource::~ImageSource()
+{
+	gst_element_set_state(m_ele, GST_STATE_NULL);
+	gst_object_unref(m_ele);
+	gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
+
+}
+
+
+
+/*
+ *  We add the decoder and imagefreeze here
+ *
+ *   +----------------bin-----------------------------------------------------------+
+ *   |  +-------------+   +--------------+   +-------------+   +-----------------+  |
+ *   |  |   filesrc   |---|   typefind   |---|   jpegdec   |---|   imagefreeze   |  |
+ *   |  +-------------+   +--------------+   +-------------+   +-----------------+  |
+ *   +------------------------------------------------------------------------------+
+ *
+ *
+ */
+
+
+void ImageSource::typefoundCallback(GstElement *typefind, guint probability, GstCaps *caps, gpointer data)
+{
+	ImageSourcePrerollCounter *pispc = (ImageSourcePrerollCounter *)data;
+	gchar *type;
+	GstElement *decoder;
+	std::ostringstream oss;
+	type = gst_caps_to_string (caps);
+	g_print ("Media type %s found, probability %d%%\n", type, probability);
+
+	// add decoder depending on type
+
+	if (g_str_has_prefix(type, "image/jpeg"))
+	{
+		oss << pispc->imageSource()->prefix() << "-jpegdec";
+		decoder = gst_element_factory_make("jpegdec", oss.str().c_str());
+		// add to bin - this also adds to pipeline because bin is already part of it
+		gst_bin_add(GST_BIN(pispc->imageSource()->bin()), decoder);
+		gst_element_link(typefind, decoder);
+	}
+	else if (g_str_has_prefix(type, "image/png"))
+	{
+		oss << pispc->imageSource()->prefix() << "-pngdec";
+		decoder = gst_element_factory_make("pngdec", oss.str().c_str());
+		// add to bin - this also adds to pipeline because bin is already part of it
+		gst_bin_add(GST_BIN(pispc->imageSource()->bin()), decoder);
+		gst_element_link(typefind, decoder);
+	}
+	else
+	{
+		oss.str("");
+		oss << "ImageSource::typefoundCallback: unknown caps - " << type;
+		throw std::runtime_error(oss.str().c_str());
+	}
+	g_free (type);
+
+	g_print("got decoder\n");
+
+	// now imagefreeze
+	GstElement *imagefreeze=NULL;
+	oss.str("");
+	oss << pispc->imageSource()->prefix() << "-imagefreeze";
+	imagefreeze = gst_element_factory_make("imagefreeze", oss.str().c_str());
+	gst_bin_add(GST_BIN(pispc->imageSource()->bin()), imagefreeze);
+	gst_element_link(decoder, imagefreeze);
+
+	g_print("imagefreeze done\n");
+
+	// ghost the src pad on imagefreeze and add it to the bin.
+	// this will be the pad saved for the stream (and where the blocking probe will be set)
+	GstPad *srcpad = gst_element_get_static_pad(imagefreeze, "src");
+	GstPad *ghost_pad = gst_ghost_pad_new ("src", srcpad);
+	gst_pad_set_active (ghost_pad, TRUE);
+	gst_element_add_pad (pispc->imageSource()->bin(), ghost_pad);
+	gst_object_unref (srcpad);
+
+	g_print("ghost done\n");
+
+	// now set blocking probe on ghost pad, send the counter as the userdata. Add stream.
+	gulong probeid = gst_pad_add_probe(ghost_pad, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &ImageSource::padProbeBlockCallback, pispc, NULL);
+	pispc->imageSource()->addStream(HMMStreamType::VIDEO, ghost_pad, NULL, probeid);
+
+	g_print("sync\n");
+	gst_element_sync_state_with_parent(decoder);
+	gst_element_sync_state_with_parent(imagefreeze);
+	g_print("done\n");
+}
+
+GstPadProbeReturn ImageSource::padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data)
+{
+	ImageSourcePrerollCounter *pcounter = (ImageSourcePrerollCounter *)user_data;
+	g_print("In Image src pad probe callback\n");
+	pcounter->decrement();
+	return GST_PAD_PROBE_OK;
+}
+
+void ImageSource::preroll(GstElement *pipeline, Counter *pc)
+{
+	// find typefind element
+	std::ostringstream oss;
+	oss << prefix() << "-typefind";
+	g_print("look for element %s\n", oss.str().c_str());
+	GstElement *typefind = gst_bin_get_by_name(GST_BIN(bin()), oss.str().c_str());
+	if (!typefind)
+		throw std::runtime_error("Cannot find typefind element!");
+
+	// catch signal. pass wrapped counter as userdata.
+	ImageSourcePrerollCounter *pispc = new ImageSourcePrerollCounter(this, 1, pc);
+	g_signal_connect(typefind, "have-type", G_CALLBACK(ImageSource::typefoundCallback), pispc);
+	gst_element_sync_state_with_parent(bin());
+
+	gst_object_unref(typefind);
+}
+
+void ImageSource::stop()
+{
+
+}
+
+void ImageSource::rewind()
+{
+
+}
+
 FileSource::FileSource(HMMSourceType stype, const std::string& filename, const std::string& prefix, GstElement *pipeline, bool bloop, unsigned int volume)
-: Source(stype)
+: Source(stype, prefix)
 , m_bloop(bloop)
 , m_volume(volume)
 , m_ele(NULL)

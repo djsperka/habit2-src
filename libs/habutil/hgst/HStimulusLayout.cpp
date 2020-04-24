@@ -7,10 +7,10 @@
 
 #include "HStimulusLayout.h"
 
-HStimulusLayout::HStimulusLayout(HVideoWidget *pVideoWidget, const HDisplayType& displayType, bool bMaintainAspectRatio, const QSize& sizeTargetScreen)
+HStimulusLayout::HStimulusLayout(HVideoWidget *pVideoWidget, bool bOriginalSize, bool bMaintainAspectRatio, const QSize& sizeTargetScreen)
 : QLayout()
 , m_item(NULL)
-, m_displayType(displayType)
+, m_bOriginalSize(bOriginalSize)
 , m_bMaintainAspectRatio(bMaintainAspectRatio)
 , m_targetDisplaySize(sizeTargetScreen)
 {
@@ -95,8 +95,10 @@ void HStimulusLayout::setGeometry(const QRect& r)
 	}
 	else
 	{
-		if (m_displayType == HDisplayType::HDisplayTypeFullScreen)
+		if (!m_bOriginalSize)
 		{
+			// expand to full size of widget
+
 			QSize s = w->getStimulusSize().scaled(r.size(), m_bMaintainAspectRatio ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
 
 			qDebug() << "HStimulusLayout::setGeometry(" << r << ", maintain " << m_bMaintainAspectRatio << ") scaled " << s;
@@ -127,7 +129,7 @@ void HStimulusLayout::setGeometry(const QRect& r)
 				}
 			}
 		}
-		else if (m_displayType == HDisplayType::HDisplayTypeOriginalSize)
+		else
 		{
 			// Scale stimulus size by factor of (actual screen size)/(target screen size)
 			// Here, "actual screen size" can be in an aspect ration that doesn't match that of the target screen,
@@ -141,10 +143,6 @@ void HStimulusLayout::setGeometry(const QRect& r)
 			QRect rnew(QPoint(r.x() + xdiff/2, r.y() + ydiff/2), s);
 			m_item->setGeometry(rnew);
 			qDebug() << "HStimulusLayout::setGeometry() - HDisplayTypeOriginalSize - set geom " << rnew;
-		}
-		else
-		{
-			qCritical() << "HStimulusLayout - Unknown display type!";
 		}
 	}
 }

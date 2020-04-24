@@ -41,7 +41,7 @@ private:
 	bool getUintFromValueWD(const rapidjson::Value& v, const char *w, unsigned int &u, unsigned int defaultUint);
 	bool getBoolFromValueWD(const rapidjson::Value& v, const char *w, bool &b, bool defaultBool);
 	bool getUintFromHexStringValueWD(const rapidjson::Value& v, const char *w, unsigned int &u, unsigned int defaultUint);
-
+	Stim::SourceP makeSourceFromValue(const rapidjson::Value& v, GstElement *pipeline, const std::string& prefix);
 public:
 	JsonStimFactory(const std::string& filename, const std::string& imageroot);
 	virtual ~JsonStimFactory();

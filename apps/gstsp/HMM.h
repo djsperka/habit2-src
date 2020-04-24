@@ -102,7 +102,8 @@ public:
 	HMMStimID addStim(const Habit::StimulusSettings& settings);
 	Stim *getStimInstance(HMMInstanceID id);
 	HMMInstanceID preroll(HMMStimID id);
-	void play(const HMMInstanceID& id);
+	HMMInstanceID play(const HMMStimID& id); // does a preroll, but does the swap once its ready
+	HMMInstanceID play(const HMMInstanceID& id);
 	void dump(const char *c);
 
 	// Port access

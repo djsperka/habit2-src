@@ -31,32 +31,43 @@ bool Counter::decrement()
 	return false;
 }
 
+void ImageSourcePrerollCounter::operator()(void)
+{
+	g_print("ImageSourcePrerollCounter triggered - image stream is prerolled.\n");
+}
 
 void FileSourcePrerollCounter::operator()(void)
 {
 	if (m_bIsImage)
 	{
-		this->fileSource()->parentStim()->setStimState(HMMStimState::PREROLLED);
-		g_print("SourcePrerollCounter triggered - image stream is prerolled.\n");
+		g_print("FileSourcePrerollCounter triggered - image stream is prerolled.\n");
 	}
 	else
 	{
 		if (!this->fileSource()->isSeeking())
 		{
-			// this is when we are first filling the pipeline, but a segment seek has not yet been issued.
-			// Set the 'seeking' flag, post a message on the bus.
-			// This object is still attached to the probe, so we should reset it to the number of streams.
-			this->fileSource()->setSeeking(true);
-			this->setCounter(this->fileSource()->streamMap().size());
-			GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
-			GstStructure *structure = gst_structure_new("seek", "psrc", G_TYPE_POINTER, this->fileSource(),  NULL);
-			gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->fileSource()->bin()), structure));
-			gst_object_unref(bus);
-			g_print("SourcePrerollCounter triggered - segment seek issued, reset counter to %d\n", this->fileSource()->streamMap().size());
+			if (this->fileSource()->isLoop())
+			{
+				// this is when we are first filling the pipeline, but a segment seek has not yet been issued.
+				// Set the 'seeking' flag, post a message on the bus.
+				// This object is still attached to the probe, so we should reset it to the number of streams.
+				this->fileSource()->setSeeking(true);
+				this->setCounter(this->fileSource()->streamMap().size());
+				GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline()));
+				GstStructure *structure = gst_structure_new("seek", "psrc", G_TYPE_POINTER, this->fileSource(),  NULL);
+				gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(this->fileSource()->bin()), structure));
+				gst_object_unref(bus);
+				g_print("FileSourcePrerollCounter (loop) triggered - segment seek issued, reset counter to %d\n", this->fileSource()->streamMap().size());
+			}
+			else
+			{
+				this->fileSource()->parentStim()->setStimState(HMMStimState::PREROLLED);
+				g_print("FileSourcePrerollCounter (not loop) triggered - source is prerolled.\n");
+			}
 		}
 		else
 		{
-			g_print("SourcePrerollCounter triggered - (was seeking) - all streams are prerolled.\n");
+			g_print("FileSourcePrerollCounter triggered - (was seeking) - all streams are prerolled.\n");
 		}
 	}
 }

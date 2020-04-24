@@ -46,13 +46,14 @@ class HStimulusWidget: public QFrame
 	Q_OBJECT
 
 	private:
-		Habit::StimulusDisplayInfo m_sdi;
 		QSize m_sizeTargetScreen;
 		HVideoWidget *m_videoWidget;
 
 
 	public:
 	    HStimulusWidget(const Habit::StimulusDisplayInfo& sdi, float screenWidth, float screenHeight, QWidget *parent = 0);
+	    HStimulusWidget(bool bOriginalSize, bool bMaintainAspectRatio, unsigned int rgba, float screenWidth, float screenHeight, QWidget *parent = 0);
+
 	    virtual ~HStimulusWidget();
 	    //bool hasHeightForWidth() const { return true; }
 	    //int heightForWidth(int w) const { return w * m_screenHeight / m_screenWidth; }

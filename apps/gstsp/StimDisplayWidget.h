@@ -19,6 +19,7 @@ class StimDisplayWidget: public QWidget
 	std::vector<HVideoWidget *> m_vecVideoWidgets;
 public:
 	StimDisplayWidget(const Habit::StimulusDisplayInfo& sdi, unsigned long width, unsigned long height, const QWidget *parent=NULL);
+	StimDisplayWidget(unsigned int n, bool bOriginalSize, bool bMaintainAspectRatio, unsigned int rgba, unsigned long width, unsigned long height, const QWidget *parent=NULL);
 	virtual ~StimDisplayWidget();
 	HVideoWidget *getVideoWidget(int index);	// not nice, will return null
 };

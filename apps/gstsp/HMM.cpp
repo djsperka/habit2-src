@@ -249,7 +249,7 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 }
 
 
-void HMM::play(const HMMInstanceID& iid)
+HMMInstanceID HMM::play(const HMMInstanceID& iid)
 {
 	if (m_instanceMap.count(iid) != 1)
 		throw std::runtime_error("instance id not found, cannot play.");
@@ -260,7 +260,7 @@ void HMM::play(const HMMInstanceID& iid)
 	if (pstimPending->getStimState() != HMMStimState::PREROLLED)
 	{
 		g_print("HMM::play(%lu) - not prerolled\n", iid);
-		return;
+		return (HMMInstanceID)0;
 	}
 
 	g_print("HMM::play(%lu) - set IDLE probes on %d sources\n", iid, (int)pstimCurrent->sourceMap().size());
@@ -300,7 +300,7 @@ void HMM::play(const HMMInstanceID& iid)
 //			}
 		}
 	}
-
+	return iid;
 }
 
 

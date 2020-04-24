@@ -36,10 +36,80 @@ hmm::JsonStimFactory::~JsonStimFactory() {
 	// TODO Auto-generated destructor stub
 }
 
+hmm::Stim::SourceP hmm::JsonStimFactory::makeSourceFromValue(const rapidjson::Value& v, GstElement *pipeline, const std::string& prefix)
+{
+	// Value assumed to be OK
+
+	if (v.HasMember("image"))
+	{
+		std::string filename;
+		getStringFromValue(v, "image", filename);
+		return new FileSource(HMMSourceType::VIDEO_ONLY, filename, prefix, pipeline);
+	}
+	else if (v.HasMember("color"))
+	{
+		// TODO ColorSource is gray, no color arg!!!
+		return new ColorSource(HMMSourceType::VIDEO_ONLY, prefix, pipeline);
+	}
+	else if (v.HasMember("file"))
+	{
+		std::string filename;
+		bool bloop;
+		unsigned int volume;
+		getStringFromValue(v, "file", filename);
+		getUintFromValueWD(v, "volume", volume, 0);
+		getBoolFromValueWD(v, "loop", bloop, false);
+		return new FileSource(HMMSourceType::AUDIO_VIDEO, filename, prefix, pipeline, bloop, volume);
+	}
+	else
+		throw std::runtime_error("bad source!");
+}
 
 hmm::Stim* hmm::JsonStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm, const std::string& prefix)
 {
-	return (hmm::Stim *)NULL;
+	hmm::Stim* pstim = nullptr;
+
+	// find the id and the stim index
+	if (m_mapNameIndex.count(id) > 0)
+	{
+		pstim = new hmm::Stim(mm.pipeline(), prefix);
+
+		rj::Value *pStimuli = GetValueByPointer(m_document, "/stimuli");
+		const rj::Value& aSources = (*pStimuli)[m_mapNameIndex[id]]["sources"];
+		for (rj::SizeType iSource = 0; iSource < aSources.Size(); iSource++)
+		{
+			std::string position, prefix;
+			getStringFromValue(aSources[iSource], "position", position);
+			prefix = position;
+			prefix.append("-").append(position);
+			pstim->addSource(position, makeSourceFromValue(aSources[iSource], mm.pipeline(), prefix));
+
+
+
+#if 0
+			if (!getStringFromValue(v, "position", position))
+				return false;
+			if (v.HasMember("image"))
+				return (getStringFromValue(v, "image", filename) && checkImageFile(filename));
+			else if (v.HasMember("color"))
+				return getUintFromHexStringValueWD(v, "color", rgba, 0);
+			else if (v.HasMember("file"))
+				return (getStringFromValue(v, "file", filename) &&
+						checkMediaFile(filename) &&
+						getUintFromValueWD(v, "volume", volume, 0) &&
+						getBoolFromValueWD(v, "loop", bloop, false));
+			return false;
+		}
+
+
+#endif
+
+
+
+
+		}
+	}
+	return pstim;
 }
 
 hmm::Stim* hmm::JsonStimFactory::background(hmm::HMM& mm)
@@ -262,6 +332,9 @@ void hmm::JsonStimFactory::parseStimuli(const rj::Document& d)
 						// TODO better msg would be helpful here
 						throw std::runtime_error("bad source!");
 				}
+
+				m_mapNameIndex[name] = i;
+
 			}
 
 			/*
