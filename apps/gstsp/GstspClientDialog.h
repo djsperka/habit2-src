@@ -39,7 +39,7 @@ private slots:
 	void executeServerCommand(const char *cmd);
 
 public:
-	GstspClientDialog(const QString& addr, int port, QWidget *parent=0);
+	GstspClientDialog(const QString& addr, int port, hmm::HMM *phmm, QWidget *parent=0);
 	~GstspClientDialog();
 	void components();
 };

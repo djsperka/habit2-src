@@ -33,6 +33,7 @@ signals:
 	void preroll(QString id);
 	void dump();
 	void play(unsigned int);
+	void playID(QString id);
 
 private slots:
     void onPrerollClicked();

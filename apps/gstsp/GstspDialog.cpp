@@ -157,6 +157,7 @@ void GstspDialog::experimentActivated(QString expt)
 	connect(m_control, &GstspControlDialog::preroll, this, &GstspDialog::preroll);
 	connect(m_control, &GstspControlDialog::dump, this, &GstspDialog::dump);
 	connect(m_control, &GstspControlDialog::play, this, &GstspDialog::playItem);
+	connect(m_control, &GstspControlDialog::playID, this, &GstspDialog::playID);
 	m_control->exec();
 	psdw->close();
 
@@ -216,6 +217,11 @@ void GstspDialog::dump()
 void GstspDialog::playItem(unsigned int iid)
 {
 	m_pmm->play(iid);
+}
+
+void GstspDialog::playID(QString id)
+{
+	m_pmm->play(id.toStdString());
 }
 
 void GstspDialog::stopItem()

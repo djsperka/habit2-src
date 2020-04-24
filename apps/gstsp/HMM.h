@@ -80,9 +80,15 @@ class HMM
 	// swap the iid in for current stim. dispose of current
 	void swap(HMMInstanceID iid);
 
+	// get next available stim instance id
+	HMMInstanceID getNextInstanceID();
+
 	// dispose of this stim or rewind as needed
 	void dispose(HMMInstanceID iid);
 	void removeStimInstance(HMMInstanceID iid);		// TODO: will throw, not trying to be pretty
+
+	// initiates process to swap stim iid (assumed prerolled) for another by blocking it, then swapping in 'iid'.
+	void initiateSwap(HMMInstanceID iid, Stim *pstimCurrent);
 
 public:
 	HMM(const HMMConfiguration& config, StimFactory& factory);

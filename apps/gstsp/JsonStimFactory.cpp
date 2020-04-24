@@ -40,11 +40,12 @@ hmm::Stim::SourceP hmm::JsonStimFactory::makeSourceFromValue(const rapidjson::Va
 {
 	// Value assumed to be OK
 
+	g_print("makeSourceFromValue prefix %s\n", prefix.c_str());
 	if (v.HasMember("image"))
 	{
 		std::string filename;
 		getStringFromValue(v, "image", filename);
-		return new FileSource(HMMSourceType::VIDEO_ONLY, filename, prefix, pipeline);
+		return new ImageSource(HMMSourceType::VIDEO_ONLY, (m_stimroot / filename).string(), prefix, pipeline);
 	}
 	else if (v.HasMember("color"))
 	{
@@ -78,37 +79,14 @@ hmm::Stim* hmm::JsonStimFactory::operator()(hmm::HMMStimID id, hmm::HMM& mm, con
 		const rj::Value& aSources = (*pStimuli)[m_mapNameIndex[id]]["sources"];
 		for (rj::SizeType iSource = 0; iSource < aSources.Size(); iSource++)
 		{
-			std::string position, prefix;
+			std::string position, newprefix(prefix);
 			getStringFromValue(aSources[iSource], "position", position);
-			prefix = position;
-			prefix.append("-").append(position);
-			pstim->addSource(position, makeSourceFromValue(aSources[iSource], mm.pipeline(), prefix));
-
-
-
-#if 0
-			if (!getStringFromValue(v, "position", position))
-				return false;
-			if (v.HasMember("image"))
-				return (getStringFromValue(v, "image", filename) && checkImageFile(filename));
-			else if (v.HasMember("color"))
-				return getUintFromHexStringValueWD(v, "color", rgba, 0);
-			else if (v.HasMember("file"))
-				return (getStringFromValue(v, "file", filename) &&
-						checkMediaFile(filename) &&
-						getUintFromValueWD(v, "volume", volume, 0) &&
-						getBoolFromValueWD(v, "loop", bloop, false));
-			return false;
-		}
-
-
-#endif
-
-
-
-
+			newprefix.append("-").append(position);
+			pstim->addSource(position, makeSourceFromValue(aSources[iSource], mm.pipeline(), newprefix));
 		}
 	}
+	else throw std::runtime_error(std::string("JsonStimFactory::operator(): no such stimid").append(id).c_str());
+
 	return pstim;
 }
 

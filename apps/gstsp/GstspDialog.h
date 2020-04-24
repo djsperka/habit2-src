@@ -42,6 +42,7 @@ public slots:
 	void dump();
 	void experimentActivated(QString expt);
 	void playItem(unsigned int);
+	void playID(QString);
 	void stopItem();
 	void stimStarted(int index);
 	void agStarted(int index);

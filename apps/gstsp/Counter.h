@@ -102,30 +102,28 @@ public:
 class HMM;
 class StimSwapCounter: public Counter
 {
-	HMMStimID m_stimidCurrent;
-	HMMStimID m_stimidPending;
-	HMM* m_pmm;
-public:
-	StimSwapCounter(HMMStimID curr, HMMStimID pend, HMM* pmm, int counter=0): Counter(counter), m_stimidCurrent(curr), m_stimidPending(pend), m_pmm(pmm) {}
-	void operator()(void);
-	HMMStimID current() const { return m_stimidCurrent; }
-	HMMStimID pending() const { return m_stimidPending; }
-	HMM* hmm() { return m_pmm; }
-};
-
-
-class PlayStimCounter: public Counter
-{
 	HMMInstanceID m_iid;
 	HMM* m_phmm;
 public:
-	PlayStimCounter(HMMInstanceID iid, HMM* phmm, int counter=0): Counter(counter), m_iid(iid), m_phmm(phmm) {}
-	~PlayStimCounter() {}
+	StimSwapCounter(HMMInstanceID iid, HMM* phmm, int counter=0): Counter(counter), m_iid(iid), m_phmm(phmm) {}
+	virtual ~StimSwapCounter() {}
 	HMMInstanceID iid() { return m_iid; }
 	HMM* hmm() { return m_phmm; }
 	void operator()(void);
 };
 
+class StimPlayCounter: public Counter
+{
+	HMMInstanceID m_iid;
+	HMM *m_phmm;
+	bool m_bPrerolled;	// state
+public:
+	StimPlayCounter(HMMInstanceID iid, HMM *phmm, int counter=0): Counter(counter), m_iid(iid), m_phmm(phmm), m_bPrerolled(false) {}
+	virtual ~StimPlayCounter() {};
+	HMMInstanceID iid() { return m_iid; }
+	HMM* hmm() { return m_phmm; }
+	void operator()(void);
+};
 
 };	// end namespace
 

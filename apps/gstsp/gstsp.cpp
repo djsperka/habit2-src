@@ -140,7 +140,7 @@ int main (int argc, char **argv)
 
 		// Create stimulus widget, then assign widgets to sinks for video display.
 		std::vector<hmm::HMMStimPosition> vecPositions(phmm->port().getVideoPositions());
-		GstspClientDialog *pClientDialog = new GstspClientDialog(f_server, f_port);
+		GstspClientDialog *pClientDialog = new GstspClientDialog(f_server, f_port, phmm);
 		StimDisplayWidget *psdw = new StimDisplayWidget(vecPositions.size(), true, true, 0x80808000, f_width, f_height, pClientDialog);
 		for (int i=0; i<vecPositions.size(); i++)
 		{

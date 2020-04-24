@@ -71,21 +71,20 @@ void GstspControlDialog::onPlayClicked()
 {
 	QModelIndexList selected = ui->listView->selectionModel()->selectedIndexes();
 	qDebug() << "play clicked";
-	if (selected.size() > 0)
+	QString txt(ui->lineEditIID->text());
+	if (txt.size() > 0)
 	{
-		for (auto index: selected)
+		bool b;
+		unsigned int iid = txt.toUInt(&b);
+		if (b)
 		{
-			bool b;
-			unsigned int iid = ui->lineEditIID->text().toUInt(&b);
-			if (b)
-			{
-				qDebug() << "emit play(" << iid << ")";
-				emit play(iid);
-			}
+			qDebug() << "emit play(" << iid << ")";
+			emit play(iid);
 		}
-	}
-	else
-	{
-		emit dump();
+		else
+		{
+			qDebug() << "emit play(" << txt << ")";
+			emit playID(txt);
+		}
 	}
 }

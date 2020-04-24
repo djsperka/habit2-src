@@ -83,13 +83,21 @@ void NoopCounter::operator()(void)
 	g_print("HMMNoopCounter triggered\n");
 }
 
-void PlayStimCounter::operator()(void)
+void StimSwapCounter::operator()(void)
 {
-	g_print("PlayStimCounter triggered\n");
+	g_print("StimSwapCounter triggered\n");
 	// post bus message
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(this->hmm()->pipeline()));
-	GstStructure *structure = gst_structure_new("play", "iid", G_TYPE_ULONG, this->iid(), NULL);
+	GstStructure *structure = gst_structure_new("swap", "iid", G_TYPE_ULONG, this->iid(), NULL);
 	gst_bus_post (bus, gst_message_new_application(GST_OBJECT_CAST(hmm()->pipeline()), structure));
 	gst_object_unref(bus);
+}
+
+void StimPlayCounter::operator()(void)
+{
+	Stim *pstim = hmm()->getStimInstance(iid());
+	pstim->setStimState(HMMStimState::PREROLLED);
+	g_print("StimPlayCounter triggered - pending stim (iid=%lu) is prerolled and ready\n", iid());
+	hmm()->play(iid());
 }
 

@@ -8,16 +8,17 @@
 
 #include "GstspClientDialog.h"
 #include "ui_gstspclientdialog.h"
+#include "HMM.h"
 #include <QTcpSocket>
 #include <QString>
 #include <QStringList>
 #include <QDialogButtonBox>
 #include <QMessageBox>
 
-GstspClientDialog::GstspClientDialog(const QString& addr, int port, QWidget *parent)
+GstspClientDialog::GstspClientDialog(const QString& addr, int port, hmm::HMM *phmm, QWidget *parent)
 : QDialog(parent)
 , m_pui(new Ui::gstspclientdialog)
-, m_pmm(NULL)
+, m_pmm(phmm)
 , m_ptcpSocket(new QTcpSocket(this))
 {
     m_pui->setupUi(this);
@@ -90,4 +91,12 @@ void GstspClientDialog::executeServerCommand(const char *cmd)
 	QString scmd(cmd);
 	QStringList slcmd = scmd.split(' ');
 	qDebug() << "GstspClientDialog::executeServerCommand: " << slcmd;
+	// first token is command
+	if (slcmd[0] == "play")
+	{
+		if (slcmd.size()==2)
+		{
+			m_pmm->play(slcmd[1].toStdString());
+		}
+	}
 }

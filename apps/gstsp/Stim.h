@@ -44,7 +44,7 @@ public:
 	Source *getSource(HMMStimPosition pos);
 
 	// set up blocking probes and sync
-	void preroll(GstElement *pipeline);
+	void preroll(GstElement *pipeline, Counter *pc);
 
 	// block playing sources with idle probe
 	void stop();

@@ -195,6 +195,7 @@ ImageSource::ImageSource(HMMSourceType stype, const std::string& filename, const
 
 	GstElement *filesrc, *typefind;
 
+	g_print("image source prefix %s\n", prefix.c_str());
 	std::ostringstream oss;
 	oss << prefix << "-filesrc";
 	filesrc = gst_element_factory_make("filesrc", oss.str().c_str());
