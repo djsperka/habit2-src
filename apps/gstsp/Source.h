@@ -78,6 +78,8 @@ public:
 	virtual void stop();
 	virtual void rewind();
 	friend class Stim;
+
+	static GstPadProbeReturn padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);
 };
 
 
@@ -113,8 +115,6 @@ class FileSource: public Source
 	bool m_bloop;
 	unsigned int m_volume;
 	GstElement *m_ele;
-	bool m_bIsImage;
-	GstElement *m_freeze;	// only valid if m_bIsImage==true
 
 public:
 	FileSource(HMMSourceType stype, const std::string& filename, const std::string& prefix, GstElement *pipeline, bool bloop=false, unsigned int volume=0);
@@ -125,7 +125,6 @@ public:
 	virtual void rewind();
 
 	bool isLoop() const { return m_bloop; }
-	void addImageElement(GstElement *ele) { m_freeze = ele; m_bIsImage = true; }
 	static void noMorePadsCallback(GstElement *, FileSourcePrerollCounter *pspc);
 	static void padAddedCallback(GstElement *, GstPad * pad, FileSourcePrerollCounter *pspc);
 	static GstPadProbeReturn padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data);

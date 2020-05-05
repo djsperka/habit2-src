@@ -1,5 +1,3 @@
-message("inside habutil.pro")
-
 TEMPLATE = lib
 CONFIG += qt staticlib debug_and_release
 greaterThan(QT_MAJOR_VERSION, 4) {
@@ -14,11 +12,9 @@ CONFIG(debug, debug|release) {
 	DESTDIR = release
 }
 
-message("reading habit2.pri")
 # Get gstreamer stuff from this file.
 include(../../habit2.pri)
 
 QT += widgets
 
-message("reading habutil.pri")
 include(habutil.pri)

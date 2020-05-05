@@ -245,6 +245,51 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	return instanceID;
 }
 
+void HMM::cam(bool bOn)
+{
+	//  video/x-raw,framerate=10/1,width=320,height=240 !
+	char *camerabin_string = "videoconvert ! osxvideosink";
+	char *camera_string = "avfvideosrc ";
+//	char *launchstring = "avfvideosrc device-index=0 ! queue ! "
+//						" videoscale ! videoconvert ! videobalance saturation=0.0 ! "
+//						" video/x-raw,framerate=10/1,width=320,height=240 ! "
+//						" osxvideosink";
+////						" x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! "
+////						" rtph264pay ! udpsink host=192.168.0.11 port=5000";
+
+	if (bOn)
+	{
+		GError *gerror = NULL;
+		gst_debug_set_threshold_from_string("avfvideosrc:5", true);
+//		m_cameraBin = gst_parse_bin_from_description(launchstring, true, &gerror);
+		m_cameraBin = gst_element_factory_make ("avfvideosrc", "camera");
+
+		gst_object_ref(m_cameraBin);
+//		if (gerror)
+//		{
+//			g_print("error in parse: %s\n", gerror->message);
+//			return;
+//		}
+		gst_bin_add(GST_BIN(m_pipeline), m_cameraBin);
+
+		//gst_element_sync_state_with_parent(m_cameraBin);
+		gst_element_set_state(m_cameraBin, GST_STATE_READY);
+		//GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, "cam");
+
+		g_print("camera added\n");
+	}
+	else
+	{
+		if (m_cameraBin)
+		{
+			gst_bin_remove(GST_BIN(m_pipeline), m_cameraBin);
+			gst_object_unref(m_cameraBin);
+			gst_element_set_state(m_cameraBin, GST_STATE_NULL);
+			m_cameraBin = NULL;
+		}
+	}
+}
+
 HMMInstanceID HMM::play(const HMMStimID& id)
 {
 	HMMInstanceID instanceID = getNextInstanceID();

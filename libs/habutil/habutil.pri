@@ -1,11 +1,7 @@
 
 RESOURCES = habit/resources.qrc
-message("inside habutil.pri")
-message("reading habit-files.pri")
 include(habit-files.pri)
-message("reading hgst-files.pri")
 include(hgst-files.pri)
-message("reading wizards-files.pri")
 include(wizards-files.pri)
 
 HEADERS +=	HLook.h \

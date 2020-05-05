@@ -60,7 +60,7 @@ hmm::Stim::SourceP hmm::JsonStimFactory::makeSourceFromValue(const rapidjson::Va
 		getStringFromValue(v, "file", filename);
 		getUintFromValueWD(v, "volume", volume, 0);
 		getBoolFromValueWD(v, "loop", bloop, false);
-		return new FileSource(HMMSourceType::AUDIO_VIDEO, filename, prefix, pipeline, bloop, volume);
+		return new FileSource(HMMSourceType::AUDIO_VIDEO, (m_stimroot / filename).string(), prefix, pipeline, bloop, volume);
 	}
 	else
 		throw std::runtime_error("bad source!");
@@ -159,6 +159,9 @@ bool hmm::JsonStimFactory::checkAudioFile(const std::string& filename)
 
 bool hmm::JsonStimFactory::checkMediaFile(const std::string& filename)
 {
+	g_print("checkMediaFile %s\n", filename.c_str());
+	std::cout << m_stimroot / filename << std::endl;
+	return boost::filesystem::exists(m_stimroot / filename);
 	std::ifstream f(filename);
 	return f.good();
 }

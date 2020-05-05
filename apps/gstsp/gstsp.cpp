@@ -88,6 +88,23 @@ void glibPrinterrFunc(const gchar *string)
 
 int main (int argc, char **argv)
 {
+	// dbg workaround - if arguments begin and end with single quote, remove them and continue.
+	// Eclipse is adding quotes to args when running dbg. See
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=516027 (comment 5)
+
+	for (int ii=0; ii<argc; ii++)
+	{
+		g_print("%d: %s\n", ii, argv[ii]);
+		if (argv[ii][0] == '\'')
+		{
+			int l = strlen(argv[ii]);
+			strncpy(argv[ii], argv[ii]+1, l-2);
+			argv[ii][l-2] = 0;
+		}
+		g_print("%d: %s\n", ii, argv[ii]);
+	}
+
+
 	// parse command line
 	GError *error = NULL;
 	GOptionContext *context;

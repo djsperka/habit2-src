@@ -12,6 +12,7 @@
 #include <QMutex>
 #include <QDir>
 #include <QMap>
+#include <QSize>
 #include "stimulussettings.h"
 #include "stimulusdisplayinfo.h"
 #include "HTypes.h"

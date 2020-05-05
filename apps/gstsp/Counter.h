@@ -16,6 +16,7 @@ namespace hmm {
 class Stim;
 class FileSource;
 class ImageSource;
+class ColorSource;
 
 class Counter
 {
@@ -63,6 +64,16 @@ public:
  *
  *
  */
+
+class ColorSourcePrerollCounter: public Counter
+{
+	ColorSource *m_psource;
+public:
+	ColorSourcePrerollCounter(ColorSource *psource, int counter=0, Counter *psubCounter=NULL): Counter(counter, psubCounter), m_psource(psource) {}
+	virtual ~ColorSourcePrerollCounter() {};
+	void operator()(void);
+	ColorSource *colorSource() const { return m_psource; }
+};
 
 
 class ImageSourcePrerollCounter: public Counter

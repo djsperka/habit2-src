@@ -47,6 +47,7 @@ class HMM
 	GThread *m_gthread;
 	GMainLoop *m_pgml;
 	StimFactory& m_factory;
+	GstElement *m_cameraBin;
 
 	// the stim info is supplied when addStim is called - it represents _the_ability_to_ display/play that "stim"
 	// What does a stim contain?
@@ -111,6 +112,9 @@ public:
 	HMMInstanceID play(const HMMStimID& id); // does a preroll, but does the swap once its ready
 	HMMInstanceID play(const HMMInstanceID& id);
 	void dump(const char *c);
+
+	// turn camera on/off
+	void cam(bool bOn);
 
 	// Port access
 	Port &port() { return m_port; }

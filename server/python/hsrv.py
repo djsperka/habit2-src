@@ -23,9 +23,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         # now prompt for commands
         while True:
             cmd = input("Enter command: ")
+            self.request.sendall(cmd.encode('utf8'))
             if 'q' == cmd[0]:
                 break
-            self.request.sendall(cmd.encode('utf8'))
             
 
 if __name__ == "__main__":
@@ -37,4 +37,6 @@ if __name__ == "__main__":
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     #server.serve_forever()
+    
+    print(f"I will wait for a connection on {HOST}:{PORT}, ^C to quit.\n")
     server.handle_request()

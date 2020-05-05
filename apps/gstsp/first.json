@@ -7,6 +7,8 @@
 				{ "name" : "bkgd", "sources" : [ { "position" : "center", "color" : "0x80808000" } ] },
 				{ "name" : "b1", "sources" : [ { "position" : "center", "image" : "images/test/B-1.png" } ] },
 				{ "name" : "r1", "sources" : [ { "position" : "center", "image" : "images/test/R-1.png" } ] },
-				{ "name" : "g1", "sources" : [ { "position" : "center", "image" : "images/test/G-1.png" } ] }
+				{ "name" : "g1", "sources" : [ { "position" : "center", "image" : "images/test/G-1.png" } ] },
+				{ "name" : "ag", "sources" : [ { "position" : "center", "file" : "mov/Loop.mov", "loop": true, "volume" : 25} ] },
+				{ "name" : "lb", "sources" : [ { "position" : "center", "file" : "mov/lb.mov", "loop": true, "volume" : 25} ] }
 			]
 }

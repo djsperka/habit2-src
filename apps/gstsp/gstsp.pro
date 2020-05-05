@@ -8,6 +8,12 @@ CONFIG += qt debug_and_release c++11
 # Get gstreamer stuff from this file.
 include(../../habit2.pri)
 
+# Info.plist file on Mac
+
+macx {
+    QMAKE_INFO_PLIST = gstsp.plist
+}
+
 CONFIG(debug, debug|release) {
 	DESTDIR = debug
 	!win32 {

@@ -37,6 +37,7 @@ private slots:
 	void readServerCommand();
 	void displayError(QAbstractSocket::SocketError socketError);
 	void executeServerCommand(const char *cmd);
+	void connectClicked(bool);
 
 public:
 	GstspClientDialog(const QString& addr, int port, hmm::HMM *phmm, QWidget *parent=0);

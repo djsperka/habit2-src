@@ -31,6 +31,11 @@ bool Counter::decrement()
 	return false;
 }
 
+void ColorSourcePrerollCounter::operator()(void)
+{
+	g_print("ColorSourcePrerollCounter triggered - color stream is prerolled.\n");
+}
+
 void ImageSourcePrerollCounter::operator()(void)
 {
 	g_print("ImageSourcePrerollCounter triggered - image stream is prerolled.\n");

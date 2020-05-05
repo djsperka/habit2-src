@@ -187,7 +187,25 @@ void Port::connect(Stim& stim)
 		{
 			g_print("Port::connect(): Found an audio stream for this source - WARNING\n");
 
-			// Just unblock it
+//			// Just unblock it
+//
+//			// set offset on the downstream pad, but not when initializing the pipeline.
+//			GstClock *clock = gst_element_get_clock(m_mapPosVideo[it->first]);
+//			if (clock)
+//			{
+//				GstClockTime abs = gst_clock_get_time(clock);
+//				GstClockTime base = gst_element_get_base_time(m_mapPosVideo[it->first]);
+//				g_print("setting AUDIO pad offset to %u ms", GST_TIME_AS_MSECONDS(abs-base));
+//				GstPad *pad = gst_pad_get_peer(pstream->srcpad());
+//				gst_pad_set_offset(pad, abs-base);
+//				gst_object_unref(clock);
+//				gst_object_unref(pad);
+//			}
+//			else
+//			{
+//				g_print("Port::connect(): linked, not setting offset on pad.\n");
+//			}
+//
 			gst_pad_remove_probe(pstream->srcpad(), pstream->getProbeID());
 			pstream->setProbeID(0);
 		}

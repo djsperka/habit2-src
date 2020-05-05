@@ -26,6 +26,13 @@ GstspClientDialog::GstspClientDialog(const QString& addr, int port, hmm::HMM *ph
     // connect OK button
     connect(m_pui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
+    // connect connect button
+    connect(m_pui->pushButtonConnect, &QPushButton::clicked, this, &GstspClientDialog::connectClicked);
+
+    // assign text edit values
+    m_pui->lineEditServer->setText(addr);
+    m_pui->lineEditPort->setText(QString("%1").arg(port));
+
     // assign socket to data stream
     m_dataStream.setDevice(m_ptcpSocket);
 
@@ -34,14 +41,42 @@ GstspClientDialog::GstspClientDialog(const QString& addr, int port, hmm::HMM *ph
     connect(m_ptcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
     		this, &GstspClientDialog::displayError);
 
-    // and connect...
-    qDebug() << "Client connect to " << addr << ":" << port;
-    m_ptcpSocket->connectToHost(addr, port);
 }
 
 GstspClientDialog::~GstspClientDialog()
 {
 }
+
+
+void GstspClientDialog::connectClicked(bool)
+{
+    // and connect...
+	QString server;
+	int port;
+	bool b = false;
+
+	server = m_pui->lineEditServer->text();
+	port = m_pui->lineEditPort->text().toInt(&b);
+	if (!b)
+	{
+    	m_pui->plainTextEdit->appendPlainText("Bad port - must be an integer");
+    	return;
+	}
+
+	m_pui->plainTextEdit->appendPlainText(QString("Trying server at %1:%2").arg(server).arg(port));
+    m_ptcpSocket->connectToHost(server, port);
+    if (m_ptcpSocket->waitForConnected())
+    {
+    	m_pui->plainTextEdit->appendPlainText(QString("Connected to server at %1:%2").arg(server).arg(port));
+    	m_pui->pushButtonConnect->setEnabled(false);
+    }
+    else
+    {
+    	m_pui->plainTextEdit->appendPlainText("Could not connect.");
+    }
+
+}
+
 
 void GstspClientDialog::displayError(QAbstractSocket::SocketError socketError)
 {
@@ -98,5 +133,35 @@ void GstspClientDialog::executeServerCommand(const char *cmd)
 		{
 			m_pmm->play(slcmd[1].toStdString());
 		}
+	}
+	else if (slcmd[0] == "cam")
+	{
+		if (slcmd.size() == 2)
+		{
+			if (slcmd[1] == "on")
+			{
+				m_pmm->cam(true);
+			}
+			else if (slcmd[1] == "off")
+			{
+				m_pmm->cam(false);
+			}
+		}
+	}
+	else if (slcmd[0] == "dump")
+	{
+		if (slcmd.size()==2)
+		{
+			m_pmm->dump(slcmd[1].toStdString().c_str());
+		}
+		else
+		{
+			m_pmm->dump("dump");
+		}
+
+	}
+	else if (slcmd[0] == "quit")
+	{
+		this->reject();
 	}
 }

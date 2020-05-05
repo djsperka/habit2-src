@@ -151,9 +151,13 @@ void ColorSource::preroll(GstElement *pipeline, Counter *pStimCounter)
 	if (streamCount() != 1 || !vs)
 		throw std::runtime_error("cannot preroll color source, must have 1 video stream");
 
-	// set blocking probe and a fake sink
+	// set blocking probe and sync state
 	//GstElement *sink = gst_element_factory_make("fakesink", NULL);
-	//gulong probeid = gst_pad_add_probe(vs->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &ColorSource::padProbeBlockCallback, pspc, NULL);
+	ColorSourcePrerollCounter *pcspc = new ColorSourcePrerollCounter(this, 1, pStimCounter);
+	gulong probeid = gst_pad_add_probe(vs->srcpad(), GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &ColorSource::padProbeBlockCallback, pcspc, NULL);
+	vs->setProbeID(probeid);
+
+	gst_element_sync_state_with_parent(bin());
 
 }
 
@@ -165,6 +169,14 @@ void ColorSource::stop()
 void ColorSource::rewind()
 {
 
+}
+
+GstPadProbeReturn ColorSource::padProbeBlockCallback(GstPad *, GstPadProbeInfo *, gpointer user_data)
+{
+	ColorSourcePrerollCounter *pcounter = (ColorSourcePrerollCounter *)user_data;
+	g_print("In color src pad probe callback\n");
+	pcounter->decrement();
+	return GST_PAD_PROBE_OK;
 }
 
 
@@ -351,10 +363,7 @@ FileSource::FileSource(HMMSourceType stype, const std::string& filename, const s
 , m_bloop(bloop)
 , m_volume(volume)
 , m_ele(NULL)
-, m_bIsImage(false)
-, m_freeze(NULL)
 {
-
 	std::string uri("file://");
 	uri.append(filename);
 	std::ostringstream oss;
@@ -370,70 +379,12 @@ FileSource::FileSource(HMMSourceType stype, const std::string& filename, const s
 
 FileSource::~FileSource()
 {
-	g_print("FileSource destructor\n");
-
-	if (!m_bIsImage)
-	{
-		g_print("!image, set NULL %s\n", GST_ELEMENT_NAME(m_ele));
-		gst_element_set_state(m_ele, GST_STATE_NULL);
-		gst_object_unref(m_ele);
-		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
-
-	}
-	else
-	{
-		// Here we have
-		/*
-		 *
-		 *       +---------------+  +-------------+
-		 *       | uridecodebin  |--| imagefreeze |---
-		 *       +---------------+  +-------------+
-		 *
-		 *                         |               |
-		 *                    unlink here      this is srcpad, has probe
-		 *
-		 *                    remove ele from bin - that unlinks
-		 */
-		g_print("image, ele %s, unlink %s\n", GST_ELEMENT_NAME(m_ele), GST_ELEMENT_NAME(m_freeze));
-		gst_element_set_state(m_ele, GST_STATE_NULL);
-		gst_object_unref(m_ele);
-		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
-
-		// remove probe on src pad of freeze element
-		Stream* str = getStream(HMMStreamType::VIDEO);
-		if (str && str->getProbeID())
-		{
-			g_print("video stream has probe %lu\n", str->getProbeID());
-			gst_pad_remove_probe(str->srcpad(), str->getProbeID());
-		}
-
-		gst_object_unref(m_freeze);
-		g_print("set state...");
-		gst_element_set_state(m_freeze, GST_STATE_NULL);
-		g_print("...done\n");
-		gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_freeze);
-
-#if 0
-		// set event probe in same place - the callback will remove from pipeline.
-		// then  send EOS
-		FileSourceDisposalHelper *phelper = new FileSourceDisposalHelper();
-		phelper->filter = m_freeze;
-		phelper->pipeline = parentStim()->pipeline();
-		gst_object_ref(m_freeze);
-		gst_object_ref(parentStim()->pipeline());
-		gulong pt = gst_pad_add_probe (str->srcpad(), (GstPadProbeType)(GST_PAD_PROBE_TYPE_BLOCK | GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM), &FileSource::padProbeEventCallback, phelper, NULL);
-		g_print("added event probe %lu\n", pt);
-
-		GstPad *sinkpad = gst_element_get_static_pad(m_freeze, "sink");
-		gst_pad_send_event(sinkpad, gst_event_new_eos());
-		gst_object_unref(sinkpad);
-
-		// unref our copy of the freeze element
-		gst_object_unref(m_freeze);
-#endif
-	}
+	gst_element_set_state(m_ele, GST_STATE_NULL);
+	gst_object_unref(m_ele);
+	gst_bin_remove(GST_BIN(this->parentStim()->pipeline()), m_ele);
 }
 
+#if 0
 GstPadProbeReturn FileSource::padProbeEventCallback(GstPad *pad, GstPadProbeInfo *info, gpointer user_data)
 {
 	FileSourceDisposalHelper *phelper = (FileSourceDisposalHelper *)user_data;
@@ -453,6 +404,7 @@ GstPadProbeReturn FileSource::padProbeEventCallback(GstPad *pad, GstPadProbeInfo
 
 	return GST_PAD_PROBE_OK;
 }
+#endif
 
 GstElement *FileSource::bin()
 {
@@ -550,44 +502,7 @@ void FileSource::padAddedCallback(GstElement *src, GstPad * pad, FileSourcePrero
 		}
 		else if (isImage)
 		{
-			pspc->setIsImage(true);
-
-			// for images, append an imagefreeze element and use its src pad for probe and connection
-			// add fake sink
-			//
-			//              ---------------                      ------------
-			//  (new pad)-->| imagefreeze |(stream.srcpad())---->| fakesink |
-			//              ---------------                      ------------
-			//
-			GstElement *freeze = gst_element_factory_make("imagefreeze", NULL);
-			gst_object_ref(freeze);
-			pspc->fileSource()->addImageElement(freeze);
-			GstElement *sink = gst_element_factory_make("fakesink", NULL);
-			gst_bin_add_many(GST_BIN(pspc->pipeline()), freeze, sink, NULL);
-			GstPad *freezesink = gst_element_get_static_pad(freeze, "sink");
-			GstPadLinkReturn r = gst_pad_link(pad, freezesink);
-			gboolean blink = gst_element_link(freeze, sink);
-			gst_object_unref(freezesink);
-			if (r != GST_PAD_LINK_OK || !blink)
-			{
-				g_print("fake sink pad/imagefreeze link error %d\n", (int)r);
-				throw std::runtime_error("Cannot link image pads.");
-			}
-
-			// The freeze element is part of the head, not the tail.
-			// Using the freeze src pad for probe.
-			// The srcpad on the freeze element is used in the stream as the connection point.
-			GstPad *freezesrc = gst_element_get_static_pad(freeze, "src");
-			gulong probeid = gst_pad_add_probe(freezesrc, GST_PAD_PROBE_TYPE_BLOCK_DOWNSTREAM, &FileSource::padProbeBlockCallback, pspc, NULL);
-			// save this stream. Note the pad is ref'd because of the call to get_static_pad
-			// TODO MAKE SURE THIS GETS UNREF'D
-			pspc->fileSource()->addStream(HMMStreamType::VIDEO, freezesrc, NULL, probeid);
-
-			// sync fakesink and freeze
-			gst_element_sync_state_with_parent(freeze);
-			gst_element_sync_state_with_parent(sink);
-
-			g_print("padAddedCallback(%s) - image stream %d x %d\n", GST_ELEMENT_NAME(src), width, height);
+			throw std::runtime_error("This source is an image - use ImageSource not FileSource.");
 		}
 	}
 	else if (strcmp (name, "audio/x-raw") == 0)
