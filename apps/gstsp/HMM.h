@@ -48,6 +48,7 @@ class HMM
 	GMainLoop *m_pgml;
 	StimFactory& m_factory;
 	GstElement *m_cameraBin;
+	GstElement *m_cameraTail;
 
 	// the stim info is supplied when addStim is called - it represents _the_ability_to_ display/play that "stim"
 	// What does a stim contain?
@@ -114,7 +115,9 @@ public:
 	void dump(const char *c);
 
 	// turn camera on/off
-	void cam(bool bOn);
+	// istate==1 create camera, set to ready
+	// istate==2 check state
+	void cam(int istate);
 
 	// Port access
 	Port &port() { return m_port; }

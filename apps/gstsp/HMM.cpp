@@ -101,15 +101,16 @@ HMM::HMM(const HMMConfiguration& config, StimFactory& factory)
 	{
 		g_print("HMM: Configuring pipeline, add audio position \"%s\" using sink element %s\n", it->first.c_str(), AUDIOSINK_ELEMENT);
 		GstElement *audioSink = NULL, *audioMixer=NULL, *audioTestSrc=NULL;
-		if (it->second.size() > 0)
-			audioSink = gst_element_factory_make(it->second.c_str(), NULL);
-		else
+
+//		if (it->second.size() > 0)
+//			audioSink = gst_element_factory_make(it->second.c_str(), NULL);
+//		else
 			audioSink = gst_element_factory_make(AUDIOSINK_ELEMENT, NULL);
 
 		if (!audioSink)
 		{
 			std::ostringstream oss;
-			oss << "Cannot create sink \"" << it->second << "\" at audio pos " << it->first;
+			oss << "Cannot create sink \"" << AUDIOSINK_ELEMENT << "\" at audio pos " << it->first;
 			throw std::runtime_error(oss.str());
 		}
 		audioMixer = gst_element_factory_make("audiomixer", NULL);
@@ -245,10 +246,10 @@ HMMInstanceID HMM::preroll(HMMStimID id)
 	return instanceID;
 }
 
-void HMM::cam(bool bOn)
+void HMM::cam(int istate)
 {
 	//  video/x-raw,framerate=10/1,width=320,height=240 !
-	char *camerabin_string = "videoconvert ! osxvideosink";
+	char *camerabin_string = "queue ! videoconvert ! osxvideosink";
 	char *camera_string = "avfvideosrc ";
 //	char *launchstring = "avfvideosrc device-index=0 ! queue ! "
 //						" videoscale ! videoconvert ! videobalance saturation=0.0 ! "
@@ -257,7 +258,7 @@ void HMM::cam(bool bOn)
 ////						" x264enc tune=zerolatency bitrate=500 speed-preset=superfast ! "
 ////						" rtph264pay ! udpsink host=192.168.0.11 port=5000";
 
-	if (bOn)
+	if (istate == 1)
 	{
 		GError *gerror = NULL;
 		gst_debug_set_threshold_from_string("avfvideosrc:5", true);
@@ -273,12 +274,49 @@ void HMM::cam(bool bOn)
 		gst_bin_add(GST_BIN(m_pipeline), m_cameraBin);
 
 		//gst_element_sync_state_with_parent(m_cameraBin);
-		gst_element_set_state(m_cameraBin, GST_STATE_READY);
+		GstStateChangeReturn r = gst_element_set_state(m_cameraBin, GST_STATE_READY);
 		//GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, "cam");
 
-		g_print("camera added\n");
+		g_print("camera added, set READY, ret %s\n", gst_element_state_change_return_get_name(r));
 	}
-	else
+	else if (istate == 2)
+	{
+		if (m_cameraBin)
+		{
+			GstState s;
+			gst_element_get_state(m_cameraBin, &s, NULL, 0);
+			g_print("camera is in state %s\n", gst_element_state_get_name(s));
+			if (s == GST_STATE_NULL)
+			{
+				GstStateChangeReturn r = gst_element_set_state(m_cameraBin, GST_STATE_READY);
+				g_print("camera set READY, ret %s\n", gst_element_state_change_return_get_name(r));
+			}
+		}
+	}
+	else if (istate == 3)
+	{
+		if (m_cameraBin)
+		{
+			GError *gerror=NULL;
+			m_cameraTail = gst_parse_bin_from_description(camerabin_string, true, &gerror);
+			if (NULL == m_cameraTail)
+			{
+				g_print("error: %s\n", gerror->message);
+			}
+			else
+			{
+				gst_bin_add(GST_BIN(m_pipeline), m_cameraTail);
+				gst_element_link(m_cameraBin, m_cameraTail);
+				gst_element_set_state(m_cameraTail, GST_STATE_READY);
+			}
+		}
+	}
+	else if (istate == 4)
+	{
+		gst_element_set_state(m_cameraTail, GST_STATE_PLAYING);
+		gst_element_set_state(m_cameraBin, GST_STATE_PLAYING);
+	}
+	else if (istate == 0)
 	{
 		if (m_cameraBin)
 		{

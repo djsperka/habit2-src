@@ -12,6 +12,10 @@
 	<string>@TYPEINFO@</string>
 	<key>CFBundleExecutable</key>
 	<string>@EXECUTABLE@</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.video</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.9</string>
 	<key>CFBundleIdentifier</key>
 	<string>edu.ucdavis.infantcognitionlab.@EXECUTABLE@</string>
 	<key>NOTE</key>

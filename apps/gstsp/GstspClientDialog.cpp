@@ -138,13 +138,12 @@ void GstspClientDialog::executeServerCommand(const char *cmd)
 	{
 		if (slcmd.size() == 2)
 		{
-			if (slcmd[1] == "on")
+			int i;
+			bool b;
+			i = slcmd[1].toInt(&b);
+			if (b)
 			{
-				m_pmm->cam(true);
-			}
-			else if (slcmd[1] == "off")
-			{
-				m_pmm->cam(false);
+				m_pmm->cam(i);
 			}
 		}
 	}

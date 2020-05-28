@@ -9,6 +9,7 @@
 #include <sstream>
 #include <QApplication>
 #include <QDir>
+#include <cstdlib>
 #include "HWorkspaceUtil.h"
 #include "HLoggerObject.h"
 #include "GstspDialog.h"
@@ -20,25 +21,31 @@
 #include <QList>
 
 hmm::HMM *f_pmm=NULL;
-static gchar *f_script=NULL;
-static gchar *f_workspace=NULL;
-static gchar *f_rootdir=NULL;
-static gchar *f_server=NULL;
-static gchar *f_defaultServer="127.0.0.1";
+static gboolean f_bselect = false;
+static gboolean f_binstalled = true;	// use -n for dev, otherwise will assume bundle is standalone
+static gchar *f_pscript=NULL;
+static gchar *f_pdefaultScript="../Stimuli/first.json";
+static gchar *f_pworkspace=NULL;
+static gchar *f_prootdir=NULL;
+static gchar *f_pdefaultRootdir = "../Stimuli";
+static gchar *f_pserver=NULL;
+static gchar *f_pdefaultServer="127.0.0.1";
 static gint f_port=5254;
 static gboolean f_bfullScreen = false;
 static gint f_width=320;
 static gint f_height=240;
 static GOptionEntry entries[] =
 {
-  { "server", 's', 0, G_OPTION_ARG_STRING, &f_server, "Server ip or name", "ip-addr" },
+  { "server", 's', 0, G_OPTION_ARG_STRING, &f_pserver, "Server ip or name", "ip-addr" },
   { "port", 'p', 0, G_OPTION_ARG_INT, &f_port, "Server port [5254]", "port-number"},
-  { "load", 'l', 0, G_OPTION_ARG_FILENAME, &f_script, "Script file to load on startup", "path-to-file" },
-  { "workspace", 'w', 0, G_OPTION_ARG_FILENAME, &f_workspace, "Load experiment drop down selection from this workspace", "workspace-path" },
-  { "root", 'r', 0, G_OPTION_ARG_FILENAME, &f_rootdir, "Habit stim root folder", NULL },
+  { "load", 'l', 0, G_OPTION_ARG_FILENAME, &f_pscript, "Script file to load on startup", "path-to-file" },
+  { "workspace", 'w', 0, G_OPTION_ARG_FILENAME, &f_pworkspace, "Load experiment drop down selection from this workspace", "workspace-path" },
+  { "root", 'r', 0, G_OPTION_ARG_FILENAME, &f_prootdir, "Habit stim root folder", NULL },
   { "fullscreen", 'F', 0, G_OPTION_ARG_NONE, &f_bfullScreen, "display stim fullscreen", NULL },
   { "width", 'W', 0, G_OPTION_ARG_INT, &f_width, "stim display width in pixels", "px" },
   { "height", 'H', 0, G_OPTION_ARG_INT, &f_height, "stim display height in pixels", "px" },
+  { "select-workspace", 'W', 0, G_OPTION_ARG_NONE, &f_bselect, "workspace select mode", NULL },
+  { "not-installed", 'N', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &f_binstalled, "developer-only, ignore bundle for libs etc.", NULL },
   { NULL }
 };
 
@@ -57,6 +64,9 @@ void gstLogFunction(GstDebugCategory * category,
                    GObject * object,
                    GstDebugMessage * message,
                    gpointer user_data);		// supposedly needs this with gnuc compiler: (void) G_GNUC_NO_INSTRUMENT
+
+std::string getPathRelativeToExe(gchar *path);
+std::string getFileRelativeToExe(gchar *path);
 
 void gstLogFunction(GstDebugCategory * category,
                    GstDebugLevel level,
@@ -122,42 +132,62 @@ int main (int argc, char **argv)
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
 
+
+	// If running as 'installed', it means we will get everything gstreamer-related from the bundle.
+	// There are a handful of env variables to set.
+	/*
+	 * GST_PLUGIN_SYSTEM_PATH
+	 * GST_PLUGIN_SCANNER
+	 * GTK_PATH
+	 * GIO_EXTRA_MODULES
+	 *
+	 */
+
+	if (f_binstalled)
+	{
+		g_print("Installed, exe path %s\n", QCoreApplication::applicationDirPath().toStdString().c_str());
+		g_print("PLUGINS: %s\n", boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString().c_str()).append("../Frameworks/lib/gstreamer-1.0").c_str());
+		setenv("GST_PLUGIN_SYSTEM_PATH", boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString().c_str()).append("../Frameworks/lib/gstreamer-1.0").c_str(), 1);
+		g_print("SCANNER: %s\n", boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString().c_str()).append("../Frameworks/libexec/gstreamer-1.0/gst-plugin-scanner").c_str());
+		setenv("GST_PLUGIN_SCANNER", boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString().c_str()).append("../Frameworks/libexec/gstreamer-1.0/gst-plugin-scanner").c_str(), 1);
+		g_print("gtk path: %s\n", boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString().c_str()).append("../Frameworks").c_str());
+		setenv("GTK_PATH", boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString().c_str()).append("../Frameworks").c_str(), 1);
+		g_print("gio path: %s\n", boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString().c_str()).append("../Frameworks/lib/gio/modules").c_str());
+		setenv("GIO_EXTRA_MODULES", boost::filesystem::path(QCoreApplication::applicationDirPath().toStdString().c_str()).append("../Frameworks/lib/gio/modules").c_str(), 1);
+	}
+
 	// init gstreamer
 	gst_init(&argc, &argv);
 
 
-	if (f_server)
+
+	if (!f_bselect)
 	{
-		if (!f_script)
-		{
-			g_print("must specify script file on command line\n");
-			exit(1);
-		}
+		gchar *pserver = f_pdefaultServer;
+		gchar *pscript = f_pdefaultScript;
+		gchar *prootdir = f_pdefaultRootdir;
+		std::string srootdir;	// this will be he full path
+		std::string sscript;	// will be full path
 
-		g_print("Server option %s : %d\n", f_server, f_port);
+		if (f_pserver) pserver = f_pserver;
+		if (f_pscript) pscript = f_pscript;
+		if (f_prootdir) prootdir = f_prootdir;
 
-		// need image root dir. full path on command line, or relative to exe folder.
-		std::string imageroot;
-		if (f_rootdir)
-		{
-			g_print("rootdir %s\n", f_rootdir);
-			imageroot = std::string(f_rootdir);
-			g_free(f_rootdir);
-		}
-		else
-		{
-			QDir dirExe(QCoreApplication::applicationDirPath());
-			dirExe.cd("../../Stimuli");
-			imageroot = dirExe.path().toStdString();
-		}
+		g_print("Connect to server %s:%d\n", pserver, f_port);
 
-		hmm::JsonStimFactory *pfactory = new hmm::JsonStimFactory(std::string(f_script), imageroot);
+		srootdir = getPathRelativeToExe(prootdir);
+		sscript = getFileRelativeToExe(pscript);
+		g_print("script arg %s use %s\n", pscript, sscript.c_str());
+		g_print("image arg %s use %s\n", prootdir, srootdir.c_str());
+
+		g_print("stim factory script %s\nstim rootdir: %s\n", sscript.c_str(), srootdir.c_str());
+		hmm::JsonStimFactory *pfactory = new hmm::JsonStimFactory(sscript, srootdir);
 
 		hmm::HMM* phmm = new hmm::HMM(pfactory->getHMMConfiguration(), *pfactory);
 
 		// Create stimulus widget, then assign widgets to sinks for video display.
 		std::vector<hmm::HMMStimPosition> vecPositions(phmm->port().getVideoPositions());
-		GstspClientDialog *pClientDialog = new GstspClientDialog(f_server, f_port, phmm);
+		GstspClientDialog *pClientDialog = new GstspClientDialog(pserver, f_port, phmm);
 		StimDisplayWidget *psdw = new StimDisplayWidget(vecPositions.size(), true, true, 0x80808000, f_width, f_height, pClientDialog);
 		for (int i=0; i<vecPositions.size(); i++)
 		{
@@ -173,20 +203,21 @@ int main (int argc, char **argv)
 		pClientDialog->exec();
 
 		delete phmm;
-		g_free(f_server);
-		g_free(f_script);
+		if (f_pserver) g_free(f_pserver);
+		if (f_pscript) g_free(f_pscript);
+		if (f_prootdir) g_free(f_prootdir);
 	}
 	else
 	{
-		if (f_workspace)
+		if (f_pworkspace)
 		{
-			habutilSetWorkspace(QString(f_workspace));
-			g_free(f_workspace);
+			habutilSetWorkspace(QString(f_pworkspace));
+			g_free(f_pworkspace);
 		}
-		if (f_rootdir)
+		if (f_prootdir)
 		{
-			habutilSetStimulusRootDir(QString(f_rootdir));
-			g_free(f_rootdir);
+			habutilSetStimulusRootDir(QString(f_prootdir));
+			g_free(f_prootdir);
 		}
 
 		if (!habutilInitWorkspace())
@@ -197,6 +228,42 @@ int main (int argc, char **argv)
 	}
 
 	return 0;
+}
+
+std::string getPathRelativeToExe(gchar *ppath)
+{
+	// check if image root need image root dir. full path on command line, or relative to exe folder.
+	std::string spath;
+	QDir dirRoot;
+	QDir dirTmp(ppath);
+	if (dirTmp.isRelative())
+	{
+		dirRoot = QDir(QCoreApplication::applicationDirPath());
+		dirRoot.cd(dirTmp.path());
+		spath = dirRoot.path().toStdString();
+	}
+	else
+	{
+		spath = dirTmp.path().toStdString();
+	}
+	return spath;
+}
+
+std::string getFileRelativeToExe(gchar *pfile)
+{
+	std::string sfile;
+	QDir dirRoot;
+	QDir dirTmp(pfile);
+	if (dirTmp.isRelative())
+	{
+		dirRoot = QDir(QCoreApplication::applicationDirPath());
+		sfile = dirRoot.filePath(dirTmp.path()).toStdString();
+	}
+	else
+	{
+		sfile = dirTmp.path().toStdString();
+	}
+	return sfile;
 }
 
 
