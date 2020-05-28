@@ -8,3 +8,4 @@ Makefile
 Makefile.*
 ui_*.h
 .DS_Store
+apps/gstsp/dist
