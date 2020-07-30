@@ -32,7 +32,11 @@ CONFIG(debug, debug|release) {
 		INCLUDEPATH += 	/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0 \
 						/Library/Frameworks/GStreamer.framework/Versions/1.0/include \
 						/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0 \
-						/Library/Frameworks/GStreamer.framework/Versions/1.0/lib/glib-2.0/include
+						/Library/Frameworks/GStreamer.framework/Versions/1.0/lib/glib-2.0/include \
+						/Library/Frameworks/GStreamer.framework/Versions/1.0/include/json-glib-1.0 \
+						/Library/Frameworks/GStreamer.framework/Versions/1.0/include/libsoup-2.4 \
+						/Library/Frameworks/GStreamer.framework/Versions/1.0/include/libxml2 
+						
 		LIBS += -L/Library/Frameworks/GStreamer.framework/Versions/1.0/lib -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lintl
 		LIBS += -L/usr/local/lib -lboost_filesystem -lboost_system -L../../libs/habutil/debug -lhabutil
 		PRE_TARGETDEPS += ../../libs/habutil/debug/libhabutil.a
@@ -48,7 +52,11 @@ CONFIG(debug, debug|release) {
 		INCLUDEPATH += 	/Library/Frameworks/GStreamer.framework/Versions/1.0/include/gstreamer-1.0 \
 						/Library/Frameworks/GStreamer.framework/Versions/1.0/include \
 						/Library/Frameworks/GStreamer.framework/Versions/1.0/include/glib-2.0 \
-						/Library/Frameworks/GStreamer.framework/Versions/1.0/lib/glib-2.0/include
+						/Library/Frameworks/GStreamer.framework/Versions/1.0/lib/glib-2.0/include \
+						/Library/Frameworks/GStreamer.framework/Versions/1.0/include/json-glib-1.0 \
+						/Library/Frameworks/GStreamer.framework/Versions/1.0/include/libsoup-2.4 \
+						/Library/Frameworks/GStreamer.framework/Versions/1.0/include/libxml2 
+						
 		LIBS += -L/Library/Frameworks/GStreamer.framework/Versions/1.0/lib -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lintl
 		LIBS += -L/usr/local/lib -lboost_filesystem -L../../libs/habutil/release -lhabutil
 		PRE_TARGETDEPS += ../../libs/habutil/release/libhabutil.a
@@ -74,7 +82,7 @@ INCLUDEPATH += 	../../libs/habutil \
 				/usr/local/include
 
 DEPENDPATH += ../../libs/habutil ../../libs/habutil/habit ../../libs/habutil/hgst 
-SOURCES			=	gstsp.cpp  HMM.cpp Port.cpp Source.cpp Stim.cpp Counter.cpp GstspDialog.cpp HabitStimFactory.cpp JsonStimFactory.cpp GstspControlDialog.cpp StimDisplayWidget.cpp GstspClientDialog.cpp
+SOURCES			=	gstsp.cpp  HMM.cpp Port.cpp Source.cpp Stim.cpp Counter.cpp GstspDialog.cpp HabitStimFactory.cpp JsonStimFactory.cpp GstspControlDialog.cpp StimDisplayWidget.cpp GstspClientDialog.cpp webrtc_helper.cpp
 HEADERS			=	HMM.h HMMTypes.h Port.h Stream.h Source.h Stim.h Counter.h GstspDialog.h StimFactory.h HabitStimFactory.h JsonStimFactory.h GstspControlDialog.h StimDisplayWidget.h GstspClientDialog.h
 FORMS =	gstspcontroldialog.ui gstspclientdialog.ui
 
