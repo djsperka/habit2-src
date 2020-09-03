@@ -1,0 +1,6 @@
+org.freedesktop.gstreamer.x86_64.base-system-1.0
+org.freedesktop.gstreamer.x86_64.gstreamer-1.0-core
+org.freedesktop.gstreamer.x86_64.gstreamer-1.0-codecs
+org.freedesktop.gstreamer.x86_64.gstreamer-1.0-codecs-gpl
+org.freedesktop.gstreamer.x86_64.gstreamer-1.0-playback
+org.freedesktop.gstreamer.x86_64.gstreamer-1.0-libav

@@ -9,7 +9,13 @@ if len(sys.argv) < 2:
     
 
 appDir = sys.argv[1]
-appSigID = 'Developer ID Application: University of California- Davis (WWAFVH26T8)'
+if len(sys.argv) == 3: 
+    appSigID = sys.argv[2]
+else:
+    appSigID = os.environ.get('SIGID')
+    
+print('Using signature id: ', appSigID)
+    
 
 if not os.path.isdir(appDir):
     print('error - app dir not found')
@@ -34,7 +40,7 @@ def frameworks(dir):
 
 def signThis(sigID, fileOrFramework):
     print('signing with sigID %s' % sigID)
-    subprocess.call(['codesign', '--verbose', '-s', sigID, fileOrFramework])
+    subprocess.call(['codesign', '--verbose', '-s', sigID, '-f', '--options', 'runtime', '--timestamp', fileOrFramework])
 
 
 
