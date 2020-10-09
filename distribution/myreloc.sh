@@ -67,7 +67,7 @@ then
 	do
   		echo "getting files from pkg: $pkg"
   		# | egrep '\.dylib$'
-  		tar -C /Library/Frameworks/GStreamer.Framework/Versions/Current -cf - `pkgutil --files $pkg | grep -E 'dylib|plist|gst-plugin-scanner|gst-inspect-1.0'` | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current -xf -
+  		tar -C /Library/Frameworks/GStreamer.Framework/Versions/Current -cf - `pkgutil --files $pkg | grep -E 'dylib|plist|gst-plugin-scanner|gst-inspect-1.0|[.]so$'` | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current -xf -
 	done < "$PKGLIST"
 fi
 ###################################
@@ -93,53 +93,54 @@ tar -cf - --files-from $LIBLIST | tar -C $DISTDIR/$BUNDLE.app/Contents/Framework
 # @rpath
 #
 # I'm lazy so I'm doing it to the entire folder of plugins. It should only apply to 1 - mine. 
-$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0 /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
+#$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0 /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
 
-# move/copy files to dist directory - done
-###################################
+# executable
+$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/MacOS /Library/Frameworks/GStreamer.framework @executable_path/../Frameworks/GStreamer.framework
 
+# relocate gstreamer libs
+$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath -r
 
-#################################
-# non-gstreamer libs and files
-#tar -C $BUILDDIR/src/libs/gstqt/release -cf - libgstqt.dylib | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks -xf -
-#################################
-
-#################################
-# non-gstreamer libs and files - done
-#################################
-
-
-#######################################################################################################
-# relocate
-#######################################################################################################
-
-# executable - make substitution for gstreamer/glib stuff, then add rpath for it. 
-# Note: There is already an rpath for @executable_path/../Frameworks, this is for Qt, as they
-# are linked via @rpath/QtGui.Framework/...
-# add an rpath for gstreamer: @executable_path/../Frameworks/GStreamer.framework/Versions/1.0
-
-echo "relocate gstreamer plugins..."
-$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/MacOS /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
-install_name_tool -add_rpath @executable_path/../Frameworks/GStreamer.framework/Versions/1.0 $DISTDIR/$BUNDLE.app/Contents/MacOS/$BUNDLE
-
-# relocate gstreamer libs??? - this is not required
-#$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath -r
-
-# gst-plugin-scanner has no rpath. create one: @executable_path/../.. - that covers gstreamer/glib
+# gst-plugin-scanner has no rpath. create one: @executable_path/../..
 # two dirs up from @executable_path because gstreamer distribution has : libexec/gstreamer-1.0/gst-plugin-scanner
-echo "fix rpath on gst-plugin-scanner"
-install_name_tool -add_rpath @executable_path/../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
-install_name_tool -add_rpath @loader_path/../../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
+install_name_tool -add_rpath @executable_path/../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0/gst-plugin-scanner
 
-# same two rpaths for gst-inspect-1.0
-echo "fix rpath on gst-inspect-1.0"
-install_name_tool -add_rpath @executable_path/.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/bin/gst-inspect-1.0
-install_name_tool -add_rpath @loader_path/../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/bin/gst-inspect-1.0
 
-#install_name_tool -change /Library/Frameworks/GStreamer.framework @rpath/GStreamer.framework $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
-
-# @loader_path/../../../../..
-
+#
+#
+#
+#
+########################################################################################################
+## relocate
+########################################################################################################
+#
+## executable - make substitution for gstreamer/glib stuff, then add rpath for it. 
+## Note: There is already an rpath for @executable_path/../Frameworks, this is for Qt, as they
+## are linked via @rpath/QtGui.Framework/...
+## add an rpath for gstreamer: @executable_path/../Frameworks/GStreamer.framework/Versions/1.0
+#
+#echo "relocate gstreamer plugins..."
+#$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/MacOS /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
+#install_name_tool -add_rpath @executable_path/../Frameworks/GStreamer.framework/Versions/1.0 $DISTDIR/$BUNDLE.app/Contents/MacOS/$BUNDLE
+#
+## relocate gstreamer libs??? - this is not required
+##$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath -r
+#
+## gst-plugin-scanner has no rpath. create one: @executable_path/../.. - that covers gstreamer/glib
+## two dirs up from @executable_path because gstreamer distribution has : libexec/gstreamer-1.0/gst-plugin-scanner
+#echo "fix rpath on gst-plugin-scanner"
+#install_name_tool -add_rpath @executable_path/../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
+#install_name_tool -add_rpath @loader_path/../../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
+#
+## same two rpaths for gst-inspect-1.0
+#echo "fix rpath on gst-inspect-1.0"
+#install_name_tool -add_rpath @executable_path/.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/bin/gst-inspect-1.0
+#install_name_tool -add_rpath @loader_path/../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/bin/gst-inspect-1.0
+#
+##install_name_tool -change /Library/Frameworks/GStreamer.framework @rpath/GStreamer.framework $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
+#
+## @loader_path/../../../../..
+#
 
 
 #######################################################################################################
