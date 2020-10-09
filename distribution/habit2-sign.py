@@ -44,7 +44,10 @@ def signThis(sigID, fileOrFramework):
 
 
 
-
+print('sign files in gstreamer framework...')
+for f in justFiles(os.path.join(appDir, 'Contents/Frameworks/GStreamer.framework')):
+    print('sign %s' % f)
+    signThis(appSigID, f)
       
 print('Sign frameworks...')  
 for fw in frameworks(os.path.join(appDir, 'Contents/Frameworks')):
