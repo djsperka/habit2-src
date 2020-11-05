@@ -171,12 +171,16 @@ void HGMM::modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const Q
 
 void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1, HStimulusWidget *p2)
 {
+	m_wid.clear();
 	if (p2)
 	{
 		// have all three. note order
 		m_pLeft = p0;
 		m_pCenter = p1;
 		m_pRight = p2;
+		m_wid[HPlayerPositionType::Left.number()] = (p0 ? p0->winId() : 0);
+		m_wid[HPlayerPositionType::Center.number()] = (p1 ? p1->winId() : 0);
+		m_wid[HPlayerPositionType::Right.number()] = (p2 ? p2->winId() : 0);
 	}
 	else if (p1)
 	{
@@ -184,11 +188,17 @@ void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1, HStimulusWidget 
 		m_pCenter = p0;
 		m_pLeft = p0;
 		m_pRight = p1;
+		m_wid[HPlayerPositionType::Left.number()] = (p0 ? p0->winId() : 0);
+		m_wid[HPlayerPositionType::Center.number()] = 0;
+		m_wid[HPlayerPositionType::Right.number()] = (p1 ? p1->winId() : 0);
 	}
 	else
 	{
 		m_pCenter = p0;
 		m_pLeft = m_pRight = NULL;
+		m_wid[HPlayerPositionType::Center.number()] = (p0 ? p0->winId() : 0);
+		m_wid[HPlayerPositionType::Left.number()] = 0;
+		m_wid[HPlayerPositionType::Right.number()] = 0;
 	}
 }
 
@@ -299,14 +309,14 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 	// create pipeline
 	if (!bForceSound)
 	{
-		pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_root, (context < 0), this);
+		pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_wid, m_root, (context < 0), this);
 	}
 	else
 	{
 		// Modify a copy of StimulusDisplayInfo to ensure sound is used.
 		Habit::StimulusDisplayInfo info(m_sdinfo);
 		info.setUseISS(true);
-		pipeline = m_pipelineFactory(key, stimulus, info, m_root, (context < 0), this);
+		pipeline = m_pipelineFactory(key, stimulus, info, m_wid, m_root, (context < 0), this);
 	}
 
 	// Add helper to map
@@ -384,7 +394,7 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 			// create pipeline. Use sdi from original -- it may have a modified sdi (if sound-only ag)
 			Habit::StimulusDisplayInfo info(pipelineToBeReplaced->getStimulusDisplayInfo());
 			info.setUseISS(bForceSound);
-			pipelineTheNewOne = m_pipelineFactory(key, stimulus, info, m_root, (context < 0), this);
+			pipelineTheNewOne = m_pipelineFactory(key, stimulus, info, m_wid, m_root, (context < 0), this);
 
 			// replace pipeline in map
 			// don't add key to context map, its already there
@@ -623,6 +633,9 @@ void HGMM::playStim(unsigned int key)
 			disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 			disconnect(m_pipelineCurrent, SIGNAL(screen(const QString&, int)), this, SIGNAL(screenStarted(const QString&, int)));
 			m_pipelineCurrent->pause();
+
+
+			qDebug() << "HGMM::playstim: detach widgets from current stim";
 			m_pipelineCurrent->detachWidgetsFromSinks();
 
 			if (!m_pipelineCurrent->isStatic())
@@ -644,6 +657,7 @@ void HGMM::playStim(unsigned int key)
 		connect(pipeline, SIGNAL(screen(const QString&, int)), this, SIGNAL(screenStarted(const QString&, int)));
 
 		// Attach new pipeline sinks to the widgets.
+		qDebug() << "HGMM::playstim: attach widgets to sinks";
 		if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutSingle)
 		{
 			pipeline->attachWidgetsToSinks(m_pCenter->getHVideoWidget());
@@ -666,6 +680,7 @@ void HGMM::playStim(unsigned int key)
 		m_pipelineCurrent->rewind();
 	}
 	m_bRewindCurrentPipeline = false;
+	qDebug() << "HGMM::playstim: set to PLAY";
 	pipeline->play();
 	m_pipelineCurrent = pipeline;
 

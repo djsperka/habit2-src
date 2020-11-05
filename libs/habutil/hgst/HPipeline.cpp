@@ -8,11 +8,12 @@
 #include "HPipeline.h"
 #include "HGMMException.h"
 
-HPipeline::HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, QObject *parent)
+HPipeline::HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pptwidMap, QObject *parent)
 : QObject(parent)
 , m_id(id)
 , m_ss(ss)
 , m_sdinfo(info)
+, m_wid(pptwidMap)
 {
 }
 
@@ -59,6 +60,11 @@ QString HPipeline::makeElementName(const char *factoryName, const HPlayerPositio
 GstElement *HPipeline::makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number, const char *prefix)
 {
 	return gst_element_factory_make(factoryName, makeElementName(factoryName, ppt, number, prefix).toStdString().c_str());
+}
+
+GstElement *HPipeline::makeElement(const char *factoryName, const char *fakeName, const HPlayerPositionType& ppt, int number, const char *prefix)
+{
+	return gst_element_factory_make(factoryName, makeElementName(fakeName, ppt, number, prefix).toStdString().c_str());
 }
 
 bool HPipeline::parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id, QString& prefix)

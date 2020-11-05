@@ -24,7 +24,7 @@
 #include "HStimulusWidget.h"
 
 
-typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, bool bStatic, QObject *parent);
+typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pwMap, const QDir& stimRoot, bool bStatic, QObject *parent);
 
 // Media manager for Habit.
 // This media manager is entirely new for Habit 2.2+. It uses GStreamer, a media library available
@@ -41,6 +41,8 @@ class HGMM: public QObject
 	QDir m_root;
 	//bool m_bUseISS;
 	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
+	// map of WId from the widgets above
+	PPTWIdMap m_wid;
 	HPipeline *m_pipelineCurrent;
 	GThread *m_gthread;
 	GMainLoop *m_pgml;
@@ -59,7 +61,6 @@ class HGMM: public QObject
 	unsigned int m_backgroundKey;
 	unsigned int m_agKey;
 	unsigned int m_defaultKey;	// this key will always work
-
 
 	// Singleton. Uses HStimPipelineFactory() to generate HPipeline objs.
 	HGMM(PipelineFactory factory = HStimPipelineFactory);

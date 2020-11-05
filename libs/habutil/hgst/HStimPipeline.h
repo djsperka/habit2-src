@@ -78,7 +78,7 @@ class HStimPipeline: public HPipeline
 public:
 	bool bInitialFlushingSeekDone;
 	int m_iAsyncPause;
-	HStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, QObject *parent);
+	HStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pwMap, const QDir& stimRoot, QObject *parent);
 	virtual ~HStimPipeline();
 
 	// create pipeline (each of its partial pipelines for single/dual screen and/or audio created and linked).
@@ -136,6 +136,6 @@ public:
 
 };
 
-HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, bool bStatic, QObject *parent);
+HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pwMap, const QDir& stimRoot, bool bStatic, QObject *parent);
 
 #endif /* LIBS_HABUTIL_HGST_HSTIMPIPELINE_H_ */

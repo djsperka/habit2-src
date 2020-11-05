@@ -13,8 +13,11 @@
 #include "stimulussettings.h"
 #include "stimulusdisplayinfo.h"
 #include <ostream>
+#include <QWidget>
 
 #define C_STR(x) x.toStdString().c_str()
+
+typedef QMap<int, WId> PPTWIdMap;
 
 class HVideoWidget;
 class HPipeline: public QObject
@@ -24,11 +27,12 @@ class HPipeline: public QObject
 	int m_id;
 	Habit::StimulusSettings m_ss;
 	Habit::StimulusDisplayInfo m_sdinfo;
+	PPTWIdMap m_wid;			// ppt - to - WId mapping for gstreamer bus sync callback
 
 	Q_DISABLE_COPY(HPipeline);
 
 public:
-	HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, QObject *parent=NULL);
+	HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pptwidMap, QObject *parent=NULL);
 
 	int id() const { return m_id; };
 	const Habit::StimulusSettings& stimulusSettings() const { return m_ss; };
@@ -55,12 +59,16 @@ public:
 	virtual void detachWidgetsFromSinks();	// default is a no-op
 	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
 
+	// get windowId map
+	const PPTWIdMap& widMap() { return m_wid; }
+
 	//static HPipeline* createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound=false, bool bISS=false);
 
 	// (static) utility functions
 	static QString makeElementName(const char *factoryName, const HPlayerPositionType& ppt, int number, const char *prefix=NULL);
 	static bool parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id, QString& prefix);
 	static GstElement *makeElement(const char *factoryName, const HPlayerPositionType& ppt, int number, const char *prefix=NULL);
+	static GstElement *makeElement(const char *factoryName, const char *fakeName, const HPlayerPositionType& ppt, int number, const char *prefix=NULL);
 	static const HPlayerPositionType& getPPTFromElementName(const QString& elementName);
 	static void parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& width, int& height, bool& isAudio);
 	// output

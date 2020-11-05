@@ -15,6 +15,7 @@
 #include <QMutexLocker>
 #include <hgst/HStimPipeline.h>
 #include <hgst/HStaticStimPipeline.h>
+#include <gst/video/videooverlay.h>
 
 HStimPipelineSource::HStimPipelineSource(HStimPipeline *pipe)
 : m_pStimPipeline(pipe)
@@ -36,8 +37,8 @@ HStimPipelineSource::~HStimPipelineSource()
 
 }
 
-HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, QObject *parent)
-: HPipeline(id, ss, info, parent)
+HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pptwidMap, const QDir& stimRoot, QObject *parent)
+: HPipeline(id, ss, info, pptwidMap, parent)
 , m_bInitialized(false)
 , m_dirStimRoot(stimRoot)
 , m_bRewindPending(false)
@@ -153,14 +154,17 @@ void HStimPipeline::play()
 
 void HStimPipeline::setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt)
 {
-	GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline()), C_STR(makeElementName("qwidget5videosink", ppt, id())));
-	Q_ASSERT(sink);
+//	GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline()), C_STR(makeElementName("videosink", ppt, id())));
+//	Q_ASSERT(sink);
+//
+//	qDebug() << "setWidgetPropertyOnSink(" << GST_ELEMENT_NAME(sink) << " w=" << w;
+//	gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (sink), w ? guintptr(w->winId()) : guintptr(0));
 
-	GValue v = G_VALUE_INIT;
-	g_value_init(&v, G_TYPE_POINTER);
-	g_value_set_pointer(&v, w);
-
-	g_object_set_property(G_OBJECT(sink), "widget", &v);
+//	GValue v = G_VALUE_INIT;
+//	g_value_init(&v, G_TYPE_POINTER);
+//	g_value_set_pointer(&v, w);
+//
+//	g_object_set_property(G_OBJECT(sink), "widget", &v);
 }
 
 void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1, HVideoWidget *w2)
@@ -223,6 +227,54 @@ void HStimPipeline::cleanup()
 	}
 }
 
+static GstBusSyncReply bus_sync_handler (GstBus * bus, GstMessage * message, gpointer user_data)
+{
+	// user_data is the map<> that goes from ppt to winid.
+	const PPTWIdMap *ppwMap = (const PPTWIdMap *)user_data;
+
+	// ignore anything but 'prepare-window-handle' element messages
+	if (!gst_is_video_overlay_prepare_window_handle_message (message))
+		return GST_BUS_PASS;
+
+	// set overlay now
+	//gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (GST_MESSAGE_SRC (message)), win);
+
+	//   gst_message_unref (message);
+
+	// return GST_BUS_DROP;
+	qDebug() << "BUS_SYNC_HANDLER - " << GST_MESSAGE_TYPE_NAME(message) << " FROM " << GST_MESSAGE_SRC_NAME(message);
+	GstObject *src = GST_MESSAGE_SRC(message);
+	GstObject *parent = gst_object_get_parent(GST_MESSAGE_SRC(message));
+	if (parent)
+	{
+		gchar *pname = gst_object_get_name(parent);
+		QString eleName(pname);
+		QString factoryName, prefix;
+		int id;
+		const HPlayerPositionType* pppt = nullptr;
+
+		qDebug() << "BUS_SYNC_HANDLER - " <<  " PARENT " << pname;
+		if (HPipeline::parseElementName(eleName, factoryName, pppt, id, prefix))
+		{
+			qDebug() << "BUS_SYNC_HANDLER - parsed: " << eleName << " " << factoryName << " " << pppt->name() << "/" << pppt->number() << " id " << id << " prefix: " << prefix;
+			qDebug() << "BUS_SYNC_HANDLER - widmap " << *ppwMap;
+			if (pppt)
+			{
+				if (ppwMap->count(pppt->number()))
+				{
+					qDebug() << "BUS_SYNC_HANDLER - set window handle";
+					gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY(src), (*ppwMap)[pppt->number()]);
+				}
+
+			}
+		}
+		g_free(pname);
+		gst_object_unref(parent);
+	}
+	gst_bus_set_sync_handler (bus, NULL, NULL, NULL);
+	return GST_BUS_PASS;
+}
+
 void HStimPipeline::initialize()
 {
 	if (m_bInitialized) return;
@@ -232,6 +284,7 @@ void HStimPipeline::initialize()
 
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
 	gst_bus_add_watch(bus, &HStimPipeline::busCallback, this);
+	gst_bus_set_sync_handler (bus, (GstBusSyncHandler) bus_sync_handler, (gpointer)&widMap(), NULL);
 	gst_object_unref(bus);
 
 	// Create HStimPipelineSource objects for each position Left/Right/Center/Sound as needed.
@@ -318,7 +371,14 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 			}
 			Q_ASSERT(src);
 
-			sink = makeElement("qwidget5videosink", ppt, id());
+
+#if defined(Q_OS_MAC)
+			sink = makeElement("glimagesink", "videosink", ppt, id());
+#elif defined(Q_OS_WIN)
+			sink = makeElement("d3dvideosink", "videosink", ppt, id());
+#elif defined(Q_OS_LINUX)
+			sink = makeElement("xvimagesink", "videosink", ppt, id());
+#endif
 			Q_ASSERT(sink);
 			convert = makeElement("videoconvert", ppt, id());
 			Q_ASSERT(convert);
@@ -365,7 +425,13 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 			Q_ASSERT(decodebin);
 			g_signal_connect(decodebin, "pad-added", G_CALLBACK(&padAdded), pStimPipelineSource);
 
-			sink = makeElement("qwidget5videosink", ppt, id());
+#if defined(Q_OS_MAC)
+			sink = makeElement("glimagesink", "videosink", ppt, id());
+#elif defined(Q_OS_WIN)
+			sink = makeElement("d3dvideosink", "videosink", ppt, id());
+#elif defined(Q_OS_LINUX)
+			sink = makeElement("xvimagesink", "videosink", ppt, id());
+#endif
 			Q_ASSERT(sink);
 
 			/*
@@ -464,7 +530,7 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			gst_element_link(queue, videoConvert);
 			gst_element_link(videoConvert, freeze);
 
-			GstElement *sink = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("qwidget5videosink", *pppt, id)));
+			GstElement *sink = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("videosink", *pppt, id)));
 			Q_ASSERT(sink);
 			gst_element_link (freeze, sink);
 			gst_object_unref(sink);
@@ -506,7 +572,7 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			gst_pad_link(newPad, sinkPad);
 			gst_object_unref(sinkPad);
 
-			GstElement *sink = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("qwidget5videosink", *pppt, id)));
+			GstElement *sink = gst_bin_get_by_name(GST_BIN(pSource->pipeline()), C_STR(makeElementName("videosink", *pppt, id)));
 			Q_ASSERT(sink);
 			gst_element_link(queue, videoConvert);
 			gst_element_link (videoConvert, sink);
@@ -754,7 +820,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
 			if (parseElementName(sElementName, sFactoryName, pppt, stimid, sPrefixUnused))
 			{
-				if (sFactoryName == "qwidget5videosink")
+				if (sFactoryName == "videosink")
 				{
 					if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
 					{
@@ -994,13 +1060,13 @@ void HStimPipeline::dump()
 
 }
 
-HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QDir& stimRoot, bool bStatic, QObject *parent)
+HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& widMap, const QDir& stimRoot, bool bStatic, QObject *parent)
 {
 	HPipeline *p;
 	if (bStatic)
-		p = new HStaticStimPipeline(id, stimulusSettings, info, stimRoot, parent);
+		p = new HStaticStimPipeline(id, stimulusSettings, info, widMap, stimRoot, parent);
 	else
-		p = new HStimPipeline(id, stimulusSettings, info, stimRoot, parent);
+		p = new HStimPipeline(id, stimulusSettings, info, widMap, stimRoot, parent);
 	return p;
 }
 
