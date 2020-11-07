@@ -15,11 +15,6 @@
 #include <algorithm>
 
 
-HGMM& HGMM::instance()
-{
-	static HGMM mm;
-	return mm;
-}
 
 HGMM::HGMM(PipelineFactory factory)
 : m_sdinfo()

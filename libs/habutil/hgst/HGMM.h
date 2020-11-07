@@ -62,8 +62,6 @@ class HGMM: public QObject
 	unsigned int m_agKey;
 	unsigned int m_defaultKey;	// this key will always work
 
-	// Singleton. Uses HStimPipelineFactory() to generate HPipeline objs.
-	HGMM(PipelineFactory factory = HStimPipelineFactory);
 	HGMM(HGMM& mm);	// not defined.
 
 
@@ -99,8 +97,7 @@ protected:
 
 public:
 
-//	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
-//	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
+	HGMM(PipelineFactory factory = HStimPipelineFactory);
 	virtual ~HGMM();
 
 	// Perform a FULL RESET: clear everything and restore HGMM to its initial state, with no pipelines, not even static ones.
@@ -118,18 +115,8 @@ public:
 	// displayed or even playing (not really sure what happens, but its easy to ensure so this is cautionary).
 	void modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
 
-
-	// Re-initialize mm, create pipelines for default, background. Widgets ARE set, but no other stimuli or ag
-	// are configured.
-	//void reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
-	//void reset(HStimulusWidget *pLeft, HStimulusWidget *pRight,  const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
-
 	// assign widget(s) to hgmm
 	void setWidgets(HStimulusWidget *p0, HStimulusWidget *p1=NULL, HStimulusWidget *p2=NULL);
-
-	// Get reference to singleton instance of HGMM.
-	static HGMM& instance();
-
 
 	// add stimuli to the un-curated list.
 	virtual unsigned int addAG(const Habit::StimulusSettings& ags, bool bForceSound = false);
