@@ -16,6 +16,7 @@
 #include "HStimulusOrderListWidget.h"
 #include "HStimulusPreviewWidget.h"
 #include "stimulusdisplayinfo.h"
+#include "HGMM.h"
 
 namespace GUILib
 {
@@ -29,6 +30,7 @@ namespace GUILib
 		HStimulusSettingsListWidget *m_pStimulusSettingsListWidget;
 		HStimulusOrderListWidget *m_pStimulusOrderListWidget;
 		HStimulusPreviewWidget *m_pStimulusPreviewWidget;
+		HGMM *m_phgmm;
 		QPushButton *m_pbImport;
 		void create(const QString& labelName, const Habit::StimulusDisplayInfo& info);
 		void connections();

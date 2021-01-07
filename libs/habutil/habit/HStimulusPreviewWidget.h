@@ -21,11 +21,16 @@
 namespace GUILib
 {
 
+	// this class is a single widget with the appropriate widgets for a given StimulusDisplayInfo
+	// setting.
 	class HStimulusPreviewWidget: public QWidget
 	{
 		Q_OBJECT
 
-		// Widget (may have one or two sub-0widgets depending on sdi) currently in layout
+		const Habit::StimulusDisplayInfo& m_sdinfo;
+		QVector<HStimulusWidget *> m_vecWidgets;
+
+		// Widget (may have one or two sub-widgets depending on sdi) currently in layout
 		// Replaced in slot(sdiChanged())
 		QWidget *m_pCurrentStimulusWidget;
 
@@ -34,7 +39,6 @@ namespace GUILib
 		bool m_bListStimulus;
 		unsigned int m_currentStimKey;	// if single stim, this is the current key
 		bool m_bPlaying;					// applies to both single and list
-		HStimulusWidget *m_w0, *m_w1, *m_w2;
 		QList<unsigned int> m_idList;	// list of indices into media manager, m_pmm->play(m_idList[m_idListCurrent])
 		int m_idListCurrent;	// current index in the list m_idListCurrent[m_idist] is the current key
 		QPushButton *m_pbDown;
@@ -63,8 +67,10 @@ namespace GUILib
 		void preview(const QList<unsigned int>& list, bool bPlayNow = true);
 
 		void clear();
-		void rewind();
 		void setStimulusLayoutType(const HStimulusLayoutType& type);
+
+		QVector<HStimulusWidget *> getStimulusWidgets();
+
 
 	protected:
 		// detach the widgets here, state is saved as single/list, current key, bPlaying
@@ -73,10 +79,15 @@ namespace GUILib
 		// assign widgets to HGMM, restore state
 		void showEvent(QShowEvent *event);
 
-	signals:
+	Q_SIGNALS:
 		void stopped();	// after stop clicked
+		void preroll(unsigned int);
+		void pause(unsigned int);
+		void stim(unsigned int);
+		void rewind(unsigned int);
+		void background();
 
-	protected slots:
+	public Q_SLOTS:
 		void nextClicked();
 		void prevClicked();
 		void stopClicked();

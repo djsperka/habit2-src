@@ -17,24 +17,14 @@
 
 using namespace Habit;
 
-HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HLookDetector* pld, HEventLog& log, bool bTestingInput)
+HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSettings, const Habit::ExperimentSettings& experimentSettings, HGMM *phgmm, HLookDetector* pld, HEventLog& log, bool bTestingInput)
 {
 	Q_UNUSED(w);
 	HStateMachine *psm;
 
-#if 0
-# djs - mm is populated elsewhere (by reset()), not here. This call leads to funny double-add of AG
-	// Need to know if AG is used. If it is, add attention getter settings to media manager
-	if (	experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed() ||
-			experimentSettings.getAttentionGetterSettings().isFixedISI() ||
-			experimentSettings.getAttentionGetterSettings().isSoundOnly())
-	{
-		HGMM::instance().addAG(experimentSettings.getAttentionGetterSettings().getAttentionGetterStimulus(), experimentSettings.getAttentionGetterSettings().isSoundOnly());
-	}
-#endif
-
 	// This is a single super-state that holds all the phases.
-	HExperiment* sExperiment = new HExperiment(log, *pld);
+	HExperiment* sExperiment = new HExperiment(log, *pld, *phgmm);
+
 	// Construct state machine.
 	psm = new HStateMachine(*sExperiment);
 	psm->addState(sExperiment);
@@ -43,6 +33,16 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	psm->addState(sFinal);
 	sExperiment->addTransition(sExperiment, SIGNAL(finished()), sFinal);
 
+	// If there is an attention getter, we add it to the MM now. Below, notice that the stimuli
+	// are not added to the MM directly, but the StimulusSettings are added to the Experiment in the
+	// order they will be presented. The experiment will coordinate preroll for the stimuli. The
+	// attention getter is different, though, it is used repeatedly in each phase (if an AG is used
+	// at all), and so its more appropriate to add it directly.
+
+	if (experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed())
+	{
+		phgmm->addAG(experimentSettings.getAttentionGetterSettings().getAttentionGetterStimulus(), experimentSettings.getAttentionGetterSettings().isSoundOnly());
+	}
 
 	// Create phases and connect them by an automatic transition. The last phase is connected to the final state
 	// for the experiment.
@@ -114,11 +114,11 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	sExperiment->prerollAsNeeded(iFirstPhaseContext);
 
 	// Store the stimulus settings events in the log
-	QMapIterator<unsigned int, HPipeline *> it(HGMM::instance().pipelineMap());
+	QMapIterator<unsigned int, HPipeline *> it(phgmm->pipelineMap());
 	while (it.hasNext())
 	{
 	    it.next();
-	    log.append(new HStimulusSettingsEvent(HGMM::instance().getStimulusSettings(it.key()), it.key()));
+	    log.append(new HStimulusSettingsEvent(phgmm->getStimulusSettings(it.key()), it.key()));
 	}
 
 	sExperiment->printLists();
@@ -126,35 +126,35 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	return psm;
 }
 
-void getOrderedStimidList(const HPhaseSettings& ps, const Habit::RunSettings& runSettings, QList< QPair<int, QString> >& stimidListOrdered)
-{
-	QList<unsigned int> stimidListInitial;
-	QList< QPair<int, QString> > list;
-
-	// Get the context stim list. It is a list of keys (used to call pmm->stim(key), e.g.)
-	// in the order that they were added to the stim list, which is the same as the
-	// order they are pulled from the DB.
-	// When the actual order of presentation is generated (stimidListOrdered), the algorithm
-	// need only generate a 0-based list -- the elements of that list are used to fetch the actual
-	// MM keys to use in the experiment.
-	stimidListInitial = HGMM::instance().getContextStimList(ps.getSeqno());
-
-	Q_ASSERT(runSettings.map().contains(ps.getSeqno()));
-	PhaseRunSettings prs(runSettings.map().value(ps.getSeqno()));
-	list = prs.getOrderList();
-	HTrialGenerator htg(list.size(), prs.isOrderRandomized(), prs.getRandomizeMethod()==1);
-	for (int i=0; i<ps.habituationSettings().getNTrials(); i++)
-	{
-		// Note: prior to version 2.1.0, the line below (with the "-1") was used.
-		// That was because the way orders were specified had used 1-based indexing.
-		// With the addition of configured orders I've done away with 1-based in lieu
-		// of regular old 0-based indices to eliminate a LOT of confusion in
-		// manipulating the orders.
-		//stimidListOrdered.append(stimidListInitial.at(list.at(htg.next()) - 1));
-		int itmp = htg.next();
-		stimidListOrdered.append(QPair<int, QString>(stimidListInitial.at(list.at(itmp).first), list.at(itmp).second));
-	}
-}
+//void getOrderedStimidList(const HPhaseSettings& ps, const Habit::RunSettings& runSettings, QList< QPair<int, QString> >& stimidListOrdered)
+//{
+//	QList<unsigned int> stimidListInitial;
+//	QList< QPair<int, QString> > list;
+//
+//	// Get the context stim list. It is a list of keys (used to call pmm->stim(key), e.g.)
+//	// in the order that they were added to the stim list, which is the same as the
+//	// order they are pulled from the DB.
+//	// When the actual order of presentation is generated (stimidListOrdered), the algorithm
+//	// need only generate a 0-based list -- the elements of that list are used to fetch the actual
+//	// MM keys to use in the experiment.
+//	stimidListInitial = HGMM::instance().getContextStimList(ps.getSeqno());
+//
+//	Q_ASSERT(runSettings.map().contains(ps.getSeqno()));
+//	PhaseRunSettings prs(runSettings.map().value(ps.getSeqno()));
+//	list = prs.getOrderList();
+//	HTrialGenerator htg(list.size(), prs.isOrderRandomized(), prs.getRandomizeMethod()==1);
+//	for (int i=0; i<ps.habituationSettings().getNTrials(); i++)
+//	{
+//		// Note: prior to version 2.1.0, the line below (with the "-1") was used.
+//		// That was because the way orders were specified had used 1-based indexing.
+//		// With the addition of configured orders I've done away with 1-based in lieu
+//		// of regular old 0-based indices to eliminate a LOT of confusion in
+//		// manipulating the orders.
+//		//stimidListOrdered.append(stimidListInitial.at(list.at(htg.next()) - 1));
+//		int itmp = htg.next();
+//		stimidListOrdered.append(QPair<int, QString>(stimidListInitial.at(list.at(itmp).first), list.at(itmp).second));
+//	}
+//}
 
 Habit::HStimulusSettingsList getOrderOfStimuli(const PhaseRunSettings& prs, unsigned int ntrials, const Habit::StimuliSettings& ss)
 {

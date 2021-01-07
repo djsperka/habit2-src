@@ -16,6 +16,11 @@ class HVideoWidget: public QWidget
 {
 	Q_OBJECT
 
+	// size of the stimulus. This is the actual size of the stimulus, when the stimulus is a
+	// file (image or video). For those types of stimuli 'decodebin' is used, and the size
+	// of the stim is fetched from the caps when the video pad is added.
+	// For stimuli created with a description (e.g. color bkgd), make sure to set the
+	// size appropriately (widget size or screen size).
 	QSize m_sizeStimulus;
 
 public:

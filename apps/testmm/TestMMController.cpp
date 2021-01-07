@@ -24,34 +24,36 @@ TestMMController::TestMMController(const QStringList& names, QWidget *screens, Q
 	m_list->setModel(pmodel);
 	m_list->setSelectionBehavior(QAbstractItemView::SelectRows);
 	m_list->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	connect(m_list, SIGNAL(clicked(const QModelIndex&)), this, SLOT(itemClicked(const QModelIndex&)));
 
-	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);
-	m_playButton = new QPushButton("Play");
-	m_stopButton = new QPushButton("Stop");
-	m_nextButton = new QPushButton("Next");
-	m_replayButton = new QPushButton("Replay");
 
-    buttonBox->addButton(m_playButton, QDialogButtonBox::ActionRole);
-    buttonBox->addButton(m_nextButton, QDialogButtonBox::ActionRole);
-    buttonBox->addButton(m_replayButton, QDialogButtonBox::ActionRole);
-    buttonBox->addButton(m_stopButton, QDialogButtonBox::ActionRole);
-
-    connect(m_playButton, SIGNAL(clicked()), this, SLOT(playClicked()));
-    connect(m_nextButton, SIGNAL(clicked()), this, SLOT(nextClicked()));
-    connect(m_replayButton, SIGNAL(clicked()), this, SLOT(replayClicked()));
-    connect(m_stopButton, SIGNAL(clicked()), this, SLOT(stopClicked()));
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+////	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);
+////	m_playButton = new QPushButton("Play");
+////	m_stopButton = new QPushButton("Stop");
+////	m_nextButton = new QPushButton("Next");
+////	m_replayButton = new QPushButton("Replay");
+//
+//    buttonBox->addButton(m_playButton, QDialogButtonBox::ActionRole);
+//    buttonBox->addButton(m_nextButton, QDialogButtonBox::ActionRole);
+//    buttonBox->addButton(m_replayButton, QDialogButtonBox::ActionRole);
+//    buttonBox->addButton(m_stopButton, QDialogButtonBox::ActionRole);
+//
+//    connect(m_playButton, SIGNAL(clicked()), this, SLOT(playClicked()));
+//    connect(m_nextButton, SIGNAL(clicked()), this, SLOT(nextClicked()));
+//    connect(m_replayButton, SIGNAL(clicked()), this, SLOT(replayClicked()));
+//    connect(m_stopButton, SIGNAL(clicked()), this, SLOT(stopClicked()));
+//    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 
     vbox->addWidget(m_list);
-    vbox->addWidget(buttonBox);
+    //vbox->addWidget(buttonBox);
     if (screens) vbox->addWidget(screens);
     setLayout(vbox);
 
     m_index = 0;
-    m_playButton->setEnabled(true);
-    m_stopButton->setEnabled(false);
-    m_nextButton->setEnabled(false);
-    m_replayButton->setEnabled(false);
+//    m_playButton->setEnabled(true);
+//    m_stopButton->setEnabled(false);
+//    m_nextButton->setEnabled(false);
+//    m_replayButton->setEnabled(false);
 }
 
 //void TestMMController::playClicked()
@@ -67,6 +69,12 @@ TestMMController::TestMMController(const QStringList& names, QWidget *screens, Q
 //	}
 //
 //}
+
+void TestMMController::itemClicked(const QModelIndex& index)
+{
+	qDebug() << "itemClicked row " << index.row();
+	emit playItem(index.row());
+}
 
 void TestMMController::playClicked()
 {

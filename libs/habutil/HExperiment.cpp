@@ -13,9 +13,10 @@
 #include <algorithm>
 
 
-HExperiment::HExperiment(HEventLog& log, HLookDetector& ld, QState* parent)
+HExperiment::HExperiment(HEventLog& log, HLookDetector& ld, HGMM& hgmm, QState* parent)
 : HLogState(log, "HExperiment", parent)
 , m_ld(ld)
+, m_hgmm(hgmm)
 {
 	connect(&m_ld, SIGNAL(attention()), this, SLOT(onAttention()));
 	connect(&m_ld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
@@ -60,7 +61,7 @@ void HExperiment::onExit(QEvent* e)
 {
 	Q_UNUSED(e);
 	// on exiting experiment, tell Media Manager to put up blank screen.
-	HGMM::instance().defaultStim();
+	m_hgmm.defaultStim();
 };
 
 void HExperiment::onEntry(QEvent *)
@@ -85,7 +86,7 @@ void HExperiment::requestStim(int context, unsigned int trial)
 	{
 		eventLog().append(new HStimulusSettingsEvent(getStimulusSettings(key), it.value(), HElapsedTimer::elapsed()));
 		eventLog().append(new HStimRequestEvent(it.value(), HElapsedTimer::elapsed()));
-		HGMM::instance().stim(it.value());
+		m_hgmm.stim(it.value());
 	}
 	else
 		qCritical() << "requestStim(" << context << ", " << trial << ") This stim is not prerolled!";
@@ -178,8 +179,8 @@ void HExperiment::prerollList(const PhTList& l)
 		// check if its already prerolled
 		if (!m_prerolled.contains(pht))
 		{
-			unsigned int i = HGMM::instance().addStimulus(getStimulusSettings(pht), pht.context);
-			HGMM::instance().preroll(i);
+			unsigned int i = m_hgmm.addStimulus(getStimulusSettings(pht), pht.context);
+			m_hgmm.preroll(i);
 			m_prerolled.insert(pht, i);
 			//qDebug() << "HExperiment::prerollList: prerolling " << pht << " stimid " << i;
 		}

@@ -599,6 +599,7 @@ void GUILib::H2MainWindow::runExperiment()
 
 void GUILib::H2MainWindow::run(bool bTestInput)
 {
+	HGMM *pHGMM = NULL;
 	Habit::ExperimentSettings experimentSettings;
 	HEventLog eventLog;
 	HTestingInputWrangler *pWrangler = NULL;
@@ -678,11 +679,13 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			}
 
 
+			// Create media manager
+			// m_phgmm = new HGMM(
 
 			if (bStimInDialog)
-				initializeMediaManager(experimentSettings, 320, 240);
+				pHGMM = createMediaManager(experimentSettings.getStimulusDisplayInfo(), 320, 240);
 			else
-				initializeMediaManager(experimentSettings);
+				pHGMM = createMediaManager(experimentSettings.getStimulusDisplayInfo());
 
 			// On mac it works OK to have a parent with the control panel - the keyboard grab works as expected.
 			// On windows, the keyboard grab doesn't work - or so it seems - cannot get any keyboard events through.
@@ -691,16 +694,16 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 
 #if defined(Q_OS_MAC)
 
-			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), &HGMM::instance(), this);
+			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pHGMM, this);
 
 #elif defined(Q_OS_LINUX)
 
-			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), &HGMM::instance(), this);
+			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pHGMM, this);
 
 #elif defined(Q_OS_WIN)
 
 			// this is deleted down below. Not in the delete list, mind you. Note order dependence with look detector.
-			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), &HGMM::instance(), NULL);
+			m_pControlPanel = new HControlPanel(experimentSettings, eventLog, m_pRunSettingsDialog->getRunSettings(), pHGMM, NULL);
 
 #else
 
@@ -712,7 +715,7 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			m_pld = createLookDetector(experimentSettings, eventLog, m_pControlPanel);
 
 			// state machine has no parent -- DELETE
-			m_psm = createExperiment(this, m_pRunSettingsDialog->getRunSettings(), experimentSettings, m_pld, eventLog, bTestInput);
+			m_psm = createExperiment(this, m_pRunSettingsDialog->getRunSettings(), experimentSettings, pHGMM, m_pld, eventLog, bTestInput);
 
 			// set state machine and dialog title
 			m_pControlPanel->setStateMachine(m_psm);
@@ -723,51 +726,35 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			//HTestingInputWrangler *pWrangler;
 			if (bTestInput)
 			{
-//				pWrangler = new HTestingInputWrangler();
 				pWrangler->enable(m_pld, &m_psm->experiment());
-//				// Get input file
-//
-//#if QT_VERSION >= 0x050000
-//				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QStandardPaths::standardLocations(QStandardPaths::DesktopLocation)[0], "(*.txt)");
-//#else
-//				QString selectedFileName = QFileDialog::getOpenFileName(NULL, "Select LD testing input file", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation), "(*.txt)");
-//#endif
-//
-//				qDebug() << "Selected input file " << selectedFileName;
-//				QFile file(selectedFileName);
-//				if (!pWrangler->load(file))
-//				{
-//					QMessageBox::critical(this, "Cannot load input file", "Cannot load testing input file.");
-//					return;
-//				}
 			}
 
-			QDialog *pStimulusDisplayDialog  = NULL;
+			QWidget *pStimulusDisplayWidget  = NULL;
 			if (bStimInDialog)
 			{
-				pStimulusDisplayDialog = HGMM::instance().createStimulusWidget();
-				deleteList.append(pStimulusDisplayDialog);
-				qDebug() << "stim display dialog min " << pStimulusDisplayDialog->minimumWidth() << "x" << pStimulusDisplayDialog->minimumHeight();
+				pStimulusDisplayWidget = pHGMM->createStimulusWidget();
+				deleteList.append(pStimulusDisplayWidget);
+				qDebug() << "stim display dialog min " << pStimulusDisplayWidget->minimumWidth() << "x" << pStimulusDisplayWidget->minimumHeight();
 				//pStimulusDisplayDialog->setGeometry(0, 0, pStimulusDisplayDialog->minimumWidth(), pStimulusDisplayDialog->minimumHeight());
-				pStimulusDisplayDialog->show();
+				pStimulusDisplayWidget->show();
 			}
 			else
 			{
-				adaptVideoWidgets(&HGMM::instance());
+				adaptVideoWidgets(pHGMM);
 				if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 				{
-					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Center));
+					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Center));
 				}
 				else if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 				{
-					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Left));
-					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Right));
+					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Left));
+					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Right));
 				}
 				else if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
 				{
-					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Left));
-					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Center));
-					deleteList.append(HGMM::instance().getHStimulusWidget(HPlayerPositionType::Right));
+					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Left));
+					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Center));
+					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Right));
 				}
 			}
 
@@ -775,9 +762,10 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			int cpStatus = m_pControlPanel->exec();
 
 			// delete the video widgets.
-			HGMM::instance().stop();
+			pHGMM->stop();
 			qDeleteAll(deleteList.begin(), deleteList.end());
 			deleteList.clear();
+			delete pHGMM;
 
 			if (cpStatus == QDialog::Accepted)
 			{
@@ -800,9 +788,6 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 				{
 					qCritical() << "Error - cannot save data to csv file " << filenameCSV;
 				}
-
-				// reset the mm
-				HGMM::instance().reset();
 
 				// if testing input, do checking here
 				if (bTestInput)

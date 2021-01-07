@@ -11,6 +11,7 @@
 #include <QObject>
 #include <QDir>
 #include <QMultiMap>
+#include <QVector>
 #include <QTimer>
 #include <QDialog>
 #include <glib.h>
@@ -40,8 +41,9 @@ class HGMM: public QObject
 	Habit::StimulusDisplayInfo m_sdinfo;
 	QDir m_root;
 	//bool m_bUseISS;
-	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
+	//HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
 	// map of WId from the widgets above
+	QMap<int, HStimulusWidget *> m_widgets;
 	PPTWIdMap m_wid;
 	HPipeline *m_pipelineCurrent;
 	GThread *m_gthread;
@@ -84,6 +86,7 @@ class HGMM: public QObject
 	// If 'bForceSound' is true, the pipeline will generate sound even if the StimulusDisplayInfo says otherwise
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss, int context, bool bForceSound = false);
 	unsigned int addStimulus(unsigned int key, const QString& name, const QColor& color, int context, bool bForceSound = false);
+	unsigned int addDefaultStim(const Habit::StimulusDisplayInfo& sdi);
 	bool getContext(unsigned int key, int& context);
 	bool m_bPendingAG;
 	bool m_bPendingStim;
@@ -97,23 +100,28 @@ protected:
 
 public:
 
-	HGMM(PipelineFactory factory = HStimPipelineFactory);
+	// Different ctor for each of the config types as defined by sdi. Must match, sorry.
+	HGMM(const Habit::StimulusDisplayInfo& sdi, HStimulusWidget *pCenter, PipelineFactory factory = HStimPipelineFactory);
+	HGMM(const Habit::StimulusDisplayInfo& sdi, HStimulusWidget *pLeft, HStimulusWidget *pRight, PipelineFactory factory = HStimPipelineFactory);
+	HGMM(const Habit::StimulusDisplayInfo& sdi, HStimulusWidget *pLeft, HStimulusWidget *pCenter, HStimulusWidget *pRight, PipelineFactory factory = HStimPipelineFactory);
+	HGMM(const Habit::StimulusDisplayInfo& sdi, QVector<HStimulusWidget *> vecWidgets, const QDir& stimRoot, PipelineFactory factory = HStimPipelineFactory);
+
 	virtual ~HGMM();
 
 	// Perform a FULL RESET: clear everything and restore HGMM to its initial state, with no pipelines, not even static ones.
-	void reset();
+	//void reset();
 
 	// Re-initializes the mm, creates pipelines for default, background, and attention-getter (if configured),
 	// and all configured stimuli (if bPopulate==true). The default, background, and attention-getter are prerolled.
 	// No widgets are set - call setWidgets() for that. Otherwise,
 	// the mm will be ready to play all stimuli. Context stim lists are also available.
-	void reset(const Habit::ExperimentSettings& settings, const QDir& dir = QDir::rootPath(), bool bPopulate = false);
+	//void reset(const Habit::ExperimentSettings& settings, const QDir& dir = QDir::rootPath(), bool bPopulate = false);
 
 	// Reconfigure all existing pipelines using the supplied StimulusDisplayInfo. The stimuli themselves remain, but they get
 	// all-new pipelines reconfigured using the new Info.
 	// Intended for use when in ExperimentEditor - this must be called when no widgets are
 	// displayed or even playing (not really sure what happens, but its easy to ensure so this is cautionary).
-	void modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
+	//void modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
 
 	// assign widget(s) to hgmm
 	void setWidgets(HStimulusWidget *p0, HStimulusWidget *p1=NULL, HStimulusWidget *p2=NULL);
@@ -134,10 +142,6 @@ public:
 	// there is no sound.
 	virtual void addStimuli(const Habit::StimuliSettings& ss, int context, bool bForceSound = false);
 
-
-
-
-
 	unsigned int getAGKey() const { return m_agKey; };
 	unsigned int getBackgroundKey() const { return m_backgroundKey; };
 	unsigned int getDefaultKey() const { return m_defaultKey; };
@@ -150,7 +154,7 @@ public:
 	//void setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1);
 	QList<unsigned int> getContextStimList(int context);
 
-	QDialog *createStimulusWidget();
+	QWidget *createStimulusWidget();
 
 	// each pipeline represents a single stimulus (single or dual screen, i.e. Habit::StimulusSettings)
 	const QMap<unsigned int, HPipeline *>& pipelineMap() const { return m_mapPipelines; };
@@ -160,10 +164,6 @@ public:
 
 	// pipeline control
 	void initialize(unsigned int id);
-	void preroll(unsigned int id);
-	void cleanup(unsigned int id);
-	void pause(unsigned int id);
-	void rewind(unsigned int id);
 
 	// remove stimulus, delete pipeline, make lists consistent
 	void remove(unsigned int id);
@@ -172,13 +172,17 @@ public:
 	void dump(unsigned int id);
 
 	virtual void defaultStim() { stim(m_defaultKey); };
-	virtual void background() { stim(m_backgroundKey); };
 	virtual void stop();
 
 public Q_SLOTS:
 
 	// replace current stimulus with the one id'd by the key
 	void stim(unsigned int);
+	void preroll(unsigned int id);
+	void cleanup(unsigned int id);
+	void pause(unsigned int id);
+	void rewind(unsigned int id);
+	void background();
 
 	// replace current stimulus with the one id'd by the current ag key
 	void ag();

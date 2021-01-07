@@ -10,6 +10,7 @@
 #include "HExperimentListWidget.h"
 #include "experimentsettings.h"
 #include "HRunSettingsDialog.h"
+#include "HStimulusPreviewWidget.h"
 #include "HPhaseSettings.h"
 #include "H2MainWindow.h"
 #include "HGMM.h"
@@ -91,134 +92,90 @@ void TestMMDialog::experimentActivated(QString expt)
 		return;
 	}
 
-	if (m_pSSWidget->isChecked())
-	{
-		// Select phase
-		//QMessageBox::information(this, "ifno", "select phase");
+	GUILib::HRunSettingsDialog *pRunSettingsDialog = new GUILib::HRunSettingsDialog(settings, true, NULL);
+	int i = pRunSettingsDialog->exec();
+	if (i != QDialog::Accepted) return;
 
-		bool ok;
-		QString item = QInputDialog::getItem(this, tr("Select phase"), "Phase", settings.getPhaseNames(), 0, false, &ok);
-		if (ok && !item.isEmpty())
-		{
-			qDebug() << "Got phase " << item;
-			//Habit::HPhaseSettings ps = settings.phaseValue(item);
-			//GUILib::HStimuliSettingsWidget *pssw = new GUILib::HStimuliSettingsWidget(item, ps.stimuli(), settings.getStimulusDisplayInfo(), this);
-			// display just that widget? Need a means of escape...
-		}
+
+
+	m_pmm = createMediaManager(settings.getStimulusDisplayInfo(), 320, 240);
+
+#if 0
+	// initialize mm, populate with stimuli and ag
+	QDir rootDir = habutilGetStimulusRootDir();
+	m_pmm = new HGMM()
+	m_pmm->reset(settings, rootDir);
+#endif
+
+
+	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
+	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
+	connect(m_pmm, SIGNAL(screen(int, QString)), this, SLOT(screen(int, QString)));
+
+	// clear indices and names
+	m_stimIndices.clear();
+	m_stimNames.clear();
+
+	// The media manager should have a default stim.
+	m_stimIndices.append(m_pmm->getDefaultKey());
+	m_stimNames.append(QString("default"));
+
+	// Is there an attention getter?
+	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
+	{
+		m_stimIndices.append(m_pmm->addStimulus(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), -1));
+		m_stimNames.append(QString("AG: %1").arg(settings.getAttentionGetterSettings().getAttentionGetterStimulus().getName()));
 	}
-	else
+
+	// Now each phase, but only if enabled
+	QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
+	while (phaseIterator.hasNext())
 	{
-		GUILib::HRunSettingsDialog *pRunSettingsDialog = new GUILib::HRunSettingsDialog(settings, true, NULL);
-		int i = pRunSettingsDialog->exec();
-		if (i != QDialog::Accepted) return;
+		const Habit::HPhaseSettings& ps = phaseIterator.next();
+		QList< QPair<int, QString> > stimidListOrdered;
 
-		// initialize mm, populate with stimuli and ag
-		QDir rootDir = habutilGetStimulusRootDir();
-		m_pmm = &HGMM::instance();
-		m_pmm->reset(settings, rootDir);
-
-		//
-		// connect to media manager signals
-		connect(this, SIGNAL(stim(unsigned int)), m_pmm, SLOT(stim(unsigned int)));
-		connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
-		connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
-		connect(m_pmm, SIGNAL(screen(int, QString)), this, SLOT(screen(int, QString)));
-
-		// clear indices and names
-		m_stimIndices.clear();
-		m_stimNames.clear();
-
-		// Now populate the media manager with default stim
-		m_stimIndices.append(m_pmm->getDefaultKey());
-		m_stimNames.append(QString("default"));
-
-		// save ag key if needed
-		bool bAGUsed = (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI());
-
-
-		QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
-		while (phaseIterator.hasNext())
+		if (ps.getIsEnabled())
 		{
-			const Habit::HPhaseSettings& ps = phaseIterator.next();
-			QList< QPair<int, QString> > stimidListOrdered;
-
-			// First index is background
-			m_stimIndices.append(m_pmm->getBackgroundKey());
-			m_stimNames.append("Background");
-			if (ps.getIsEnabled())
+			Habit::PhaseRunSettings prs(pRunSettingsDialog->getRunSettings().map().value(ps.getSeqno()));
+			Habit::HStimulusSettingsList sslist(getOrderOfStimuli(prs, ps.habituationSettings().getNTrials(), ps.stimuli()));
+			for (Habit::StimulusSettingsListIterator it = sslist.begin(); it!=sslist.end(); it++)
 			{
-				getOrderedStimidList(ps, pRunSettingsDialog->getRunSettings(), stimidListOrdered);
-
-				qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno();
-				QListIterator< QPair<int, QString> > it(stimidListOrdered);
-				while (it.hasNext())
-				{
-					// if ag is used, put it in the list
-					if (bAGUsed)
-					{
-						m_stimIndices.append(m_pmm->getAGKey());
-						m_stimNames.append(QString("AG: %1").arg(m_pmm->getStimulusSettings(m_pmm->getAGKey()).getName()));
-					}
-
-					QPair<int, QString> p = it.next();
-					qDebug() << "phase " << ps.getName() << " stim " << p.first << " name " << m_pmm->getStimulusSettings(p.first).getName();
-					m_stimIndices.append(p.first);
-					m_stimNames.append(QString("%1:%2").arg(ps.getName()).arg(m_pmm->getStimulusSettings(p.first).getName()));
-				}
-				qDebug() << "stimid list for phase " << ps.getName() << " seqno " << ps.getSeqno() << " DONE";
+				m_stimIndices.append(m_pmm->addStimulus(*it, ps.getSeqno()));
+				m_stimNames.append(it->getName());
+				qDebug() << "Stim added " << it->getName();
 			}
 		}
-
-		// get display widget(s)
-		if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
-			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 1024, 768));
-		else if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
-			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 800, 600), new HStimulusWidget(settings.getStimulusDisplayInfo(), 800, 600));
-		else if (settings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
-			m_pmm->setWidgets(new HStimulusWidget(settings.getStimulusDisplayInfo(), 400, 300), new HStimulusWidget(settings.getStimulusDisplayInfo(), 400, 300), new HStimulusWidget(settings.getStimulusDisplayInfo(), 400, 300));
-
-		QDialog *d = m_pmm->createStimulusWidget();
-
-		// preroll stuff
-		m_pmm->preroll(m_pmm->getAGKey());
-
-		// Now create a controller and exec() it
-		TestMMController controller(m_stimNames, d);
-		connect(&controller, SIGNAL(playItem(unsigned int)), this, SLOT(playItem(unsigned int)));
-		connect(&controller, SIGNAL(stopItem()), this, SLOT(stopItem()));
-		connect(m_pmm, SIGNAL(stimStarted(int)), &controller, SLOT(stimStarted(int)));
-		connect(m_pmm, SIGNAL(agStarted(int)), &controller, SLOT(stimStarted(int)));
-		controller.exec();
-
-
-		// clean up
-		//		m_stimIndices.clear();
-		//		m_stimNames.clear();
-		//		delete m_pmm;
-		m_pmm->reset();
-		m_pmm = NULL;
 	}
+
+
+	// Now create a controller and exec() it
+	TestMMController controller(m_stimNames, m_pmm->createStimulusWidget());
+	connect(&controller, SIGNAL(playItem(unsigned int)), this, SLOT(playItem(unsigned int)));
+	connect(m_pmm, SIGNAL(stimStarted(int)), &controller, SLOT(stimStarted(int)));
+	connect(m_pmm, SIGNAL(agStarted(int)), &controller, SLOT(stimStarted(int)));
+	controller.exec();
+
+
+	// clean up
+	//		m_stimIndices.clear();
+	//		m_stimNames.clear();
+	//		delete m_pmm;
+	delete m_pmm;
+	m_pmm = NULL;
 }
 
 
 void TestMMDialog::playItem(unsigned int uistim)
 {
-	if (m_stimIndices[uistim] == m_pmm->getAGKey())
-	{
-		m_pmm->ag();
-		qDebug() << "playItem(" << uistim << ") : key " << m_stimIndices[uistim] << m_stimIndices[uistim] << " AG";
-	}
-	else
-	{
-		qDebug() << "playItem(" << uistim << ") : " << m_stimIndices[uistim] << " stim";
-		m_pmm->stim(m_stimIndices[uistim]);
-	}
+	qDebug() << "playItem(" << uistim << ") : " << m_stimIndices[uistim] << " stim";
+	m_pmm->stim(m_stimIndices[uistim]);
 }
 
 void TestMMDialog::stopItem()
 {
 	qDebug() << "stopItem()";
-	m_pmm->defaultStim();
+	m_pmm->background();
+	//m_pmm->defaultStim();
 }
 
 

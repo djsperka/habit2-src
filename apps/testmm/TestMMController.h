@@ -43,6 +43,7 @@ public slots:
 	void nextClicked();
 	void replayClicked();
 	void stimStarted(int);
+	void itemClicked(const QModelIndex&);
 
 };
 

@@ -1,4 +1,4 @@
-#hgst.pri
+s#hgst.pri
 # Created on: Mar 25, 2018
 #     Author: dan
 
@@ -10,8 +10,7 @@ HEADERS += \
 	hgst/HStimulusWidget.h \
 	hgst/HVideoWidget.h \
 	hgst/HStimulusLayout.h \
-	hgst/HGMMException.h \
-	hgst/Preroller.h
+	hgst/HGMMException.h
 
 SOURCES += \
 	hgst/HGMM.cpp \
@@ -21,6 +20,5 @@ SOURCES += \
 	hgst/HStimulusWidget.cpp \
 	hgst/HVideoWidget.cpp \
 	hgst/HStimulusLayout.cpp \
-	hgst/HGMMException.cpp \
-	hgst/Preroller.cpp
+	hgst/HGMMException.cpp
 	

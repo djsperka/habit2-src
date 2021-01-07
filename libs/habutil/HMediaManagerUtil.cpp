@@ -13,99 +13,89 @@
 #include <QtGlobal>
 
 #include <QDesktopWidget>
-#include <QApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include "HWorkspaceUtil.h"
 
-void initializeMediaManager(const Habit::ExperimentSettings& es)
+HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi)
 {
-	QDir rootDir = habutilGetStimulusRootDir();
-	HGMM::instance().reset(es, rootDir);
-
-	if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	QVector<HStimulusWidget *> vecWidgets;
+	if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		QRect rect = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
-		HStimulusWidget *pSingle = new HStimulusWidget(es.getStimulusDisplayInfo(), rect.width(), rect.height());
-
-		HGMM::instance().setWidgets(pSingle);
+		//QRect rect = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
+		QRect rect = QGuiApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Center))->availableGeometry();
+		HStimulusWidget *pSingle = new HStimulusWidget(sdi, rect.width(), rect.height());
 		pSingle->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pSingle->move(rect.x(), rect.y());
 		qDebug() << "Center player index " << habutilGetMonitorID(HPlayerPositionType::Center) << " moved to rect " << rect;
+		vecWidgets.append(pSingle);
 	}
-	else if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		QRect rectLeft = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Left));
-		HStimulusWidget *pLeft = new HStimulusWidget(es.getStimulusDisplayInfo(), rectLeft.width(), rectLeft.height());
+		//QRect rectLeft = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Left));
+		QRect rectLeft = QGuiApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Left))->availableGeometry();
+		HStimulusWidget *pLeft = new HStimulusWidget(sdi, rectLeft.width(), rectLeft.height());
 		pLeft->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pLeft->move(rectLeft.x(), rectLeft.y());
 		qDebug() << "Left player index " << habutilGetMonitorID(HPlayerPositionType::Left) << " moved to rect " << rectLeft;
 
-		QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
-		HStimulusWidget *pRight = new HStimulusWidget(es.getStimulusDisplayInfo(), rectRight.width(), rectRight.height());
+		//QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
+		QRect rectRight = QGuiApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Right))->availableGeometry();
+		HStimulusWidget *pRight = new HStimulusWidget(sdi, rectRight.width(), rectRight.height());
 		pRight->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pRight->move(rectRight.x(), rectRight.y());
 		qDebug() << "Right player index " << habutilGetMonitorID(HPlayerPositionType::Right) << " moved to rect " << rectRight;
 
-		HGMM::instance().setWidgets(pLeft, pRight);
+		vecWidgets.append(pLeft);
+		vecWidgets.append(pRight);
 	}
-	else if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
 	{
-		QRect rectLeft = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Left));
-		HStimulusWidget *pLeft = new HStimulusWidget(es.getStimulusDisplayInfo(), rectLeft.width(), rectLeft.height());
+		//QRect rectLeft = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Left));
+		QRect rectLeft = QGuiApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Left))->availableGeometry();
+		HStimulusWidget *pLeft = new HStimulusWidget(sdi, rectLeft.width(), rectLeft.height());
 		pLeft->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pLeft->move(rectLeft.x(), rectLeft.y());
 		qDebug() << "Left player index " << habutilGetMonitorID(HPlayerPositionType::Left) << " moved to rect " << rectLeft;
 
-		QRect rectCenter = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
-		HStimulusWidget *pCenter = new HStimulusWidget(es.getStimulusDisplayInfo(), rectCenter.width(), rectCenter.height());
+		//QRect rectCenter = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
+		QRect rectCenter = QGuiApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Center))->availableGeometry();
+		HStimulusWidget *pCenter = new HStimulusWidget(sdi, rectCenter.width(), rectCenter.height());
 		pCenter->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pCenter->move(rectCenter.x(), rectCenter.y());
 		qDebug() << "Center player index " << habutilGetMonitorID(HPlayerPositionType::Center) << " moved to rect " << rectCenter;
 
-		QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
-		HStimulusWidget *pRight = new HStimulusWidget(es.getStimulusDisplayInfo(), rectRight.width(), rectRight.height());
+		//QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
+		QRect rectRight = QGuiApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Right))->availableGeometry();
+		HStimulusWidget *pRight = new HStimulusWidget(sdi, rectRight.width(), rectRight.height());
 		pRight->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pRight->move(rectRight.x(), rectRight.y());
 		qDebug() << "Right player index " << habutilGetMonitorID(HPlayerPositionType::Right) << " moved to rect " << rectRight;
 
-		HGMM::instance().setWidgets(pLeft, pCenter, pRight);
+		vecWidgets.append(pLeft);
+		vecWidgets.append(pCenter);
+		vecWidgets.append(pRight);
 	}
-
-	return;
+	return new HGMM(sdi, vecWidgets, habutilGetStimulusRootDir());
 }
 
-
-void initializeMediaManager(const Habit::ExperimentSettings& es, int screenWidth, int screenHeight)
+HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int w, int h)
 {
-//	return initializeMediaManager(es.getStimulusDisplayInfo(), screenWidth, screenHeight);
-	QDir rootDir = habutilGetStimulusRootDir();
-	HGMM::instance().reset(es, rootDir);
-
-	Habit::StimulusDisplayInfo sdi = es.getStimulusDisplayInfo();
+	QVector<HStimulusWidget *> vecWidgets;
 	if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		HStimulusWidget *pSingle = new HStimulusWidget(sdi, screenWidth, screenHeight);
-		HGMM::instance().modifyStimulusDisplay(sdi, rootDir);
-		HGMM::instance().setWidgets(pSingle);
+		vecWidgets.append(new HStimulusWidget(sdi, w, h));
 	}
 	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		HStimulusWidget *pLeft = new HStimulusWidget(sdi, screenWidth, screenHeight);
-		HStimulusWidget *pRight = new HStimulusWidget(sdi, screenWidth, screenHeight);
-		HGMM::instance().modifyStimulusDisplay(sdi, rootDir);
-		HGMM::instance().setWidgets(pLeft, pRight);
+		vecWidgets.append(new HStimulusWidget(sdi, w, h));
+		vecWidgets.append(new HStimulusWidget(sdi, w, h));
 	}
 	else if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
 	{
-		HStimulusWidget *pLeft = new HStimulusWidget(sdi, screenWidth, screenHeight);
-		HStimulusWidget *pRight = new HStimulusWidget(sdi, screenWidth, screenHeight);
-		HStimulusWidget *pCenter = new HStimulusWidget(sdi, screenWidth, screenHeight);
-		HGMM::instance().modifyStimulusDisplay(sdi, rootDir);
-		HGMM::instance().setWidgets(pLeft, pCenter, pRight);
+		vecWidgets.append(new HStimulusWidget(sdi, w, h));
+		vecWidgets.append(new HStimulusWidget(sdi, w, h));
+		vecWidgets.append(new HStimulusWidget(sdi, w, h));
 	}
-	else
-	{
-		qFatal("Unknown stimulus layout type in initializeMediaManager");
-	}
-
-	return;
+	return new HGMM(sdi, vecWidgets, habutilGetStimulusRootDir());
 }

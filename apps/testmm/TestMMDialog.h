@@ -10,10 +10,14 @@
 
 #include <QDialog>
 #include <QWidget>
-#include <QString>
+#include <QStringList>
+#include <QList>
 #include <QCheckBox>
 
 class HGMM;
+namespace GUILib {
+	class HStimulusPreviewWidget;
+}
 
 class TestMMDialog: public QDialog
 {
@@ -21,6 +25,7 @@ class TestMMDialog: public QDialog
 
 private:
 	HGMM *m_pmm;
+	GUILib::HStimulusPreviewWidget *m_previewWidget;
 	QStringList m_stimNames;
 	QList<unsigned int> m_stimIndices;
 	QCheckBox *m_pFullScreen;
@@ -30,9 +35,6 @@ public:
 	TestMMDialog(QWidget *parent=0);
 	~TestMMDialog();
 	void components();
-
-signals:
-	void stim(unsigned int);
 
 public slots:
 

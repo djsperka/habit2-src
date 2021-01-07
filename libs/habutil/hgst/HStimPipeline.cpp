@@ -64,16 +64,19 @@ GstElement *HStimPipelineSource::pipeline()
 
 void HStimPipeline::emitNowPlaying()
 {
+	qDebug() << "HStimPipeline::emitNowPlaying() for id " << this->id();
 	Q_EMIT nowPlaying();
 }
 
 void HStimPipeline::emitPrerolling()
 {
+	qDebug() << "HStimPipeline::emitPrerolling() for id " << this->id();
 	Q_EMIT prerolling(this->id());
 }
 
 void HStimPipeline::emitPrerolled()
 {
+	qDebug() << "HStimPipeline::emitPrerolled() for id " << this->id();
 	Q_EMIT prerolled(this->id());
 }
 
@@ -227,8 +230,10 @@ void HStimPipeline::cleanup()
 	}
 }
 
-static GstBusSyncReply bus_sync_handler (GstBus * bus, GstMessage * message, gpointer user_data)
+GstBusSyncReply HStimPipeline::busSyncHandler(GstBus * bus, GstMessage * message, gpointer user_data)
 {
+	QString sDebugPrefix("HStimPipeline::busSyncHandler() - ");
+
 	// user_data is the map<> that goes from ppt to winid.
 	const PPTWIdMap *ppwMap = (const PPTWIdMap *)user_data;
 
@@ -242,7 +247,7 @@ static GstBusSyncReply bus_sync_handler (GstBus * bus, GstMessage * message, gpo
 	//   gst_message_unref (message);
 
 	// return GST_BUS_DROP;
-	qDebug() << "BUS_SYNC_HANDLER - " << GST_MESSAGE_TYPE_NAME(message) << " FROM " << GST_MESSAGE_SRC_NAME(message);
+	qDebug() << sDebugPrefix << GST_MESSAGE_TYPE_NAME(message) << " FROM " << GST_MESSAGE_SRC_NAME(message);
 	GstObject *src = GST_MESSAGE_SRC(message);
 	GstObject *parent = gst_object_get_parent(GST_MESSAGE_SRC(message));
 	if (parent)
@@ -253,19 +258,22 @@ static GstBusSyncReply bus_sync_handler (GstBus * bus, GstMessage * message, gpo
 		int id;
 		const HPlayerPositionType* pppt = nullptr;
 
-		qDebug() << "BUS_SYNC_HANDLER - " <<  " PARENT " << pname;
+		qDebug() << sDebugPrefix <<  " parent " << pname;
 		if (HPipeline::parseElementName(eleName, factoryName, pppt, id, prefix))
 		{
-			qDebug() << "BUS_SYNC_HANDLER - parsed: " << eleName << " " << factoryName << " " << pppt->name() << "/" << pppt->number() << " id " << id << " prefix: " << prefix;
-			qDebug() << "BUS_SYNC_HANDLER - widmap " << *ppwMap;
+			qDebug() << sDebugPrefix << " parsed: " << eleName << " " << factoryName << " " << pppt->name() << "/" << pppt->number() << " id " << id << " prefix: " << prefix;
+			//qDebug() << "BUS_SYNC_HANDLER - widmap " << *ppwMap;
 			if (pppt)
 			{
 				if (ppwMap->count(pppt->number()))
 				{
-					qDebug() << "BUS_SYNC_HANDLER - set window handle";
+					qDebug() << sDebugPrefix << " set window handle";
 					gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY(src), (*ppwMap)[pppt->number()]);
 				}
-
+				else
+				{
+					qCritical() << sDebugPrefix << " no window handle for this position";
+				}
 			}
 		}
 		g_free(pname);
@@ -284,7 +292,7 @@ void HStimPipeline::initialize()
 
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
 	gst_bus_add_watch(bus, &HStimPipeline::busCallback, this);
-	gst_bus_set_sync_handler (bus, (GstBusSyncHandler) bus_sync_handler, (gpointer)&widMap(), NULL);
+	gst_bus_set_sync_handler (bus, (GstBusSyncHandler)HStimPipeline::busSyncHandler, (gpointer)&widMap(), NULL);
 	gst_object_unref(bus);
 
 	// Create HStimPipelineSource objects for each position Left/Right/Center/Sound as needed.
@@ -752,7 +760,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 
 	HStimPipeline *pStimPipeline = (HStimPipeline *)p;
 	QString sDebugPrefix;
-	sDebugPrefix = QString("busCallback(%1): ").arg(GST_MESSAGE_SRC_NAME(msg));
+	sDebugPrefix = QString("HStimPipeline::busCallback(%1): ").arg(GST_MESSAGE_SRC_NAME(msg));
 	if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ASYNC_DONE)
 	{
 		qDebug() << sDebugPrefix << "Got ASYNC_DONE";
@@ -803,9 +811,10 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 		{
 			GstState old_state, new_state;
 			gst_message_parse_state_changed(msg, &old_state, &new_state, NULL);
-			//qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
+			qDebug() << "HStimPipeline::busCallback( " << pStimPipeline->id() << "): got STATE_CHANGED " << gst_element_state_get_name(old_state) << "-" << gst_element_state_get_name(new_state) << " from " << GST_MESSAGE_SRC_NAME(msg);
 			if (old_state == GST_STATE_PAUSED && new_state == GST_STATE_PLAYING)
 			{
+				// this is a static function, have to call the class method to emit a signal.
 				pStimPipeline->emitNowPlaying();
 			}
 		}
@@ -1005,7 +1014,8 @@ GstPadProbeReturn HStimPipeline::eventProbeCB(GstPad * pad, GstPadProbeInfo * in
 			//GstElement* parent = GST_PAD_PARENT(pad);
 			qDebug() << sDebugPrefix << "got SEGMENT event";
 			// << ". Running time is " << (gst_clock_get_time(gst_element_get_clock(parent)) - gst_element_get_base_time(parent));
-			QMutexLocker locker(pSource->stimPipeline()->mutex());
+			// djs QMutexLocker locker(pSource->stimPipeline()->mutex());
+			qWarning() << "HStimPipeline::eventProbeCB - not locking mutex()";
 			if (pSource->bLoop)
 			{
 				const GstSegment *segment;

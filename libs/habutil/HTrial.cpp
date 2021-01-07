@@ -54,7 +54,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 
 	// Once that happens the media manager starts playing the ag, it emits
 	// agStarted(). We use that signal as a transition to the AGRunning state. 
-	sAGRequest->addTransition(&HGMM::instance(), SIGNAL(agStarted(int)), sAGRunning);
+	sAGRequest->addTransition(&(this->phase().experiment().getHGMM()), SIGNAL(agStarted(int)), sAGRunning);
 	
 	// When AGRunning state is entered, it tells the look detector to start looking for 
 	// attention. It will emit an attention() signal when that happens (see below). 
@@ -90,7 +90,7 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookPending()), sStimRunning, SLOT(gotLookPending()));
 	QObject::connect(&phase.experiment().getLookDetector(), SIGNAL(lookAborted(HLook)), sStimRunning, SLOT(gotLookAborted(HLook)));
 
-	sStimRequest->addTransition(&HGMM::instance(), SIGNAL(stimStarted(int)), sStimRunning);		// on entry, emits playStim()
+	sStimRequest->addTransition(&(this->phase().experiment().getHGMM()), SIGNAL(stimStarted(int)), sStimRunning);		// on entry, emits playStim()
 
 	// Set up state(s) that sStimRunning can transition to.
 	// These are turned on/off by the settings in m_phaseSettings.

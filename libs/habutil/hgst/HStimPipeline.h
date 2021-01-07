@@ -125,6 +125,9 @@ public:
 
 	// callback functions for gstreamer
 
+	// bus sync handler
+	static GstBusSyncReply busSyncHandler (GstBus * bus, GstMessage * message, gpointer user_data);
+
 	// bus callback - bus messages here
 	static gboolean busCallback(GstBus *, GstMessage *msg, gpointer pdata);
 

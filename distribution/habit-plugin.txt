@@ -1,1 +1,3 @@
+-C
+/Users/dan/git/habit2-src/distribution/build/src/libs/gstqt/release
 libgstqt.dylib

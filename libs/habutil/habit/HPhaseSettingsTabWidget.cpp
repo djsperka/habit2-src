@@ -83,7 +83,7 @@ Habit::HPhaseSettings HPhaseSettingsTabWidget::getPhaseSettings()
 void HPhaseSettingsTabWidget::phaseNameTextChanged(const QString& text)
 {
     QFontMetrics fm(font());
-    int mWidth = fm.width("m");
+    int mWidth = fm.horizontalAdvance("m");
     int pixelsWide = mWidth * (text.size() + 2);
     int pixelsHigh = fm.height();
 

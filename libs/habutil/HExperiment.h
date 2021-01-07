@@ -79,11 +79,14 @@ class HExperiment: public HLogState
 	Q_OBJECT
 
 public:
-	HExperiment(HEventLog& log, HLookDetector& ld, QState* parent = 0);
+	HExperiment(HEventLog& log, HLookDetector& ld, HGMM& hgmm, QState* parent = 0);
 	virtual ~HExperiment() {};
 	
 	HLookDetector& getLookDetector() { return m_ld; };
 	const HLookDetector& getLookDetector() const { return m_ld; };
+
+	HGMM& getHGMM() { return m_hgmm; };
+	const HGMM& getHGMM() const { return m_hgmm; };
 
 	// FSM hooks on entry/exit from state
 	void onExit(QEvent* e);
@@ -119,6 +122,7 @@ private Q_SLOTS:
 
 private:
 	HLookDetector& m_ld;
+	HGMM& m_hgmm;
 	PhaseStimulusLists m_phaseStimulusLists;	// list of phases in the experiment, with the stim for each
 	PhTStimidMap m_prerolled;					// curated stimuli that we've prerolled here
 	PhTStimidPairList m_cleanup;				// curated stimuli that need to be cleaned up
