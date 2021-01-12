@@ -37,6 +37,11 @@ HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const S
 	m_phgmm->addStimuli(stimuli, context);
 }
 
+HStimuliSettingsWidget::~HStimuliSettingsWidget()
+{
+	m_phgmm->stop();
+	delete m_phgmm;
+}
 void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisplayInfo& info)
 {
 	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_sdi);
@@ -44,7 +49,7 @@ void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisp
 	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(info, this);
 
 
-	m_phgmm = new HGMM(info, m_pStimulusPreviewWidget->getStimulusWidgets(), habutilGetStimulusRootDir());
+	m_phgmm = new HGMM(info, m_pStimulusPreviewWidget->getStimulusWidgets(), habutilGetStimulusRootDir(), labelName);
 
 	connect(m_pStimulusPreviewWidget, SIGNAL(preroll(unsigned int)), m_phgmm, SLOT(preroll(unsigned int)));
 	connect(m_pStimulusPreviewWidget, SIGNAL(pause(unsigned int)), m_phgmm, SLOT(pause(unsigned int)));

@@ -21,7 +21,7 @@ AttentionSetupForm::AttentionSetupForm(const Habit::AttentionGetterSettings& set
 	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, this);
 
 
-	m_phgmm = new HGMM(info, m_pStimulusPreviewWidget->getStimulusWidgets(), habutilGetStimulusRootDir());
+	m_phgmm = new HGMM(info, m_pStimulusPreviewWidget->getStimulusWidgets(), habutilGetStimulusRootDir(), QString("agsetup"));
 	m_phgmm->addAG(settings.getAttentionGetterStimulus(), settings.isSoundOnly());
 
 
@@ -40,6 +40,8 @@ AttentionSetupForm::AttentionSetupForm(const Habit::AttentionGetterSettings& set
 
 AttentionSetupForm::~AttentionSetupForm()
 {
+	m_phgmm->stop();
+	delete m_phgmm;
 }
 
 void AttentionSetupForm::components()

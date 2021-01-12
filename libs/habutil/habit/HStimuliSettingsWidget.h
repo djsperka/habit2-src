@@ -37,7 +37,7 @@ namespace GUILib
 		void populate();
 	public:
 		HStimuliSettingsWidget(const QString& labelName, const Habit::StimuliSettings& stimuli, int context, const Habit::StimulusDisplayInfo& sdi, QWidget *parent=0);
-		virtual ~HStimuliSettingsWidget() {};
+		virtual ~HStimuliSettingsWidget();
 
 		// Get stimulisettings as currently defined in the widget (including changes)
 		Habit::StimuliSettings getStimuliSettings();

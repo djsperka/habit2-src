@@ -683,9 +683,9 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			// m_phgmm = new HGMM(
 
 			if (bStimInDialog)
-				pHGMM = createMediaManager(experimentSettings.getStimulusDisplayInfo(), 320, 240);
+				pHGMM = createMediaManager(experimentSettings.getStimulusDisplayInfo(), 320, 240, QString("expt-wind"));
 			else
-				pHGMM = createMediaManager(experimentSettings.getStimulusDisplayInfo());
+				pHGMM = createMediaManager(experimentSettings.getStimulusDisplayInfo(), QString("expt-full"));
 
 			// On mac it works OK to have a parent with the control panel - the keyboard grab works as expected.
 			// On windows, the keyboard grab doesn't work - or so it seems - cannot get any keyboard events through.
@@ -740,18 +740,23 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 			}
 			else
 			{
-				adaptVideoWidgets(pHGMM);
 				if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 				{
+					pHGMM->getHStimulusWidget(HPlayerPositionType::Center)->show();
 					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Center));
 				}
 				else if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 				{
+					pHGMM->getHStimulusWidget(HPlayerPositionType::Left)->show();
+					pHGMM->getHStimulusWidget(HPlayerPositionType::Right)->show();
 					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Left));
 					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Right));
 				}
 				else if (experimentSettings.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
 				{
+					pHGMM->getHStimulusWidget(HPlayerPositionType::Left)->show();
+					pHGMM->getHStimulusWidget(HPlayerPositionType::Center)->show();
+					pHGMM->getHStimulusWidget(HPlayerPositionType::Right)->show();
 					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Left));
 					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Center));
 					deleteList.append(pHGMM->getHStimulusWidget(HPlayerPositionType::Right));
@@ -830,29 +835,6 @@ void GUILib::H2MainWindow::run(bool bTestInput)
 	}
 }
 
-
-void GUILib::H2MainWindow::adaptVideoWidgets(HGMM *pmm)
-{
-	if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		pmm->getHStimulusWidget(HPlayerPositionType::Center)->show();
-	}
-	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		pmm->getHStimulusWidget(HPlayerPositionType::Left)->show();
-		pmm->getHStimulusWidget(HPlayerPositionType::Right)->show();
-	}
-	else if (pmm->getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
-	{
-		pmm->getHStimulusWidget(HPlayerPositionType::Left)->show();
-		pmm->getHStimulusWidget(HPlayerPositionType::Center)->show();
-		pmm->getHStimulusWidget(HPlayerPositionType::Right)->show();
-	}
-	return;
-
-}
-
-
 void GUILib::H2MainWindow::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
 	Q_UNUSED(deselected);
@@ -873,6 +855,8 @@ void GUILib::H2MainWindow::selectionChanged(const QItemSelection& selected, cons
 		m_actionClone->setEnabled(false);
 	}
 }
+
+
 
 void GUILib::H2MainWindow::cloneExperiment()
 {

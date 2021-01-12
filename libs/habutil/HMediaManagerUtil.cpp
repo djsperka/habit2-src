@@ -17,9 +17,10 @@
 #include <QScreen>
 #include "HWorkspaceUtil.h"
 
-HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi)
+HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, const QString& name)
 {
 	QVector<HStimulusWidget *> vecWidgets;
+	qDebug() << "createMediaManager(" << name << ") for type " << sdi.getStimulusLayoutType().name();
 	if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		//QRect rect = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
@@ -76,12 +77,13 @@ HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi)
 		vecWidgets.append(pCenter);
 		vecWidgets.append(pRight);
 	}
-	return new HGMM(sdi, vecWidgets, habutilGetStimulusRootDir());
+	return new HGMM(sdi, vecWidgets, habutilGetStimulusRootDir(), name);
 }
 
-HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int w, int h)
+HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int w, int h, const QString& name)
 {
 	QVector<HStimulusWidget *> vecWidgets;
+	qDebug() << "createMediaManager(" << name << ") for type " << sdi.getStimulusLayoutType().name();
 	if (sdi.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		vecWidgets.append(new HStimulusWidget(sdi, w, h));
@@ -97,5 +99,5 @@ HGMM* createMediaManager(const Habit::StimulusDisplayInfo& sdi, int w, int h)
 		vecWidgets.append(new HStimulusWidget(sdi, w, h));
 		vecWidgets.append(new HStimulusWidget(sdi, w, h));
 	}
-	return new HGMM(sdi, vecWidgets, habutilGetStimulusRootDir());
+	return new HGMM(sdi, vecWidgets, habutilGetStimulusRootDir(), name);
 }

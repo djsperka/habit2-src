@@ -73,7 +73,6 @@ class HStateMachine;
 		 void createActions();
 		 void createToolBars();
 		 void run(bool bInputTesting);
-		 void adaptVideoWidgets(HGMM *pmm);
 		 QDialog *createStimulusWidget(HGMM *pmm);
 
 #ifdef Q_OS_WIN
