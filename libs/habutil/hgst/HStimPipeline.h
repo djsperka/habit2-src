@@ -112,8 +112,8 @@ public:
 	virtual void dump();
 
 	// manage widget property on video sink element
-	void detachWidgetsFromSinks();	// default is a no-op
-	void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
+	//void detachWidgetsFromSinks();	// default is a no-op
+	//void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
 
 	// return the GstElement corresponding to the entire pipeline
 	GstElement *pipeline() const { return m_pipeline; }

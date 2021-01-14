@@ -24,15 +24,15 @@ void HPipeline::reconfigure(const Habit::StimulusDisplayInfo& info)
 }
 
 
-void HPipeline::detachWidgetsFromSinks()
-{
-	//no-op
-}
-
-void HPipeline::attachWidgetsToSinks(HVideoWidget *, HVideoWidget *, HVideoWidget *)
-{
-	// no-op
-}
+//void HPipeline::detachWidgetsFromSinks()
+//{
+//	//no-op
+//}
+//
+//void HPipeline::attachWidgetsToSinks(HVideoWidget *, HVideoWidget *, HVideoWidget *)
+//{
+//	// no-op
+//}
 
 void HPipeline::dump()
 {

@@ -547,8 +547,8 @@ void HGMM::playStim(unsigned int key)
 			m_pipelineCurrent->pause();
 
 
-			qDebug() << "HGMM(" << m_name << ")::playstim: detach widgets from current stim";
-			m_pipelineCurrent->detachWidgetsFromSinks();
+			//qDebug() << "HGMM(" << m_name << ")::playstim: detach widgets from current stim";
+			//m_pipelineCurrent->detachWidgetsFromSinks();
 
 			if (!m_pipelineCurrent->isStatic())
 			{
@@ -610,7 +610,7 @@ void HGMM::stop()
 		disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 		disconnect(m_pipelineCurrent, SIGNAL(screen(const QString&, int)), this, SIGNAL(screenStarted(const QString&, int)));
 		m_pipelineCurrent->pause();
-		m_pipelineCurrent->detachWidgetsFromSinks();
+		//m_pipelineCurrent->detachWidgetsFromSinks();
 	}
 }
 

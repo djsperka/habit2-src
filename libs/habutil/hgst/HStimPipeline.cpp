@@ -155,60 +155,60 @@ void HStimPipeline::play()
 	gst_element_set_state(pipeline(), GST_STATE_PLAYING);
 }
 
-void HStimPipeline::setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt)
-{
-//	GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline()), C_STR(makeElementName("videosink", ppt, id())));
-//	Q_ASSERT(sink);
+//void HStimPipeline::setWidgetPropertyOnSink(HVideoWidget *w, const HPlayerPositionType& ppt)
+//{
+////	GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline()), C_STR(makeElementName("videosink", ppt, id())));
+////	Q_ASSERT(sink);
+////
+////	qDebug() << "setWidgetPropertyOnSink(" << GST_ELEMENT_NAME(sink) << " w=" << w;
+////	gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (sink), w ? guintptr(w->winId()) : guintptr(0));
 //
-//	qDebug() << "setWidgetPropertyOnSink(" << GST_ELEMENT_NAME(sink) << " w=" << w;
-//	gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (sink), w ? guintptr(w->winId()) : guintptr(0));
-
-//	GValue v = G_VALUE_INIT;
-//	g_value_init(&v, G_TYPE_POINTER);
-//	g_value_set_pointer(&v, w);
+////	GValue v = G_VALUE_INIT;
+////	g_value_init(&v, G_TYPE_POINTER);
+////	g_value_set_pointer(&v, w);
+////
+////	g_object_set_property(G_OBJECT(sink), "widget", &v);
+//}
 //
-//	g_object_set_property(G_OBJECT(sink), "widget", &v);
-}
-
-void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1, HVideoWidget *w2)
-{
-	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
-	{
-		setWidgetPropertyOnSink(w0, HPlayerPositionType::Center);
-		if (w0)
-		{
-			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Center]->size);
-			qDebug() << "Setting stimulus size " << m_mapPipelineSources[HPlayerPositionType::Center]->size
-					<< " prerolled? " << m_mapPipelineSources[HPlayerPositionType::Center]->bPrerolled;
-		}
-	}
-	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		setWidgetPropertyOnSink(w0, HPlayerPositionType::Left);
-		if (w0)
-			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Left]->size);
-		setWidgetPropertyOnSink(w1, HPlayerPositionType::Right);
-		if (w1)
-			w1->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Right]->size);
-	}
-	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
-	{
-		setWidgetPropertyOnSink(w0, HPlayerPositionType::Left);
-		if (w0)
-			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Left]->size);
-		setWidgetPropertyOnSink(w1, HPlayerPositionType::Center);
-		if (w1)
-			w1->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Center]->size);
-		setWidgetPropertyOnSink(w2, HPlayerPositionType::Right);
-		if (w2)
-			w2->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Right]->size);
-	}
-}
-
-void HStimPipeline::detachWidgetsFromSinks()
-{
-	attachWidgetsToSinks(NULL, NULL);
-}
+//void HStimPipeline::attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1, HVideoWidget *w2)
+//{
+//	if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+//	{
+//		setWidgetPropertyOnSink(w0, HPlayerPositionType::Center);
+//		if (w0)
+//		{
+//			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Center]->size);
+//			qDebug() << "Setting stimulus size " << m_mapPipelineSources[HPlayerPositionType::Center]->size
+//					<< " prerolled? " << m_mapPipelineSources[HPlayerPositionType::Center]->bPrerolled;
+//		}
+//	}
+//	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+//	{
+//		setWidgetPropertyOnSink(w0, HPlayerPositionType::Left);
+//		if (w0)
+//			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Left]->size);
+//		setWidgetPropertyOnSink(w1, HPlayerPositionType::Right);
+//		if (w1)
+//			w1->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Right]->size);
+//	}
+//	else if (stimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+//	{
+//		setWidgetPropertyOnSink(w0, HPlayerPositionType::Left);
+//		if (w0)
+//			w0->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Left]->size);
+//		setWidgetPropertyOnSink(w1, HPlayerPositionType::Center);
+//		if (w1)
+//			w1->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Center]->size);
+//		setWidgetPropertyOnSink(w2, HPlayerPositionType::Right);
+//		if (w2)
+//			w2->setStimulusSize(m_mapPipelineSources[HPlayerPositionType::Right]->size);
+//	}
+//}
+//
+//void HStimPipeline::detachWidgetsFromSinks()
+//{
+//	attachWidgetsToSinks(NULL, NULL);
+//}
 
 void HStimPipeline::cleanup()
 {
@@ -241,12 +241,6 @@ GstBusSyncReply HStimPipeline::busSyncHandler(GstBus * bus, GstMessage * message
 	if (!gst_is_video_overlay_prepare_window_handle_message (message))
 		return GST_BUS_PASS;
 
-	// set overlay now
-	//gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (GST_MESSAGE_SRC (message)), win);
-
-	//   gst_message_unref (message);
-
-	// return GST_BUS_DROP;
 	qDebug() << sDebugPrefix << GST_MESSAGE_TYPE_NAME(message) << " FROM " << GST_MESSAGE_SRC_NAME(message);
 	GstObject *src = GST_MESSAGE_SRC(message);
 	GstObject *parent = gst_object_get_parent(GST_MESSAGE_SRC(message));
@@ -414,6 +408,7 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 			pStimPipelineSource->bPrerolled = false;
 			pStimPipelineSource->bLoop = false;
 			pStimPipelineSource->volume = 0;
+			pStimPipelineSource->size = QSize(320, 240);	// default size for solid color
 
 		}
 		else

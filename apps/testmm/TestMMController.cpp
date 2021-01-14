@@ -73,7 +73,7 @@ TestMMController::TestMMController(const QStringList& names, QWidget *screens, Q
 void TestMMController::itemClicked(const QModelIndex& index)
 {
 	qDebug() << "itemClicked row " << index.row();
-	emit playItem(index.row());
+	//emit playItem(index.row());
 }
 
 void TestMMController::playClicked()

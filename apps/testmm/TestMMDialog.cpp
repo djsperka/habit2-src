@@ -98,19 +98,11 @@ void TestMMDialog::experimentActivated(QString expt)
 
 
 
-	m_pmm = createMediaManager(settings.getStimulusDisplayInfo(), 320, 240);
+	m_pmm = createMediaManager(settings.getStimulusDisplayInfo(), 320, 240, "testmm");
 
-#if 0
-	// initialize mm, populate with stimuli and ag
-	QDir rootDir = habutilGetStimulusRootDir();
-	m_pmm = new HGMM()
-	m_pmm->reset(settings, rootDir);
-#endif
-
-
-	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
-	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
-	connect(m_pmm, SIGNAL(screen(int, QString)), this, SLOT(screen(int, QString)));
+//	connect(m_pmm, SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
+//	connect(m_pmm, SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
+//	connect(m_pmm, SIGNAL(screen(int, QString)), this, SLOT(screen(int, QString)));
 
 	// clear indices and names
 	m_stimIndices.clear();

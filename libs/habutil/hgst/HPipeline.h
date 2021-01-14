@@ -56,8 +56,8 @@ public:
 	virtual void rewind() = 0;
 	virtual void dump();
 
-	virtual void detachWidgetsFromSinks();	// default is a no-op
-	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
+//	virtual void detachWidgetsFromSinks();	// default is a no-op
+//	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
 
 	// get windowId map
 	const PPTWIdMap& widMap() { return m_wid; }
