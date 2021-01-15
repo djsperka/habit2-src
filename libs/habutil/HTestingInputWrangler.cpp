@@ -143,6 +143,7 @@ bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSe
 		{
 			TrialEventLogMap telm;
 			m_map.insert(phaseName, telm);
+			qDebug() << "HTestingInputWrangler::processLine - found new phase: " << phaseName;
 		}
 		TrialEventLogMap* pTrialEventLogMap = &m_map[phaseName];
 #endif
@@ -179,39 +180,41 @@ bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSe
 		if (!pTrialEventLogMap->contains(key))
 		{
 			pTrialEventLogMap->insert(key, new HEventLog());
+			qDebug() << "HTestingInputWrangler::processLine - Found new trial/repeat: " << itrial << "/" << irepeat;
 		}
 		HEventLog *pEventLog = pTrialEventLogMap->value(key);
 
 
 		// no LookTransType - do this by hand
 		QString sTrans = tokens.at(3).trimmed();
+		HEvent *pEvent = NULL;
 		if (sTrans == HLookTrans::NoneLeft.name())
 		{
-			pEventLog->append(new HLookTransEvent(HLookTrans::NoneLeft, ims));
+			pEvent = new HLookTransEvent(HLookTrans::NoneLeft, ims);
 		}
 		else if (sTrans == HLookTrans::LeftNone.name())
 		{
-			pEventLog->append(new HLookTransEvent(HLookTrans::LeftNone, ims));
+			pEvent = new HLookTransEvent(HLookTrans::LeftNone, ims);
 		}
 		else if (sTrans == HLookTrans::NoneCenter.name())
 		{
-			pEventLog->append(new HLookTransEvent(HLookTrans::NoneCenter, ims));
+			pEvent = new HLookTransEvent(HLookTrans::NoneCenter, ims);
 		}
 		else if (sTrans == HLookTrans::CenterNone.name())
 		{
-			pEventLog->append(new HLookTransEvent(HLookTrans::CenterNone, ims));
+			pEvent = new HLookTransEvent(HLookTrans::CenterNone, ims);
 		}
 		else if (sTrans == HLookTrans::NoneRight.name())
 		{
-			pEventLog->append(new HLookTransEvent(HLookTrans::NoneRight, ims));
+			pEvent = new HLookTransEvent(HLookTrans::NoneRight, ims);
 		}
 		else if (sTrans == HLookTrans::RightNone.name())
 		{
-			pEventLog->append(new HLookTransEvent(HLookTrans::RightNone, ims));
+			pEvent = new HLookTransEvent(HLookTrans::RightNone, ims);
 		}
 		else if (sTrans == HLookTrans::NoneNone.name())
 		{
-			pEventLog->append(new HLookTransEvent(HLookTrans::NoneNone, tokens.at(1).toInt()));
+			pEvent = new HLookTransEvent(HLookTrans::NoneNone, tokens.at(1).toInt());
 		}
 		else
 		{
@@ -219,7 +222,12 @@ bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSe
 			return false;
 		}
 
-		qDebug() << "There are " << pEventLog->count() << " events so far...";
+		if (pEvent)
+		{
+			pEventLog->append(pEvent);
+			qDebug() << "Appended event " << pEvent->type().name() << " at " << pEvent->timestamp();
+		}
+		qDebug() << "This trial/repeat has " << pEventLog->count() << " events so far...";
 
 	}
 	return true;
