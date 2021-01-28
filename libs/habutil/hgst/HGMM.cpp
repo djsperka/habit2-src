@@ -37,32 +37,21 @@ HGMM::HGMM(const Habit::StimulusDisplayInfo& sdi, QVector<HStimulusWidget *> vec
 	m_pgml = g_main_loop_new(NULL, FALSE);
 	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
 
-	// m_wid is a mapping of player position to window ID. See HStimPipeline::busSyncHandler
+	// m_widgets is a mapping of player position to widget. See HStimPipeline::busSyncHandler
 	if (vecWidgets.size() == 1)
 	{
 		m_widgets.insert(HPlayerPositionType::Center.number(), vecWidgets[0]);
-
-		m_wid.insert(HPlayerPositionType::Center.number(), vecWidgets[0]->winId());
 	}
 	else if (vecWidgets.size() == 2)
 	{
 		m_widgets.insert(HPlayerPositionType::Left.number(), vecWidgets[0]);
 		m_widgets.insert(HPlayerPositionType::Right.number(), vecWidgets[1]);
-
-		m_wid.insert(HPlayerPositionType::Left.number(), vecWidgets[0]->winId());
-		m_wid.insert(HPlayerPositionType::Right.number(), vecWidgets[1]->winId());
-
 	}
 	else if (vecWidgets.size() == 3)
 	{
 		m_widgets.insert(HPlayerPositionType::Left.number(), vecWidgets[0]);
 		m_widgets.insert(HPlayerPositionType::Center.number(), vecWidgets[1]);
 		m_widgets.insert(HPlayerPositionType::Right.number(), vecWidgets[2]);
-
-		m_wid.insert(HPlayerPositionType::Left.number(), vecWidgets[0]->winId());
-		m_wid.insert(HPlayerPositionType::Center.number(), vecWidgets[1]->winId());
-		m_wid.insert(HPlayerPositionType::Right.number(), vecWidgets[2]->winId());
-
 	}
 	else
 		qCritical() << "Cannot create HGMM with " << vecWidgets.size() << " widgets.";
@@ -206,14 +195,14 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 	// create pipeline
 	if (!bForceSound)
 	{
-		pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_wid, m_root, (context < 0), this);
+		pipeline = m_pipelineFactory(key, stimulus, m_sdinfo, m_widgets, m_root, (context < 0), this);
 	}
 	else
 	{
 		// Modify a copy of StimulusDisplayInfo to ensure sound is used.
 		Habit::StimulusDisplayInfo info(m_sdinfo);
 		info.setUseISS(true);
-		pipeline = m_pipelineFactory(key, stimulus, info, m_wid, m_root, (context < 0), this);
+		pipeline = m_pipelineFactory(key, stimulus, info, m_widgets, m_root, (context < 0), this);
 	}
 
 	// add signals
@@ -301,7 +290,7 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 			// create pipeline. Use sdi from original -- it may have a modified sdi (if sound-only ag)
 			Habit::StimulusDisplayInfo info(pipelineToBeReplaced->getStimulusDisplayInfo());
 			info.setUseISS(bForceSound);
-			pipelineTheNewOne = m_pipelineFactory(key, stimulus, info, m_wid, m_root, (context < 0), this);
+			pipelineTheNewOne = m_pipelineFactory(key, stimulus, info, m_widgets, m_root, (context < 0), this);
 
 			// replace pipeline in map
 			// don't add key to context map, its already there

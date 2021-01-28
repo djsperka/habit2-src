@@ -21,9 +21,8 @@ class TestMMController: public QDialog
 	Q_OBJECT
 
 	QPushButton *m_playButton;
-	QPushButton *m_stopButton;
-	QPushButton *m_nextButton;
-	QPushButton *m_replayButton;
+	QPushButton *m_prerollButton;
+	QPushButton *m_cleanupButton;
 	QListView *m_list;
 	QStringList m_stringList;
 	unsigned int m_index;
@@ -39,9 +38,8 @@ signals:
 public slots:
 
 	void playClicked();
-	void stopClicked();
-	void nextClicked();
-	void replayClicked();
+	void prerollClicked();
+	void cleanupClicked();
 	void stimStarted(int);
 	void itemClicked(const QModelIndex&);
 

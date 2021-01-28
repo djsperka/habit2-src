@@ -7,8 +7,8 @@
 
 #include <hgst/HStaticStimPipeline.h>
 
-HStaticStimPipeline::HStaticStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& widMap, const QDir& stimRoot, QObject *parent)
-: HStimPipeline(id, stimulusSettings, info, widMap, stimRoot, parent)
+HStaticStimPipeline::HStaticStimPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QMap<int, HStimulusWidget *>& pwMap, const QDir& stimRoot, QObject *parent)
+: HStimPipeline(id, stimulusSettings, info, pwMap, stimRoot, parent)
 {
 }
 

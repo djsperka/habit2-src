@@ -8,12 +8,12 @@
 #include "HPipeline.h"
 #include "HGMMException.h"
 
-HPipeline::HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pptwidMap, QObject *parent)
+HPipeline::HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const QMap<int, HStimulusWidget *>& pwMap, QObject *parent)
 : QObject(parent)
 , m_id(id)
 , m_ss(ss)
 , m_sdinfo(info)
-, m_wid(pptwidMap)
+, m_pwMap(pwMap)
 {
 }
 

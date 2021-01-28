@@ -19,7 +19,7 @@
 
 typedef QMap<int, WId> PPTWIdMap;
 
-class HVideoWidget;
+class HStimulusWidget;
 class HPipeline: public QObject
 {
 	Q_OBJECT
@@ -27,12 +27,12 @@ class HPipeline: public QObject
 	int m_id;
 	Habit::StimulusSettings m_ss;
 	Habit::StimulusDisplayInfo m_sdinfo;
-	PPTWIdMap m_wid;			// ppt - to - WId mapping for gstreamer bus sync callback
+	const QMap<int, HStimulusWidget *>& m_pwMap;			// ppt - to - WId mapping for gstreamer bus sync callback
 
 	Q_DISABLE_COPY(HPipeline);
 
 public:
-	HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pptwidMap, QObject *parent=NULL);
+	HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const QMap<int, HStimulusWidget *>& pwMap, QObject *parent=NULL);
 
 	int id() const { return m_id; };
 	const Habit::StimulusSettings& stimulusSettings() const { return m_ss; };
@@ -60,7 +60,7 @@ public:
 //	virtual void attachWidgetsToSinks(HVideoWidget *w0, HVideoWidget *w1=NULL, HVideoWidget *w2=NULL);		// default is a no-op
 
 	// get windowId map
-	const PPTWIdMap& widMap() { return m_wid; }
+	const QMap<int, HStimulusWidget *>& pwMap() { return m_pwMap; }
 
 	//static HPipeline* createPipeline(int id, const Habit::StimulusSettings& stimulusSettings, const QDir& stimRoot, const HStimulusLayoutType& layoutType, bool bSound=false, bool bISS=false);
 

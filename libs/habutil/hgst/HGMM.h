@@ -25,7 +25,7 @@
 #include "HStimulusWidget.h"
 
 
-typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pwMap, const QDir& stimRoot, bool bStatic, QObject *parent);
+typedef HPipeline* (*PipelineFactory)(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QMap<int, HStimulusWidget *>& pwMap, const QDir& stimRoot, bool bStatic, QObject *parent);
 
 // Media manager for Habit.
 // This media manager is entirely new for Habit 2.2+. It uses GStreamer, a media library available
@@ -40,11 +40,7 @@ class HGMM: public QObject
 
 	Habit::StimulusDisplayInfo m_sdinfo;
 	QDir m_root;
-	//bool m_bUseISS;
-	//HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
-	// map of WId from the widgets above
 	QMap<int, HStimulusWidget *> m_widgets;
-	PPTWIdMap m_wid;
 	HPipeline *m_pipelineCurrent;
 	GThread *m_gthread;
 	GMainLoop *m_pgml;
@@ -101,10 +97,6 @@ protected:
 
 public:
 
-	// Different ctor for each of the config types as defined by sdi. Must match, sorry.
-//	HGMM(const Habit::StimulusDisplayInfo& sdi, HStimulusWidget *pCenter, PipelineFactory factory = HStimPipelineFactory);
-//	HGMM(const Habit::StimulusDisplayInfo& sdi, HStimulusWidget *pLeft, HStimulusWidget *pRight, PipelineFactory factory = HStimPipelineFactory);
-//	HGMM(const Habit::StimulusDisplayInfo& sdi, HStimulusWidget *pLeft, HStimulusWidget *pCenter, HStimulusWidget *pRight, PipelineFactory factory = HStimPipelineFactory);
 	HGMM(const Habit::StimulusDisplayInfo& sdi, QVector<HStimulusWidget *> vecWidgets, const QDir& stimRoot, const QString& name = QString("unnamed"), PipelineFactory factory = HStimPipelineFactory);
 
 	virtual ~HGMM();
@@ -182,7 +174,6 @@ Q_SIGNALS:
 	void agStarted(int);
 	void stimStarted(int);
 	void screenStarted(const QString&, int);
-	//void screen(int, const QString&);
 	void stimulusChanged();
 	void prerolling(int);
 	void prerolled(int);

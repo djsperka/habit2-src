@@ -47,6 +47,7 @@ class HStimulusWidget: public QFrame
 
 	private:
 		QSize m_sizeTargetScreen;
+		QSize m_sizeStimulus;	// changes when stim changes
 		HVideoWidget *m_videoWidget;
 
 

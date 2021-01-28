@@ -11,7 +11,7 @@
 // if iss==false it means that sound can only come from stim source files. Can have two sources l/r, will be mixed. Can have only one, or none.
 // if iss==true it means that sound can ONLY come from a dedicated iss sound file. Video sources l/r/c that have sound are ok, but sound from those sources is ignored.
 
-#include "HVideoWidget.h"
+#include "HStimulusWidget.h"
 #include <QMutexLocker>
 #include <hgst/HStimPipeline.h>
 #include <hgst/HStaticStimPipeline.h>
@@ -37,8 +37,8 @@ HStimPipelineSource::~HStimPipelineSource()
 
 }
 
-HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& pptwidMap, const QDir& stimRoot, QObject *parent)
-: HPipeline(id, ss, info, pptwidMap, parent)
+HStimPipeline::HStimPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, const QMap<int, HStimulusWidget *>& pwMap, const QDir& stimRoot, QObject *parent)
+: HPipeline(id, ss, info, pwMap, parent)
 , m_bInitialized(false)
 , m_dirStimRoot(stimRoot)
 , m_bRewindPending(false)
@@ -235,7 +235,7 @@ GstBusSyncReply HStimPipeline::busSyncHandler(GstBus * bus, GstMessage * message
 	QString sDebugPrefix("HStimPipeline::busSyncHandler() - ");
 
 	// user_data is the map<> that goes from ppt to winid.
-	const PPTWIdMap *ppwMap = (const PPTWIdMap *)user_data;
+	HStimPipeline *pStimPipeline = (HStimPipeline *)user_data;
 
 	// ignore anything but 'prepare-window-handle' element messages
 	if (!gst_is_video_overlay_prepare_window_handle_message (message))
@@ -259,10 +259,13 @@ GstBusSyncReply HStimPipeline::busSyncHandler(GstBus * bus, GstMessage * message
 			//qDebug() << "BUS_SYNC_HANDLER - widmap " << *ppwMap;
 			if (pppt)
 			{
-				if (ppwMap->count(pppt->number()))
+				if (pStimPipeline->pwMap().count(pppt->number()))
 				{
+					// assign stimulus size to the HStimulusWidget. This will be used when
+					// the widget is resized or its geometry is updated.
+
 					qDebug() << sDebugPrefix << " set window handle";
-					gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY(src), (*ppwMap)[pppt->number()]);
+					gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY(src), pStimPipeline->pwMap()[pppt->number()]->winId());
 				}
 				else
 				{
@@ -286,7 +289,7 @@ void HStimPipeline::initialize()
 
 	GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
 	gst_bus_add_watch(bus, &HStimPipeline::busCallback, this);
-	gst_bus_set_sync_handler (bus, (GstBusSyncHandler)HStimPipeline::busSyncHandler, (gpointer)&widMap(), NULL);
+	gst_bus_set_sync_handler (bus, (GstBusSyncHandler)HStimPipeline::busSyncHandler, (gpointer)this, NULL);
 	gst_object_unref(bus);
 
 	// Create HStimPipelineSource objects for each position Left/Right/Center/Sound as needed.
@@ -1065,13 +1068,13 @@ void HStimPipeline::dump()
 
 }
 
-HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const PPTWIdMap& widMap, const QDir& stimRoot, bool bStatic, QObject *parent)
+HPipeline* HStimPipelineFactory(int id, const Habit::StimulusSettings& stimulusSettings, const Habit::StimulusDisplayInfo& info, const QMap<int, HStimulusWidget *>& pwMap, const QDir& stimRoot, bool bStatic, QObject *parent)
 {
 	HPipeline *p;
 	if (bStatic)
-		p = new HStaticStimPipeline(id, stimulusSettings, info, widMap, stimRoot, parent);
+		p = new HStaticStimPipeline(id, stimulusSettings, info, pwMap, stimRoot, parent);
 	else
-		p = new HStimPipeline(id, stimulusSettings, info, widMap, stimRoot, parent);
+		p = new HStimPipeline(id, stimulusSettings, info, pwMap, stimRoot, parent);
 	return p;
 }
 
