@@ -93,9 +93,9 @@ void HPhase::onEntry(QEvent* e)
 	// connect media manager signal agStarted(int) to slot agStarted(int)
 	// connect media manager signal stimStarted(int) to slot stimStarted(int)
 	// disconnect onExit() from this state.
-	QObject::connect(&HGMM::instance(), SIGNAL(screenStarted(const QString&, int)), this, SLOT(screenStarted(const QString&, int)));
-	QObject::connect(&HGMM::instance(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
-	QObject::connect(&HGMM::instance(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
+	QObject::connect(&(this->experiment().getHGMM()), SIGNAL(screenStarted(const QString&, int)), this, SLOT(screenStarted(const QString&, int)));
+	QObject::connect(&(this->experiment().getHGMM()), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
+	QObject::connect(&(this->experiment().getHGMM()), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 
 	// update look detector settings  to per-phase values
 	experiment().getLookDetector().setIsInclusiveLookTime(m_lookSettings.getInclusiveLookTime());
@@ -124,9 +124,9 @@ void HPhase::onExit(QEvent* e)
 
 	// connect media manager signal screen(int) to slot screenStarted(int)
 	// disconnect onExit() from this state.
-	QObject::disconnect(&HGMM::instance(), SIGNAL(screenStarted(const QString&, int)), this, SLOT(screenStarted(const QString&, int)));
-	QObject::disconnect(&HGMM::instance(), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
-	QObject::disconnect(&HGMM::instance(), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
+	QObject::disconnect(&(this->experiment().getHGMM()), SIGNAL(screenStarted(const QString&, int)), this, SLOT(screenStarted(const QString&, int)));
+	QObject::disconnect(&(this->experiment().getHGMM()), SIGNAL(agStarted(int)), this, SLOT(agStarted(int)));
+	QObject::disconnect(&(this->experiment().getHGMM()), SIGNAL(stimStarted(int)), this, SLOT(stimStarted(int)));
 	QObject::disconnect(this, SIGNAL(phaseStarted(QString, int)), &experiment(), SIGNAL(phaseStarted(QString, int)));
 	QObject::disconnect(this, SIGNAL(phaseEnded(QString, int)), &experiment(), SIGNAL(phaseEnded(QString, int)));
 	
@@ -137,7 +137,7 @@ void HPhase::onExit(QEvent* e)
 void HPhase::requestAG()
 {
 	eventLog().append(new HAGRequestEvent(HElapsedTimer::elapsed()));
-	HGMM::instance().ag();
+	this->experiment().getHGMM().ag();
 }
 
 void HPhase::onTrialCompleteEntered()

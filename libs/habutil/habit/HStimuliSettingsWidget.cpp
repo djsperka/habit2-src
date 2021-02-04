@@ -34,14 +34,28 @@ HStimuliSettingsWidget::HStimuliSettingsWidget(const QString& labelName, const S
 {
 	create(labelName, info);
 	connections();
-	//stimulusLayoutTypeChanged(info.getStimulusLayoutType().number());
+	m_phgmm->addStimuli(stimuli, context);
 }
 
+HStimuliSettingsWidget::~HStimuliSettingsWidget()
+{
+	m_phgmm->stop();
+	delete m_phgmm;
+}
 void HStimuliSettingsWidget::create(const QString& labelName, const StimulusDisplayInfo& info)
 {
 	m_pStimulusSettingsListWidget = new HStimulusSettingsListWidget(m_stimuli.stimuli(), m_sdi);
 	m_pStimulusOrderListWidget = new HStimulusOrderListWidget(m_stimuli.orders(), m_stimuli.stimuli(), m_sdi);
 	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(info, this);
+
+
+	m_phgmm = new HGMM(info, m_pStimulusPreviewWidget->getStimulusWidgets(), habutilGetStimulusRootDir(), labelName);
+
+	connect(m_pStimulusPreviewWidget, SIGNAL(preroll(unsigned int)), m_phgmm, SLOT(preroll(unsigned int)));
+	connect(m_pStimulusPreviewWidget, SIGNAL(pause(unsigned int)), m_phgmm, SLOT(pause(unsigned int)));
+	connect(m_pStimulusPreviewWidget, SIGNAL(stim(unsigned int)), m_phgmm, SLOT(stim(unsigned int)));
+	connect(m_pStimulusPreviewWidget, SIGNAL(rewind(unsigned int)), m_phgmm, SLOT(rewind(unsigned int)));
+	connect(m_pStimulusPreviewWidget, SIGNAL(background()), m_phgmm, SLOT(background()));
 
 	QGroupBox *g1 = new QGroupBox(QString("%1 Stimuli").arg(labelName));
 	QVBoxLayout *v1 = new QVBoxLayout;
@@ -104,7 +118,7 @@ void HStimuliSettingsWidget::stimulusAdded(int row)
 	qDebug() << m_stimuli.stimuli().at(row);
 
 	// add this stimulus to the media manager.
-	HGMM::instance().addStimulus(m_stimuli.stimuli().at(row), m_context);
+	m_phgmm->addStimulus(m_stimuli.stimuli().at(row), m_context);
 }
 
 void HStimuliSettingsWidget::stimulusSettingsChanged(int row)
@@ -113,8 +127,8 @@ void HStimuliSettingsWidget::stimulusSettingsChanged(int row)
 	clearStimulus();
 
 	// replace stimulus in media manager
-	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
-	HGMM::instance().replaceStimulus(list.at(row), m_stimuli.stimuli().at(row));
+	QList<unsigned int> list = m_phgmm->getContextStimList(m_context);
+	m_phgmm->replaceStimulus(list.at(row), m_stimuli.stimuli().at(row));
 	m_pStimulusPreviewWidget->preview(list.at(row), true);
 
 }
@@ -124,13 +138,11 @@ void HStimuliSettingsWidget::stimulusSettingsChanged(int row)
 // make sure that HGMM is in sync with the stimuli remaining.
 void HStimuliSettingsWidget::stimulusAboutToBeRemoved(int row)
 {
-	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
+	QList<unsigned int> list = m_phgmm->getContextStimList(m_context);
+
 	// in the stimulusSettingsLIst widget a stim was selected and "Remove" was clicked.
 	// We have to remove the stimulus from the media manager.
-
-	// play background before removing.
-	//HGMM::instance().background();
-	HGMM::instance().remove(list.at(row));
+	m_phgmm->remove(list.at(row));
 }
 
 
@@ -141,14 +153,14 @@ void HStimuliSettingsWidget::clearStimulus()
 
 void HStimuliSettingsWidget::previewStimulus(int row)
 {
-	QList<unsigned int> list = HGMM::instance().getContextStimList(m_context);
+	QList<unsigned int> list = m_phgmm->getContextStimList(m_context);
 	qDebug() << "HStimuliSettingsWidget::previewStimulus at row " << row << " key " << list.at(row);
 	m_pStimulusPreviewWidget->preview(list.at(row), true);
 }
 
 void HStimuliSettingsWidget::previewOrder(int row)
 {
-	QList<unsigned int> contextStimList = HGMM::instance().getContextStimList(m_context);
+	QList<unsigned int> contextStimList = m_phgmm->getContextStimList(m_context);
 	qDebug() << "HStimuliSettingsWidget::previewOrder at row " << row;
 	QList< QPair<int, QString> > indexedOrderList;
 	QString orderName;

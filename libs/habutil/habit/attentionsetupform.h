@@ -7,6 +7,7 @@
 #include "HStimulusSettingsWidget.h"
 #include "HStimulusPreviewWidget.h"
 #include "HIntertrialIntervalSettingsWidget.h"
+#include "HGMM.h"
 #include <QtGlobal>
 #if QT_VERSION >= 0x050000
 #include <QtWidgets>
@@ -45,6 +46,7 @@ private:
 	Habit::StimulusDisplayInfo m_stimulusDisplayInfo;
 	HIntertrialIntervalSettingsWidget *m_pIntertrialIntervalSettingsWidget;
 	HStimulusPreviewWidget* m_pStimulusPreviewWidget;
+	HGMM* m_phgmm;
 };
 }
 #endif // ATTENTIONSETUPFORM_H

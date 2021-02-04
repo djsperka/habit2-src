@@ -14,20 +14,34 @@ AttentionSetupForm::AttentionSetupForm(const Habit::AttentionGetterSettings& set
 , m_ssCurrent(settings.getAttentionGetterStimulus())
 , m_stimulusDisplayInfo(info)
 {
-	QVBoxLayout *vbox = new QVBoxLayout;
 	m_pIntertrialIntervalSettingsWidget = new HIntertrialIntervalSettingsWidget(m_agSettings, m_stimulusDisplayInfo, this);
+	connect(m_pIntertrialIntervalSettingsWidget, SIGNAL(stimulusSettingsChanged()), this, SLOT(stimulusSettingsChanged()));
+
+
+	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, this);
+
+
+	m_phgmm = new HGMM(info, m_pStimulusPreviewWidget->getStimulusWidgets(), habutilGetStimulusRootDir(), QString("agsetup"));
+	m_phgmm->addAG(settings.getAttentionGetterStimulus(), settings.isSoundOnly());
+
+
+	connect(m_pStimulusPreviewWidget, SIGNAL(preroll(unsigned int)), m_phgmm, SLOT(preroll(unsigned int)));
+	connect(m_pStimulusPreviewWidget, SIGNAL(pause(unsigned int)), m_phgmm, SLOT(pause(unsigned int)));
+	connect(m_pStimulusPreviewWidget, SIGNAL(stim(unsigned int)), m_phgmm, SLOT(stim(unsigned int)));
+	connect(m_pStimulusPreviewWidget, SIGNAL(rewind(unsigned int)), m_phgmm, SLOT(rewind(unsigned int)));
+	connect(m_pStimulusPreviewWidget, SIGNAL(background()), m_phgmm, SLOT(background()));
+
+	QVBoxLayout *vbox = new QVBoxLayout;
 	vbox->addWidget(m_pIntertrialIntervalSettingsWidget);
-	m_pStimulusPreviewWidget = new HStimulusPreviewWidget(m_stimulusDisplayInfo, HGMM::instance().getAGKey(), this);
 	vbox->addWidget(m_pStimulusPreviewWidget);
 	setLayout(vbox);
 
-	connect(m_pIntertrialIntervalSettingsWidget, SIGNAL(stimulusSettingsChanged()), this, SLOT(stimulusSettingsChanged()));
-	//initialize();
-//	qDebug() << m_agSettings.getAttentionGetterStimulus();
 }
 
 AttentionSetupForm::~AttentionSetupForm()
 {
+	m_phgmm->stop();
+	delete m_phgmm;
 }
 
 void AttentionSetupForm::components()
@@ -39,9 +53,9 @@ void AttentionSetupForm::stimulusSettingsChanged()
 	m_ssCurrent = m_pIntertrialIntervalSettingsWidget->getCurrentStimulusSettings();
 	qDebug() << "AttentionSetupForm::stimulusSettingsChanged() - got stimulus settings:";
 	qDebug() << m_ssCurrent;
-	m_pStimulusPreviewWidget->preview(HGMM::instance().getBackgroundKey(), true);
-	HGMM::instance().replaceStimulus(HGMM::instance().getAGKey(), m_ssCurrent, m_pIntertrialIntervalSettingsWidget->isSoundOnlyAG());
-	m_pStimulusPreviewWidget->preview(HGMM::instance().getAGKey(), true);
+	m_pStimulusPreviewWidget->preview(m_phgmm->getBackgroundKey(), true);
+	m_phgmm->replaceStimulus(m_phgmm->getAGKey(), m_ssCurrent, m_pIntertrialIntervalSettingsWidget->isSoundOnlyAG());
+	m_pStimulusPreviewWidget->preview(m_phgmm->getAGKey(), true);
 }
 
 void AttentionSetupForm::stimulusDisplayInfoChanged(const Habit::StimulusDisplayInfo& info)

@@ -9,28 +9,23 @@
 #include "HPhaseSettings.h"
 #include <QMapIterator>
 #include <QEventLoop>
-#include <QDialog>
+#include <QLabel>
 #include <gst/gst.h>
 #include <iostream>
 #include <algorithm>
 
 
-HGMM& HGMM::instance()
-{
-	static HGMM mm;
-	return mm;
-}
 
-HGMM::HGMM(PipelineFactory factory)
-: m_sdinfo()
-//, m_bUseISS(false)
-, m_pCenter(NULL)
-, m_pLeft(NULL)
-, m_pRight(NULL)
+
+
+HGMM::HGMM(const Habit::StimulusDisplayInfo& sdi, QVector<HStimulusWidget *> vecWidgets, const QDir& stimRoot, const QString& name, PipelineFactory factory)
+: m_sdinfo(sdi)
+, m_root(stimRoot)
 , m_pipelineCurrent(NULL)
 , m_gthread(NULL)
 , m_pgml(NULL)
 , m_pipelineFactory(factory)
+, m_name(name)
 , m_backgroundKey(99998)
 , m_agKey(99999)
 , m_defaultKey(99997)
@@ -41,18 +36,32 @@ HGMM::HGMM(PipelineFactory factory)
 	// launch main loop thread
 	m_pgml = g_main_loop_new(NULL, FALSE);
 	m_gthread = g_thread_new("HGMM-main-loop", &HGMM::threadFunc, m_pgml);
-}
 
-void HGMM::reset()
-{
-	qDebug() << "HGMM::reset()";
-	cleanupAll();
-	qDeleteAll(m_mapPipelines);
-	m_mapPipelines.clear();
-	m_mapContext.clear();
-	m_pCenter = m_pLeft = m_pRight = NULL;
-	m_pipelineCurrent = NULL;
-	m_sdinfo = Habit::StimulusDisplayInfo();
+	// m_wid is a mapping of player position to window ID. See HStimPipeline::busSyncHandler
+	if (vecWidgets.size() == 1)
+	{
+		m_widgets.insert(HPlayerPositionType::Center.number(), vecWidgets[0]);
+	}
+	else if (vecWidgets.size() == 2)
+	{
+		m_widgets.insert(HPlayerPositionType::Left.number(), vecWidgets[0]);
+		m_widgets.insert(HPlayerPositionType::Right.number(), vecWidgets[1]);
+	}
+	else if (vecWidgets.size() == 3)
+	{
+		m_widgets.insert(HPlayerPositionType::Left.number(), vecWidgets[0]);
+		m_widgets.insert(HPlayerPositionType::Center.number(), vecWidgets[1]);
+		m_widgets.insert(HPlayerPositionType::Right.number(), vecWidgets[2]);
+	}
+	else
+		qCritical() << "Cannot create HGMM with " << vecWidgets.size() << " widgets.";
+
+	// default stim is background color, specified in the StimulusDisplayInfo
+	addDefaultStim(sdi);
+
+	// Now actually play/display the background. This means that instantiating this class
+	// will display something in the widgets.
+	background();
 }
 
 void HGMM::cleanupAll()
@@ -82,114 +91,6 @@ void HGMM::cleanupAll()
 		p->forceCleanup();
 	}
 	return;
-}
-void HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir, bool bPopulate)
-{
-	qDebug() << "HGMM::reset(const Habit::ExperimentSettings& settings, const QDir& dir) - layout type " << settings.getStimulusDisplayInfo().getStimulusLayoutType().name();
-	reset();
-	modifyStimulusDisplay(settings.getStimulusDisplayInfo(), dir);
-
-//	// Need to know if AG is used. If it is, add attention getter settings to media manager
-	if (settings.getAttentionGetterSettings().isAttentionGetterUsed() || settings.getAttentionGetterSettings().isFixedISI())
-	{
-		qDebug() << "Adding AG...";
-//	qDebug() << settings.getAttentionGetterSettings().getAttentionGetterStimulus();
-//	qDebug() << "sound only? " << settings.getAttentionGetterSettings().isSoundOnly();
-
-		// FIXME ag is prerolled in addAG(). Shouldn't do that.
-		addAG(settings.getAttentionGetterSettings().getAttentionGetterStimulus(), settings.getAttentionGetterSettings().isSoundOnly());
-	}
-
-	if (bPopulate)
-	{
-		qDebug() << "Populating stimuli...";
-		QListIterator<Habit::HPhaseSettings> phaseIterator = settings.phaseIterator();
-		while (phaseIterator.hasNext())
-		{
-			const Habit::HPhaseSettings& ps = phaseIterator.next();
-			if (ps.getIsEnabled())
-			{
-				addStimuli(ps.stimuli(), ps.getSeqno());
-			}
-		}
-	}
-}
-
-void HGMM::modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const QDir& dir)
-{
-	qDebug() << "HGMM::reset(" << info << ", " << dir << " )";
-	m_sdinfo = info;
-	m_root = dir;
-
-	// if default key doesn't exist yet, create that pipleline. If it exists, then reconfigure it.
-	qDebug() << "m_mapPipelines has " << m_mapPipelines.count() << " def " << m_defaultKey << "?" << m_mapPipelines.contains(m_defaultKey);
-	if (m_mapPipelines.contains(m_defaultKey))
-	{
-		m_mapPipelines.value(m_defaultKey)->cleanup();
-		m_mapPipelines.value(m_defaultKey)->reconfigure(m_sdinfo);
-	}
-	else
-	{
-		m_defaultKey = addStimulus(QString("default"), QColor(Qt::gray), -3);
-	}
-	preroll(m_defaultKey);
-
-	if (m_mapPipelines.contains(m_backgroundKey))
-	{
-		qDebug() << "reconfigure background key " << m_backgroundKey;
-		m_mapPipelines.value(m_backgroundKey)->reconfigure(m_sdinfo);
-	}
-	else
-	{
-		qDebug() << "add background key " << m_backgroundKey;
-		m_backgroundKey = addStimulus(QString("background"), m_sdinfo.getBackGroundColor(), -2);
-	}
-	preroll(m_backgroundKey);
-
-	// just reconfigure ag if it already exists, don't create here
-	if (m_mapPipelines.contains(m_agKey))
-	{
-		m_mapPipelines.value(m_agKey)->reconfigure(m_sdinfo);
-		preroll(m_agKey);
-	}
-
-}
-
-//void HGMM::reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir)
-//{
-//	qDebug() << "HGMM::reset(HStimulusWidget *pCenter, info, dir)";
-//	modifyStimulusDisplay(info, dir);
-//	setWidgets(pCenter);
-//}
-//
-//void HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, const Habit::StimulusDisplayInfo& info, const QDir& dir)
-//{
-//	qDebug() << "HGMM::reset(HStimulusWidget *pLeft, HStimulusWidget *pRight, info, dir)";
-//	modifyStimulusDisplay(info, dir);
-//	setWidgets(pLeft, pRight);
-//}
-
-void HGMM::setWidgets(HStimulusWidget *p0, HStimulusWidget *p1, HStimulusWidget *p2)
-{
-	if (p2)
-	{
-		// have all three. note order
-		m_pLeft = p0;
-		m_pCenter = p1;
-		m_pRight = p2;
-	}
-	else if (p1)
-	{
-		// have left and right
-		m_pCenter = p0;
-		m_pLeft = p0;
-		m_pRight = p1;
-	}
-	else
-	{
-		m_pCenter = p0;
-		m_pLeft = m_pRight = NULL;
-	}
 }
 
 
@@ -244,30 +145,25 @@ HGMM::~HGMM()
 	}
 
 	// exit main loop
-	qDebug() << "HGMM::~HGMM: quit main loop";
+	qDebug() << "HGMM(" << m_name << ")::~HGMM: quit main loop";
 	g_main_loop_quit(m_pgml);
-	qDebug() << "HGMM::~HGMM: g_thread_join...";
+	qDebug() << "HGMM(" << m_name << ")::~HGMM: g_thread_join...";
 	g_thread_join(m_gthread);
-	qDebug() << "HGMM::~HGMM: g_thread_join done\n";
+	qDebug() << "HGMM(" << m_name << ")::~HGMM: g_thread_join done\n";
 
 	g_main_loop_unref(m_pgml);
 	g_thread_unref(m_gthread);
 	qDeleteAll(m_mapPipelines);
 	m_mapPipelines.clear();
-	qDebug() << "~HGMM() - done";
+	qDebug() << "HGMM(" << m_name << ")::~HGMM() - done";
 }
 
 
 HStimulusWidget *HGMM::getHStimulusWidget(const HPlayerPositionType& type)
 {
-	if (type == HPlayerPositionType::Left)
-		return m_pLeft;
-	else if (type == HPlayerPositionType::Right)
-		return m_pRight;
-	else if (type == HPlayerPositionType::Center)
-		return m_pCenter;
-	else
-		return NULL;
+	if (m_widgets.contains(type.number()))
+		return m_widgets[type.number()];
+	return (HStimulusWidget *)NULL;
 }
 
 unsigned int HGMM::nextKey()
@@ -294,7 +190,7 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 {
 	HPipeline *pipeline;
 
-	qDebug() << "HGMM::addStimulus(" << key << "): " << stimulus.getName() << " context " << context << " layout type " << getStimulusLayoutType().name();
+	qDebug() << "HGMM(" << m_name << ")::addStimulus(" << key << "): " << stimulus.getName() << " context " << context;
 
 	// create pipeline
 	if (!bForceSound)
@@ -309,18 +205,28 @@ unsigned int HGMM::addStimulus(unsigned int key, const Habit::StimulusSettings& 
 		pipeline = m_pipelineFactory(key, stimulus, info, m_root, (context < 0), this);
 	}
 
-	// Add helper to map
-	m_mapPipelines.insert(key, pipeline);
-
 	// add signals
 	connect(pipeline, SIGNAL(prerolling(int)), this, SIGNAL(prerolling(int)));
 	connect(pipeline, SIGNAL(prerolled(int)), this, SIGNAL(prerolled(int)));
+
+	// Add key to pipeline map
+	m_mapPipelines.insert(key, pipeline);
 
 	// add key to context map
 	m_mapContext.insert(context, key);
 
 	return key;
 }
+
+
+unsigned int HGMM::addDefaultStim(const Habit::StimulusDisplayInfo& sdi)
+{
+	m_backgroundKey = addStimulus("default", sdi.getBackGroundColor(), -2);
+	qDebug() << "HGMM(" << m_name << ")::addDefaultStim " << sdi.getBackGroundColor() << " id " << m_backgroundKey;
+	return m_backgroundKey;
+}
+
+
 
 unsigned int HGMM::addStimulus(unsigned int key, const QString& name, const QColor& color, int context, bool bForceSound)
 {
@@ -362,7 +268,7 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 	int context;
 	bool bOK = false;
 
-	qDebug() << "HGMM::replaceStimulus(" << key << "): " << stimulus.getName();
+	qDebug() << "HGMM(" << m_name << ")::replaceStimulus(" << key << "): " << stimulus.getName();
 
 	// first, make sure there is already a pipeline with that key.
 	if (m_mapPipelines.contains(key))
@@ -416,7 +322,7 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 	}
 	else
 	{
-		qCritical() << "HGMM::initialize(): key " << key << " not found!";
+		qCritical() << "HGMM(" << m_name << ")::replaceStimulus(): key " << key << " not found!";
 	}
 
 	return key;
@@ -424,15 +330,16 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 
 unsigned int HGMM::addAG(const Habit::StimulusSettings& ssAG, bool bForceSound)
 {
+	// AG is just a stimulus with context = -1
+	// note we assume that there is only one ag ever - m_agKey is assigned here.
 	m_agKey = addStimulus(ssAG, -1, bForceSound);
+
+	// TODO - don't do this here!!!!
 	preroll(m_agKey);
+
 	return m_agKey;
 }
 
-//void HGMM::clear()
-//{
-//	stim(m_backgroundKey);
-//}
 
 void HGMM::ag()
 {
@@ -442,30 +349,34 @@ void HGMM::ag()
 	playStim(m_agKey);
 }
 
+void HGMM::background()
+{
+	stim(m_backgroundKey);
+}
 
 void HGMM::nowPlaying()
 {
 	if (m_bPendingAG)
 	{
 		m_bRewindCurrentPipeline = true;
-		qDebug() << "HGMM::nowPlaying: Q_EMIT(agStarted(" << m_iPendingStimKey << "))";
+		qDebug() << "HGMM(" << m_name << ")::nowPlaying: Q_EMIT(agStarted(" << m_iPendingStimKey << "))";
 		Q_EMIT(agStarted(m_iPendingStimKey));
 	}
 	else if (m_bPendingStim)
 	{
-		qDebug() << "HGMM::nowPlaying: Q_EMIT(stimStarted(" << m_iPendingStimKey << "))";
+		qDebug() << "HGMM(" << m_name << ")::nowPlaying: Q_EMIT(stimStarted(" << m_iPendingStimKey << "))";
 		Q_EMIT(stimStarted(m_iPendingStimKey));
 	}
 	else
 	{
-		qCritical() << "HGMM::nowPlaying: No stim or ag pending!";
+		qCritical() << "HGMM(" << m_name << ")::nowPlaying: No stim or ag pending!";
 	}
 }
 
 // replace current stimulus with the one identified by 'key'.
 void HGMM::stim(unsigned int key)
 {
-	qDebug() << "HGMM::stim(" << key << ")";
+	qDebug() << "HGMM(" << m_name << ")::stim(" << key << ")";
 	m_bPendingStim = true;
 	m_bPendingAG = false;
 	m_iPendingStimKey = key;
@@ -474,7 +385,7 @@ void HGMM::stim(unsigned int key)
 
 void HGMM::initialize(unsigned int key)
 {
-	qDebug() << "HGMM::initialize(" << key << ") stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM(" << m_name << ")::initialize(" << key << ") stim " << getStimulusSettings(key).getName();
 
 	if (m_mapPipelines.contains(key))
 	{
@@ -482,13 +393,13 @@ void HGMM::initialize(unsigned int key)
 	}
 	else
 	{
-		qWarning() << "HGMM::initialize(): key " << key << " not found!";
+		qWarning() << "HGMM(" << m_name << ")::initialize(): key " << key << " not found!";
 	}
 }
 
 void HGMM::cleanup(unsigned int key)
 {
-	qDebug() << "HGMM::cleanup(" << key << ") stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM(" << m_name << ")::cleanup(" << key << ") stim " << getStimulusSettings(key).getName();
 
 	if (m_mapPipelines.contains(key))
 	{
@@ -496,7 +407,7 @@ void HGMM::cleanup(unsigned int key)
 	}
 	else
 	{
-		qWarning() << "HGMM::cleanup(): key " << key << " not found!";
+		qWarning() << "HGMM(" << m_name << ")::cleanup(): key " << key << " not found!";
 	}
 }
 
@@ -504,7 +415,7 @@ void HGMM::cleanup(unsigned int key)
 // 'key' is the context, and the 'value' is the stim id (input parake.
 void HGMM::remove(unsigned int stimkey)
 {
-	qDebug() << "HGMM::remove(" << stimkey << ") stim " << getStimulusSettings(stimkey).getName();
+	qDebug() << "HGMM(" << m_name << ")::remove(" << stimkey << ") stim " << getStimulusSettings(stimkey).getName();
 
 	if (m_mapPipelines.contains(stimkey))
 	{
@@ -529,53 +440,53 @@ void HGMM::remove(unsigned int stimkey)
 	}
 	else
 	{
-		qWarning() << "HGMM::remove(): stimkey " << stimkey << " not found!";
+		qWarning() << "HGMM(" << m_name << ")::remove(): stimkey " << stimkey << " not found!";
 	}
 }
 
 
 void HGMM::preroll(unsigned int key)
 {
-	qDebug() << "HGMM::preroll(" << key << ") stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM(" << m_name << ")::preroll(" << key << ") stim " << getStimulusSettings(key).getName();
 	if (m_mapPipelines.contains(key))
 	{
 		m_mapPipelines.value(key)->preroll();
 	}
 	else
 	{
-		qWarning() << "HGMM::preroll(): key " << key << " not found!";
+		qWarning() << "HGMM(" << m_name << ")::preroll(): key " << key << " not found!";
 	}
 }
 
 void HGMM::pause(unsigned int key)
 {
-	qDebug() << "HGMM::pause(" << key << ") stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM(" << m_name << ")::pause(" << key << ") stim " << getStimulusSettings(key).getName();
 	if (m_mapPipelines.contains(key))
 	{
 		m_mapPipelines.value(key)->pause();
 	}
 	else
 	{
-		qWarning() << "HGMM::pause(): key " << key << " not found!";
+		qWarning() << "HGMM(" << m_name << ")::pause(): key " << key << " not found!";
 	}
 }
 
 void HGMM::rewind(unsigned int key)
 {
-	qDebug() << "HGMM::rewind(" << key << ") stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM(" << m_name << ")::rewind(" << key << ") stim " << getStimulusSettings(key).getName();
 	if (m_mapPipelines.contains(key))
 	{
 		m_mapPipelines.value(key)->rewind();
 	}
 	else
 	{
-		qWarning() << "HGMM::rewind(): key " << key << " not found!";
+		qWarning() << "HGMM(" << m_name << ")::rewind(): key " << key << " not found!";
 	}
 }
 
 void HGMM::dump(unsigned int key)
 {
-	qDebug() << "HGMM::dump(" << key << " stim " << getStimulusSettings(key).getName();
+	qDebug() << "HGMM(" << m_name << ")::dump(" << key << " stim " << getStimulusSettings(key).getName();
 
 	if (m_mapPipelines.contains(key))
 	{
@@ -583,14 +494,14 @@ void HGMM::dump(unsigned int key)
 	}
 	else
 	{
-		qWarning() << "HGMM::dump(): key " << key << " not found!";
+		qWarning() << "HGMM(" << m_name << ")::dump(): key " << key << " not found!";
 	}
 }
 
 
 void HGMM::playStim(unsigned int key)
 {
-	qDebug() << "HGMM::playstim(" << key << ") stim " << getStimulusSettings(key).getName() << " layout " << getStimulusLayoutType().name();
+	qDebug() << "HGMM(" << m_name << ")::playstim(" << key << ") stim " << getStimulusSettings(key).getName();
 	HPipeline *pipeline = NULL;		// the pipeline that will be played
 
 	// get pipeline that will be displayed/played.
@@ -619,10 +530,13 @@ void HGMM::playStim(unsigned int key)
 		// deal with current pipeline. After this 'm_pipelineCurrent' is no longer connected to the display widget.
 		if (m_pipelineCurrent)
 		{
-			qDebug() << "HGMM::playstim: pause current stim";
+			qDebug() << "HGMM(" << m_name << ")::playstim: pause current stim";
 			disconnect(m_pipelineCurrent, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 			disconnect(m_pipelineCurrent, SIGNAL(screen(const QString&, int)), this, SIGNAL(screenStarted(const QString&, int)));
 			m_pipelineCurrent->pause();
+
+
+			qDebug() << "HGMM(" << m_name << ")::playstim: detach widgets from current stim";
 			m_pipelineCurrent->detachWidgetsFromSinks();
 
 			if (!m_pipelineCurrent->isStatic())
@@ -643,21 +557,22 @@ void HGMM::playStim(unsigned int key)
 		connect(pipeline, SIGNAL(nowPlaying()), this, SLOT(nowPlaying()));
 		connect(pipeline, SIGNAL(screen(const QString&, int)), this, SIGNAL(screenStarted(const QString&, int)));
 
-		// Attach new pipeline sinks to the widgets.
-		if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutSingle)
-		{
-			pipeline->attachWidgetsToSinks(m_pCenter->getHVideoWidget());
-		}
-		else if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutLeftRight)
-		{
-			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget());
-		}
-		else if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutTriple)
-		{
-			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pCenter->getHVideoWidget(), m_pRight->getHVideoWidget());
-		}
-		else
-			qCritical() << "HGMM::playStim  stimulus layout type " << getStimulusLayoutType().name() << " not handled.";
+//		// Attach new pipeline sinks to the widgets.
+//		qDebug() << "HGMM::playstim: attach widgets to sinks";
+//		if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutSingle)
+//		{
+//			pipeline->attachWidgetsToSinks(m_pCenter->getHVideoWidget());
+//		}
+//		else if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutLeftRight)
+//		{
+//			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pRight->getHVideoWidget());
+//		}
+//		else if (getStimulusLayoutType()==HStimulusLayoutType::HStimulusLayoutTriple)
+//		{
+//			pipeline->attachWidgetsToSinks(m_pLeft->getHVideoWidget(), m_pCenter->getHVideoWidget(), m_pRight->getHVideoWidget());
+//		}
+//		else
+//			qCritical() << "HGMM::playStim  stimulus layout type " << getStimulusLayoutType().name() << " not handled.";
 	}
 	else
 	{
@@ -666,6 +581,7 @@ void HGMM::playStim(unsigned int key)
 		m_pipelineCurrent->rewind();
 	}
 	m_bRewindCurrentPipeline = false;
+	qDebug() << "HGMM(" << m_name << ")::playstim: set to PLAY";
 	pipeline->play();
 	m_pipelineCurrent = pipeline;
 
@@ -689,24 +605,12 @@ void HGMM::stop()
 
 void HGMM::updateGeometry()
 {
-	// Create a helper.
-	if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	QList<HStimulusWidget *> list = m_widgets.values();
+	for (int i=0; i<list.size(); i++)
 	{
-		qDebug() << "HGMM::updateGeometry( SINGLE ) - widget size " << m_pCenter->getHVideoWidget()->getStimulusSize();
-		m_pCenter->getHVideoWidget()->updateGeometry();
+		qDebug() << "HGMM(" << m_name << ")::updateGeometry" << i << "/" << list.size();
+		list[i]->updateGeometry();
 	}
-	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
-	{
-		m_pLeft->getHVideoWidget()->updateGeometry();
-		m_pRight->getHVideoWidget()->updateGeometry();
-	}
-	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
-	{
-		m_pLeft->getHVideoWidget()->updateGeometry();
-		m_pCenter->getHVideoWidget()->updateGeometry();
-		m_pRight->getHVideoWidget()->updateGeometry();
-	}
-	qDebug() << "HGMM::updateGeometry" << getStimulusLayoutType().name() << " done.";
 }
 
 
@@ -719,20 +623,20 @@ const Habit::StimulusSettings& HGMM::getStimulusSettings(unsigned int key) const
 		return dummy;
 }
 
-QDialog* HGMM::createStimulusWidget()
+QWidget* HGMM::createStimulusWidget()
 {
-	QDialog *pDialog = new QDialog;
+	QLabel *pLabel = new QLabel;
+	//QDialog *pDialog = new QDialog;
 	QHBoxLayout *hbox = new QHBoxLayout;
-	qDebug() << "createStimulusWidget - layout type " << getStimulusLayoutType().name();
-	if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
+	if (m_sdinfo.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
 		qDebug() << "createStimulusWidget - single";
 		HStimulusWidget *video = getHStimulusWidget(HPlayerPositionType::Center);
 		connect(this, SIGNAL(stimulusChanged()), video->getHVideoWidget(), SLOT(stimulusChanged()));
 		hbox->addWidget(video);
-		pDialog->setLayout(hbox);
+		pLabel->setLayout(hbox);
 	}
-	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
+	else if (m_sdinfo.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
 		HStimulusWidget *videoLeft = getHStimulusWidget(HPlayerPositionType::Left);
 		HStimulusWidget *videoRight = getHStimulusWidget(HPlayerPositionType::Right);
@@ -740,10 +644,10 @@ QDialog* HGMM::createStimulusWidget()
 		connect(this, SIGNAL(stimulusChanged()), videoRight->getHVideoWidget(), SLOT(stimulusChanged()));
 		hbox->addWidget(videoLeft);
 		hbox->addWidget(videoRight);
-		pDialog->setLayout(hbox);
+		pLabel->setLayout(hbox);
 		qDebug() << "createStimulusWidget - L/R";
 	}
-	else if (getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
+	else if (m_sdinfo.getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
 	{
 		HStimulusWidget *videoLeft = getHStimulusWidget(HPlayerPositionType::Left);
 		HStimulusWidget *videoCenter = getHStimulusWidget(HPlayerPositionType::Center);
@@ -754,8 +658,8 @@ QDialog* HGMM::createStimulusWidget()
 		hbox->addWidget(videoLeft);
 		hbox->addWidget(videoCenter);
 		hbox->addWidget(videoRight);
-		pDialog->setLayout(hbox);
+		pLabel->setLayout(hbox);
 		qDebug() << "createStimulusWidget - Triple";
 	}
-	return pDialog;
+	return pLabel;
 }

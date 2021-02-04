@@ -11,6 +11,7 @@
 #include <QObject>
 #include <QDir>
 #include <QMultiMap>
+#include <QVector>
 #include <QTimer>
 #include <QDialog>
 #include <glib.h>
@@ -40,11 +41,14 @@ class HGMM: public QObject
 	Habit::StimulusDisplayInfo m_sdinfo;
 	QDir m_root;
 	//bool m_bUseISS;
-	HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
+	//HStimulusWidget *m_pCenter, *m_pLeft, *m_pRight;
+	// map of WId from the widgets above
+	QMap<int, HStimulusWidget *> m_widgets;
 	HPipeline *m_pipelineCurrent;
 	GThread *m_gthread;
 	GMainLoop *m_pgml;
 	PipelineFactory m_pipelineFactory;
+	QString m_name;
 
 	// A map containing lists of stimulus keys (which can be played with stim(key), and whose
 	// StimulusSettings can be fetched with getStimulusSettings(key)), saved according to their
@@ -60,9 +64,6 @@ class HGMM: public QObject
 	unsigned int m_agKey;
 	unsigned int m_defaultKey;	// this key will always work
 
-
-	// Singleton. Uses HStimPipelineFactory() to generate HPipeline objs.
-	HGMM(PipelineFactory factory = HStimPipelineFactory);
 	HGMM(HGMM& mm);	// not defined.
 
 
@@ -85,6 +86,7 @@ class HGMM: public QObject
 	// If 'bForceSound' is true, the pipeline will generate sound even if the StimulusDisplayInfo says otherwise
 	unsigned int addStimulus(unsigned int key, const Habit::StimulusSettings& ss, int context, bool bForceSound = false);
 	unsigned int addStimulus(unsigned int key, const QString& name, const QColor& color, int context, bool bForceSound = false);
+	unsigned int addDefaultStim(const Habit::StimulusDisplayInfo& sdi);
 	bool getContext(unsigned int key, int& context);
 	bool m_bPendingAG;
 	bool m_bPendingStim;
@@ -98,71 +100,42 @@ protected:
 
 public:
 
-//	HGMM(HStimulusWidget *center, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
-//	HGMM(HStimulusWidget *left, HStimulusWidget *right, const QDir& dir = QDir("/"), bool useISS = true, const QColor& bkgdColor = Qt::gray, PipelineFactory factory = HStimPipelineFactory);
+	HGMM(const Habit::StimulusDisplayInfo& sdi, QVector<HStimulusWidget *> vecWidgets, const QDir& stimRoot, const QString& name = QString("unnamed"), PipelineFactory factory = HStimPipelineFactory);
+
 	virtual ~HGMM();
 
-	// Perform a FULL RESET: clear everything and restore HGMM to its initial state, with no pipelines, not even static ones.
-	void reset();
-
-	// Re-initializes the mm, creates pipelines for default, background, and attention-getter (if configured),
-	// and all configured stimuli (if bPopulate==true). The default, background, and attention-getter are prerolled.
-	// No widgets are set - call setWidgets() for that. Otherwise,
-	// the mm will be ready to play all stimuli. Context stim lists are also available.
-	void reset(const Habit::ExperimentSettings& settings, const QDir& dir = QDir::rootPath(), bool bPopulate = false);
-
-	// Reconfigure all existing pipelines using the supplied StimulusDisplayInfo. The stimuli themselves remain, but they get
-	// all-new pipelines reconfigured using the new Info.
-	// Intended for use when in ExperimentEditor - this must be called when no widgets are
-	// displayed or even playing (not really sure what happens, but its easy to ensure so this is cautionary).
-	void modifyStimulusDisplay(const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
-
-
-	// Re-initialize mm, create pipelines for default, background. Widgets ARE set, but no other stimuli or ag
-	// are configured.
-	//void reset(HStimulusWidget *pCenter, const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
-	//void reset(HStimulusWidget *pLeft, HStimulusWidget *pRight,  const Habit::StimulusDisplayInfo& info, const QDir& dir = QDir::rootPath());
-
-	// assign widget(s) to hgmm
-	void setWidgets(HStimulusWidget *p0, HStimulusWidget *p1=NULL, HStimulusWidget *p2=NULL);
-
-	// Get reference to singleton instance of HGMM.
-	static HGMM& instance();
-
-
-	// add stimuli to the un-curated list.
+	// Add attention getter stimulus. This stimulus is then prerolled and made ready to go.
+	// Returns stimulus ID.
 	virtual unsigned int addAG(const Habit::StimulusSettings& ags, bool bForceSound = false);
+
+	// Add individual solid-color stimulus.
 	virtual unsigned int addStimulus(const Habit::StimulusSettings& ss, int context, bool bForceSound = false);
+
+	// Add stimulus specified in StimulusSettings. Return value is stimID.
 	virtual unsigned int addStimulus(const QString& name, const QColor& color, int context, bool bForceSound = false);
 
 	// update the given pipeline to use a new stim. Used when changing AG stim, e.g.
 	virtual bool replaceStimulus(unsigned int key, const Habit::StimulusSettings& stimulus, bool bForceSound = false);
 
-	// Add stimuli to be used in curated pipelines. These should be coming from
-	// a phase - where StimuliSettings hold the stim (and orders) for a single phase.
-	// A pipeline is created with a call to its factory method. Each such call takes args
-	// StimulusSettings, context, bForceSound. The latter arg, bForceSound, tells the
-	// factory to inlcude audio in the output, even if the StimulusDisplayInfo says
-	// there is no sound.
+	// add all stimuli in StimuliSettings. StimuliSettings intended to hold all
+	// stim for a single context (phase). To get the stimIDs, call getContextStimList.
+	// StimIDs for the stimuli are in same order as StimulusSettings are in the StimuliSettings.
 	virtual void addStimuli(const Habit::StimuliSettings& ss, int context, bool bForceSound = false);
+	QList<unsigned int> getContextStimList(int context);
 
-
-
-
-
+	// Convenience funcs for standard stimIDs
 	unsigned int getAGKey() const { return m_agKey; };
 	unsigned int getBackgroundKey() const { return m_backgroundKey; };
 	unsigned int getDefaultKey() const { return m_defaultKey; };
 
+	// Get the widget for a particular position
 	HStimulusWidget *getHStimulusWidget(const HPlayerPositionType& type);
-	const HStimulusLayoutType& getStimulusLayoutType() const { return m_sdinfo.getStimulusLayoutType(); };
+
+
 	const Habit::StimulusSettings& getStimulusSettings(unsigned int key) const;
 
-	// Change layout type and widgets. Must supply correct # of pointers.
-	//void setStimulusLayoutType(const HStimulusLayoutType& layoutType, HStimulusWidget *w0, HStimulusWidget *w1);
-	QList<unsigned int> getContextStimList(int context);
 
-	QDialog *createStimulusWidget();
+	QWidget *createStimulusWidget();
 
 	// each pipeline represents a single stimulus (single or dual screen, i.e. Habit::StimulusSettings)
 	const QMap<unsigned int, HPipeline *>& pipelineMap() const { return m_mapPipelines; };
@@ -172,10 +145,6 @@ public:
 
 	// pipeline control
 	void initialize(unsigned int id);
-	void preroll(unsigned int id);
-	void cleanup(unsigned int id);
-	void pause(unsigned int id);
-	void rewind(unsigned int id);
 
 	// remove stimulus, delete pipeline, make lists consistent
 	void remove(unsigned int id);
@@ -184,13 +153,17 @@ public:
 	void dump(unsigned int id);
 
 	virtual void defaultStim() { stim(m_defaultKey); };
-	virtual void background() { stim(m_backgroundKey); };
 	virtual void stop();
 
 public Q_SLOTS:
 
 	// replace current stimulus with the one id'd by the key
 	void stim(unsigned int);
+	void preroll(unsigned int id);
+	void cleanup(unsigned int id);
+	void pause(unsigned int id);
+	void rewind(unsigned int id);
+	void background();
 
 	// replace current stimulus with the one id'd by the current ag key
 	void ag();
