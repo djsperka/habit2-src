@@ -1,1 +1,1 @@
-libgstqt.dylib
+build/src/libs/gstqt/release/libgstqt.dylib
