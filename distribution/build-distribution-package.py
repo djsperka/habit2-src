@@ -21,6 +21,7 @@ print('Git tag %s' % argsdict['git_tag'])
 print('Dist version %s' % argsdict['dist_version'])
 print('Stim version %s' % argsdict['stim_version'])
 print('Installer display title %s' % argsdict['extra_label'])
+print('Make target is %s' % argsdict['make_target'])
 
 
 # set gstreamer-related env vars
