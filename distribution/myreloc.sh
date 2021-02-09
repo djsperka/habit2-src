@@ -73,7 +73,22 @@ fi
 ###################################
 
 # Now copy plugin from $LIBLIST into plugin folder -- dumping into Frameworks folder (PKG_CONFIG_PATH must be set to th)
-tar -cf - --files-from $LIBLIST | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/lib/gstreamer-1.0 -xf -
+#tar -cf - --files-from $LIBLIST | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/lib/gstreamer-1.0 -xf -
+
+# if defined, copy files from LIBLIST
+# If lib  has path, tar -C to that
+if [ ! -z "$LIBLIST" ]
+then
+	echo "getting files from liblist file $LIBLIST"
+	while IFS= read -r lib
+	do
+		tar -C `dirname $lib` -cf - `basename $lib` | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0/ -xf -
+done < "$LIBLIST"
+fi
+
+
+
+
 
 # relocation on the plugin is required. 
 # the plugin build (as of 8/26/20) leaves gstreamer libs linked with full paths, and 
