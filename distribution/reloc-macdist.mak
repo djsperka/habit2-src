@@ -116,7 +116,7 @@ build: $(BUILDDIR)/stamp-build
 
 
 $(BUILDDIR)/stamp-reloc: $(BUILDDIR)/stamp-build
-	$(RELOC) $(SRCDIR)/apps/habit/release habit2 ff.txt pkgs.txt $(DISTDIR)
+	$(RELOC) $(SRCDIR)/apps/habit/release habit2 habit-plugin.txt pkgs.txt $(DISTDIR)
 	touch $@
 
 
