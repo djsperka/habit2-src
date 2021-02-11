@@ -4,3 +4,7 @@ org.freedesktop.gstreamer.x86_64.gstreamer-1.0-codecs
 org.freedesktop.gstreamer.x86_64.gstreamer-1.0-codecs-gpl
 org.freedesktop.gstreamer.x86_64.gstreamer-1.0-playback
 org.freedesktop.gstreamer.x86_64.gstreamer-1.0-libav
+org.freedesktop.gstreamer.x86_64.gstreamer-1.0-system
+org.freedesktop.gstreamer.x86_64.gstreamer-1.0-effects
+org.freedesktop.gstreamer.x86_64.base-crypto
+org.freedesktop.gstreamer.x86_64.gstreamer-1.0-net
