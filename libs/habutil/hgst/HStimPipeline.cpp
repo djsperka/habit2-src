@@ -527,7 +527,7 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 
 		}
 		qDebug() << sDebugPrefix << "video - " << GST_ELEMENT_NAME(src) << " - done.";
-		GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pSource->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, "video");
+		//GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pSource->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, "video");
 
 	}
 	else if (isAudio)
@@ -727,7 +727,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			if (pStimPipeline->m_iAsyncPause) pStimPipeline->m_iAsyncPause--;
 			qDebug() << sDebugPrefix << "pipeline is now prerolled. m_iAsyncPause=" << pStimPipeline->m_iAsyncPause;
 			pStimPipeline->emitPrerolled();
-			GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pStimPipeline->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pStimPipeline->pipeline()));
+			//GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pStimPipeline->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pStimPipeline->pipeline()));
 		}
 		//#endif here see bottom
 	}
@@ -989,8 +989,8 @@ void HStimPipeline::dump()
 		return;
 	}
 
-	qDebug() << "Dump dot file base name " << GST_ELEMENT_NAME(pipeline());
-	GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline()));
+	//qDebug() << "Dump dot file base name " << GST_ELEMENT_NAME(pipeline());
+	//GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pipeline()));
 
 }
 
