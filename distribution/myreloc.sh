@@ -118,7 +118,7 @@ $OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks /Library/Frameworks/GStre
 
 # gst-plugin-scanner has no rpath. create one: @executable_path/../..
 # two dirs up from @executable_path because gstreamer distribution has : libexec/gstreamer-1.0/gst-plugin-scanner
-install_name_tool -add_rpath @executable_path/../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0/gst-plugin-scanner
+install_name_tool -add_rpath @executable_path/../../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0/gst-plugin-scanner
 
 
 #
