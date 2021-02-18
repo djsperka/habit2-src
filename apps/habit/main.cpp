@@ -292,10 +292,14 @@ int main(int argc, char *argv[])
 		QString sRelPathToScanner;
 		QString sRelPathToSystemPlugins;
 		QString sRelPathToGioModules;
+		QString sRelPathToMyPlugins;
+		bool bUseMyPlugins = false;
 #if defined(Q_OS_MAC)
 		sRelPathToScanner = "../Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0";
 		sRelPathToSystemPlugins = "../Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0";
 		sRelPathToGioModules = "../Frameworks/GStreamer.framework/Versions/Current/lib/gio/modules";
+		sRelPathToMyPlugins = "../Plugins/gstreamer-1.0";
+		bUseMyPlugins = true;	// mac only
 #else
 		sRelPathToScanner = "gstreamer-1.0/libexec/gstreamer-1.0";
 		sRelPathToSystemPlugins = "gstreamer-1.0/lib/gstreamer-1.0";
@@ -329,6 +333,19 @@ int main(int argc, char *argv[])
 		else
 		{
 			qCritical() << "Cannot navigate to relative gio module folder " << sRelPathToGioModules;
+		}
+		if (bUseMyPlugins)
+		{
+			QDir dirMyPlugins(QCoreApplication::applicationDirPath());
+			if (dirMyPlugins.cd(sRelPathToMyPlugins))
+			{
+				qDebug() << "Set GST_PLUGIN_PATH=" << dirMyPlugins.path();
+				qputenv("GST_PLUGIN_PATH", dirMyPlugins.path().toLocal8Bit());
+			}
+			else
+			{
+				qCritical() << "Cannot navigate to relative plugins folder " << sRelPathToMyPlugins;
+			}
 		}
 
 #ifdef Q_OS_WIN
