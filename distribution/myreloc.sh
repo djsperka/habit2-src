@@ -28,7 +28,7 @@ else
 	exit -1
 fi		
 OSXRELOCATOR="$(which osxrelocator)"
-MACDEPLOYQT="$(which macdeployqt)"
+#MACDEPLOYQT="$(which macdeployqt)"
 
 # if DISTDIR exists, make sure bundle isn't in it.
 if [ -e $DISTDIR ]
@@ -120,49 +120,16 @@ $OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks /Library/Frameworks/GStre
 # two dirs up from @executable_path because gstreamer distribution has : libexec/gstreamer-1.0/gst-plugin-scanner
 install_name_tool -add_rpath @executable_path/../../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0/gst-plugin-scanner
 
-
-#
-#
-#
-#
-########################################################################################################
-## relocate
-########################################################################################################
-#
-## executable - make substitution for gstreamer/glib stuff, then add rpath for it. 
-## Note: There is already an rpath for @executable_path/../Frameworks, this is for Qt, as they
-## are linked via @rpath/QtGui.Framework/...
-## add an rpath for gstreamer: @executable_path/../Frameworks/GStreamer.framework/Versions/1.0
-#
-#echo "relocate gstreamer plugins..."
-#$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/MacOS /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
-#install_name_tool -add_rpath @executable_path/../Frameworks/GStreamer.framework/Versions/1.0 $DISTDIR/$BUNDLE.app/Contents/MacOS/$BUNDLE
-#
-## relocate gstreamer libs??? - this is not required
-##$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath -r
-#
-## gst-plugin-scanner has no rpath. create one: @executable_path/../.. - that covers gstreamer/glib
-## two dirs up from @executable_path because gstreamer distribution has : libexec/gstreamer-1.0/gst-plugin-scanner
-#echo "fix rpath on gst-plugin-scanner"
-#install_name_tool -add_rpath @executable_path/../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
-#install_name_tool -add_rpath @loader_path/../../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
-#
-## same two rpaths for gst-inspect-1.0
-#echo "fix rpath on gst-inspect-1.0"
-#install_name_tool -add_rpath @executable_path/.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/bin/gst-inspect-1.0
-#install_name_tool -add_rpath @loader_path/../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/bin/gst-inspect-1.0
-#
-##install_name_tool -change /Library/Frameworks/GStreamer.framework @rpath/GStreamer.framework $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner
-#
-## @loader_path/../../../../..
-#
+# gst-inspect-1.0 is useful
+install_name_tool -add_rpath @executable_path/../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/bin/gst-inspect-1.0
 
 
 #######################################################################################################
 # relocate - done
 #######################################################################################################
-echo "run macdeployqt..."
-$MACDEPLOYQT $DISTDIR/$BUNDLE.app
+
+#echo "run macdeployqt using $MACDEPLOYQT"
+#$MACDEPLOYQT $DISTDIR/$BUNDLE.app
 
 
 

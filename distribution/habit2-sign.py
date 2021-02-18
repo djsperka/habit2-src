@@ -41,6 +41,7 @@ def frameworks(dir):
 def signThis(sigID, fileOrFramework):
     print('signing with sigID %s' % sigID)
     subprocess.call(['codesign', '--verbose', '-s', sigID, '-f', '--options', 'runtime', '--timestamp', fileOrFramework])
+    subprocess.call(['codesign', '--verbose', '-s', sigID, '-o', 'runtime', '-f', '--entitlements', entitlements, fileOrFramework])
 
 
 

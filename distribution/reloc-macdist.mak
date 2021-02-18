@@ -58,7 +58,7 @@ SIGNED_PACKAGE_BASE=habit2-$(GIT_TAG)$(EXTRA_LABEL)
 
 all: package
 
-.PHONY: all directories clean getsrc qmake build reloc dmg
+.PHONY: all directories clean getsrc qmake build reloc deploy dmg
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # empty out build folder
@@ -114,19 +114,28 @@ $(BUILDDIR)/stamp-build: $(BUILDDIR)/stamp-patch-src
 
 build: $(BUILDDIR)/stamp-build
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# relocate libs (not qt)
 
 $(BUILDDIR)/stamp-reloc: $(BUILDDIR)/stamp-build
 	$(RELOC) $(SRCDIR)/apps/habit/release habit2 habit-plugin.txt pkgs.txt $(DISTDIR)
 	touch $@
 
-
 reloc: $(BUILDDIR)/stamp-reloc
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# do Qt relocation stuff, pull Qt libs into bundle
+
+$(BUILDDIR)/stamp-deploy: $(BUILDDIR)/stamp-reloc
+	$(MACDEPLOYQT) $(DISTDIR)/habit2.app
+	touch $@
 	
-#
+deploy: $(BUILDDIR)/stamp-deploy
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # sign bundle with my handy-dandy signer
 
-$(BUILDDIR)/stamp-sign-app: $(BUILDDIR)/stamp-reloc
+$(BUILDDIR)/stamp-sign-app: $(BUILDDIR)/stamp-deploy
 	./habit2-sign.py $(DISTDIR)/habit2.app $(SIGUSERID)
 	touch $@
 
