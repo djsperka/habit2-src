@@ -294,8 +294,8 @@ int main(int argc, char *argv[])
 		QString sRelPathToGioModules;
 #if defined(Q_OS_MAC)
 		sRelPathToScanner = "./";
-		sRelPathToSystemPlugins = "../lib/gstreamer-1.0";
-		sRelPathToGioModules = "../lib/gio/modules";
+		sRelPathToSystemPlugins = "../Frameworks/lib/gstreamer-1.0";
+		sRelPathToGioModules = "../Frameworks/lib/gio/modules";
 #else
 		sRelPathToScanner = "gstreamer-1.0/libexec/gstreamer-1.0";
 		sRelPathToSystemPlugins = "gstreamer-1.0/lib/gstreamer-1.0";
