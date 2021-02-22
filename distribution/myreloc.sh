@@ -8,23 +8,16 @@
 #
 # Assuming that exe name is same as bundle name, e.g. Contents/MacOS/bundle is the exe file
 
-if [ $# -eq 4 ]
-then
-		
-	BUILDDIR=$1	
-	BUNDLE=$2
-	LIBLIST=$3
-	PKGLIST=""
-	DISTDIR=$4
-elif [ $# -eq 5 ]
+if [ $# -eq 5 ]
 then
 	BUILDDIR=$1	
 	BUNDLE=$2
 	LIBLIST=$3
 	PKGLIST=$4
 	DISTDIR=$5
+#	MOVLIST=$6
 else
-	echo "usage: reloc.sh BUILDDIR BUNDLE LIBLIST [PKGLIST] DISTDIR"
+	echo "usage: reloc.sh BUILDDIR BUNDLE LIBLIST PKGLIST MOVLIST DISTDIR"
 	exit -1
 fi		
 OSXRELOCATOR="$(which osxrelocator)"
@@ -67,7 +60,7 @@ then
 	do
   		echo "getting files from pkg: $pkg"
   		# | egrep '\.dylib$'
-  		tar -C /Library/Frameworks/GStreamer.Framework/Versions/Current -cf - `pkgutil --files $pkg | grep -E 'dylib|plist|gst-plugin-scanner|gst-inspect-1.0|[.]so$'` | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current -xf -
+  		tar -C /Library/Frameworks/GStreamer.Framework/Versions/Current -cf - `pkgutil --files $pkg | grep -E 'dylib|plist|gst-plugin-scanner|gst-inspect-1.0|[.]so$'` | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks -xf -
 	done < "$PKGLIST"
 fi
 ###################################
@@ -82,10 +75,13 @@ then
 	echo "getting files from liblist file $LIBLIST"
 	while IFS= read -r lib
 	do
-		tar -C `dirname $lib` -cf - `basename $lib` | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0/ -xf -
+		tar -C `dirname $lib` -cf - `basename $lib` | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/lib/gstreamer-1.0/ -xf -
 done < "$LIBLIST"
 fi
 
+# move gst-plugin-scanner and gst-inspect-1.0
+mv $DISTDIR/$BUNDLE.app/Contents/Frameworks/libexec/gstreamer-1.0/gst-plugin-scanner $DISTDIR/$BUNDLE.app/Contents/MacOS
+mv $DISTDIR/$BUNDLE.app/Contents/Frameworks/bin/gst-inspect-1.0 $DISTDIR/$BUNDLE.app/Contents/MacOS
 
 
 
@@ -110,26 +106,20 @@ fi
 # I'm lazy so I'm doing it to the entire folder of plugins. It should only apply to 1 - mine. 
 #$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0 /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
 
-# executable
-$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/MacOS /Library/Frameworks/GStreamer.framework @executable_path/../Frameworks/GStreamer.framework
+# executable files
+$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/MacOS /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
+install_name_tool -add_rpath @executable_path/../Frameworks $DISTDIR/$BUNDLE.app/Contents/MacOS/habit2
+install_name_tool -add_rpath @executable_path/../Frameworks $DISTDIR/$BUNDLE.app/Contents/MacOS/gst-plugin-scanner
+install_name_tool -add_rpath @executable_path/../Frameworks $DISTDIR/$BUNDLE.app/Contents/MacOS/gst-inspect-1.0
+
 
 # relocate gstreamer libs
 $OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath -r
-
-# gst-plugin-scanner has no rpath. create one: @executable_path/../..
-# two dirs up from @executable_path because gstreamer distribution has : libexec/gstreamer-1.0/gst-plugin-scanner
-install_name_tool -add_rpath @executable_path/../../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/libexec/gstreamer-1.0/gst-plugin-scanner
-
-# gst-inspect-1.0 is useful
-install_name_tool -add_rpath @executable_path/../../../.. $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/1.0/bin/gst-inspect-1.0
 
 
 #######################################################################################################
 # relocate - done
 #######################################################################################################
-
-#echo "run macdeployqt using $MACDEPLOYQT"
-#$MACDEPLOYQT $DISTDIR/$BUNDLE.app
 
 
 
