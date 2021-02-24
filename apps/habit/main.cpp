@@ -18,6 +18,7 @@
 #include <QMutexLocker>
 #include <QMutex>
 #include <QCommandLineParser>
+#include <QScreen>
 #include <iostream>
 #include <gst/gst.h>
 
@@ -254,18 +255,17 @@ int main(int argc, char *argv[])
 	// dump process environment
 	QStringList envVars = QProcessEnvironment::systemEnvironment().toStringList();
 	qDebug() << "Environment: " << envVars;
-	qInfo() << "Number of screens: " << QApplication::desktop()->screenCount();
-	for (int i=0; i<QApplication::desktop()->screenCount(); i++)
+	qInfo() << "Number of screens: " << QApplication::screens().size();
+	for (int i=0; i<QApplication::screens().size(); i++)
 	{
-		qInfo() << "screen " << i << ": screenGeometry: " << QApplication::desktop()->screenGeometry(i);
-		qInfo() << "screen " << i << ": availableGeometry: " << QApplication::desktop()->availableGeometry(i);
+		qInfo() << "screen " << i << ": screenGeometry: " << QApplication::screens().at(i)->geometry();
+		qInfo() << "screen " << i << ": availableGeometry: " << QApplication::screens().at(i)->availableGeometry();
 	}
 
 	// dump misc dirs
 	qInfo() << "DocumentsLocation: " << QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation);
 	qInfo() << "GenericCache: " << QStandardPaths::standardLocations(QStandardPaths::GenericCacheLocation);
 	qInfo() << "GenericData: " << QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
-
 
 	// Initialize gstreamer
 	// Debug  builds (HABIT_DEBUG) use system-defined gstreamer libs.
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 		QString sRelPathToGioModules;
 #if defined(Q_OS_MAC)
 		sRelPathToScanner = "./";
-		sRelPathToSystemPlugins = "../Frameworks/lib/gstreamer-1.0";
+		sRelPathToSystemPlugins = "../Frameworks/lib/gstreamer-1_0";
 		sRelPathToGioModules = "../Frameworks/lib/gio/modules";
 #else
 		sRelPathToScanner = "gstreamer-1.0/libexec/gstreamer-1.0";
