@@ -42,15 +42,12 @@ fi
 # move/copy files to dist directory
 ###################################
 
+
 # copy bundle to distdir
 tar -C $BUILDDIR -cf - $BUNDLE.app | tar -C $DISTDIR -xf -
 
-# mkdir Frameworks in app bundle
-mkdir -p $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework
-
-# move GStreamer framework package - this package sets up the framework directory structure
-# (note the -n)
-tar -C /Library/Frameworks/GStreamer.framework/ -n -cf - `pkgutil --files org.freedesktop.gstreamer.x86_64.GStreamer` | tar -C $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework -xf -
+# create frameworks dir
+mkdir -p $DISTDIR/$BUNDLE.app/Contents/Frameworks
 
 # if defined, copy files from PKGLIST
 if [ ! -z "$PKGLIST" ]
@@ -82,6 +79,8 @@ fi
 # move gst-plugin-scanner and gst-inspect-1.0
 mv $DISTDIR/$BUNDLE.app/Contents/Frameworks/libexec/gstreamer-1.0/gst-plugin-scanner $DISTDIR/$BUNDLE.app/Contents/MacOS
 mv $DISTDIR/$BUNDLE.app/Contents/Frameworks/bin/gst-inspect-1.0 $DISTDIR/$BUNDLE.app/Contents/MacOS
+rm -rf $DISTDIR/$BUNDLE.app/Contents/Frameworks/libexec
+rm -rf $DISTDIR/$BUNDLE.app/Contents/Frameworks/bin
 
 
 
@@ -103,19 +102,18 @@ mv $DISTDIR/$BUNDLE.app/Contents/Frameworks/bin/gst-inspect-1.0 $DISTDIR/$BUNDLE
 #
 # @rpath
 #
-# I'm lazy so I'm doing it to the entire folder of plugins. It should only apply to 1 - mine. 
-#$OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0 /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
-
 # executable files
 $OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/MacOS /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath
 install_name_tool -add_rpath @executable_path/../Frameworks $DISTDIR/$BUNDLE.app/Contents/MacOS/habit2
 install_name_tool -add_rpath @executable_path/../Frameworks $DISTDIR/$BUNDLE.app/Contents/MacOS/gst-plugin-scanner
 install_name_tool -add_rpath @executable_path/../Frameworks $DISTDIR/$BUNDLE.app/Contents/MacOS/gst-inspect-1.0
 
-
 # relocate gstreamer libs
 $OSXRELOCATOR $DISTDIR/$BUNDLE.app/Contents/Frameworks /Library/Frameworks/GStreamer.framework/Versions/1.0 @rpath -r
 
+
+# last step - rename "gstreamer-1.0" to "gstreamer-1_0"
+mv $DISTDIR/$BUNDLE.app/Contents/Frameworks/lib/gstreamer-1.0 $DISTDIR/$BUNDLE.app/Contents/Frameworks/lib/gstreamer-1_0
 
 #######################################################################################################
 # relocate - done
