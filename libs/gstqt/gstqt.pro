@@ -16,6 +16,7 @@ LIBS += -lgstvideo-1.0 -lgstbase-1.0
 
 !win32 {
     PKGCONFIG += gstreamer-plugins-base-1.0
+#    QMAKE_LFLAGS += -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk 
 } else {
 # need changes to INCLUDEPATH?
 }
