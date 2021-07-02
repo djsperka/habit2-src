@@ -385,8 +385,10 @@ void HLooker::onLookingStateEntered()
 						l.setLookMS(cumulativeLookTimeMS);
 					}
 					m_looks.append(l);
-					//qDebug() << "emit look(1): " << l;
-					//qDebug() << "sublooks follow" << endl << sublooks;
+					qDebug() << "emit look(1): " << l;
+					qDebug() << "sublooks follow" << endl << sublooks;
+
+					// update looking parameters before emit
 					emit look(l);
 				}
 				else
@@ -723,8 +725,8 @@ void HLooker::minLookAwayTimeout()
 			}
 
 			m_looks.append(l);
-			//qDebug() << "emit look(2, inclusive=" << m_bInclusiveLookTime << "): " << l;
-			//qDebug() << "sublooks follow" << endl << sublooks;
+			qDebug() << "emit look(2, inclusive=" << m_bInclusiveLookTime << "): " << l;
+			qDebug() << "sublooks follow" << endl << sublooks;
 			emit look(l);
 
 		}
@@ -768,8 +770,10 @@ void HLooker::stopLooker(int tMS)
 	// Stop any active timers.
 	// Flush out any look or lookaway pending.
 
+	qDebug() << "HLooker::stopLooker()";
 	if (isLive())
 	{
+		qDebug() << "HLooker::stopLooker() - isLive() = true";
 		if (m_ptimerMinLookTime->isActive()) m_ptimerMinLookTime->stop();
 		if (m_ptimerMinLookAwayTime->isActive()) m_ptimerMinLookAwayTime->stop();
 		if (m_ptimerMaxLookAway->isActive()) m_ptimerMaxLookAway->stop();
@@ -784,18 +788,19 @@ void HLooker::stopLooker(int tMS)
 		int lookStartTimeMS;
 		int lastLookStartTimeMS;
 		HLookList sublooks;
+		qDebug() << "HLooker::stopLooker() - m_bLookStarted = true";
 		if (!analyzeLooking(m_iLookStartedIndex, lookStartTimeMS, lastLookStartTimeMS, cumulativeLookTimeMS, lastLookAwayStartTimeMS, sublooks))
 		{
 			qCritical() << "Cannot analyze looking at index " << m_iLookStartedIndex;
 			return;
 		}
 
-		//qDebug() << "analyzeLooking(): m_iLookStartedIndex = " << m_iLookStartedIndex;
-		//qDebug() << "analyzeLooking(): lookStartTimeMS = " << lookStartTimeMS;
-		//qDebug() << "analyzeLooking(): lastLookStartTimeMS = " << lastLookStartTimeMS;
-		//qDebug() << "analyzeLooking(): cumulativeLookTimeMS = " << cumulativeLookTimeMS;
-		//qDebug() << "analyzeLooking(): lastLookAwayStartTimeMS = " << lastLookAwayStartTimeMS;
-		//qDebug() << "analyzeLooking(): sublooks.size = " << sublooks.size();
+		qDebug() << "analyzeLooking(): m_iLookStartedIndex = " << m_iLookStartedIndex;
+		qDebug() << "analyzeLooking(): lookStartTimeMS = " << lookStartTimeMS;
+		qDebug() << "analyzeLooking(): lastLookStartTimeMS = " << lastLookStartTimeMS;
+		qDebug() << "analyzeLooking(): cumulativeLookTimeMS = " << cumulativeLookTimeMS;
+		qDebug() << "analyzeLooking(): lastLookAwayStartTimeMS = " << lastLookAwayStartTimeMS;
+		qDebug() << "analyzeLooking(): sublooks.size = " << sublooks.size();
 
 
 		if (m_bLookAwayStarted)
@@ -803,6 +808,7 @@ void HLooker::stopLooker(int tMS)
 			// Since a lookaway has started, the current state is LookAway, so the cumulativeLookTime is the
 			// it, no need to add the additional from last transition to tMS. If the cumulativeLookTime is
 			// sufficient, emit a look, otherwise do nothing.
+			qDebug() << "HLooker::stopLooker() - m_bLookAwayStarted = true";
 			if (cumulativeLookTimeMS >= m_minLookTimeMS)
 			{
 				//HLook l(*m_pdirectionLookStarted, lookStartTimeMS, lastLookAwayStartTimeMS, cumulativeLookTimeMS);
@@ -820,8 +826,9 @@ void HLooker::stopLooker(int tMS)
 					l.setLookMS(cumulativeLookTimeMS);
 				}
 				m_looks.append(l);
-				//qDebug() << "emit look(3): " << l;
-				//qDebug() << "sublooks follow" << endl << sublooks;
+
+				qDebug() << "emit look(3): " << l;
+				qDebug() << "sublooks follow" << endl << sublooks;
 				emit look(l);
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
@@ -850,8 +857,8 @@ void HLooker::stopLooker(int tMS)
 					l.setLookMS(cumulativeLookTimeMS);
 				}
 				m_looks.append(l);
-				//qDebug() << "emit look(4): " << l;
-				//qDebug() << "sublooks follow" << endl << sublooks;
+				qDebug() << "emit look(4): " << l;
+				qDebug() << "sublooks follow" << endl << sublooks;
 				emit look(l);
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
