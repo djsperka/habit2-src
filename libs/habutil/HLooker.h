@@ -77,7 +77,7 @@ public slots:
 	void onLookingAwayStateEntered();
 	void onLookingAwayStateExited();
 	void onStarted();
-
+	void onRunningChanged(bool);
 
 	// slot called when state machine is stopped (i.e. when stop() is called).
 	// Should always call the overloaded stop(int tMS) so a proper stop time is

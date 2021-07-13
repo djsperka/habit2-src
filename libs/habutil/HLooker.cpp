@@ -110,7 +110,17 @@ HLooker::HLooker(HEventLog& log, bool bIsLive)
 	connect(sLooking, SIGNAL(exited()), this, SLOT(onLookingStateExited()));
 	connect(sLookingAway, SIGNAL(exited()), this, SLOT(onLookingAwayStateExited()));
 	connect(this, SIGNAL(started()), this, SLOT(onStarted()));
+	connect(this, SIGNAL(runningChanged(bool)), this, SLOT(onRunningChanged(bool)));
 };
+
+void HLooker::onRunningChanged(bool b)
+{
+	if (b)
+		qDebug() << "HLooker::onRunningChanged(): STARTED";
+	else
+		qDebug() << "HLooker::onRunningChanged(): STOPPED";
+
+}
 
 void HLooker::onStarted()
 {
@@ -389,6 +399,13 @@ void HLooker::onLookingStateEntered()
 					qDebug() << "sublooks follow" << endl << sublooks;
 
 					// update looking parameters before emit
+					// This look() may end a trial. In the steps ending a trial, the looker will
+					// be stopped, and may re-emit the same look.
+					m_bLookAwayStarted = false;
+					m_bLookStarted = true;
+					m_pdirectionLookStarted = &directionTo(*p.first);
+					m_iLookStartedIndex = m_transitions.size()-1;
+
 					emit look(l);
 				}
 				else
@@ -411,11 +428,13 @@ void HLooker::onLookingStateEntered()
 				}
 
 				// Starting a new potential look.
-				emit lookStarted();
+				// These two bools may have been set above before look emitted. Have to make
+				// sure it happens there because the emit look() can lead to the look() being emitted twice.
 				m_bLookAwayStarted = false;
 				m_bLookStarted = true;
 				m_pdirectionLookStarted = &directionTo(*p.first);
 				m_iLookStartedIndex = m_transitions.size()-1;
+				emit lookStarted();
 				if (isLive())
 					m_ptimerMinLookTime->start(m_minLookTimeMS);
 			}
@@ -875,6 +894,9 @@ void HLooker::stopLooker(int tMS)
 			}
 		}
 	}
+	qDebug() << "HLooker::stopLooker(): calling stop()";
 	stop();
+	qDebug() << "HLooker::stopLooker(): calling QCoreApplication::processEvents(0)";
 	QCoreApplication::processEvents(0);
+	qDebug() << "HLooker::stopLooker(): calling QCoreApplication::processEvents(0) - done";
 }
