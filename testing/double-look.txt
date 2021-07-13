@@ -1,0 +1,37 @@
+# Look Settings 1000/1000 not inclusive
+# Trial: max stim = 10s
+#        max inattentive 1000ms
+# Phase: fixed 3 trials
+#
+#  Looking here is plenty, and 
+#  look-away time is exactly the min look-away in LookSettings. 
+#  SHOULD have a single look which ends trial. 
+First, 0, 0, NoneCenter, 1000
+First, 0, 0, CenterNone, 2100
+First, 0, 0, NoneCenter, 3100
+First, 0, 0, CenterNone, 3500
+#
+#
+First, 1, 0, NoneCenter, 1000
+First, 1, 0, CenterNone, 2100
+First, 1, 0, NoneCenter, 3100
+First, 1, 0, CenterNone, 3500
+#
+#
+First, 2, 0, NoneCenter, 1000
+First, 2, 0, CenterNone, 2100
+First, 2, 0, NoneCenter, 3100
+First, 2, 0, CenterNone, 3500
+#
+#
+First, 3, 0, NoneCenter, 1000
+First, 3, 0, CenterNone, 2100
+First, 3, 0, NoneCenter, 3100
+First, 3, 0, CenterNone, 3500
+#
+#
+First, 4, 0, NoneCenter, 1000
+First, 4, 0, CenterNone, 2100
+First, 4, 0, NoneCenter, 3100
+First, 4, 0, CenterNone, 3500
+#
