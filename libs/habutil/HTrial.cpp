@@ -129,13 +129,19 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 		if (m_phaseSettings.getIsSingleLook())
 		{
 			HGotLookState* sGotLook = new HGotLookState(*this, log);
-			sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(look(HLook)), sGotLook);
+			HGotLookTransition* pGotLookTrans = new HGotLookTransition();
+			pGotLookTrans->setTargetState(sGotLook);
+			sStimRunning->addTransition(pGotLookTrans);
+//			sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(look(HLook)), sGotLook);
 			sGotLook->addTransition(sFinal);
 		}
 		if (m_phaseSettings.getIsMaxAccumulatedLookTime())
 		{
 			HMaxAccumulatedLookTimeState* sMaxAccum = new HMaxAccumulatedLookTimeState(*this, log);
-			sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(maxAccumulatedLookTime()), sMaxAccum);
+			HMaxAccumulatedLookTimeTransition* pMaxTrans = new HMaxAccumulatedLookTimeTransition();
+			pMaxTrans->setTargetState(sMaxAccum);
+			sStimRunning->addTransition(pMaxTrans);
+//			sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(maxAccumulatedLookTime()), sMaxAccum);
 			sMaxAccum->addTransition(sFinal);
 		}
 	}
@@ -145,7 +151,10 @@ HTrial::HTrial(HPhase& phase, HEventLog& log, const Habit::HPhaseSettings& phase
 	if (m_phaseSettings.habituationSettings().getHabituationType() == HHabituationType::HHabituationTypeTotalLookingTime)
 	{
 		HPhaseAccumulatedLookTimeState *sPhaseAccum = new HPhaseAccumulatedLookTimeState(*this, log);
-		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(phaseAccumulatedLookTime()), sPhaseAccum);
+		HPhaseAccumulatedLookTimeTransition *sPhaseTrans = new HPhaseAccumulatedLookTimeTransition();
+		sPhaseTrans->setTargetState(sPhaseAccum);
+		sStimRunning->addTransition(sPhaseTrans);
+//		sStimRunning->addTransition(&phase.experiment().getLookDetector(), SIGNAL(phaseAccumulatedLookTime()), sPhaseAccum);
 		sPhaseAccum->addTransition(sFinal);
 	}
 
