@@ -16,6 +16,8 @@ class HEvent;
 class HLookTrans;
 
 
+
+
 struct HAllTrialsDoneEvent : public QEvent
 {
 	HAllTrialsDoneEvent() : QEvent(Type(AllTrialsDoneType)) {};
@@ -37,29 +39,40 @@ struct HAbortTrialQEvent : public QEvent
 	enum { AbortTrialType = QEvent::User + 3 };
 };
 
-class HReliabilityQEvent : public QEvent
-{
-public:
-	HReliabilityQEvent(HEvent* phevent) : QEvent(Type(ReliabilityType)), m_phevent(phevent) {};
-	~HReliabilityQEvent() {};
-	enum { ReliabilityType = QEvent::User + 4 };
-	HEvent* hevent() { return m_phevent; };
-private:
-	HEvent* m_phevent;
-};
-
-struct HReliabilityEndQEvent : public QEvent
-{
-	HReliabilityEndQEvent() : QEvent(Type(ReliabilityEndType)) {};
-	~HReliabilityEndQEvent() {};
-	enum { ReliabilityEndType = QEvent::User + 5 };
-};
 
 struct HNoLookQEvent : public QEvent
 {
 	HNoLookQEvent() : QEvent(Type(NoLookType)) {};
 	~HNoLookQEvent() {};
 	enum { NoLookType = QEvent::User + 6 };
+};
+
+struct HMaxLookAwayTimeQEvent : public QEvent
+{
+	HMaxLookAwayTimeQEvent() : QEvent(Type(MaxLookAwayTimeType)) {};
+	~HMaxLookAwayTimeQEvent() {};
+	enum { MaxLookAwayTimeType = QEvent::User + 4 };
+};
+
+struct HGotLookQEvent : public QEvent
+{
+	HGotLookQEvent() : QEvent(Type(GotLookType)) {};
+	~HGotLookQEvent() {};
+	enum { GotLookType = QEvent::User + 5 };
+};
+
+struct HMaxAccumulatedLookTimeQEvent : public QEvent
+{
+	HMaxAccumulatedLookTimeQEvent() : QEvent(Type(MaxAccumLookTimeType)) {};
+	~HMaxAccumulatedLookTimeQEvent() {};
+	enum { MaxAccumLookTimeType = QEvent::User + 7 };
+};
+
+struct HPhaseAccumulatedLookTimeQEvent : public QEvent
+{
+	HPhaseAccumulatedLookTimeQEvent() : QEvent(Type(PhaseAccumulatedLookTimeType)) {};
+	~HPhaseAccumulatedLookTimeQEvent() {};
+	enum { PhaseAccumulatedLookTimeType = QEvent::User + 8 };
 };
 
 

@@ -150,6 +150,77 @@ protected:
 	void onEntry(QEvent* e);
 };
 
+
+class HMaxLookAwayTimeTransition: public QAbstractTransition
+{
+
+public:
+	HMaxLookAwayTimeTransition() {};
+	~HMaxLookAwayTimeTransition() {};
+protected:
+	bool eventTest(QEvent* e)
+	{
+		return (e->type() == QEvent::Type(HMaxLookAwayTimeQEvent::MaxLookAwayTimeType));
+	};
+	virtual void onTransition(QEvent* event)
+	{
+		Q_UNUSED(event);
+	};
+};
+
+
+class HGotLookTransition: public QAbstractTransition
+{
+
+public:
+	HGotLookTransition() {};
+	~HGotLookTransition() {};
+protected:
+	bool eventTest(QEvent* e)
+	{
+		return (e->type() == QEvent::Type(HGotLookQEvent::GotLookType));
+	};
+	virtual void onTransition(QEvent* event)
+	{
+		Q_UNUSED(event);
+	};
+};
+
+class HMaxAccumulatedLookTimeTransition: public QAbstractTransition
+{
+
+public:
+	HMaxAccumulatedLookTimeTransition() {};
+	~HMaxAccumulatedLookTimeTransition() {};
+protected:
+	bool eventTest(QEvent* e)
+	{
+		return (e->type() == QEvent::Type(HMaxAccumulatedLookTimeQEvent::MaxAccumLookTimeType));
+	};
+	virtual void onTransition(QEvent* event)
+	{
+		Q_UNUSED(event);
+	};
+};
+
+class HPhaseAccumulatedLookTimeTransition: public QAbstractTransition
+{
+
+public:
+	HPhaseAccumulatedLookTimeTransition() {};
+	~HPhaseAccumulatedLookTimeTransition() {};
+protected:
+	bool eventTest(QEvent* e)
+	{
+		return (e->type() == QEvent::Type(HPhaseAccumulatedLookTimeQEvent::PhaseAccumulatedLookTimeType));
+	};
+	virtual void onTransition(QEvent* event)
+	{
+		Q_UNUSED(event);
+	};
+};
+
+
 class HMaxStimulusTimeState: public HTrialChildState
 {
 	

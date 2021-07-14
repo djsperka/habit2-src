@@ -114,6 +114,8 @@ private Q_SLOTS:
 	void onAttention();
 	void onLook(HLook l);
 	void onLookAborted(HLook l);
+	void onMaxAccumulatedLookTime();
+	void onPhaseAccumulatedLookTime();
 	void onPhaseStarted(QString phaseName);
 	void onPhaseEnded(QString phaseName);
 

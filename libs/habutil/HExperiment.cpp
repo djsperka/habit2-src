@@ -9,6 +9,7 @@
 #include "HElapsedTimer.h"
 #include "HLookDetector.h"
 #include "HGMM.h"
+#include "HQEvents.h"
 #include <QObject>
 #include <algorithm>
 
@@ -20,6 +21,9 @@ HExperiment::HExperiment(HEventLog& log, HLookDetector& ld, QState* parent)
 	connect(&m_ld, SIGNAL(attention()), this, SLOT(onAttention()));
 	connect(&m_ld, SIGNAL(look(HLook)), this, SLOT(onLook(HLook)));
 	connect(&m_ld, SIGNAL(lookAborted(HLook)), this, SLOT(onLookAborted(HLook)));
+	connect(&m_ld, SIGNAL(maxAccumulatedLookTime()), this, SLOT(onMaxAccumulatedLookTime()));
+	connect(&m_ld, SIGNAL(phaseAccumulatedLookTime()), this, SLOT(onPhaseAccumulatedLookTime()));
+
 };
 
 void HExperiment::onAttention()
@@ -31,6 +35,17 @@ void HExperiment::onAttention()
 void HExperiment::onLook(HLook l)
 {
 	eventLog().append(new HLookEvent(l, HElapsedTimer::elapsed()));
+	machine()->postEvent(new HGotLookQEvent());
+}
+
+void HExperiment::onMaxAccumulatedLookTime()
+{
+	machine()->postEvent(new HMaxAccumulatedLookTimeQEvent());
+}
+
+void HExperiment::onPhaseAccumulatedLookTime()
+{
+	machine()->postEvent(new HPhaseAccumulatedLookTimeQEvent());
 }
 
 void HExperiment::onLookAborted(HLook l)
