@@ -265,6 +265,8 @@ void HTrialResult::setLooks(const QList<HLook>& looks)
 
 void HTrialResult::appendLook(const HLook& look)
 {
+	if (m_looks.contains(look))
+		qDebug() << "HTrialResult::appendLook: duplicated look: " << look;
 	m_looks.append(look);
 }
 

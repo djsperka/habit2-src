@@ -10,6 +10,7 @@
 
 #include "HTrialResult.h"
 #include "HLookSettings.h"
+#include "HResults.h"
 
 class HTrialScanner
 {
@@ -20,47 +21,48 @@ public:
 	virtual bool init() const = 0;
 	virtual bool trial(const HTrialResult& t) const = 0;
 	virtual bool done() const = 0;
+	virtual bool scan(const HResults& results);
 };
 
-class HTextResultsDumper: public HTrialScanner
+class HTextResultsScanner: public HTrialScanner
 {
 	QTextStream& m_out;
 	public:
-	HTextResultsDumper(QTextStream& out) : HTrialScanner(), m_out(out) {};
-	HTextResultsDumper(const HTextResultsDumper& d) : HTrialScanner(), m_out(d.out()) {};
-	virtual ~HTextResultsDumper() {};
+	HTextResultsScanner(QTextStream& out) : HTrialScanner(), m_out(out) {};
+	HTextResultsScanner(const HTextResultsScanner& d) : HTrialScanner(), m_out(d.out()) {};
+	virtual ~HTextResultsScanner() {};
 	QTextStream& out() const { return m_out; };
 };
 
-class CSV1ResultsDumper: public HTextResultsDumper
+class CSV1ResultsScanner: public HTextResultsScanner
 {
 	public:
-	CSV1ResultsDumper(QTextStream& out) : HTextResultsDumper(out) {};
-	CSV1ResultsDumper(const CSV1ResultsDumper& d) : HTextResultsDumper(d.out()) {};
-	virtual ~CSV1ResultsDumper() {};
+	CSV1ResultsScanner(QTextStream& out) : HTextResultsScanner(out) {};
+	CSV1ResultsScanner(const CSV1ResultsScanner& d) : HTextResultsScanner(d.out()) {};
+	virtual ~CSV1ResultsScanner() {};
 	virtual bool init() const;
 	virtual bool trial(const HTrialResult& t) const;
 	virtual bool done() const;
 };
 
-class CSV2ResultsDumper: public HTextResultsDumper
+class CSV2ResultsScanner: public HTextResultsScanner
 {
 	public:
-	CSV2ResultsDumper(QTextStream& out) : HTextResultsDumper(out) {};
-	CSV2ResultsDumper(const CSV2ResultsDumper& d) : HTextResultsDumper(d.out()) {};
-	virtual ~CSV2ResultsDumper() {};
+	CSV2ResultsScanner(QTextStream& out) : HTextResultsScanner(out) {};
+	CSV2ResultsScanner(const CSV2ResultsScanner& d) : HTextResultsScanner(d.out()) {};
+	virtual ~CSV2ResultsScanner() {};
 	virtual bool init() const;
 	virtual bool trial(const HTrialResult& t) const;
 	virtual bool done() const;
 };
 
-class ReplaceLooksResultsDumper: public HTextResultsDumper
+class ReplaceLooksResultsDumper: public HTextResultsScanner
 {
 private:
-	const HTextResultsDumper& m_dumper;
+	const HTextResultsScanner& m_dumper;
 	Habit::HLookSettings m_lookSettings;
 public:
-	ReplaceLooksResultsDumper(const Habit::HLookSettings& settings, const HTextResultsDumper& dumper);
+	ReplaceLooksResultsDumper(const Habit::HLookSettings& settings, const HTextResultsScanner& dumper);
 	virtual ~ReplaceLooksResultsDumper() {};
 	virtual bool init() const;
 	virtual bool trial(const HTrialResult& t) const;

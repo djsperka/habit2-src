@@ -15,9 +15,6 @@
 #include <QCoreApplication>
 #include <QtDebug>
 
-
-
-
 HResults::HResults()
 : m_originalFilename("")
 , m_filename("NOT_SAVED")
@@ -154,202 +151,6 @@ HResults* HResults::load(const QString& filename)
 	return results;
 }
 
-bool HResults::scanTrials(const HTrialScanner& scanner) const
-{
-	bool b = true;
-	QString subjectId;
-	QMap<int, QString> mapStimIdNames;
-
-	b = true;
-	if (type() == HResultsType::HResultsTypeOriginalRun)
-	{
-		subjectId = subjectSettings().getSubjectName();
-	}
-	else if (type() == HResultsType::HResultsTypeTestRun)
-	{
-		subjectId = QString("TESTING");
-	}
-	else if (type() == HResultsType::HResultsTypeReliabilityRun)
-	{
-		subjectId = QString("R-%1").arg(subjectSettings().getSubjectName());
-	}
-	else
-	{
-		qCritical() << "Unknown results type. Cannot save HResults to CSV.";
-		return false;
-	}
-
-	b = scanner.init();
-
-
-	if (b)
-	{
-		QString sPhase;
-		HTrialResult trialResult;
-		bool bInsidePhase = false;
-		bool bInsideTrial = false;
-		bool bHabituated = false;
-		bool bHaveStimRequest = false;
-		QString sPendingStimLabel;
-		QString sOrderName;
-		HEvent* e;
-
-		foreach(e, this->eventLog())
-		{
-
-			if (e->type() == HEventType::HEventPhaseStart)
-			{
-				HPhaseStartEvent* pse = static_cast<HPhaseStartEvent*>(e);
-				sPhase = pse->phase();
-				sOrderName = "";
-				if (runSettings().map().contains(pse->seqno()))
-				{
-					Habit::PhaseRunSettings prs = runSettings().map().value(pse->seqno());
-					sOrderName = prs.getOrderName();
-					if (sOrderName.isEmpty()) sOrderName = "default";
-
-					if (prs.isOrderRandomized())
-					{
-						sOrderName += " (" + getRandomizationType(prs.getRandomizeMethod()).name() + ")";
-					}
-					else
-					{
-						sOrderName += " (none)";
-					}
-
-				}
-				else
-				{
-					sOrderName = "unknown (unknown)";
-				}
-
-				if (bInsidePhase) qCritical("Found phase start without preceding phase end event!");
-				bInsidePhase = true;
-			}
-			else if (e->type() == HEventType::HEventPhaseEnd)
-			{
-				bInsidePhase = false;
-			}
-			else if (e->type() == HEventType::HEventTrialStart)
-			{
-				HTrialStartEvent* ptse = static_cast<HTrialStartEvent*>(e);
-				bHaveStimRequest = false;
-				if (bInsideTrial) qCritical("Found trial start without preceding trial end event!");
-
-				// initialize trialResult
-				trialResult = HTrialResult(HTrialKey(sPhase, ptse->trialnumber()+1, ptse->repeatnumber()));
-
-				// throw in
-				trialResult.setSubjectID(subjectId);
-				if (bHabituated)
-					trialResult.setHabituated(true);
-				else
-					trialResult.setHabituated(false);
-				trialResult.setTrialStartTime(ptse->timestamp());
-			}
-			else if (e->type() == HEventType::HEventStimRequest)
-			{
-				bHaveStimRequest = true;
-				sPendingStimLabel = "";
-			}
-			else if (e->type() == HEventType::HEventStimLabelRequest)
-			{
-				HStimLabelRequestEvent* pslre = static_cast<HStimLabelRequestEvent*>(e);
-				bHaveStimRequest = true;
-				sPendingStimLabel = pslre->label();
-			}
-			else if (e->type() == HEventType::HEventStimStart)
-			{
-				HStimStartEvent* psse = static_cast<HStimStartEvent*>(e);
-				trialResult.setStimId(psse->stimid());
-				trialResult.setStimName(mapStimIdNames.value(psse->stimid()));
-				trialResult.setStimLabel(sPendingStimLabel);
-			}
-			else if (e->type() == HEventType::HEventScreenStart)
-			{
-				HScreenStartEvent* psse = static_cast<HScreenStartEvent*>(e);
-				const HPlayerPositionType& ppt = getPlayerPositionType(psse->playerid());
-				// Do not keep filename unless stim request has been seen. Otherwise we will
-				// record attention getter file(s).
-				if (bHaveStimRequest)
-				{
-					if (ppt == HPlayerPositionType::Sound)
-					{
-						trialResult.setStimISS(psse->filename());
-					}
-					else if (ppt == HPlayerPositionType::Left)
-					{
-						trialResult.setStimLeft(psse->filename());
-					}
-					else if (ppt == HPlayerPositionType::Right)
-					{
-						trialResult.setStimRight(psse->filename());
-					}
-					else if (ppt == HPlayerPositionType::Center)
-					{
-						trialResult.setStimCenter(psse->filename());
-					}
-					else
-					{
-						qWarning() << "Warning: cannot match player id to monitor.";
-					}
-				}
-			}
-			else if (e->type() == HEventType::HEventLook)
-			{
-				HLookEvent* ple = static_cast<HLookEvent*>(e);
-				trialResult.appendLook(ple->look());
-			}
-			else if (e->type() == HEventType::HEventIncompleteLook)
-			{
-				HIncompleteLookEvent* ple = static_cast<HIncompleteLookEvent*>(e);
-				trialResult.appendLook(ple->look());
-			}
-			else if (e->type() == HEventType::HEventLookTrans)
-			{
-				trialResult.appendEvent(e);
-			}
-			else if (e->type() == HEventType::HEventLookEnabled)
-			{
-				HLookEnabledEvent* ple = static_cast<HLookEnabledEvent*>(e);
-				trialResult.setLookEnabledTime(ple->timestamp());
-				trialResult.appendEvent(e);
-			}
-			else if (e->type() == HEventType::HEventLookDisabled)
-			{
-				HLookDisabledEvent* pld = static_cast<HLookDisabledEvent*>(e);
-				trialResult.setLookDisabledTime(pld->timestamp());
-				trialResult.appendEvent(e);
-			}
-			else if (e->type() == HEventType::HEventTrialEnd)
-			{
-				// set trial end type and flush
-				HTrialEndEvent* pte = static_cast<HTrialEndEvent*>(e);
-				trialResult.setEndType(pte->endtype().name());
-				trialResult.setTrialEndTime(pte->timestamp());	// automatically sets total look(away) times
-				trialResult.setOrderName(sOrderName);
-
-				scanner.trial(trialResult);
-
-				// clear pending stim label
-				sPendingStimLabel = "";
-			}
-			else if (e->type() == HEventType::HEventStimulusSettings)
-			{
-				HStimulusSettingsEvent* pss = static_cast<HStimulusSettingsEvent*>(e);
-				mapStimIdNames.insert(pss->stimindex(), pss->settings().getName());
-			}
-			else if (e->type() == HEventType::HHabituationSuccess)
-			{
-				bHabituated = true;
-			}
-		}
-	}
-	if (b) b = scanner.done();
-	return b;
-}
-
-
 bool HResults::saveToCSV(const QString& filename, bool bReplace) const
 {
 	bool b = false;
@@ -358,21 +159,21 @@ bool HResults::saveToCSV(const QString& filename, bool bReplace) const
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
 	{
 		QTextStream out(&file);
-		CSV1ResultsDumper csv1(out);
-		CSV2ResultsDumper csv2(out);
+		CSV1ResultsScanner csv1(out);
+		CSV2ResultsScanner csv2(out);
 		if (!bReplace)
 		{
-			b = scanTrials(csv1);
+			b = csv1.scan(*this);
 			if (b) out << endl;
-			if (b) b = scanTrials(csv2);
+			if (b) b = csv2.scan(*this);
 		}
 		else
 		{
 			ReplaceLooksResultsDumper r1(this->experimentSettings().getHLookSettings(), csv1);
 			ReplaceLooksResultsDumper r2(this->experimentSettings().getHLookSettings(), csv2);
-			b = scanTrials(r1);
+			b = r1.scan(*this);
 			if (b) out << endl;
-			if (b) b = scanTrials(r2);
+			if (b) b = r2.scan(*this);
 			if (b) out << endl;
 		}
 		file.close();
