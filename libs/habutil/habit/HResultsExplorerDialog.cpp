@@ -53,36 +53,21 @@ void HResultsExplorerDialog::initialize()
 	m_pFolderModel->setNameFilters(nameFilter);
 	m_pFolderModel->setNameFilterDisables(false);
 
-
-//	m_pFilesModel = new QFileSystemModel(this);
-//	m_pFilesModel->setRootPath(m_rootDir.absolutePath());
-//	m_pFilesModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
-//	m_pFilesModel->setNameFilters(nameFilter);
-//	m_pFilesModel->setNameFilterDisables(false);
-//
-//	m_pFilesProxyModel = new HResultsExplorerFilesProxyModel(m_pFilesModel, this);
-//	// done in constructor m_pFilesProxyModel->setSourceModel(m_pFilesModel);
-//
-//	ui->tableViewFiles->setModel(m_pFilesProxyModel);
-//	ui->tableViewFiles->setRootIndex(m_pFilesProxyModel->mapFromSource(m_pFilesModel->setRootPath(m_rootDir.absolutePath())));
-//	ui->tableViewFiles->setShowGrid(false);
-//	ui->tableViewFiles->verticalHeader()->hide();
-//	ui->tableViewFiles->horizontalHeader()->setStretchLastSection(true);
-//	ui->tableViewFiles->setSelectionBehavior(QAbstractItemView::SelectRows);
-
 	// Open pushbutton initially disabled - it is enabled when something is clicked.
 	ui->pbOpen->setEnabled(false);
+
+	// Check pushbutton initially disabled
+	ui->pbCheckResults->setEnabled(false);
 }
 
 void HResultsExplorerDialog::connections()
 {
 	connect(ui->pbCancel, SIGNAL(clicked()), this, SLOT(reject()));
 	connect(ui->pbOpen, SIGNAL(clicked()), this, SLOT(openClicked()));
+	connect(ui->pbCheckResults, SIGNAL(clicked()), this, SLOT(checkResultsClicked()));
 	connect(ui->treeViewFolders, SIGNAL(clicked(QModelIndex)), this, SLOT(itemClicked(QModelIndex)));
 	connect(ui->treeViewFolders, SIGNAL(activated(QModelIndex)), this, SLOT(itemActivated(QModelIndex)));
 	connect(ui->treeViewFolders->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&,const QItemSelection&)));
-//	connect(ui->tableViewFiles, SIGNAL(clicked(QModelIndex)), this, SLOT(resultsFileClicked(QModelIndex)));
-//	connect(ui->tableViewFiles, SIGNAL(activated(QModelIndex)), this, SLOT(resultsFileActivated(QModelIndex)));
 }
 
 void HResultsExplorerDialog::itemClicked(QModelIndex index)
@@ -96,14 +81,33 @@ void HResultsExplorerDialog::itemClicked(QModelIndex index)
 void HResultsExplorerDialog::selectionChanged(const QItemSelection& selected,const QItemSelection&)
 {
 	QModelIndexList indexes = selected.indexes();
-	if (indexes.size() > 0 && m_pFolderModel->fileInfo(indexes.first()).isFile())
+	if (indexes.size() > 0)
 	{
-		ui->pbOpen->setEnabled(true);
+		if (m_pFolderModel->fileInfo(indexes.first()).isFile())
+		{
+			ui->pbOpen->setEnabled(true);
+			// only enable check button if its a results file
+			if (m_pFolderModel->fileInfo(indexes.first()).suffix().contains("hab", Qt::CaseInsensitive))
+			{
+				ui->pbCheckResults->setEnabled(true);
+			}
+			else
+			{
+				ui->pbCheckResults->setEnabled(false);
+			}
+		}
+		else
+		{
+			ui->pbOpen->setEnabled(false);
+			ui->pbCheckResults->setEnabled(true);
+		}
 	}
 	else
 	{
 		ui->pbOpen->setEnabled(false);
+		ui->pbCheckResults->setEnabled(false);
 	}
+
 }
 
 //void HResultsExplorerDialog::resultsFileClicked(QModelIndex index)
@@ -179,6 +183,14 @@ void HResultsExplorerDialog::openClicked()
 		showResultsFile(getSelectedFile());
 	accept();
 }
+
+void HResultsExplorerDialog::checkResultsClicked()
+{
+	qDebug() << "check results " << getSelectedFile();
+
+	accept();
+}
+
 
 QString HResultsExplorerDialog::getSelectedFile()
 {
