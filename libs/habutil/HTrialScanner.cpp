@@ -8,7 +8,7 @@
 #include "HTrialScanner.h"
 #include "HLookerReprocessor.h"
 
-bool HTrialScanner::scan(const HResults& results)
+bool HTrialScanner::scan(const HResults& results, QStringList *pSErrorWarnings)
 {
 	bool b = true;
 	QString subjectId;
@@ -29,12 +29,12 @@ bool HTrialScanner::scan(const HResults& results)
 	}
 	else
 	{
-		qCritical() << "Unknown results type. Cannot save HResults to CSV.";
+		if (pSErrorWarnings)
+			pSErrorWarnings->append("Unknown results type. Cannot save HResults to CSV.");
 		return false;
 	}
 
 	b = this->init();
-
 
 	if (b)
 	{
@@ -77,7 +77,12 @@ bool HTrialScanner::scan(const HResults& results)
 					sOrderName = "unknown (unknown)";
 				}
 
-				if (bInsidePhase) qCritical("Found phase start without preceding phase end event!");
+				if (bInsidePhase)
+				{
+					qCritical("Found phase start without preceding phase end event!");
+					if (pSErrorWarnings)
+						pSErrorWarnings->append("Found phase start without preceding phase end event!");
+				}
 				bInsidePhase = true;
 			}
 			else if (e->type() == HEventType::HEventPhaseEnd)
@@ -88,7 +93,12 @@ bool HTrialScanner::scan(const HResults& results)
 			{
 				HTrialStartEvent* ptse = static_cast<HTrialStartEvent*>(e);
 				bHaveStimRequest = false;
-				if (bInsideTrial) qCritical("Found trial start without preceding trial end event!");
+				if (bInsideTrial)
+				{
+					qCritical("Found trial start without preceding trial end event!");
+					if (pSErrorWarnings)
+						pSErrorWarnings->append("Found trial start without preceding trial end event!");
+				}
 
 				// initialize trialResult
 				trialResult = HTrialResult(HTrialKey(sPhase, ptse->trialnumber()+1, ptse->repeatnumber()));
@@ -146,6 +156,8 @@ bool HTrialScanner::scan(const HResults& results)
 					else
 					{
 						qWarning() << "Warning: cannot match player id to monitor.";
+						if (pSErrorWarnings)
+							pSErrorWarnings->append("Warning: cannot match player id to monitor.");
 					}
 				}
 			}
@@ -154,6 +166,14 @@ bool HTrialScanner::scan(const HResults& results)
 				HLookEvent* ple = static_cast<HLookEvent*>(e);
 				if (trialResult.looks().contains(ple->look()))
 				{
+					if (pSErrorWarnings)
+					{
+						QString s;
+						QTextStream tmpStream(&s);
+						tmpStream << "Phase: " << trialResult.getString(HTrialResult::indPhase) << " Trial: " << trialResult.getString(HTrialResult::indTrial) << endl;
+						tmpStream << "   Duplicate look: " << ple->look();
+						pSErrorWarnings->append(s);
+					}
 					qWarning() << "Duplicate look: " << ple->look();
 				}
 				else

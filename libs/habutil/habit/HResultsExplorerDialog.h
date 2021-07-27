@@ -54,6 +54,7 @@ namespace GUILib
 //		void resultsFileActivated(QModelIndex index);
 		void itemActivated(QModelIndex index);
 		void openClicked();
+		void checkResultsClicked();
 		void selectionChanged(const QItemSelection&,const QItemSelection&);
 
 	public:

@@ -58,22 +58,6 @@ HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings
 {};
 
 
-// This constructor used for RELIABILTY RUN
-
-/*
- * 2-24-15 djs Remove reliability settings for now, clearing out unused code. Will probably need to add this back soon. Cleaner, I hope.
-HResults::HResults(const Habit::ExperimentSettings& es, const Habit::RunSettings& rs, const Habit::ReliabilitySettings& bs, const HEventLog& log, const QString origFilename, const QString filename, const QString version)
-: m_version(version)
-, m_originalFilename(origFilename)
-, m_filename(filename)
-, m_pResultsType(&HResultsType::HResultsTypeReliabilityRun)
-, m_experimentSettings(es)
-, m_runSettings(rs)
-, m_reliabilitySettings(bs)
-, m_log(log)
-{};
-*/
-
 HResults::~HResults() {};
 
 // Save
@@ -139,8 +123,6 @@ HResults* HResults::load(const QString& filename)
 		else if (itype == HResultsType::HResultsTypeReliabilityRun.number())
 		{
 			qCritical() << "Loading reliability results not implemented!";
-			//in >> originalFilename >> es >> rs >> bs >> log;
-			//results = new HResults(es, rs, bs, log, originalFilename, filename);
 		}
 		file.close();
 	}
