@@ -19,9 +19,12 @@
 #include <QMutex>
 #include <QCommandLineParser>
 #include <QScreen>
+#include <QMessageBox>
 #include <iostream>
 #include <gst/gst.h>
-
+#include "HResults.h"
+#include "HTrialScanner.h"
+#include "HPhaseSettings.h"
 
 using namespace std;
 QFile *f_pFileLog = NULL;
@@ -29,6 +32,9 @@ QTextStream f_streamFileLog;
 bool f_bScreenLog = false;
 bool f_bFileLog = false;
 QMutex f_mutex;
+
+
+bool checkHabFileForDups(const QString& sPath);
 
 
 #if QT_VERSION < 0x050000
@@ -152,7 +158,7 @@ int main(int argc, char *argv[])
 	bool bFileLogPending = true;
 
 	// create application
-    HApplication h(argc, &argv);
+    HApplication h(argc, argv);
 	h.setApplicationVersion(HABIT_VERSION);
 	h.setApplicationName("habit2");
 	h.setOrganizationName("Infant Cognition Lab");
@@ -188,22 +194,36 @@ int main(int argc, char *argv[])
 			 {"e", "edit templates"},
 			 {"z", "Show stimuli in a dialog - for developing experiments."},
 			 {"n", "Run habit as if it is NOT installed - developers only!"},
+			 {"q", "Analyze habit results file for errors and exit.", "results filename (*.hab)"},
          });
     parser.process(h);
 
 	f_bScreenLog = parser.isSet("s");
 	bFileLogPending = parser.isSet("f");
     if (parser.isSet("w"))
-    	{
-    		bPendingWorkspace = true;
-    		sPendingWorkspace = parser.value("w");
-    	}
+	{
+		bPendingWorkspace = true;
+		sPendingWorkspace = parser.value("w");
+	}
     bDBUpdateOnly = parser.isSet("D");
     bTestRunIsDefault = parser.isSet("T");
     bShowTestingIcon = parser.isSet("t");
     bEditTemplates = parser.isSet("e");
 	bStimInDialog = parser.isSet("z");
 	bNotInstalled = parser.isSet("n");
+
+	for (int i=0; i<argc; i++)
+	{
+		cerr << i << " " << std::string(argv[i]) << std::endl;
+	}
+
+	// If -q is set, hijack the whole process, analyze the file, and get out.
+    if (parser.isSet("q"))
+    {
+    	checkHabFileForDups(parser.value("q"));
+    	return 0;
+    }
+
 
 	// TODO - moved gst_init and env vaer setup from here to below
 
@@ -216,9 +236,13 @@ int main(int argc, char *argv[])
 
 	if (!habutilInitWorkspace() || bDBUpdateOnly)
 		return 0;
-
+#if 1
 	GUILib::H2MainWindow w(bTestRunIsDefault, bShowTestingIcon, bEditTemplates, bStimInDialog);
 	QObject::connect(&h, SIGNAL(showResultsFile(QString)), &w, SLOT(showResultsFile(QString)));
+#else
+	QMessageBox w;
+	w.setText("The document has been modified.");
+#endif
 	Q_INIT_RESOURCE(resources);
 
 
@@ -366,3 +390,46 @@ int main(int argc, char *argv[])
     return ii;
 }
 
+bool checkHabFileForDups(const QString& sPath)
+{
+	bool b = false;
+	QStringList sPhasesToCheck;
+	HResults* pResults = HResults::load(sPath);
+	if (pResults)
+	{
+		qDebug() << "Loaded file " << sPath;
+
+		// Look at settings for each phase, see if any phases are "single look"
+
+		for (int i=0; i<pResults->experimentSettings().phases().size(); i++)
+		{
+			const Habit::HPhaseSettings& ps = pResults->experimentSettings().phases().at(i);
+			qDebug() << "Phase: " << ps.getName();
+			if (ps.getIsEnabled())
+				qDebug() << "Enabled: YES";
+			else
+				qDebug() << "Enabled: NO";
+			if (ps.getIsSingleLook())
+			{
+				qDebug() << "Uses \"Single complete look\" criteria for trial ending.";
+				sPhasesToCheck.append(ps.getName());
+			}
+			else
+				qDebug() << "Does not use \"Single complete look\" criteria for trial ending.";
+		}
+
+		QStringList sl;
+		NoopResultsScanner nts;
+		nts.scan(*pResults, &sl);
+		qDebug() << "sl results: ";
+		qDebug() << sl;
+
+		b = true;
+		delete pResults;
+	}
+	else
+	{
+		qDebug() << "Cannot load file " << sPath;
+	}
+	return b;
+}
