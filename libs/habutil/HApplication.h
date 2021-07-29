@@ -14,7 +14,7 @@ class HApplication : public QApplication
 {
 	Q_OBJECT
 public:
-	HApplication(int &argc, char **argv[]) : QApplication(argc, *argv) {};
+	HApplication(int &argc, char *argv[]) : QApplication(argc, argv) {};
 	~HApplication() {};
 protected:
 	bool event(QEvent* event);
