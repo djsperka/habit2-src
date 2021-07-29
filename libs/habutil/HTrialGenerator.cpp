@@ -9,6 +9,8 @@
 
 #include "HTrialGenerator.h"
 #include <QtDebug>
+#include <QtGlobal>
+#include <stdlib.h>
 
 HTrialGenerator::HTrialGenerator(int N, bool bRand, bool bBlocks) : m_N(N), m_bRand(bRand), m_bBlocks(bBlocks)
 {
@@ -16,7 +18,7 @@ HTrialGenerator::HTrialGenerator(int N, bool bRand, bool bBlocks) : m_N(N), m_bR
 	static bool bSeeded = false;
 	if (!bSeeded)
 	{
-		qsrand(time(NULL));
+		srand(time(NULL));
 		bSeeded = true;
 	}
 }
@@ -36,7 +38,7 @@ unsigned int HTrialGenerator::next()
 		{
 			int irand;
 			// draw random number between 0 and m_remaining.size()-1
-			irand = qrand() % m_remaining.size();
+			irand = rand() % m_remaining.size();
 			val = m_remaining.at(irand);
 			// remove element from m_remaining. 
 			m_remaining.removeAt(irand);
@@ -44,7 +46,7 @@ unsigned int HTrialGenerator::next()
 		else 
 		{
 			// draw random number between 0 and m_N. Do NOT remove element from m_remaining.
-			irand = qrand() % m_remaining.size();
+			irand = rand() % m_remaining.size();
 			val = m_remaining.at(irand);
 		}
 	}

@@ -11,8 +11,7 @@
 #include "HStimulusWidget.h"
 #include "HStimPipeline.h"
 #include <QtGlobal>
-
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QApplication>
 #include "HWorkspaceUtil.h"
 
@@ -23,9 +22,8 @@ void initializeMediaManager(const Habit::ExperimentSettings& es)
 
 	if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutSingle)
 	{
-		QRect rect = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
+		QRect rect = QApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Center))->geometry();
 		HStimulusWidget *pSingle = new HStimulusWidget(es.getStimulusDisplayInfo(), rect.width(), rect.height());
-
 		HGMM::instance().setWidgets(pSingle);
 		pSingle->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pSingle->move(rect.x(), rect.y());
@@ -33,13 +31,13 @@ void initializeMediaManager(const Habit::ExperimentSettings& es)
 	}
 	else if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutLeftRight)
 	{
-		QRect rectLeft = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Left));
+		QRect rectLeft = QApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Left))->geometry();
 		HStimulusWidget *pLeft = new HStimulusWidget(es.getStimulusDisplayInfo(), rectLeft.width(), rectLeft.height());
 		pLeft->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pLeft->move(rectLeft.x(), rectLeft.y());
 		qDebug() << "Left player index " << habutilGetMonitorID(HPlayerPositionType::Left) << " moved to rect " << rectLeft;
 
-		QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
+		QRect rectRight = QApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Right))->geometry();
 		HStimulusWidget *pRight = new HStimulusWidget(es.getStimulusDisplayInfo(), rectRight.width(), rectRight.height());
 		pRight->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pRight->move(rectRight.x(), rectRight.y());
@@ -49,19 +47,19 @@ void initializeMediaManager(const Habit::ExperimentSettings& es)
 	}
 	else if (es.getStimulusDisplayInfo().getStimulusLayoutType() == HStimulusLayoutType::HStimulusLayoutTriple)
 	{
-		QRect rectLeft = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Left));
+		QRect rectLeft = QApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Left))->geometry();
 		HStimulusWidget *pLeft = new HStimulusWidget(es.getStimulusDisplayInfo(), rectLeft.width(), rectLeft.height());
 		pLeft->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pLeft->move(rectLeft.x(), rectLeft.y());
 		qDebug() << "Left player index " << habutilGetMonitorID(HPlayerPositionType::Left) << " moved to rect " << rectLeft;
 
-		QRect rectCenter = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Center));
+		QRect rectCenter = QApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Center))->geometry();
 		HStimulusWidget *pCenter = new HStimulusWidget(es.getStimulusDisplayInfo(), rectCenter.width(), rectCenter.height());
 		pCenter->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pCenter->move(rectCenter.x(), rectCenter.y());
 		qDebug() << "Center player index " << habutilGetMonitorID(HPlayerPositionType::Center) << " moved to rect " << rectCenter;
 
-		QRect rectRight = QApplication::desktop()->screenGeometry(habutilGetMonitorID(HPlayerPositionType::Right));
+		QRect rectRight = QApplication::screens().at(habutilGetMonitorID(HPlayerPositionType::Right))->geometry();
 		HStimulusWidget *pRight = new HStimulusWidget(es.getStimulusDisplayInfo(), rectRight.width(), rectRight.height());
 		pRight->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 		pRight->move(rectRight.x(), rectRight.y());

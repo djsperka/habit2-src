@@ -3,7 +3,7 @@ SOURCES = testmisc.cpp TestPreroller.cpp
 HEADERS = testmisc.h TestPreroller.h
 TARGET = testmisc
 CONFIG += qt debug_and_release
-QT += sql testlib widgets
+QT += sql testlib widgets statemachine
 
 # Get gstreamer stuff from this file.
 include(../../habit2.pri)

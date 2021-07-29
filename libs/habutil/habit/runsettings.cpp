@@ -2,7 +2,7 @@
 #include "HTypes.h"
 #include <QDebug>
 #include <QStringList>
-#include <QRegExp>
+#include <QIODevice>
 
 using namespace Habit;
 

@@ -6,7 +6,6 @@
  */
 
 #include <QDialogButtonBox>
-#include <QDesktopWidget>
 #include <QtDebug>
 
 #include "stimulisettings.h"

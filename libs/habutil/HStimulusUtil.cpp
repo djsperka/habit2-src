@@ -9,7 +9,8 @@
 #include "HWorkspaceUtil.h"
 #include <QDir>
 #include <QtDebug>
-#include <QRegExp>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QColor>
 
 static const QString sreCOLOR("color\\((.*)\\)");
@@ -21,12 +22,13 @@ static const QString sreRGB("rgb\\((\\d+),(\\d+),(\\d+)\\)");
 bool habutilStimulusColorOK(const QString& color)
 {
 	bool b = false;
-	QRegExp reColor(sreCOLOR);
-	QRegExp reRGB(sreRGB);
-
-	if (reColor.exactMatch(color))
+	QRegularExpression reColor(sreCOLOR);
+	QRegularExpression reRGB(sreRGB);
+	QRegularExpressionMatch matchColor = reColor.match(color);
+	QRegularExpressionMatch matchRGB = reRGB.match(color);
+	if (matchColor.hasMatch())
 	{
-		QString specColor(reColor.cap(1));
+		QString specColor(matchColor.captured(1));
 		if (specColor == QString("background"))
 			b = true;
 		else
@@ -37,13 +39,13 @@ bool habutilStimulusColorOK(const QString& color)
 		if (!b)
 			qDebug() << "Color spec is invalid: " << color;
 	}
-	else if (reRGB.exactMatch(color))
+	else if (matchRGB.hasMatch())
 	{
 		bool bR, bG, bB;
 		int iR, iG, iB;
-		iR = reRGB.cap(1).toInt(&bR);
-		iG = reRGB.cap(1).toInt(&bG);
-		iB = reRGB.cap(1).toInt(&bB);
+		iR = matchRGB.captured(1).toInt(&bR);
+		iG = matchRGB.captured(2).toInt(&bG);
+		iB = matchRGB.captured(3).toInt(&bB);
 		b = (bR && bG && bB && 0<=iR && iR<=255 && 0<=iG && iG<=255 && 0<=iB && iB<=255);
 		if (!b)
 			qDebug() << "Color spec rgb values out of range (0-255): " << color;

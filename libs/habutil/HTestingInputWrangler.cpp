@@ -336,7 +336,6 @@ void HTestingInputWrangler::dump()
 	while (itPhases.hasNext())
 	{
 		QString type = itPhases.next();
-		qDebug() << type << endl;
 
 		// Get the map for this phase.
 		TrialEventLogMap *pEventLogMap = &m_map[type];
@@ -345,7 +344,7 @@ void HTestingInputWrangler::dump()
 		while (itTrialRepeat.hasNext())
 		{
 			QPair<int, int> tr = itTrialRepeat.next();
-			qDebug() << "Trial/repeat " << tr.first << "/" << tr.second << " has " << pEventLogMap->value(tr)->count() << " events";
+			qDebug() << "Phase " << type << " Trial/repeat " << tr.first << "/" << tr.second << " has " << pEventLogMap->value(tr)->count() << " events";
 		}
 
 	}

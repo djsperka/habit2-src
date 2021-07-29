@@ -19,7 +19,8 @@ QValidator::State GUILib::HExperimentListValidator::validate(QString& input, int
 	else
 	{
 		// check against re
-		if (m_re.exactMatch(input))
+		QRegularExpressionMatch match = m_re.match(input);
+		if (match.hasMatch())
 		{
 			// check if its in the list of existing experiments
 			if (m_list.contains(input))

@@ -160,6 +160,6 @@ void Habit::ControlBarOptions::saveToDB(int experimentID)
 
 QDebug Habit::operator<<(QDebug dbg, ControlBarOptions& cbo)
 {
-	dbg.nospace() << "ControlBarOptions: id " << cbo.getId() << " cbar used?  " << cbo.isControlBarUsed() << " expt displayed " << cbo.isCurrentExperimentDisplayed() << " stim displayed " << cbo.isCurrentStimulusDisplayed() << " looking dir displayed " << cbo.isLookingDirectionDisplayed() << endl;
+	dbg.nospace() << "ControlBarOptions: id " << cbo.getId() << " cbar used?  " << cbo.isControlBarUsed() << " expt displayed " << cbo.isCurrentExperimentDisplayed() << " stim displayed " << cbo.isCurrentStimulusDisplayed() << " looking dir displayed " << cbo.isLookingDirectionDisplayed() << "\n";
 	return dbg.nospace();
 }

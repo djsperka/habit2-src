@@ -9,7 +9,6 @@
 #include <QtDebug>
 #include <QMessageBox>
 #include <QDir>
-#include <QDesktopWidget>
 #include <gst/gst.h>
 
 
@@ -26,13 +25,6 @@ int main(int argc, char **argv)
 	app.setApplicationName("hg3");
 	app.setOrganizationName("Infant Cognition Lab");
 	app.setOrganizationDomain("infantcognitionlab.ucdavis.edu");
-
-	qInfo() << "Number of screens: " << QApplication::desktop()->screenCount();
-	for (int i=0; i<QApplication::desktop()->screenCount(); i++)
-	{
-		qInfo() << "screen " << i << ": screenGeometry: " << QApplication::desktop()->screenGeometry(i);
-		qInfo() << "screen " << i << ": availableGeometry: " << QApplication::desktop()->availableGeometry(i);
-	}
 
 	if (argc >= 2)
 	{

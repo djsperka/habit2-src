@@ -34,7 +34,7 @@ namespace Habit
 		QString getName() const { return m_name; };
 
 		// Convenience - this is the clearing house for correct spelling of stimulus names and labels!
-		static const QRegExp& getStimlusNameLabelRE();
+		static const QRegularExpression& getStimlusNameLabelRE();
 
 		// the List is the list of strings as they should be stored in the database.
 		// That means the strings may carry labels with them, i.e. "stimname/label" instead of

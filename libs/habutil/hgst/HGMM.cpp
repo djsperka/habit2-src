@@ -7,7 +7,7 @@
 
 #include "HGMM.h"
 #include "HPhaseSettings.h"
-#include <QMapIterator>
+#include <QMultiMapIterator>
 #include <QEventLoop>
 #include <QDialog>
 #include <gst/gst.h>
@@ -342,7 +342,7 @@ bool HGMM::getContext(unsigned int key, int& context)
 {
 	bool bFound = false;
 	// iterate through all pairs in m_mapContext
-	QMapIterator<int, unsigned int> i(m_mapContext);
+	QMultiMapIterator<int, unsigned int> i(m_mapContext);
 	while (i.hasNext() && !bFound)
 	{
 		i.next();
@@ -513,7 +513,7 @@ void HGMM::remove(unsigned int stimkey)
 		if (p) delete p;
 
 		// fix context list. Have to iterate over list to find the stim key.
-		QMapIterator<int, unsigned int> it(m_mapContext);
+		QMultiMapIterator<int, unsigned int> it(m_mapContext);
 		int context = -999;
 		while (it.hasNext())
 		{

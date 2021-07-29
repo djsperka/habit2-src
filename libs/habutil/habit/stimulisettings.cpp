@@ -203,16 +203,16 @@ QDebug Habit::operator<<(QDebug dbg, const StimuliSettings& ss)
 {
 	const StimulusSettingsList& c = ss.stimuli();
 	HStimulusOrderList o = ss.orders();
-	dbg.nospace() << "StimuliSettings: "<< endl;
+	dbg.nospace().noquote() << "StimuliSettings: \n";
 	for (int i=0; i<c.size(); i++)
 	{
-		dbg.nospace() << "Stimulus " << i << endl;
-		dbg.nospace() << c.at(i) << endl;
+		dbg.nospace().noquote() << "Stimulus " << i << "\n";
+		dbg.nospace().noquote() << c.at(i) << "\n";
 	}
 	for (int i=0; i<o.size(); i++)
 	{
-		dbg.nospace() << "Order " << i << endl;
-		dbg.nospace() << o.at(i) << endl;
+		dbg.nospace().noquote() << "Order " << i << "\n";
+		dbg.nospace().noquote() << o.at(i) << "\n";
 	}
 	return dbg.nospace();
 }

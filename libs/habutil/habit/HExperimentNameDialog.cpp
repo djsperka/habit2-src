@@ -6,7 +6,6 @@
  */
 
 #include "HExperimentNameDialog.h"
-#include <QRegExpValidator>
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QLabel>

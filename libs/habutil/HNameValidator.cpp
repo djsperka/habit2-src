@@ -12,13 +12,13 @@ namespace GUILib {
 
 
 static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");
-static const QRegExp reStimAndLabel(sreWordWithSpaces + "(/" + sreWordWithSpaces + ")?");
+static const QRegularExpression reStimAndLabel(sreWordWithSpaces + "(/" + sreWordWithSpaces + ")?");
 
 //static const QString sreWordWithPunctuation("(\\w[ ':;_-!@#$%\\w]*)");
 static const QString sreWordWithPunctuation("(\\w[ ':;_!@#$%&*()=+,.?\\w-]*)");
 static const QString sreWordWithPunctuationAndLabel(sreWordWithPunctuation + "(/" + sreWordWithPunctuation + ")?");
-static const QRegExp reHabitName(sreWordWithPunctuation);
-static const QRegExp reHabitNameAndLabel(sreWordWithPunctuationAndLabel);
+static const QRegularExpression reHabitName(sreWordWithPunctuation);
+static const QRegularExpression reHabitNameAndLabel(sreWordWithPunctuationAndLabel);
 
 const QString& HName::getNameREString()
 {
@@ -30,19 +30,19 @@ const QString& HName::getNameAndLabelREString()
 	return sreWordWithPunctuationAndLabel;
 }
 
-const QRegExp& HName::getNameRE()
+const QRegularExpression& HName::getNameRE()
 {
 	return reHabitName;
 }
 
-const QRegExp& HName::getNameAndLabelRE()
+const QRegularExpression& HName::getNameAndLabelRE()
 {
 	return reHabitNameAndLabel;
 }
 
 
 HNameRegExp::HNameRegExp()
-: QRegExp(sreWordWithPunctuation)
+: QRegularExpression(sreWordWithPunctuation)
 {
 }
 
@@ -51,7 +51,7 @@ HNameRegExp::~HNameRegExp()
 }
 
 HNameAndLabelRegExp::HNameAndLabelRegExp()
-: QRegExp(sreWordWithPunctuationAndLabel)
+: QRegularExpression(sreWordWithPunctuationAndLabel)
 {
 }
 
@@ -71,7 +71,7 @@ const QString& HNameValidator::getNameRE()
 }
 
 HNameValidator::HNameValidator(QWidget *parent)
-: QRegExpValidator(reHabitName, parent)
+: QRegularExpressionValidator(reHabitName, parent)
 {
 }
 
@@ -80,7 +80,7 @@ HNameValidator::~HNameValidator()
 }
 
 HNameAndLabelValidator::HNameAndLabelValidator(QWidget *parent)
-: QRegExpValidator(reHabitName, parent)
+: QRegularExpressionValidator(reHabitName, parent)
 {
 }
 

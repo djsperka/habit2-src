@@ -48,7 +48,7 @@ void GUILib::HExperimentListModel::reload()
 		}
 		catch (const Habit::HDBException& e)
 		{
-			qCritical() << "Cannot load experiment " << stringList().at(irow) << endl << e.what();
+			qCritical().noquote() << "Cannot load experiment " << stringList().at(irow) << "\n" << e.what();
 			m_colorProblemPairList.append(CSLPair(QColor(Qt::red), QStringList(e.what())));
 		}
 		irow++;

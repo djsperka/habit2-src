@@ -15,6 +15,6 @@ CONFIG(debug, debug|release) {
 # Get gstreamer stuff from this file.
 include(../../habit2.pri)
 
-QT += widgets
+QT += widgets statemachine
 
 include(habutil.pri)

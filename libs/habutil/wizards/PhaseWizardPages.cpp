@@ -14,7 +14,6 @@
 #include "ui_PhaseWPHabit1.h"
 #include "ui_PhaseWPHabit2.h"
 
-#include <QRegExpValidator>
 #include <QIntValidator>
 #include <QPixmap>
 #include <QMessageBox>
@@ -25,9 +24,6 @@
 #include "HPhaseSettings.h"
 #include "habituationsettings.h"
 #include "HNameValidator.h"
-
-static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");
-static const QRegExp reWordWithSpaces(sreWordWithSpaces);
 
 static const int pageFirst = 1;
 static const int pageTrialSettings = 2;

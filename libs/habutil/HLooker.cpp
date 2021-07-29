@@ -896,7 +896,5 @@ void HLooker::stopLooker(int tMS)
 	}
 	qDebug() << "HLooker::stopLooker(): calling stop()";
 	stop();
-	qDebug() << "HLooker::stopLooker(): calling QCoreApplication::processEvents(0)";
 	QCoreApplication::processEvents(0);
-	qDebug() << "HLooker::stopLooker(): calling QCoreApplication::processEvents(0) - done";
 }

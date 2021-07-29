@@ -8,15 +8,16 @@
 
 #include "HWorkspaceUtil.h"
 #include "HDBUtil.h"
-#include <QDesktopServices>
 #include <QSettings>
 #include <QDir>
 #include <QFile>
 #include <QFileDialog>
 #include <QtDebug>
 #include <QMessageBox>
-#include <QRegExp>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QtGlobal>
+#include <QStandardPaths>
 #ifdef Q_OS_WIN
 #include <QProcess>
 #endif
@@ -523,13 +524,14 @@ bool habutilCompareVersions(QString v1, QString v2, int &result)
 	result = 0;
 
 	// parse the two strings
-	QRegExp re("([0-9]+)[.]([0-9]+)[.]([0-9]+)(-([a-zA-Z0-9]+))?");
-	if (re.exactMatch(v1))
+	QRegularExpression re("([0-9]+)[.]([0-9]+)[.]([0-9]+)(-([a-zA-Z0-9]+))?");
+	QRegularExpressionMatch match1 = re.match(v1);
+	if (match1.hasMatch())
 	{
-		v1_a = re.cap(1).toInt();
-		v1_b = re.cap(2).toInt();
-		v1_c = re.cap(3).toInt();
-		v1_s = re.cap(4);
+		v1_a = match1.captured(1).toInt();
+		v1_b = match1.captured(2).toInt();
+		v1_c = match1.captured(3).toInt();
+		v1_s = match1.captured(4);
 		b = true;
 	}
 	else
@@ -537,12 +539,13 @@ bool habutilCompareVersions(QString v1, QString v2, int &result)
 		b = false;
 	}
 
-	if (b && re.exactMatch(v2))
+	QRegularExpressionMatch match2 = re.match(v2);
+	if (b && match2.hasMatch())
 	{
-		v2_a = re.cap(1).toInt();
-		v2_b = re.cap(2).toInt();
-		v2_c = re.cap(3).toInt();
-		v2_s = re.cap(4);
+		v2_a = match2.captured(1).toInt();
+		v2_b = match2.captured(2).toInt();
+		v2_c = match2.captured(3).toInt();
+		v2_s = match2.captured(4);
 	}
 	else
 	{

@@ -266,7 +266,7 @@ QTextStream & Habit::operator>> (QTextStream& stream, StimulusInfo& settings)
 
 QDebug Habit::operator<<(QDebug dbg, const StimulusInfo& info)
 {
-	dbg.nospace() << "StimulusInfo: Id " << info.getId() << " File " << (info.getFileName().isEmpty() ? QString("empty") : info.getFileName()) << " Loop? " << info.isLoopPlayBack() << " Vol " << info.getAudioBalance() << " Bkgd? " << info.isBackground() << " color? " << info.isColor() << " color " << info.getColor() << endl;
+	dbg.nospace().noquote() << "StimulusInfo: Id " << info.getId() << " File " << (info.getFileName().isEmpty() ? QString("empty") : info.getFileName()) << " Loop? " << info.isLoopPlayBack() << " Vol " << info.getAudioBalance() << " Bkgd? " << info.isBackground() << " color? " << info.isColor() << " color " << info.getColor() << "\n";
 	return dbg.nospace();
 }
 

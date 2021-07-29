@@ -10,7 +10,7 @@ TARGET = habit2
 CONFIG += debug_and_release c++11
 
 # need sql libs and print support
-QT += sql printsupport
+QT += sql printsupport statemachine
 
 # Get gstreamer stuff from this file.
 include(../../habit2.pri)

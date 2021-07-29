@@ -12,7 +12,6 @@
 #include <QtDebug>
 #include <QInputDialog>
 #include <QMessageBox>
-#include <QRegExp>
 #include <QListIterator>
 #include <QtGlobal>
 #include <QList>
@@ -287,30 +286,6 @@ QString GUILib::H2MainWindow::getExperimentNewName()
 	return newExpt;
 }
 
-
-#if 0
-bool GUILib::H2MainWindow::inputExperimentName(QString& newName, const QString defaultName)
-{
-	bool bOK = false;
-	newName = QInputDialog::getText(this, "Enter Experiment Name", "Experiment Name:", QLineEdit::Normal, defaultName, &bOK);
-	newName = newName.trimmed();
-    if (bOK)
-    {
-    	// Validate experiment name
-    	if (newName.isEmpty())
-		{
-			QMessageBox::warning(this, "Bad Experiment Name", "The experiment name is empty.");
-			bOK = false;
-		}
-		else if (!newName.contains(QRegExp("^[a-zA-Z0-9-]([a-zA-Z0-9- ()]*[a-zA-Z0-9-()])?$")))
-		{
-			QMessageBox::warning(this, "Bad Experiment Name", "The experiment name can only contain letters, numbers, and the characters \"-\", \"(\", and \")\". Spaces are allowed in the interior of the name, but are trimmed from the beginning and end.");
-			bOK = false;
-		}
-    }
-	return bOK;
-}
-#endif
 
 void GUILib::H2MainWindow::newExperiment()
 {

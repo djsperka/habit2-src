@@ -9,12 +9,12 @@
 #include <QApplication>
 #include <QTime>
 #include <QDesktopServices>
+#include <QStandardPaths>
 #include <QTextStream>
 #include <QFile>
 #include <QtDebug>
 #include <QMenuBar>
 #include <QProcessEnvironment>
-#include <QDesktopWidget>
 #include <QMutexLocker>
 #include <QMutex>
 #include <QCommandLineParser>

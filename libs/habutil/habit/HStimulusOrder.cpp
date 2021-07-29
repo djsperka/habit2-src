@@ -8,20 +8,7 @@
 #include "HStimulusOrder.h"
 #include "HNameValidator.h"
 #include <QDebug>
-#include <QRegExp>
 #include <QDataStream>
-
-//static const QRegExp re("(\\w+)(/(\\w+))?");
-//static const QString sreWordWithSpaces("((\\w)|(\\w[ '_-\\w]*\\w))");
-//static const QString sreWordWithPunctuation("((\\w)|(\\w[ \\(\\)\\!\\#\\$\\%\\&\\*\\[\\]\\{\\}\\:\\<\\>'_-\\w]*\\w))");
-//static const QRegExp reStimAndLabel(GUILib::HNameAndLabelValidator::getNameAndLabelRE());
-//static const QRegExp reHabitNames(sreWordWithPunctuation + "(/" + sreWordWithPunctuation + ")?");
-
-//const QRegExp& Habit::HStimulusOrder::getStimlusNameLabelRE()
-//{
-//	return reStimAndLabel;
-//}
-
 
 QString Habit::HStimulusOrder::getStim(const QString& stimAndLabel)
 {
@@ -42,9 +29,10 @@ QString Habit::HStimulusOrder::getStim(const QString& stimAndLabel)
 	}
 #endif
 
-	if (GUILib::HName::getNameAndLabelRE().indexIn(stimAndLabel) > -1)
+	QRegularExpressionMatch match = GUILib::HName::getNameAndLabelRE().match(stimAndLabel);
+	if (match.hasMatch())
 	{
-		result = GUILib::HName::getNameAndLabelRE().cap(1);
+		result = match.captured(1);
 	}
 
 	return result;
@@ -53,9 +41,10 @@ QString Habit::HStimulusOrder::getStim(const QString& stimAndLabel)
 QString Habit::HStimulusOrder::getLabel(const QString& stimAndLabel)
 {
 	QString result;
-	if (GUILib::HName::getNameAndLabelRE().indexIn(stimAndLabel) > -1)
+	QRegularExpressionMatch match = GUILib::HName::getNameAndLabelRE().match(stimAndLabel);
+	if (match.hasMatch())
 	{
-		result = GUILib::HName::getNameAndLabelRE().cap(3);
+		result = match.captured(3);
 	}
 	return result;
 }
@@ -92,7 +81,7 @@ Habit::HStimulusOrder::HStimulusOrder(const HStimulusOrder& o)
 
 QDebug Habit::operator<<(QDebug dbg, const Habit::HStimulusOrder& order)
 {
-	dbg.nospace() << "name=" << order.getName() << " order=" << order.getList().join(QString(",")) << endl;
+	dbg.nospace().noquote() << "name=" << order.getName() << " order=" << order.getList().join(QString(",")) << "\n";
 	return dbg.nospace();
 }
 

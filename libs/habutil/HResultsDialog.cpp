@@ -48,7 +48,7 @@ void HResultsDialog::onPrint()
     QPrintDialog *dialog = new QPrintDialog(&printer, this);
     dialog->setWindowTitle(tr("Print Document"));
     if (m_pResultsWidget->textCursor().hasSelection())
-    	dialog->addEnabledOption(QAbstractPrintDialog::PrintSelection);
+    	dialog->setOption(QAbstractPrintDialog::PrintSelection);
 	if (dialog->exec() != QDialog::Accepted)
         return;
 

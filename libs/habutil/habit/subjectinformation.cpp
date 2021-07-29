@@ -1,5 +1,6 @@
 #include "subjectinformation.h"
-
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QtGlobal>
 #if QT_VERSION >= 0x050000
 #include <QtWidgets>
@@ -74,7 +75,7 @@ void GUILib::SubjectInformation::createEditsSection()
 	conditionEdit_ = new QLineEdit();
 	observerEdit_ = new QLineEdit();
 	cellNoEdit_ = new QLineEdit();
-	cellNoEdit_->setValidator(new QRegExpValidator(QRegExp("[+]?[()0-9]*"), this));
+	cellNoEdit_->setValidator(new QRegularExpressionValidator(QRegularExpression("[+]?[()0-9]*"), this));
 	commentsEdit_ = new QTextEdit();
 }
 

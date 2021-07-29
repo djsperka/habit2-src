@@ -8,8 +8,8 @@
 #ifndef LIBS_HABUTIL_HNAMEVALIDATOR_H_
 #define LIBS_HABUTIL_HNAMEVALIDATOR_H_
 
-#include <QRegExpValidator>
-#include <QRegExp>
+#include <QRegularExpressionValidator>
+#include <QRegularExpression>
 
 namespace GUILib {
 
@@ -19,33 +19,33 @@ public:
 
 	static const QString& getNameREString();
 	static const QString& getNameAndLabelREString();
-	static const QRegExp& getNameRE();
-	static const QRegExp& getNameAndLabelRE();
+	static const QRegularExpression& getNameRE();
+	static const QRegularExpression& getNameAndLabelRE();
 
 };
 
-class HNameRegExp: public QRegExp
+class HNameRegExp: public QRegularExpression
 {
 public:
 	HNameRegExp();
 	virtual ~HNameRegExp();
 };
 
-class HNameAndLabelRegExp: public QRegExp
+class HNameAndLabelRegExp: public QRegularExpression
 {
 public:
 	HNameAndLabelRegExp();
 	virtual ~HNameAndLabelRegExp();
 };
 
-class HNameValidator: public QRegExpValidator {
+class HNameValidator: public QRegularExpressionValidator {
 public:
 	HNameValidator(QWidget *parent=NULL);
 	static const QString& getNameRE();
 	virtual ~HNameValidator();
 };
 
-class HNameAndLabelValidator: public QRegExpValidator {
+class HNameAndLabelValidator: public QRegularExpressionValidator {
 public:
 	HNameAndLabelValidator(QWidget *parent=NULL);
 	static const QString& getNameAndLabelRE();

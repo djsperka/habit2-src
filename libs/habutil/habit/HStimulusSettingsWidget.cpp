@@ -13,7 +13,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QRegExpValidator>
 
 GUILib::HStimulusSettingsWidget::HStimulusSettingsWidget(const Habit::StimulusSettings& settings, const Habit::StimulusDisplayInfo& sdi, QWidget *parent)
 : QWidget(parent)

@@ -7,7 +7,6 @@
 
 #include "HStimulusSettingsOrderImportUtil.h"
 #include <QFile>
-#include <QRegExp>
 #include <QTextStream>
 #include <QMessageBox>
 
@@ -244,51 +243,3 @@ bool importStimulusSettingsAndOrders(const QString& filename, Habit::StimulusSet
 	return b;
 }
 
-#if 0
-				if (reFULL.indexIn(line) == 0)
-				{
-					// check phase vs context for this
-					if (checkPhase(reFULL.cap(3), context))
-					{
-						// correct phase
-						if (reFULL.cap(1) == "stim")
-						{
-							Habit::StimulusSettings stim(reFULL.cap(5), context);
-							if (parseStim(reFULL.cap(7), stim))
-							{
-								qDebug() << "parseStim got " << stim;
-								stimList.append(stim);
-							}
-							else
-							{
-								qDebug() << "Cannot parse stimulus: " << reFULL.cap(7);
-							}
-						}
-						else
-						{
-							HStimulusOrder order(context, reFULL.cap(5));
-							if (parseOrder(reFULL.cap(7), order))
-							{
-								orderList.append(order);
-							}
-							else
-							{
-								qDebug() << "Cannot parse stim order: " << reFULL.cap(7);
-							}
-						}
-					}
-					else
-					{
-						qDebug() << "Ignoring import line for phase " << reFULL.cap(3);
-					}
-				}
-				else
-					qDebug() << "unmatched line " << line.trimmed();
-			}
-		}
-		file.close();
-		b = true;	// return true if file was opened ok.
-	}
-	return b;
-}
-#endif
