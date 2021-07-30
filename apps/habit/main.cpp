@@ -220,7 +220,10 @@ int main(int argc, char *argv[])
 	// If -q is set, hijack the whole process, analyze the file, and get out.
     if (parser.isSet("q"))
     {
-    	checkHabFileForDups(parser.value("q"));
+    	QString s;
+    	QTextStream scannerOutput(&s);
+    	int i = HResults::checkHabFileForDups(parser.value("q"), scannerOutput);
+    	qDebug() << "Found " << i << " duplicate looks.";
     	return 0;
     }
 
@@ -390,6 +393,7 @@ int main(int argc, char *argv[])
     return ii;
 }
 
+#if 0
 bool checkHabFileForDups(const QString& sPath)
 {
 	bool b = false;
@@ -433,3 +437,4 @@ bool checkHabFileForDups(const QString& sPath)
 	}
 	return b;
 }
+#endif

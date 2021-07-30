@@ -8,7 +8,7 @@
 #include "HTrialScanner.h"
 #include "HLookerReprocessor.h"
 
-bool HTrialScanner::scan(const HResults& results, QStringList *pSErrorWarnings)
+bool HTrialScanner::scan(const HResults& results, QTextStream& output)
 {
 	bool b = true;
 	QString subjectId;
@@ -29,8 +29,7 @@ bool HTrialScanner::scan(const HResults& results, QStringList *pSErrorWarnings)
 	}
 	else
 	{
-		if (pSErrorWarnings)
-			pSErrorWarnings->append("Unknown results type. Cannot save HResults to CSV.");
+		output << "Unknown results type. Cannot save HResults to CSV." << Qt::endl;
 		return false;
 	}
 
@@ -80,8 +79,7 @@ bool HTrialScanner::scan(const HResults& results, QStringList *pSErrorWarnings)
 				if (bInsidePhase)
 				{
 					qCritical("Found phase start without preceding phase end event!");
-					if (pSErrorWarnings)
-						pSErrorWarnings->append("Found phase start without preceding phase end event!");
+					output << "Found phase start without preceding phase end event!";
 				}
 				bInsidePhase = true;
 			}
@@ -96,8 +94,7 @@ bool HTrialScanner::scan(const HResults& results, QStringList *pSErrorWarnings)
 				if (bInsideTrial)
 				{
 					qCritical("Found trial start without preceding trial end event!");
-					if (pSErrorWarnings)
-						pSErrorWarnings->append("Found trial start without preceding trial end event!");
+					output << "Found trial start without preceding trial end event!";
 				}
 
 				// initialize trialResult
@@ -156,8 +153,7 @@ bool HTrialScanner::scan(const HResults& results, QStringList *pSErrorWarnings)
 					else
 					{
 						qWarning() << "Warning: cannot match player id to monitor.";
-						if (pSErrorWarnings)
-							pSErrorWarnings->append("Warning: cannot match player id to monitor.");
+						output << "Warning: cannot match player id to monitor.";
 					}
 				}
 			}
@@ -166,14 +162,8 @@ bool HTrialScanner::scan(const HResults& results, QStringList *pSErrorWarnings)
 				HLookEvent* ple = static_cast<HLookEvent*>(e);
 				if (trialResult.looks().contains(ple->look()))
 				{
-					if (pSErrorWarnings)
-					{
-						QString s;
-						QTextStream tmpStream(&s);
-						tmpStream << "Phase: " << trialResult.getString(HTrialResult::indPhase) << " Trial: " << trialResult.getString(HTrialResult::indTrial) << endl;
-						tmpStream << "   Duplicate look: " << ple->look();
-						pSErrorWarnings->append(s);
-					}
+					output << "Phase: " << trialResult.getString(HTrialResult::indPhase) << " Trial: " << trialResult.getString(HTrialResult::indTrial) << Qt::endl;
+					output << "   Duplicate look: " << ple->look() << Qt::endl;
 					qWarning() << "Duplicate look: " << ple->look();
 				}
 				else
@@ -234,7 +224,7 @@ bool HTrialScanner::scan(const HResults& results, QStringList *pSErrorWarnings)
 bool CSV1ResultsScanner::init() const
 {
 	// put headers in output file
-	out() << HTrialResult::headers.join(",") << endl;
+	out() << HTrialResult::headers.join(",") << Qt::endl;
 	return true;
 }
 
@@ -268,7 +258,7 @@ bool CSV1ResultsScanner::trial(const HTrialResult& row) const
 		if (l.isComplete())
 			out() << "," << l.direction().name() << "," << l.startMS() << "," << l.endMS() << "," << l.lookMS();
 	}
-	out() << endl;
+	out() << Qt::endl;
 	return true;
 }
 
@@ -282,7 +272,7 @@ bool CSV2ResultsScanner::init() const
 	out() << HTrialResult::headers.at(HTrialResult::indPhase) << ","
 			<< HTrialResult::headers.at(HTrialResult::indTrial) << ","
 			<< HTrialResult::headers.at(HTrialResult::indRepeat) << ","
-			<< "Num,Complete,Direction,Start,End,Diff" << endl;
+			<< "Num,Complete,Direction,Start,End,Diff" << Qt::endl;
 	return true;
 }
 
@@ -300,7 +290,7 @@ bool CSV2ResultsScanner::trial(const HTrialResult& row) const
 			out() << row.getString(HTrialResult::indPhase) << ","
 					<< row.getString(HTrialResult::indTrial) << ","
 					<< row.getString(HTrialResult::indRepeat) << ","
-					<< num << ",FALSE," << l.direction().name() << "," << l.startMS() << "," << l.endMS() << "," << l.lookMS() << endl;
+					<< num << ",FALSE," << l.direction().name() << "," << l.startMS() << "," << l.endMS() << "," << l.lookMS() << Qt::endl;
 		}
 		else
 		{
@@ -311,7 +301,7 @@ bool CSV2ResultsScanner::trial(const HTrialResult& row) const
 					out() << row.getString(HTrialResult::indPhase) << ","
 							<< row.getString(HTrialResult::indTrial) << ","
 							<< row.getString(HTrialResult::indRepeat) << ","
-							<< num << ",TRUE," << sub.direction().name() << "," << sub.startMS() << "," << sub.endMS() << "," << sub.lookMS() << endl;
+							<< num << ",TRUE," << sub.direction().name() << "," << sub.startMS() << "," << sub.endMS() << "," << sub.lookMS() << Qt::endl;
 				}
 			}
 		}

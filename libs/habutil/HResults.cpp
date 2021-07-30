@@ -140,23 +140,25 @@ bool HResults::saveToCSV(const QString& filename, bool bReplace) const
 
 	if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
 	{
+		QString s;
+		QTextStream scannerOutput(&s);
 		QTextStream out(&file);
 		CSV1ResultsScanner csv1(out);
 		CSV2ResultsScanner csv2(out);
 		if (!bReplace)
 		{
-			b = csv1.scan(*this);
-			if (b) out << endl;
-			if (b) b = csv2.scan(*this);
+			b = csv1.scan(*this, scannerOutput);
+			if (b) out << Qt::endl;
+			if (b) b = csv2.scan(*this, scannerOutput);
 		}
 		else
 		{
 			ReplaceLooksResultsDumper r1(this->experimentSettings().getHLookSettings(), csv1);
 			ReplaceLooksResultsDumper r2(this->experimentSettings().getHLookSettings(), csv2);
-			b = r1.scan(*this);
-			if (b) out << endl;
-			if (b) b = r2.scan(*this);
-			if (b) out << endl;
+			b = r1.scan(*this, scannerOutput);
+			if (b) out << Qt::endl;
+			if (b) b = r2.scan(*this, scannerOutput);
+			if (b) out << Qt::endl;
 		}
 		file.close();
 	}
@@ -165,5 +167,54 @@ bool HResults::saveToCSV(const QString& filename, bool bReplace) const
 		qWarning() << "HResults::saveToCSV: Cannot open file \"" << filename << "\".";
 	}
 	return b;
+}
+
+int HResults::checkHabFileForDups(const QString& sPath, QTextStream& output)
+{
+	int ireturn = 0;
+	QStringList sPhasesToCheck;
+	HResults* pResults = HResults::load(sPath);
+	if (pResults)
+	{
+		output << "Loaded file " << sPath << Qt::endl;
+
+		// Look at settings for each phase, see if any phases are "single look"
+
+		for (int i=0; i<pResults->experimentSettings().phases().size(); i++)
+		{
+			const Habit::HPhaseSettings& ps = pResults->experimentSettings().phases().at(i);
+			output << "Phase: " << ps.getName() << Qt::endl;
+			if (ps.getIsEnabled())
+				output << "Enabled: YES" << Qt::endl;
+			else
+				output << "Enabled: NO" << Qt::endl;
+			if (ps.getIsSingleLook())
+			{
+				output << "Uses \"Single complete look\" criteria for trial ending. Will check for duplicates!" << Qt::endl;
+				sPhasesToCheck.append(ps.getName());
+			}
+			else
+				output << "Does not use \"Single complete look\" criteria for trial ending, duplicate check not needed (but doing it anyways)" << Qt::endl;
+		}
+
+		QString s;
+		QTextStream scannerOutput(&s);
+		NoopResultsScanner nts;
+		nts.scan(*pResults, scannerOutput);
+
+		// See if there were any duplicate looks
+		// set i= # duplicate looks found
+		ireturn = s.count(QString("Duplicate look"));
+
+
+
+		delete pResults;
+	}
+	else
+	{
+		output << "Cannot load file " << sPath;
+		ireturn = -1;
+	}
+	return ireturn;
 }
 
