@@ -9,6 +9,7 @@
 #include "HResultsDialog.h"
 #include "ui_HResultsExplorerForm.h"
 #include "HResults.h"
+#include "ResultsScannerDialog.h"
 #include <QtDebug>
 #include <QMessageBox>
 #include <QFileInfo>
@@ -186,9 +187,28 @@ void HResultsExplorerDialog::openClicked()
 
 void HResultsExplorerDialog::checkResultsClicked()
 {
-	qDebug() << "check results " << getSelectedFile();
+	QString s;
+	QTextStream output(&s);
+	QFileInfo selectedFile(getSelectedFile());
+	if (selectedFile.isDir())
+	{
+		output << "Checking dir: " << getSelectedFile();
+		// Scan folder for individual files
+	}
+	else
+	{
+		output << "Checking file: " << getSelectedFile() << Qt::endl;
+		int i = HResults::checkHabFileForDups(getSelectedFile(), output);
+		if (i > -1)
+			output << QString("Found %1 duplicate looks.").arg(i) << Qt::endl;
+		else
+			output << "Cannot open file." << Qt::endl;
+		qDebug().noquote() << s;
+	}
 
-	accept();
+	ResultsScannerDialog rsd(this, s);
+	rsd.show();
+	rsd.exec();
 }
 
 

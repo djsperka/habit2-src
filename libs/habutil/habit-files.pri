@@ -70,7 +70,8 @@
 	habit/HIntertrialIntervalSettingsWidget.h \
 	habit/HAboutHabitDialog.h \
 	habit/HLoggerObject.h  \
-	habit/HLoggerWidget.h
+	habit/HLoggerWidget.h \
+	habit/ResultsScannerDialog.h
 	
 	
 
@@ -141,7 +142,8 @@ SOURCES += \
 	habit/HIntertrialIntervalSettingsWidget.cpp \
 	habit/HAboutHabitDialog.cpp \
 	habit/HLoggerObject.cpp \
-	habit/HLoggerWidget.cpp
+	habit/HLoggerWidget.cpp \
+	habit/ResultsScannerDialog.cpp
 	
 
  FORMS =		\
@@ -170,5 +172,6 @@ SOURCES += \
  	habit/GlobalPreferencesDialog.ui \
  	habit/HRunSettingsTestingForm.ui \
  	habit/HIntertrialIntervalSettingsForm.ui \
- 	habit/AboutHabitDialog.ui
+ 	habit/AboutHabitDialog.ui \
+ 	habit/ResultsScannerForm.ui
  

@@ -46,6 +46,9 @@ public:
 	// Load an HResults object from a file.
 	static HResults* load(const QString& filename);
 
+	// Analyze results file -- look for duplicate Look
+	static int checkHabFileForDups(const QString& sPath, QTextStream& output);
+
 	// save to file. File will be CLOBBERED!
 	bool save(const QString& filename) const;
 

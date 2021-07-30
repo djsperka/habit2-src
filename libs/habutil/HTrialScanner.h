@@ -21,7 +21,7 @@ public:
 	virtual bool init() const = 0;
 	virtual bool trial(const HTrialResult& t) const = 0;
 	virtual bool done() const = 0;
-	virtual bool scan(const HResults& results, QStringList *pSErrorWarnings = nullptr);
+	virtual bool scan(const HResults& results, QTextStream& output);
 };
 
 class NoopResultsScanner: public HTrialScanner
