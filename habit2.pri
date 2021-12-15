@@ -28,3 +28,16 @@
                     c:/gstreamer/1.0/x86_64/lib/glib-2.0/include \
                     c:/gstreamer/1.0/x86_64/include/gstreamer-1.0
 }
+
+
+# Add QTadjustments for all projects here. REmoving from various *.pro, *.pri files. 
+
+QT += sql printsupport widgets
+
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += widgets printsupport
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += core5compat statemachine
+}

@@ -9,16 +9,8 @@ TARGET = habit2
 # Tell qmake to use pkg-config to find gstreamer.
 CONFIG += debug_and_release c++11
 
-# need sql libs and print support
-QT += sql printsupport statemachine
-
 # Get gstreamer stuff from this file.
 include(../../habit2.pri)
-
-# Now tell qmake to link to gstreamer and also use its include path and Cflags.
-#PKGCONFIG += gstreamer-1.0 gstreamer-plugins-base-1.0
-# gstreamer-plugins-bad-1.0
-QT += widgets
 
 # Recommended, to avoid possible issues with the "emit" keyword
 # You can otherwise also define QT_NO_EMIT, but notice that this is not a documented Qt macro.

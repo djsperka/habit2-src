@@ -4,6 +4,10 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     QT += widgets printsupport
 }
 
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += core5compat
+}
+
 QMAKE_CXXFLAGS += -fvisibility=hidden
 INCLUDEPATH += . ./habit ./wizards ./hgst
 CONFIG(debug, debug|release) {
