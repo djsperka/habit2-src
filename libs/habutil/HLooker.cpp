@@ -396,7 +396,7 @@ void HLooker::onLookingStateEntered()
 					}
 					m_looks.append(l);
 					qDebug() << "emit look(1): " << l;
-					qDebug() << "sublooks follow" << endl << sublooks;
+					qDebug() << "sublooks follow" << Qt::endl << sublooks;
 
 					// update looking parameters before emit
 					// This look() may end a trial. In the steps ending a trial, the looker will
@@ -745,7 +745,7 @@ void HLooker::minLookAwayTimeout()
 
 			m_looks.append(l);
 			qDebug() << "emit look(2, inclusive=" << m_bInclusiveLookTime << "): " << l;
-			qDebug() << "sublooks follow" << endl << sublooks;
+			qDebug() << "sublooks follow" << Qt::endl << sublooks;
 			emit look(l);
 
 		}
@@ -847,7 +847,7 @@ void HLooker::stopLooker(int tMS)
 				m_looks.append(l);
 
 				qDebug() << "emit look(3): " << l;
-				qDebug() << "sublooks follow" << endl << sublooks;
+				qDebug() << "sublooks follow" << Qt::endl << sublooks;
 				emit look(l);
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
@@ -877,7 +877,7 @@ void HLooker::stopLooker(int tMS)
 				}
 				m_looks.append(l);
 				qDebug() << "emit look(4): " << l;
-				qDebug() << "sublooks follow" << endl << sublooks;
+				qDebug() << "sublooks follow" << Qt::endl << sublooks;
 				emit look(l);
 				m_bLookStarted = false;
 				m_iLookStartedIndex = -1;
@@ -896,5 +896,5 @@ void HLooker::stopLooker(int tMS)
 	}
 	qDebug() << "HLooker::stopLooker(): calling stop()";
 	stop();
-	QCoreApplication::processEvents(0);
+	QCoreApplication::processEvents();
 }
