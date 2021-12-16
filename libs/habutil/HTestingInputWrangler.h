@@ -57,7 +57,7 @@ protected slots:
 	void experimentFinished();
 };
 
-QDebug operator<<(QDebug dbg, const HTestingInputWrangler& w);
+//QDebug operator<<(QDebug dbg, const HTestingInputWrangler& w);
 
 
 #endif /* HTESTINGINPUTWRANGLER_H_ */
