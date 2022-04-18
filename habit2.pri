@@ -21,10 +21,11 @@
 	#QMAKE_LFLAGS += -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 
     CONFIG += c++11
-    LIBS += -Lc:/gstreamer/1.0/x86_64/lib -lgstreamer-1.0 -lglib-2.0 -lgobject-2.0 -lintl 
-#    LIBS += -lgstreamer-1.0 -lglib-2.0 -lintl 
-    INCLUDEPATH +=  \
-                    c:/gstreamer/1.0/x86_64/include/glib-2.0 \
-                    c:/gstreamer/1.0/x86_64/lib/glib-2.0/include \
-                    c:/gstreamer/1.0/x86_64/include/gstreamer-1.0
+	
+	# djs change to backslashes for windows
+	# change additions to INCLUDEPATH to single line
+    LIBS += -Lc:\gstreamer\1.0\msvc_x86_64\lib -lgstreamer-1.0 -lglib-2.0 -lgobject-2.0 -lintl 
+    INCLUDEPATH += c:\gstreamer\1.0\msvc_x86_64\include\glib-2.0
+    INCLUDEPATH += c:\gstreamer\1.0\msvc_x86_64\lib\glib-2.0\include
+    INCLUDEPATH += c:\gstreamer\1.0\msvc_x86_64\include\gstreamer-1.0
 }
