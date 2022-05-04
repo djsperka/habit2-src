@@ -38,7 +38,6 @@
 			<MergeRef Id="gstreamer_codecs"/>
 			<MergeRef Id="gstreamer_codecs_gpl"/>
 			<MergeRef Id="gstreamer_codecs_restricted"/>
-			<MergeRef Id="gstreamer_dvd"/>
 			<MergeRef Id="gstreamer_core"/>
 			<MergeRef Id="gstreamer_playback"/>
 			<MergeRef Id="gstreamer_effects"/>
@@ -72,18 +71,17 @@
 			<Directory Id="ProgramFiles64Folder" Name="PFiles">
 				<Directory Id="INSTALLDIR" Name="habit2">
 				    <Directory Id="GSTDIR" Name="gstreamer-1.0">
-					    <Merge Id="base_system" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\base-system-1.0-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="base_crypto" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\base-crypto-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_net" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-net-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_system" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-system-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_codecs" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-codecs-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_codecs_gpl" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-codecs-gpl-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_codecs_restricted" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-codecs-restricted-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_dvd" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-dvd-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_core" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-core-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_playback" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-playback-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_effects" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-effects-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
-					    <Merge Id="gstreamer_libav" SourceFile="C:\gstreamer-msm\MinGW\msys\1.0\home\Jan\cerbero\gstreamer-1.0-libav-1.12.4-x86_64.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="base_system" SourceFile="C:\gstreamer-msm\1.18.4\base-system-1.0-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="base_crypto" SourceFile="C:\gstreamer-msm\1.18.4\base-crypto-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_net" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-net-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_system" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-system-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_codecs" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-codecs-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_codecs_gpl" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-codecs-gpl-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_codecs_restricted" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-codecs-restricted-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_core" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-core-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_playback" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-playback-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_effects" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-effects-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_libav" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-libav-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
 				    </Directory>
 				</Directory>
 			</Directory>
@@ -125,7 +123,7 @@
 	</Fragment>
 	<Fragment>
 		<DirectoryRef Id="TARGETDIR">
-			<Merge Id="VCRedist" SourceFile="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.13.26020\MergeModules\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>
+			<Merge Id="VCRedist" SourceFile="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Redist\MSVC\v142\MergeModules\Microsoft_VC142_CRT_x64.msm" DiskId="1" Language="0"/>
 		</DirectoryRef>
 	</Fragment>
 </Wix>
