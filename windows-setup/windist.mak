@@ -1,16 +1,24 @@
 # env can contain these, else set them here
-GIT_TAG=v2.2.5-rc4
-DIST_VERSION=2.2.5
+GIT_TAG=v2.2.9-win2
+DIST_VERSION=2.2.9
 EXTRA_LABEL=_win_x64
-QT_BIN=C:\Qt\5.10.1\msvc2017_64\bin
+QT_BIN=C:\Qt\5.15.2\msvc2019_64\bin
 
 # qmake exe based on QT_BIN - this sets the qt version to use in the dist
 QMAKE=$(QT_BIN)\qmake.exe
 
+# path to sed exe
+SED="C:\Program Files\Git\usr\bin\sed.exe"
+
+# path to WIX tools
+HEAT="C:\Program Files (x86)\WiX Toolset v3.11\bin\heat.exe"
+LIGHT="C:\Program Files (x86)\WiX Toolset v3.11\bin\light.exe"
+CANDLE="C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe"
+
 # export key from certmgr, set filename and password here
 # delete file when build is done!
-PFXFILE=ucd.pfx
-PFXKEY=horseyface
+PFXFILE=djsperka-win-2022.p12
+PFXKEY=horsCPh8s
 
 # Note: $(MAKEDIR) is the location of this makefile. 
 BUILDDIR=$(MAKEDIR)\build
@@ -57,7 +65,7 @@ clean:
 
 $(PACKAGE): $(BUILDDIR)\stamp-Directories $(BUILDDIR)\stamp-SignExe $(OBJS) 
 	echo "Building $(PACKAGE)"
-	-light -out $(PACKAGE) -ext $(WIXUIEXTENSION) -nologo $(OBJS)
+	-$(LIGHT) -out $(PACKAGE) -ext $(WIXUIEXTENSION) -nologo $(OBJS)
 	signtool sign /a /t http://timestamp.comodoca.com /f $(PFXFILE) /p "$(PFXKEY)" $(PACKAGE)
 
 Package: Directories $(PACKAGE)
@@ -89,8 +97,8 @@ $(BUILDDIR)\stamp-BuildSrc: $(BUILDDIR)\stamp-PatchSrc
 PatchSrc: $(BUILDDIR)\stamp-PatchSrc
 
 $(BUILDDIR)\stamp-PatchSrc: $(BUILDDIR)\stamp-QMakeSrc
-	sed -i '/ProductVersion/s/\".*\"/\"$(DIST_VERSION)\"/' HabitConfiguration.wxi
-	sed -i '/HABIT_VERSION/s/\".*\"/\"$(DIST_VERSION)\"/' $(SRCDIR)\apps\habit\version.h
+	$(SED) -i '/ProductVersion/s/\".*\"/\"$(DIST_VERSION)\"/' HabitConfiguration.wxi
+	$(SED) -i '/HABIT_VERSION/s/\".*\"/\"$(DIST_VERSION)\"/' $(SRCDIR)\apps\habit\version.h
 	copy /y /b NUL $@
 
 QMakeSrc: $(BUILDDIR)\stamp-QMakeSrc
@@ -107,16 +115,16 @@ $(BUILDDIR)\stamp-DownloadSrc: DIRECTORIES
 	copy /y /b NUL $@	
 	
 $(OBJDIR)\Habit2.wixobj: Habit2.wxs
-	candle -dStimFolder=$(DISTSTIMDIR) -dStagingFolder=$(STAGINGDIR) -nologo -out $@ -arch x86 -ext "C:\Program Files (x86)\WiX Toolset v3.11\bin\\WixUIExtension.dll" $? 
+	$(CANDLE) -dStimFolder=$(DISTSTIMDIR) -dStagingFolder=$(STAGINGDIR) -nologo -out $@ -arch x86 -ext "C:\Program Files (x86)\WiX Toolset v3.11\bin\\WixUIExtension.dll" $? 
 
 $(OBJDIR)\StimComponents.wixobj: $(GENDIR)\StimComponents.wxs
-	candle -dStimFolder=$(DISTSTIMDIR) -dStagingFolder=$(STAGINGDIR) -nologo -out $@ -arch x86 -ext "C:\Program Files (x86)\WiX Toolset v3.11\bin\\WixUIExtension.dll" $? 
+	$(CANDLE) -dStimFolder=$(DISTSTIMDIR) -dStagingFolder=$(STAGINGDIR) -nologo -out $@ -arch x86 -ext "C:\Program Files (x86)\WiX Toolset v3.11\bin\\WixUIExtension.dll" $? 
 
 $(OBJDIR)\HabitComponents.wixobj: $(GENDIR)\HabitComponents.wxs
-	candle -dStimFolder=$(DISTSTIMDIR) -dStagingFolder=$(STAGINGDIR) -nologo -out $@ -arch x86 -ext "C:\Program Files (x86)\WiX Toolset v3.11\bin\\WixUIExtension.dll" $? 
+	$(CANDLE) -dStimFolder=$(DISTSTIMDIR) -dStagingFolder=$(STAGINGDIR) -nologo -out $@ -arch x86 -ext "C:\Program Files (x86)\WiX Toolset v3.11\bin\\WixUIExtension.dll" $? 
 
 $(GENDIR)\StimComponents.wxs:
-	heat dir $(DISTSTIMDIR) -cg StimComponents -dr STIMDIR -sreg -srd -var var.StimFolder -nologo -ag -out $@
+	$(HEAT) dir $(DISTSTIMDIR) -cg StimComponents -dr STIMDIR -sreg -srd -var var.StimFolder -nologo -ag -out $@
 	
 $(GENDIR)\HabitComponents.wxs:
-	heat dir $(STAGINGDIR) -cg HabitComponents -dr INSTALLDIR -sreg -srd -var var.StagingFolder -nologo -ag -out $@
+	$(HEAT) dir $(STAGINGDIR) -cg HabitComponents -dr INSTALLDIR -sreg -srd -var var.StagingFolder -nologo -ag -out $@
