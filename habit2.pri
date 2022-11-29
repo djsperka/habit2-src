@@ -8,7 +8,7 @@
 
 !win32 {
     CONFIG += link_pkgconfig c++11
-    PKGCONFIG += gstreamer-1.0
+    PKGCONFIG += gstreamer-1.0 gst-validate-1.0
  #   INCLUDEPATH += \
  #                   /usr/local/include \
  #                   /Users/dan/git/gst-plugins-base \
@@ -24,7 +24,7 @@
 	
 	# djs change to backslashes for windows
 	# change additions to INCLUDEPATH to single line
-    LIBS += -Lc:\gstreamer\1.0\msvc_x86_64\lib -lgstreamer-1.0 -lglib-2.0 -lgobject-2.0 -lintl 
+    LIBS += -Lc:\gstreamer\1.0\msvc_x86_64\lib -lgstvalidate-1.0 -lgstreamer-1.0 -lglib-2.0 -lgobject-2.0 -lintl
     INCLUDEPATH += c:\gstreamer\1.0\msvc_x86_64\include\glib-2.0
     INCLUDEPATH += c:\gstreamer\1.0\msvc_x86_64\lib\glib-2.0\include
     INCLUDEPATH += c:\gstreamer\1.0\msvc_x86_64\include\gstreamer-1.0
