@@ -15,6 +15,7 @@
 #include <QMutexLocker>
 #include <hgst/HStimPipeline.h>
 #include <hgst/HStaticStimPipeline.h>
+#include "gst/validate/gst-validate-media-info.h"
 
 HStimPipelineSource::HStimPipelineSource(HStimPipeline *pipe)
 : m_pStimPipeline(pipe)
@@ -27,6 +28,7 @@ HStimPipelineSource::HStimPipelineSource(HStimPipeline *pipe)
 , bVideo(false)
 , bLoop(false)
 , volume(0)
+, bExpectImage(false)
 , nPadsLinked(0)
 {
 }
@@ -350,6 +352,36 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 		}
 		else
 		{
+
+			// This section checks whether the incoming source is an image file.
+			// We use the caps that are presented at the 'padAdded' callback to decide
+			// if the incoming stream is video (framerate > 0) or image (framerate=0).
+			// It turns out that for some video the frame rate is variable, and for those
+			// sources the framerate (according to the caps) is zero! For those videos, the
+			// pipeline freezes! (Why? Because the padAdded callback sees framerate=0 and tries
+			// to connect up a pipeline to present an image (via imagefreeze element), and that
+			// fails when the source stream is actually video.
+
+			GstValidateMediaInfo mi;
+			GError *err = NULL, *err2 = NULL;
+			gchar *uri;
+			gst_validate_media_info_init(&mi);
+			uri = gst_filename_to_uri(C_STR(info.getAbsoluteFileName(m_dirStimRoot)), &err);
+			if (!uri)
+			{
+				qWarning() << "HStimPipeline::addStimulusInfo - cannot convert to uri: " << err2->message;
+			}
+			else if (FALSE == gst_validate_media_info_inspect_uri(&mi, uri, TRUE, &err2))
+			{
+				qWarning() << "HStimPipeline::addStimulusInfo - error inspecting uri: " << err->message;
+			}
+			else
+			{
+				g_free(uri);
+				pStimPipelineSource->bExpectImage = mi.is_image;
+				gst_validate_media_info_clear(&mi);
+			}
+
 			// all other stim types -- image or movie -- handled here. The determination
 			// of whether its an image or movie is done when caps are handled in padAdded.
 			// Same is true of audio handling.
@@ -364,7 +396,6 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 			decodebin = makeElement("decodebin", ppt, id());
 			Q_ASSERT(decodebin);
 			g_signal_connect(decodebin, "pad-added", G_CALLBACK(&padAdded), pStimPipelineSource);
-
 			sink = makeElement("qwidget5videosink", ppt, id());
 			Q_ASSERT(sink);
 
@@ -416,6 +447,16 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 	Q_ASSERT(b);
 	qDebug() << sDebugPrefix << "parsed element name, factory " << factory << " ppt " << pppt->name() << " id " << id << " prefix " << prefix;
 
+	{
+		GstCaps *caps;
+		GstStructure *str;
+		const gchar *name;
+		caps = gst_pad_query_caps (newPad, NULL);
+		str = gst_caps_get_structure (caps, 0);
+		name = gst_structure_get_name (str);
+		qDebug() << sDebugPrefix << "CAPS: " << name;
+	}
+
 	// get the caps and parse them. That will tell us whether its audio or video. If its video, then
 	// we get the frame rate - that tells us whether its an image (rate=0) or video. We also get the
 	// resolution.
@@ -429,10 +470,11 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 	// set size of source, but only if this is an image or video stream. Audio streams have no size.
 	// Container that has video and audio - this prevents us from wiping out the size if audio pad appears second.
 	if (isImage || isVideo) pSource->size = QSize(width, height);
-
-	if (isImage)
+	if (isImage && !pSource->bExpectImage)
+		qWarning() << "Variable rate video stream? NOT expecting image stream";
+	if (isImage && pSource->bExpectImage)
 	{
-		qDebug() << sDebugPrefix << "got image stream";
+		if (isImage) qDebug() << sDebugPrefix << "got image stream";
 		if (!pSource->bVideo)
 		{
 			qDebug() << sDebugPrefix << "ignoring video for this source";
@@ -483,9 +525,10 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 			pSource->nPadsLinked++;
 		}
 	}
-	else if (isVideo)
+	else if (isVideo || (isImage && !pSource->bExpectImage))
 	{
-		qDebug() << sDebugPrefix << "got video stream";
+		if (isVideo) qDebug() << sDebugPrefix << "this stream is fixed rate video";
+		if (isImage && !pSource->bExpectImage) qDebug() << sDebugPrefix << "this stream is variable rate video";
 		if (!pSource->bVideo)
 		{
 			qDebug() << sDebugPrefix << "ignoring video for this source";
@@ -681,6 +724,9 @@ void HStimPipeline::padAdded(GstElement *src, GstPad *newPad, gpointer p)
 }
 
 
+
+
+
 gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 {
 
@@ -727,7 +773,7 @@ gboolean HStimPipeline::busCallback(GstBus *, GstMessage *msg, gpointer p)
 			if (pStimPipeline->m_iAsyncPause) pStimPipeline->m_iAsyncPause--;
 			qDebug() << sDebugPrefix << "pipeline is now prerolled. m_iAsyncPause=" << pStimPipeline->m_iAsyncPause;
 			pStimPipeline->emitPrerolled();
-			//GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pStimPipeline->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pStimPipeline->pipeline()));
+			GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pStimPipeline->pipeline()), GST_DEBUG_GRAPH_SHOW_ALL, GST_ELEMENT_NAME(pStimPipeline->pipeline()));
 		}
 		//#endif here see bottom
 	}

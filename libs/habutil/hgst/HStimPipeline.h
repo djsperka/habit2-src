@@ -32,10 +32,16 @@ public:
 	bool bWaitingForSegment;		// true when non-flushing segment seek issued, but segment not received. Used in event probe.
 	bool bWaitingForSegment2;
 	QString sWaitingForSegment2Pad;
+
+	// These are derived from the StimulusSettings
 	bool bAudio;
 	bool bVideo;
 	bool bLoop;
 	float volume;
+
+	// This is only set when GstDiscover tells us we have an image file.
+	bool bExpectImage;
+
 	QSize size;		// stim size for video/image streams
 	unsigned int nPadsLinked;
 
@@ -133,6 +139,10 @@ public:
 
 	// event probe for events passing through the pipeline
 	static GstPadProbeReturn eventProbeCB(GstPad * pad, GstPadProbeInfo * info, gpointer p);
+
+	static void elementAdded(GstBin * self, GstElement * element, gpointer user_data);
+	static void foreachCallback(gpointer * item, gpointer user_data);
+
 
 };
 
