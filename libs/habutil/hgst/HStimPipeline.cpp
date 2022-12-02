@@ -362,16 +362,20 @@ HStimPipelineSource *HStimPipeline::addStimulusInfo(const HPlayerPositionType& p
 			// to connect up a pipeline to present an image (via imagefreeze element), and that
 			// fails when the source stream is actually video.
 
+			GError *err = nullptr;
+			gchar *uri=nullptr;
 			GstValidateMediaInfo mi;
-			GError *err = NULL, *err2 = NULL;
-			gchar *uri;
 			gst_validate_media_info_init(&mi);
-			uri = gst_filename_to_uri(C_STR(info.getAbsoluteFileName(m_dirStimRoot)), &err);
-			if (!uri)
+
+			if (!QFile::exists(info.getAbsoluteFileName(m_dirStimRoot)))
 			{
-				qWarning() << "HStimPipeline::addStimulusInfo - cannot convert to uri: " << err2->message;
+				qWarning() << "HStimPipeline::addStimulusInfo - stimulus file not found. " << info.getAbsoluteFileName(m_dirStimRoot);
 			}
-			else if (FALSE == gst_validate_media_info_inspect_uri(&mi, uri, TRUE, &err2))
+			else if (!(uri = gst_filename_to_uri(C_STR(info.getAbsoluteFileName(m_dirStimRoot)), &err)))
+			{
+				qWarning() << "HStimPipeline::addStimulusInfo - cannot convert to uri: " << err->message;
+			}
+			else if (FALSE == gst_validate_media_info_inspect_uri(&mi, uri, TRUE, &err))
 			{
 				qWarning() << "HStimPipeline::addStimulusInfo - error inspecting uri: " << err->message;
 			}
