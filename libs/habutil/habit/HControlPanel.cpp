@@ -109,7 +109,7 @@ void HControlPanel::onPhaseStarted(QString phaseName, int context)
 	m_pExperimentStatusWidget->setPhase(phaseName);
 }
 
-void HControlPanel::onTrialStarted(int context, unsigned int trialindex, unsigned int repeatindex)
+void HControlPanel::onTrialStarted(int, unsigned int trialindex, unsigned int repeatindex)
 {
 	m_pExperimentStatusWidget->setTrial(trialindex, repeatindex);
 	return;
