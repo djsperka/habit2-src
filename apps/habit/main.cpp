@@ -212,11 +212,6 @@ int main(int argc, char *argv[])
 	bStimInDialog = parser.isSet("z");
 	bNotInstalled = parser.isSet("n");
 
-	for (int i=0; i<argc; i++)
-	{
-		cerr << i << " " << std::string(argv[i]) << std::endl;
-	}
-
 	// If -q is set, hijack the whole process, analyze the file, and get out.
     if (parser.isSet("q"))
     {
@@ -227,8 +222,6 @@ int main(int argc, char *argv[])
     	return 0;
     }
 
-
-	// TODO - moved gst_init and env vaer setup from here to below
 
 	// Open a workspace. The workspace is a folder containing "habit.sqlite" and three folders:
 	// "results", "log" and "stim". This MUST be called AFTER the organization name is set in the QApplication
