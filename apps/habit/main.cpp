@@ -380,6 +380,9 @@ int main(int argc, char *argv[])
 	// Initialize gstreamer
 	qDebug() << "Initialize gstreamer...";
 	gst_init(&argc, &argv);
+	gchar *gcharVersion = gst_version_string();
+	qDebug() << "Using gstreamer version " << gcharVersion;
+	g_free(gcharVersion);
 	qDebug() << "Initialize gstreamer...Done.";
 
 	// Now show dialog and start event loop.
