@@ -52,31 +52,13 @@ GUILib::HHabituationCriteriaWidget::HHabituationCriteriaWidget(int ntrials, cons
 	// different. Hopefully that means this will not lead to infinite calls...
 	connect(ui->spinBoxNTrials,								SIGNAL(valueChanged(int)),	ui->spinBoxMaximumNumberOfTotalLookingTrials, 	SLOT(setValue(int)));
 	connect(ui->spinBoxNTrials, 								SIGNAL(valueChanged(int)), 	ui->spinBoxMaxNumberOfHabituationTrials, 		SLOT(setValue(int)));
-	connect(ui->spinBoxNTrials, 								SIGNAL(valueChanged(int)), 	this, 											SLOT(spinBoxNTrialsValueChanged(int)));
 
 	connect(ui->spinBoxMaximumNumberOfTotalLookingTrials,		SIGNAL(valueChanged(int)), 	ui->spinBoxNTrials, 								SLOT(setValue(int)));
 	connect(ui->spinBoxMaximumNumberOfTotalLookingTrials,		SIGNAL(valueChanged(int)), 	ui->spinBoxMaxNumberOfHabituationTrials, 		SLOT(setValue(int)));
-	connect(ui->spinBoxMaximumNumberOfTotalLookingTrials,		SIGNAL(valueChanged(int)), 	this, 											SLOT(spinBoxLookValueChanged(int)));
 
 	connect(ui->spinBoxMaxNumberOfHabituationTrials,			SIGNAL(valueChanged(int)), 	ui->spinBoxMaximumNumberOfTotalLookingTrials, 	SLOT(setValue(int)));
 	connect(ui->spinBoxMaxNumberOfHabituationTrials,			SIGNAL(valueChanged(int)), 	ui->spinBoxNTrials, 								SLOT(setValue(int)));
-	connect(ui->spinBoxMaxNumberOfHabituationTrials,			SIGNAL(valueChanged(int)), 	this, 											SLOT(spinBoxHabValueChanged(int)));
 
-}
-
-void GUILib::HHabituationCriteriaWidget::spinBoxHabValueChanged(int n)
-{
-//	qDebug() << "spinBoxMaxHabituationTrialsValueChanged " << n;
-}
-
-void GUILib::HHabituationCriteriaWidget::spinBoxNTrialsValueChanged(int n)
-{
-//	qDebug() << "spinBoxNTrialsValueChanged " << n;
-}
-
-void GUILib::HHabituationCriteriaWidget::spinBoxLookValueChanged(int n)
-{
-//	qDebug() << "spinBoxMaxLookingTrialsValueChanged " << n;
 }
 
 // this assumes that the above connections for the spinboxes work....

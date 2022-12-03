@@ -72,7 +72,7 @@ void HControlPanel::components()
 //			m_experimentSettings.getName(),
 //			m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(),
 //			m_experimentSettings.getControlBarOptions().isCurrentStimulusDisplayed(), this);
-	m_pExperimentStatusWidget = new HExperimentStatusWidget(m_experimentSettings.getName(), m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(), this);
+	m_pExperimentStatusWidget = new HExperimentStatusWidget(m_experimentSettings.getName(), m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(), m_experimentSettings.getControlBarOptions().isLookingDirectionDisplayed(), this);
 
 	m_pbStartTrials = new QPushButton(tr("Start Trials"));
 	m_pbNextTrial = new QPushButton(tr("Next Trial"));

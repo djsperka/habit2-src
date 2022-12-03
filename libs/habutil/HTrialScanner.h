@@ -30,7 +30,7 @@ public:
 	NoopResultsScanner(): HTrialScanner() {};
 	virtual ~NoopResultsScanner() {};
 	virtual bool init() const { return true; };
-	virtual bool trial(const HTrialResult& t) const { return true; };
+	virtual bool trial(const HTrialResult&) const { return true; };
 	virtual bool done() const { return true; };
 };
 

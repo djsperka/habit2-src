@@ -8,7 +8,6 @@
 #include "HResults.h"
 #include "HLook.h"
 #include "HTrialScanner.h"
-#include "HLookerReprocessor.h"
 #include "HTrialKey.h"
 #include <QFile>
 #include <QDataStream>

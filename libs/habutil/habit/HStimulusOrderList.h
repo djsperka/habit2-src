@@ -19,7 +19,7 @@ namespace Habit
 	{
 	public:
 		HStimulusOrderList(): QList<HStimulusOrder>() {};
-		HStimulusOrderList(const HStimulusOrderList& list) : QList<HStimulusOrder>(list) {};
+		//HStimulusOrderList(const HStimulusOrderList& list) : QList<HStimulusOrder>(list) {};
 		bool contains(const QString& name) const;
 		bool contains(const QStringList& names) const;
 		QStringList names() const;

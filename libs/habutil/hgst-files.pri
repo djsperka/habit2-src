@@ -9,9 +9,7 @@ HEADERS += \
 	hgst/HPipeline.h \
 	hgst/HStimulusWidget.h \
 	hgst/HVideoWidget.h \
-	hgst/HStimulusLayout.h \
-	hgst/HGMMException.h \
-	hgst/Preroller.h
+	hgst/HStimulusLayout.h
 
 SOURCES += \
 	hgst/HGMM.cpp \
@@ -20,7 +18,5 @@ SOURCES += \
 	hgst/HPipeline.cpp \
 	hgst/HStimulusWidget.cpp \
 	hgst/HVideoWidget.cpp \
-	hgst/HStimulusLayout.cpp \
-	hgst/HGMMException.cpp \
-	hgst/Preroller.cpp
+	hgst/HStimulusLayout.cpp
 	

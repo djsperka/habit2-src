@@ -10,7 +10,7 @@
 
 using namespace GUILib;
 
-HSubjectSettingsWidget::HSubjectSettingsWidget(bool bTestRun, QWidget *parent)
+HSubjectSettingsWidget::HSubjectSettingsWidget(bool, QWidget *parent)
 : QWidget(parent)
 , ui(new Ui::HSubjectSettingsForm)
 {

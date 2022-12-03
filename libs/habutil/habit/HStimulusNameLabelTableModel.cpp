@@ -38,24 +38,24 @@ QVariant HStimulusNameLabelTableModel::data(const QModelIndex & index, int role)
 	else return QVariant();
 }
 
-Qt::ItemFlags GUILib::HStimulusNameLabelTableModel::flags(const QModelIndex & index) const
+Qt::ItemFlags GUILib::HStimulusNameLabelTableModel::flags(const QModelIndex &) const
 {
 	return Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
-QVariant GUILib::HStimulusNameLabelTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant GUILib::HStimulusNameLabelTableModel::headerData(int section, Qt::Orientation, int) const
 {
 	if (section == 0) return QString("Stimulus");
 	else if (section == 1) return QString("Label");
 	else return QVariant();
 }
 
-int GUILib::HStimulusNameLabelTableModel::rowCount(const QModelIndex & parent) const
+int GUILib::HStimulusNameLabelTableModel::rowCount(const QModelIndex &) const
 {
 	return m_stimNamesAndLabels.length();
 }
 
-int GUILib::HStimulusNameLabelTableModel::columnCount(const QModelIndex & parent) const
+int GUILib::HStimulusNameLabelTableModel::columnCount(const QModelIndex &) const
 {
 	return 2;
 }

@@ -224,9 +224,7 @@ bool validateExperiment(int experimentId)
 		QListIterator<QVariant> itStimuli(listStim);
 		while (itStimuli.hasNext())
 		{
-			bool bval;
 			QVariant stimid = itStimuli.next();
-//			qDebug() << "     check stimulus id " << stimid.toInt();
 			if (!validateStimulus(stimid.toInt()))
 			{
 				qDebug() << "   stimulus id " << stimid.toInt() << "...ERR";

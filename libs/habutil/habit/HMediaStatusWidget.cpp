@@ -42,27 +42,25 @@ void HMediaStatusWidget::setMediaManager(const HGMM* pmm)
 
 void HMediaStatusWidget::initialize()
 {
-	int i;
-
 	// add pages to stacked widget
 	QWidget *pWidget0 = new QWidget();
 	QPalette p = palette();
 	p.setColor(backgroundRole(), Qt::gray);
 	pWidget0->setPalette(p);
 	pWidget0->setAutoFillBackground(true);
-	i=ui->statusStack->addWidget(pWidget0);
+	ui->statusStack->addWidget(pWidget0);
 
 	QLabel *pWidget1 = new QLabel();
 	QPixmap pixmap1;
 	pixmap1.load(":/resources/attention.png");
 	pWidget1->setPixmap(pixmap1);
-	i=ui->statusStack->addWidget(pWidget1);
+	ui->statusStack->addWidget(pWidget1);
 
 	QLabel *pWidget2 = new QLabel();
 	QPixmap pixmap2;
 	pixmap2.load(":/resources/stim-now-playing.png");
 	pWidget2->setPixmap(pixmap2);
-	i = ui->statusStack->addWidget(pWidget2);
+	ui->statusStack->addWidget(pWidget2);
 
 	setStatusBackground();
 }

@@ -182,8 +182,6 @@ void HStimuliSettingsWidget::importClicked()
 	QString filename = QFileDialog::getOpenFileName(this, "", QDesktopServices::storageLocation(QDesktopServices::DesktopLocation));
 #endif
 
-
-	bool b;
 	Habit::StimulusSettingsList slist;
 	Habit::HStimulusOrderList olist;
 	bool bClobberAllStimuli = false;
@@ -193,7 +191,7 @@ void HStimuliSettingsWidget::importClicked()
 	qDebug() << "Selected file " << filename;
 	if (!filename.isEmpty())
 	{
-		b = importStimulusSettingsAndOrders(filename, slist, olist);
+		importStimulusSettingsAndOrders(filename, slist, olist);
 		qDebug() << slist.size() << "stim imported " << olist.size() << " orders imported";
 
 		// We append the stimuli and orders to the widgets so the display isupdated correctly.

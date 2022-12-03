@@ -14,7 +14,7 @@
 #include "HGlobalPreferencesDialog.h"
 #include "ui_GlobalPreferencesDialog.h"
 #include "HWorkspaceUtil.h"
-#include <QApplication>
+#include <QGuiApplication>
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QDir>
@@ -96,7 +96,7 @@ void GUILib::HGlobalPreferencesDialog::chooseStimulusRootDirClicked()
 
 int GUILib::HGlobalPreferencesDialog::getNumberOfMonitors()
 {
-	return QApplication::desktop()->screenCount();
+	return QGuiApplication::screens().size();
 }
 
 void GUILib::HGlobalPreferencesDialog::connections()
@@ -172,7 +172,7 @@ void GUILib::HGlobalPreferencesDialog::identifyClicked()
 	{
 		QMessageBox box(QMessageBox::Information, "Information", QString("This monitor is identified as 'Monitor %1'").arg(i));
 		QSize size = box.sizeHint();
-		QRect screen = QApplication::desktop()->screenGeometry(i);
+		QRect screen = QGuiApplication::screens().at(i)->geometry();
 		QRect wind(screen.x() + (screen.width()-size.width())/2, screen.y() + (screen.height()-size.height())/2, size.width(), size.height());
 		box.setGeometry(wind);
 		box.setModal(true);

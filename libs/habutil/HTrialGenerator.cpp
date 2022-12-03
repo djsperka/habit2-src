@@ -8,17 +8,12 @@
  */
 
 #include "HTrialGenerator.h"
+#include <QRandomGenerator>
 #include <QtDebug>
 
 HTrialGenerator::HTrialGenerator(int N, bool bRand, bool bBlocks) : m_N(N), m_bRand(bRand), m_bBlocks(bBlocks)
 {
 	for (int i=0; i<m_N; i++) m_remaining.append(i);
-	static bool bSeeded = false;
-	if (!bSeeded)
-	{
-		qsrand(time(NULL));
-		bSeeded = true;
-	}
 }
 
 unsigned int HTrialGenerator::next()
@@ -36,7 +31,8 @@ unsigned int HTrialGenerator::next()
 		{
 			int irand;
 			// draw random number between 0 and m_remaining.size()-1
-			irand = qrand() % m_remaining.size();
+			// deprecated irand = qrand() % m_remaining.size();
+			irand = QRandomGenerator::global()->generate() % m_remaining.size();
 			val = m_remaining.at(irand);
 			// remove element from m_remaining. 
 			m_remaining.removeAt(irand);
@@ -44,7 +40,8 @@ unsigned int HTrialGenerator::next()
 		else 
 		{
 			// draw random number between 0 and m_N. Do NOT remove element from m_remaining.
-			irand = qrand() % m_remaining.size();
+			// deprecated irand = qrand() % m_remaining.size();
+			irand = QRandomGenerator::global()->generate() % m_remaining.size();
 			val = m_remaining.at(irand);
 		}
 	}

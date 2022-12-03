@@ -65,7 +65,7 @@ void HExperiment::onPhaseEnded(QString phase)
 
 QDebug operator<<(QDebug dbg, const PhaseStimStuff& pss)
 {
-	dbg.nospace() << "Context " << pss.context << " hab? " << pss.isHabituation << endl;
+	dbg.nospace() << "Context " << pss.context << " hab? " << pss.isHabituation << Qt::endl;
 	dbg.nospace() << pss.sslist;
 	return dbg.space();
 }

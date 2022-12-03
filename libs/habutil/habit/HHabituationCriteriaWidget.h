@@ -33,10 +33,6 @@ namespace GUILib
 	private:
 		Ui::HHabituationCriteriaForm *ui;
 
-	public Q_SLOTS:
-		void spinBoxHabValueChanged(int n);
-		void spinBoxNTrialsValueChanged(int n);
-		void spinBoxLookValueChanged(int n);
 	};
 };
 

@@ -16,7 +16,7 @@ GUILib::HExperimentListDelegate::HExperimentListDelegate(QObject *parent)
 
 
 
-QWidget *GUILib::HExperimentListDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & option, const QModelIndex &index) const
+QWidget *GUILib::HExperimentListDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const
 {
 	QLineEdit* editor = new QLineEdit(parent);
 	const QStringListModel *pmodel = static_cast<const QStringListModel*>(index.model());
@@ -39,7 +39,7 @@ void GUILib::HExperimentListDelegate::setModelData(QWidget *editor, QAbstractIte
   model->setData(index, lineedit->text(), Qt::EditRole);
 }
 
-void GUILib::HExperimentListDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void GUILib::HExperimentListDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
 {
   editor->setGeometry(option.rect);
 }

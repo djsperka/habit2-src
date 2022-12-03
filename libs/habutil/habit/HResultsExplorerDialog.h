@@ -23,17 +23,6 @@ namespace Ui
 
 namespace GUILib
 {
-#if 0
-	class HResultsFileSystemModel: public QFileSystemModel
-	{
-		Q_OBJECT
-
-	public:
-		HResultsFileSystemModel(QObject *parent = NULL) : QFileSystemModel(parent) {};
-		virtual ~HResultsFileSystemModel() {};
-		virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-	};
-#endif
 
 	class HResultsExplorerDialog: public QDialog
 	{
@@ -49,9 +38,6 @@ namespace GUILib
 		void showResultsFile(const QString filename);
 		void openCSVFile(const QFileInfo& info);
 	private slots:
-//		void folderClicked(QModelIndex index);
-		void itemClicked(QModelIndex index);
-//		void resultsFileActivated(QModelIndex index);
 		void itemActivated(QModelIndex index);
 		void openClicked();
 		void checkResultsClicked();

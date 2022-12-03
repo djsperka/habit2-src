@@ -360,7 +360,6 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 	HPipeline *pipelineToBeReplaced = NULL;
 	HPipeline *pipelineTheNewOne = NULL;
 	int context;
-	bool bOK = false;
 
 	qDebug() << "HGMM::replaceStimulus(" << key << "): " << stimulus.getName();
 
@@ -410,8 +409,6 @@ bool HGMM::replaceStimulus(unsigned int key, const Habit::StimulusSettings& stim
 				pipelineToBeReplaced->cleanup();
 			}
 			delete pipelineToBeReplaced;
-
-			bOK = true;
 		}
 	}
 	else

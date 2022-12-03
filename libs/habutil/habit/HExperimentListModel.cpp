@@ -33,7 +33,6 @@ void GUILib::HExperimentListModel::reload()
 	{
 		Habit::ExperimentSettings settings;
 		QStringList sProblems;
-		QColor color;
 		try
 		{
 			settings.loadFromDB(stringList().at(irow));
@@ -48,7 +47,7 @@ void GUILib::HExperimentListModel::reload()
 		}
 		catch (const Habit::HDBException& e)
 		{
-			qCritical() << "Cannot load experiment " << stringList().at(irow) << endl << e.what();
+			qCritical() << "Cannot load experiment " << stringList().at(irow) << Qt::endl << e.what();
 			m_colorProblemPairList.append(CSLPair(QColor(Qt::red), QStringList(e.what())));
 		}
 		irow++;

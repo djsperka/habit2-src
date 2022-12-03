@@ -66,17 +66,8 @@ void HResultsExplorerDialog::connections()
 	connect(ui->pbCancel, SIGNAL(clicked()), this, SLOT(reject()));
 	connect(ui->pbOpen, SIGNAL(clicked()), this, SLOT(openClicked()));
 	connect(ui->pbCheckResults, SIGNAL(clicked()), this, SLOT(checkResultsClicked()));
-	connect(ui->treeViewFolders, SIGNAL(clicked(QModelIndex)), this, SLOT(itemClicked(QModelIndex)));
 	connect(ui->treeViewFolders, SIGNAL(activated(QModelIndex)), this, SLOT(itemActivated(QModelIndex)));
 	connect(ui->treeViewFolders->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)), this, SLOT(selectionChanged(const QItemSelection&,const QItemSelection&)));
-}
-
-void HResultsExplorerDialog::itemClicked(QModelIndex index)
-{
-//	if (m_pFolderModel->fileInfo(index).isFile())
-//		ui->pbOpen->setEnabled(true);
-//	else
-//		ui->pbOpen->setEnabled(false);
 }
 
 void HResultsExplorerDialog::selectionChanged(const QItemSelection& selected,const QItemSelection&)

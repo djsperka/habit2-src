@@ -176,7 +176,7 @@ QTextStream& operator<<(QTextStream& out, const HTrialEndType& etype)
 
 QTextStream& operator<<(QTextStream& out, const HEvent& e)
 {
-	out << qSetFieldWidth(7) << right << e.timestamp() << " " << qSetFieldWidth(20) << left << e.type() << " " << qSetFieldWidth(0) << e.eventInfo() << endl;
+	out << qSetFieldWidth(7) << Qt::right << e.timestamp() << " " << qSetFieldWidth(20) << Qt::left << e.type() << " " << qSetFieldWidth(0) << e.eventInfo() << Qt::endl;
 	return out;
 };
 

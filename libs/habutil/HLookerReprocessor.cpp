@@ -31,7 +31,6 @@ HLookerReprocessor::HLookerReprocessor(const HLookSettings& lookSettings, const 
 	// set up connections to look(HLook) and lookAborted(HLook) signals
 	connect(m_pLooker, SIGNAL(look(HLook)), this, SLOT(gotLook(HLook)));
 	connect(m_pLooker, SIGNAL(lookAborted(HLook)), this, SLOT(gotLookAborted(HLook)));
-	connect(m_pLooker, SIGNAL(lookingDirection(QString)), this, SLOT(gotLookingDirection(QString)));
 
 	// start state machine
 	// Note that we are running inside of a SLOT, and so the Qt event loop is effectively stopped.
@@ -93,10 +92,5 @@ void HLookerReprocessor::gotLookAborted(HLook l)
 	qDebug() << "gotLookAborted():";
 	qDebug() << l;
 	m_list.append(l);
-}
-
-void HLookerReprocessor::gotLookingDirection(QString s)
-{
-	//qDebug() << "gotLookingDirection " << s;
 }
 

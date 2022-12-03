@@ -29,7 +29,6 @@ public:
 public slots:
 	void gotLook(HLook);
 	void gotLookAborted(HLook);
-	void gotLookingDirection(QString s);
 
 };
 

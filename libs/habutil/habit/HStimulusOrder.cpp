@@ -92,7 +92,7 @@ Habit::HStimulusOrder::HStimulusOrder(const HStimulusOrder& o)
 
 QDebug Habit::operator<<(QDebug dbg, const Habit::HStimulusOrder& order)
 {
-	dbg.nospace() << "name=" << order.getName() << " order=" << order.getList().join(QString(",")) << endl;
+	dbg.nospace() << "name=" << order.getName() << " order=" << order.getList().join(QString(",")) << Qt::endl;
 	return dbg.nospace();
 }
 
