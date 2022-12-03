@@ -209,19 +209,19 @@ QDataStream & Habit::operator>> (QDataStream& stream, StimulusSettings& settings
 
 }
 
-QTextStream & Habit::operator<< (QTextStream& stream, StimulusSettings settings)
+QTextStream & Habit::operator<< (QTextStream& stream, StimulusSettings)
 {
 	return stream;
 }
 
-QTextStream & operator>> (QTextStream& stream, StimulusSettings& settings)
+QTextStream & operator>> (QTextStream& stream, StimulusSettings&)
 {
 	return stream;
 }
 
 QDebug Habit::operator<<(QDebug dbg, const StimulusSettings& ss)
 {
-	dbg.nospace() << "StimulusSettings: Name " << ss.getName() << " id " << ss.getId() << endl;
+	dbg.nospace() << "StimulusSettings: Name " << ss.getName() << " id " << ss.getId() << Qt::endl;
 	dbg.nospace() << "Left " << ss.getLeftStimulusInfo();
 	dbg.nospace() << "Center " << ss.getCenterStimulusInfo();
 	dbg.nospace() << "Right " << ss.getRightStimulusInfo();

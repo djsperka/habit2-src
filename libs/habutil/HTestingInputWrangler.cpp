@@ -99,7 +99,7 @@ bool HTestingInputWrangler::load(QFile& inputFile, Habit::ExperimentSettings& ex
     return b;
 };
 
-bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSettings& expSettings)
+bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSettings&)
 {
 	// If line begins with # or is blank then skip it
 	if (line.trimmed().isEmpty() || line.startsWith('#'))
@@ -120,24 +120,6 @@ bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSe
 		}
 
 
-#if WHEN_THERE_WERE_FIXED_PHASE_NAMES
-		// First token should be a phase name recognized by getPhaseType()
-		const HPhaseType& phaseType = getPhaseType(tokens.at(0));
-		if (phaseType == HPhaseType::UnknownPhase)
-		{
-			qDebug() << "HTestingInputWrangler::processLine - unrecognized phase type \"" << tokens.at(0) << "\"";
-			return false;
-		}
-
-		// Get the TrialEventLogMap from the PhaseTrialEventLogMapMap;
-		if (!m_map.contains(phaseType))
-		{
-			TrialEventLogMap telm;
-			m_map.insert(phaseType, telm);
-		}
-		TrialEventLogMap* pTrialEventLogMap = &m_map[phaseType];
-#else
-
 		QString phaseName = tokens.at(0).trimmed();
 		if (!m_map.contains(phaseName))
 		{
@@ -146,9 +128,6 @@ bool HTestingInputWrangler::processLine(const QString& line, Habit::ExperimentSe
 			qDebug() << "HTestingInputWrangler::processLine - found new phase: " << phaseName;
 		}
 		TrialEventLogMap* pTrialEventLogMap = &m_map[phaseName];
-#endif
-
-
 
 		bool bt, br, bm;
 		int itrial, irepeat, ims;
@@ -250,7 +229,7 @@ void HTestingInputWrangler::phaseStarted(QString sPhase, int context)
 	}
 }
 
-void HTestingInputWrangler::trialStarted(int context, unsigned int itrial, unsigned int irepeat)
+void HTestingInputWrangler::trialStarted(int, unsigned int itrial, unsigned int irepeat)
 {
 	Q_ASSERT(m_bIsEnabled);
 	// initialize pointer to the event log found in m_pCurrentEventLogMap for this trial/repeat
@@ -336,7 +315,7 @@ void HTestingInputWrangler::dump()
 	while (itPhases.hasNext())
 	{
 		QString type = itPhases.next();
-		qDebug() << type << endl;
+		qDebug() << type << Qt::endl;
 
 		// Get the map for this phase.
 		TrialEventLogMap *pEventLogMap = &m_map[type];

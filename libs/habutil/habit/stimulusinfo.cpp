@@ -266,7 +266,7 @@ QTextStream & Habit::operator>> (QTextStream& stream, StimulusInfo& settings)
 
 QDebug Habit::operator<<(QDebug dbg, const StimulusInfo& info)
 {
-	dbg.nospace() << "StimulusInfo: Id " << info.getId() << " File " << (info.getFileName().isEmpty() ? QString("empty") : info.getFileName()) << " Loop? " << info.isLoopPlayBack() << " Vol " << info.getAudioBalance() << " Bkgd? " << info.isBackground() << " color? " << info.isColor() << " color " << info.getColor() << endl;
+	dbg.nospace() << "StimulusInfo: Id " << info.getId() << " File " << (info.getFileName().isEmpty() ? QString("empty") : info.getFileName()) << " Loop? " << info.isLoopPlayBack() << " Vol " << info.getAudioBalance() << " Bkgd? " << info.isBackground() << " color? " << info.isColor() << " color " << info.getColor() << Qt::endl;
 	return dbg.nospace();
 }
 
@@ -298,7 +298,7 @@ StimulusInfoOld::StimulusInfoOld()
     audioBalance_ = 50;
 }
 
-StimulusInfoOld::StimulusInfoOld(const QString& name, const QString& filename, bool is_loop, float audio, bool isBackground)
+StimulusInfoOld::StimulusInfoOld(const QString& name, const QString& filename, bool is_loop, float audio, bool)
 	: name_(name)
 	, fileName_(filename)
 	, isLoopPlayBack_(is_loop)

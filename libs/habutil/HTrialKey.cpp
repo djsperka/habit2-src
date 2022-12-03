@@ -49,8 +49,6 @@ HTrialKey& HTrialKey::operator=(const HTrialKey& rhs)
 
 bool HTrialKey::operator<(const HTrialKey& rhs)
 {
-	bool b;
-
 	if (m_phase < rhs.phase()) return true;
 	if (m_phase > rhs.phase()) return false;
 

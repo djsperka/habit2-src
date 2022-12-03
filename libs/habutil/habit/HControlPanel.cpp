@@ -72,7 +72,7 @@ void HControlPanel::components()
 //			m_experimentSettings.getName(),
 //			m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(),
 //			m_experimentSettings.getControlBarOptions().isCurrentStimulusDisplayed(), this);
-	m_pExperimentStatusWidget = new HExperimentStatusWidget(m_experimentSettings.getName(), m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(), this);
+	m_pExperimentStatusWidget = new HExperimentStatusWidget(m_experimentSettings.getName(), m_experimentSettings.getControlBarOptions().isCurrentExperimentDisplayed(), m_experimentSettings.getControlBarOptions().isLookingDirectionDisplayed(), this);
 
 	m_pbStartTrials = new QPushButton(tr("Start Trials"));
 	m_pbNextTrial = new QPushButton(tr("Next Trial"));
@@ -109,7 +109,7 @@ void HControlPanel::onPhaseStarted(QString phaseName, int context)
 	m_pExperimentStatusWidget->setPhase(phaseName);
 }
 
-void HControlPanel::onTrialStarted(int context, unsigned int trialindex, unsigned int repeatindex)
+void HControlPanel::onTrialStarted(int, unsigned int trialindex, unsigned int repeatindex)
 {
 	m_pExperimentStatusWidget->setTrial(trialindex, repeatindex);
 	return;

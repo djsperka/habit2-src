@@ -120,7 +120,7 @@ bool HEventLog::saveToCSV(QString& filename) const
 		while (events.hasNext())
 		{
 			HEvent* e = events.next();
-			out << e->eventCSV() << endl;
+			out << e->eventCSV() << Qt::endl;
 		}
 		file.close();
 		b = true;

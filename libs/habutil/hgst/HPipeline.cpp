@@ -6,7 +6,6 @@
  */
 
 #include "HPipeline.h"
-#include "HGMMException.h"
 
 HPipeline::HPipeline(int id, const Habit::StimulusSettings& ss, const Habit::StimulusDisplayInfo& info, QObject *parent)
 : QObject(parent)
@@ -61,7 +60,7 @@ GstElement *HPipeline::makeElement(const char *factoryName, const HPlayerPositio
 	return gst_element_factory_make(factoryName, makeElementName(factoryName, ppt, number, prefix).toStdString().c_str());
 }
 
-bool HPipeline::parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id, QString& prefix)
+bool HPipeline::parseElementName(const QString& elementName, QString& factoryName, const HPlayerPositionType*& pppt, int& id, QString&)
 {
 	bool b = false;
 	int iPrefix=0;
@@ -92,11 +91,9 @@ void HPipeline::parseCaps(GstCaps* caps, bool& isVideo, bool& isImage, int& widt
 {
 	QString sDebugPrefix("HPipeline::parseCaps(): ");
 	GstStructure *new_pad_struct = NULL;
-	const gchar *new_pad_type = NULL;
 	gchar *s_new_pad_caps = NULL;
 	const GValue *v = NULL;
 	new_pad_struct = gst_caps_get_structure(caps, 0);
-	new_pad_type = gst_structure_get_name(new_pad_struct);
 	s_new_pad_caps = gst_caps_to_string(caps);
 	qDebug() << "HPipeline::parseCaps: " << s_new_pad_caps;
 

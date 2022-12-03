@@ -64,6 +64,6 @@ void HOrderSettings::getList(QList<int>& list) const
 
 QDebug Habit::operator<<(QDebug dbg, const HOrderSettings& os)
 {
-	dbg.nospace() << "HOrderSettings: list " << os.getCanonicalList() << " randomized? " << os.getIsRandomized() << "(" << os.getRandomizationType().name() << ")" << endl;
+	dbg.nospace() << "HOrderSettings: list " << os.getCanonicalList() << " randomized? " << os.getIsRandomized() << "(" << os.getRandomizationType().name() << ")" << Qt::endl;
 	return dbg.nospace();
 }

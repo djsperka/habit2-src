@@ -14,8 +14,8 @@ using namespace GUILib;
 using namespace Habit;
 
 QWidget *HStimulusOrderListItemDelegate::createEditor(QWidget *parent,
-                                    const QStyleOptionViewItem &option,
-                                    const QModelIndex &index) const
+                                    const QStyleOptionViewItem &,
+                                    const QModelIndex &) const
 
 {
 	QLineEdit *editor = new QLineEdit(parent);

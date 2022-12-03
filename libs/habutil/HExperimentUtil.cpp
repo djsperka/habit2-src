@@ -22,17 +22,6 @@ HStateMachine* createExperiment(QWidget *w, const Habit::RunSettings& runSetting
 	Q_UNUSED(w);
 	HStateMachine *psm;
 
-#if 0
-# djs - mm is populated elsewhere (by reset()), not here. This call leads to funny double-add of AG
-	// Need to know if AG is used. If it is, add attention getter settings to media manager
-	if (	experimentSettings.getAttentionGetterSettings().isAttentionGetterUsed() ||
-			experimentSettings.getAttentionGetterSettings().isFixedISI() ||
-			experimentSettings.getAttentionGetterSettings().isSoundOnly())
-	{
-		HGMM::instance().addAG(experimentSettings.getAttentionGetterSettings().getAttentionGetterStimulus(), experimentSettings.getAttentionGetterSettings().isSoundOnly());
-	}
-#endif
-
 	// This is a single super-state that holds all the phases.
 	HExperiment* sExperiment = new HExperiment(log, *pld);
 	// Construct state machine.
@@ -163,7 +152,7 @@ Habit::HStimulusSettingsList getOrderOfStimuli(const PhaseRunSettings& prs, unsi
 	QList< QPair<int, QString> > list;
 	list = prs.getOrderList();
 	HTrialGenerator htg(list.size(), prs.isOrderRandomized(), prs.getRandomizeMethod()==1);
-	for (int itrial=0; itrial<ntrials; itrial++)
+	for (unsigned int itrial=0; itrial<ntrials; itrial++)
 	{
 		int itmp = htg.next();
 

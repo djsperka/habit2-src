@@ -122,18 +122,18 @@ QDataStream & Habit::operator<< (QDataStream& stream, const HPhaseSettings& sett
 
 QDebug Habit::operator<<(QDebug dbg, const HPhaseSettings& settings)
 {
-	dbg.space() << "PhaseSettings:" << endl;
+	dbg.space() << "PhaseSettings:" << Qt::endl;
 	dbg.space() << "Id:" << settings.getId() << "Enabled?" << settings.getIsEnabled() << "Name:" << settings.getName() << "Seqno:" << settings.getSeqno()
 			<< "Use look?" << settings.getUseLookingCriteria() << "Single?" << settings.getIsSingleLook() << "MaxAccum?(t)" << settings.getIsMaxAccumulatedLookTime()
 			<< settings.getMaxAccumulatedLookTime() << "MaxLookaway:" << settings.getIsMaxLookAwayTime()
 			<< settings.getMaxLookAwayTime() << "Repeat?" << settings.getRepeatTrialOnMaxLookAwayTime() << "MaxStim?(t)" << settings.getIsMaxStimulusTime()
 			<< settings.getMaxStimulusTime() << "FromOnset?" << settings.getMeasureStimulusTimeFromOnset()
 			<< "FromLook?" << settings.getMeasureStimulusTimeFromLooking()
-			<< "MaxNoLook?(t)" << settings.getIsMaxNoLookTime() << settings.getMaxNoLookTime() << endl;
-	dbg.space() << "HabituationSettings..." << endl;
-	dbg.space() << settings.habituationSettings() << endl;
-	dbg.space() << "Stimuli..." << endl;
-	dbg.space() << settings.stimuli() << endl;
+			<< "MaxNoLook?(t)" << settings.getIsMaxNoLookTime() << settings.getMaxNoLookTime() << Qt::endl;
+	dbg.space() << "HabituationSettings..." << Qt::endl;
+	dbg.space() << settings.habituationSettings() << Qt::endl;
+	dbg.space() << "Stimuli..." << Qt::endl;
+	dbg.space() << settings.stimuli() << Qt::endl;
 	return dbg.space();
 }
 

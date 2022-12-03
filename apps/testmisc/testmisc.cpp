@@ -1103,7 +1103,7 @@ void TestHabutil::testTrialGenerator()
 }
 
 
-QTEST_MAIN(TestPreroller);
+//QTEST_MAIN(TestPreroller);
 //#include "testmisc.moc"
 
 //int main(int argc, char **argv)

@@ -27,7 +27,7 @@ namespace GUILib
 		Q_OBJECT
 
 	public:
-		HExperimentStatusWidget(const QString& name, bool bDisplayCurrentPhaseTrial = false, bool bDisplayLookingDirection = false, QWidget* parent = NULL);
+		HExperimentStatusWidget(const QString& name, bool bDisplayCurrentPhaseTrial, bool bDisplayLookingDirection, QWidget* parent);
 		virtual ~HExperimentStatusWidget();
 
 		void setExperimentName(QString name);

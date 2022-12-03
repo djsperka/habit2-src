@@ -60,7 +60,7 @@ void HPhase::stimStarted(int stimid)
 	qDebug() << "stimStarted( " << stimid << " )";
 }
 
-void HPhase::trialStarted(int context, unsigned int trial, unsigned int repeat)
+void HPhase::trialStarted(int, unsigned int, unsigned int)
 {
 	// If phase criteria uses total looking time, update the look detector so it knows when this
 	// criteria is met
