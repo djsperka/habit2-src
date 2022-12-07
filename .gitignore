@@ -9,3 +9,6 @@ Makefile.*
 ui_*.h
 .DS_Store
 apps/gstsp/dist
+*.vcxproj.filters
+*.vcxproj.user
+*.vcxproj
