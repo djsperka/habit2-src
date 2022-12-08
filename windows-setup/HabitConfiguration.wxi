@@ -2,7 +2,7 @@
 <Include>
   <?define ProductName = "Habit2" ?>
   <?define ProductManufacturer = "Infant Cognition Lab, UC Davis Center for Mind and Brain" ?>
-  <?define ProductVersion = "2.2.2.2717" ?>
+  <?define ProductVersion = "2.2.10" ?>
   <?define ProductUpgradeCode = "E4A76876-A565-4026-B02B-470EB5942844" ?>
   <?define ExeDistributionFolder = "$(sys.SOURCEFILEDIR)\exe" ?>
   <?define StimDistributionFolder = "$(sys.SOURCEFILEDIR)\..\distribution\stim" ?>
