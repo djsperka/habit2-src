@@ -42,6 +42,7 @@
 			<MergeRef Id="gstreamer_playback"/>
 			<MergeRef Id="gstreamer_effects"/>
 			<MergeRef Id="gstreamer_libav"/>
+			<MergeRef Id="gstreamer_devtools"/>
 		</Feature>
 		<Feature Id="VCRedist" Title="Visual C++ 14.1 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
 			<MergeRef Id="VCRedist"/>
@@ -82,6 +83,7 @@
 					    <Merge Id="gstreamer_playback" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-playback-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
 					    <Merge Id="gstreamer_effects" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-effects-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
 					    <Merge Id="gstreamer_libav" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-libav-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
+					    <Merge Id="gstreamer_devtools" SourceFile="C:\gstreamer-msm\1.18.4\gstreamer-1.0-devtools-msvc-x86_64-1.18.4.msm" DiskId="1" Language="1033"/>
 				    </Directory>
 				</Directory>
 			</Directory>
