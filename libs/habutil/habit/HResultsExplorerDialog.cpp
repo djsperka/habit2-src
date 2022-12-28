@@ -13,6 +13,7 @@
 #include <QtDebug>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QDirIterator>
 
 using namespace GUILib;
 
@@ -183,12 +184,23 @@ void HResultsExplorerDialog::checkResultsClicked()
 	QFileInfo selectedFile(getSelectedFile());
 	if (selectedFile.isDir())
 	{
-		output << "Checking dir: " << getSelectedFile();
+		output << "Scanning results in folder: " << getSelectedFile() << Qt::endl;
 		// Scan folder for individual files
+		QDirIterator it(getSelectedFile(), QStringList() << "*.hab", QDir::Files, QDirIterator::NoIteratorFlags);
+		while (it.hasNext())
+		{
+		    qDebug() << it.next();
+		    output << "Results file: " << it.next() << Qt::endl;
+		    int i = HResults::checkHabFileForDups(it.next(), output);
+			if (i > -1)
+				output << QString("Found %1 duplicate looks.").arg(i) << Qt::endl;
+			else
+				output << "Cannot open file." << Qt::endl;
+		}
 	}
 	else
 	{
-		output << "Checking file: " << getSelectedFile() << Qt::endl;
+		output << "Results file: " << getSelectedFile() << Qt::endl;
 		int i = HResults::checkHabFileForDups(getSelectedFile(), output);
 		if (i > -1)
 			output << QString("Found %1 duplicate looks.").arg(i) << Qt::endl;
