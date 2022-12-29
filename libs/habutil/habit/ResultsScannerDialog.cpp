@@ -10,12 +10,12 @@
 
 namespace GUILib {
 
-ResultsScannerDialog::ResultsScannerDialog(QWidget *parent, const QString& text)
+ResultsScannerDialog::ResultsScannerDialog(QWidget *parent, const QString& html)
 : QDialog(parent)
 , ui(new Ui::ResultsScannerForm())
 {
 	ui->setupUi(this);
-	ui->textEditScannerOutput->setText(text);
+	ui->textEditScannerOutput->setHtml(html);
 }
 
 ResultsScannerDialog::~ResultsScannerDialog() {

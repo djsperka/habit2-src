@@ -179,23 +179,56 @@ void HResultsExplorerDialog::openClicked()
 
 void HResultsExplorerDialog::checkResultsClicked()
 {
-	QString s;
-	QTextStream output(&s);
+	QString sHtml;
+	QTextStream output(&sHtml);
 	QFileInfo selectedFile(getSelectedFile());
+
+	// style for the text edit
+	output << "<style>";
+	output << " .okres { background-color: #90E090; margin-left: 10px;}";
+	output << " .warnres { background-color: #F0F090; margin-left: 10px;}";
+	output << " .errres { background-color: #F09090; margin-left: 10px;}";
+	output << " .results { margin-left: 20px; color:#808080; font-size:75%;}";
+	output << "</style>";
+
 	if (selectedFile.isDir())
 	{
-		output << "Scanning results in folder: " << getSelectedFile() << Qt::endl;
-		// Scan folder for individual files
+		// heading line for output
+		output << "Scanning results in folder: <b>" << getSelectedFile() << "</b><br>";
 		QDirIterator it(getSelectedFile(), QStringList() << "*.hab", QDir::Files, QDirIterator::NoIteratorFlags);
 		while (it.hasNext())
 		{
-		    qDebug() << it.next();
-		    output << "Results file: " << it.next() << Qt::endl;
-		    int i = HResults::checkHabFileForDups(it.next(), output);
-			if (i > -1)
-				output << QString("Found %1 duplicate looks.").arg(i) << Qt::endl;
+		    QFileInfo inf(it.next());
+		    QString sFileScanResults;
+		    QTextStream outputFileScanResults(&sFileScanResults);
+
+			// scan file and get count of number of duplicate looks.
+			// Begin html output once results are in.
+		    int i = HResults::checkHabFileForDups(it.next(), outputFileScanResults);
+			if (i > 0)
+			{
+				outputFileScanResults << QString("Found %1 duplicate looks.<br>").arg(i);
+				output <<  "<div class='warnres'>";
+			}
+			else if (i == 0)
+			{
+				outputFileScanResults << "No duplicate looks found.<br>";
+				output <<  "<div class='okres'>";
+			}
 			else
-				output << "Cannot open file." << Qt::endl;
+			{
+				outputFileScanResults << "Cannot read file.<br>";
+				output <<  "<div class='errres'>";
+			}
+			output <<  "<p>";
+		    output << "Results file: <i>" << inf.completeBaseName() << "</i>";
+		    // results from the scanner
+		    //output << "<div class='results'>";
+		    output << "<p class='results'>";
+			output << sFileScanResults;
+		    output << "</p>";
+		    //output << "</div>";
+		    output << "</div>";
 		}
 	}
 	else
@@ -206,10 +239,12 @@ void HResultsExplorerDialog::checkResultsClicked()
 			output << QString("Found %1 duplicate looks.").arg(i) << Qt::endl;
 		else
 			output << "Cannot open file." << Qt::endl;
-		qDebug().noquote() << s;
+		qDebug().noquote() << sHtml;
 	}
 
-	ResultsScannerDialog rsd(this, s);
+	qDebug() << sHtml;
+
+	ResultsScannerDialog rsd(this, sHtml);
 	rsd.show();
 	rsd.exec();
 }
