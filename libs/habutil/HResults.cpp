@@ -180,24 +180,27 @@ int HResults::checkHabFileForDups(const QString& sPath, QTextStream& output)
 		for (int i=0; i<pResults->experimentSettings().phases().size(); i++)
 		{
 			const Habit::HPhaseSettings& ps = pResults->experimentSettings().phases().at(i);
-			output << "Phase: " << ps.getName();
+			output << "Phase: <b>" << ps.getName() << "</b>";
 			if (ps.getIsEnabled())
-				output << " Enabled: YES<br>";
+				output << " Enabled: <b>YES</b><br>";
 			else
-				output << " Enabled: NO<br>";
+				output << " Enabled: <b>NO</b><br>";
 			if (ps.getIsSingleLook())
 			{
-				output << "\"Single complete look\" criteria: YES<br>";
+				output << "\"Single complete look\" criteria: <b>YES</b><br>";
 				sPhasesToCheck.append(ps.getName());
 			}
 			else
-				output << "\"Single complete look\" criteria: NO<br>";
+				output << "\"Single complete look\" criteria: <b>NO</b><br>";
 		}
 
 		QString s;
 		QTextStream scannerOutput(&s);
 		NoopResultsScanner nts;
 		nts.scan(*pResults, scannerOutput);
+
+		output << "Scan file...<br>";
+		output << s << "<br>";
 
 		// See if there were any duplicate looks
 		// set i= # duplicate looks found
