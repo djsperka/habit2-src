@@ -13,6 +13,7 @@
 #include <QtDebug>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QDirIterator>
 
 using namespace GUILib;
 
@@ -178,26 +179,160 @@ void HResultsExplorerDialog::openClicked()
 
 void HResultsExplorerDialog::checkResultsClicked()
 {
-	QString s;
-	QTextStream output(&s);
+#if 0
+	QString sHtml;
+	QTextStream output(&sHtml);
 	QFileInfo selectedFile(getSelectedFile());
+
+	// style for the text edit
+	output << "<style>";
+	output << " .okres { background-color: #90E090; margin-left: 10px;}";
+	output << " .warnres { background-color: #F0F090; margin-left: 10px;}";
+	output << " .errres { background-color: #F09090; margin-left: 10px;}";
+	output << " .results { margin-left: 20px; color:#808080; font-size:75%;}";
+	//output << " .okres .results { background-color: #90E090; margin-left: 20px; color:#808080; font-size:75%;}";
+	//output << " .warnres .results { background-color: #F0F090; margin-left: 20px; color:#808080; font-size:75%;}";
+	//output << " .errres .results { background-color: #F09090; margin-left: 20px; color:#808080; font-size:75%;}";
+	output << "</style>";
+
 	if (selectedFile.isDir())
 	{
-		output << "Checking dir: " << getSelectedFile();
-		// Scan folder for individual files
+		// heading line for output
+		output << "Scanning results in folder: <b>" << getSelectedFile() << "</b><br>";
+		QDirIterator it(getSelectedFile(), QStringList() << "*.hab", QDir::Files, QDirIterator::NoIteratorFlags);
+		while (it.hasNext())
+		{
+		    QFileInfo inf(it.next());
+		    QString sFileScanResults;
+		    QTextStream outputFileScanResults(&sFileScanResults);
+
+			// scan file and get count of number of duplicate looks.
+			// Begin html output once results are in.
+		    int i = HResults::checkHabFileForDups(it.next(), outputFileScanResults);
+			if (i > 0)
+			{
+				outputFileScanResults << QString("Found %1 duplicate looks.<br>").arg(i);
+				output <<  "<div class='warnres'>";
+			}
+			else if (i == 0)
+			{
+				outputFileScanResults << "No duplicate looks found.<br>";
+				output <<  "<div class='okres'>";
+			}
+			else
+			{
+				outputFileScanResults << "Cannot read file.<br>";
+				output <<  "<div class='errres'>";
+			}
+			output <<  "<p>";
+		    output << "Results file: <i>" << inf.completeBaseName() << "</i>";
+		    // results from the scanner
+		    output << "<div class='results'>";
+			output << sFileScanResults;
+		    output << "</div>";
+		    output << "</p>";
+		    output << "</div>";
+		}
 	}
 	else
 	{
-		output << "Checking file: " << getSelectedFile() << Qt::endl;
+		output << "Results file: " << getSelectedFile() << Qt::endl;
 		int i = HResults::checkHabFileForDups(getSelectedFile(), output);
 		if (i > -1)
 			output << QString("Found %1 duplicate looks.").arg(i) << Qt::endl;
 		else
 			output << "Cannot open file." << Qt::endl;
-		qDebug().noquote() << s;
+		qDebug().noquote() << sHtml;
+	}
+#else
+	QString sHtml;
+	QTextStream output(&sHtml);
+	QFileInfo selectedFile(getSelectedFile());
+
+	auto styleHtml = [&output]()
+		{
+			output << "<style>"
+					<< " .okres { background-color: #90E090; margin-left: 10px;}"
+					<< " .warnres { background-color: #F0F090; margin-left: 10px;}"
+					<< " .errres { background-color: #F09090; margin-left: 10px;}"
+					<< " .results { margin-left: 20px; color:#808080; font-size:50%;}"
+					<< "</style>";
+		};
+	auto singleFileHtml = [&output] (const QString& filename, bool isLi)
+	{
+	    QFileInfo inf(filename);
+	    QString sFileScanResults;
+	    QString sClass;
+	    QTextStream outputFileScanResults(&sFileScanResults);
+
+		// scan file and get count of number of duplicate looks.
+		// Begin html output once results are in.
+	    int i = HResults::checkHabFileForDups(filename, outputFileScanResults);
+		if (i > 0)
+		{
+			outputFileScanResults << QString("Found %1 duplicate looks.<br>").arg(i);
+			sClass = "warnres";
+			//output <<  "<div class='warnres'>";
+		}
+		else if (i == 0)
+		{
+			outputFileScanResults << "No duplicate looks found.<br>";
+			sClass = "okres";
+			//output <<  "<div class='okres'>";
+		}
+		else
+		{
+			outputFileScanResults << "Cannot read file.<br>";
+			sClass = "errres";
+			//output <<  "<div class='errres'>";
+		}
+
+		// list element
+		if (isLi)
+		{
+			output << QString("<li class='%1'><i>%2</i></li>").arg(sClass).arg(inf.completeBaseName());
+
+			// results from the scanner
+			output << "<div class='results'>"
+				<< sFileScanResults
+				<< "</div>";
+		}
+		else
+		{
+			output << QString("<p class='%1'><i>%2</i></p>").arg(sClass).arg(inf.completeBaseName());
+
+			// results from the scanner
+			output << "<div class='results'>"
+				<< sFileScanResults
+				<< "</div>";
+		}
+	};
+
+	if (selectedFile.isDir())
+	{
+		// style element
+		styleHtml();
+
+		// heading line for output, list element
+		output << "Scanning experimental results in folder: <br><b>" << getSelectedFile() << "</b><br>";
+		output << "<ul style=\"list-style-type:none;\">";
+		QDirIterator it(getSelectedFile(), QStringList() << "*.hab", QDir::Files, QDirIterator::NoIteratorFlags);
+		while (it.hasNext())
+		{
+			singleFileHtml(it.next(), true);
+		}
+		output << "</ul>";
+	}
+	else
+	{
+		styleHtml();
+		singleFileHtml(getSelectedFile(), false);
 	}
 
-	ResultsScannerDialog rsd(this, s);
+#endif
+	qDebug() << sHtml;
+
+	ResultsScannerDialog rsd(this, sHtml);
 	rsd.show();
 	rsd.exec();
 }

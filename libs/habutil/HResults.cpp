@@ -175,31 +175,32 @@ int HResults::checkHabFileForDups(const QString& sPath, QTextStream& output)
 	HResults* pResults = HResults::load(sPath);
 	if (pResults)
 	{
-		output << "Loaded file " << sPath << Qt::endl;
-
 		// Look at settings for each phase, see if any phases are "single look"
 
 		for (int i=0; i<pResults->experimentSettings().phases().size(); i++)
 		{
 			const Habit::HPhaseSettings& ps = pResults->experimentSettings().phases().at(i);
-			output << "Phase: " << ps.getName() << Qt::endl;
+			output << "Phase: <b>" << ps.getName() << "</b>";
 			if (ps.getIsEnabled())
-				output << "Enabled: YES" << Qt::endl;
+				output << " Enabled: <b>YES</b><br>";
 			else
-				output << "Enabled: NO" << Qt::endl;
+				output << " Enabled: <b>NO</b><br>";
 			if (ps.getIsSingleLook())
 			{
-				output << "Uses \"Single complete look\" criteria for trial ending. Will check for duplicates!" << Qt::endl;
+				output << "\"Single complete look\" criteria: <b>YES</b><br>";
 				sPhasesToCheck.append(ps.getName());
 			}
 			else
-				output << "Does not use \"Single complete look\" criteria for trial ending, duplicate check not needed (but doing it anyways)" << Qt::endl;
+				output << "\"Single complete look\" criteria: <b>NO</b><br>";
 		}
 
 		QString s;
 		QTextStream scannerOutput(&s);
 		NoopResultsScanner nts;
 		nts.scan(*pResults, scannerOutput);
+
+		output << "Scan file...<br>";
+		output << s << "<br>";
 
 		// See if there were any duplicate looks
 		// set i= # duplicate looks found

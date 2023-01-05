@@ -79,7 +79,7 @@ bool HTrialScanner::scan(const HResults& results, QTextStream& output)
 				if (bInsidePhase)
 				{
 					qCritical("Found phase start without preceding phase end event!");
-					output << "Found phase start without preceding phase end event!";
+					output << "Found phase start without preceding phase end event!<br>";
 				}
 				bInsidePhase = true;
 			}
@@ -94,7 +94,7 @@ bool HTrialScanner::scan(const HResults& results, QTextStream& output)
 				if (bInsideTrial)
 				{
 					qCritical("Found trial start without preceding trial end event!");
-					output << "Found trial start without preceding trial end event!";
+					output << "Found trial start without preceding trial end event!<br>";
 				}
 
 				// initialize trialResult
@@ -153,7 +153,7 @@ bool HTrialScanner::scan(const HResults& results, QTextStream& output)
 					else
 					{
 						qWarning() << "Warning: cannot match player id to monitor.";
-						output << "Warning: cannot match player id to monitor.";
+						output << "Warning: cannot match player id to monitor.<br>";
 					}
 				}
 			}
@@ -162,8 +162,8 @@ bool HTrialScanner::scan(const HResults& results, QTextStream& output)
 				HLookEvent* ple = static_cast<HLookEvent*>(e);
 				if (trialResult.looks().contains(ple->look()))
 				{
-					output << "Phase: " << trialResult.getString(HTrialResult::indPhase) << " Trial: " << trialResult.getString(HTrialResult::indTrial) << Qt::endl;
-					output << "   Duplicate look: " << ple->look() << Qt::endl;
+					output << "Phase: " << trialResult.getString(HTrialResult::indPhase) << " Trial: " << trialResult.getString(HTrialResult::indTrial) << "<br>";
+					output << "   Duplicate look: " << ple->look() << "<br>";
 					qWarning() << "Duplicate look: " << ple->look();
 				}
 				else
